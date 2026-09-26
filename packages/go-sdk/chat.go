@@ -1,4 +1,4 @@
-package threadwave
+package convohop
 
 import (
 	"context"

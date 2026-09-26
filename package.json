@@ -6,7 +6,7 @@
     "packages/server-sdk"
   ],
   "scripts": {
-    "build": "npm run build --workspace @threadwave/browser-sdk && npm run build --workspace @threadwave/server-sdk",
-    "test": "npm test --workspace @threadwave/browser-sdk && npm test --workspace @threadwave/server-sdk"
+    "build": "npm run build --workspace @convohop/browser-sdk && npm run build --workspace @convohop/server-sdk",
+    "test": "npm test --workspace @convohop/browser-sdk && npm test --workspace @convohop/server-sdk"
   }
 }

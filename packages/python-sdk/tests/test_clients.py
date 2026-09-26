@@ -28,7 +28,7 @@ from _fixtures import (
     thread,
     thread_event,
 )
-from threadwave import (
+from convohop import (
     APIError,
     ManagementClient,
     ProtocolError,

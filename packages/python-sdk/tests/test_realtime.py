@@ -6,7 +6,7 @@ import httpx
 from websockets.asyncio.server import serve
 
 from _fixtures import THREAD, SESSION_TOKEN, ok, operation, thread_event
-from threadwave import APIError, ProtocolError, RequestTimeout, UserClient
+from convohop import APIError, ProtocolError, RequestTimeout, UserClient
 
 
 async def subscribe(socket, field="threadEvents"):

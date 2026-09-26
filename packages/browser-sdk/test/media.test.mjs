@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { mock, test } from "node:test";
-import { ApiError, ThreadwaveClient } from "../dist/index.js";
+import { ApiError, ConvoHopClient } from "../dist/index.js";
 
 const mediaId = "c65bcf38-a73d-436d-91cf-81d671b49a44";
 const participantId = "d24021e7-9869-476f-8ef1-d8be8af13767";
@@ -89,7 +89,7 @@ function service(mode = "video") {
   };
   const initialExpiry = new Date(Date.now() + 60_000).toISOString();
   const renewedExpiry = new Date(Date.now() + 120_000).toISOString();
-  const client = new ThreadwaveClient({
+  const client = new ConvoHopClient({
     baseUrl: "http://127.0.0.1:24610",
     sessionToken: token,
     roomFactory: () => {

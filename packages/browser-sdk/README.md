@@ -1,31 +1,30 @@
-# Threadwave browser SDK (source package)
+# ConvoHop browser SDK
 
-This ConvoHop repository retains the existing `@threadwave/browser-sdk` API
-name. This source package has not been published; no hosted service is included.
+`@convohop/browser-sdk` exports a browser/TypeScript `ConvoHopClient` for
+chat, call signaling, and LiveKit-backed call connections. This is **source
+only**: the package has not been published and no hosted service is included.
 Its source is licensed under the [Apache License, Version 2.0](../../LICENSE).
 
-This package gives one browser/TypeScript `ThreadwaveClient` chat, in-app call
-signaling and a LiveKit-backed call connection. It accepts **only** an end-user
-`st_` session; keep the `pk_` project key on your authenticated backend and
-the `adm_` operator credential outside customer applications. Build this
-unpublished package from the repository root:
+The client accepts **only** an end-user `st_` session. Keep the `pk_` project
+key on your authenticated backend and the `adm_` operator credential outside
+customer applications. From the repository root with Node.js 24+:
 
 ```sh
 npm ci
-npm run build --workspace @threadwave/browser-sdk
-npm test --workspace @threadwave/browser-sdk
+npm run build --workspace @convohop/browser-sdk
+npm test --workspace @convohop/browser-sdk
 ```
 
 The API origin must serve GraphQL HTTP and `graphql-transport-ws` at `/graphql`
-(and authenticated `/media` for local broadcasts). Your backend registers each
+(and authenticated `/media` if broadcast/HLS is enabled). Your backend registers each
 app user once as a service-issued `ci_` identity and mints a 15-minute `st_`
 session for that **authenticated** identity. An invited member must accept the
 thread invitation before they can chat or join its calls.
 
 ```ts
-import { ThreadwaveClient } from "@threadwave/browser-sdk";
+import { ConvoHopClient } from "@convohop/browser-sdk";
 
-const client = new ThreadwaveClient({
+const client = new ConvoHopClient({
   baseUrl: window.location.origin, // Your same-origin GraphQL HTTP/WS proxy
   sessionToken, // st_ from your backend, never pk_ or adm_
 });
@@ -63,7 +62,8 @@ the device grant. An `audio` call never turns on a camera. Use
 `{ camera: false }` for microphone-only video, or `{ publish: false }` for a
 listen-only member. `client.connectMedia` uses the same adapter for a
 broadcast publisher; broadcast/HLS availability depends on the separately
-operated service. `joinMedia` remains available to integrations that need the raw grant.
+operated service. `joinMedia` remains available to integrations that need
+the raw grant.
 If a browser blocks remote audio autoplay, show a user-gesture button when
 `onAudioPlaybackBlocked` fires and call `connection.enableAudio()` from its
 click handler in your application.

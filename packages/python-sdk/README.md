@@ -1,11 +1,11 @@
-# Threadwave Python SDK (source package)
+# ConvoHop Python SDK
 
 Async, typed Python 3.9+ clients for the Communication and separate Management
-**GraphQL** APIs. The ConvoHop repository retains the `threadwave-python-sdk`
-distribution and `threadwave` import names; this package has not been published.
-Its source is licensed under the [Apache License, Version 2.0](../../LICENSE);
-no hosted service is included.
-Install from the repository root with `python3 -m pip install -e ./packages/python-sdk`.
+**GraphQL** APIs. The distribution is named `convohop-sdk` (import `convohop`).
+It has not been published to PyPI: install directly from this source tree
+with `python3 -m pip install -e ./packages/python-sdk` from the repository
+root. Its source is licensed under the
+[Apache License, Version 2.0](../../LICENSE); no hosted service is included.
 The only runtime dependencies are `httpx` and `websockets`. This prototype has
 no REST compatibility layer or versioned endpoint.
 
@@ -26,14 +26,14 @@ import asyncio
 import os
 from uuid import UUID, uuid4
 
-from threadwave import ServerProjectClient, UserClient
+from convohop import ServerProjectClient, UserClient
 
 
 async def main():
     base = os.environ["COMMS_API_URL"]
-    request_id = UUID(os.environ["THREADWAVE_ACCOUNT_REQUEST_ID"])
-    teammate_identity_id = os.environ["THREADWAVE_TEAMMATE_ID"]
-    another_identity_id = os.environ["THREADWAVE_OTHER_ID"]
+    request_id = UUID(os.environ["CONVOHOP_ACCOUNT_REQUEST_ID"])
+    teammate_identity_id = os.environ["CONVOHOP_TEAMMATE_ID"]
+    another_identity_id = os.environ["CONVOHOP_OTHER_ID"]
     async with ServerProjectClient(base, os.environ["COMMS_PROJECT_KEY"]) as project:
         # Persist this UUID with the authenticated app account before the call.
         identity = await project.create_identity(request_id)
@@ -190,7 +190,7 @@ origin, with a private `adm_` bootstrap token, and also uses `/graphql`:
 
 ```python
 import os
-from threadwave import ManagementClient
+from convohop import ManagementClient
 
 async with ManagementClient(
     os.environ["COMMS_MANAGEMENT_URL"], os.environ["COMMS_ADMIN_TOKEN"]

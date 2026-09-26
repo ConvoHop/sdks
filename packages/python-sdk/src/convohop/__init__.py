@@ -1,4 +1,4 @@
-"""Typed asynchronous GraphQL clients for Threadwave."""
+"""Typed asynchronous GraphQL clients for ConvoHop."""
 
 from ._calls import IncomingCallFeed
 from ._clients import ManagementClient, ServerProjectClient, UserClient

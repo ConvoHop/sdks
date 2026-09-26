@@ -1,5 +1,5 @@
 {
-  "name": "@threadwave/server-sdk",
+  "name": "@convohop/server-sdk",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
     "test": "npm run build && node --test test/*.test.mjs"
   },
   "dependencies": {
-    "@threadwave/browser-sdk": "0.1.0"
+    "@convohop/browser-sdk": "0.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

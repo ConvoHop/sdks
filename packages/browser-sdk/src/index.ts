@@ -75,7 +75,7 @@ export interface SendMessageOptions {
   props?: MessageProps;
 }
 
-export class ThreadwaveClient {
+export class ConvoHopClient {
   readonly #http: GraphQLHttp;
   #sessionToken: string;
   readonly #socketFactory: SocketFactory;

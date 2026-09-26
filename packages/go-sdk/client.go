@@ -1,6 +1,6 @@
 // Package comms provides GraphQL clients for project management, trusted
 // identity/session issuance, and communications.
-package threadwave
+package convohop
 
 import (
 	"bytes"

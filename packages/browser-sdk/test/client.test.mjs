@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  ApiError, ThreadwaveClient, GraphQLSubscription, InvalidResponseError,
+  ApiError, ConvoHopClient, GraphQLSubscription, InvalidResponseError,
 } from "../dist/index.js";
 
 const token = `st_${"a".repeat(64)}`;
@@ -103,7 +103,7 @@ class FakeSocket {
 
 test("browser SDK uses only GraphQL with st_ credentials, JSON props, and exact decimal cursors", async () => {
   const requests = [];
-  const client = new ThreadwaveClient({
+  const client = new ConvoHopClient({
     baseUrl: "http://localhost:8080/",
     sessionToken: token,
     fetch: async (url, options) => {
@@ -149,11 +149,11 @@ test("browser SDK uses only GraphQL with st_ credentials, JSON props, and exact 
   });
   assert.equal(JSON.parse(requests[1].options.body).variables.after, "9007199254740992");
   assert.throws(
-    () => new ThreadwaveClient({ baseUrl: "http://localhost:8080", sessionToken: `pk_${"a".repeat(64)}` }),
+    () => new ConvoHopClient({ baseUrl: "http://localhost:8080", sessionToken: `pk_${"a".repeat(64)}` }),
     /st_/,
   );
   assert.throws(
-    () => new ThreadwaveClient({ baseUrl: "http://example.com", sessionToken: token }),
+    () => new ConvoHopClient({ baseUrl: "http://example.com", sessionToken: token }),
     /HTTPS/,
   );
   assert.throws(() => client.getThread(".."), /UUID/);
@@ -163,7 +163,7 @@ test("browser SDK uses only GraphQL with st_ credentials, JSON props, and exact 
 });
 
 test("HTTP and GraphQL errors never become partial successes", async () => {
-  const client = (fetcher) => new ThreadwaveClient({
+  const client = (fetcher) => new ConvoHopClient({
     baseUrl: "http://localhost:8080", sessionToken: token, fetch: fetcher,
   });
   await assert.rejects(
@@ -196,7 +196,7 @@ test("thread subscriptions authenticate in the first frame, support sparse repla
   const sockets = [];
   const received = [];
   const errors = [];
-  const client = new ThreadwaveClient({
+  const client = new ConvoHopClient({
     baseUrl: "http://localhost:8080",
     sessionToken: token,
     socketFactory: (url, protocol) => {
@@ -245,7 +245,7 @@ test("thread subscriptions authenticate in the first frame, support sparse repla
 test("failed event callback does not advance the cursor and subscription errors stop the socket", async () => {
   const sockets = [];
   const errors = [];
-  const client = new ThreadwaveClient({
+  const client = new ConvoHopClient({
     baseUrl: "http://localhost:8080", sessionToken: token,
     socketFactory: () => {
       const socket = new FakeSocket();
@@ -287,7 +287,7 @@ test("failed event callback does not advance the cursor and subscription errors 
 
 test("thread-scoped media, nullable revoked call details and HLS assets use the right transport", async () => {
   const operations = [];
-  const client = new ThreadwaveClient({
+  const client = new ConvoHopClient({
     baseUrl: "http://localhost:8080", sessionToken: token,
     fetch: async (_url, init) => {
       const { query, variables } = JSON.parse(init.body);
@@ -323,7 +323,7 @@ test("updating an st_ token rotates WebSockets after acknowledgement without los
   const requests = [];
   const fresh = `st_${"b".repeat(64)}`;
   let acknowledge;
-  const client = new ThreadwaveClient({
+  const client = new ConvoHopClient({
     baseUrl: "http://localhost:8080", sessionToken: token,
     fetch: async (_url, init) => {
       requests.push(init.headers.Authorization);

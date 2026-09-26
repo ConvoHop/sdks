@@ -1,10 +1,10 @@
 import { Buffer } from "node:buffer";
 import {
-  ThreadwaveClient, GraphQLHttp, InvalidResponseError, isIdentityId, requireIdentityId,
+  ConvoHopClient, GraphQLHttp, InvalidResponseError, isIdentityId, requireIdentityId,
   type ClientOptions,
-} from "@threadwave/browser-sdk";
+} from "@convohop/browser-sdk";
 
-export { ApiError, InvalidResponseError, TransportError } from "@threadwave/browser-sdk";
+export { ApiError, InvalidResponseError, TransportError } from "@convohop/browser-sdk";
 
 export interface ManagementClientOptions {
   baseUrl: string;
@@ -184,12 +184,12 @@ export class ProjectServerClient {
   }
 
   async asIdentity(identityId: string, options: Pick<ClientOptions, "socketFactory"> = {}):
-    Promise<ThreadwaveClient> {
+    Promise<ConvoHopClient> {
     if (options.socketFactory !== undefined && typeof options.socketFactory !== "function") {
       throw new TypeError("socketFactory must be a function");
     }
     const { token } = await this.mintIdentityToken(identityId);
-    return new ThreadwaveClient({
+    return new ConvoHopClient({
       baseUrl: this.#http.origin,
       sessionToken: token,
       fetch: this.#http.fetcher,

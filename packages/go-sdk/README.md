@@ -1,10 +1,9 @@
-# Threadwave Go SDK (source package)
+# ConvoHop Go SDK
 
 `github.com/ConvoHop/sdks/packages/go-sdk` is a standalone Go 1.22+ module
-(package `threadwave`) with no third-party dependencies. All customer-facing
+(package `convohop`) with no third-party dependencies. All customer-facing
 operations use GraphQL, **not** a versioned REST API.
 
-The ConvoHop repository retains the existing Go package name `threadwave`.
 Its source is licensed under the [Apache License, Version 2.0](../../LICENSE).
 No module version or hosted service has been released.
 
@@ -27,7 +26,7 @@ a token. Constructors reject the wrong token prefix, disable redirects even
 on a supplied HTTP client, and require HTTPS except for loopback origins.
 
 The server returns domain errors in `errors[].extensions.code` even when
-GraphQL responds with HTTP 200; `errors.As` with a `*threadwave.APIError` exposes
+GraphQL responds with HTTP 200; `errors.As` with a `*convohop.APIError` exposes
 `StatusCode` (200), uppercase `Code` (e.g. `NOT_FOUND`, `CONFLICT`), and
 `Message`. Invalid/missing bearer credentials can instead produce an HTTP
 401 JSON error with lowercase `Code` (`unauthenticated`). Both kinds of error

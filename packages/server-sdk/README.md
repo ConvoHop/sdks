@@ -1,16 +1,16 @@
-# Node server SDK
+# ConvoHop Node server SDK
 
-`@threadwave/server-sdk` is an unpublished Node 24+ TypeScript/ESM source
-package in the ConvoHop repository. Its API name remains Threadwave for
-compatibility. Its source is licensed under the
-[Apache License, Version 2.0](../../LICENSE); no hosted service is included.
-It uses two **separate credentials and services**:
+`@convohop/server-sdk` is an unpublished Node.js 24+ TypeScript/ESM source
+package for project provisioning and issuing user sessions. The source is
+licensed under the [Apache License, Version 2.0](../../LICENSE); no hosted
+service is included. It distinguishes **two privileged credentials and
+services**, then hands a short-lived user token to the browser SDK:
 
 | Client | Service | Credential | Allowed calls |
 |---|---|---|---|
 | `ManagementClient` | Operator-provided loopback Management API | Local `adm_` bootstrap token | Create/list/suspend projects |
 | `ProjectServerClient` | Operator-provided Communication API | One project's `pk_` key | Register project identities and issue short-lived `st_` tokens for authenticated application users |
-| `ThreadwaveClient` from `@threadwave/browser-sdk` | Communication API | An identity's `st_` token | Threads, JSON message props, GraphQL subscriptions, calls, broadcasts and LiveKit grants |
+| `ConvoHopClient` from `@convohop/browser-sdk` | Communication API | An identity's `st_` token | Threads, JSON message props, GraphQL subscriptions, calls, broadcasts and LiveKit grants |
 
 The server SDK has a Node-only package export, requires root HTTP(S) service
 origins (no URL paths, credentials or query strings), allows plain HTTP only on
@@ -20,11 +20,12 @@ and time out after 30 seconds by default (`timeoutMs` accepts 1-600000).
 No services are shipped in this repository. A remote Communication
 deployment needs HTTPS and a separately configured secure server.
 
-From the repository root:
+From the repository root (the unpublished browser SDK resolves locally
+through the npm workspace):
 
 ```sh
 npm ci
-npm test --workspace @threadwave/server-sdk
+npm test --workspace @convohop/server-sdk
 ```
 
 All customer operations use `/graphql`; the only native media URL is
@@ -43,7 +44,7 @@ returns a project key **only once**: securely persist it for use by your
 backend, and do not return it in an HTTP response or log it.
 
 ```ts
-import { ManagementClient, ProjectServerClient } from "@threadwave/server-sdk";
+import { ManagementClient, ProjectServerClient } from "@convohop/server-sdk";
 
 const management = new ManagementClient({
   baseUrl: process.env.COMMS_MANAGEMENT_URL!,
@@ -79,9 +80,9 @@ from your backend when needed. No SDK call silently refreshes a token.
 In the browser, use the **separate browser SDK** with the short-lived token:
 
 ```ts
-import { ThreadwaveClient } from "@threadwave/browser-sdk";
+import { ConvoHopClient } from "@convohop/browser-sdk";
 
-const user = new ThreadwaveClient({
+const user = new ConvoHopClient({
   baseUrl: publicCommunicationUrl,
   sessionToken: sessionFromYourBackend.token, // st_ only; never a pk_ key
 });
@@ -101,7 +102,7 @@ const join = await user.joinMedia(call.id); // a short-lived LiveKit grant
 
 For server-side jobs acting as an authorized identity,
 `await server.asIdentity(identity.id)` mints an `st_` token and returns a
-`ThreadwaveClient` with the **identity's token only**. Its
+`ConvoHopClient` with the **identity's token only**. Its
 `createThread`, `sendMessage`, `threadMessages`, `subscribeThread`, `createCall`,
 `joinMedia` and other methods are the browser SDK GraphQL API. Do not send
 the server client, `adm_` token or `pk_` key to a client. The server SDK does

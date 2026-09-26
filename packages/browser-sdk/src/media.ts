@@ -327,8 +327,8 @@ export class MediaConnection {
       try {
         this.#options.onError(error);
       } catch (handlerError) {
-        console.error("Threadwave media error handler failed:", error, handlerError);
+        console.error("ConvoHop media error handler failed:", error, handlerError);
       }
-    } else console.error("Threadwave media:", error);
+    } else console.error("ConvoHop media:", error);
   }
 }

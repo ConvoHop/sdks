@@ -13,7 +13,7 @@ from _fixtures import (
     ok,
     operation,
 )
-from threadwave import APIError, ProtocolError, UserClient
+from convohop import APIError, ProtocolError, UserClient
 from test_realtime import next_event, subscribe
 
 CALL_A = "1582f4ba-813e-4d05-a754-c7503638091a"

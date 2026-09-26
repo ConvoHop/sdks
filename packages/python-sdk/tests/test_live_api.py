@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
-from threadwave import APIError, ManagementClient, ServerProjectClient, UserClient
+from convohop import APIError, ManagementClient, ServerProjectClient, UserClient
 
 
 def _local_origins():
