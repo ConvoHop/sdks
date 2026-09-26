@@ -1,0 +1,12 @@
+{
+  "name": "convohop-sdks",
+  "private": true,
+  "workspaces": [
+    "packages/browser-sdk",
+    "packages/server-sdk"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @threadwave/browser-sdk && npm run build --workspace @threadwave/server-sdk",
+    "test": "npm test --workspace @threadwave/browser-sdk && npm test --workspace @threadwave/server-sdk"
+  }
+}
