@@ -5,6 +5,7 @@
 operations use GraphQL, **not** a versioned REST API.
 
 The ConvoHop repository retains the existing Go package name `threadwave`.
+Its source is licensed under the [Apache License, Version 2.0](../../LICENSE).
 No module version or hosted service has been released.
 
 | Client | Credential | Endpoint | Purpose |

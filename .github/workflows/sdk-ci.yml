@@ -1,0 +1,66 @@
+name: SDK CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  node:
+    name: Node SDKs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Build and test browser and server SDKs
+        run: npm test
+
+  python:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.13"]
+    env:
+      COMMS_LIVE_ADMIN_TOKEN: ""
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install ./packages/python-sdk
+      - run: python -m pip wheel --no-deps --wheel-dir "$RUNNER_TEMP/wheels" ./packages/python-sdk
+      - name: Run unit tests without live API access
+        run: python -m unittest discover -s packages/python-sdk/tests -v
+
+  go:
+    name: Go SDK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/go-sdk
+    env:
+      COMMS_LIVE_ADMIN_TOKEN: ""
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: packages/go-sdk/go.mod
+          cache: false
+      - run: go test ./...
+      - run: go vet ./...

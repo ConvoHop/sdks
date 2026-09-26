@@ -4,15 +4,14 @@ This repository contains the source and tests for four SDKs targeting compatible
 Communication and Management GraphQL services. It does **not** contain the
 services, infrastructure, a hosted API, or published package releases. Service
 origins and credentials must be supplied by an operator; no public endpoint is
-provided here. No public license has been selected yet. Do not assume that
-public visibility grants a license to use or redistribute the code.
+provided here. The SDK source is licensed under the
+[Apache License, Version 2.0](LICENSE).
 
 The repository is called **ConvoHop**, but the existing API/package names still
 say **Threadwave**: `@threadwave/browser-sdk`, `@threadwave/server-sdk`,
 `threadwave-python-sdk` (import `threadwave`), and Go package `threadwave`.
-These names are preserved to avoid changing client APIs during source
-preparation; they are **not** a claim that packages have been published or
-that a naming migration has been approved. The Go module path has been updated
+These names are preserved for client API compatibility; they are **not** a
+claim that packages have been published. The Go module path has been updated
 to `github.com/ConvoHop/sdks/packages/go-sdk` for this source repository.
 
 | SDK | Source | Runtime |
@@ -60,3 +59,11 @@ compatible services and explicit `COMMS_API_URL`, `COMMS_MANAGEMENT_URL`, and
 `COMMS_LIVE_ADMIN_TOKEN` environment variables. The unit tests do not need
 them. Keep `adm_` and `pk_` credentials on trusted servers, and never put
 secrets in this repository or client applications.
+
+## Continuous integration
+
+The [SDK CI workflow](.github/workflows/sdk-ci.yml) runs the Node workspace
+builds and tests, Python 3.9 and 3.13 unit tests and wheel builds, and Go
+tests and vet on pushes and pull requests to `main`. It has read-only
+repository permissions, skips opt-in live API tests, and does not publish
+packages or deploy services.

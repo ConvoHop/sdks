@@ -2,7 +2,9 @@
 
 `@threadwave/server-sdk` is an unpublished Node 24+ TypeScript/ESM source
 package in the ConvoHop repository. Its API name remains Threadwave for
-compatibility. It uses two **separate credentials and services**:
+compatibility. Its source is licensed under the
+[Apache License, Version 2.0](../../LICENSE); no hosted service is included.
+It uses two **separate credentials and services**:
 
 | Client | Service | Credential | Allowed calls |
 |---|---|---|---|

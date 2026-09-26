@@ -3,6 +3,8 @@
 Async, typed Python 3.9+ clients for the Communication and separate Management
 **GraphQL** APIs. The ConvoHop repository retains the `threadwave-python-sdk`
 distribution and `threadwave` import names; this package has not been published.
+Its source is licensed under the [Apache License, Version 2.0](../../LICENSE);
+no hosted service is included.
 Install from the repository root with `python3 -m pip install -e ./packages/python-sdk`.
 The only runtime dependencies are `httpx` and `websockets`. This prototype has
 no REST compatibility layer or versioned endpoint.

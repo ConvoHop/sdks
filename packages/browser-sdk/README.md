@@ -2,6 +2,7 @@
 
 This ConvoHop repository retains the existing `@threadwave/browser-sdk` API
 name. This source package has not been published; no hosted service is included.
+Its source is licensed under the [Apache License, Version 2.0](../../LICENSE).
 
 This package gives one browser/TypeScript `ThreadwaveClient` chat, in-app call
 signaling and a LiveKit-backed call connection. It accepts **only** an end-user
