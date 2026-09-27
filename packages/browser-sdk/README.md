@@ -1,11 +1,123 @@
 # ConvoHop browser SDK
 
-`@convohop/browser-sdk` exports a browser/TypeScript `ConvoHopClient` for
-chat, call signaling, and LiveKit-backed call connections. This is **source
+`@convohop/browser-sdk` exports native REST/WSS `V1Client` and
+`V1MediaConnection`, alongside the retained GraphQL `ConvoHopClient`.
+This is **source
 only**: the package has not been published and no hosted service is included.
 Its source is licensed under the [Apache License, Version 2.0](../../LICENSE).
 
-The client accepts **only** an end-user `st_` session. Keep the `pk_` project
+## Native v1 chat and calling
+
+Build from the root npm workspace with Node.js 24+:
+
+```sh
+npm ci
+npm run build
+npm test --workspace @convohop/browser-sdk
+```
+
+Your authenticated backend returns a native session bootstrap; it must never
+return its backend key or an operator credential. Native IDs are canonical
+nonzero UUIDs, and SQL counters are decimal **strings**, not JavaScript
+numbers. The communication origin must expose the compatible authenticated
+REST/WSS service. The current integration is local, not a hosted endpoint.
+
+```ts
+import { V1Client } from "@convohop/browser-sdk";
+
+const client = new V1Client({
+  baseUrl: bootstrap.baseUrl,
+  projectId: bootstrap.projectId,
+  incarnation: bootstrap.session.incarnation,
+  principalId: bootstrap.session.principalId,
+  sessionToken: bootstrap.sessionToken,
+  recoveryStorage: localStorage, // Optional; contains application request payloads.
+});
+await client.initialize();
+const stream = await client.watch(conversationId, async (events) => {
+  await applyCurrentEvents(events); // Your idempotent application update.
+}, showError);
+const sent = await client.send(conversationId, "Hello", crypto.randomUUID());
+// sent.status === "sent" is an authority commit receipt, not delivery.
+// Close stream when the view closes, not immediately after sending.
+```
+
+`messages(id, beforeSequence?)` pages current history in descending creation
+order. `edit(message, text)` and `delete(message)` compare the current
+revision. `search(query, conversationIds?)` returns `V1SearchHit` items shaped
+as `{conversationId, message}`, not flat messages. Use `reportRead` with
+current membership/visibility epochs; it reports device coverage, not a
+human-read attestation. Low-level `client.http` supports the other explicit
+wire routes and page continuations without creating another SDK.
+
+`watch` catches up from an authority-issued cursor before connecting,
+reconciles on hints/foreground/reconnect, and persists a frontier only after
+the application callback succeeds. It never silently resets an invalid,
+ahead or expired cursor. HTTP/WSS credentials never follow a route to a
+different origin. Without `recoveryStorage`, unresolved mutations/cursors
+are in-memory only. Recovery storage contains original message payloads:
+use a trusted origin/profile, not shared public-machine storage.
+
+An uncertain mutation retains its ID, payload, original 60-second budget
+and at most three submissions. `client.resolve(requestId)` is read-only;
+`recoverPending(showError)` only resends eligible original requests within
+that budget. The same-identity state is recovered on startup/foreground.
+Do not replace an unresolved request with a new UUID. A committed/accepted
+result cannot regress to unknown after a later transport error. Session
+renewal is your trusted backend's responsibility; the current `V1Client`
+uses one bootstrap, so construct a new client/stream with a fresh session
+and the same authorized recovery storage when it expires.
+
+Calling requires a **ConvoHopAdmissionV1-capable native SFU**. Stock LiveKit,
+GraphQL device grants and a direct cached-token `Room.connect` are not
+compatible substitutes. Start with `client.startCall(conversationId,
+invitedPrincipalIds, video)`; retain its returned call ID and observe
+`client.call(id)` until the room is offering/active. Do not treat preparation
+or an accepted HTTP response as connected media. The initiator can then
+connect; each invitee must first accept its own current invitation:
+
+```ts
+import { V1MediaConnection } from "@convohop/browser-sdk";
+
+// In the invitee's explicit foreground accept handler:
+const accepted = await client.accept(currentInvitation);
+let connection = await V1MediaConnection.connect(client, accepted, {
+  localVideo,
+  onTrack: ({ element }) => remoteTracks.append(element),
+  onTrackRemoved: ({ element }) => element.remove(),
+  onDisconnected: showDisconnected,
+  onAudioPlaybackBlocked: showEnableAudioButton,
+});
+await connection.microphone(false);
+await connection.microphone(true);
+// Only for a video-capable call:
+// await connection.camera(false);
+// A reconnect returns a new connection with fresh authority credentials:
+connection = await connection.reconnect();
+const stats = await connection.stats(); // Actual received bytes/tracks/frames.
+
+// On leaving: durable authority denial plus unconditional local cleanup.
+try {
+  await client.leave(await client.call(accepted.callId));
+} finally {
+  await connection.disconnect();
+}
+```
+
+Use `connection.enableAudio()` from a user gesture if autoplay is blocked.
+Voice never requests a camera. Microphone/camera choices survive a fresh
+authorized reconnect. `disconnect()` only cleans up the local connection;
+call `client.leave` or authorized `client.end` for durable lifecycle changes.
+No automatic stock cached-token reconnect is enabled. A deliberately closed
+connection cannot reconnect. Expiry, revocation or lost clock confidence
+must stop forwarding; native JWT lifetime is not forwarding permission.
+There is no native v1 broadcast, Egress, recording, screen-share or offline
+ringing implementation.
+
+## Retained legacy GraphQL client
+
+The following documentation applies **only** to `ConvoHopClient`, not the
+native `V1*` classes above. This legacy client accepts an end-user `st_` session. Keep the `pk_` project
 key on your authenticated backend and the `adm_` operator credential outside
 customer applications. From the repository root with Node.js 24+:
 

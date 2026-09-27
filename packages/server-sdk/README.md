@@ -3,8 +3,96 @@
 `@convohop/server-sdk` is an unpublished Node.js 24+ TypeScript/ESM source
 package for project provisioning and issuing user sessions. The source is
 licensed under the [Apache License, Version 2.0](../../LICENSE); no hosted
-service is included. It distinguishes **two privileged credentials and
-services**, then hands a short-lived user token to the browser SDK:
+service is included.
+
+## Native v1 management and application backend
+
+`V1ManagementClient` calls `/management/v1` with a trusted operator credential.
+`V1ProjectServerClient` calls `/v1/projects/{projectId}` with one scoped
+backend key. These are separate from the legacy GraphQL clients below.
+Native backend keys, short-lived session tokens and credential-delivery
+permits must not be confused with the old `adm_`/`pk_`/`st_` prefixes.
+
+```ts
+import { V1ProjectServerClient } from "@convohop/server-sdk";
+
+const server = new V1ProjectServerClient({
+  baseUrl: communicationBase,
+  projectId,
+  incarnation,
+  backendKey, // Trusted secret storage only.
+});
+await server.initialize();
+// Authenticate the user in your application before selecting this mapping.
+const principalId = await server.createPrincipal(authenticatedAccountId);
+const bootstrap = await server.issueSession(principalId, deviceId);
+// Return only this user's bootstrap plus public project/route metadata.
+const conversation = await server.createConversation("Support", [
+  { principalId, role: "moderator" },
+  { principalId: teammatePrincipalId, role: "member" },
+]);
+```
+
+The mapping is project-scoped and stable; a caller-supplied principal ID is
+not authentication. A backend key can issue sessions only within its actual
+scopes/project, and does not receive unrestricted end-user message browsing.
+The default requested session lifetime is 15 minutes. Backend and operator
+credentials never belong in browser bundles, URLs or logs.
+
+For the supported local provisioning profile:
+
+```ts
+import { V1ManagementClient } from "@convohop/server-sdk";
+import { v1Id } from "@convohop/browser-sdk";
+
+const management = new V1ManagementClient({
+  baseUrl: managementBase,
+  actorId: operatorId,
+  accessToken: operatorToken,
+  recoveryStorage: privateRequestStorage,
+});
+const organization = await management.createOrganization("Local team", termsRef);
+const accepted = await management.createDeployment(v1Id(organization.orgId));
+// Retain accepted.operation.operationId and poll management.operation(id).
+// A deployment/project must be ready before a dependent operation.
+```
+
+`createDeployment` deliberately selects `local-single-node` managed-shared
+development, not an Azure provisioner. `createProject`, `issueBackendKey`
+and `deliveryPermit` expose the subsequent public flow. Accepted management
+operations have durable IDs; inspect their state/result rather than treating
+acceptance as completion. A backend key is obtained through one-time
+credential delivery, not embedded in a generic management receipt.
+Use the returned permit in a **bearer-less** `V1Transport` redeem request,
+persist the redeemed capsule in trusted secret storage, then acknowledge.
+Do not put a credential-delivery permit or capsule in ordinary recovery
+storage. The service's maintained public-API examples exercise this flow.
+
+The public `http` transport supports the remaining explicit v1 routes and
+same-request recovery. With app-supplied storage it preserves original request
+payloads, IDs and budgets, not bearer headers. For an unresolved request,
+use `http.recover(requestId, "/management/v1/requests/" + requestId)`;
+do not allocate a new ID or reset the retry deadline. The server wrappers
+do not automatically poll management operations, deploy Azure or provide
+a payment/signup system. Node does not publish microphone/camera media;
+the authenticated browser uses `V1MediaConnection`.
+
+Build/test from the root npm workspace:
+
+```sh
+npm ci
+npm run build
+npm test
+```
+
+Real CockroachDB and WebRTC acceptance runs in the compatible service's
+integration suite, not in these isolated SDK unit tests.
+
+## Retained legacy GraphQL clients
+
+The remainder applies only to the separately named `ManagementClient`,
+`ProjectServerClient` and `ConvoHopClient`. It distinguishes **two privileged
+credentials and services**, then hands a short-lived user token to the browser SDK:
 
 | Client | Service | Credential | Allowed calls |
 |---|---|---|---|

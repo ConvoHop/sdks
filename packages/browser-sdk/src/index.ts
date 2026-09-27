@@ -503,3 +503,5 @@ export class ConvoHopClient {
     return subscription;
   }
 }
+export * from "./v1.js";
+export * from "./v1-media.js";

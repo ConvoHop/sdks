@@ -9,8 +9,8 @@ or that a versioned Go module or production service is available.
 
 | SDK | Source and package | What it does |
 | --- | --- | --- |
-| Browser | [`@convohop/browser-sdk`](packages/browser-sdk/README.md) | TypeScript `ConvoHopClient` for authenticated chat, event subscriptions, and LiveKit call connections |
-| Node server | [`@convohop/server-sdk`](packages/server-sdk/README.md) | Node.js 24+ project provisioning, identity registration, and session issuance |
+| Browser | [`@convohop/browser-sdk`](packages/browser-sdk/README.md) | Native REST/WSS `V1Client` and `V1MediaConnection`; separately retained GraphQL `ConvoHopClient` |
+| Node server | [`@convohop/server-sdk`](packages/server-sdk/README.md) | Native `V1ManagementClient`/`V1ProjectServerClient`; separately retained legacy GraphQL clients |
 | Python | [`convohop-sdk`](packages/python-sdk/README.md), import `convohop` | Python 3.9+ async GraphQL and WebSocket clients |
 | Go | [`github.com/ConvoHop/sdks/packages/go-sdk`](packages/go-sdk/README.md), package `convohop` | Go 1.22+ GraphQL clients and cursor-safe event polling |
 
@@ -55,11 +55,29 @@ and does not publish packages or deploy infrastructure.
 
 ## Service and credential boundaries
 
-SDK requests target `/graphql` on separately operated services. Browser and
-Python subscriptions use `graphql-transport-ws`; media calls may require a
-compatible LiveKit deployment. Configure origins in your application: the
-examples use `COMMS_API_URL` and `COMMS_MANAGEMENT_URL`, but no origin is
-bundled here.
+**Native v1** Browser/Node clients target `/v1/projects/{projectId}`,
+`/management/v1` and `convohop.realtime.v1` at `/v1/realtime`. The trusted
+backend registers principals and issues scoped sessions; an end-user
+bootstrap carries the project, incarnation, principal/device/session and
+short-lived session token. Operator and backend credentials must stay on
+trusted servers. Call connections require the compatible native
+ConvoHopAdmissionV1 SFU, not an unmodified stock LiveKit server. The SDK
+obtains fresh one-attempt admission and forwarding proofs; an invitation,
+native JWT or WebSocket upgrade alone does not grant media.
+
+Mutation recovery retains the original UUID, payload, fingerprint and retry
+budget. Application-supplied `recoveryStorage` enables persistence of request
+state and acknowledged replay cursors, not session tokens. Stored request
+payloads can contain message text; treat that storage as application data.
+Native browser/backend examples are in the package READMEs. Real CockroachDB/
+WebRTC acceptance belongs to the separately operated service's integration
+suite; these package unit tests do not establish that deployment.
+
+**Legacy only:** `ConvoHopClient`, `ManagementClient`, `ProjectServerClient`,
+and the Python/Go SDKs target `/graphql`. Browser/Python legacy subscriptions
+use `graphql-transport-ws`; the following prefix table is **not** the native
+v1 credential contract. No Python/Go v1 parity is claimed. Configure origins
+in your application; no hosted origin is bundled here.
 
 | Credential | Keep it with | Use |
 | --- | --- | --- |
@@ -77,8 +95,8 @@ hosted availability are **not** established by the unit-test CI.
 ## Maintenance and license
 
 SDK implementation and API documentation belong in this repository; service
-code and deployment are maintained separately. Changes to the GraphQL
-contract require coordinated SDK updates, tests, and docs here. There is no
+code and deployment are maintained separately. Changes to either native v1
+or legacy GraphQL require coordinated SDK updates, tests, and docs here. There is no
 automatic cross-repository synchronization, package release, or deployment;
 maintainers should verify compatibility against a separately operated service
 before claiming support. Do not commit secrets.

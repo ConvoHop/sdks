@@ -1,0 +1,15 @@
+instructions: |
+  Follow .github/copilot-instructions.md.
+  Use sdk-code-review and sdk-testing for reviews and regression work.
+  This repository is the canonical SDK source; do not copy private backend code here.
+  Use maintained test frameworks and never commit credentials or claim untested parity.
+scripts:
+  - name: Build JavaScript SDKs
+    command: npm run build
+  - name: Test JavaScript SDKs
+    command: npm test
+  - name: Test Python SDK
+    command: python3 -m unittest discover -s packages/python-sdk/tests -v
+  - name: Test Go SDK
+    command: cd packages/go-sdk && go test ./... && go vet ./...
+auto_open_in_browser: false
