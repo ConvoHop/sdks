@@ -1,11 +1,13 @@
 # ConvoHop SDKs
 
-This is the canonical source repository for ConvoHop client SDKs. It contains
-client code, tests, a Go example, and read-only CI; **not** the Communication
-or Management services, LiveKit infrastructure, or a hosted API. Bring your
-own compatible service origins and credentials for live use. Source
-availability does not mean the npm or Python packages have been published,
-or that a versioned Go module or production service is available.
+ConvoHop's goal is to help developers add durable chat, then voice/video calls,
+in the same conversation, identity, and permission context instead of
+stitching together separate services. This repository is the canonical source
+for its client SDKs, tests, and a Go example; **not** the Communication or
+Management services, LiveKit infrastructure, or a hosted API. Bring your own
+compatible service origins and credentials for live use. Source availability
+does not mean the npm or Python packages have been published, or that a
+versioned Go module or production service is available.
 
 | SDK | Source and package | What it does |
 | --- | --- | --- |
