@@ -11,6 +11,7 @@
   ["communication", "GET", "/conversations/:conversationId", "getConversation"],
   ["communication", "PATCH", "/conversations/:conversationId", "updateConversation"],
   ["communication", "GET", "/conversations/:conversationId/members", "members"],
+  ["communication", "POST", "/conversations/:conversationId/memberBatches", "addMembers"],
   ["communication", "POST", "/conversations/:conversationId/members/:principalId", "addMember", "expectedMembershipRevision"],
   ["communication", "POST", "/conversations/:conversationId/members/:principalId/remove", "removeMember", "expectedMembershipRevision"],
   ["communication", "POST", "/conversations/:conversationId/members/:principalId/historyGrants", "historyGrant", "expectedMembershipRevision"],

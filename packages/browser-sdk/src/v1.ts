@@ -1,5 +1,6 @@
 import { v1GraphqlRequest, v1GraphqlEnvelope } from "./v1-graphql.js";
 import { v1Operations } from "./v1-operations.js";
+import type { CommunicationMembersQuery } from "./v1-generated.js";
 /** Current Cockroach-backed GraphQL protocol. The legacy GraphQL client is separate. */
 export type V1Record = Record<string, unknown>;
 export interface V1Cursor { incarnation: string; conversationId: string; sequence: string }
@@ -13,10 +14,7 @@ export interface V1SendReceipt {
   messageId: string; conversationId: string; sequence: string; revision: string; status: "sent"; cursor: V1Cursor;
 }
 export interface V1SearchHit { conversationId: string; message: V1Message }
-export interface V1Membership {
-  conversationId: string; principalId: string; role: string; status: string;
-  membershipEpoch: string; visibilityEpoch: string; revision: string; visibleFromSequence: string;
-}
+export type V1Membership = NonNullable<CommunicationMembersQuery["members"]["result"]>["items"][number];
 export interface V1Conversation {
   conversationId: string; revision: string; title: string; latestSequence: string;
   props: V1Record; membership: V1Membership | null;
@@ -121,7 +119,7 @@ export function v1Membership(value: unknown): V1Membership {
   return { conversationId: v1Id(v.conversationId), principalId: v1Id(v.principalId),
     role: v1String(v.role), status: v1String(v.status), revision: v1Counter(v.revision),
     membershipEpoch: v1Counter(v.membershipEpoch), visibilityEpoch: v1Counter(v.visibilityEpoch),
-    visibleFromSequence: v1Counter(v.visibleFromSequence) };
+    visibleFromSequence: v1Counter(v.visibleFromSequence), canStartBroadcast: boolean(v.canStartBroadcast) };
 }
 export function v1Conversation(value: unknown): V1Conversation {
   const v = v1Record(value);

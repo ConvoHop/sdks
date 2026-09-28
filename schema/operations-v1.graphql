@@ -144,6 +144,7 @@ query CommunicationGetConversation($context: RequestContextInput!, $input: GetCo
         visibilityEpoch
         revision
         visibleFromSequence
+        canStartBroadcast
       }
     }
   }
@@ -177,6 +178,7 @@ query CommunicationMembers($context: RequestContextInput!, $input: MembersReques
         visibilityEpoch
         revision
         visibleFromSequence
+        canStartBroadcast
       }
       complete
       refreshRequired
@@ -554,6 +556,20 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
               visibilityEpoch
               revision
               visibleFromSequence
+              canStartBroadcast
+            }
+          }
+          conversationMemberBatch {
+            items {
+              conversationId
+              principalId
+              role
+              status
+              membershipEpoch
+              visibilityEpoch
+              revision
+              visibleFromSequence
+              canStartBroadcast
             }
           }
           credentialDeliveryReceipt {
@@ -586,6 +602,7 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
             visibilityEpoch
             revision
             visibleFromSequence
+            canStartBroadcast
           }
           message {
             messageId
@@ -1091,6 +1108,7 @@ mutation CommunicationCreateConversation($context: RequestContextInput!, $input:
         visibilityEpoch
         revision
         visibleFromSequence
+        canStartBroadcast
       }
     }
   }
@@ -1129,6 +1147,7 @@ mutation CommunicationUpdateConversation($context: RequestContextInput!, $input:
         visibilityEpoch
         revision
         visibleFromSequence
+        canStartBroadcast
       }
     }
   }
@@ -1161,6 +1180,30 @@ mutation CommunicationAddMember($context: RequestContextInput!, $input: AddMembe
       visibilityEpoch
       revision
       visibleFromSequence
+      canStartBroadcast
+    }
+  }
+}
+
+mutation CommunicationAddMembers($context: RequestContextInput!, $input: AddMembersInput!) {
+  addMembers(context: $context, input: $input) {
+    status
+    requestId
+    receiptId
+    committedAt
+    replayed
+    result {
+      items {
+        conversationId
+        principalId
+        role
+        status
+        membershipEpoch
+        visibilityEpoch
+        revision
+        visibleFromSequence
+        canStartBroadcast
+      }
     }
   }
 }
@@ -1192,6 +1235,7 @@ mutation CommunicationRemoveMember($context: RequestContextInput!, $input: Remov
       visibilityEpoch
       revision
       visibleFromSequence
+      canStartBroadcast
     }
   }
 }
@@ -1223,6 +1267,7 @@ mutation CommunicationHistoryGrant($context: RequestContextInput!, $input: Histo
       visibilityEpoch
       revision
       visibleFromSequence
+      canStartBroadcast
     }
   }
 }
@@ -2325,6 +2370,20 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
               visibilityEpoch
               revision
               visibleFromSequence
+              canStartBroadcast
+            }
+          }
+          conversationMemberBatch {
+            items {
+              conversationId
+              principalId
+              role
+              status
+              membershipEpoch
+              visibilityEpoch
+              revision
+              visibleFromSequence
+              canStartBroadcast
             }
           }
           credentialDeliveryReceipt {
@@ -2357,6 +2416,7 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
             visibilityEpoch
             revision
             visibleFromSequence
+            canStartBroadcast
           }
           message {
             messageId

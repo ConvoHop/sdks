@@ -56,6 +56,20 @@ input AddMemberRequestInput {
 	expectedRevision: Decimal!
 }
 
+input AddMembersInput {
+	conversationId: UUID!
+	members: [MemberBatchEntryInput!]!
+}
+
+type AddMembersPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: ConversationMemberBatch!
+}
+
 type Call {
 	callId: UUID!
 	conversationId: UUID!
@@ -161,6 +175,10 @@ type Conversation {
 	props: Properties
 	latestSequence: Decimal!
 	membership: Member
+}
+
+type ConversationMemberBatch {
+	items: [Member!]!
 }
 
 type CreateConversationReply {
@@ -699,6 +717,13 @@ type Member {
 	visibilityEpoch: Decimal!
 	revision: Decimal!
 	visibleFromSequence: Decimal!
+	canStartBroadcast: Boolean!
+}
+
+input MemberBatchEntryInput {
+	principalId: UUID!
+	role: String!
+	expectedRevision: Decimal!
 }
 
 input MemberInputInput {
@@ -788,6 +813,7 @@ type Mutation {
 	createConversation(context: RequestContextInput!, input: CreateConversationRequestInput!): CreateConversationReply!
 	updateConversation(context: RequestContextInput!, input: UpdateConversationRequestInput!): UpdateConversationReply!
 	addMember(context: RequestContextInput!, input: AddMemberRequestInput!): AddMemberReply!
+	addMembers(context: RequestContextInput!, input: AddMembersInput!): AddMembersPayload!
 	removeMember(context: RequestContextInput!, input: RemoveMemberRequestInput!): RemoveMemberReply!
 	historyGrant(context: RequestContextInput!, input: HistoryGrantRequestInput!): HistoryGrantReply!
 	sendMessage(context: RequestContextInput!, input: SendMessageRequestInput!): SendMessageReply!
@@ -1092,6 +1118,7 @@ type RetainedResult {
 	call: Call
 	callSummary: CallSummary
 	conversation: Conversation
+	conversationMemberBatch: ConversationMemberBatch
 	credentialDeliveryReceipt: CredentialDeliveryReceipt
 	deliveryAck: DeliveryAck
 	mediaGrant: MediaGrant

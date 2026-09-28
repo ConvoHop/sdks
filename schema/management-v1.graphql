@@ -113,6 +113,10 @@ type Conversation {
 	membership: Member
 }
 
+type ConversationMemberBatch {
+	items: [Member!]!
+}
+
 type CreateDeploymentReply {
 	status: String!
 	requestId: UUID!
@@ -523,6 +527,13 @@ type Member {
 	visibilityEpoch: Decimal!
 	revision: Decimal!
 	visibleFromSequence: Decimal!
+	canStartBroadcast: Boolean!
+}
+
+input MemberBatchEntryInput {
+	principalId: UUID!
+	role: String!
+	expectedRevision: Decimal!
 }
 
 input MemberInputInput {
@@ -833,6 +844,7 @@ type RetainedResult {
 	call: Call
 	callSummary: CallSummary
 	conversation: Conversation
+	conversationMemberBatch: ConversationMemberBatch
 	credentialDeliveryReceipt: CredentialDeliveryReceipt
 	deliveryAck: DeliveryAck
 	mediaGrant: MediaGrant

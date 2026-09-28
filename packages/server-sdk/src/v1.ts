@@ -1,6 +1,6 @@
 import {
-  V1Transport, v1Id, v1Record, v1String, v1Conversation,
-  type V1RecoveryStorage, type V1Record, type V1Conversation, type V1Graphql,
+  V1Transport, v1Id, v1Record, v1String, v1Conversation, v1Membership, v1Counter,
+  type V1RecoveryStorage, type V1Record, type V1Conversation, type V1Graphql, type V1Membership,
 } from "@convohop/browser-sdk";
 
 export type V1DeploymentOptions = Omit<V1Graphql.CreateDeploymentRequestInput, "orgId">;
@@ -72,5 +72,17 @@ export class V1ProjectServerClient {
   }
   async createConversation(title: string, members: { principalId: string; role: "member" | "moderator" }[]): Promise<V1Conversation> {
     return v1Conversation((await this.http.mutate("POST", this.path + "/conversations", { title, props: {}, members })).result);
+  }
+  async addMembers(conversationId: string, members: V1Graphql.MemberBatchEntryInput[], requestId?: string): Promise<V1Membership[]> {
+    if (!members.length || members.length > 100 || new Set(members.map(member => member.principalId)).size !== members.length)
+      throw new TypeError("A membership batch requires 1..100 distinct principals");
+    const entries = members.map(member => {
+      if (member.role !== "member" && member.role !== "moderator") throw new TypeError("Invalid membership role");
+      return { principalId: v1Id(member.principalId), role: member.role, expectedRevision: v1Counter(member.expectedRevision) };
+    });
+    const result = v1Record((await this.http.mutate("POST",
+      `${this.path}/conversations/${v1Id(conversationId)}/memberBatches`, { members: entries }, requestId)).result);
+    if (!Array.isArray(result.items) || result.items.length !== entries.length) throw new TypeError("Invalid membership batch result");
+    return result.items.map(v1Membership);
   }
 }
