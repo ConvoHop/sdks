@@ -1,4 +1,6 @@
-/** Selected REST/WSS protocol. The legacy GraphQL client remains a separate API. */
+import { v1GraphqlRequest, v1GraphqlEnvelope } from "./v1-graphql.js";
+import { v1Operations } from "./v1-operations.js";
+/** Current Cockroach-backed GraphQL protocol. The legacy GraphQL client is separate. */
 export type V1Record = Record<string, unknown>;
 export interface V1Cursor { incarnation: string; conversationId: string; sequence: string }
 export interface V1Page<T> { items: T[]; complete: boolean; refreshRequired: boolean; nextCursor?: unknown }
@@ -87,6 +89,19 @@ export function v1Page<T>(value: unknown, parse: (value: unknown) => T): V1Page<
   if (!Array.isArray(v.items) || v.items.length > 100) throw new TypeError("Invalid bounded page");
   return { items: v.items.map(parse), complete: boolean(v.complete), refreshRequired: boolean(v.refreshRequired),
     ...(v.nextCursor === undefined ? {} : { nextCursor: v.nextCursor }) };
+}
+function eventPage(value: unknown, incarnation: string, conversationId: string, after?: V1Cursor): V1Page<V1Record> & { nextCursor: V1Cursor } {
+  const result = v1Page(value, v1Record), cursor = v1Cursor(result.nextCursor);
+  if (cursor.conversationId !== conversationId || cursor.incarnation !== incarnation ||
+      (after && BigInt(cursor.sequence) < BigInt(after.sequence))) throw new TypeError("Invalid authoritative replay frontier");
+  let previous = BigInt(after?.sequence ?? "0");
+  for (const event of result.items) {
+    const sequence = BigInt(v1Counter(event.sequence));
+    if (v1Id(event.conversationId) !== conversationId || sequence <= previous || sequence > BigInt(cursor.sequence))
+      throw new TypeError("Invalid ordered event scope");
+    v1Id(event.eventId); previous = sequence;
+  }
+  return { ...result, nextCursor: cursor };
 }
 export function v1Message(value: unknown): V1Message {
   const v = v1Record(value);
@@ -269,31 +284,54 @@ export class V1Transport {
   }
   async #request(method: string, path: string, body: V1Record | undefined, requestId: string): Promise<V1Envelope<unknown>> {
     if (!path.startsWith("/") || path.startsWith("//") || path.includes("#")) throw new TypeError("Expected a closed API path");
-    const headers: Record<string, string> = { accept: "application/json", "idempotency-key": requestId };
+    let plan: ReturnType<typeof v1GraphqlRequest>;
+    try {
+      plan = v1GraphqlRequest(method, path, body, { requestId,
+        ...(this.incarnation === "management" ? {} : { incarnation: this.incarnation }),
+        ...(this.servingEpoch === undefined ? {} : { observedServingEpoch: this.servingEpoch }) });
+    } catch (error) {
+      throw new V1Problem("INVALID_REQUEST", requestId, "rejected", 400,
+        error instanceof Error ? error.message : "Invalid SDK operation");
+    }
+    const headers: Record<string, string> = { accept: "application/json", "content-type": "application/json" };
     if (this.#credential !== undefined) headers.authorization = "Bearer " + this.#credential;
-    if (body !== undefined) headers["content-type"] = "application/json";
-    if (this.incarnation !== "management") headers["convohop-incarnation"] = this.incarnation;
-    if (this.servingEpoch !== undefined) headers["convohop-serving-epoch"] = this.servingEpoch;
     let response: Response;
     try {
-      response = await this.#fetch(this.baseUrl + path, { method, headers, redirect: "error", cache: "no-store", credentials: "omit",
-        signal: AbortSignal.timeout(12000), ...(body === undefined ? {} : { body: canonical(body) }) });
+      response = await this.#fetch(this.baseUrl + "/graphql", { method: "POST", headers, redirect: "error", cache: "no-store", credentials: "omit",
+        signal: AbortSignal.timeout(12000), body: canonical(plan.body) });
     } catch { throw new V1Problem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Authority response unavailable; resolve the original request"); }
-    const text = await response.text();
+    let text: string;
+    try { text = await response.text(); }
+    catch { throw new V1Problem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Incomplete authority response; resolve the original request"); }
     if (text.length > 1_048_576) throw new V1Problem("INVALID_RESPONSE", requestId, "unknown", response.status, "Authority response exceeds the bound");
     let decoded: unknown;
     try { decoded = JSON.parse(text); } catch { throw new V1Problem("INVALID_RESPONSE", requestId, "unknown", response.status, "Unrecognized authority response"); }
-    const value = v1Record(decoded);
-    if (!response.ok) {
-      throw new V1Problem(typeof value.code === "string" ? value.code : "HTTP_FAILURE", requestId,
-        typeof value.outcome === "string" ? value.outcome : "unknown", response.status,
-        typeof value.message === "string" ? value.message : "Authority rejected the request");
+    try {
+      const graphql = v1Record(decoded);
+      if (Array.isArray(graphql.errors) && graphql.errors.length) {
+        const error = v1Record(graphql.errors[0]);
+        const extensions = error.extensions == null ? {} : v1Record(error.extensions);
+        throw new V1Problem(typeof extensions.code === "string" ? extensions.code : "GRAPHQL_ERROR", requestId,
+          typeof extensions.outcome === "string" ? extensions.outcome : "unknown",
+          typeof extensions.status === "number" ? extensions.status : 503,
+          typeof error.message === "string" ? error.message : "GraphQL rejected the request");
+      }
+      if (!response.ok) {
+        throw new V1Problem(typeof graphql.code === "string" ? graphql.code : "HTTP_FAILURE", requestId,
+          typeof graphql.outcome === "string" ? graphql.outcome : "unknown", response.status,
+          typeof graphql.message === "string" ? graphql.message : "Authority rejected the request");
+      }
+      const value = v1GraphqlEnvelope(v1Record(graphql.data)[plan.operation.field], plan.operation);
+      if (!["ok", "committed", "accepted"].includes(v1String(value.status))) throw new TypeError("Unrecognized authority envelope");
+      if (v1Id(value.requestId) !== requestId) throw new V1Problem("INVALID_RESPONSE", requestId, "unknown", response.status, "Mismatched authority request identity");
+      return { status: value.status as V1Envelope<unknown>["status"], requestId: v1Id(value.requestId), result: value.result,
+        ...(value.replayed === undefined ? {} : { replayed: boolean(value.replayed) }),
+        ...(value.operation === undefined ? {} : { operation: v1Record(value.operation) }),
+        ...(value.resourceRef === undefined ? {} : { resourceRef: v1Record(value.resourceRef) }) };
+    } catch (error) {
+      if (!(error instanceof TypeError)) throw error;
+      throw new V1Problem("INVALID_RESPONSE", requestId, "unknown", response.status, "Malformed authority response; resolve the original request");
     }
-    if (!["ok", "committed", "accepted"].includes(v1String(value.status))) throw new TypeError("Unrecognized authority envelope");
-    return { status: value.status as V1Envelope<unknown>["status"], requestId: v1Id(value.requestId), result: value.result,
-      ...(value.replayed === undefined ? {} : { replayed: boolean(value.replayed) }),
-      ...(value.operation === undefined ? {} : { operation: v1Record(value.operation) }),
-      ...(value.resourceRef === undefined ? {} : { resourceRef: v1Record(value.resourceRef) }) };
   }
 }
 export interface V1ClientOptions {
@@ -318,7 +356,7 @@ export class V1Client {
     const socket = new URL(value.wssUrl), base = new URL(this.http.baseUrl);
     if (origin(value.communicationBase) !== this.http.baseUrl || socket.host !== base.host ||
         socket.protocol !== (base.protocol === "https:" ? "wss:" : "ws:") ||
-        socket.pathname !== "/v1/realtime" || socket.username || socket.password || socket.search || socket.hash)
+        socket.pathname !== "/graphql" || socket.username || socket.password || socket.search || socket.hash)
       throw new TypeError("Route cannot redirect this client's credentials to another origin or an unsafe socket");
     this.http.servingEpoch = value.servingEpoch; this.#route = value; return value;
   }
@@ -342,15 +380,8 @@ export class V1Client {
   }
   async events(id: string, after?: V1Cursor): Promise<V1Page<V1Record> & { nextCursor: V1Cursor }> {
     const query = after === undefined ? "" : "&after=" + btoa(JSON.stringify(after)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-    const result = v1Page((await this.http.read(`${this.path}/conversations/${v1Id(id)}/events?limit=100${query}`)).result, v1Record);
-    const cursor = v1Cursor(result.nextCursor);
-    if (cursor.conversationId !== id || cursor.incarnation !== this.http.incarnation ||
-        (after && BigInt(cursor.sequence) < BigInt(after.sequence))) throw new TypeError("Invalid authoritative replay frontier");
-    for (const event of result.items) {
-      if (v1Id(event.conversationId) !== id || BigInt(v1Counter(event.sequence)) > BigInt(cursor.sequence)) throw new TypeError("Invalid event scope");
-      v1Id(event.eventId);
-    }
-    return { ...result, nextCursor: cursor };
+    return eventPage((await this.http.read(`${this.path}/conversations/${v1Id(id)}/events?limit=100${query}`)).result,
+      this.http.incarnation, id, after);
   }
   async reportRead(id: string, membership: V1Membership, throughSequence: string): Promise<V1Record> {
     return v1Record((await this.http.mutate("POST", `${this.path}/conversations/${v1Id(id)}/receipts`,
@@ -400,6 +431,8 @@ export class V1Realtime {
   #socket: WebSocket | undefined; #closed = false; #working: Promise<void> | undefined;
   #cursor: V1Cursor | undefined; #timer: ReturnType<typeof setTimeout> | undefined;
   #reconnectAttempts = 0;
+  #pendingPages = 0;
+  #queueGeneration = 0;
   #currentRoute: V1Route;
   readonly #storageKey: string;
   readonly #token: string;
@@ -419,32 +452,71 @@ export class V1Realtime {
   }
   #connect(): void {
     if (this.#closed) return;
-    const ws = new WebSocket(this.#currentRoute.wssUrl, "convohop.realtime.v1"); this.#socket = ws;
+    const ws = new WebSocket(this.#currentRoute.wssUrl, "graphql-transport-ws"); this.#socket = ws;
+    const subscriptionId = crypto.randomUUID();
     ws.onopen = () => {
       if (this.#closed || this.#socket !== ws) { ws.close(1000); return; }
-      ws.send(JSON.stringify({ type: "authenticate", protocolVersion: "1", requestId: crypto.randomUUID(),
-        projectId: this.client.projectId, incarnation: this.#currentRoute.incarnation, sessionToken: this.#token }));
+      ws.send(JSON.stringify({ type: "connection_init", payload: {
+        projectId: this.client.projectId, incarnation: this.#currentRoute.incarnation, token: this.#token } }));
     };
     ws.onmessage = event => {
       if (this.#closed || this.#socket !== ws) return;
       try {
-        const frame = v1Record(JSON.parse(v1String(event.data)));
-        if (frame.type === "authenticated") {
+        const text = v1String(event.data);
+        if (text.length > 65536) throw new V1Problem("ADMISSION_LIMIT", subscriptionId, "rejected", 503, "Subscription frame exceeds its budget");
+        const frame = v1Record(JSON.parse(text));
+        if (frame.type === "connection_ack") {
           this.#reconnectAttempts = 0;
-          ws.send(JSON.stringify({ type: "subscribe", requestId: crypto.randomUUID(),
-            subscriptions: [{ conversationId: this.conversationId, ...(this.#cursor ? { cursor: this.#cursor } : {}) }] }));
+          const operation = v1Operations["communication.conversationEvents"];
+          ws.send(JSON.stringify({ type: "subscribe", id: subscriptionId, payload: {
+            query: operation.query, operationName: operation.operationName,
+            variables: { context: { requestId: crypto.randomUUID(), projectId: this.client.projectId,
+              incarnation: this.#currentRoute.incarnation, observedServingEpoch: this.#currentRoute.servingEpoch },
+            input: { conversationId: this.conversationId, limit: 50, ...(this.#cursor ? { after: this.#cursor } : {}) } },
+          } }));
         }
-        else if (frame.type === "invalidated") this.reconcile().catch(error => this.#fail(error));
-        else if (frame.type === "error") { const p = v1Record(frame.problem); this.#fail(new V1Problem(v1String(p.code), v1Id(p.requestId), v1String(p.outcome), Number(p.status), v1String(p.message))); }
+        else if (frame.type === "ping") ws.send(JSON.stringify({ type: "pong" }));
+        else if (frame.type === "next" || frame.type === "error") {
+          if (frame.id !== subscriptionId) throw new TypeError("Unknown subscription identity");
+          const payload = frame.type === "error" ? { errors: frame.payload } : v1Record(frame.payload);
+          if (Array.isArray(payload.errors) && payload.errors.length) {
+            const problem = v1Record(payload.errors[0]), extensions = v1Record(problem.extensions);
+            throw new V1Problem(v1String(extensions.code), v1Id(extensions.requestId), v1String(extensions.outcome),
+              Number(extensions.status), v1String(problem.message));
+          }
+          this.#page(v1Record(payload.data).conversationEvents);
+        } else if (frame.type === "complete") {
+          throw new V1Problem("AUTHORITY_UNAVAILABLE", subscriptionId, "unknown", 503, "Resume the subscription from its applied cursor");
+        }
       } catch (error) { this.#fail(error); }
     };
     ws.onerror = () => this.onError(new Error("Realtime connection unavailable; current history remains authoritative"));
     ws.onclose = event => {
       if (this.#socket !== ws) return;
       this.#socket = undefined;
-      if (!this.#closed && event.code !== 1008) this.#retry();
-      else if (!this.#closed) this.#fail(new Error("Realtime authorization ended; obtain a current session"));
+      if (!this.#closed && ![4400, 4401, 4403, 4408, 4409].includes(event.code)) this.#retry();
+      else if (!this.#closed) this.#fail(new V1Problem("UNAUTHENTICATED", subscriptionId, "rejected", 401, "Realtime authorization ended; obtain a current session"));
     };
+  }
+  #page(value: unknown): void {
+    if (this.#pendingPages >= 4) throw new V1Problem("ADMISSION_LIMIT", crypto.randomUUID(), "unknown", 503, "Application must resume from its applied cursor");
+    const page = eventPage(value, this.#currentRoute.incarnation, this.conversationId);
+    if (page.refreshRequired) throw new Error("Explicit authorized history resynchronization required");
+    const generation = this.#queueGeneration;
+    this.#pendingPages++;
+    const work = (this.#working ?? Promise.resolve()).then(async () => {
+      if (this.#closed || generation !== this.#queueGeneration ||
+          (this.#cursor && BigInt(page.nextCursor.sequence) < BigInt(this.#cursor.sequence))) return;
+      const events = this.#cursor ? page.items.filter(event => BigInt(v1Counter(event.sequence)) > BigInt(this.#cursor!.sequence)) : page.items;
+      await this.apply(events);
+      if (this.#closed || generation !== this.#queueGeneration) return;
+      this.#cursor = page.nextCursor;
+      this.client.storage?.setItem(this.#storageKey, JSON.stringify(this.#cursor));
+    }).catch(error => { if (generation === this.#queueGeneration) this.#fail(error); }).finally(() => {
+      this.#pendingPages--;
+      if (this.#working === work) this.#working = undefined;
+    });
+    this.#working = work;
   }
   #retry(): void {
     if (this.#closed || this.#timer) return;
@@ -459,7 +531,9 @@ export class V1Realtime {
     }, delay);
   }
   #fail(error: unknown): void {
-    if (!this.#closed && error instanceof V1Problem && ([0, 429, 503].includes(error.status) || error.code === "WRONG_REGION")) {
+    if (this.#closed) return;
+    this.#queueGeneration++;
+    if (error instanceof V1Problem && ([0, 429, 503].includes(error.status) || error.code === "WRONG_REGION")) {
       const socket = this.#socket; this.#socket = undefined;
       socket?.close(4000, "Retrying authoritative connection");
       this.onError(error); this.#retry(); return;
@@ -470,19 +544,26 @@ export class V1Realtime {
   async reconcile(): Promise<void> {
     if (this.#closed) return;
     if (this.#working) return this.#working;
+    const generation = this.#queueGeneration;
     const work = async () => {
       for (let page = 0; page < 10 && !this.#closed; page++) {
         const result = await this.client.events(this.conversationId, this.#cursor);
+        if (this.#closed || generation !== this.#queueGeneration) return;
         if (result.refreshRequired) throw new Error("Explicit authorized history resynchronization required");
         await this.apply(result.items);
+        if (this.#closed || generation !== this.#queueGeneration) return;
         this.#cursor = result.nextCursor;
         this.client.storage?.setItem(this.#storageKey, JSON.stringify(this.#cursor));
         if (result.complete) return;
       }
       throw new Error("Replay work limit reached; explicitly reconcile again");
     };
-    this.#working = work();
-    try { await this.#working; } finally { this.#working = undefined; }
+    const pending = work(); this.#working = pending;
+    try { await pending; } finally { if (this.#working === pending) this.#working = undefined; }
   }
-  close(): void { this.#closed = true; if (this.#timer) clearTimeout(this.#timer); this.#socket?.close(1000); }
+  close(): void {
+    this.#closed = true; this.#queueGeneration++;
+    if (this.#timer) clearTimeout(this.#timer);
+    const socket = this.#socket; this.#socket = undefined; socket?.close(1000);
+  }
 }

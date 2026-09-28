@@ -1,7 +1,7 @@
 # ConvoHop browser SDK
 
-`@convohop/browser-sdk` exports native REST/WSS `V1Client` and
-`V1MediaConnection`, alongside the retained GraphQL `ConvoHopClient`.
+`@convohop/browser-sdk` exports current GraphQL `V1Client` and native
+`V1MediaConnection`, alongside the retained legacy `ConvoHopClient`.
 This is **source
 only**: the package has not been published and no hosted service is included.
 Its source is licensed under the [Apache License, Version 2.0](../../LICENSE).
@@ -20,7 +20,9 @@ Your authenticated backend returns a native session bootstrap; it must never
 return its backend key or an operator credential. Native IDs are canonical
 nonzero UUIDs, and SQL counters are decimal **strings**, not JavaScript
 numbers. The communication origin must expose the compatible authenticated
-REST/WSS service. The current integration is local, not a hosted endpoint.
+unversioned `/graphql` HTTP/subscription service. `V1*` identifies the current
+SDK/domain generation, not an API URL or schema-version selector.
+The current integration is local, not a qualified hosted endpoint.
 
 ```ts
 import { V1Client } from "@convohop/browser-sdk";
@@ -48,15 +50,21 @@ revision. `search(query, conversationIds?)` returns `V1SearchHit` items shaped
 as `{conversationId, message}`, not flat messages. Use `reportRead` with
 current membership/visibility epochs; it reports device coverage, not a
 human-read attestation. Low-level `client.http` supports the other explicit
-wire routes and page continuations without creating another SDK.
+logical operation identifiers and page continuations without creating another
+SDK. Its compatibility `/v1/...` strings are translated into checked GraphQL
+documents, never sent as HTTP paths.
 
 `watch` catches up from an authority-issued cursor before connecting,
-reconciles on hints/foreground/reconnect, and persists a frontier only after
+receives ordered durable `conversationEvents` pages over `graphql-transport-ws`,
+reconciles on foreground/reconnect, and persists a frontier only after
 the application callback succeeds. It never silently resets an invalid,
 ahead or expired cursor. HTTP/WSS credentials never follow a route to a
 different origin. Without `recoveryStorage`, unresolved mutations/cursors
 are in-memory only. Recovery storage contains original message payloads:
 use a trusted origin/profile, not shared public-machine storage.
+The socket initializes with `{token, projectId, incarnation}`. Expiry/revocation
+ends the stream; a slow application is limited to four pending pages and
+must resume from its last applied cursor. Queries/mutations use HTTP only.
 
 An uncertain mutation retains its ID, payload, original 60-second budget
 and at most three submissions. `client.resolve(requestId)` is read-only;
@@ -69,7 +77,7 @@ uses one bootstrap, so construct a new client/stream with a fresh session
 and the same authorized recovery storage when it expires.
 
 Calling requires a **ConvoHopAdmissionV1-capable native SFU**. Stock LiveKit,
-GraphQL device grants and a direct cached-token `Room.connect` are not
+legacy GraphQL device grants and a direct cached-token `Room.connect` are not
 compatible substitutes. Start with `client.startCall(conversationId,
 invitedPrincipalIds, video)`; retain its returned call ID and observe
 `client.call(id)` until the room is offering/active. Do not treat preparation
@@ -113,6 +121,12 @@ connection cannot reconnect. Expiry, revocation or lost clock confidence
 must stop forwarding; native JWT lifetime is not forwarding permission.
 There is no native v1 broadcast, Egress, recording, screen-share or offline
 ringing implementation.
+
+Checked operations are exported as `v1Operations`, with `V1OperationTypes`
+and the `V1Graphql` type namespace. `npm run generate:graphql` uses the
+maintained pinned GraphQL Code Generator; `npm run check:graphql` detects
+schema/document/type drift. These artifact names do not version the public
+GraphQL API. Add fields compatibly and use schema deprecations for retirement.
 
 ## Retained legacy GraphQL client
 

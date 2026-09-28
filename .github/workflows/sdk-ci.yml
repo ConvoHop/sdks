@@ -22,6 +22,7 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci --no-audit --no-fund
+      - run: npm run check:graphql
       - name: Build and test browser and server SDKs
         run: npm test
 

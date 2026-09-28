@@ -1,7 +1,10 @@
 import {
   V1Transport, v1Id, v1Record, v1String, v1Conversation,
-  type V1RecoveryStorage, type V1Record, type V1Conversation,
+  type V1RecoveryStorage, type V1Record, type V1Conversation, type V1Graphql,
 } from "@convohop/browser-sdk";
+
+export type V1DeploymentOptions = Omit<V1Graphql.CreateDeploymentRequestInput, "orgId">;
+export type V1ProjectOptions = Omit<V1Graphql.CreateProjectRequestInput, "deploymentId" | "name">;
 
 export class V1ManagementClient {
   readonly http: V1Transport;
@@ -14,14 +17,18 @@ export class V1ManagementClient {
   async createOrganization(name: string, termsRef: string): Promise<V1Record> {
     return v1Record((await this.http.mutate("POST", "/management/v1/organizations", { name, termsRef })).result);
   }
-  async createDeployment(orgId: string): Promise<V1Record> {
+  async createDeployment(orgId: string, configuration?: V1DeploymentOptions): Promise<V1Record> {
+    if (!configuration && !["127.0.0.1", "localhost", "[::1]"].includes(new URL(this.http.baseUrl).hostname))
+      throw new TypeError("Hosted deployment requires explicit offering, geoId, installationProfileId and consentRef");
     const response = await this.http.mutate("POST", `/management/v1/organizations/${v1Id(orgId)}/deployments`,
-      { offering: "managedShared", geoId: "local", installationProfileId: "local-single-node", consentRef: "local-development" });
+      configuration ?? { offering: "managedShared", geoId: "local", installationProfileId: "local-single-node", consentRef: "local-development" });
     return { operation: response.operation, resourceRef: response.resourceRef };
   }
-  async createProject(deploymentId: string, name: string): Promise<V1Record> {
+  async createProject(deploymentId: string, name: string, configuration?: V1ProjectOptions): Promise<V1Record> {
+    if (!configuration && !["127.0.0.1", "localhost", "[::1]"].includes(new URL(this.http.baseUrl).hostname))
+      throw new TypeError("Hosted project requires explicit environment and backendPrincipalName");
     const response = await this.http.mutate("POST", `/management/v1/deployments/${v1Id(deploymentId)}/projects`,
-      { name, environment: "local", backendPrincipalName: "application-server" });
+      { ...(configuration ?? { environment: "local", backendPrincipalName: "application-server" }), name });
     return { operation: response.operation, resourceRef: response.resourceRef };
   }
   async operation(operationId: string): Promise<V1Record> { return v1Record((await this.http.read(`/management/v1/operations/${v1Id(operationId)}`)).result); }

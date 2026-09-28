@@ -9,7 +9,7 @@ or that a versioned Go module or production service is available.
 
 | SDK | Source and package | What it does |
 | --- | --- | --- |
-| Browser | [`@convohop/browser-sdk`](packages/browser-sdk/README.md) | Native REST/WSS `V1Client` and `V1MediaConnection`; separately retained GraphQL `ConvoHopClient` |
+| Browser | [`@convohop/browser-sdk`](packages/browser-sdk/README.md) | Current GraphQL `V1Client` and native `V1MediaConnection`; separately retained legacy `ConvoHopClient` |
 | Node server | [`@convohop/server-sdk`](packages/server-sdk/README.md) | Native `V1ManagementClient`/`V1ProjectServerClient`; separately retained legacy GraphQL clients |
 | Python | [`convohop-sdk`](packages/python-sdk/README.md), import `convohop` | Python 3.9+ async GraphQL and WebSocket clients |
 | Go | [`github.com/ConvoHop/sdks/packages/go-sdk`](packages/go-sdk/README.md), package `convohop` | Go 1.22+ GraphQL clients and cursor-safe event polling |
@@ -25,6 +25,7 @@ From the repository root, with Node.js 24+:
 
 ```sh
 npm ci
+npm run check:graphql
 npm run build
 npm test
 ```
@@ -55,8 +56,13 @@ and does not publish packages or deploy infrastructure.
 
 ## Service and credential boundaries
 
-**Native v1** Browser/Node clients target `/v1/projects/{projectId}`,
-`/management/v1` and `convohop.realtime.v1` at `/v1/realtime`. The trusted
+**Current** Browser/Node clients target the unversioned `/graphql` on their
+separate data/management origins. Subscriptions use `graphql-transport-ws`
+at the data origin's same path. Generated documents/types are checked
+against the service-exported schemas in `schema/`; run `npm run generate:graphql`
+after an approved schema update. Evolve the schema additively and deprecate
+fields before removal. `V1*` identifies the SDK/domain generation, not an
+API version that clients select. The trusted
 backend registers principals and issues scoped sessions; an end-user
 bootstrap carries the project, incarnation, principal/device/session and
 short-lived session token. Operator and backend credentials must stay on
@@ -69,12 +75,15 @@ Mutation recovery retains the original UUID, payload, fingerprint and retry
 budget. Application-supplied `recoveryStorage` enables persistence of request
 state and acknowledged replay cursors, not session tokens. Stored request
 payloads can contain message text; treat that storage as application data.
-Native browser/backend examples are in the package READMEs. Real CockroachDB/
+Existing low-level SDK path strings are compatibility operation identifiers,
+not HTTP routes. HTTP 200 GraphQL errors never become successful mutation
+evidence. Native browser/backend examples are in the package READMEs. Real CockroachDB/
 WebRTC acceptance belongs to the separately operated service's integration
 suite; these package unit tests do not establish that deployment.
 
 **Legacy only:** `ConvoHopClient`, `ManagementClient`, `ProjectServerClient`,
-and the Python/Go SDKs target `/graphql`. Browser/Python legacy subscriptions
+and the Python/Go SDKs target the older prototype's different schema, also at
+`/graphql`. Browser/Python legacy subscriptions
 use `graphql-transport-ws`; the following prefix table is **not** the native
 v1 credential contract. No Python/Go v1 parity is claimed. Configure origins
 in your application; no hosted origin is bundled here.

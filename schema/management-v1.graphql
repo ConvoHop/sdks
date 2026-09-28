@@ -1,0 +1,970 @@
+type ActorRef {
+	tenantId: String!
+	objectId: String!
+}
+
+type Call {
+	callId: UUID!
+	conversationId: UUID!
+	revision: Decimal!
+	generation: Decimal!
+	state: String!
+	media: CallMedia
+	creatorId: UUID!
+	invitation: Invitation
+	participation: Participation
+	mediaCutoff: MediaCutoff
+	errorCode: String
+}
+
+type CallCompletion {
+	callId: UUID!
+	conversationId: UUID
+	revision: Decimal
+	generation: Decimal
+	state: String
+	media: CallMedia
+	creatorId: UUID
+	invitation: Invitation
+	participation: Participation
+	mediaCutoff: MediaCutoff
+	errorCode: String
+}
+
+type CallMedia {
+	audio: Boolean!
+	video: Boolean!
+}
+
+input CallMediaInput {
+	audio: Boolean!
+	video: Boolean!
+}
+
+type CallPage {
+	items: [Call!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type CallSummary {
+	callId: UUID!
+	mediaCutoff: MediaCutoff
+}
+
+type Capabilities {
+	contractVersion: String!
+	serverRelease: String!
+	publicApiVersion: String!
+	wssVersions: [String!]!
+	capabilityRevision: Decimal!
+	limitsRevision: Decimal!
+	features: Features
+	limits: [LimitEntry!]!
+	environment: String!
+	productionQualified: Boolean!
+	mediaPolicy: MediaPolicy
+	geoControlAuthorityId: String
+	offerings: [String!]!
+	geos: [String!]!
+	installationProfiles: [String!]!
+	portalIdentity: String
+}
+
+type CapabilitiesReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Capabilities
+}
+
+type ConfigureWebhookReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input ConfigureWebhookRequestInput {
+	projectId: UUID!
+	url: String!
+	eventTypes: [String!]!
+	payloadVersion: String!
+	consentRef: String!
+}
+
+type Conversation {
+	conversationId: UUID!
+	revision: Decimal!
+	title: String!
+	props: Properties
+	latestSequence: Decimal!
+	membership: Member
+}
+
+type CreateDeploymentReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input CreateDeploymentRequestInput {
+	orgId: UUID!
+	offering: String!
+	geoId: String!
+	installationProfileId: String!
+	consentRef: String!
+}
+
+type CreateOrganizationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Organization
+}
+
+input CreateOrganizationRequestInput {
+	name: String!
+	termsRef: String!
+}
+
+type CreateProjectReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input CreateProjectRequestInput {
+	deploymentId: UUID!
+	name: String!
+	environment: String!
+	backendPrincipalName: String!
+}
+
+type CredentialCapsule {
+	kind: String!
+	keyId: String
+	backendPrincipalId: String
+	backendKey: String
+	expiresAt: String
+	endpointId: UUID
+	secretVersion: String
+	secret: String
+}
+
+type CredentialDelivery {
+	deliveryId: UUID!
+	kind: String!
+	projectId: UUID!
+	installationId: String!
+	resourceRef: ResourceRef
+	expiresAt: String!
+	payloadDigest: String!
+	recipientActorRef: ActorRef
+}
+
+type CredentialDeliveryReceipt {
+	deliveryId: UUID!
+}
+
+type CredentialPermitReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: SignedProof
+}
+
+input CredentialPermitRequestInput {
+	projectId: UUID!
+	deliveryId: UUID!
+	redemptionRequestId: UUID!
+}
+
+type Cursor {
+	incarnation: UUID!
+	conversationId: UUID!
+	sequence: Decimal!
+}
+
+input CursorInput {
+	incarnation: UUID!
+	conversationId: UUID!
+	sequence: Decimal!
+}
+
+type CutoffScope {
+	kind: String!
+	principalId: UUID
+	sessionId: UUID
+	deviceId: UUID
+	callId: UUID
+}
+
+scalar Decimal
+
+type DeliveryAck {
+	deliveryId: UUID!
+	acknowledged: Boolean!
+}
+
+type Deployment {
+	deploymentId: UUID!
+	orgId: UUID!
+	offering: String!
+	geoId: String!
+	installationId: String!
+	resourceOwner: String!
+	approvedRegions: [String!]!
+	readiness: String!
+	revision: Decimal!
+	consentRef: String!
+	environment: String!
+}
+
+type DeploymentHealth {
+	deploymentId: UUID!
+	readiness: String!
+	observedAt: String!
+	services: [ServiceObservation!]!
+}
+
+type DeploymentHealthReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: DeploymentHealth
+}
+
+input DeploymentHealthRequestInput {
+	deploymentId: UUID!
+}
+
+type DeploymentUsage {
+	deploymentId: UUID!
+	source: String!
+	observedAt: String!
+	complete: Boolean!
+	reason: String!
+}
+
+type DeploymentUsageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: DeploymentUsage
+}
+
+input DeploymentUsageRequestInput {
+	deploymentId: UUID!
+}
+
+type DisableWebhookReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input DisableWebhookRequestInput {
+	projectId: UUID!
+	endpointId: UUID!
+	expectedRevision: Decimal!
+}
+
+type Event {
+	eventId: UUID!
+	conversationId: UUID!
+	sequence: Decimal!
+	eventVersion: String!
+	type: String!
+	occurredAt: String!
+	subjectRef: ResourceRef
+	payload: EventPayload
+}
+
+type EventPage {
+	items: [Event!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: Cursor
+}
+
+type EventPayload {
+	messageId: UUID
+	revision: Decimal
+	revisionSequence: Decimal
+	principalId: UUID
+	membershipEpoch: Decimal
+	visibilityEpoch: Decimal
+	kind: String
+	throughSequence: Decimal
+	callId: UUID
+	generation: Decimal
+	state: String
+	cutoffEvidence: String
+}
+
+type Features {
+	chat: Boolean!
+	inbox: Boolean!
+	lexicalSearch: Boolean!
+	typing: Boolean!
+	foregroundCalls: Boolean!
+	webhooks: Boolean!
+}
+
+type GetDeploymentReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Deployment
+}
+
+input GetDeploymentRequestInput {
+	deploymentId: UUID!
+}
+
+type GetOperationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Operation
+}
+
+input GetOperationRequestInput {
+	operationId: UUID!
+}
+
+type GetOrganizationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Organization
+}
+
+input GetOrganizationRequestInput {
+	orgId: UUID!
+}
+
+type GetProjectReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Project
+}
+
+input GetProjectRequestInput {
+	projectId: UUID!
+}
+
+type InboxItem {
+	conversationId: UUID!
+	title: String!
+	activityAt: String
+	visibilityEpoch: Decimal!
+	latestVisibleMessage: Message
+	hasUnread: Boolean!
+}
+
+type InboxPage {
+	items: [InboxItem!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+	partialReason: String
+}
+
+type Invitation {
+	invitationId: UUID!
+	callId: UUID!
+	generation: Decimal!
+	principalId: UUID!
+	status: String!
+	expiresAt: String!
+}
+
+type IssueBackendKeyReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input IssueBackendKeyRequestInput {
+	projectId: UUID!
+	name: String!
+	scopes: [String!]!
+	expiresAt: String!
+}
+
+type Limit {
+	maximum: Decimal
+	unit: String
+	scope: String
+	milliseconds: Decimal
+	policyId: String
+	revision: Decimal
+}
+
+type LimitEntry {
+	key: String!
+	value: Limit!
+}
+
+type MediaCutoff {
+	state: String!
+	scope: CutoffScope
+}
+
+type MediaGrant {
+	callId: UUID!
+	generation: Decimal!
+	roomName: String!
+	participantIdentity: String!
+	livekitUrl: String!
+	transportToken: String!
+	forwardingLease: SignedProof
+	admissionTicket: SignedProof
+	transportExpiresAt: String!
+	admissionExpiresAt: String!
+	leaseExpiresAt: String!
+	leasePolicyId: String!
+}
+
+type MediaPolicy {
+	leasePolicyId: String!
+	leaseProtocolVersion: String!
+	maxLeaseMs: Decimal!
+	renewAttemptMs: Decimal!
+	preludeMaxBytes: String!
+	preludeTimeoutMs: String!
+	clockProfileId: String!
+}
+
+type Member {
+	conversationId: UUID!
+	principalId: UUID!
+	role: String!
+	status: String!
+	membershipEpoch: Decimal!
+	visibilityEpoch: Decimal!
+	revision: Decimal!
+	visibleFromSequence: Decimal!
+}
+
+input MemberInputInput {
+	principalId: UUID!
+	role: String!
+}
+
+type MemberPage {
+	items: [Member!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type Message {
+	messageId: UUID!
+	conversationId: UUID!
+	authorId: String!
+	sequence: Decimal!
+	revision: Decimal!
+	revisionSequence: Decimal!
+	createdAt: String!
+	deleted: Boolean!
+	text: String
+	props: Properties
+	editedAt: String
+}
+
+type MessageAck {
+	messageId: UUID!
+	conversationId: UUID!
+	sequence: Decimal!
+	revision: Decimal!
+	status: String!
+	cursor: Cursor
+}
+
+type MessagePage {
+	items: [Message!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type Mutation {
+	createOrganization(context: RequestContextInput!, input: CreateOrganizationRequestInput!): CreateOrganizationReply!
+	createDeployment(context: RequestContextInput!, input: CreateDeploymentRequestInput!): CreateDeploymentReply!
+	createProject(context: RequestContextInput!, input: CreateProjectRequestInput!): CreateProjectReply!
+	issueBackendKey(context: RequestContextInput!, input: IssueBackendKeyRequestInput!): IssueBackendKeyReply!
+	revokeBackendKey(context: RequestContextInput!, input: RevokeBackendKeyRequestInput!): RevokeBackendKeyReply!
+	projectPolicy(context: RequestContextInput!, input: ProjectPolicyRequestInput!): ProjectPolicyReply!
+	credentialPermit(context: RequestContextInput!, input: CredentialPermitRequestInput!): CredentialPermitReply!
+	pauseOperation(context: RequestContextInput!, input: PauseOperationRequestInput!): PauseOperationReply!
+	resumeOperation(context: RequestContextInput!, input: ResumeOperationRequestInput!): ResumeOperationReply!
+	configureWebhook(context: RequestContextInput!, input: ConfigureWebhookRequestInput!): ConfigureWebhookReply!
+	disableWebhook(context: RequestContextInput!, input: DisableWebhookRequestInput!): DisableWebhookReply!
+}
+
+type Operation {
+	operationId: UUID!
+	kind: String!
+	targetRef: ResourceRef
+	state: String!
+	revision: Decimal!
+	requestedAt: String!
+	updatedAt: String!
+	steps: [OperationStep!]!
+	result: OperationResult
+	blockedReason: String
+}
+
+type OperationRef {
+	operationId: UUID!
+	owner: String!
+	href: String!
+	state: String!
+}
+
+type OperationResult {
+	projectId: UUID
+	incarnation: UUID
+	status: String
+	backend: String
+	environment: String
+	policyRevision: Decimal
+	expiresAt: String
+	kind: String
+	resourceRef: ResourceRef
+	delivery: CredentialDelivery
+	keyId: String
+	endpointId: UUID
+	enabled: Boolean
+	callId: UUID
+	conversationId: UUID
+	revision: Decimal
+	generation: Decimal
+	state: String
+	media: CallMedia
+	creatorId: UUID
+	mediaCutoff: MediaCutoff
+	errorCode: String
+}
+
+type OperationStep {
+	stepId: String!
+	state: String!
+}
+
+type Organization {
+	orgId: UUID!
+	name: String!
+	status: String!
+	revision: Decimal!
+}
+
+type OrganizationPage {
+	items: [Organization!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type OrganizationsReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OrganizationPage
+}
+
+scalar PageSize
+
+type Participation {
+	principalId: UUID!
+	sessionId: UUID
+	deviceId: UUID
+	status: String!
+	nativeConnectionId: String
+	mediaCutoff: MediaCutoff
+}
+
+type PauseOperationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Operation
+}
+
+input PauseOperationRequestInput {
+	operationId: UUID!
+	expectedRevision: Decimal!
+}
+
+input PolicyChangeInput {
+	kind: String!
+	reason: String
+	holdId: String
+}
+
+type Principal {
+	principalId: UUID!
+	externalUserId: String!
+	status: String!
+	revision: Decimal!
+}
+
+type Project {
+	projectId: UUID!
+	deploymentId: UUID!
+	name: String!
+	environment: String!
+	incarnation: UUID!
+	servingRegion: String!
+	servingEpoch: Decimal!
+	status: String!
+	revision: Decimal!
+	policyRevision: Decimal!
+}
+
+type ProjectPolicyReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input ProjectPolicyRequestInput {
+	projectId: UUID!
+	expectedRevision: Decimal!
+	change: PolicyChangeInput!
+}
+
+scalar Properties
+
+type Query {
+	capabilities(context: RequestContextInput!): CapabilitiesReply!
+	organizations(context: RequestContextInput!): OrganizationsReply!
+	getOrganization(context: RequestContextInput!, input: GetOrganizationRequestInput!): GetOrganizationReply!
+	getDeployment(context: RequestContextInput!, input: GetDeploymentRequestInput!): GetDeploymentReply!
+	getProject(context: RequestContextInput!, input: GetProjectRequestInput!): GetProjectReply!
+	deploymentHealth(context: RequestContextInput!, input: DeploymentHealthRequestInput!): DeploymentHealthReply!
+	deploymentUsage(context: RequestContextInput!, input: DeploymentUsageRequestInput!): DeploymentUsageReply!
+	webhookDeliveries(context: RequestContextInput!, input: WebhookDeliveriesRequestInput!): WebhookDeliveriesReply!
+	resolveRequest(context: RequestContextInput!, input: ResolveRequestRequestInput!): ResolveRequestReply!
+	getOperation(context: RequestContextInput!, input: GetOperationRequestInput!): GetOperationReply!
+}
+
+type ReadReceipt {
+	principalId: UUID!
+	membershipEpoch: Decimal!
+	visibilityEpoch: Decimal!
+	deliveredThroughSequence: Decimal
+	readThroughSequence: Decimal
+	updatedAt: String
+}
+
+type ReceiptPage {
+	items: [ReadReceipt!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+input RequestContextInput {
+	requestId: UUID!
+	projectId: UUID
+	incarnation: UUID
+	observedServingEpoch: Decimal
+	credentialDeliveryPermit: SignedProof
+}
+
+type RequestResolution {
+	state: String!
+	requestId: UUID!
+	checkedAt: String!
+	resultWithheld: Boolean!
+	receipt: ResolvedReceipt
+}
+
+type ResolveRequestReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: RequestResolution
+}
+
+input ResolveRequestRequestInput {
+	requestId: UUID!
+}
+
+type ResolvedReceipt {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: RetainedResult
+}
+
+type ResourceRef {
+	kind: String!
+	id: String!
+}
+
+type ResumeOperationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Operation
+}
+
+input ResumeOperationRequestInput {
+	operationId: UUID!
+	expectedRevision: Decimal!
+}
+
+"""
+Exactly one typed field contains the retained, currently authorized receipt result.
+"""
+type RetainedResult {
+	call: Call
+	callSummary: CallSummary
+	conversation: Conversation
+	credentialDeliveryReceipt: CredentialDeliveryReceipt
+	deliveryAck: DeliveryAck
+	mediaGrant: MediaGrant
+	member: Member
+	message: Message
+	messageAck: MessageAck
+	organization: Organization
+	principal: Principal
+	readReceipt: ReadReceipt
+	sessionBootstrap: SessionBootstrap
+	sessionRevocation: SessionRevocation
+	signedProof: SignedProof
+}
+
+type RevokeBackendKeyReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input RevokeBackendKeyRequestInput {
+	projectId: UUID!
+	keyId: String!
+	expectedRevision: Decimal!
+	revokeIssuedSessions: Boolean!
+}
+
+type SearchHit {
+	conversationId: UUID!
+	message: Message
+}
+
+type SearchPage {
+	items: [SearchHit!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+input SearchScopeInput {
+	conversationIds: [UUID!]!
+}
+
+type ServiceDetails {
+	status: String!
+}
+
+type ServiceObservation {
+	role: String!
+	observedAt: String!
+	details: ServiceDetails
+}
+
+type Session {
+	sessionId: UUID!
+	principalId: UUID!
+	deviceId: UUID!
+	incarnation: UUID!
+	sessionRevision: Decimal!
+	expiresAt: String!
+	status: String!
+}
+
+type SessionBootstrap {
+	session: Session
+	tokenExpiresAt: String!
+	sessionToken: String!
+}
+
+type SessionRevocation {
+	sessionId: UUID!
+	status: String!
+	mediaCutoff: MediaCutoff
+}
+
+scalar SignedProof
+
+type TypingStatus {
+	accepted: Boolean!
+}
+
+scalar UUID
+
+type WebhookDeliveriesReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: WebhookDeliveryPage
+}
+
+input WebhookDeliveriesRequestInput {
+	projectId: UUID!
+	endpointId: UUID!
+}
+
+type WebhookDelivery {
+	effectId: UUID!
+	eventId: UUID!
+	state: String!
+	attempts: Decimal!
+	lastOutcome: String
+	nextAttemptAt: String!
+}
+
+type WebhookDeliveryPage {
+	items: [WebhookDelivery!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+"""
+Directs the executor to include this field or fragment only when the `if` argument is true.
+"""
+directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+"""
+Directs the executor to skip this field or fragment when the `if` argument is true.
+"""
+directive @skip(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+schema {
+	query: Query
+	mutation: Mutation
+}
+

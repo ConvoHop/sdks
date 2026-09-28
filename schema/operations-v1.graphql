@@ -1,0 +1,3288 @@
+query CommunicationCapabilities($context: RequestContextInput!) {
+  capabilities(context: $context) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      contractVersion
+      serverRelease
+      publicApiVersion
+      wssVersions
+      capabilityRevision
+      limitsRevision
+      features {
+        chat
+        inbox
+        lexicalSearch
+        typing
+        foregroundCalls
+        webhooks
+      }
+      limits {
+        key
+        value {
+          maximum
+          unit
+          scope
+          milliseconds
+          policyId
+          revision
+        }
+      }
+      environment
+      productionQualified
+      mediaPolicy {
+        leasePolicyId
+        leaseProtocolVersion
+        maxLeaseMs
+        renewAttemptMs
+        preludeMaxBytes
+        preludeTimeoutMs
+        clockProfileId
+      }
+      geoControlAuthorityId
+      offerings
+      geos
+      installationProfiles
+      portalIdentity
+    }
+  }
+}
+
+query CommunicationRoute($context: RequestContextInput!) {
+  route(context: $context) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result
+  }
+}
+
+query CommunicationGetPrincipal($context: RequestContextInput!, $input: GetPrincipalRequestInput!) {
+  getPrincipal(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      principalId
+      externalUserId
+      status
+      revision
+    }
+  }
+}
+
+query CommunicationGetConversation($context: RequestContextInput!, $input: GetConversationRequestInput!) {
+  getConversation(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      conversationId
+      revision
+      title
+      props
+      latestSequence
+      membership {
+        conversationId
+        principalId
+        role
+        status
+        membershipEpoch
+        visibilityEpoch
+        revision
+        visibleFromSequence
+      }
+    }
+  }
+}
+
+query CommunicationMembers($context: RequestContextInput!, $input: MembersRequestInput!) {
+  members(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        conversationId
+        principalId
+        role
+        status
+        membershipEpoch
+        visibilityEpoch
+        revision
+        visibleFromSequence
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}
+
+query CommunicationMessages($context: RequestContextInput!, $input: MessagesRequestInput!) {
+  messages(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        messageId
+        conversationId
+        authorId
+        sequence
+        revision
+        revisionSequence
+        createdAt
+        deleted
+        text
+        props
+        editedAt
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}
+
+query CommunicationGetMessage($context: RequestContextInput!, $input: GetMessageRequestInput!) {
+  getMessage(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      messageId
+      conversationId
+      authorId
+      sequence
+      revision
+      revisionSequence
+      createdAt
+      deleted
+      text
+      props
+      editedAt
+    }
+  }
+}
+
+query CommunicationEvents($context: RequestContextInput!, $input: EventsRequestInput!) {
+  events(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        eventId
+        conversationId
+        sequence
+        eventVersion
+        type
+        occurredAt
+        subjectRef {
+          kind
+          id
+        }
+        payload {
+          messageId
+          revision
+          revisionSequence
+          principalId
+          membershipEpoch
+          visibilityEpoch
+          kind
+          throughSequence
+          callId
+          generation
+          state
+          cutoffEvidence
+        }
+      }
+      complete
+      refreshRequired
+      nextCursor {
+        incarnation
+        conversationId
+        sequence
+      }
+    }
+  }
+}
+
+query CommunicationReceipts($context: RequestContextInput!, $input: ReceiptsRequestInput!) {
+  receipts(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        principalId
+        membershipEpoch
+        visibilityEpoch
+        deliveredThroughSequence
+        readThroughSequence
+        updatedAt
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}
+
+query CommunicationInbox($context: RequestContextInput!, $input: InboxRequestInput!) {
+  inbox(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        conversationId
+        title
+        activityAt
+        visibilityEpoch
+        latestVisibleMessage {
+          messageId
+          conversationId
+          authorId
+          sequence
+          revision
+          revisionSequence
+          createdAt
+          deleted
+          text
+          props
+          editedAt
+        }
+        hasUnread
+      }
+      complete
+      refreshRequired
+      nextCursor
+      partialReason
+    }
+  }
+}
+
+query CommunicationSearch($context: RequestContextInput!, $input: SearchRequestInput!) {
+  search(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        conversationId
+        message {
+          messageId
+          conversationId
+          authorId
+          sequence
+          revision
+          revisionSequence
+          createdAt
+          deleted
+          text
+          props
+          editedAt
+        }
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}
+
+query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {
+  resolveRequest(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      state
+      requestId
+      checkedAt
+      resultWithheld
+      receipt {
+        status
+        requestId
+        serverTime
+        receiptId
+        committedAt
+        replayed
+        operation {
+          operationId
+          owner
+          href
+          state
+        }
+        resourceRef {
+          kind
+          id
+        }
+        result {
+          call {
+            callId
+            conversationId
+            revision
+            generation
+            state
+            media {
+              audio
+              video
+            }
+            creatorId
+            invitation {
+              invitationId
+              callId
+              generation
+              principalId
+              status
+              expiresAt
+            }
+            participation {
+              principalId
+              sessionId
+              deviceId
+              status
+              nativeConnectionId
+              mediaCutoff {
+                state
+                scope {
+                  kind
+                  principalId
+                  sessionId
+                  deviceId
+                  callId
+                }
+              }
+            }
+            mediaCutoff {
+              state
+              scope {
+                kind
+                principalId
+                sessionId
+                deviceId
+                callId
+              }
+            }
+            errorCode
+          }
+          callSummary {
+            callId
+            mediaCutoff {
+              state
+              scope {
+                kind
+                principalId
+                sessionId
+                deviceId
+                callId
+              }
+            }
+          }
+          conversation {
+            conversationId
+            revision
+            title
+            props
+            latestSequence
+            membership {
+              conversationId
+              principalId
+              role
+              status
+              membershipEpoch
+              visibilityEpoch
+              revision
+              visibleFromSequence
+            }
+          }
+          credentialDeliveryReceipt {
+            deliveryId
+          }
+          deliveryAck {
+            deliveryId
+            acknowledged
+          }
+          mediaGrant {
+            callId
+            generation
+            roomName
+            participantIdentity
+            livekitUrl
+            transportToken
+            forwardingLease
+            admissionTicket
+            transportExpiresAt
+            admissionExpiresAt
+            leaseExpiresAt
+            leasePolicyId
+          }
+          member {
+            conversationId
+            principalId
+            role
+            status
+            membershipEpoch
+            visibilityEpoch
+            revision
+            visibleFromSequence
+          }
+          message {
+            messageId
+            conversationId
+            authorId
+            sequence
+            revision
+            revisionSequence
+            createdAt
+            deleted
+            text
+            props
+            editedAt
+          }
+          messageAck {
+            messageId
+            conversationId
+            sequence
+            revision
+            status
+            cursor {
+              incarnation
+              conversationId
+              sequence
+            }
+          }
+          organization {
+            orgId
+            name
+            status
+            revision
+          }
+          principal {
+            principalId
+            externalUserId
+            status
+            revision
+          }
+          readReceipt {
+            principalId
+            membershipEpoch
+            visibilityEpoch
+            deliveredThroughSequence
+            readThroughSequence
+            updatedAt
+          }
+          sessionBootstrap {
+            session {
+              sessionId
+              principalId
+              deviceId
+              incarnation
+              sessionRevision
+              expiresAt
+              status
+            }
+            tokenExpiresAt
+            sessionToken
+          }
+          sessionRevocation {
+            sessionId
+            status
+            mediaCutoff {
+              state
+              scope {
+                kind
+                principalId
+                sessionId
+                deviceId
+                callId
+              }
+            }
+          }
+          signedProof
+        }
+      }
+    }
+  }
+}
+
+query CommunicationGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {
+  getOperation(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      operationId
+      kind
+      targetRef {
+        kind
+        id
+      }
+      state
+      revision
+      requestedAt
+      updatedAt
+      steps {
+        stepId
+        state
+      }
+      result {
+        projectId
+        incarnation
+        status
+        backend
+        environment
+        policyRevision
+        expiresAt
+        kind
+        resourceRef {
+          kind
+          id
+        }
+        delivery {
+          deliveryId
+          kind
+          projectId
+          installationId
+          resourceRef {
+            kind
+            id
+          }
+          expiresAt
+          payloadDigest
+          recipientActorRef {
+            tenantId
+            objectId
+          }
+        }
+        keyId
+        endpointId
+        enabled
+        callId
+        conversationId
+        revision
+        generation
+        state
+        media {
+          audio
+          video
+        }
+        creatorId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+        errorCode
+      }
+      blockedReason
+    }
+  }
+}
+
+query CommunicationGetCall($context: RequestContextInput!, $input: GetCallRequestInput!) {
+  getCall(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      invitation {
+        invitationId
+        callId
+        generation
+        principalId
+        status
+        expiresAt
+      }
+      participation {
+        principalId
+        sessionId
+        deviceId
+        status
+        nativeConnectionId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+      }
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+query CommunicationCallInvitations($context: RequestContextInput!, $input: CallInvitationsRequestInput!) {
+  callInvitations(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        callId
+        conversationId
+        revision
+        generation
+        state
+        media {
+          audio
+          video
+        }
+        creatorId
+        invitation {
+          invitationId
+          callId
+          generation
+          principalId
+          status
+          expiresAt
+        }
+        participation {
+          principalId
+          sessionId
+          deviceId
+          status
+          nativeConnectionId
+          mediaCutoff {
+            state
+            scope {
+              kind
+              principalId
+              sessionId
+              deviceId
+              callId
+            }
+          }
+        }
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+        errorCode
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}
+
+mutation CommunicationCreatePrincipal($context: RequestContextInput!, $input: CreatePrincipalRequestInput!) {
+  createPrincipal(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      principalId
+      externalUserId
+      status
+      revision
+    }
+  }
+}
+
+mutation CommunicationDisablePrincipal($context: RequestContextInput!, $input: DisablePrincipalRequestInput!) {
+  disablePrincipal(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      principalId
+      externalUserId
+      status
+      revision
+    }
+  }
+}
+
+mutation CommunicationIssueSession($context: RequestContextInput!, $input: IssueSessionRequestInput!) {
+  issueSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      session {
+        sessionId
+        principalId
+        deviceId
+        incarnation
+        sessionRevision
+        expiresAt
+        status
+      }
+      tokenExpiresAt
+      sessionToken
+    }
+  }
+}
+
+mutation CommunicationRenewSession($context: RequestContextInput!, $input: RenewSessionRequestInput!) {
+  renewSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      session {
+        sessionId
+        principalId
+        deviceId
+        incarnation
+        sessionRevision
+        expiresAt
+        status
+      }
+      tokenExpiresAt
+      sessionToken
+    }
+  }
+}
+
+mutation CommunicationRevokeSession($context: RequestContextInput!, $input: RevokeSessionRequestInput!) {
+  revokeSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      sessionId
+      status
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+    }
+  }
+}
+
+mutation CommunicationCreateConversation($context: RequestContextInput!, $input: CreateConversationRequestInput!) {
+  createConversation(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      conversationId
+      revision
+      title
+      props
+      latestSequence
+      membership {
+        conversationId
+        principalId
+        role
+        status
+        membershipEpoch
+        visibilityEpoch
+        revision
+        visibleFromSequence
+      }
+    }
+  }
+}
+
+mutation CommunicationUpdateConversation($context: RequestContextInput!, $input: UpdateConversationRequestInput!) {
+  updateConversation(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      conversationId
+      revision
+      title
+      props
+      latestSequence
+      membership {
+        conversationId
+        principalId
+        role
+        status
+        membershipEpoch
+        visibilityEpoch
+        revision
+        visibleFromSequence
+      }
+    }
+  }
+}
+
+mutation CommunicationAddMember($context: RequestContextInput!, $input: AddMemberRequestInput!) {
+  addMember(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      conversationId
+      principalId
+      role
+      status
+      membershipEpoch
+      visibilityEpoch
+      revision
+      visibleFromSequence
+    }
+  }
+}
+
+mutation CommunicationRemoveMember($context: RequestContextInput!, $input: RemoveMemberRequestInput!) {
+  removeMember(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      conversationId
+      principalId
+      role
+      status
+      membershipEpoch
+      visibilityEpoch
+      revision
+      visibleFromSequence
+    }
+  }
+}
+
+mutation CommunicationHistoryGrant($context: RequestContextInput!, $input: HistoryGrantRequestInput!) {
+  historyGrant(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      conversationId
+      principalId
+      role
+      status
+      membershipEpoch
+      visibilityEpoch
+      revision
+      visibleFromSequence
+    }
+  }
+}
+
+mutation CommunicationSendMessage($context: RequestContextInput!, $input: SendMessageRequestInput!) {
+  sendMessage(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      messageId
+      conversationId
+      sequence
+      revision
+      status
+      cursor {
+        incarnation
+        conversationId
+        sequence
+      }
+    }
+  }
+}
+
+mutation CommunicationEditMessage($context: RequestContextInput!, $input: EditMessageRequestInput!) {
+  editMessage(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      messageId
+      conversationId
+      authorId
+      sequence
+      revision
+      revisionSequence
+      createdAt
+      deleted
+      text
+      props
+      editedAt
+    }
+  }
+}
+
+mutation CommunicationDeleteMessage($context: RequestContextInput!, $input: DeleteMessageRequestInput!) {
+  deleteMessage(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      messageId
+      conversationId
+      authorId
+      sequence
+      revision
+      revisionSequence
+      createdAt
+      deleted
+      text
+      props
+      editedAt
+    }
+  }
+}
+
+mutation CommunicationReportReceipt($context: RequestContextInput!, $input: ReportReceiptRequestInput!) {
+  reportReceipt(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      principalId
+      membershipEpoch
+      visibilityEpoch
+      deliveredThroughSequence
+      readThroughSequence
+      updatedAt
+    }
+  }
+}
+
+mutation CommunicationTyping($context: RequestContextInput!, $input: TypingRequestInput!) {
+  typing(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      accepted
+    }
+  }
+}
+
+mutation CommunicationStartCall($context: RequestContextInput!, $input: StartCallRequestInput!) {
+  startCall(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      callId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+    }
+  }
+}
+
+mutation CommunicationInviteCall($context: RequestContextInput!, $input: InviteCallRequestInput!) {
+  inviteCall(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      invitation {
+        invitationId
+        callId
+        generation
+        principalId
+        status
+        expiresAt
+      }
+      participation {
+        principalId
+        sessionId
+        deviceId
+        status
+        nativeConnectionId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+      }
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation CommunicationRingCall($context: RequestContextInput!, $input: RingCallRequestInput!) {
+  ringCall(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      invitation {
+        invitationId
+        callId
+        generation
+        principalId
+        status
+        expiresAt
+      }
+      participation {
+        principalId
+        sessionId
+        deviceId
+        status
+        nativeConnectionId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+      }
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation CommunicationAcceptCall($context: RequestContextInput!, $input: AcceptCallRequestInput!) {
+  acceptCall(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      invitation {
+        invitationId
+        callId
+        generation
+        principalId
+        status
+        expiresAt
+      }
+      participation {
+        principalId
+        sessionId
+        deviceId
+        status
+        nativeConnectionId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+      }
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation CommunicationDeclineCall($context: RequestContextInput!, $input: DeclineCallRequestInput!) {
+  declineCall(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      invitation {
+        invitationId
+        callId
+        generation
+        principalId
+        status
+        expiresAt
+      }
+      participation {
+        principalId
+        sessionId
+        deviceId
+        status
+        nativeConnectionId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+      }
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation CommunicationMediaCredentials($context: RequestContextInput!, $input: MediaCredentialsRequestInput!) {
+  mediaCredentials(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      callId
+      generation
+      roomName
+      participantIdentity
+      livekitUrl
+      transportToken
+      forwardingLease
+      admissionTicket
+      transportExpiresAt
+      admissionExpiresAt
+      leaseExpiresAt
+      leasePolicyId
+    }
+  }
+}
+
+mutation CommunicationLeaveCall($context: RequestContextInput!, $input: LeaveCallRequestInput!) {
+  leaveCall(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      callId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+    }
+  }
+}
+
+mutation CommunicationEndCall($context: RequestContextInput!, $input: EndCallRequestInput!) {
+  endCall(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      invitation {
+        invitationId
+        callId
+        generation
+        principalId
+        status
+        expiresAt
+      }
+      participation {
+        principalId
+        sessionId
+        deviceId
+        status
+        nativeConnectionId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+      }
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation CommunicationRedeemCredential($context: RequestContextInput!, $input: RedeemCredentialRequestInput!) {
+  redeemCredential(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      kind
+      keyId
+      backendPrincipalId
+      backendKey
+      expiresAt
+      endpointId
+      secretVersion
+      secret
+    }
+  }
+}
+
+mutation CommunicationAcknowledgeCredential($context: RequestContextInput!, $input: AcknowledgeCredentialRequestInput!) {
+  acknowledgeCredential(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      deliveryId
+      acknowledged
+    }
+  }
+}
+
+subscription CommunicationConversationEvents($context: RequestContextInput!, $input: EventsRequestInput!) {
+  conversationEvents(context: $context, input: $input) {
+    items {
+      eventId
+      conversationId
+      sequence
+      eventVersion
+      type
+      occurredAt
+      subjectRef {
+        kind
+        id
+      }
+      payload {
+        messageId
+        revision
+        revisionSequence
+        principalId
+        membershipEpoch
+        visibilityEpoch
+        kind
+        throughSequence
+        callId
+        generation
+        state
+        cutoffEvidence
+      }
+    }
+    complete
+    refreshRequired
+    nextCursor {
+      incarnation
+      conversationId
+      sequence
+    }
+  }
+}
+
+query ManagementCapabilities($context: RequestContextInput!) {
+  capabilities(context: $context) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      contractVersion
+      serverRelease
+      publicApiVersion
+      wssVersions
+      capabilityRevision
+      limitsRevision
+      features {
+        chat
+        inbox
+        lexicalSearch
+        typing
+        foregroundCalls
+        webhooks
+      }
+      limits {
+        key
+        value {
+          maximum
+          unit
+          scope
+          milliseconds
+          policyId
+          revision
+        }
+      }
+      environment
+      productionQualified
+      mediaPolicy {
+        leasePolicyId
+        leaseProtocolVersion
+        maxLeaseMs
+        renewAttemptMs
+        preludeMaxBytes
+        preludeTimeoutMs
+        clockProfileId
+      }
+      geoControlAuthorityId
+      offerings
+      geos
+      installationProfiles
+      portalIdentity
+    }
+  }
+}
+
+query ManagementOrganizations($context: RequestContextInput!) {
+  organizations(context: $context) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        orgId
+        name
+        status
+        revision
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}
+
+query ManagementGetOrganization($context: RequestContextInput!, $input: GetOrganizationRequestInput!) {
+  getOrganization(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      name
+      status
+      revision
+    }
+  }
+}
+
+query ManagementGetDeployment($context: RequestContextInput!, $input: GetDeploymentRequestInput!) {
+  getDeployment(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      deploymentId
+      orgId
+      offering
+      geoId
+      installationId
+      resourceOwner
+      approvedRegions
+      readiness
+      revision
+      consentRef
+      environment
+    }
+  }
+}
+
+query ManagementGetProject($context: RequestContextInput!, $input: GetProjectRequestInput!) {
+  getProject(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      projectId
+      deploymentId
+      name
+      environment
+      incarnation
+      servingRegion
+      servingEpoch
+      status
+      revision
+      policyRevision
+    }
+  }
+}
+
+query ManagementDeploymentHealth($context: RequestContextInput!, $input: DeploymentHealthRequestInput!) {
+  deploymentHealth(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      deploymentId
+      readiness
+      observedAt
+      services {
+        role
+        observedAt
+        details {
+          status
+        }
+      }
+    }
+  }
+}
+
+query ManagementDeploymentUsage($context: RequestContextInput!, $input: DeploymentUsageRequestInput!) {
+  deploymentUsage(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      deploymentId
+      source
+      observedAt
+      complete
+      reason
+    }
+  }
+}
+
+query ManagementWebhookDeliveries($context: RequestContextInput!, $input: WebhookDeliveriesRequestInput!) {
+  webhookDeliveries(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        effectId
+        eventId
+        state
+        attempts
+        lastOutcome
+        nextAttemptAt
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}
+
+query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {
+  resolveRequest(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      state
+      requestId
+      checkedAt
+      resultWithheld
+      receipt {
+        status
+        requestId
+        serverTime
+        receiptId
+        committedAt
+        replayed
+        operation {
+          operationId
+          owner
+          href
+          state
+        }
+        resourceRef {
+          kind
+          id
+        }
+        result {
+          call {
+            callId
+            conversationId
+            revision
+            generation
+            state
+            media {
+              audio
+              video
+            }
+            creatorId
+            invitation {
+              invitationId
+              callId
+              generation
+              principalId
+              status
+              expiresAt
+            }
+            participation {
+              principalId
+              sessionId
+              deviceId
+              status
+              nativeConnectionId
+              mediaCutoff {
+                state
+                scope {
+                  kind
+                  principalId
+                  sessionId
+                  deviceId
+                  callId
+                }
+              }
+            }
+            mediaCutoff {
+              state
+              scope {
+                kind
+                principalId
+                sessionId
+                deviceId
+                callId
+              }
+            }
+            errorCode
+          }
+          callSummary {
+            callId
+            mediaCutoff {
+              state
+              scope {
+                kind
+                principalId
+                sessionId
+                deviceId
+                callId
+              }
+            }
+          }
+          conversation {
+            conversationId
+            revision
+            title
+            props
+            latestSequence
+            membership {
+              conversationId
+              principalId
+              role
+              status
+              membershipEpoch
+              visibilityEpoch
+              revision
+              visibleFromSequence
+            }
+          }
+          credentialDeliveryReceipt {
+            deliveryId
+          }
+          deliveryAck {
+            deliveryId
+            acknowledged
+          }
+          mediaGrant {
+            callId
+            generation
+            roomName
+            participantIdentity
+            livekitUrl
+            transportToken
+            forwardingLease
+            admissionTicket
+            transportExpiresAt
+            admissionExpiresAt
+            leaseExpiresAt
+            leasePolicyId
+          }
+          member {
+            conversationId
+            principalId
+            role
+            status
+            membershipEpoch
+            visibilityEpoch
+            revision
+            visibleFromSequence
+          }
+          message {
+            messageId
+            conversationId
+            authorId
+            sequence
+            revision
+            revisionSequence
+            createdAt
+            deleted
+            text
+            props
+            editedAt
+          }
+          messageAck {
+            messageId
+            conversationId
+            sequence
+            revision
+            status
+            cursor {
+              incarnation
+              conversationId
+              sequence
+            }
+          }
+          organization {
+            orgId
+            name
+            status
+            revision
+          }
+          principal {
+            principalId
+            externalUserId
+            status
+            revision
+          }
+          readReceipt {
+            principalId
+            membershipEpoch
+            visibilityEpoch
+            deliveredThroughSequence
+            readThroughSequence
+            updatedAt
+          }
+          sessionBootstrap {
+            session {
+              sessionId
+              principalId
+              deviceId
+              incarnation
+              sessionRevision
+              expiresAt
+              status
+            }
+            tokenExpiresAt
+            sessionToken
+          }
+          sessionRevocation {
+            sessionId
+            status
+            mediaCutoff {
+              state
+              scope {
+                kind
+                principalId
+                sessionId
+                deviceId
+                callId
+              }
+            }
+          }
+          signedProof
+        }
+      }
+    }
+  }
+}
+
+query ManagementGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {
+  getOperation(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      operationId
+      kind
+      targetRef {
+        kind
+        id
+      }
+      state
+      revision
+      requestedAt
+      updatedAt
+      steps {
+        stepId
+        state
+      }
+      result {
+        projectId
+        incarnation
+        status
+        backend
+        environment
+        policyRevision
+        expiresAt
+        kind
+        resourceRef {
+          kind
+          id
+        }
+        delivery {
+          deliveryId
+          kind
+          projectId
+          installationId
+          resourceRef {
+            kind
+            id
+          }
+          expiresAt
+          payloadDigest
+          recipientActorRef {
+            tenantId
+            objectId
+          }
+        }
+        keyId
+        endpointId
+        enabled
+        callId
+        conversationId
+        revision
+        generation
+        state
+        media {
+          audio
+          video
+        }
+        creatorId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+        errorCode
+      }
+      blockedReason
+    }
+  }
+}
+
+mutation ManagementCreateOrganization($context: RequestContextInput!, $input: CreateOrganizationRequestInput!) {
+  createOrganization(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      name
+      status
+      revision
+    }
+  }
+}
+
+mutation ManagementCreateDeployment($context: RequestContextInput!, $input: CreateDeploymentRequestInput!) {
+  createDeployment(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      projectId
+      incarnation
+      status
+      backend
+      environment
+      policyRevision
+      expiresAt
+      kind
+      resourceRef {
+        kind
+        id
+      }
+      delivery {
+        deliveryId
+        kind
+        projectId
+        installationId
+        resourceRef {
+          kind
+          id
+        }
+        expiresAt
+        payloadDigest
+        recipientActorRef {
+          tenantId
+          objectId
+        }
+      }
+      keyId
+      endpointId
+      enabled
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateProjectRequestInput!) {
+  createProject(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      projectId
+      incarnation
+      status
+      backend
+      environment
+      policyRevision
+      expiresAt
+      kind
+      resourceRef {
+        kind
+        id
+      }
+      delivery {
+        deliveryId
+        kind
+        projectId
+        installationId
+        resourceRef {
+          kind
+          id
+        }
+        expiresAt
+        payloadDigest
+        recipientActorRef {
+          tenantId
+          objectId
+        }
+      }
+      keyId
+      endpointId
+      enabled
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: IssueBackendKeyRequestInput!) {
+  issueBackendKey(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      projectId
+      incarnation
+      status
+      backend
+      environment
+      policyRevision
+      expiresAt
+      kind
+      resourceRef {
+        kind
+        id
+      }
+      delivery {
+        deliveryId
+        kind
+        projectId
+        installationId
+        resourceRef {
+          kind
+          id
+        }
+        expiresAt
+        payloadDigest
+        recipientActorRef {
+          tenantId
+          objectId
+        }
+      }
+      keyId
+      endpointId
+      enabled
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: RevokeBackendKeyRequestInput!) {
+  revokeBackendKey(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      projectId
+      incarnation
+      status
+      backend
+      environment
+      policyRevision
+      expiresAt
+      kind
+      resourceRef {
+        kind
+        id
+      }
+      delivery {
+        deliveryId
+        kind
+        projectId
+        installationId
+        resourceRef {
+          kind
+          id
+        }
+        expiresAt
+        payloadDigest
+        recipientActorRef {
+          tenantId
+          objectId
+        }
+      }
+      keyId
+      endpointId
+      enabled
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation ManagementProjectPolicy($context: RequestContextInput!, $input: ProjectPolicyRequestInput!) {
+  projectPolicy(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      projectId
+      incarnation
+      status
+      backend
+      environment
+      policyRevision
+      expiresAt
+      kind
+      resourceRef {
+        kind
+        id
+      }
+      delivery {
+        deliveryId
+        kind
+        projectId
+        installationId
+        resourceRef {
+          kind
+          id
+        }
+        expiresAt
+        payloadDigest
+        recipientActorRef {
+          tenantId
+          objectId
+        }
+      }
+      keyId
+      endpointId
+      enabled
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation ManagementCredentialPermit($context: RequestContextInput!, $input: CredentialPermitRequestInput!) {
+  credentialPermit(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result
+  }
+}
+
+mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseOperationRequestInput!) {
+  pauseOperation(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      operationId
+      kind
+      targetRef {
+        kind
+        id
+      }
+      state
+      revision
+      requestedAt
+      updatedAt
+      steps {
+        stepId
+        state
+      }
+      result {
+        projectId
+        incarnation
+        status
+        backend
+        environment
+        policyRevision
+        expiresAt
+        kind
+        resourceRef {
+          kind
+          id
+        }
+        delivery {
+          deliveryId
+          kind
+          projectId
+          installationId
+          resourceRef {
+            kind
+            id
+          }
+          expiresAt
+          payloadDigest
+          recipientActorRef {
+            tenantId
+            objectId
+          }
+        }
+        keyId
+        endpointId
+        enabled
+        callId
+        conversationId
+        revision
+        generation
+        state
+        media {
+          audio
+          video
+        }
+        creatorId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+        errorCode
+      }
+      blockedReason
+    }
+  }
+}
+
+mutation ManagementResumeOperation($context: RequestContextInput!, $input: ResumeOperationRequestInput!) {
+  resumeOperation(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      operationId
+      kind
+      targetRef {
+        kind
+        id
+      }
+      state
+      revision
+      requestedAt
+      updatedAt
+      steps {
+        stepId
+        state
+      }
+      result {
+        projectId
+        incarnation
+        status
+        backend
+        environment
+        policyRevision
+        expiresAt
+        kind
+        resourceRef {
+          kind
+          id
+        }
+        delivery {
+          deliveryId
+          kind
+          projectId
+          installationId
+          resourceRef {
+            kind
+            id
+          }
+          expiresAt
+          payloadDigest
+          recipientActorRef {
+            tenantId
+            objectId
+          }
+        }
+        keyId
+        endpointId
+        enabled
+        callId
+        conversationId
+        revision
+        generation
+        state
+        media {
+          audio
+          video
+        }
+        creatorId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            principalId
+            sessionId
+            deviceId
+            callId
+          }
+        }
+        errorCode
+      }
+      blockedReason
+    }
+  }
+}
+
+mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: ConfigureWebhookRequestInput!) {
+  configureWebhook(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      projectId
+      incarnation
+      status
+      backend
+      environment
+      policyRevision
+      expiresAt
+      kind
+      resourceRef {
+        kind
+        id
+      }
+      delivery {
+        deliveryId
+        kind
+        projectId
+        installationId
+        resourceRef {
+          kind
+          id
+        }
+        expiresAt
+        payloadDigest
+        recipientActorRef {
+          tenantId
+          objectId
+        }
+      }
+      keyId
+      endpointId
+      enabled
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}
+
+mutation ManagementDisableWebhook($context: RequestContextInput!, $input: DisableWebhookRequestInput!) {
+  disableWebhook(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      projectId
+      incarnation
+      status
+      backend
+      environment
+      policyRevision
+      expiresAt
+      kind
+      resourceRef {
+        kind
+        id
+      }
+      delivery {
+        deliveryId
+        kind
+        projectId
+        installationId
+        resourceRef {
+          kind
+          id
+        }
+        expiresAt
+        payloadDigest
+        recipientActorRef {
+          tenantId
+          objectId
+        }
+      }
+      keyId
+      endpointId
+      enabled
+      callId
+      conversationId
+      revision
+      generation
+      state
+      media {
+        audio
+        video
+      }
+      creatorId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          principalId
+          sessionId
+          deviceId
+          callId
+        }
+      }
+      errorCode
+    }
+  }
+}

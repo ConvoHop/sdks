@@ -16,6 +16,9 @@ import type {
 
 export { ApiError, GraphQLHttp, InvalidResponseError, TransportError, isIdentityId, requireIdentityId } from "./graphql.js";
 export { GraphQLSubscription } from "./subscriptions.js";
+export { v1Operations } from "./v1-operations.js";
+export type { V1OperationKey, V1OperationTypes } from "./v1-operations.js";
+export type * as V1Graphql from "./v1-generated.js";
 export type { SubscriptionOptions } from "./subscriptions.js";
 export type { MediaConnectOptions, MediaConnection, RemoteMediaTrack } from "./media.js";
 export type * from "./types.js";

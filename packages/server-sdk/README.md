@@ -7,9 +7,10 @@ service is included.
 
 ## Native v1 management and application backend
 
-`V1ManagementClient` calls `/management/v1` with a trusted operator credential.
-`V1ProjectServerClient` calls `/v1/projects/{projectId}` with one scoped
-backend key. These are separate from the legacy GraphQL clients below.
+`V1ManagementClient` calls the management origin's unversioned `/graphql`
+with a trusted portal credential. `V1ProjectServerClient` calls the data
+origin's `/graphql` with one scoped backend key. These use the current
+Cockroach-backed schema, separate from the legacy GraphQL clients below.
 Native backend keys, short-lived session tokens and credential-delivery
 permits must not be confused with the old `adm_`/`pk_`/`st_` prefixes.
 
@@ -57,8 +58,12 @@ const accepted = await management.createDeployment(v1Id(organization.orgId));
 // A deployment/project must be ready before a dependent operation.
 ```
 
-`createDeployment` deliberately selects `local-single-node` managed-shared
-development, not an Azure provisioner. `createProject`, `issueBackendKey`
+On an explicit loopback origin, omitted deployment/project configuration
+selects local development defaults. On HTTPS hosted origins those omissions
+are rejected: pass the reviewed `offering`, `geoId`, `installationProfileId`,
+`consentRef`, and project `environment`/`backendPrincipalName` explicitly.
+The helper is not an Azure provisioner or a hosted-auth fallback.
+`createProject`, `issueBackendKey`
 and `deliveryPermit` expose the subsequent public flow. Accepted management
 operations have durable IDs; inspect their state/result rather than treating
 acceptance as completion. A backend key is obtained through one-time
@@ -68,7 +73,8 @@ persist the redeemed capsule in trusted secret storage, then acknowledge.
 Do not put a credential-delivery permit or capsule in ordinary recovery
 storage. The service's maintained public-API examples exercise this flow.
 
-The public `http` transport supports the remaining explicit v1 routes and
+The public `http` transport maps the remaining closed logical SDK paths to
+generated, checked GraphQL queries/mutations and
 same-request recovery. With app-supplied storage it preserves original request
 payloads, IDs and budgets, not bearer headers. For an unresolved request,
 use `http.recover(requestId, "/management/v1/requests/" + requestId)`;
@@ -87,6 +93,11 @@ npm test
 
 Real CockroachDB and WebRTC acceptance runs in the compatible service's
 integration suite, not in these isolated SDK unit tests.
+
+The endpoint/schema is unversioned; evolve it through additive changes and
+deprecations. SDK releases and `V1*` domain compatibility names are separate.
+GraphQL `errors` under HTTP 200 are failures; only a matching authoritative
+committed/accepted receipt changes an uncertain mutation's outcome.
 
 ## Retained legacy GraphQL clients
 
