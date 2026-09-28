@@ -96,6 +96,7 @@ export interface V1RemoteMedia {
   trackId: string; participantIdentity: string; kind: "audio" | "video"; element: HTMLMediaElement;
 }
 export interface V1MediaOptions {
+  iceTransportPolicy?: "all" | "relay";
   localVideo?: HTMLVideoElement;
   onTrack?: (track: V1RemoteMedia) => void;
   onTrackRemoved?: (track: V1RemoteMedia) => void;
@@ -106,6 +107,7 @@ export interface V1MediaStats {
   audioTracks: number; videoTracks: number; audioBytesReceived: number;
   videoBytesReceived: number; framesDecoded: number; localAudioEnabled: boolean; localVideoEnabled: boolean;
   tracks: { trackId: string; participantIdentity: string; kind: "audio" | "video"; bytesReceived: number; framesDecoded: number }[];
+  transports?: { localCandidateType: string; remoteCandidateType: string; protocol: string; relayProtocol?: string }[];
 }
 export class V1MediaConnection {
   readonly #room: Room;
@@ -119,6 +121,9 @@ export class V1MediaConnection {
   admissionId: string | undefined;
   nativeConnectionId: string | undefined;
   private constructor(readonly client: V1Client, readonly call: V1Call, readonly options: V1MediaOptions) {
+    if (options.iceTransportPolicy !== undefined && options.iceTransportPolicy !== "all" && options.iceTransportPolicy !== "relay") {
+      throw new TypeError("ICE policy must be all or relay");
+    }
     this.#microphoneEnabled = call.media.audio;
     this.#cameraEnabled = call.media.video;
     this.#room = new Room({
@@ -164,7 +169,8 @@ export class V1MediaConnection {
     result.#registration = register(grant);
     try {
       const [, admission] = await Promise.all([
-        result.#room.connect(grant.livekitUrl, grant.transportToken, { autoSubscribe: true, maxRetries: 0 }),
+        result.#room.connect(grant.livekitUrl, grant.transportToken, { autoSubscribe: true, maxRetries: 0,
+          rtcConfig: { iceTransportPolicy: result.options.iceTransportPolicy ?? "all" } }),
         result.#registration.admitted,
       ]);
       result.admissionId = admission.admissionId; result.nativeConnectionId = admission.nativeConnectionId;
@@ -222,12 +228,24 @@ export class V1MediaConnection {
     const result: V1MediaStats = { audioTracks: 0, videoTracks: 0, audioBytesReceived: 0, videoBytesReceived: 0,
       framesDecoded: 0, localAudioEnabled: this.#room.localParticipant.isMicrophoneEnabled,
       localVideoEnabled: this.#room.localParticipant.isCameraEnabled, tracks: [] };
+    result.transports = [];
     for (const { track, remote } of this.#tracks.values()) {
       if (remote.kind === "audio") result.audioTracks++; else result.videoTracks++;
       const report = await track.getRTCStatsReport();
       const inbound = { trackId: remote.trackId, participantIdentity: remote.participantIdentity, kind: remote.kind, bytesReceived: 0, framesDecoded: 0 };
       report?.forEach(value => {
         const stat = v1Record(value);
+        if (stat.type === "transport" && typeof stat.selectedCandidatePairId === "string") {
+          const pair = report?.get(stat.selectedCandidatePairId);
+          const local = pair && report?.get(pair.localCandidateId);
+          const remote = pair && report?.get(pair.remoteCandidateId);
+          if (local && remote) {
+            const transport = { localCandidateType: v1String(local.candidateType),
+              remoteCandidateType: v1String(remote.candidateType), protocol: v1String(local.protocol),
+              ...(typeof local.relayProtocol === "string" ? { relayProtocol: local.relayProtocol } : {}) };
+            if (!result.transports?.some(value => JSON.stringify(value) === JSON.stringify(transport))) result.transports?.push(transport);
+          }
+        }
         if (stat.type !== "inbound-rtp" || (stat.kind !== undefined && stat.kind !== remote.kind)) return;
         const bytes = typeof stat.bytesReceived === "number" ? stat.bytesReceived : 0;
         inbound.bytesReceived += bytes;

@@ -122,6 +122,20 @@ must stop forwarding; native JWT lifetime is not forwarding permission.
 There is no native v1 broadcast, Egress, recording, screen-share or offline
 ringing implementation.
 
+`V1MediaConnection.connect(client, call, { iceTransportPolicy: "relay" })`
+uses the maintained WebRTC relay-only policy; the default is `"all"`.
+It still requires the same fresh native admission and current membership.
+The server must offer its authenticated TURN service: do not supply a
+permanent relay secret or treat relay selection as authorization.
+`stats().transports` reports selected candidate types, `protocol`, and
+optional `relayProtocol`, without addresses, URLs or credentials. For
+TURN over TLS, assert `localCandidateType === "relay"` and
+`relayProtocol === "tls"`; the candidate's `protocol` can still be UDP.
+Direct ICE TCP is separately identified by `protocol === "tcp"`.
+A server boot change ends the old occurrence after durable ownership
+recovery; use current call state and a fresh authorized call, not old
+tokens or an assumption that live media survived.
+
 Checked operations are exported as `v1Operations`, with `V1OperationTypes`
 and the `V1Graphql` type namespace. `npm run generate:graphql` uses the
 maintained pinned GraphQL Code Generator; `npm run check:graphql` detects
