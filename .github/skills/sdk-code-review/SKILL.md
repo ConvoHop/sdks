@@ -1,6 +1,6 @@
 ---
 name: sdk-code-review
-description: Review ConvoHop SDK changes for public API compatibility, authorization, retry/replay correctness and native media lifecycle defects. Use for pull request and release reviews.
+description: Review current ConvoHop SDK changes for schema alignment, authorization, retry/replay correctness and native media lifecycle defects. Use for pull request and release reviews.
 ---
 
 # SDK review
@@ -21,8 +21,9 @@ caller-visible state together. Prioritize:
   stale asynchronous callbacks.
 - One-use native admission, exact acknowledgment handling, no bypassing
   reconnect, source rights and cleanup of media tracks/elements/listeners.
-- Export/build compatibility, matching types/runtime behavior, supported
-  Node/Python/Go versions and honest capability/publication documentation.
+- Current generated exports/builds, matching types/runtime behavior, Node 24
+  and honest capability/publication documentation. Do not reintroduce removed
+  prototype clients, invitation-only calls or unsupported Python/Go SDKs.
 
 Reproduce suspected defects with the existing test frameworks. Add a failing
 regression before fixing behavior where practical. Inspect consumer effects

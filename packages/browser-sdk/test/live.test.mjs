@@ -1,13 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { V1Client, V1MediaConnection, LiveSessionHandle, LiveParticipationHandle } from "../dist/index.js";
-import { v1Operations, v1OutputShapes } from "../dist/v1-operations.js";
+import { v1Operations } from "../dist/v1-operations.js";
 import { operationPayload } from "../dist/v1-graphql.js";
+import { full, reply } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID(), time = () => new Date().toISOString();
-function full(type, fields) {
-  return Object.fromEntries(Object.keys(v1OutputShapes[type].fields).map(key => [key, fields[key] ?? null]));
-}
 function fixture(handle) {
   const requests = [], values = new Map(), context = { projectId: id(), incarnation: id(), principalId: id() };
   const recoveryStorage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) };
@@ -16,11 +14,7 @@ function fixture(handle) {
       .find(key => v1Operations[key].operationName === request.operationName);
     requests.push(request);
     const output = await handle(key, request);
-    return Response.json({ data: { [v1Operations[key].field]: full(v1Operations[key].resultType.replace(/!$/, ""), {
-      status: v1Operations[key].kind === "mutation" ? "committed" : "ok",
-      requestId: request.variables.context.requestId, serverTime: time(),
-      receiptId: id(), committedAt: time(), replayed: false, ...output,
-    }) } });
+    return reply(request, output);
   };
   const options = { baseUrl: "http://localhost:18080", ...context, sessionToken: "private", recoveryStorage, fetch };
   return { client: new V1Client(options), options, requests, values };
@@ -46,16 +40,13 @@ test("conversation handles are synchronous, nonthenable and do not make hidden r
   assert.equal(setup.requests[0].operationName, "CommunicationCurrentLiveSession");
 });
 
-test("generated union keeps legacy discovery explicitly legacy without fabricated profile or rights", async () => {
-  const legacy = { __typename: "LegacyInviteOnlyCall", callId: id(), conversationId: id(), creatorId: id(),
-    generation: "1", revision: "1", legacyState: "offering", media: { audio: true, video: false },
-    invitation: null, participation: null, mediaCutoff: null };
-  const setup = fixture(() => ({ result: legacy }));
-  const value = await setup.client.conversation(legacy.conversationId).live.current();
-  assert.deepEqual(value, legacy);
-  assert.equal(value.join, undefined);
-  assert.equal(value.mediaProfile, undefined);
-  assert.match(setup.requests[0].query, /legacyState: state/);
+test("current live discovery returns one typed nullable LiveSession without a union discriminator", async () => {
+  const session = live(), setup = fixture(() => ({ result: session }));
+  const value = await setup.client.conversation(session.conversationId).live.current();
+  assert.ok(value instanceof LiveSessionHandle);
+  assert.deepEqual(value.snapshot, session);
+  assert.equal(value.__typename, undefined);
+  assert.doesNotMatch(setup.requests[0].query, /__typename|Legacy|legacyState/);
 });
 
 test("start, join and capture are distinct generated commands with original action completion", async () => {
@@ -136,7 +127,7 @@ test("viewer and audio-only capture controls fail before local device access", a
   ]) {
     const setup = fixture(() => { throw new Error("no request expected"); });
     const participation = new LiveParticipationHandle(new LiveSessionHandle(setup.client, live()), participant({ permissions }));
-    const connection = new V1MediaConnection({ kind: "participation", participation }, {});
+    const connection = new V1MediaConnection(participation, {});
     connection.nativeConnectionId = id();
     for (const control of controls) await assert.rejects(connection[control](true), /not authorized/);
     const stats = await connection.stats();
@@ -214,10 +205,9 @@ test("receive-only reconnect never carries the old explicit credential request I
   const setup = fixture(() => { throw new Error("no network request expected"); });
   const p = new LiveParticipationHandle(new LiveSessionHandle(setup.client, live()), participant());
   let received;
-  const next = new V1MediaConnection({ kind: "participation", participation: p }, {});
+  const next = new V1MediaConnection(p, {});
   p.connect = async options => { received = options; return next; };
-  const connection = new V1MediaConnection({ kind: "participation", participation: p },
-    { requestId: id(), iceTransportPolicy: "relay" });
+  const connection = new V1MediaConnection(p, { requestId: id(), iceTransportPolicy: "relay" });
   assert.equal(await connection.reconnect(), next);
   assert.deepEqual(received, { iceTransportPolicy: "relay" });
   const stats = await next.stats();

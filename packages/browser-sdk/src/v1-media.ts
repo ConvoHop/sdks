@@ -1,10 +1,8 @@
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
-import { V1Client, V1Problem, v1Id, v1Record, v1String, type V1Call, type V1MediaGrant } from "./v1.js";
-import type { LiveParticipationHandle, LiveConnectOptions } from "./live.js";
+import { V1Problem, v1Id, v1Record, v1String } from "./v1.js";
+import type { LiveParticipationHandle, LiveConnectOptions, LiveConnectionGrant } from "./live.js";
 
-type NativeGrant = Omit<V1MediaGrant, "callId"> & { participationId?: string };
-type MediaBinding = { kind: "legacy"; client: V1Client; call: V1Call }
-  | { kind: "participation"; participation: LiveParticipationHandle };
+type NativeGrant = LiveConnectionGrant;
 
 interface Admission {
   grant: NativeGrant; attemptId: string; used: boolean;
@@ -61,7 +59,7 @@ function register(grant: NativeGrant) {
           try {
             const frame = v1Record(JSON.parse(v1String(event.data)));
             if (frame.type !== "convohop.admitted.v1" || frame.leaseExpiresAt !== gate.grant.leaseExpiresAt) throw new Error("Native admission was not accepted");
-            if (gate.grant.participationId && frame.participationId !== gate.grant.participationId)
+            if (frame.participationId !== gate.grant.participationId)
               throw new Error("Native admission participation mismatch");
             const value = { admissionId: v1Id(frame.admissionId), nativeConnectionId: v1Id(frame.nativeConnectionId) };
             this.#admitted = true; clearTimeout(timer); gate.resolve(value);
@@ -122,24 +120,18 @@ export class V1MediaConnection {
   #registration: ReturnType<typeof register> | undefined;
   #closed = false;
   #left = false;
-  #microphoneEnabled: boolean;
-  #cameraEnabled: boolean;
   #reconnecting: Promise<V1MediaConnection> | undefined;
   readonly #permissions: { microphone: boolean; camera: boolean };
   readonly options: V1MediaOptions;
   admissionId: string | undefined;
   nativeConnectionId: string | undefined;
-  private constructor(readonly binding: MediaBinding, options: LiveConnectOptions) {
+  private constructor(readonly participation: LiveParticipationHandle, options: LiveConnectOptions) {
     const { requestId: _requestId, ...mediaOptions } = options;
     this.options = mediaOptions;
     if (options.iceTransportPolicy !== undefined && options.iceTransportPolicy !== "all" && options.iceTransportPolicy !== "relay") {
       throw new TypeError("ICE policy must be all or relay");
     }
-    this.#permissions = binding.kind === "legacy"
-      ? { microphone: binding.call.media.audio, camera: binding.call.media.video }
-      : { ...binding.participation.snapshot.permissions };
-    this.#microphoneEnabled = binding.kind === "legacy" && this.#permissions.microphone;
-    this.#cameraEnabled = binding.kind === "legacy" && this.#permissions.camera;
+    this.#permissions = { ...participation.snapshot.permissions };
     this.#room = new Room({
       adaptiveStream: false, dynacast: false, singlePeerConnection: false,
       reconnectPolicy: { nextRetryDelayInMs: () => null },
@@ -172,15 +164,9 @@ export class V1MediaConnection {
       if (!this.#room.canPlaybackAudio) options.onAudioPlaybackBlocked?.();
     });
   }
-  static async connect(client: V1Client, call: V1Call, options: V1MediaOptions = {}): Promise<V1MediaConnection> {
-    const result = new V1MediaConnection({ kind: "legacy", client, call }, options);
-    const grant = await client.mediaCredentials(call);
-    await result.#open(grant);
-    return result;
-  }
-  /** @internal New participations use the same native transport, but never implicit capture. */
+  /** @internal Connect never starts capture. */
   static async connectParticipation(participation: LiveParticipationHandle, options: LiveConnectOptions): Promise<V1MediaConnection> {
-    const result = new V1MediaConnection({ kind: "participation", participation }, options);
+    const result = new V1MediaConnection(participation, options);
     const { requestId, grant } = await participation.connectionGrant(options);
     const ticket = v1Record(grant.admissionTicket), lease = v1Record(grant.forwardingLease);
     if (ticket.participationId !== participation.participationId || lease.participationId !== participation.participationId ||
@@ -199,13 +185,6 @@ export class V1MediaConnection {
         result.#registration.admitted,
       ]);
       result.admissionId = admission.admissionId; result.nativeConnectionId = admission.nativeConnectionId;
-      if (result.#microphoneEnabled) await result.#room.localParticipant.setMicrophoneEnabled(true);
-      if (result.#cameraEnabled) {
-        await result.#room.localParticipant.setCameraEnabled(true);
-        const video = result.#room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
-        if (result.options.localVideo && video) video.attach(result.options.localVideo);
-      }
-      if (result.binding.kind === "legacy") await result.#room.startAudio();
     } catch {
       await result.disconnect();
       throw new V1Problem("MEDIA_CONNECT_FAILED", requestId, "unknown", 0,
@@ -216,28 +195,10 @@ export class V1MediaConnection {
     if (this.#reconnecting) return this.#reconnecting;
     if (this.#left) return Promise.reject(new Error("A deliberately closed connection cannot reconnect"));
     const work = async () => {
-      if (this.binding.kind === "participation") {
-        await this.#close(false);
-        if (this.#left) throw new Error("Connection was closed during reconnect");
-        const next = await this.binding.participation.connect(this.options);
-        if (this.#left) { await next.disconnect(); throw new Error("Connection was closed during reconnect"); }
-        return next;
-      }
-      const { client, call: original } = this.binding;
-      const call = await client.call(original.callId);
-      if (call.generation !== original.generation) throw new Error("Call generation changed; obtain a fresh invitation before connecting");
-      const connectionId = v1Id(v1Record(call.participation).nativeConnectionId);
-      const grant = await client.mediaCredentials(call, connectionId);
-      const next = new V1MediaConnection({ kind: "legacy", client, call }, this.options);
-      next.#microphoneEnabled = this.#microphoneEnabled;
-      next.#cameraEnabled = this.#cameraEnabled;
-      if (this.#left) throw new Error("Connection was closed during authorization");
       await this.#close(false);
-      await next.#open(grant);
-      if (this.#left) {
-        await next.disconnect();
-        throw new Error("Connection was closed during reconnect");
-      }
+      if (this.#left) throw new Error("Connection was closed during reconnect");
+      const next = await this.participation.connect(this.options);
+      if (this.#left) { await next.disconnect(); throw new Error("Connection was closed during reconnect"); }
       return next;
     };
     this.#reconnecting = work();
@@ -247,12 +208,10 @@ export class V1MediaConnection {
   async microphone(enabled: boolean): Promise<void> {
     if (!this.connected || !this.#permissions.microphone) throw new Error("Microphone is not authorized for this participation");
     await this.#room.localParticipant.setMicrophoneEnabled(enabled);
-    this.#microphoneEnabled = enabled;
   }
   async camera(enabled: boolean): Promise<void> {
     if (!this.connected || !this.#permissions.camera) throw new Error("Camera is not authorized for this participation");
     await this.#room.localParticipant.setCameraEnabled(enabled);
-    this.#cameraEnabled = enabled;
     const track = this.#room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
     if (enabled && track && this.options.localVideo) track.attach(this.options.localVideo);
   }

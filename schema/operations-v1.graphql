@@ -28,7 +28,6 @@ query CommunicationCapabilities($context: RequestContextInput!) {
         inbox
         lexicalSearch
         typing
-        foregroundCalls
         webhooks
         liveSessions
         liveBroadcast
@@ -508,67 +507,6 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
               operationId
             }
           }
-          call {
-            callId
-            conversationId
-            revision
-            generation
-            state
-            media {
-              audio
-              video
-            }
-            creatorId
-            invitation {
-              invitationId
-              callId
-              generation
-              principalId
-              status
-              expiresAt
-            }
-            participation {
-              principalId
-              sessionId
-              deviceId
-              status
-              nativeConnectionId
-              mediaCutoff {
-                state
-                scope {
-                  kind
-                  principalId
-                  sessionId
-                  deviceId
-                  callId
-                }
-              }
-            }
-            mediaCutoff {
-              state
-              scope {
-                kind
-                principalId
-                sessionId
-                deviceId
-                callId
-              }
-            }
-            errorCode
-          }
-          callSummary {
-            callId
-            mediaCutoff {
-              state
-              scope {
-                kind
-                principalId
-                sessionId
-                deviceId
-                callId
-              }
-            }
-          }
           conversation {
             conversationId
             revision
@@ -689,20 +627,6 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
             kind
             mediaProfile
             operationId
-          }
-          mediaGrant {
-            callId
-            generation
-            roomName
-            participantIdentity
-            livekitUrl
-            transportToken
-            forwardingLease
-            admissionTicket
-            transportExpiresAt
-            admissionExpiresAt
-            leaseExpiresAt
-            leasePolicyId
           }
           member {
             conversationId
@@ -859,27 +783,6 @@ query CommunicationGetOperation($context: RequestContextInput!, $input: GetOpera
         keyId
         endpointId
         enabled
-        callId
-        conversationId
-        revision
-        generation
-        state
-        media {
-          audio
-          video
-        }
-        creatorId
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-        errorCode
         liveSessionCompletion {
           liveSessionId
           generation
@@ -911,44 +814,29 @@ query CommunicationCurrentLiveSession($context: RequestContextInput!, $input: Co
     requestId
     serverTime
     result {
-      __typename
-      ... on LiveSession {
-        liveSessionId
-        conversationId
-        creatorId
-        kind
-        mediaProfile
+      liveSessionId
+      conversationId
+      creatorId
+      kind
+      mediaProfile
+      state
+      generation
+      revision
+      createdAt
+      expiresAt
+      myParticipation {
+        participationId
+        principalId
+        membershipEpoch
+        role
         state
-        generation
-        revision
-        createdAt
-        expiresAt
-        myParticipation {
-          participationId
-          principalId
-          membershipEpoch
-          role
-          state
-          permissions {
-            microphone
-            camera
-            subscribe
-          }
-          reservationExpiresAt
-          nativeConnectionId
-          mediaCutoff {
-            state
-            scope {
-              kind
-              liveSessionId
-              generation
-              participationId
-            }
-            evidence
-            enforcedAt
-            operationId
-          }
+        permissions {
+          microphone
+          camera
+          subscribe
         }
+        reservationExpiresAt
+        nativeConnectionId
         mediaCutoff {
           state
           scope {
@@ -962,42 +850,17 @@ query CommunicationCurrentLiveSession($context: RequestContextInput!, $input: Co
           operationId
         }
       }
-      ... on LegacyInviteOnlyCall {
-        callId
-        conversationId
-        creatorId
-        generation
-        revision
-        legacyState: state
-        media {
-          audio
-          video
-        }
-        invitation {
-          invitationId
-          callId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          liveSessionId
           generation
-          principalId
-          status
-          expiresAt
+          participationId
         }
-        participation {
-          principalId
-          sessionId
-          deviceId
-          status
-          nativeConnectionId
-          mediaCutoff {
-            state
-            scope {
-              kind
-              principalId
-              sessionId
-              deviceId
-              callId
-            }
-          }
-        }
+        evidence
+        enforcedAt
+        operationId
       }
     }
   }
@@ -1225,149 +1088,6 @@ query CommunicationLiveSessionOperation($context: RequestContextInput!, $input: 
         code
         message
       }
-    }
-  }
-}
-
-query CommunicationGetCall($context: RequestContextInput!, $input: GetCallRequestInput!) {
-  getCall(context: $context, input: $input) {
-    status
-    requestId
-    serverTime
-    receiptId
-    committedAt
-    replayed
-    operation {
-      operationId
-      owner
-      href
-      state
-    }
-    resourceRef {
-      kind
-      id
-    }
-    result {
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      invitation {
-        invitationId
-        callId
-        generation
-        principalId
-        status
-        expiresAt
-      }
-      participation {
-        principalId
-        sessionId
-        deviceId
-        status
-        nativeConnectionId
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-      }
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
-    }
-  }
-}
-
-query CommunicationCallInvitations($context: RequestContextInput!, $input: CallInvitationsRequestInput!) {
-  callInvitations(context: $context, input: $input) {
-    status
-    requestId
-    serverTime
-    receiptId
-    committedAt
-    replayed
-    operation {
-      operationId
-      owner
-      href
-      state
-    }
-    resourceRef {
-      kind
-      id
-    }
-    result {
-      items {
-        callId
-        conversationId
-        revision
-        generation
-        state
-        media {
-          audio
-          video
-        }
-        creatorId
-        invitation {
-          invitationId
-          callId
-          generation
-          principalId
-          status
-          expiresAt
-        }
-        participation {
-          principalId
-          sessionId
-          deviceId
-          status
-          nativeConnectionId
-          mediaCutoff {
-            state
-            scope {
-              kind
-              principalId
-              sessionId
-              deviceId
-              callId
-            }
-          }
-        }
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-        errorCode
-      }
-      complete
-      refreshRequired
-      nextCursor
     }
   }
 }
@@ -2076,454 +1796,6 @@ mutation CommunicationLiveSessionCredentials($context: RequestContextInput!, $in
   }
 }
 
-mutation CommunicationStartCall($context: RequestContextInput!, $input: StartCallRequestInput!) {
-  startCall(context: $context, input: $input) {
-    status
-    requestId
-    serverTime
-    receiptId
-    committedAt
-    replayed
-    operation {
-      operationId
-      owner
-      href
-      state
-    }
-    resourceRef {
-      kind
-      id
-    }
-    result {
-      callId
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-    }
-  }
-}
-
-mutation CommunicationInviteCall($context: RequestContextInput!, $input: InviteCallRequestInput!) {
-  inviteCall(context: $context, input: $input) {
-    status
-    requestId
-    serverTime
-    receiptId
-    committedAt
-    replayed
-    operation {
-      operationId
-      owner
-      href
-      state
-    }
-    resourceRef {
-      kind
-      id
-    }
-    result {
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      invitation {
-        invitationId
-        callId
-        generation
-        principalId
-        status
-        expiresAt
-      }
-      participation {
-        principalId
-        sessionId
-        deviceId
-        status
-        nativeConnectionId
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-      }
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
-    }
-  }
-}
-
-mutation CommunicationRingCall($context: RequestContextInput!, $input: RingCallRequestInput!) {
-  ringCall(context: $context, input: $input) {
-    status
-    requestId
-    serverTime
-    receiptId
-    committedAt
-    replayed
-    operation {
-      operationId
-      owner
-      href
-      state
-    }
-    resourceRef {
-      kind
-      id
-    }
-    result {
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      invitation {
-        invitationId
-        callId
-        generation
-        principalId
-        status
-        expiresAt
-      }
-      participation {
-        principalId
-        sessionId
-        deviceId
-        status
-        nativeConnectionId
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-      }
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
-    }
-  }
-}
-
-mutation CommunicationAcceptCall($context: RequestContextInput!, $input: AcceptCallRequestInput!) {
-  acceptCall(context: $context, input: $input) {
-    status
-    requestId
-    serverTime
-    receiptId
-    committedAt
-    replayed
-    operation {
-      operationId
-      owner
-      href
-      state
-    }
-    resourceRef {
-      kind
-      id
-    }
-    result {
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      invitation {
-        invitationId
-        callId
-        generation
-        principalId
-        status
-        expiresAt
-      }
-      participation {
-        principalId
-        sessionId
-        deviceId
-        status
-        nativeConnectionId
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-      }
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
-    }
-  }
-}
-
-mutation CommunicationDeclineCall($context: RequestContextInput!, $input: DeclineCallRequestInput!) {
-  declineCall(context: $context, input: $input) {
-    status
-    requestId
-    serverTime
-    receiptId
-    committedAt
-    replayed
-    operation {
-      operationId
-      owner
-      href
-      state
-    }
-    resourceRef {
-      kind
-      id
-    }
-    result {
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      invitation {
-        invitationId
-        callId
-        generation
-        principalId
-        status
-        expiresAt
-      }
-      participation {
-        principalId
-        sessionId
-        deviceId
-        status
-        nativeConnectionId
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-      }
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
-    }
-  }
-}
-
-mutation CommunicationMediaCredentials($context: RequestContextInput!, $input: MediaCredentialsRequestInput!) {
-  mediaCredentials(context: $context, input: $input) {
-    status
-    requestId
-    serverTime
-    receiptId
-    committedAt
-    replayed
-    operation {
-      operationId
-      owner
-      href
-      state
-    }
-    resourceRef {
-      kind
-      id
-    }
-    result {
-      callId
-      generation
-      roomName
-      participantIdentity
-      livekitUrl
-      transportToken
-      forwardingLease
-      admissionTicket
-      transportExpiresAt
-      admissionExpiresAt
-      leaseExpiresAt
-      leasePolicyId
-    }
-  }
-}
-
-mutation CommunicationLeaveCall($context: RequestContextInput!, $input: LeaveCallRequestInput!) {
-  leaveCall(context: $context, input: $input) {
-    status
-    requestId
-    serverTime
-    receiptId
-    committedAt
-    replayed
-    operation {
-      operationId
-      owner
-      href
-      state
-    }
-    resourceRef {
-      kind
-      id
-    }
-    result {
-      callId
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-    }
-  }
-}
-
-mutation CommunicationEndCall($context: RequestContextInput!, $input: EndCallRequestInput!) {
-  endCall(context: $context, input: $input) {
-    status
-    requestId
-    serverTime
-    receiptId
-    committedAt
-    replayed
-    operation {
-      operationId
-      owner
-      href
-      state
-    }
-    resourceRef {
-      kind
-      id
-    }
-    result {
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      invitation {
-        invitationId
-        callId
-        generation
-        principalId
-        status
-        expiresAt
-      }
-      participation {
-        principalId
-        sessionId
-        deviceId
-        status
-        nativeConnectionId
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-      }
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
-    }
-  }
-}
-
 mutation CommunicationRedeemCredential($context: RequestContextInput!, $input: RedeemCredentialRequestInput!) {
   redeemCredential(context: $context, input: $input) {
     status
@@ -2649,7 +1921,6 @@ query ManagementCapabilities($context: RequestContextInput!) {
         inbox
         lexicalSearch
         typing
-        foregroundCalls
         webhooks
         liveSessions
         liveBroadcast
@@ -2972,67 +2243,6 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
               operationId
             }
           }
-          call {
-            callId
-            conversationId
-            revision
-            generation
-            state
-            media {
-              audio
-              video
-            }
-            creatorId
-            invitation {
-              invitationId
-              callId
-              generation
-              principalId
-              status
-              expiresAt
-            }
-            participation {
-              principalId
-              sessionId
-              deviceId
-              status
-              nativeConnectionId
-              mediaCutoff {
-                state
-                scope {
-                  kind
-                  principalId
-                  sessionId
-                  deviceId
-                  callId
-                }
-              }
-            }
-            mediaCutoff {
-              state
-              scope {
-                kind
-                principalId
-                sessionId
-                deviceId
-                callId
-              }
-            }
-            errorCode
-          }
-          callSummary {
-            callId
-            mediaCutoff {
-              state
-              scope {
-                kind
-                principalId
-                sessionId
-                deviceId
-                callId
-              }
-            }
-          }
           conversation {
             conversationId
             revision
@@ -3153,20 +2363,6 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
             kind
             mediaProfile
             operationId
-          }
-          mediaGrant {
-            callId
-            generation
-            roomName
-            participantIdentity
-            livekitUrl
-            transportToken
-            forwardingLease
-            admissionTicket
-            transportExpiresAt
-            admissionExpiresAt
-            leaseExpiresAt
-            leasePolicyId
           }
           member {
             conversationId
@@ -3323,27 +2519,6 @@ query ManagementGetOperation($context: RequestContextInput!, $input: GetOperatio
         keyId
         endpointId
         enabled
-        callId
-        conversationId
-        revision
-        generation
-        state
-        media {
-          audio
-          video
-        }
-        creatorId
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-        errorCode
         liveSessionCompletion {
           liveSessionId
           generation
@@ -3446,27 +2621,6 @@ mutation ManagementCreateDeployment($context: RequestContextInput!, $input: Crea
       keyId
       endpointId
       enabled
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
       liveSessionCompletion {
         liveSessionId
         generation
@@ -3540,27 +2694,6 @@ mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateP
       keyId
       endpointId
       enabled
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
       liveSessionCompletion {
         liveSessionId
         generation
@@ -3634,27 +2767,6 @@ mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: Issue
       keyId
       endpointId
       enabled
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
       liveSessionCompletion {
         liveSessionId
         generation
@@ -3728,27 +2840,6 @@ mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: Revo
       keyId
       endpointId
       enabled
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
       liveSessionCompletion {
         liveSessionId
         generation
@@ -3822,27 +2913,6 @@ mutation ManagementProjectPolicy($context: RequestContextInput!, $input: Project
       keyId
       endpointId
       enabled
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
       liveSessionCompletion {
         liveSessionId
         generation
@@ -3953,27 +3023,6 @@ mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseO
         keyId
         endpointId
         enabled
-        callId
-        conversationId
-        revision
-        generation
-        state
-        media {
-          audio
-          video
-        }
-        creatorId
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-        errorCode
         liveSessionCompletion {
           liveSessionId
           generation
@@ -4064,27 +3113,6 @@ mutation ManagementResumeOperation($context: RequestContextInput!, $input: Resum
         keyId
         endpointId
         enabled
-        callId
-        conversationId
-        revision
-        generation
-        state
-        media {
-          audio
-          video
-        }
-        creatorId
-        mediaCutoff {
-          state
-          scope {
-            kind
-            principalId
-            sessionId
-            deviceId
-            callId
-          }
-        }
-        errorCode
         liveSessionCompletion {
           liveSessionId
           generation
@@ -4160,27 +3188,6 @@ mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: Conf
       keyId
       endpointId
       enabled
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
       liveSessionCompletion {
         liveSessionId
         generation
@@ -4254,27 +3261,6 @@ mutation ManagementDisableWebhook($context: RequestContextInput!, $input: Disabl
       keyId
       endpointId
       enabled
-      callId
-      conversationId
-      revision
-      generation
-      state
-      media {
-        audio
-        video
-      }
-      creatorId
-      mediaCutoff {
-        state
-        scope {
-          kind
-          principalId
-          sessionId
-          deviceId
-          callId
-        }
-      }
-      errorCode
       liveSessionCompletion {
         liveSessionId
         generation

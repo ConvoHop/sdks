@@ -1,14 +1,10 @@
 # ConvoHop browser SDK
 
-`@convohop/browser-sdk` exports current GraphQL `V1Client` and native
-`V1MediaConnection`, alongside the retained legacy `ConvoHopClient`.
-This is **source
-only**: the package has not been published and no hosted service is included.
-Its source is licensed under the [Apache License, Version 2.0](../../LICENSE).
+`@convohop/browser-sdk` is unpublished TypeScript/ESM source for the current
+Conversation, LiveSession and Participation API. No hosted service is
+included. Source license: [Apache-2.0](../../LICENSE).
 
-## Native v1 chat and calling
-
-Build from the root npm workspace with Node.js 24+:
+Build and test from the repository's root npm workspace with Node.js 24+:
 
 ```sh
 npm ci
@@ -16,13 +12,13 @@ npm run build
 npm test --workspace @convohop/browser-sdk
 ```
 
-Your authenticated backend returns a native session bootstrap; it must never
-return its backend key or an operator credential. Native IDs are canonical
-nonzero UUIDs, and SQL counters are decimal **strings**, not JavaScript
-numbers. The communication origin must expose the compatible authenticated
-unversioned `/graphql` HTTP/subscription service. `V1*` identifies the current
-SDK/domain generation, not an API URL or schema-version selector.
-The current integration is local, not a qualified hosted endpoint.
+## Chat and replay
+
+Your authenticated backend returns a scoped user bootstrap, never its backend
+or operator credentials. IDs are canonical nonzero UUIDs; SQL counters are
+decimal strings. Configure an HTTPS origin, or explicit loopback HTTP for
+local development. HTTP and `graphql-transport-ws` use unversioned `/graphql`.
+`V1*` names do not select an API/schema version.
 
 ```ts
 import { V1Client } from "@convohop/browser-sdk";
@@ -33,61 +29,40 @@ const client = new V1Client({
   incarnation: bootstrap.session.incarnation,
   principalId: bootstrap.session.principalId,
   sessionToken: bootstrap.sessionToken,
-  recoveryStorage: localStorage, // Optional; contains application request payloads.
+  recoveryStorage: localStorage,
 });
 await client.initialize();
-const stream = await client.watch(conversationId, async (events) => {
-  await applyCurrentEvents(events); // Your idempotent application update.
-}, showError);
-const sent = await client.send(conversationId, "Hello", crypto.randomUUID());
-// sent.status === "sent" is an authority commit receipt, not delivery.
-// Close stream when the view closes, not immediately after sending.
+const thread = client.conversation(conversationId); // Synchronous handle.
+const stream = await client.watch(conversationId, applyCurrentEvents, showError);
+const sent = await thread.messages.send(
+  { text: "Hello", props: {} }, { requestId: ids.text },
+);
+// A sent receipt proves the authority commit, not remote delivery.
 ```
 
-`messages(id, beforeSequence?)` pages current history in descending creation
-order. `edit(message, text)` and `delete(message)` compare the current
-revision. `search(query, conversationIds?)` returns `V1SearchHit` items shaped
-as `{conversationId, message}`, not flat messages. Use `reportRead` with
-current membership/visibility epochs; it reports device coverage, not a
-human-read attestation. Low-level `client.http` supports the other explicit
-logical operation identifiers and page continuations without creating another
-SDK. Its compatibility `/v1/...` strings are translated into checked GraphQL
-documents, never sent as HTTP paths.
+`getConversation(id)` reads a snapshot. `messages(id, beforeSequence?)` pages
+history in descending creation order. `edit(message, text)` and
+`delete(message)` use the expected revision. Search hits contain
+`{conversationId, message}`. `reportRead` binds current membership/visibility
+epochs and records device coverage, not human-read attestation.
 
-`watch` catches up from an authority-issued cursor before connecting,
-receives ordered durable `conversationEvents` pages over `graphql-transport-ws`,
-reconciles on foreground/reconnect, and persists a frontier only after
-the application callback succeeds. It never silently resets an invalid,
-ahead or expired cursor. HTTP/WSS credentials never follow a route to a
-different origin. Without `recoveryStorage`, unresolved mutations/cursors
-are in-memory only. Recovery storage contains original message payloads:
-use a trusted origin/profile, not shared public-machine storage.
-The socket initializes with `{token, projectId, incarnation}`. Expiry/revocation
-ends the stream; a slow application is limited to four pending pages and
-must resume from its last applied cursor. Queries/mutations use HTTP only.
+`watch` catches up with an authority-issued cursor, applies ordered event
+pages and persists the frontier only after the application callback succeeds.
+It does not silently reset invalid/ahead/expired cursors. At most four pushed
+pages may await application work; reconnect resumes at the applied frontier.
+Close the stream on view teardown. Expiry/revocation closes the stream;
+session renewal belongs to your authenticated backend.
 
-An uncertain mutation retains its ID, payload, original 60-second budget
-and at most three submissions. `client.resolve(requestId)` is read-only;
-`recoverPending(showError)` only resends eligible original requests within
-that budget. The same-identity state is recovered on startup/foreground.
-Do not replace an unresolved request with a new UUID. A committed/accepted
-result cannot regress to unknown after a later transport error. Session
-renewal is your trusted backend's responsibility; the current `V1Client`
-uses one bootstrap, so construct a new client/stream with a fresh session
-and the same authorized recovery storage when it expires.
+HTTP/WSS credentials never follow a route to another origin. Recovery storage
+contains original application inputs, including possible message text; use
+a trusted profile/origin, not shared public-machine storage. Tokens and native
+grants are not stored there.
 
-Member-open media requires a **participation-aware native SFU**. Stock
-LiveKit, legacy device grants and a cached-token `Room.connect` are not
-substitutes. Conversation membership, durable participation, native connection
-and capture are separate. No invitation array or automatic local capture is
-required. Runtime capabilities and finite qualified media limits must be enabled
-by the service operator; package tests alone do not qualify a deployed service.
+## Explicit live phases
 
 ```ts
-const thread = client.conversation(conversationId); // Synchronous, not thenable.
-await thread.messages.send({ text: "Can we talk?", props: {} }, { requestId: ids.text });
 const start = await thread.live.startVideo({ requestId: ids.start });
-const live = await start.ready(); // Native preparation; no automatic join.
+const live = await start.ready(); // Native preparation, not joining/capture.
 const participation = await live.join({ requestId: ids.join });
 let connection = await participation.connect({
   localVideo,
@@ -97,197 +72,74 @@ let connection = await participation.connect({
   onAudioPlaybackBlocked: showEnableAudioButton,
 }); // Receive-only.
 await connection.microphone(true);
-// Optional later action, in the same AUDIO_VIDEO occurrence:
-await connection.camera(true);
+await connection.camera(true); // Optional later action in AUDIO_VIDEO.
 await live.alerts.send([bobPrincipalId], { requestId: ids.alert });
-// Another current member can discover and join, whether alerted or not:
-const current = await thread.live.current();
-// current is LiveSessionHandle | LegacyInviteOnlyCall | null.
 
-// A fresh admission retains P and returns receive-only; capture is explicit.
-connection = await connection.reconnect();
+const current = await thread.live.current(); // LiveSessionHandle | null.
+// Any current member may discover/join; an alert is not an invitation.
+connection = await connection.reconnect(); // Same P, capture-off.
 await connection.microphone(true);
 const stats = await connection.stats(); // Actual inbound tracks/bytes/frames.
 
-await participation.leave({ requestId: ids.leave }); // Intent; inspect mediaCutoff.
+await participation.leave({ requestId: ids.leave }); // Inspect mediaCutoff.
 const ending = await live.end({ requestId: ids.end });
-await ending.completed(); // Proven generation cutoff, not accepted intent.
+await ending.completed(); // Proven cutoff, not just accepted intent.
 ```
 
-`startVoice()` sets the immutable `AUDIO_ONLY` ceiling. `startVideo()` allows
-camera later, not camera capture now. `startBroadcast({mediaProfile:"AUDIO_VIDEO"})`
-requires an independently backend-granted `canStartBroadcast` permission.
-Only the creator publishes; viewers follow join/connect, never capture, and
-still use ordinary conversation messages. SDK controls reject unauthorized
-sources; the native server also enforces empty viewer publication rights.
+`startVoice()` fixes the AUDIO_ONLY source ceiling. `startVideo()` permits
+camera later without starting capture. `startBroadcast({mediaProfile:
+"AUDIO_VIDEO"})` requires independently backend-granted `canStartBroadcast`.
+The creator is the sole publisher; viewers join/connect receive-only and
+retain normal chat. Both SDK controls and native final writers enforce
+source rights. Membership capacity and finite qualified media capacity are
+separate.
 
-Use `connection.enableAudio()` from a user gesture if autoplay is blocked.
-A capture denial rejects that control action without discarding the already
-returned receive-only connection. A failed connect retains the reservation;
-explicitly retry `participation.connect()` or leave. It resolves a prior used
-credential before a separately identified fresh attempt and never recaptures
-automatically, reuses a spent bearer, changes P, or extends the original expiry.
-Until an uncertain native admission is known or expired it reports
-`RESOLUTION_REQUIRED`, rather than guessing. `disconnect()` only closes local
-transport; it does not prove durable leave or cutoff.
+A capture denial retains the returned connection/participation. A failed
+native connect retains its reservation: explicitly retry or leave. Unknown
+admission resolves before another credential attempt; it never reuses a
+spent bearer, extends the original expiry or silently recaptures. An
+unresolved native outcome yields `RESOLUTION_REQUIRED`. `disconnect()`
+closes local transport only, not durable participation or proven cutoff.
+Use `connection.enableAudio()` from a gesture when autoplay is blocked.
 
-Use `client.requests.resolve(id)` for the generated typed retained receipt;
-live credential results contain non-secret issuance metadata. Start and end
-have distinct `operationId`s and immutable completions. Handles also expose
-`get()`, `participants({cursor,limit})`, conversation `live.history(...)` and
-`client.liveAlerts.list(...)`. `client.liveSession(id)` obtains an authorized
-handle after recovery. Page tokens remain opaque and epoch-bound.
+Start and end have distinct durable operation IDs and original completion
+snapshots. Handles also expose `get()`, `participants({limit,cursor})`,
+conversation `live.history(...)`, and `client.liveAlerts.list(...)`.
+`client.liveSession(id)` reads an authorized handle after recovery.
+Roster/history/alert cursors are opaque and epoch-bound.
 
-**Helper migration:** the old asynchronous `client.conversation(id)` read is
-now explicitly `client.getConversation(id)`. The former name is a synchronous
-handle; do not await it as a snapshot. Original stored request paths,
-discriminators, payloads, fingerprints and retry deadlines remain unchanged.
-Existing invitation-only occurrences retain `call/accept/decline/leave/end`
-and `V1MediaConnection.connect`; fresh `startCall` is gated by
-`CLIENT_UPGRADE_REQUIRED`, not translated into a member-open call. Current
-discovery marks the legacy union branch explicitly and aliases its old String
-state to `legacyState`; it does not invent a new profile or publisher role.
-No Egress, recording, screen-share, host transfer or offline ringing is added.
+## Typed recovery and low-level operations
 
-`participation.connect({ iceTransportPolicy: "relay" })`
-uses the maintained WebRTC relay-only policy; the default is `"all"`.
-It still requires the same fresh native admission and current membership.
-The server must offer its authenticated TURN service: do not supply a
-permanent relay secret or treat relay selection as authorization.
-`stats().transports` reports selected candidate types, `protocol`, and
-optional `relayProtocol`, without addresses, URLs or credentials. For
-TURN over TLS, assert `localCandidateType === "relay"` and
-`relayProtocol === "tls"`; the candidate's `protocol` can still be UDP.
-Direct ICE TCP is separately identified by `protocol === "tcp"`.
-A server boot change ends the old occurrence after durable ownership
-recovery; use current occurrence state and a fresh authorized occurrence, not old
-tokens or an assumption that live media survived.
+`client.requests.resolve(id)` is read-only and returns the generated typed
+receipt. `client.requests.retry(id)` resolves first and can resend only an
+unobserved original command inside its unchanged three-attempt/60-second
+budget. `recoverPending(showError)` runs that bounded recovery on startup or
+foreground. Never replace an uncertain command with a new UUID. Native-use
+markers survive reconstruction without persisting the grant.
 
-Checked operations are exported as `v1Operations`, with `V1OperationTypes`
-and the `V1Graphql` type namespace. `npm run generate:graphql` uses the
-maintained pinned GraphQL Code Generator; `npm run check:graphql` detects
-schema/document/type drift. These artifact names do not version the public
-GraphQL API. Add fields compatibly and use schema deprecations for retirement.
+The low-level surface is
+`client.http.execute("communication.operation", projectId, input, requestId)`.
+It accepts generated operation keys and exact inputs, not REST paths or
+revision aliases. Responses retain declared nullable fields and typed
+`receipt.result`, with no result-shape inference. HTTP 200 GraphQL errors or
+malformed metadata cannot become successful mutation evidence.
+`v1Operations`, `V1OperationTypes`, `OperationInput`, `OperationPayload` and
+the `V1Graphql` namespace are generated/aligned exports. Schema files are
+authority exports; `npm run check:graphql` detects document/type drift.
 
-## Retained legacy GraphQL client
+## Network fallback and limits
 
-The following documentation applies **only** to `ConvoHopClient`, not the
-native `V1*` classes above. This legacy client accepts an end-user `st_` session. Keep the `pk_` project
-key on your authenticated backend and the `adm_` operator credential outside
-customer applications. From the repository root with Node.js 24+:
+`participation.connect({iceTransportPolicy: "relay"})` requests maintained
+WebRTC relay-only policy; default is `"all"`. It still requires current
+native admission/membership and the authority's authenticated TURN service.
+Never supply a permanent relay secret. `stats().transports` includes
+candidate types, protocol and optional relayProtocol, without credentials,
+addresses or URLs. TURN/TLS evidence requires a relay candidate and
+`relayProtocol === "tls"`; direct ICE TCP reports `protocol === "tcp"`.
 
-```sh
-npm ci
-npm run build --workspace @convohop/browser-sdk
-npm test --workspace @convohop/browser-sdk
-```
-
-The API origin must serve GraphQL HTTP and `graphql-transport-ws` at `/graphql`
-(and authenticated `/media` if broadcast/HLS is enabled). Your backend registers each
-app user once as a service-issued `ci_` identity and mints a 15-minute `st_`
-session for that **authenticated** identity. An invited member must accept the
-thread invitation before they can chat or join its calls.
-
-```ts
-import { ConvoHopClient } from "@convohop/browser-sdk";
-
-const client = new ConvoHopClient({
-  baseUrl: window.location.origin, // Your same-origin GraphQL HTTP/WS proxy
-  sessionToken, // st_ from your backend, never pk_ or adm_
-});
-const thread = await client.createThread("Support", [teammateIdentityId]);
-await client.sendMessage(thread.id, "Hello", {
-  clientMessageId: crypto.randomUUID(),
-  props: { caseId: "case-42" },
-});
-
-// After the teammate accepts the invitation on their own session:
-const call = await client.createCall(thread.id, "Support", "video", [teammateIdentityId]);
-await client.startMedia(call.id);
-const localVideo = document.querySelector<HTMLVideoElement>("#local-video");
-const remote = document.querySelector("#remote-tracks");
-if (!localVideo || !remote) throw new Error("Call elements are missing");
-const connection = await client.connectCall(call.id, {
-  localVideo,
-  onTrackAdded: ({ element }) => remote.append(element),
-  onTrackRemoved: ({ element }) => element.remove(),
-  onReconnecting: () => console.info("Call reconnecting"),
-  onDisconnected: (error) => console.error("Call disconnected", error),
-  onError: (error) => console.error("Media error", error),
-});
-// On leaving the call UI, disconnect, stop local tracks and revoke this device.
-await connection.leave();
-// The call owner may end the occurrence; its chat thread remains:
-await client.stopMedia(call.id);
-```
-
-`connectCall` fetches the live call, obtains a device grant with `joinMedia`,
-connects LiveKit to the returned `serverUrl` (do not append `/rtc`), publishes
-microphone/camera as allowed, and attaches/detaches remote tracks. It rejects
-if the call is not live or if admission/publishing fails; a failed join revokes
-the device grant. An `audio` call never turns on a camera. Use
-`{ camera: false }` for microphone-only video, or `{ publish: false }` for a
-listen-only member. `client.connectMedia` uses the same adapter for a
-broadcast publisher; broadcast/HLS availability depends on the separately
-operated service. `joinMedia` remains available to integrations that need
-the raw grant.
-If a browser blocks remote audio autoplay, show a user-gesture button when
-`onAudioPlaybackBlocked` fires and call `connection.enableAudio()` from its
-click handler in your application.
-
-## Ringing, reconnection and token renewal
-
-Call `incomingCalls(after, limit)` and paginate the snapshot before
-`subscribeCalls({ after: firstPage.cursor, onEvent, onError })`. Apply events
-idempotently by call ID/sequence; `call.ringing` includes call details, while
-`call.revoked` may have `call: null`. `declineCall(id)` dismisses only that
-invitation. An acceptance is not proof of media connectivity.
-
-The `st_` token expires after **15 minutes**. Your authenticated backend must
-mint another token for the *same identity* before expiry. Call
-`client.updateSessionToken(freshStFromYourBackend)`; HTTP and HLS requests
-thereafter use it, and active WebSockets re-authenticate from each stream's
-last successfully processed `subscription.after`. An already-connected call
-does not need a fresh grant just because its 60-second join JWT expires.
-On a failed transport the SDK tries a fresh `joinMedia(id, participantId)`
-grant and reconnects the **same authorized device**; `connection.reconnect()`
-also forces that path explicitly. It disconnects and revokes on renewal
-failure, reporting the error; if revocation itself fails, `leave()` can be
-retried after updating the session token. Neither old JWTs nor a new `st_`
-credential for a different user are a safe substitute for authorization.
-Call `leave()` before unmount/navigation; a sudden tab close cannot guarantee
-the revocation request completes.
-
-## Catch-up belongs to your application
-
-The SDK keeps the last acknowledged decimal-string cursor **in memory**
-across network reconnects and `updateSessionToken`. It does not store chat
-or tokens on disk or send offline push. Persist each event and its cursor
-together in your app's durable store, keyed by your authenticated user and
-thread. On resume, page through `threadEvents` from that cursor and apply
-events idempotently, retaining the **first page's** high-water `cursor`
-before you start `subscribeThread`. Do not require consecutive sequences.
-
-```ts
-let after = await loadAcknowledgedCursor(thread.id) ?? "0"; // Your app store
-let highWater: string | undefined;
-for (;;) {
-  const page = await client.threadEvents(thread.id, after, 100);
-  highWater ??= page.cursor;
-  for (const event of page.items) {
-    await applyAndPersistEvent(thread.id, event); // Idempotent, including cursor
-  }
-  if (!page.hasMore) break;
-  after = page.nextAfter;
-}
-const stream = client.subscribeThread(thread.id, {
-  after: highWater,
-  onEvent: async (event) => { await applyAndPersistEvent(thread.id, event); },
-  onError: (error) => console.error("Resume from the stored cursor", error),
-});
-// stream.after advances only after onEvent succeeds. Close on view teardown.
-```
-
-The SDK source does not include the services or a hosted endpoint. Deployment
-availability, including broadcast/HLS support, must be confirmed separately.
-There is no published package, offline push or production SLA.
+The service requires a participation-aware ConvoHop native SFU, not stock
+LiveKit or cached-token reconnect. A server boot change ends the old
+occurrence after durable recovery; explicitly start/join a new occurrence.
+No transparent cross-boot continuity, invitation-only compatibility API,
+HLS, Egress, recording, screen-share, host transfer or offline ringing is
+provided. Unit tests do not qualify real media or a hosted deployment.

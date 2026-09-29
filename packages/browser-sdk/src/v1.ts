@@ -1,49 +1,22 @@
-import { v1GraphqlRequest, v1GraphqlEnvelope, operationPayload, validateOperationPayload,
-  type CommunicationOperation, type OperationInput, type OperationPayload } from "./v1-graphql.js";
+import { v1GraphqlRequest, operationPayload, operationKey, validateOperationPayload, validateOutput,
+  type OperationInput, type OperationPayload } from "./v1-graphql.js";
 import { ConversationHandle, LiveSessionHandle, type PageOptions } from "./live.js";
-import { v1Operations } from "./v1-operations.js";
-import type { CommunicationMembersQuery } from "./v1-generated.js";
-/** Current Cockroach-backed GraphQL protocol. The legacy GraphQL client is separate. */
+import { v1Operations, type V1OperationKey } from "./v1-operations.js";
 export type V1Record = Record<string, unknown>;
-export interface V1Cursor { incarnation: string; conversationId: string; sequence: string }
+export type V1Cursor = NonNullable<NonNullable<OperationPayload<"communication.events">["result"]>["nextCursor"]>;
 export interface V1Page<T> { items: T[]; complete: boolean; refreshRequired: boolean; nextCursor?: unknown }
-export interface V1Message {
-  messageId: string; conversationId: string; authorId: string; sequence: string;
-  revision: string; revisionSequence: string; createdAt: string; deleted: boolean;
-  text?: string; props?: V1Record;
-}
-export interface V1SendReceipt {
-  messageId: string; conversationId: string; sequence: string; revision: string; status: "sent"; cursor: V1Cursor;
-}
-export interface V1SearchHit { conversationId: string; message: V1Message }
-export type V1Membership = NonNullable<CommunicationMembersQuery["members"]["result"]>["items"][number];
-export interface V1Conversation {
-  conversationId: string; revision: string; title: string; latestSequence: string;
-  props: V1Record; membership: V1Membership | null;
-}
-export interface V1Call {
-  callId: string; conversationId: string; revision: string; generation: string; state: string;
-  creatorId: string; media: { audio: boolean; video: boolean };
-  invitation?: { invitationId: string; callId: string; generation: string; status: string; expiresAt: string };
-  participation?: V1Record;
-  errorCode?: string;
-}
-export interface V1MediaGrant {
-  callId: string; generation: string; livekitUrl: string; roomName: string; participantIdentity: string;
-  transportToken: string; admissionTicket: V1Record; forwardingLease: V1Record;
-  transportExpiresAt: string; admissionExpiresAt: string; leaseExpiresAt: string; leasePolicyId: string;
-}
+export type V1Message = NonNullable<OperationPayload<"communication.getMessage">["result"]>;
+export type V1SendReceipt = NonNullable<OperationPayload<"communication.sendMessage">["result"]> & { cursor: V1Cursor };
+export type V1SearchHit = NonNullable<OperationPayload<"communication.search">["result"]>["items"][number];
+export type V1Membership = NonNullable<OperationPayload<"communication.members">["result"]>["items"][number];
+export type V1Conversation = NonNullable<OperationPayload<"communication.getConversation">["result"]>;
 export interface V1Route {
   projectId: string; incarnation: string; servingEpoch: string; communicationBase: string;
   wssUrl: string; expiresAt: string; signature: string;
 }
-export interface V1Envelope<T> {
-  status: "ok" | "committed" | "accepted"; requestId: string; result: T;
-  replayed?: boolean; operation?: V1Record; resourceRef?: V1Record; receiptId?: string; committedAt?: string;
-}
 export interface V1RecoveryState {
   requestId: string; incarnation: string; payloadFingerprint: string;
-  method: string; path: string; payload: V1Record;
+  operation: V1OperationKey; projectId?: string; input: V1Record;
   firstSubmittedAt: number; retryDeadline: number; attemptCount: number; lastAttemptAt: number;
   lastAttemptClassification: string; resolutionState: "pending" | "unknown" | "committed" | "accepted";
   mediaAdmissionAttempted?: true;
@@ -54,7 +27,7 @@ export class V1Problem extends Error {
     readonly status: number, message: string) { super(message); this.name = "V1Problem"; }
 }
 export function v1Record(value: unknown): V1Record {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) throw new TypeError("Invalid versioned JSON object");
+  if (value === null || typeof value !== "object" || Array.isArray(value)) throw new TypeError("Invalid protocol object");
   return value as V1Record;
 }
 export function v1String(value: unknown): string {
@@ -92,6 +65,7 @@ export function v1Page<T>(value: unknown, parse: (value: unknown) => T): V1Page<
     ...(v.nextCursor === undefined ? {} : { nextCursor: v.nextCursor }) };
 }
 function eventPage(value: unknown, incarnation: string, conversationId: string, after?: V1Cursor): V1Page<V1Record> & { nextCursor: V1Cursor } {
+  validateOutput(value, "EventPage");
   const result = v1Page(value, v1Record), cursor = v1Cursor(result.nextCursor);
   if (cursor.conversationId !== conversationId || cursor.incarnation !== incarnation ||
       (after && BigInt(cursor.sequence) < BigInt(after.sequence))) throw new TypeError("Invalid authoritative replay frontier");
@@ -105,12 +79,8 @@ function eventPage(value: unknown, incarnation: string, conversationId: string, 
   return { ...result, nextCursor: cursor };
 }
 export function v1Message(value: unknown): V1Message {
-  const v = v1Record(value);
-  const deleted = boolean(v.deleted);
-  return { messageId: v1Id(v.messageId), conversationId: v1Id(v.conversationId), authorId: v1Id(v.authorId),
-    sequence: v1Counter(v.sequence), revision: v1Counter(v.revision), revisionSequence: v1Counter(v.revisionSequence),
-    createdAt: timestamp(v.createdAt), deleted,
-    ...(deleted ? {} : { text: v1String(v.text), props: v1Record(v.props) }) };
+  validateOutput(value, "Message");
+  return value as V1Message;
 }
 export function v1SearchHit(value: unknown): V1SearchHit {
   const v = v1Record(value), conversationId = v1Id(v.conversationId), message = v1Message(v.message);
@@ -118,39 +88,12 @@ export function v1SearchHit(value: unknown): V1SearchHit {
   return { conversationId, message };
 }
 export function v1Membership(value: unknown): V1Membership {
-  const v = v1Record(value);
-  return { conversationId: v1Id(v.conversationId), principalId: v1Id(v.principalId),
-    role: v1String(v.role), status: v1String(v.status), revision: v1Counter(v.revision),
-    membershipEpoch: v1Counter(v.membershipEpoch), visibilityEpoch: v1Counter(v.visibilityEpoch),
-    visibleFromSequence: v1Counter(v.visibleFromSequence), canStartBroadcast: boolean(v.canStartBroadcast) };
+  validateOutput(value, "Member");
+  return value as V1Membership;
 }
 export function v1Conversation(value: unknown): V1Conversation {
-  const v = v1Record(value);
-  return { conversationId: v1Id(v.conversationId), revision: v1Counter(v.revision), title: v1String(v.title),
-    latestSequence: v1Counter(v.latestSequence), props: v1Record(v.props), membership: v.membership === null ? null : v1Membership(v.membership) };
-}
-export function v1Call(value: unknown): V1Call {
-  const v = v1Record(value); const media = v1Record(v.media);
-  const result: V1Call = { callId: v1Id(v.callId), conversationId: v1Id(v.conversationId),
-    revision: v1Counter(v.revision), generation: v1Counter(v.generation), state: v1String(v.state),
-    creatorId: v1Id(v.creatorId), media: { audio: boolean(media.audio), video: boolean(media.video) } };
-  if (!["preparing", "offering", "active", "draining", "ended", "interrupted", "failed"].includes(result.state)) throw new TypeError("Invalid call state");
-  if (v.invitation !== undefined) {
-    const invitation = v1Record(v.invitation);
-    result.invitation = { invitationId: v1Id(invitation.invitationId), callId: v1Id(invitation.callId),
-      generation: v1Counter(invitation.generation), status: v1String(invitation.status), expiresAt: timestamp(invitation.expiresAt) };
-  }
-  if (v.participation !== undefined) result.participation = v1Record(v.participation);
-  if (v.errorCode !== undefined) result.errorCode = v1String(v.errorCode);
-  return result;
-}
-export function v1MediaGrant(value: unknown): V1MediaGrant {
-  const v = v1Record(value);
-  return { callId: v1Id(v.callId), generation: v1Counter(v.generation),
-    livekitUrl: v1String(v.livekitUrl), roomName: v1String(v.roomName), participantIdentity: v1String(v.participantIdentity),
-    transportToken: v1String(v.transportToken), admissionTicket: v1Record(v.admissionTicket), forwardingLease: v1Record(v.forwardingLease),
-    transportExpiresAt: timestamp(v.transportExpiresAt), admissionExpiresAt: timestamp(v.admissionExpiresAt),
-    leaseExpiresAt: timestamp(v.leaseExpiresAt), leasePolicyId: v1String(v.leasePolicyId) };
+  validateOutput(value, "Conversation");
+  return value as V1Conversation;
 }
 function route(value: unknown): V1Route {
   const v = v1Record(value);
@@ -192,7 +135,7 @@ export class V1Transport {
   readonly #storage: V1RecoveryStorage | undefined;
   readonly #storageKey: string;
   readonly #states = new Map<string, V1RecoveryState>();
-  readonly #active = new Map<string, Promise<V1Envelope<unknown>>>();
+  readonly #active = new Map<string, Promise<V1Record>>();
   incarnation: string;
   servingEpoch: string | undefined;
   constructor(options: V1TransportOptions) {
@@ -200,15 +143,19 @@ export class V1Transport {
     this.incarnation = options.incarnation ?? "management";
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
     this.#storage = options.recoveryStorage; this.durableRecovery = this.#storage !== undefined;
-    this.#storageKey = "convohop.v1.recovery:" + options.namespace;
+    this.#storageKey = "convohop.requests:" + options.namespace;
     const saved = this.#storage?.getItem(this.#storageKey);
     if (saved) {
       const values: unknown = JSON.parse(saved);
       if (!Array.isArray(values) || values.length > 128) throw new TypeError("Invalid mutation recovery storage");
       for (const item of values) {
         const v = v1Record(item);
-        if (!["POST", "PATCH"].includes(v1String(v.method)) || !v1String(v.path).startsWith("/") ||
+        const operation = operationKey(v.operation);
+        if (v1Operations[operation].kind !== "mutation" ||
             !["pending", "unknown", "committed", "accepted"].includes(v1String(v.resolutionState))) throw new TypeError("Invalid recovery record");
+        const projectId = v.projectId === undefined ? undefined : v1Id(v.projectId);
+        if ((v1Operations[operation].plane === "communication") !== (projectId !== undefined))
+          throw new TypeError("Invalid recovery project scope");
         for (const key of ["firstSubmittedAt", "retryDeadline", "attemptCount", "lastAttemptAt"]) {
           if (typeof v[key] !== "number" || !Number.isSafeInteger(v[key]) || v[key] < 0) throw new TypeError("Invalid recovery clock or count");
         }
@@ -217,12 +164,11 @@ export class V1Transport {
         // All fields are checked before this stored record can authorize a resend.
         const state: V1RecoveryState = {
           requestId: v1Id(v.requestId), incarnation: v1String(v.incarnation), payloadFingerprint: v1String(v.payloadFingerprint),
-          method: v1String(v.method), path: v1String(v.path), payload: v1Record(v.payload),
+          operation, ...(projectId === undefined ? {} : { projectId }), input: v1Record(v.input),
           firstSubmittedAt: Number(v.firstSubmittedAt), retryDeadline: Number(v.retryDeadline), attemptCount: Number(v.attemptCount),
           lastAttemptAt: Number(v.lastAttemptAt), lastAttemptClassification: v1String(v.lastAttemptClassification),
           resolutionState: v.resolutionState as V1RecoveryState["resolutionState"],
-          ...(v.mediaAdmissionAttempted === true || v.lastAttemptClassification === "nativeAdmissionAttempted"
-            ? { mediaAdmissionAttempted: true } : {}),
+          ...(v.mediaAdmissionAttempted === true ? { mediaAdmissionAttempted: true } : {}),
         };
         this.#states.set(state.requestId, state);
       }
@@ -232,7 +178,7 @@ export class V1Transport {
   /** @internal Persist the native attempt boundary without retaining a bearer grant. */
   markMediaAdmissionAttempted(requestId: string): void {
     const state = this.#states.get(v1Id(requestId));
-    if (!state || !state.path.endsWith("/graphql/liveSessionCredentials") || state.resolutionState !== "committed")
+    if (!state || state.operation !== "communication.liveSessionCredentials" || state.resolutionState !== "committed")
       throw new Error("Native admission requires a committed credential issuance");
     state.lastAttemptClassification = "nativeAdmissionAttempted";
     state.mediaAdmissionAttempted = true;
@@ -246,43 +192,47 @@ export class V1Transport {
     }
     this.#storage?.setItem(this.#storageKey, JSON.stringify([...this.#states.values()]));
   }
-  async read(path: string, body?: V1Record): Promise<V1Envelope<unknown>> {
-    return this.#request(body === undefined ? "GET" : "POST", path, body, crypto.randomUUID());
-  }
-  async execute<K extends CommunicationOperation>(key: K, projectId: string, input: OperationInput<K>,
-    requestId?: string): Promise<OperationPayload<K>> {
-    const operation = v1Operations[key];
-    const path = `/v1/projects/${v1Id(projectId)}/graphql/${operation.field}`;
-    const body = v1Record(input);
+  async execute<K extends V1OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>,
+    requestId: string = crypto.randomUUID(), credentialDeliveryPermit?: V1Record): Promise<OperationPayload<K>> {
+    const operation = v1Operations[operationKey(key)];
+    const body = Object.fromEntries(Object.entries(v1Record(input)).filter(([, value]) => value !== undefined));
+    this.#plan(key, projectId, body, requestId, credentialDeliveryPermit);
     const result = operationPayload(key, operation.kind === "mutation"
-      ? await this.mutate("POST", path, body, requestId)
-      : await this.#request("GET", path, body, crypto.randomUUID()));
-    if (key === "communication.resolveRequest") {
+      ? await this.#mutate(key, projectId, body, requestId, credentialDeliveryPermit)
+      : await this.#request(key, projectId, body, requestId, credentialDeliveryPermit));
+    if (key === "communication.resolveRequest" || key === "management.resolveRequest") {
       const state = this.#states.get(v1String(body.requestId)), resolution = v1Record(v1Record(result).result);
+      if (resolution.requestId !== body.requestId ||
+          (resolution.receipt != null && v1Record(resolution.receipt).requestId !== body.requestId))
+        throw new V1Problem("INVALID_RESPONSE", requestId, "unknown", 503, "Request resolution identity changed");
+      if (state && (state.projectId !== projectId || state.incarnation !== this.incarnation))
+        throw new V1Problem("RESOLUTION_REQUIRED", requestId, "unknown", 409, "Resolve within the original project and incarnation");
       if (state && (resolution.state === "committed" || resolution.state === "accepted")) {
         state.resolutionState = resolution.state; state.lastAttemptClassification = "authorityReceipt"; this.#persist();
       }
     }
     return result;
   }
-  async mutate(method: "POST" | "PATCH", path: string, payload: V1Record, requestId: string = crypto.randomUUID()): Promise<V1Envelope<unknown>> {
+  async #mutate(operation: V1OperationKey, projectId: string | undefined, input: V1Record,
+    requestId: string, credentialDeliveryPermit?: V1Record): Promise<V1Record> {
     v1Id(requestId);
-    const hash = await fingerprint({ method, path, payload });
+    const hash = await fingerprint({ operation, projectId: projectId ?? null, input });
     let state = this.#states.get(requestId);
     if (state && (state.payloadFingerprint !== hash || state.incarnation !== this.incarnation)) throw new V1Problem("IDEMPOTENCY_CONFLICT", requestId, "unknown", 409, "Preserve the original request and payload");
     if (!state) {
       const now = Date.now();
-      state = { requestId, incarnation: this.incarnation, payloadFingerprint: hash, method, path,
-        payload: structuredClone(payload), firstSubmittedAt: now, retryDeadline: now + 60000,
+      state = { requestId, incarnation: this.incarnation, payloadFingerprint: hash, operation,
+        ...(projectId === undefined ? {} : { projectId }), input: structuredClone(input),
+        firstSubmittedAt: now, retryDeadline: now + 60000,
         attemptCount: 0, lastAttemptAt: now, lastAttemptClassification: "notSubmitted", resolutionState: "pending" };
       this.#states.set(requestId, state); this.#persist();
     }
     const active = this.#active.get(requestId); if (active) return active;
-    const work = this.#submit(state);
+    const work = this.#submit(state, credentialDeliveryPermit);
     this.#active.set(requestId, work);
     try { return await work; } finally { this.#active.delete(requestId); }
   }
-  async #submit(state: V1RecoveryState): Promise<V1Envelope<unknown>> {
+  async #submit(state: V1RecoveryState, credentialDeliveryPermit?: V1Record): Promise<V1Record> {
     const now = Date.now();
     if (state.attemptCount >= 3 || now > state.retryDeadline || now < state.firstSubmittedAt || now < state.lastAttemptAt)
       throw new V1Problem("RESOLUTION_REQUIRED", state.requestId, "unknown", 409, "Retry budget expired or clock changed; resolve this request read-only");
@@ -290,7 +240,7 @@ export class V1Transport {
     if (state.resolutionState === "pending") state.resolutionState = "unknown";
     state.lastAttemptClassification = "submitted"; this.#persist();
     try {
-      const result = await this.#request(state.method, state.path, state.payload, state.requestId);
+      const result = await this.#request(state.operation, state.projectId, state.input, state.requestId, credentialDeliveryPermit);
       if (result.status !== "committed" && result.status !== "accepted") throw new TypeError("A mutation requires authority receipt evidence");
       state.resolutionState = result.status; state.lastAttemptClassification = "authorityReceipt"; this.#persist(); return result;
     } catch (error) {
@@ -298,31 +248,44 @@ export class V1Transport {
       this.#persist(); throw error;
     }
   }
-  async recover(requestId: string, resolutionPath: string, allowResend = false): Promise<V1Record> {
+  async retry(requestId: string): Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>> {
     const state = this.#states.get(v1Id(requestId));
     if (!state) throw new Error("No recovery record exists; do not invent a replacement identity");
     if (state.incarnation !== this.incarnation) throw new V1Problem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
-    const resolution = v1Record((await this.read(resolutionPath)).result);
-    if (resolution.state === "committed" || resolution.state === "accepted") {
-      state.resolutionState = resolution.state; state.lastAttemptClassification = "authorityReceipt"; this.#persist();
-    } else if (allowResend && resolution.state === "notObservedYet") {
-      if (await fingerprint({ method: state.method, path: state.path, payload: state.payload }) !== state.payloadFingerprint) throw new Error("Recovery payload fingerprint changed");
-      if (state.method !== "POST" && state.method !== "PATCH") throw new TypeError("Invalid mutation recovery method");
-      await this.mutate(state.method, state.path, state.payload, state.requestId);
+    const key = v1Operations[state.operation].plane === "management" ? "management.resolveRequest" : "communication.resolveRequest";
+    const resolution = (await this.execute(key, state.projectId, { requestId })).result;
+    if (!resolution) throw new TypeError("Missing current request resolution");
+    if (resolution.state === "committed" || resolution.state === "accepted") return resolution;
+    if (resolution.state !== "notObservedYet") throw new TypeError("Unknown request resolution state");
+    if (["committed", "accepted"].includes(state.resolutionState) || state.mediaAdmissionAttempted) {
+      throw new V1Problem("RESOLUTION_REQUIRED", requestId, "unknown", 409,
+        "Previously observed commit or native admission cannot be retried from absent evidence");
     }
-    return resolution;
+    if (state.operation === "communication.redeemCredential") throw new V1Problem("CREDENTIAL_REQUIRED",
+      requestId, "unknown", 409, "Obtain a current permit and submit the same redemption identity explicitly");
+    if (await fingerprint({ operation: state.operation, projectId: state.projectId ?? null, input: state.input }) !== state.payloadFingerprint)
+      throw new Error("Recovery input fingerprint changed");
+    await this.#mutate(state.operation, state.projectId, state.input, state.requestId);
+    const current = (await this.execute(key, state.projectId, { requestId })).result;
+    if (!current) throw new TypeError("Missing current request resolution");
+    return current;
   }
-  async #request(method: string, path: string, body: V1Record | undefined, requestId: string): Promise<V1Envelope<unknown>> {
-    if (!path.startsWith("/") || path.startsWith("//") || path.includes("#")) throw new TypeError("Expected a closed API path");
-    let plan: ReturnType<typeof v1GraphqlRequest>;
+  #plan(key: V1OperationKey, projectId: string | undefined, input: V1Record,
+    requestId: string, credentialDeliveryPermit?: V1Record): ReturnType<typeof v1GraphqlRequest> {
     try {
-      plan = v1GraphqlRequest(method, path, body, { requestId,
+      return v1GraphqlRequest(key, input, { requestId: v1Id(requestId),
+        ...(projectId === undefined ? {} : { projectId: v1Id(projectId) }),
+        ...(credentialDeliveryPermit === undefined ? {} : { credentialDeliveryPermit }),
         ...(this.incarnation === "management" ? {} : { incarnation: this.incarnation }),
         ...(this.servingEpoch === undefined ? {} : { observedServingEpoch: this.servingEpoch }) });
     } catch (error) {
       throw new V1Problem("INVALID_REQUEST", requestId, "rejected", 400,
         error instanceof Error ? error.message : "Invalid SDK operation");
     }
+  }
+  async #request(key: V1OperationKey, projectId: string | undefined, input: V1Record,
+    requestId: string, credentialDeliveryPermit?: V1Record): Promise<V1Record> {
+    const plan = this.#plan(key, projectId, input, requestId, credentialDeliveryPermit);
     const headers: Record<string, string> = { accept: "application/json", "content-type": "application/json" };
     if (this.#credential !== undefined) headers.authorization = "Bearer " + this.#credential;
     let response: Response;
@@ -352,19 +315,18 @@ export class V1Transport {
           typeof graphql.message === "string" ? graphql.message : "Authority rejected the request");
       }
       const raw = v1Record(graphql.data)[plan.operation.field];
-      const direct = path.includes("/graphql/");
-      const value = direct ? v1Record(raw) : v1GraphqlEnvelope(raw, plan.operation);
-      if (direct) validateOperationPayload(plan.operation, value);
+      const value = v1Record(raw);
+      validateOperationPayload(plan.operation, value);
       if (!["ok", "committed", "accepted"].includes(v1String(value.status))) throw new TypeError("Unrecognized authority envelope");
       if (v1Id(value.requestId) !== requestId) throw new V1Problem("INVALID_RESPONSE", requestId, "unknown", response.status, "Mismatched authority request identity");
-      if (direct) return { ...value, status: value.status as V1Envelope<unknown>["status"],
-        requestId: v1Id(value.requestId), result: value.result };
-      return { status: value.status as V1Envelope<unknown>["status"], requestId: v1Id(value.requestId), result: value.result,
-        ...(value.receiptId === undefined ? {} : { receiptId: v1Id(value.receiptId) }),
-        ...(value.committedAt === undefined ? {} : { committedAt: timestamp(value.committedAt) }),
-        ...(value.replayed === undefined ? {} : { replayed: boolean(value.replayed) }),
-        ...(value.operation === undefined ? {} : { operation: v1Record(value.operation) }),
-        ...(value.resourceRef === undefined ? {} : { resourceRef: v1Record(value.resourceRef) }) };
+      if (plan.operation.kind === "mutation") {
+        if (value.status === "committed") {
+          v1Id(value.receiptId); timestamp(value.committedAt); boolean(value.replayed);
+        } else if (value.status === "accepted") {
+          v1Id(v1Record(value.operation).operationId);
+        } else throw new TypeError("A mutation requires authority receipt evidence");
+      }
+      return value;
     } catch (error) {
       if (!(error instanceof TypeError)) throw error;
       throw new V1Problem("INVALID_RESPONSE", requestId, "unknown", response.status, "Malformed authority response; resolve the original request");
@@ -386,9 +348,8 @@ export class V1Client {
       ...(options.recoveryStorage ? { recoveryStorage: options.recoveryStorage } : {}),
       ...(options.fetch ? { fetch: options.fetch } : {}) });
   }
-  get path(): string { return "/v1/projects/" + this.projectId; }
   async initialize(): Promise<V1Route> {
-    const value = route((await this.http.read(this.path + "/route")).result);
+    const value = route((await this.http.execute("communication.route", this.projectId, {})).result);
     if (value.projectId !== this.projectId || value.incarnation !== this.http.incarnation) throw new V1Problem("INCARNATION_MISMATCH", crypto.randomUUID(), "rejected", 409, "Explicit session/route recovery required");
     const socket = new URL(value.wssUrl), base = new URL(this.http.baseUrl);
     if (origin(value.communicationBase) !== this.http.baseUrl || socket.host !== base.host ||
@@ -398,10 +359,16 @@ export class V1Client {
     this.http.servingEpoch = value.servingEpoch; this.#route = value; return value;
   }
   conversation(id: string): ConversationHandle { return new ConversationHandle(this, v1Id(id)); }
-  async getConversation(id: string): Promise<V1Conversation> { return v1Conversation((await this.http.read(`${this.path}/conversations/${v1Id(id)}`)).result); }
+  async getConversation(id: string): Promise<V1Conversation> {
+    return v1Conversation((await this.http.execute("communication.getConversation", this.projectId, { conversationId: v1Id(id) })).result);
+  }
   readonly requests = {
-    resolve: async (requestId: string) => (await this.http.execute("communication.resolveRequest",
-      this.projectId, { requestId: v1Id(requestId) })).result,
+    resolve: async (requestId: string) => {
+      const result = (await this.http.execute("communication.resolveRequest", this.projectId, { requestId: v1Id(requestId) })).result;
+      if (!result) throw new TypeError("Missing current request resolution");
+      return result;
+    },
+    retry: (requestId: string) => this.http.retry(requestId),
   };
   liveSession(id: string) { return LiveSessionHandle.get(this, v1Id(id)); }
   readonly liveAlerts = {
@@ -409,62 +376,48 @@ export class V1Client {
       (await this.http.execute("communication.liveSessionAlerts", this.projectId, options)).result,
   };
   async messages(id: string, beforeSequence?: string): Promise<V1Page<V1Message>> {
-    const before = beforeSequence === undefined ? "" : "&beforeSequence=" + v1Counter(beforeSequence);
-    return v1Page((await this.http.read(`${this.path}/conversations/${v1Id(id)}/messages?limit=100${before}`)).result, v1Message);
+    return v1Page((await this.http.execute("communication.messages", this.projectId,
+      { conversationId: v1Id(id), limit: 100, ...(beforeSequence === undefined ? {} : { beforeSequence: v1Counter(beforeSequence) }) })).result, v1Message);
   }
   async send(id: string, text: string, requestId?: string): Promise<V1SendReceipt> {
-    const result = v1Record((await this.http.mutate("POST", `${this.path}/conversations/${v1Id(id)}/messages`, { text, props: {} }, requestId)).result);
+    const result = (await this.http.execute("communication.sendMessage", this.projectId, { conversationId: v1Id(id), text, props: {} }, requestId)).result;
+    if (!result) throw new TypeError("Missing send receipt");
     const cursor = v1Cursor(result.cursor);
-    if (result.status !== "sent" || cursor.conversationId !== id || cursor.incarnation !== this.http.incarnation) throw new TypeError("Invalid send receipt scope");
-    return { messageId: v1Id(result.messageId), conversationId: v1Id(result.conversationId), sequence: v1Counter(result.sequence),
-      revision: v1Counter(result.revision), status: "sent", cursor };
+    if (result.status !== "sent" || result.conversationId !== id || cursor.conversationId !== id ||
+        cursor.sequence !== result.sequence || cursor.incarnation !== this.http.incarnation) throw new TypeError("Invalid send receipt scope");
+    return { ...result, cursor };
   }
   async edit(message: V1Message, text: string, requestId?: string): Promise<V1Message> {
-    return v1Message((await this.http.mutate("PATCH", `${this.path}/conversations/${message.conversationId}/messages/${message.messageId}`, { text, expectedRevision: message.revision }, requestId)).result);
+    return v1Message((await this.http.execute("communication.editMessage", this.projectId,
+      { conversationId: message.conversationId, messageId: message.messageId, text, expectedRevision: message.revision }, requestId)).result);
   }
   async delete(message: V1Message, requestId?: string): Promise<V1Message> {
-    return v1Message((await this.http.mutate("POST", `${this.path}/conversations/${message.conversationId}/messages/${message.messageId}/delete`, { expectedRevision: message.revision }, requestId)).result);
+    return v1Message((await this.http.execute("communication.deleteMessage", this.projectId,
+      { conversationId: message.conversationId, messageId: message.messageId, expectedRevision: message.revision }, requestId)).result);
   }
   async events(id: string, after?: V1Cursor): Promise<V1Page<V1Record> & { nextCursor: V1Cursor }> {
-    const query = after === undefined ? "" : "&after=" + btoa(JSON.stringify(after)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-    return eventPage((await this.http.read(`${this.path}/conversations/${v1Id(id)}/events?limit=100${query}`)).result,
+    return eventPage((await this.http.execute("communication.events", this.projectId,
+      { conversationId: v1Id(id), limit: 100, ...(after === undefined ? {} : { after }) })).result,
       this.http.incarnation, id, after);
   }
   async reportRead(id: string, membership: V1Membership, throughSequence: string): Promise<V1Record> {
-    return v1Record((await this.http.mutate("POST", `${this.path}/conversations/${v1Id(id)}/receipts`,
-      { kind: "read", membershipEpoch: membership.membershipEpoch, visibilityEpoch: membership.visibilityEpoch, throughSequence: v1Counter(throughSequence) })).result);
+    return v1Record((await this.http.execute("communication.reportReceipt", this.projectId,
+      { conversationId: v1Id(id), kind: "read", membershipEpoch: membership.membershipEpoch,
+        visibilityEpoch: membership.visibilityEpoch, throughSequence: v1Counter(throughSequence) })).result);
   }
-  async receipts(id: string): Promise<V1Page<V1Record>> { return v1Page((await this.http.read(`${this.path}/conversations/${v1Id(id)}/receipts?limit=100`)).result, v1Record); }
+  async receipts(id: string): Promise<V1Page<V1Record>> {
+    return v1Page((await this.http.execute("communication.receipts", this.projectId, { conversationId: v1Id(id), limit: 100 })).result, v1Record);
+  }
   async search(query: string, conversationIds?: string[]): Promise<V1Page<V1SearchHit>> {
-    return v1Page((await this.http.read(this.path + "/search", { query, pageSize: 100, ...(conversationIds ? { conversationIds } : {}) })).result, v1SearchHit);
+    return v1Page((await this.http.execute("communication.search", this.projectId,
+      { query, pageSize: 100, ...(conversationIds ? { scope: { conversationIds } } : {}) })).result, v1SearchHit);
   }
-  async invitations(): Promise<V1Page<V1Call>> { return v1Page((await this.http.read(this.path + "/callInvitations?limit=100")).result, v1Call); }
-  async call(id: string): Promise<V1Call> { return v1Call((await this.http.read(`${this.path}/calls/${v1Id(id)}`)).result); }
-  async startCall(id: string, invitedPrincipalIds: string[], video: boolean): Promise<string> {
-    const result = await this.http.mutate("POST", `${this.path}/conversations/${v1Id(id)}/calls`, { invitedPrincipalIds, media: { audio: true, video } });
-    return v1Id(v1Record(result.result).callId);
-  }
-  async accept(call: V1Call): Promise<V1Call> {
-    if (!call.invitation) throw new TypeError("Current invitation is required");
-    return v1Call((await this.http.mutate("POST", `${this.path}/calls/${call.callId}/accept`, { generation: call.generation, invitationId: call.invitation.invitationId })).result);
-  }
-  async decline(call: V1Call): Promise<V1Call> {
-    if (!call.invitation) throw new TypeError("Current invitation is required");
-    return v1Call((await this.http.mutate("POST", `${this.path}/calls/${call.callId}/decline`, { generation: call.generation, invitationId: call.invitation.invitationId })).result);
-  }
-  async mediaCredentials(call: V1Call, replacementOfConnectionId?: string): Promise<V1MediaGrant> {
-    return v1MediaGrant((await this.http.mutate("POST", `${this.path}/calls/${call.callId}/mediaCredentials`,
-      { generation: call.generation, mode: replacementOfConnectionId ? "reconnect" : "initial", ...(replacementOfConnectionId ? { replacementOfConnectionId } : {}) })).result);
-  }
-  async leave(call: V1Call): Promise<void> { await this.http.mutate("POST", `${this.path}/calls/${call.callId}/leave`, { generation: call.generation }); }
-  async end(call: V1Call): Promise<void> { await this.http.mutate("POST", `${this.path}/calls/${call.callId}/end`, { generation: call.generation, expectedRevision: call.revision }); }
-  async resolve(requestId: string, allowResend = false): Promise<V1Record> { return this.http.recover(requestId, `${this.path}/requests/${v1Id(requestId)}`, allowResend); }
   async recoverPending(onError: (error: Error) => void): Promise<void> {
     for (const state of this.http.recoveryStates.filter(state => state.resolutionState === "pending" || state.resolutionState === "unknown").slice(0, 16)) {
       const transient = ["submitted", "TRANSPORT_UNKNOWN", "OUTCOME_UNKNOWN", "AUTHORITY_UNAVAILABLE", "RETRY_EXHAUSTED", "ADMISSION_LIMIT", "HTTP_FAILURE", "INVALID_RESPONSE"].includes(state.lastAttemptClassification);
       const now = Date.now();
       const resend = transient && state.attemptCount < 3 && now >= state.lastAttemptAt && now >= state.firstSubmittedAt && now <= state.retryDeadline;
-      try { await this.resolve(state.requestId, resend); }
+      try { if (resend) await this.requests.retry(state.requestId); else await this.requests.resolve(state.requestId); }
       catch (error) { onError(error instanceof Error ? error : new Error("Mutation recovery failed")); }
     }
   }

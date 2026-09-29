@@ -1,17 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { V1Transport, V1Client, V1Realtime, V1Problem, v1Id, v1Counter, v1Message, v1SearchHit } from "../dist/v1.js";
-import { v1Operations } from "../dist/v1-operations.js";
+import { event, full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID();
 function storage() {
   const values = new Map();
   return { values, getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) };
 }
-function response(status, result, options) {
-  const request = JSON.parse(options.body);
-  const field = Object.values(v1Operations).find(operation => operation.operationName === request.operationName).field;
-  return Response.json({ data: { [field]: { status, requestId: request.variables.context.requestId, result } } });
+function response(status, result, options, metadata = {}) {
+  return reply(JSON.parse(options.body), { status, result, ...metadata });
+}
+function messageAck(conversationId, incarnation) {
+  return { messageId: id(), conversationId, sequence: "1", revision: "1", status: "sent",
+    cursor: { incarnation, conversationId, sequence: "1" } };
 }
 test("v1 rejects unsafe counters, noncanonical IDs and incomplete message shapes", () => {
   for (const value of ["01", "-1", "1.0", "9223372036854775808"]) assert.throws(() => v1Counter(value));
@@ -20,8 +22,8 @@ test("v1 rejects unsafe counters, noncanonical IDs and incomplete message shapes
   assert.throws(() => v1Message({ messageId: id(), text: "missing authorization-scoped fields" }));
 });
 test("v1 search parses nested current messages and rejects mismatched conversation scopes", () => {
-  const message = { messageId: id(), conversationId: id(), authorId: id(), sequence: "1", revision: "2",
-    revisionSequence: "3", createdAt: new Date().toISOString(), deleted: false, text: "current text", props: {} };
+  const message = full("Message", { messageId: id(), conversationId: id(), authorId: id(), sequence: "1", revision: "2",
+    revisionSequence: "3", createdAt: new Date().toISOString(), deleted: false, text: "current text", props: {} });
   const hit = { conversationId: message.conversationId, message };
   assert.deepEqual(v1SearchHit(hit), hit);
   assert.throws(() => v1SearchHit({ ...hit, conversationId: id() }), /scope/);
@@ -29,10 +31,11 @@ test("v1 search parses nested current messages and rejects mismatched conversati
 });
 test("v1 unknown mutation survives restart with same identity, payload and retry deadline", async () => {
   const saved = storage(); const incarnation = id(); const requestId = id(); let submissions = 0;
-  const path = `/v1/projects/${id()}`, conversationId = id();
+  const projectId = id(), conversationId = id(), input = { conversationId, text: "original", props: {} };
+  const ack = messageAck(conversationId, incarnation);
   const options = { baseUrl: "http://127.0.0.1:18080", credential: "private-never-persist-this", namespace: "test", incarnation, recoveryStorage: saved };
   const first = new V1Transport({ ...options, fetch: async () => { submissions++; throw new TypeError("connection lost"); } });
-  await assert.rejects(first.mutate("POST", `${path}/conversations/${conversationId}/messages`, { text: "original", props: {} }, requestId), { code: "TRANSPORT_UNKNOWN" });
+  await assert.rejects(first.execute("communication.sendMessage", projectId, input, requestId), { code: "TRANSPORT_UNKNOWN" });
   const original = first.recoveryStates[0];
   assert.equal(original.resolutionState, "unknown");
   assert.ok(![...saved.values.values()].join("").includes(options.credential));
@@ -40,34 +43,67 @@ test("v1 unknown mutation survives restart with same identity, payload and retry
     assert.equal(url, "http://127.0.0.1:18080/graphql");
     assert.equal(options.method, "POST");
     const request = JSON.parse(options.body);
-    if (request.operationName === "CommunicationResolveRequest") return response("ok", { state: "notObservedYet" }, options);
+    if (request.operationName === "CommunicationResolveRequest") return response("ok",
+      resolution(requestId, submissions === 1 ? "notObservedYet" : "committed", submissions === 1 ? null : { messageAck: ack }), options);
     submissions++;
     assert.equal(request.variables.context.requestId, requestId);
     assert.deepEqual(request.variables.input, { conversationId, props: {}, text: "original" });
-    return response("committed", { messageId: id() }, options);
+    return response("committed", ack, options);
   } });
-  await retried.recover(requestId, `${path}/requests/${requestId}`, true);
+  const recovered = await retried.retry(requestId);
+  assert.deepEqual(recovered.receipt.result.messageAck, ack);
   assert.equal(submissions, 2);
   assert.equal(retried.recoveryStates[0].firstSubmittedAt, original.firstSubmittedAt);
   assert.equal(retried.recoveryStates[0].retryDeadline, original.retryDeadline);
   assert.equal(retried.recoveryStates[0].resolutionState, "committed");
-  await assert.rejects(retried.mutate("POST", `${path}/conversations/${conversationId}/messages`, { text: "different" }, requestId), { code: "IDEMPOTENCY_CONFLICT" });
+  assert.equal(original.operation, "communication.sendMessage");
+  assert.deepEqual(original.input, input);
+  assert.equal(original.path, undefined);
+  assert.equal(original.payload, undefined);
+  await assert.rejects(retried.execute("communication.sendMessage", projectId, { ...input, text: "different" }, requestId), { code: "IDEMPOTENCY_CONFLICT" });
 });
-test("v1 expiry and clock rollback prohibit resends but still allow authoritative resolution", async () => {
+test("v1 expiry prohibits resends but still allows authoritative resolution", async () => {
   const saved = storage(); const requestId = id();
   const options = { baseUrl: "http://localhost:18080", credential: "private", namespace: "clock", recoveryStorage: saved };
   const first = new V1Transport({ ...options, fetch: async () => { throw new Error("transport"); } });
-  await assert.rejects(first.mutate("POST", "/management/v1/organizations", { name: "Original" }, requestId));
+  await assert.rejects(first.execute("management.createOrganization", undefined, { name: "Original", termsRef: "fixture" }, requestId));
   const [key, text] = [...saved.values.entries()][0];
   const states = JSON.parse(text); states[0].retryDeadline = Date.now() - 1; saved.setItem(key, JSON.stringify(states));
   let writes = 0;
   const expired = new V1Transport({ ...options, fetch: async (_url, options) => {
     if (JSON.parse(options.body).operationName !== "ManagementResolveRequest") writes++;
-    return response("ok", { state: "notObservedYet" }, options);
+    return response("ok", resolution(requestId, "notObservedYet"), options);
   } });
-  await assert.rejects(expired.recover(requestId, "/management/v1/requests/" + requestId, true), { code: "RESOLUTION_REQUIRED" });
+  await assert.rejects(expired.retry(requestId), { code: "RESOLUTION_REQUIRED" });
   assert.equal(writes, 0);
-  assert.equal((await expired.recover(requestId, "/management/v1/requests/" + requestId)).state, "notObservedYet");
+  assert.equal((await expired.execute("management.resolveRequest", undefined, { requestId })).result.state, "notObservedYet");
+});
+
+test("clock rollback and the original attempt limit survive SDK reconstruction", async t => {
+  const saved = storage(), requestId = id(), start = Date.now(), input = { name: "fixture", termsRef: "fixture" };
+  let now = start, writes = 0;
+  t.mock.method(Date, "now", () => now);
+  const options = { baseUrl: "http://localhost:18080", namespace: "rollback", recoveryStorage: saved,
+    fetch: async (_url, options) => {
+      const request = JSON.parse(options.body);
+      if (request.operationName === "ManagementResolveRequest")
+        return reply(request, { result: resolution(requestId, "notObservedYet") });
+      writes++; throw new Error("unknown");
+    } };
+  const first = new V1Transport(options);
+  await assert.rejects(first.execute("management.createOrganization", undefined, input, requestId), { code: "TRANSPORT_UNKNOWN" });
+  now += 1000;
+  await assert.rejects(first.execute("management.createOrganization", undefined, input, requestId), { code: "TRANSPORT_UNKNOWN" });
+  const restored = new V1Transport(options);
+  now -= 1;
+  await assert.rejects(restored.retry(requestId), { code: "RESOLUTION_REQUIRED" });
+  assert.equal(writes, 2);
+  now = start + 2000;
+  await assert.rejects(restored.retry(requestId), { code: "TRANSPORT_UNKNOWN" });
+  await assert.rejects(restored.retry(requestId), { code: "RESOLUTION_REQUIRED" });
+  assert.equal(writes, 3);
+  assert.equal(restored.recoveryStates[0].attemptCount, 3);
+  assert.equal(restored.recoveryStates[0].retryDeadline, start + 60000);
 });
 test("v1 accepts a current same-origin route but never forwards credentials to a redirect", async () => {
   const projectId = id(), incarnation = id();
@@ -79,24 +115,36 @@ test("v1 accepts a current same-origin route but never forwards credentials to a
 });
 
 test("v1 credential delivery sends the permit without a fabricated bearer credential", async () => {
-  const projectId = id(), deliveryId = id();
-  const transport = new V1Transport({ baseUrl: "http://localhost:18080", namespace: "delivery", fetch: async (_url, options) => {
+  const projectId = id(), deliveryId = id(), saved = storage(), permit = { signature: "opaque" };
+  const capsule = full("CredentialCapsule", { kind: "backendKey", backendKey: "fixture-capsule" });
+  const transport = new V1Transport({ baseUrl: "http://localhost:18080", namespace: "delivery", recoveryStorage: saved, fetch: async (_url, options) => {
     assert.equal(options.headers.authorization, undefined);
     const request = JSON.parse(options.body);
     assert.deepEqual(request.variables.context.credentialDeliveryPermit, { signature: "opaque" });
     assert.deepEqual(request.variables.input, { deliveryId });
-    return response("committed", { deliveryId }, options);
+    return response("committed", capsule, options);
   } });
-  await transport.mutate("POST", `/v1/projects/${projectId}/credentialDeliveries/${deliveryId}/redeem`, { credentialDeliveryPermit: { signature: "opaque" } });
+  await transport.execute("communication.redeemCredential", projectId, { deliveryId }, id(), permit);
+  const stored = [...saved.values.values()].join("");
+  assert.ok(!stored.includes("opaque"));
+  assert.ok(!stored.includes("fixture-capsule"));
 });
 
 for (const outcome of ["committed", "accepted"]) {
   test(`v1 later transport failures cannot regress known ${outcome} evidence`, async () => {
     let requests = 0; const requestId = id();
+    const operation = outcome === "committed" ? "management.createOrganization" : "management.createDeployment";
+    const input = outcome === "committed" ? { name: "original", termsRef: "fixture" } :
+      { orgId: id(), offering: "managedShared", geoId: "local", installationProfileId: "fixture", consentRef: "fixture" };
     const transport = new V1Transport({ baseUrl: "http://localhost:18080", credential: "private", namespace: "knowledge",
-      fetch: async (_url, options) => { if (requests++ === 0) return response(outcome, {}, options); throw new Error("disconnected"); } });
-    await transport.mutate("POST", "/management/v1/organizations", { name: "original" }, requestId);
-    await assert.rejects(transport.mutate("POST", "/management/v1/organizations", { name: "original" }, requestId), { code: "TRANSPORT_UNKNOWN" });
+      fetch: async (_url, options) => {
+        if (requests++ === 0) return response(outcome,
+          outcome === "committed" ? { orgId: id(), name: "original", status: "active", revision: "1" } : null, options,
+          outcome === "accepted" ? { operation: { operationId: id(), owner: "management", href: "/graphql", state: "requested" } } : {});
+        throw new Error("disconnected");
+      } });
+    await transport.execute(operation, undefined, input, requestId);
+    await assert.rejects(transport.execute(operation, undefined, input, requestId), { code: "TRANSPORT_UNKNOWN" });
     assert.equal(transport.recoveryStates[0].resolutionState, outcome);
   });
 }
@@ -105,20 +153,23 @@ test("v1 startup and foreground recovery reuse the original mutation without ren
   const saved = storage(), requestId = id();
   const options = { baseUrl: "http://localhost:18080", sessionToken: "private", projectId: id(), incarnation: id(), principalId: id(), recoveryStorage: saved };
   const first = new V1Client({ ...options, fetch: async () => { throw new Error("offline"); } });
-  const path = first.path + "/conversations/" + id() + "/messages";
-  await assert.rejects(first.http.mutate("POST", path, { text: "original", props: {} }, requestId));
+  const conversationId = id(), input = { conversationId, text: "original", props: {} };
+  await assert.rejects(first.http.execute("communication.sendMessage", first.projectId, input, requestId));
   const original = first.http.recoveryStates[0];
-  const methods = [];
+  const methods = [], ack = messageAck(conversationId, options.incarnation);
+  let committed = false;
   const recovered = new V1Client({ ...options, fetch: async (_url, options) => {
     const request = JSON.parse(options.body);
     methods.push(request.operationName);
-    if (request.operationName === "CommunicationResolveRequest") return response("ok", { state: "notObservedYet" }, options);
+    if (request.operationName === "CommunicationResolveRequest") return response("ok",
+      resolution(requestId, committed ? "committed" : "notObservedYet", committed ? { messageAck: ack } : null), options);
     assert.equal(request.variables.context.requestId, requestId);
-    return response("committed", {}, options);
+    committed = true;
+    return response("committed", ack, options);
   } });
   await recovered.recoverPending(error => { throw error; });
   await recovered.recoverPending(error => { throw error; });
-  assert.deepEqual(methods, ["CommunicationResolveRequest", "CommunicationSendMessage"]);
+  assert.deepEqual(methods, ["CommunicationResolveRequest", "CommunicationSendMessage", "CommunicationResolveRequest"]);
   assert.equal(recovered.http.recoveryStates[0].retryDeadline, original.retryDeadline);
   assert.equal(recovered.http.recoveryStates[0].attemptCount, 2);
 });
@@ -147,7 +198,7 @@ test("HTTP 200 GraphQL errors and malformed envelopes never become successful mu
   ]) {
     const transport = new V1Transport({ baseUrl: "https://management.example.test", namespace: "graphql",
       fetch: async () => Response.json(value) });
-    await assert.rejects(transport.mutate("POST", "/management/v1/organizations", { name: "Fixture", termsRef: "fixture" }),
+    await assert.rejects(transport.execute("management.createOrganization", undefined, { name: "Fixture", termsRef: "fixture" }),
       { code, outcome: "unknown" });
     assert.equal(transport.recoveryStates[0].resolutionState, "unknown");
   }
@@ -188,7 +239,7 @@ test("GraphQL subscription applies ordered pages before persisting and sends sco
   assert.equal(subscription.payload.variables.context.projectId, projectId);
   const nextCursor = { ...zero, sequence: "1" };
   socket.onmessage({ data: JSON.stringify({ type: "next", id: subscription.id, payload: { data: { conversationEvents: {
-    items: [{ eventId: id(), conversationId, sequence: "1" }], nextCursor, complete: true, refreshRequired: false,
+    items: [event(conversationId, "1")], nextCursor, complete: true, refreshRequired: false,
   } } } }) });
   await new Promise(resolve => setImmediate(resolve));
   assert.deepEqual(replay.cursor, zero);
@@ -235,7 +286,7 @@ test("a failed pushed page invalidates queued successors and resumes from the la
   };
   const push = (socket, subscription, sequence) => socket.onmessage({ data: JSON.stringify({
     type: "next", id: subscription.id, payload: { data: { conversationEvents: {
-      items: [{ eventId: id(), conversationId, sequence }], nextCursor: { ...zero, sequence },
+      items: [event(conversationId, sequence)], nextCursor: { ...zero, sequence },
       complete: true, refreshRequired: false,
     } } },
   }) });
@@ -264,4 +315,105 @@ test("a failed pushed page invalidates queued successors and resumes from the la
   assert.deepEqual(attempts, ["1", "1", "2"]);
   assert.equal(replay.cursor.sequence, "2");
   assert.equal(JSON.parse([...saved.values.values()][0]).sequence, "2");
+});
+
+test("read-only resolution and explicit retry preserve typed committed evidence without another mutation", async () => {
+  const projectId = id(), incarnation = id(), conversationId = id(), requestId = id();
+  const ack = messageAck(conversationId, incarnation), requests = [];
+  const client = new V1Client({ baseUrl: "http://localhost:18080", projectId, incarnation,
+    principalId: id(), sessionToken: "fixture", fetch: async (_url, options) => {
+      const request = JSON.parse(options.body); requests.push(request);
+      if (request.operationName === "CommunicationSendMessage") throw new Error("unknown commit");
+      return reply(request, { result: resolution(requestId, "committed", { messageAck: ack }) });
+    } });
+  await assert.rejects(client.send(conversationId, "original", requestId), { code: "TRANSPORT_UNKNOWN" });
+  const original = client.http.recoveryStates[0];
+  const resolved = await client.requests.resolve(requestId);
+  assert.equal(resolved.receipt.result.messageAck.messageId, ack.messageId);
+  assert.equal((await client.requests.retry(requestId)).state, "committed");
+  assert.equal(requests.filter(value => value.operationName === "CommunicationSendMessage").length, 1);
+  assert.equal(client.http.recoveryStates[0].attemptCount, 1);
+  assert.equal(client.http.recoveryStates[0].retryDeadline, original.retryDeadline);
+});
+
+test("malformed or differently scoped resolutions cannot change recovery evidence", async () => {
+  for (const mismatch of ["resolution", "receipt", "project"]) {
+    const projectId = id(), requestId = id(), conversationId = id(), incarnation = id();
+    const ack = messageAck(conversationId, incarnation);
+    const transport = new V1Transport({ baseUrl: "http://localhost:18080", namespace: mismatch, incarnation,
+      fetch: async (_url, options) => {
+        const request = JSON.parse(options.body);
+        if (request.operationName === "CommunicationSendMessage") throw new Error("offline");
+        const result = resolution(requestId, "committed", { messageAck: ack });
+        if (mismatch === "resolution") result.requestId = id();
+        if (mismatch === "receipt") result.receipt.requestId = id();
+        return reply(request, { result });
+      } });
+    await assert.rejects(transport.execute("communication.sendMessage", projectId, { conversationId, text: "original", props: {} }, requestId));
+    await assert.rejects(transport.execute("communication.resolveRequest", mismatch === "project" ? id() : projectId, { requestId }),
+      { code: mismatch === "project" ? "RESOLUTION_REQUIRED" : "INVALID_RESPONSE" });
+    assert.equal(transport.recoveryStates[0].resolutionState, "unknown");
+  }
+});
+
+test("absent evidence never authorizes replay of a previously committed command", async () => {
+  const projectId = id(), incarnation = id(), conversationId = id(), requestId = id();
+  let writes = 0;
+  const transport = new V1Transport({ baseUrl: "http://localhost:18080", namespace: "nonregression", incarnation,
+    fetch: async (_url, options) => {
+      const request = JSON.parse(options.body);
+      if (request.operationName === "CommunicationResolveRequest")
+        return reply(request, { result: resolution(requestId, "notObservedYet") });
+      writes++;
+      return reply(request, { result: messageAck(conversationId, incarnation) });
+    } });
+  await transport.execute("communication.sendMessage", projectId, { conversationId, text: "original", props: {} }, requestId);
+  await assert.rejects(transport.retry(requestId), { code: "RESOLUTION_REQUIRED", requestId });
+  assert.equal(writes, 1);
+  assert.equal(transport.recoveryStates[0].resolutionState, "committed");
+});
+
+test("current generated operation inputs reject route aliases and wrong-plane scopes before persistence", async () => {
+  let fetches = 0;
+  const transport = new V1Transport({ baseUrl: "http://localhost:18080", namespace: "closed", fetch: async () => { fetches++; } });
+  const projectId = id();
+  for (const [key, project, input, permit] of [
+    ["communication.removeMember", projectId, { conversationId: id(), principalId: id(), expectedMembershipRevision: "1" }],
+    ["communication.sendMessage", undefined, { conversationId: id(), text: "test", props: {} }],
+    ["management.createOrganization", projectId, { name: "test", termsRef: "fixture" }],
+    ["management.createOrganization", undefined, { name: "test", termsRef: "fixture" }, { signature: "secret" }],
+  ]) await assert.rejects(transport.execute(key, project, input, id(), permit), { code: "INVALID_REQUEST" });
+  await assert.rejects(transport.execute("communication.startCall", projectId, {}), /Unknown generated/);
+  assert.equal(fetches, 0);
+  assert.equal(transport.recoveryStates.length, 0);
+  assert.equal(transport.read, undefined);
+  assert.equal(transport.mutate, undefined);
+});
+
+test("unknown credential redemption needs a fresh transient permit for the same identity", async () => {
+  const saved = storage(), requestId = id(), projectId = id(), deliveryId = id();
+  let writes = 0;
+  const transport = new V1Transport({ baseUrl: "http://localhost:18080", namespace: "delivery-unknown", recoveryStorage: saved,
+    fetch: async (_url, options) => {
+      const request = JSON.parse(options.body);
+      if (request.operationName === "CommunicationResolveRequest")
+        return reply(request, { result: resolution(requestId, "notObservedYet") });
+      writes++; throw new Error("response lost");
+    } });
+  await assert.rejects(transport.execute("communication.redeemCredential", projectId, { deliveryId },
+    requestId, { signature: "never-persist-this-permit" }), { code: "TRANSPORT_UNKNOWN" });
+  await assert.rejects(transport.retry(requestId), { code: "CREDENTIAL_REQUIRED", requestId });
+  assert.equal(writes, 1);
+  assert.ok([...saved.values.values()].every(value => !value.includes("never-persist")));
+});
+
+test("missing committed receipt metadata stays unknown despite a complete result object", async () => {
+  const requestId = id();
+  const transport = new V1Transport({ baseUrl: "http://localhost:18080", namespace: "metadata",
+    fetch: async (_url, options) => reply(JSON.parse(options.body), {
+      receiptId: null, result: { orgId: id(), name: "fixture", status: "active", revision: "1" },
+    }) });
+  await assert.rejects(transport.execute("management.createOrganization", undefined, { name: "fixture", termsRef: "fixture" }, requestId),
+    { code: "INVALID_RESPONSE", requestId, outcome: "unknown" });
+  assert.equal(transport.recoveryStates[0].resolutionState, "unknown");
 });

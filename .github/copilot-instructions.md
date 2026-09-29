@@ -1,21 +1,21 @@
 # ConvoHop SDK instructions
 
-This is the canonical public `ConvoHop/sdks` repository. Browser, trusted
-Node, Python and Go SDKs live under `packages/`. The private backend consumes
+This is the canonical public `ConvoHop/sdks` repository. Browser and trusted
+Node SDKs live under `packages/`. The private backend consumes
 this repository through a pinned submodule; never create a second SDK in a
 consumer or include private service implementation/configuration here.
 
 Browser and Node are root npm workspaces. Use Node 24 and the root
 `package-lock.json`: `npm ci`, `npm run build`, `npm test`. Package tests use
-Node's test runner and strict TypeScript builds. Python uses
-`python -m unittest discover -s packages/python-sdk/tests -v` after installing
-that local package; Go uses `go test ./...` and `go vet ./...` from
-`packages/go-sdk`. Preserve supported-language/version checks in CI.
+Node's test runner and strict TypeScript builds. `npm run check:graphql`
+checks actual authority-exported schemas and generated operations/types.
 
-Do not conflate an existing GraphQL API with the separately named v1
-REST/WSS API. Preserve compatibility until a deliberate documented
-migration. Do not advertise Python/Go v1 parity or registry publication
-without implementation and release evidence.
+Only the current Conversation/LiveSession/Participation model is supported.
+The zero-customer consolidation deliberately removed prototype clients and
+Python/Go SDKs. Do not restore compatibility adapters or REST-shaped logical
+routes: HTTP and graphql-transport-ws use unversioned `/graphql`.
+`V1*` is a current SDK/domain name, not a selectable API version.
+Do not advertise registry publication without release evidence.
 
 Keep browser credentials short-lived and scoped. Trusted backend/operator
 keys must never enter browser code, bundles, storage, URLs or examples.

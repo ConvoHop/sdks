@@ -8,56 +8,6 @@ type BroadcastPermissionChanged {
 	mediaCutoff: LiveMediaCutoff
 }
 
-type Call {
-	callId: UUID!
-	conversationId: UUID!
-	revision: Decimal!
-	generation: Decimal!
-	state: String!
-	media: CallMedia
-	creatorId: UUID!
-	invitation: Invitation
-	participation: Participation
-	mediaCutoff: MediaCutoff
-	errorCode: String
-}
-
-type CallCompletion {
-	callId: UUID!
-	conversationId: UUID
-	revision: Decimal
-	generation: Decimal
-	state: String
-	media: CallMedia
-	creatorId: UUID
-	invitation: Invitation
-	participation: Participation
-	mediaCutoff: MediaCutoff
-	errorCode: String
-}
-
-type CallMedia {
-	audio: Boolean!
-	video: Boolean!
-}
-
-input CallMediaInput {
-	audio: Boolean!
-	video: Boolean!
-}
-
-type CallPage {
-	items: [Call!]!
-	complete: Boolean!
-	refreshRequired: Boolean!
-	nextCursor: String
-}
-
-type CallSummary {
-	callId: UUID!
-	mediaCutoff: MediaCutoff
-}
-
 type Capabilities {
 	contractVersion: String!
 	serverRelease: String!
@@ -222,8 +172,6 @@ input CredentialPermitRequestInput {
 	redemptionRequestId: UUID!
 }
 
-union CurrentLiveOccurrence = LiveSession | LegacyInviteOnlyCall
-
 type Cursor {
 	incarnation: UUID!
 	conversationId: UUID!
@@ -369,7 +317,6 @@ type Features {
 	inbox: Boolean!
 	lexicalSearch: Boolean!
 	typing: Boolean!
-	foregroundCalls: Boolean!
 	webhooks: Boolean!
 	liveSessions: Boolean!
 	liveBroadcast: Boolean!
@@ -456,15 +403,6 @@ type InboxPage {
 	partialReason: String
 }
 
-type Invitation {
-	invitationId: UUID!
-	callId: UUID!
-	generation: Decimal!
-	principalId: UUID!
-	status: String!
-	expiresAt: String!
-}
-
 type IssueBackendKeyReply {
 	status: String!
 	requestId: UUID!
@@ -482,18 +420,6 @@ input IssueBackendKeyRequestInput {
 	name: String!
 	scopes: [String!]!
 	expiresAt: String!
-}
-
-type LegacyInviteOnlyCall {
-	callId: UUID!
-	conversationId: UUID!
-	creatorId: UUID!
-	generation: Decimal!
-	revision: Decimal!
-	state: String!
-	media: CallMedia!
-	invitation: Invitation
-	participation: Participation
 }
 
 type Limit {
@@ -601,7 +527,6 @@ enum LiveErrorCode {
 	GENERATION_CONFLICT
 	MEDIA_NOT_READY
 	CREDENTIAL_REFRESH_REQUIRED
-	CLIENT_UPGRADE_REQUIRED
 	LIVE_START_CANCELLED
 	LIVE_PREPARATION_FAILED
 }
@@ -765,21 +690,6 @@ type MediaCutoff {
 	scope: CutoffScope
 }
 
-type MediaGrant {
-	callId: UUID!
-	generation: Decimal!
-	roomName: String!
-	participantIdentity: String!
-	livekitUrl: String!
-	transportToken: String!
-	forwardingLease: SignedProof
-	admissionTicket: SignedProof
-	transportExpiresAt: String!
-	admissionExpiresAt: String!
-	leaseExpiresAt: String!
-	leasePolicyId: String!
-}
-
 type MediaPolicy {
 	leasePolicyId: String!
 	leaseProtocolVersion: String!
@@ -898,15 +808,6 @@ type OperationResult {
 	keyId: String
 	endpointId: UUID
 	enabled: Boolean
-	callId: UUID
-	conversationId: UUID
-	revision: Decimal
-	generation: Decimal
-	state: String
-	media: CallMedia
-	creatorId: UUID
-	mediaCutoff: MediaCutoff
-	errorCode: String
 	liveSessionCompletion: LiveSessionOperationCompletion
 }
 
@@ -942,15 +843,6 @@ type OrganizationsReply {
 }
 
 scalar PageSize
-
-type Participation {
-	principalId: UUID!
-	sessionId: UUID
-	deviceId: UUID
-	status: String!
-	nativeConnectionId: String
-	mediaCutoff: MediaCutoff
-}
 
 type PauseOperationReply {
 	status: String!
@@ -1115,8 +1007,6 @@ Exactly one typed field contains the retained, currently authorized receipt resu
 """
 type RetainedResult {
 	broadcastPermissionChanged: BroadcastPermissionChanged
-	call: Call
-	callSummary: CallSummary
 	conversation: Conversation
 	conversationMemberBatch: ConversationMemberBatch
 	credentialDeliveryReceipt: CredentialDeliveryReceipt
@@ -1127,7 +1017,6 @@ type RetainedResult {
 	liveSessionJoined: LiveSessionJoined
 	liveSessionLeft: LiveSessionLeft
 	liveSessionStarted: LiveSessionStarted
-	mediaGrant: MediaGrant
 	member: Member
 	message: Message
 	messageAck: MessageAck

@@ -1,6 +1,6 @@
 ---
 name: sdk-testing
-description: Build maintainable ConvoHop SDK regression tests with Node node:test, Python unittest and Go testing. Use for SDK validation, recovery/protocol changes and integration coverage.
+description: Build maintainable current ConvoHop Browser/Node regression tests with node:test. Use for SDK validation, recovery/protocol changes and integration coverage.
 ---
 
 # SDK framework testing
@@ -8,9 +8,10 @@ description: Build maintainable ConvoHop SDK regression tests with Node node:tes
 Use the existing package test suites:
 
 - Browser/Node: root `npm test` builds packages and runs `node:test`.
-- Python: install `./packages/python-sdk`, then run
-  `python -m unittest discover -s packages/python-sdk/tests -v`.
-- Go: run `go test ./...` and `go vet ./...` in `packages/go-sdk`.
+- Generated contract: root `npm run check:graphql`.
+
+Prototype clients and unsupported Python/Go implementations were deliberately
+removed. Test the current exported contract, not compatibility aliases.
 
 Reuse fixtures and transport seams. Do not deliver standalone assertion
 scripts or a second SDK-shaped test client. Keep unit stubs deterministic
@@ -29,5 +30,5 @@ consumer's maintained Playwright suite against a real service/SFU; synthetic
 camera/microphone sources are acceptable, fabricated RTP counters are not.
 
 Use isolated artifacts and no real credentials. Run focused cases while
-iterating, then the complete affected package suites and supported-version
-CI matrix. Record skipped or unavailable integration explicitly.
+iterating, then the complete affected package suites and Node 24 CI.
+Record skipped or unavailable integration explicitly.

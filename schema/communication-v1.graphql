@@ -1,21 +1,3 @@
-type AcceptCallReply {
-	status: String!
-	requestId: UUID!
-	serverTime: String
-	receiptId: UUID
-	committedAt: String
-	replayed: Boolean
-	operation: OperationRef
-	resourceRef: ResourceRef
-	result: Call
-}
-
-input AcceptCallRequestInput {
-	callId: UUID!
-	invitationId: UUID!
-	generation: Decimal!
-}
-
 type AcknowledgeCredentialReply {
 	status: String!
 	requestId: UUID!
@@ -88,73 +70,6 @@ type AlertLiveSessionPayload {
 type BroadcastPermissionChanged {
 	member: Member!
 	mediaCutoff: LiveMediaCutoff
-}
-
-type Call {
-	callId: UUID!
-	conversationId: UUID!
-	revision: Decimal!
-	generation: Decimal!
-	state: String!
-	media: CallMedia
-	creatorId: UUID!
-	invitation: Invitation
-	participation: Participation
-	mediaCutoff: MediaCutoff
-	errorCode: String
-}
-
-type CallCompletion {
-	callId: UUID!
-	conversationId: UUID
-	revision: Decimal
-	generation: Decimal
-	state: String
-	media: CallMedia
-	creatorId: UUID
-	invitation: Invitation
-	participation: Participation
-	mediaCutoff: MediaCutoff
-	errorCode: String
-}
-
-type CallInvitationsReply {
-	status: String!
-	requestId: UUID!
-	serverTime: String
-	receiptId: UUID
-	committedAt: String
-	replayed: Boolean
-	operation: OperationRef
-	resourceRef: ResourceRef
-	result: CallPage
-}
-
-input CallInvitationsRequestInput {
-	limit: PageSize!
-	cursor: String
-}
-
-type CallMedia {
-	audio: Boolean!
-	video: Boolean!
-}
-
-input CallMediaInput {
-	audio: Boolean!
-	video: Boolean!
-}
-
-type CallPage {
-	items: [Call!]!
-	complete: Boolean!
-	refreshRequired: Boolean!
-	nextCursor: String
-}
-
-type CallSummary {
-	callId: UUID!
-	mediaCutoff: MediaCutoff
 }
 
 type Capabilities {
@@ -265,13 +180,11 @@ type CredentialDeliveryReceipt {
 	deliveryId: UUID!
 }
 
-union CurrentLiveOccurrence = LiveSession | LegacyInviteOnlyCall
-
 type CurrentLiveSessionReply {
 	status: String!
 	requestId: UUID!
 	serverTime: String!
-	result: CurrentLiveOccurrence
+	result: LiveSession
 }
 
 type Cursor {
@@ -295,24 +208,6 @@ type CutoffScope {
 }
 
 scalar Decimal
-
-type DeclineCallReply {
-	status: String!
-	requestId: UUID!
-	serverTime: String
-	receiptId: UUID
-	committedAt: String
-	replayed: Boolean
-	operation: OperationRef
-	resourceRef: ResourceRef
-	result: Call
-}
-
-input DeclineCallRequestInput {
-	callId: UUID!
-	invitationId: UUID!
-	generation: Decimal!
-}
 
 type DeleteMessageReply {
 	status: String!
@@ -403,24 +298,6 @@ input EditMessageRequestInput {
 	props: Properties
 }
 
-type EndCallReply {
-	status: String!
-	requestId: UUID!
-	serverTime: String
-	receiptId: UUID
-	committedAt: String
-	replayed: Boolean
-	operation: OperationRef
-	resourceRef: ResourceRef
-	result: CallCompletion
-}
-
-input EndCallRequestInput {
-	callId: UUID!
-	generation: Decimal!
-	expectedRevision: Decimal!
-}
-
 input EndLiveSessionInput {
 	liveSessionId: UUID!
 	expectedGeneration: Decimal!
@@ -494,26 +371,9 @@ type Features {
 	inbox: Boolean!
 	lexicalSearch: Boolean!
 	typing: Boolean!
-	foregroundCalls: Boolean!
 	webhooks: Boolean!
 	liveSessions: Boolean!
 	liveBroadcast: Boolean!
-}
-
-type GetCallReply {
-	status: String!
-	requestId: UUID!
-	serverTime: String
-	receiptId: UUID
-	committedAt: String
-	replayed: Boolean
-	operation: OperationRef
-	resourceRef: ResourceRef
-	result: Call
-}
-
-input GetCallRequestInput {
-	callId: UUID!
 }
 
 type GetConversationReply {
@@ -635,33 +495,6 @@ input InboxRequestInput {
 	cursor: String
 }
 
-type Invitation {
-	invitationId: UUID!
-	callId: UUID!
-	generation: Decimal!
-	principalId: UUID!
-	status: String!
-	expiresAt: String!
-}
-
-type InviteCallReply {
-	status: String!
-	requestId: UUID!
-	serverTime: String
-	receiptId: UUID
-	committedAt: String
-	replayed: Boolean
-	operation: OperationRef
-	resourceRef: ResourceRef
-	result: Call
-}
-
-input InviteCallRequestInput {
-	callId: UUID!
-	principalIds: [UUID!]!
-	expectedRevision: Decimal!
-}
-
 type IssueSessionReply {
 	status: String!
 	requestId: UUID!
@@ -694,23 +527,6 @@ type JoinLiveSessionPayload {
 	result: LiveSessionJoined!
 }
 
-type LeaveCallReply {
-	status: String!
-	requestId: UUID!
-	serverTime: String
-	receiptId: UUID
-	committedAt: String
-	replayed: Boolean
-	operation: OperationRef
-	resourceRef: ResourceRef
-	result: CallSummary
-}
-
-input LeaveCallRequestInput {
-	callId: UUID!
-	generation: Decimal!
-}
-
 input LeaveLiveSessionInput {
 	liveSessionId: UUID!
 	expectedGeneration: Decimal!
@@ -724,18 +540,6 @@ type LeaveLiveSessionPayload {
 	committedAt: String!
 	replayed: Boolean!
 	result: LiveSessionLeft!
-}
-
-type LegacyInviteOnlyCall {
-	callId: UUID!
-	conversationId: UUID!
-	creatorId: UUID!
-	generation: Decimal!
-	revision: Decimal!
-	state: String!
-	media: CallMedia!
-	invitation: Invitation
-	participation: Participation
 }
 
 type Limit {
@@ -855,7 +659,6 @@ enum LiveErrorCode {
 	GENERATION_CONFLICT
 	MEDIA_NOT_READY
 	CREDENTIAL_REFRESH_REQUIRED
-	CLIENT_UPGRADE_REQUIRED
 	LIVE_START_CANCELLED
 	LIVE_PREPARATION_FAILED
 }
@@ -1079,43 +882,9 @@ input LiveSessionsInput {
 	cursor: String
 }
 
-type MediaCredentialsReply {
-	status: String!
-	requestId: UUID!
-	serverTime: String
-	receiptId: UUID
-	committedAt: String
-	replayed: Boolean
-	operation: OperationRef
-	resourceRef: ResourceRef
-	result: MediaGrant
-}
-
-input MediaCredentialsRequestInput {
-	callId: UUID!
-	generation: Decimal!
-	mode: String!
-	replacementOfConnectionId: String
-}
-
 type MediaCutoff {
 	state: String!
 	scope: CutoffScope
-}
-
-type MediaGrant {
-	callId: UUID!
-	generation: Decimal!
-	roomName: String!
-	participantIdentity: String!
-	livekitUrl: String!
-	transportToken: String!
-	forwardingLease: SignedProof
-	admissionTicket: SignedProof
-	transportExpiresAt: String!
-	admissionExpiresAt: String!
-	leaseExpiresAt: String!
-	leasePolicyId: String!
 }
 
 type MediaPolicy {
@@ -1248,14 +1017,6 @@ type Mutation {
 	leaveLiveSession(context: RequestContextInput!, input: LeaveLiveSessionInput!): LeaveLiveSessionPayload!
 	endLiveSession(context: RequestContextInput!, input: EndLiveSessionInput!): EndLiveSessionPayload!
 	liveSessionCredentials(context: RequestContextInput!, input: LiveSessionCredentialsInput!): LiveSessionCredentialsPayload!
-	startCall(context: RequestContextInput!, input: StartCallRequestInput!): StartCallReply!
-	inviteCall(context: RequestContextInput!, input: InviteCallRequestInput!): InviteCallReply!
-	ringCall(context: RequestContextInput!, input: RingCallRequestInput!): RingCallReply!
-	acceptCall(context: RequestContextInput!, input: AcceptCallRequestInput!): AcceptCallReply!
-	declineCall(context: RequestContextInput!, input: DeclineCallRequestInput!): DeclineCallReply!
-	mediaCredentials(context: RequestContextInput!, input: MediaCredentialsRequestInput!): MediaCredentialsReply!
-	leaveCall(context: RequestContextInput!, input: LeaveCallRequestInput!): LeaveCallReply!
-	endCall(context: RequestContextInput!, input: EndCallRequestInput!): EndCallReply!
 	redeemCredential(context: RequestContextInput!, input: RedeemCredentialRequestInput!): RedeemCredentialReply!
 	acknowledgeCredential(context: RequestContextInput!, input: AcknowledgeCredentialRequestInput!): AcknowledgeCredentialReply!
 }
@@ -1294,15 +1055,6 @@ type OperationResult {
 	keyId: String
 	endpointId: UUID
 	enabled: Boolean
-	callId: UUID
-	conversationId: UUID
-	revision: Decimal
-	generation: Decimal
-	state: String
-	media: CallMedia
-	creatorId: UUID
-	mediaCutoff: MediaCutoff
-	errorCode: String
 	liveSessionCompletion: LiveSessionOperationCompletion
 }
 
@@ -1326,15 +1078,6 @@ type OrganizationPage {
 }
 
 scalar PageSize
-
-type Participation {
-	principalId: UUID!
-	sessionId: UUID
-	deviceId: UUID
-	status: String!
-	nativeConnectionId: String
-	mediaCutoff: MediaCutoff
-}
 
 input PolicyChangeInput {
 	kind: String!
@@ -1384,8 +1127,6 @@ type Query {
 	liveSessionParticipants(context: RequestContextInput!, input: LiveParticipantsInput!): LiveParticipantPageReply!
 	liveSessionAlerts(context: RequestContextInput!, input: LiveAlertsInput!): LiveAlertPageReply!
 	liveSessionOperation(context: RequestContextInput!, input: LiveSessionOperationInput!): LiveSessionOperationReply!
-	getCall(context: RequestContextInput!, input: GetCallRequestInput!): GetCallReply!
-	callInvitations(context: RequestContextInput!, input: CallInvitationsRequestInput!): CallInvitationsReply!
 }
 
 type ReadReceipt {
@@ -1550,8 +1291,6 @@ Exactly one typed field contains the retained, currently authorized receipt resu
 """
 type RetainedResult {
 	broadcastPermissionChanged: BroadcastPermissionChanged
-	call: Call
-	callSummary: CallSummary
 	conversation: Conversation
 	conversationMemberBatch: ConversationMemberBatch
 	credentialDeliveryReceipt: CredentialDeliveryReceipt
@@ -1562,7 +1301,6 @@ type RetainedResult {
 	liveSessionJoined: LiveSessionJoined
 	liveSessionLeft: LiveSessionLeft
 	liveSessionStarted: LiveSessionStarted
-	mediaGrant: MediaGrant
 	member: Member
 	message: Message
 	messageAck: MessageAck
@@ -1589,24 +1327,6 @@ type RevokeSessionReply {
 input RevokeSessionRequestInput {
 	sessionId: UUID!
 	expectedRevision: Decimal!
-}
-
-type RingCallReply {
-	status: String!
-	requestId: UUID!
-	serverTime: String
-	receiptId: UUID
-	committedAt: String
-	replayed: Boolean
-	operation: OperationRef
-	resourceRef: ResourceRef
-	result: Call
-}
-
-input RingCallRequestInput {
-	callId: UUID!
-	invitationId: UUID!
-	generation: Decimal!
 }
 
 type RouteReply {
@@ -1723,24 +1443,6 @@ type SetBroadcastPermissionPayload {
 }
 
 scalar SignedProof
-
-type StartCallReply {
-	status: String!
-	requestId: UUID!
-	serverTime: String
-	receiptId: UUID
-	committedAt: String
-	replayed: Boolean
-	operation: OperationRef
-	resourceRef: ResourceRef
-	result: CallSummary
-}
-
-input StartCallRequestInput {
-	conversationId: UUID!
-	invitedPrincipalIds: [UUID!]!
-	media: CallMediaInput!
-}
 
 input StartLiveSessionInput {
 	conversationId: UUID!

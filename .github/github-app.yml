@@ -8,8 +8,6 @@ scripts:
     command: npm run build
   - name: Test JavaScript SDKs
     command: npm test
-  - name: Test Python SDK
-    command: python3 -m unittest discover -s packages/python-sdk/tests -v
-  - name: Test Go SDK
-    command: cd packages/go-sdk && go test ./... && go vet ./...
+  - name: Check generated GraphQL
+    command: npm run check:graphql
 auto_open_in_browser: false

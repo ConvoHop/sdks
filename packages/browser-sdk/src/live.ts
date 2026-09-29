@@ -7,8 +7,6 @@ export type LiveSession = OperationPayload<"communication.liveSession">["result"
 export type LiveParticipation = OperationPayload<"communication.joinLiveSession">["result"]["participation"];
 export type LiveConnectionGrant = OperationPayload<"communication.liveSessionCredentials">["result"];
 export type LiveOperation = OperationPayload<"communication.liveSessionOperation">["result"];
-export type LegacyInviteOnlyCall = Extract<
-  OperationPayload<"communication.currentLiveSession">["result"], { __typename: "LegacyInviteOnlyCall" }>;
 export interface CommandOptions { requestId?: string }
 export interface PageOptions { cursor?: string; limit?: number }
 export interface LiveWaitOptions { signal?: AbortSignal; timeoutMs?: number }
@@ -54,11 +52,11 @@ export class ConversationHandle {
 
 export class ConversationLive {
   constructor(readonly conversation: ConversationHandle) {}
-  async current(): Promise<LiveSessionHandle | LegacyInviteOnlyCall | null> {
+  async current(): Promise<LiveSessionHandle | null> {
     const { client, conversationId } = this.conversation;
     const current = (await client.http.execute("communication.currentLiveSession", client.projectId, { conversationId })).result;
     if (current == null) return null;
-    return current.__typename === "LiveSession" ? new LiveSessionHandle(client, current) : current;
+    return new LiveSessionHandle(client, current);
   }
   async history(options: PageOptions = {}) {
     const { client, conversationId } = this.conversation;
@@ -128,7 +126,6 @@ export class LiveEndOperation extends LiveAction {
 }
 
 export class LiveSessionHandle {
-  readonly __typename = "LiveSession";
   readonly liveSessionId: string;
   readonly generation: string;
   readonly conversationId: string;
@@ -169,10 +166,10 @@ export class LiveSessionHandle {
   async end(options: CommandOptions = {}) {
     this.#endRequest = options.requestId ?? this.#endRequest ??
       [...this.client.http.recoveryStates].reverse().find(state =>
-        state.path.endsWith("/graphql/endLiveSession") && state.payload.liveSessionId === this.liveSessionId)?.requestId ??
+        state.operation === "communication.endLiveSession" && state.input.liveSessionId === this.liveSessionId)?.requestId ??
       crypto.randomUUID();
     const saved = this.client.http.recoveryStates.find(state => state.requestId === this.#endRequest);
-    const revision = saved ? saved.payload.expectedRevision : (await this.get()).revision;
+    const revision = saved ? saved.input.expectedRevision : (await this.get()).revision;
     if (typeof revision !== "string") throw new TypeError("Missing original end revision");
     const receipt = await this.client.http.execute("communication.endLiveSession", this.client.projectId,
       { liveSessionId: this.liveSessionId, expectedGeneration: this.generation, expectedRevision: revision }, this.#endRequest);
@@ -189,7 +186,7 @@ export class LiveParticipationHandle {
   constructor(readonly live: LiveSessionHandle, readonly snapshot: LiveParticipation) {
     this.participationId = v1Id(snapshot.participationId);
     this.#leaveRequest = [...live.client.http.recoveryStates].reverse().find(state =>
-      state.path.endsWith("/graphql/leaveLiveSession") && state.payload.participationId === this.participationId)?.requestId;
+      state.operation === "communication.leaveLiveSession" && state.input.participationId === this.participationId)?.requestId;
   }
   async get(): Promise<LiveParticipation> {
     const current = (await this.live.get()).myParticipation;
@@ -214,11 +211,11 @@ export class LiveParticipationHandle {
     const current = await this.get();
     if (!this.#attempt) {
       const previous = [...client.http.recoveryStates].reverse().find(state =>
-        state.path.endsWith("/graphql/liveSessionCredentials") && state.payload.participationId === this.participationId);
+        state.operation === "communication.liveSessionCredentials" && state.input.participationId === this.participationId);
       if (previous) {
-        const mode = previous.payload.mode;
+        const mode = previous.input.mode;
         if (mode !== "INITIAL" && mode !== "RECONNECT") throw new TypeError("Unknown stored credential operation");
-        const replacement = previous.payload.replacementOfConnectionId;
+        const replacement = previous.input.replacementOfConnectionId;
         this.#attempt = { requestId: previous.requestId, mode,
           used: previous.mediaAdmissionAttempted === true || !!current.nativeConnectionId,
           ...(replacement === undefined ? {} : { replacementOfConnectionId: v1Id(replacement) }) };
