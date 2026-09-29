@@ -80,8 +80,9 @@ export function v1GraphqlRequest(key: V1OperationKey, input: RecordValue, contex
     throw new TypeError("Management project selection belongs in the generated operation input");
   }
   if (Object.keys(input).some(name => !operation.inputFields.includes(name))) throw new TypeError("Unknown GraphQL input field");
-  if (context.credentialDeliveryPermit !== undefined && key !== "communication.redeemCredential")
-    throw new TypeError("A credential delivery permit is only valid for its redemption operation");
+  if (context.credentialDeliveryPermit !== undefined &&
+      key !== "communication.redeemCredential" && key !== "communication.acknowledgeCredential")
+    throw new TypeError("A credential delivery permit is only valid for redemption or acknowledgement");
   return { operation, body: {
     query: operation.query, operationName: operation.operationName,
     variables: { context, ...(operation.inputFields.length ? { input } : {}) },

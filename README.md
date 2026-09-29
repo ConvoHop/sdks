@@ -57,8 +57,9 @@ headers, native grants or credential-delivery permits.
 `client.requests.retry(id)` resolves first, then resends only an unobserved
 original command within its unchanged three-attempt/60-second budget.
 Known acceptance/commit and a native admission attempt cannot regress into
-permission to resend. Credential redemption requires an explicit fresh,
-transient permit with the original redemption ID.
+permission to resend. Credential redemption and acknowledgement instead
+require an explicit fresh transient permit with their original command IDs;
+that permit cannot authorize generic request lookup.
 
 Live start, join, native connect and microphone/camera capture are separate
 actions. Discovery returns a nullable LiveSession directly. Native admission

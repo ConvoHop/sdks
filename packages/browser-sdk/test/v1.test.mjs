@@ -114,7 +114,7 @@ test("v1 accepts a current same-origin route but never forwards credentials to a
   await assert.rejects(client.initialize(), /another origin/);
 });
 
-test("v1 credential delivery sends the permit without a fabricated bearer credential", async () => {
+test("credential redemption and acknowledgement use transient permits without a fabricated bearer", async () => {
   const projectId = id(), deliveryId = id(), saved = storage(), permit = { signature: "opaque" };
   const capsule = full("CredentialCapsule", { kind: "backendKey", backendKey: "fixture-capsule" });
   const transport = new V1Transport({ baseUrl: "http://localhost:18080", namespace: "delivery", recoveryStorage: saved, fetch: async (_url, options) => {
@@ -122,9 +122,11 @@ test("v1 credential delivery sends the permit without a fabricated bearer creden
     const request = JSON.parse(options.body);
     assert.deepEqual(request.variables.context.credentialDeliveryPermit, { signature: "opaque" });
     assert.deepEqual(request.variables.input, { deliveryId });
-    return response("committed", capsule, options);
+    return response("committed", request.operationName === "CommunicationRedeemCredential"
+      ? capsule : { deliveryId, acknowledged: true }, options);
   } });
   await transport.execute("communication.redeemCredential", projectId, { deliveryId }, id(), permit);
+  await transport.execute("communication.acknowledgeCredential", projectId, { deliveryId }, id(), permit);
   const stored = [...saved.values.values()].join("");
   assert.ok(!stored.includes("opaque"));
   assert.ok(!stored.includes("fixture-capsule"));
@@ -390,17 +392,17 @@ test("current generated operation inputs reject route aliases and wrong-plane sc
   assert.equal(transport.mutate, undefined);
 });
 
-test("unknown credential redemption needs a fresh transient permit for the same identity", async () => {
+for (const operation of ["communication.redeemCredential", "communication.acknowledgeCredential"])
+test(`unknown ${operation} needs a fresh permit without unauthorized request lookup`, async () => {
   const saved = storage(), requestId = id(), projectId = id(), deliveryId = id();
   let writes = 0;
   const transport = new V1Transport({ baseUrl: "http://localhost:18080", namespace: "delivery-unknown", recoveryStorage: saved,
     fetch: async (_url, options) => {
       const request = JSON.parse(options.body);
-      if (request.operationName === "CommunicationResolveRequest")
-        return reply(request, { result: resolution(requestId, "notObservedYet") });
+      assert.notEqual(request.operationName, "CommunicationResolveRequest");
       writes++; throw new Error("response lost");
     } });
-  await assert.rejects(transport.execute("communication.redeemCredential", projectId, { deliveryId },
+  await assert.rejects(transport.execute(operation, projectId, { deliveryId },
     requestId, { signature: "never-persist-this-permit" }), { code: "TRANSPORT_UNKNOWN" });
   await assert.rejects(transport.retry(requestId), { code: "CREDENTIAL_REQUIRED", requestId });
   assert.equal(writes, 1);

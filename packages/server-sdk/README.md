@@ -90,9 +90,12 @@ const result = await deliveryTransport.execute(
 // Persist the capsule in trusted secret storage before acknowledging delivery.
 ```
 
-The permit is transient authorization, not saved command input. An unknown
-redemption requires a fresh permit bound to the same original request ID;
-generic recovery will not replay a persisted permit or fabricate a bearer.
+The permit is transient authorization for both redemption and
+`communication.acknowledgeCredential`, not saved command input. An unknown
+delivery command requires a fresh permit and the same original command ID
+within its remaining retry budget. Delivery permits cannot authorize generic
+request lookup; `http.retry` reports `CREDENTIAL_REQUIRED` rather than making
+an unauthorized lookup or fabricating a bearer.
 
 ## Generated operations and bounded recovery
 

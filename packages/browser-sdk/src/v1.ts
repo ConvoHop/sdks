@@ -252,6 +252,9 @@ export class V1Transport {
     const state = this.#states.get(v1Id(requestId));
     if (!state) throw new Error("No recovery record exists; do not invent a replacement identity");
     if (state.incarnation !== this.incarnation) throw new V1Problem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
+    if (state.operation === "communication.redeemCredential" || state.operation === "communication.acknowledgeCredential")
+      throw new V1Problem("CREDENTIAL_REQUIRED", requestId, "unknown", 409,
+        "Delivery permits cannot authorize request lookup; obtain a current permit and submit the same delivery identity explicitly");
     const key = v1Operations[state.operation].plane === "management" ? "management.resolveRequest" : "communication.resolveRequest";
     const resolution = (await this.execute(key, state.projectId, { requestId })).result;
     if (!resolution) throw new TypeError("Missing current request resolution");
@@ -261,8 +264,6 @@ export class V1Transport {
       throw new V1Problem("RESOLUTION_REQUIRED", requestId, "unknown", 409,
         "Previously observed commit or native admission cannot be retried from absent evidence");
     }
-    if (state.operation === "communication.redeemCredential") throw new V1Problem("CREDENTIAL_REQUIRED",
-      requestId, "unknown", 409, "Obtain a current permit and submit the same redemption identity explicitly");
     if (await fingerprint({ operation: state.operation, projectId: state.projectId ?? null, input: state.input }) !== state.payloadFingerprint)
       throw new Error("Recovery input fingerprint changed");
     await this.#mutate(state.operation, state.projectId, state.input, state.requestId);
