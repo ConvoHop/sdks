@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { V1Transport, V1Client, V1Realtime, V1Problem, v1Id, v1Counter, v1Message, v1SearchHit } from "../dist/v1.js";
+import { V1Transport, V1Client, V1Realtime, V1Problem, v1Id, v1Counter, v1Message, v1Membership, v1Conversation, v1SearchHit } from "../dist/v1.js";
 import { event, full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID();
@@ -20,6 +20,7 @@ test("v1 rejects unsafe counters, noncanonical IDs and incomplete message shapes
   assert.equal(v1Counter("9223372036854775807"), "9223372036854775807");
   assert.throws(() => v1Id(id().toUpperCase()));
   assert.throws(() => v1Message({ messageId: id(), text: "missing authorization-scoped fields" }));
+  for (const parse of [v1Message, v1Membership, v1Conversation]) assert.throws(() => parse(null), TypeError);
 });
 test("v1 search parses nested current messages and rejects mismatched conversation scopes", () => {
   const message = full("Message", { messageId: id(), conversationId: id(), authorId: id(), sequence: "1", revision: "2",
@@ -28,6 +29,7 @@ test("v1 search parses nested current messages and rejects mismatched conversati
   assert.deepEqual(v1SearchHit(hit), hit);
   assert.throws(() => v1SearchHit({ ...hit, conversationId: id() }), /scope/);
   assert.throws(() => v1SearchHit(message));
+  assert.throws(() => v1SearchHit({ conversationId: message.conversationId, message: null }), TypeError);
 });
 test("v1 unknown mutation survives restart with same identity, payload and retry deadline", async () => {
   const saved = storage(); const incarnation = id(); const requestId = id(); let submissions = 0;

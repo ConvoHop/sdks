@@ -7,7 +7,7 @@ export type V1Cursor = NonNullable<NonNullable<OperationPayload<"communication.e
 export interface V1Page<T> { items: T[]; complete: boolean; refreshRequired: boolean; nextCursor?: unknown }
 export type V1Message = NonNullable<OperationPayload<"communication.getMessage">["result"]>;
 export type V1SendReceipt = NonNullable<OperationPayload<"communication.sendMessage">["result"]> & { cursor: V1Cursor };
-export type V1SearchHit = NonNullable<OperationPayload<"communication.search">["result"]>["items"][number];
+export type V1SearchHit = NonNullable<OperationPayload<"communication.search">["result"]>["items"][number] & { message: V1Message };
 export type V1Membership = NonNullable<OperationPayload<"communication.members">["result"]>["items"][number];
 export type V1Conversation = NonNullable<OperationPayload<"communication.getConversation">["result"]>;
 export interface V1Route {
@@ -79,7 +79,7 @@ function eventPage(value: unknown, incarnation: string, conversationId: string, 
   return { ...result, nextCursor: cursor };
 }
 export function v1Message(value: unknown): V1Message {
-  validateOutput(value, "Message");
+  validateOutput(value, "Message!");
   return value as V1Message;
 }
 export function v1SearchHit(value: unknown): V1SearchHit {
@@ -88,11 +88,11 @@ export function v1SearchHit(value: unknown): V1SearchHit {
   return { conversationId, message };
 }
 export function v1Membership(value: unknown): V1Membership {
-  validateOutput(value, "Member");
+  validateOutput(value, "Member!");
   return value as V1Membership;
 }
 export function v1Conversation(value: unknown): V1Conversation {
-  validateOutput(value, "Conversation");
+  validateOutput(value, "Conversation!");
   return value as V1Conversation;
 }
 function route(value: unknown): V1Route {
