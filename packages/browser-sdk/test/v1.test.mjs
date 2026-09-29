@@ -314,6 +314,107 @@ test("an initializing watcher cannot reopen after explicit history resynchroniza
   recovered.close();
 });
 
+test("resync waits for old application work before applying a fresh authorized snapshot", async t => {
+  const original = globalThis.WebSocket;
+  class Socket { static OPEN = 1; readyState = 1; send() {} close() { this.readyState = 3; } }
+  globalThis.WebSocket = Socket;
+  t.after(() => { globalThis.WebSocket = original; });
+  const projectId = id(), principalId = id(), conversationId = id(), incarnation = id(), saved = storage();
+  const key = `convohop.v1.cursor:${projectId}:${principalId}:${conversationId}`;
+  const old = { incarnation, conversationId, sequence: "4" };
+  saved.setItem(key, JSON.stringify(old));
+  const client = new V1Client({ projectId, principalId, incarnation, sessionToken: "private",
+    baseUrl: "http://localhost:18080", recoveryStorage: saved });
+  client.initialize = async () => ({ projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" });
+  client.getConversation = async () => full("Conversation", { conversationId });
+  client.recoverPending = async () => {};
+  client.events = async (_, after) => ({ items: [], nextCursor: { ...old, sequence: after ? "5" : "20" },
+    complete: true, refreshRequired: false });
+  let enter, release, view = "before", fresh = false;
+  const entered = new Promise(resolve => { enter = resolve; });
+  const gate = new Promise(resolve => { release = resolve; });
+  const watching = client.watch(conversationId, async () => { enter(); await gate; view = "old"; }, () => {});
+  const superseded = assert.rejects(watching, /superseded/);
+  await entered;
+  const resync = client.resyncAuthorizedHistory(conversationId, async () => { fresh = true; view = "fresh"; }, () => {});
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(view, "before");
+  assert.equal(fresh, false);
+  assert.deepEqual(JSON.parse(saved.getItem(key)), old);
+  release();
+  await superseded;
+  const current = await resync;
+  assert.equal(view, "fresh");
+  assert.equal(current.cursor.sequence, "20");
+  assert.equal(JSON.parse(saved.getItem(key)).sequence, "20");
+  current.close();
+});
+
+test("successive resyncs retain closing application work until it retires and only the latest resumes", async t => {
+  const original = globalThis.WebSocket;
+  class Socket { static OPEN = 1; readyState = 1; send() {} close() { this.readyState = 3; } }
+  globalThis.WebSocket = Socket;
+  t.after(() => { globalThis.WebSocket = original; });
+  const projectId = id(), principalId = id(), conversationId = id(), incarnation = id(), saved = storage();
+  const client = new V1Client({ projectId, principalId, incarnation, sessionToken: "private",
+    baseUrl: "http://localhost:18080", recoveryStorage: saved });
+  client.initialize = async () => ({ projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" });
+  client.getConversation = async () => full("Conversation", { conversationId });
+  client.recoverPending = async () => {};
+  let sequence = 0;
+  client.events = async () => ({ items: [], nextCursor: { incarnation, conversationId, sequence: String(++sequence) },
+    complete: true, refreshRequired: false });
+  let enter, release;
+  const entered = new Promise(resolve => { enter = resolve; }), gate = new Promise(resolve => { release = resolve; });
+  const applications = [];
+  const originalWatch = client.watch(conversationId, async () => { enter(); await gate; applications.push("old"); }, () => {});
+  const oldRejected = assert.rejects(originalWatch, /superseded/);
+  await entered;
+  const first = client.resyncAuthorizedHistory(conversationId, async () => { applications.push("superseded"); }, () => {});
+  const firstRejected = assert.rejects(first, /superseded/);
+  const latest = client.resyncAuthorizedHistory(conversationId, async () => { applications.push("latest"); }, () => {});
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(applications, []);
+  release();
+  await Promise.all([oldRejected, firstRejected]);
+  const current = await latest;
+  assert.deepEqual(applications, ["old", "latest"]);
+  assert.equal(current.cursor.sequence, "2");
+  current.close();
+});
+
+test("a closing application's failure rejects resync without replacing its saved frontier", async t => {
+  const original = globalThis.WebSocket;
+  class Socket { static OPEN = 1; readyState = 1; send() {} close() { this.readyState = 3; } }
+  globalThis.WebSocket = Socket;
+  t.after(() => { globalThis.WebSocket = original; });
+  const projectId = id(), principalId = id(), conversationId = id(), incarnation = id(), saved = storage();
+  const key = `convohop.v1.cursor:${projectId}:${principalId}:${conversationId}`;
+  const cursor = { incarnation, conversationId, sequence: "4" };
+  saved.setItem(key, JSON.stringify(cursor));
+  const client = new V1Client({ projectId, principalId, incarnation, sessionToken: "private",
+    baseUrl: "http://localhost:18080", recoveryStorage: saved });
+  client.initialize = async () => ({ projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" });
+  client.getConversation = async () => full("Conversation", { conversationId });
+  client.recoverPending = async () => {};
+  client.events = async () => ({ items: [], nextCursor: { ...cursor, sequence: "20" }, complete: true, refreshRequired: false });
+  let enter, release, fresh = false;
+  const entered = new Promise(resolve => { enter = resolve; }), gate = new Promise(resolve => { release = resolve; });
+  const originalWatch = client.watch(conversationId, async () => { enter(); await gate; throw new Error("old application failed"); }, () => {});
+  const oldRejected = assert.rejects(originalWatch, /old application failed/);
+  await entered;
+  const resync = client.resyncAuthorizedHistory(conversationId, async () => { fresh = true; }, () => {});
+  const resyncRejected = assert.rejects(resync, /old application failed/);
+  release();
+  await Promise.all([oldRejected, resyncRejected]);
+  assert.equal(fresh, false);
+  assert.deepEqual(JSON.parse(saved.getItem(key)), cursor);
+  const retried = await client.resyncAuthorizedHistory(conversationId, async () => { fresh = true; }, () => {});
+  assert.equal(fresh, true);
+  assert.equal(retried.cursor.sequence, "20");
+  retried.close();
+});
+
 test("HTTP 200 GraphQL errors and malformed envelopes never become successful mutation evidence", async () => {
   for (const [value, code] of [
     [{ errors: [{ message: "Resolve the same request", extensions: { code: "OUTCOME_UNKNOWN", outcome: "unknown", status: 503 } }] }, "OUTCOME_UNKNOWN"],

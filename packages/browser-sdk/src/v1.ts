@@ -437,6 +437,9 @@ export class V1Client {
   async #openReplay(conversationId: string, apply: (events: V1Record[]) => Promise<void>,
     onError: (error: Error) => void, resync: boolean): Promise<V1Realtime> {
     const generation = this.#replayGenerations.get(conversationId) ?? 0;
+    await Promise.all([...this.#streams]
+      .filter(stream => stream.conversationId === conversationId && stream.closed)
+      .map(stream => stream.retire()));
     const route = this.#route ?? await this.initialize();
     if (generation !== (this.#replayGenerations.get(conversationId) ?? 0)) throw new Error("History watcher superseded by explicit resynchronization");
     const realtime = new V1Realtime(this, conversationId, route, this.#token, apply, onError, () => this.#streams.delete(realtime));
@@ -451,6 +454,7 @@ export class V1Client {
 }
 export class V1Realtime {
   #socket: WebSocket | undefined; #closed = false; #working: Promise<void> | undefined;
+  #applying: Promise<void> | undefined;
   #started = false;
   #cursor: V1Cursor | undefined; #timer: ReturnType<typeof setTimeout> | undefined;
   #reconnectAttempts = 0;
@@ -469,6 +473,22 @@ export class V1Realtime {
     if (saved) this.#cursor = v1Cursor(JSON.parse(saved));
   }
   get cursor(): V1Cursor | undefined { return this.#cursor; }
+  get closed(): boolean { return this.#closed; }
+  async retire(): Promise<void> {
+    this.close();
+    await this.#applying;
+  }
+  async #apply(events: V1Record[]): Promise<void> {
+    const applying = Promise.resolve().then(() => {
+      if (!this.#closed) return this.apply(events);
+    });
+    this.#applying = applying;
+    try { await applying; }
+    finally {
+      this.#applying = undefined;
+      if (this.#closed) this.onClose?.();
+    }
+  }
   async resyncAuthorizedHistory(): Promise<void> {
     if (this.#closed || this.#started || this.#working) throw new Error("History resynchronization requires a new idle replay");
     this.#currentRoute = await this.client.initialize();
@@ -542,7 +562,7 @@ export class V1Realtime {
       if (this.#closed || generation !== this.#queueGeneration ||
           (this.#cursor && BigInt(page.nextCursor.sequence) < BigInt(this.#cursor.sequence))) return;
       const events = this.#cursor ? page.items.filter(event => BigInt(v1Counter(event.sequence)) > BigInt(this.#cursor!.sequence)) : page.items;
-      await this.apply(events);
+      await this.#apply(events);
       if (this.#closed || generation !== this.#queueGeneration) return;
       this.#cursor = page.nextCursor;
       this.client.storage?.setItem(this.#storageKey, JSON.stringify(this.#cursor));
@@ -584,7 +604,7 @@ export class V1Realtime {
         const result = await this.client.events(this.conversationId, this.#cursor);
         if (this.#closed || generation !== this.#queueGeneration) return;
         if (result.refreshRequired) throw new Error("Explicit authorized history resynchronization required");
-        await this.apply(result.items);
+        await this.#apply(result.items);
         if (this.#closed || generation !== this.#queueGeneration) return;
         this.#cursor = result.nextCursor;
         this.client.storage?.setItem(this.#storageKey, JSON.stringify(this.#cursor));
@@ -600,6 +620,6 @@ export class V1Realtime {
     this.#closed = true; this.#queueGeneration++;
     if (this.#timer) clearTimeout(this.#timer);
     const socket = this.#socket; this.#socket = undefined; socket?.close(1000);
-    this.onClose?.();
+    if (!this.#applying) this.onClose?.();
   }
 }
