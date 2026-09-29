@@ -28,11 +28,27 @@ await server.initialize();
 const principalId = await server.createPrincipal(authenticatedAccountId);
 const bootstrap = await server.issueSession(principalId, deviceId);
 // Return only this user's bootstrap plus public project/route metadata.
-const conversation = await server.createConversation("Support", [
-  { principalId, role: "moderator" },
-  { principalId: teammatePrincipalId, role: "member" },
-]);
+const conversation = await server.conversations.create({
+  title: "Support", props: {},
+  members: [
+    { principalId, role: "member" },
+    { principalId: teammatePrincipalId, role: "member" },
+  ],
+}, { requestId: ids.create });
+await server.conversation(conversation.conversationId).members.setBroadcastPermission({
+  principalId, allowed: true, expectedMembershipRevision: "1",
+}, { requestId: ids.permission });
 ```
+
+The broadcast grant requires `membershipManage` independently of moderator
+status. It never creates an end-user media connection. The broadcast creator
+is the sole publisher; native-enforced viewers can continue to chat.
+`server.conversation(id).members.addBatch(entries, {requestId})` accepts
+1..100 distinct revision-guarded entries atomically; `members.list({limit,cursor})`
+returns bounded pages. A conversation supports 2,000 memberships; its media
+participant/publisher limits are separate. Removal/re-add clears the grant.
+The original `createConversation` and `addMembers` helpers remain available;
+the new handles use the same generated schema and authority use cases.
 
 The mapping is project-scoped and stable; a caller-supplied principal ID is
 not authentication. A backend key can issue sessions only within its actual

@@ -70,6 +70,26 @@ type AddMembersPayload {
 	result: ConversationMemberBatch!
 }
 
+input AlertLiveSessionInput {
+	liveSessionId: UUID!
+	expectedGeneration: Decimal!
+	principalIds: [UUID!]!
+}
+
+type AlertLiveSessionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: LiveAlertBatch!
+}
+
+type BroadcastPermissionChanged {
+	member: Member!
+	mediaCutoff: LiveMediaCutoff
+}
+
 type Call {
 	callId: UUID!
 	conversationId: UUID!
@@ -177,6 +197,10 @@ type Conversation {
 	membership: Member
 }
 
+input ConversationLiveInput {
+	conversationId: UUID!
+}
+
 type ConversationMemberBatch {
 	items: [Member!]!
 }
@@ -239,6 +263,15 @@ type CredentialDelivery {
 
 type CredentialDeliveryReceipt {
 	deliveryId: UUID!
+}
+
+union CurrentLiveOccurrence = LiveSession | LegacyInviteOnlyCall
+
+type CurrentLiveSessionReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: CurrentLiveOccurrence
 }
 
 type Cursor {
@@ -388,6 +421,22 @@ input EndCallRequestInput {
 	expectedRevision: Decimal!
 }
 
+input EndLiveSessionInput {
+	liveSessionId: UUID!
+	expectedGeneration: Decimal!
+	expectedRevision: Decimal!
+}
+
+type EndLiveSessionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	operation: OperationRef!
+	result: LiveSessionEndRequested!
+}
+
 type Event {
 	eventId: UUID!
 	conversationId: UUID!
@@ -419,6 +468,7 @@ type EventPayload {
 	generation: Decimal
 	state: String
 	cutoffEvidence: String
+	liveSessionId: UUID
 }
 
 type EventsReply {
@@ -446,6 +496,8 @@ type Features {
 	typing: Boolean!
 	foregroundCalls: Boolean!
 	webhooks: Boolean!
+	liveSessions: Boolean!
+	liveBroadcast: Boolean!
 }
 
 type GetCallReply {
@@ -628,6 +680,20 @@ input IssueSessionRequestInput {
 	requestedTtlMs: Decimal!
 }
 
+input JoinLiveSessionInput {
+	liveSessionId: UUID!
+	expectedGeneration: Decimal!
+}
+
+type JoinLiveSessionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: LiveSessionJoined!
+}
+
 type LeaveCallReply {
 	status: String!
 	requestId: UUID!
@@ -645,6 +711,33 @@ input LeaveCallRequestInput {
 	generation: Decimal!
 }
 
+input LeaveLiveSessionInput {
+	liveSessionId: UUID!
+	expectedGeneration: Decimal!
+	participationId: UUID!
+}
+
+type LeaveLiveSessionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: LiveSessionLeft!
+}
+
+type LegacyInviteOnlyCall {
+	callId: UUID!
+	conversationId: UUID!
+	creatorId: UUID!
+	generation: Decimal!
+	revision: Decimal!
+	state: String!
+	media: CallMedia!
+	invitation: Invitation
+	participation: Participation
+}
+
 type Limit {
 	maximum: Decimal
 	unit: String
@@ -657,6 +750,333 @@ type Limit {
 type LimitEntry {
 	key: String!
 	value: Limit!
+}
+
+type LiveAlert {
+	alertId: UUID!
+	liveSessionId: UUID!
+	conversationId: UUID!
+	generation: Decimal!
+	membershipEpoch: Decimal!
+	createdAt: String!
+	expiresAt: String!
+}
+
+type LiveAlertBatch {
+	liveSessionId: UUID!
+	created: Decimal!
+	suppressed: Decimal!
+}
+
+type LiveAlertPage {
+	items: [LiveAlert!]!
+	nextCursor: String
+	complete: Boolean!
+	partialReason: String
+	refreshRequired: Boolean!
+}
+
+type LiveAlertPageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveAlertPage!
+}
+
+input LiveAlertsInput {
+	limit: PageSize! = 50
+	cursor: String
+}
+
+type LiveConnectionGrant {
+	liveSessionId: UUID!
+	participationId: UUID!
+	generation: Decimal!
+	roomName: String!
+	participantIdentity: String!
+	livekitUrl: String!
+	transportToken: String!
+	admissionTicket: SignedProof!
+	forwardingLease: SignedProof!
+	transportExpiresAt: String!
+	admissionExpiresAt: String!
+	leaseExpiresAt: String!
+	leasePolicyId: String!
+}
+
+enum LiveConnectionMode {
+	INITIAL
+	RECONNECT
+}
+
+type LiveCredentialIssuance {
+	liveSessionId: UUID!
+	participationId: UUID!
+	generation: Decimal!
+	leaseId: UUID!
+	grantOrdinal: Decimal!
+	admissionExpiresAt: String!
+	leaseExpiresAt: String!
+}
+
+enum LiveCutoffEvidence {
+	NATIVE_FENCE
+	MONOTONIC_BOOT_RETIREMENT
+	NO_GRANTS_ISSUED
+}
+
+type LiveCutoffScope {
+	kind: LiveCutoffScopeKind!
+	liveSessionId: UUID!
+	generation: Decimal!
+	participationId: UUID
+}
+
+enum LiveCutoffScopeKind {
+	PARTICIPATION
+	GENERATION
+}
+
+enum LiveCutoffState {
+	PENDING
+	ENFORCED
+	UNKNOWN
+}
+
+enum LiveErrorCode {
+	LIVE_SESSION_EXISTS
+	LIVE_SESSION_CLOSED
+	LIVE_SESSION_INTERRUPTED
+	LIVE_SESSION_CAPACITY
+	LIVE_ALERT_LIMIT
+	JOINED_ELSEWHERE
+	PARTICIPATION_DRAINING
+	PARTICIPATION_MISMATCH
+	GENERATION_CONFLICT
+	MEDIA_NOT_READY
+	CREDENTIAL_REFRESH_REQUIRED
+	CLIENT_UPGRADE_REQUIRED
+	LIVE_START_CANCELLED
+	LIVE_PREPARATION_FAILED
+}
+
+type LiveMediaCutoff {
+	state: LiveCutoffState!
+	scope: LiveCutoffScope!
+	evidence: LiveCutoffEvidence
+	enforcedAt: String
+	operationId: UUID
+}
+
+type LiveMediaPermissions {
+	microphone: Boolean!
+	camera: Boolean!
+	subscribe: Boolean!
+}
+
+enum LiveMediaProfile {
+	AUDIO_ONLY
+	AUDIO_VIDEO
+}
+
+type LiveOperationFailure {
+	code: LiveErrorCode!
+	message: String!
+}
+
+enum LiveOperationKind {
+	START
+	END
+}
+
+enum LiveOperationState {
+	RUNNING
+	COMPLETED
+	FAILED
+}
+
+type LiveParticipantPage {
+	items: [LiveParticipation!]!
+	nextCursor: String
+	complete: Boolean!
+	partialReason: String
+	refreshRequired: Boolean!
+}
+
+type LiveParticipantPageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveParticipantPage!
+}
+
+input LiveParticipantsInput {
+	liveSessionId: UUID!
+	limit: PageSize! = 50
+	cursor: String
+}
+
+type LiveParticipation {
+	participationId: UUID!
+	principalId: UUID!
+	membershipEpoch: Decimal!
+	role: LiveRole!
+	state: LiveParticipationState!
+	permissions: LiveMediaPermissions!
+	reservationExpiresAt: String
+	nativeConnectionId: UUID
+	mediaCutoff: LiveMediaCutoff
+}
+
+enum LiveParticipationState {
+	JOINED
+	CONNECTING
+	CONNECTED
+	DISCONNECTED
+	LEAVING
+	LEFT
+}
+
+enum LiveRole {
+	PUBLISHER
+	VIEWER
+}
+
+type LiveSession {
+	liveSessionId: UUID!
+	conversationId: UUID!
+	creatorId: UUID!
+	kind: LiveSessionKind!
+	mediaProfile: LiveMediaProfile!
+	state: LiveSessionState!
+	generation: Decimal!
+	revision: Decimal!
+	createdAt: String!
+	expiresAt: String!
+	myParticipation: LiveParticipation
+	mediaCutoff: LiveMediaCutoff
+}
+
+input LiveSessionCredentialsInput {
+	liveSessionId: UUID!
+	participationId: UUID!
+	expectedGeneration: Decimal!
+	mode: LiveConnectionMode!
+	replacementOfConnectionId: UUID
+}
+
+type LiveSessionCredentialsPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: LiveConnectionGrant!
+}
+
+type LiveSessionEndRequested {
+	liveSessionId: UUID!
+	operationId: UUID!
+	mediaCutoff: LiveMediaCutoff!
+}
+
+input LiveSessionInput {
+	liveSessionId: UUID!
+}
+
+type LiveSessionJoined {
+	liveSessionId: UUID!
+	generation: Decimal!
+	participation: LiveParticipation!
+}
+
+enum LiveSessionKind {
+	INTERACTIVE
+	BROADCAST
+}
+
+type LiveSessionLeft {
+	liveSessionId: UUID!
+	participationId: UUID!
+	mediaCutoff: LiveMediaCutoff!
+}
+
+type LiveSessionOperation {
+	operationId: UUID!
+	requestId: UUID!
+	liveSessionId: UUID!
+	kind: LiveOperationKind!
+	state: LiveOperationState!
+	revision: Decimal!
+	requestedAt: String!
+	completedAt: String
+	completion: LiveSessionOperationCompletion
+	failure: LiveOperationFailure
+}
+
+type LiveSessionOperationCompletion {
+	liveSessionId: UUID!
+	generation: Decimal!
+	state: LiveSessionState!
+	revision: Decimal!
+	completedAt: String!
+	mediaCutoff: LiveMediaCutoff
+}
+
+input LiveSessionOperationInput {
+	operationId: UUID!
+}
+
+type LiveSessionOperationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveSessionOperation!
+}
+
+type LiveSessionPage {
+	items: [LiveSession!]!
+	nextCursor: String
+	complete: Boolean!
+	partialReason: String
+	refreshRequired: Boolean!
+}
+
+type LiveSessionPageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveSessionPage!
+}
+
+type LiveSessionReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveSession!
+}
+
+type LiveSessionStarted {
+	liveSessionId: UUID!
+	conversationId: UUID!
+	kind: LiveSessionKind!
+	mediaProfile: LiveMediaProfile!
+	operationId: UUID!
+}
+
+enum LiveSessionState {
+	PREPARING
+	READY
+	ACTIVE
+	DRAINING
+	ENDED
+	FAILED
+}
+
+input LiveSessionsInput {
+	conversationId: UUID!
+	limit: PageSize! = 50
+	cursor: String
 }
 
 type MediaCredentialsReply {
@@ -821,6 +1241,13 @@ type Mutation {
 	deleteMessage(context: RequestContextInput!, input: DeleteMessageRequestInput!): DeleteMessageReply!
 	reportReceipt(context: RequestContextInput!, input: ReportReceiptRequestInput!): ReportReceiptReply!
 	typing(context: RequestContextInput!, input: TypingRequestInput!): TypingReply!
+	setBroadcastPermission(context: RequestContextInput!, input: SetBroadcastPermissionInput!): SetBroadcastPermissionPayload!
+	startLiveSession(context: RequestContextInput!, input: StartLiveSessionInput!): StartLiveSessionPayload!
+	joinLiveSession(context: RequestContextInput!, input: JoinLiveSessionInput!): JoinLiveSessionPayload!
+	alertLiveSession(context: RequestContextInput!, input: AlertLiveSessionInput!): AlertLiveSessionPayload!
+	leaveLiveSession(context: RequestContextInput!, input: LeaveLiveSessionInput!): LeaveLiveSessionPayload!
+	endLiveSession(context: RequestContextInput!, input: EndLiveSessionInput!): EndLiveSessionPayload!
+	liveSessionCredentials(context: RequestContextInput!, input: LiveSessionCredentialsInput!): LiveSessionCredentialsPayload!
 	startCall(context: RequestContextInput!, input: StartCallRequestInput!): StartCallReply!
 	inviteCall(context: RequestContextInput!, input: InviteCallRequestInput!): InviteCallReply!
 	ringCall(context: RequestContextInput!, input: RingCallRequestInput!): RingCallReply!
@@ -876,6 +1303,7 @@ type OperationResult {
 	creatorId: UUID
 	mediaCutoff: MediaCutoff
 	errorCode: String
+	liveSessionCompletion: LiveSessionOperationCompletion
 }
 
 type OperationStep {
@@ -950,6 +1378,12 @@ type Query {
 	search(context: RequestContextInput!, input: SearchRequestInput!): SearchReply!
 	resolveRequest(context: RequestContextInput!, input: ResolveRequestRequestInput!): ResolveRequestReply!
 	getOperation(context: RequestContextInput!, input: GetOperationRequestInput!): GetOperationReply!
+	currentLiveSession(context: RequestContextInput!, input: ConversationLiveInput!): CurrentLiveSessionReply!
+	liveSession(context: RequestContextInput!, input: LiveSessionInput!): LiveSessionReply!
+	liveSessions(context: RequestContextInput!, input: LiveSessionsInput!): LiveSessionPageReply!
+	liveSessionParticipants(context: RequestContextInput!, input: LiveParticipantsInput!): LiveParticipantPageReply!
+	liveSessionAlerts(context: RequestContextInput!, input: LiveAlertsInput!): LiveAlertPageReply!
+	liveSessionOperation(context: RequestContextInput!, input: LiveSessionOperationInput!): LiveSessionOperationReply!
 	getCall(context: RequestContextInput!, input: GetCallRequestInput!): GetCallReply!
 	callInvitations(context: RequestContextInput!, input: CallInvitationsRequestInput!): CallInvitationsReply!
 }
@@ -1115,12 +1549,19 @@ type ResourceRef {
 Exactly one typed field contains the retained, currently authorized receipt result.
 """
 type RetainedResult {
+	broadcastPermissionChanged: BroadcastPermissionChanged
 	call: Call
 	callSummary: CallSummary
 	conversation: Conversation
 	conversationMemberBatch: ConversationMemberBatch
 	credentialDeliveryReceipt: CredentialDeliveryReceipt
 	deliveryAck: DeliveryAck
+	liveAlertBatch: LiveAlertBatch
+	liveCredentialIssuance: LiveCredentialIssuance
+	liveSessionEndRequested: LiveSessionEndRequested
+	liveSessionJoined: LiveSessionJoined
+	liveSessionLeft: LiveSessionLeft
+	liveSessionStarted: LiveSessionStarted
 	mediaGrant: MediaGrant
 	member: Member
 	message: Message
@@ -1265,6 +1706,22 @@ type SessionRevocation {
 	mediaCutoff: MediaCutoff
 }
 
+input SetBroadcastPermissionInput {
+	conversationId: UUID!
+	principalId: UUID!
+	allowed: Boolean!
+	expectedMembershipRevision: Decimal!
+}
+
+type SetBroadcastPermissionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: BroadcastPermissionChanged!
+}
+
 scalar SignedProof
 
 type StartCallReply {
@@ -1283,6 +1740,22 @@ input StartCallRequestInput {
 	conversationId: UUID!
 	invitedPrincipalIds: [UUID!]!
 	media: CallMediaInput!
+}
+
+input StartLiveSessionInput {
+	conversationId: UUID!
+	kind: LiveSessionKind! = INTERACTIVE
+	mediaProfile: LiveMediaProfile! = AUDIO_ONLY
+}
+
+type StartLiveSessionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	operation: OperationRef!
+	result: LiveSessionStarted!
 }
 
 type Subscription {

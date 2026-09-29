@@ -30,6 +30,8 @@ query CommunicationCapabilities($context: RequestContextInput!) {
         typing
         foregroundCalls
         webhooks
+        liveSessions
+        liveBroadcast
       }
       limits {
         key
@@ -303,6 +305,7 @@ query CommunicationEvents($context: RequestContextInput!, $input: EventsRequestI
           generation
           state
           cutoffEvidence
+          liveSessionId
         }
       }
       complete
@@ -480,6 +483,31 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
           id
         }
         result {
+          broadcastPermissionChanged {
+            member {
+              conversationId
+              principalId
+              role
+              status
+              membershipEpoch
+              visibilityEpoch
+              revision
+              visibleFromSequence
+              canStartBroadcast
+            }
+            mediaCutoff {
+              state
+              scope {
+                kind
+                liveSessionId
+                generation
+                participationId
+              }
+              evidence
+              enforcedAt
+              operationId
+            }
+          }
           call {
             callId
             conversationId
@@ -578,6 +606,89 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
           deliveryAck {
             deliveryId
             acknowledged
+          }
+          liveAlertBatch {
+            liveSessionId
+            created
+            suppressed
+          }
+          liveCredentialIssuance {
+            liveSessionId
+            participationId
+            generation
+            leaseId
+            grantOrdinal
+            admissionExpiresAt
+            leaseExpiresAt
+          }
+          liveSessionEndRequested {
+            liveSessionId
+            operationId
+            mediaCutoff {
+              state
+              scope {
+                kind
+                liveSessionId
+                generation
+                participationId
+              }
+              evidence
+              enforcedAt
+              operationId
+            }
+          }
+          liveSessionJoined {
+            liveSessionId
+            generation
+            participation {
+              participationId
+              principalId
+              membershipEpoch
+              role
+              state
+              permissions {
+                microphone
+                camera
+                subscribe
+              }
+              reservationExpiresAt
+              nativeConnectionId
+              mediaCutoff {
+                state
+                scope {
+                  kind
+                  liveSessionId
+                  generation
+                  participationId
+                }
+                evidence
+                enforcedAt
+                operationId
+              }
+            }
+          }
+          liveSessionLeft {
+            liveSessionId
+            participationId
+            mediaCutoff {
+              state
+              scope {
+                kind
+                liveSessionId
+                generation
+                participationId
+              }
+              evidence
+              enforcedAt
+              operationId
+            }
+          }
+          liveSessionStarted {
+            liveSessionId
+            conversationId
+            kind
+            mediaProfile
+            operationId
           }
           mediaGrant {
             callId
@@ -769,8 +880,351 @@ query CommunicationGetOperation($context: RequestContextInput!, $input: GetOpera
           }
         }
         errorCode
+        liveSessionCompletion {
+          liveSessionId
+          generation
+          state
+          revision
+          completedAt
+          mediaCutoff {
+            state
+            scope {
+              kind
+              liveSessionId
+              generation
+              participationId
+            }
+            evidence
+            enforcedAt
+            operationId
+          }
+        }
       }
       blockedReason
+    }
+  }
+}
+
+query CommunicationCurrentLiveSession($context: RequestContextInput!, $input: ConversationLiveInput!) {
+  currentLiveSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    result {
+      __typename
+      ... on LiveSession {
+        liveSessionId
+        conversationId
+        creatorId
+        kind
+        mediaProfile
+        state
+        generation
+        revision
+        createdAt
+        expiresAt
+        myParticipation {
+          participationId
+          principalId
+          membershipEpoch
+          role
+          state
+          permissions {
+            microphone
+            camera
+            subscribe
+          }
+          reservationExpiresAt
+          nativeConnectionId
+          mediaCutoff {
+            state
+            scope {
+              kind
+              liveSessionId
+              generation
+              participationId
+            }
+            evidence
+            enforcedAt
+            operationId
+          }
+        }
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
+      ... on LegacyInviteOnlyCall {
+        callId
+        conversationId
+        creatorId
+        generation
+        revision
+        legacyState: state
+        media {
+          audio
+          video
+        }
+        invitation {
+          invitationId
+          callId
+          generation
+          principalId
+          status
+          expiresAt
+        }
+        participation {
+          principalId
+          sessionId
+          deviceId
+          status
+          nativeConnectionId
+          mediaCutoff {
+            state
+            scope {
+              kind
+              principalId
+              sessionId
+              deviceId
+              callId
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query CommunicationLiveSession($context: RequestContextInput!, $input: LiveSessionInput!) {
+  liveSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    result {
+      liveSessionId
+      conversationId
+      creatorId
+      kind
+      mediaProfile
+      state
+      generation
+      revision
+      createdAt
+      expiresAt
+      myParticipation {
+        participationId
+        principalId
+        membershipEpoch
+        role
+        state
+        permissions {
+          microphone
+          camera
+          subscribe
+        }
+        reservationExpiresAt
+        nativeConnectionId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
+      mediaCutoff {
+        state
+        scope {
+          kind
+          liveSessionId
+          generation
+          participationId
+        }
+        evidence
+        enforcedAt
+        operationId
+      }
+    }
+  }
+}
+
+query CommunicationLiveSessions($context: RequestContextInput!, $input: LiveSessionsInput!) {
+  liveSessions(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    result {
+      items {
+        liveSessionId
+        conversationId
+        creatorId
+        kind
+        mediaProfile
+        state
+        generation
+        revision
+        createdAt
+        expiresAt
+        myParticipation {
+          participationId
+          principalId
+          membershipEpoch
+          role
+          state
+          permissions {
+            microphone
+            camera
+            subscribe
+          }
+          reservationExpiresAt
+          nativeConnectionId
+          mediaCutoff {
+            state
+            scope {
+              kind
+              liveSessionId
+              generation
+              participationId
+            }
+            evidence
+            enforcedAt
+            operationId
+          }
+        }
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
+      nextCursor
+      complete
+      partialReason
+      refreshRequired
+    }
+  }
+}
+
+query CommunicationLiveSessionParticipants($context: RequestContextInput!, $input: LiveParticipantsInput!) {
+  liveSessionParticipants(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    result {
+      items {
+        participationId
+        principalId
+        membershipEpoch
+        role
+        state
+        permissions {
+          microphone
+          camera
+          subscribe
+        }
+        reservationExpiresAt
+        nativeConnectionId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
+      nextCursor
+      complete
+      partialReason
+      refreshRequired
+    }
+  }
+}
+
+query CommunicationLiveSessionAlerts($context: RequestContextInput!, $input: LiveAlertsInput!) {
+  liveSessionAlerts(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    result {
+      items {
+        alertId
+        liveSessionId
+        conversationId
+        generation
+        membershipEpoch
+        createdAt
+        expiresAt
+      }
+      nextCursor
+      complete
+      partialReason
+      refreshRequired
+    }
+  }
+}
+
+query CommunicationLiveSessionOperation($context: RequestContextInput!, $input: LiveSessionOperationInput!) {
+  liveSessionOperation(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    result {
+      operationId
+      requestId
+      liveSessionId
+      kind
+      state
+      revision
+      requestedAt
+      completedAt
+      completion {
+        liveSessionId
+        generation
+        state
+        revision
+        completedAt
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
+      failure {
+        code
+        message
+      }
     }
   }
 }
@@ -1426,6 +1880,202 @@ mutation CommunicationTyping($context: RequestContextInput!, $input: TypingReque
   }
 }
 
+mutation CommunicationSetBroadcastPermission($context: RequestContextInput!, $input: SetBroadcastPermissionInput!) {
+  setBroadcastPermission(context: $context, input: $input) {
+    status
+    requestId
+    receiptId
+    committedAt
+    replayed
+    result {
+      member {
+        conversationId
+        principalId
+        role
+        status
+        membershipEpoch
+        visibilityEpoch
+        revision
+        visibleFromSequence
+        canStartBroadcast
+      }
+      mediaCutoff {
+        state
+        scope {
+          kind
+          liveSessionId
+          generation
+          participationId
+        }
+        evidence
+        enforcedAt
+        operationId
+      }
+    }
+  }
+}
+
+mutation CommunicationStartLiveSession($context: RequestContextInput!, $input: StartLiveSessionInput!) {
+  startLiveSession(context: $context, input: $input) {
+    status
+    requestId
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    result {
+      liveSessionId
+      conversationId
+      kind
+      mediaProfile
+      operationId
+    }
+  }
+}
+
+mutation CommunicationJoinLiveSession($context: RequestContextInput!, $input: JoinLiveSessionInput!) {
+  joinLiveSession(context: $context, input: $input) {
+    status
+    requestId
+    receiptId
+    committedAt
+    replayed
+    result {
+      liveSessionId
+      generation
+      participation {
+        participationId
+        principalId
+        membershipEpoch
+        role
+        state
+        permissions {
+          microphone
+          camera
+          subscribe
+        }
+        reservationExpiresAt
+        nativeConnectionId
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
+    }
+  }
+}
+
+mutation CommunicationAlertLiveSession($context: RequestContextInput!, $input: AlertLiveSessionInput!) {
+  alertLiveSession(context: $context, input: $input) {
+    status
+    requestId
+    receiptId
+    committedAt
+    replayed
+    result {
+      liveSessionId
+      created
+      suppressed
+    }
+  }
+}
+
+mutation CommunicationLeaveLiveSession($context: RequestContextInput!, $input: LeaveLiveSessionInput!) {
+  leaveLiveSession(context: $context, input: $input) {
+    status
+    requestId
+    receiptId
+    committedAt
+    replayed
+    result {
+      liveSessionId
+      participationId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          liveSessionId
+          generation
+          participationId
+        }
+        evidence
+        enforcedAt
+        operationId
+      }
+    }
+  }
+}
+
+mutation CommunicationEndLiveSession($context: RequestContextInput!, $input: EndLiveSessionInput!) {
+  endLiveSession(context: $context, input: $input) {
+    status
+    requestId
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    result {
+      liveSessionId
+      operationId
+      mediaCutoff {
+        state
+        scope {
+          kind
+          liveSessionId
+          generation
+          participationId
+        }
+        evidence
+        enforcedAt
+        operationId
+      }
+    }
+  }
+}
+
+mutation CommunicationLiveSessionCredentials($context: RequestContextInput!, $input: LiveSessionCredentialsInput!) {
+  liveSessionCredentials(context: $context, input: $input) {
+    status
+    requestId
+    receiptId
+    committedAt
+    replayed
+    result {
+      liveSessionId
+      participationId
+      generation
+      roomName
+      participantIdentity
+      livekitUrl
+      transportToken
+      admissionTicket
+      forwardingLease
+      transportExpiresAt
+      admissionExpiresAt
+      leaseExpiresAt
+      leasePolicyId
+    }
+  }
+}
+
 mutation CommunicationStartCall($context: RequestContextInput!, $input: StartCallRequestInput!) {
   startCall(context: $context, input: $input) {
     status
@@ -1956,6 +2606,7 @@ subscription CommunicationConversationEvents($context: RequestContextInput!, $in
         generation
         state
         cutoffEvidence
+        liveSessionId
       }
     }
     complete
@@ -2000,6 +2651,8 @@ query ManagementCapabilities($context: RequestContextInput!) {
         typing
         foregroundCalls
         webhooks
+        liveSessions
+        liveBroadcast
       }
       limits {
         key
@@ -2294,6 +2947,31 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
           id
         }
         result {
+          broadcastPermissionChanged {
+            member {
+              conversationId
+              principalId
+              role
+              status
+              membershipEpoch
+              visibilityEpoch
+              revision
+              visibleFromSequence
+              canStartBroadcast
+            }
+            mediaCutoff {
+              state
+              scope {
+                kind
+                liveSessionId
+                generation
+                participationId
+              }
+              evidence
+              enforcedAt
+              operationId
+            }
+          }
           call {
             callId
             conversationId
@@ -2392,6 +3070,89 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
           deliveryAck {
             deliveryId
             acknowledged
+          }
+          liveAlertBatch {
+            liveSessionId
+            created
+            suppressed
+          }
+          liveCredentialIssuance {
+            liveSessionId
+            participationId
+            generation
+            leaseId
+            grantOrdinal
+            admissionExpiresAt
+            leaseExpiresAt
+          }
+          liveSessionEndRequested {
+            liveSessionId
+            operationId
+            mediaCutoff {
+              state
+              scope {
+                kind
+                liveSessionId
+                generation
+                participationId
+              }
+              evidence
+              enforcedAt
+              operationId
+            }
+          }
+          liveSessionJoined {
+            liveSessionId
+            generation
+            participation {
+              participationId
+              principalId
+              membershipEpoch
+              role
+              state
+              permissions {
+                microphone
+                camera
+                subscribe
+              }
+              reservationExpiresAt
+              nativeConnectionId
+              mediaCutoff {
+                state
+                scope {
+                  kind
+                  liveSessionId
+                  generation
+                  participationId
+                }
+                evidence
+                enforcedAt
+                operationId
+              }
+            }
+          }
+          liveSessionLeft {
+            liveSessionId
+            participationId
+            mediaCutoff {
+              state
+              scope {
+                kind
+                liveSessionId
+                generation
+                participationId
+              }
+              evidence
+              enforcedAt
+              operationId
+            }
+          }
+          liveSessionStarted {
+            liveSessionId
+            conversationId
+            kind
+            mediaProfile
+            operationId
           }
           mediaGrant {
             callId
@@ -2583,6 +3344,25 @@ query ManagementGetOperation($context: RequestContextInput!, $input: GetOperatio
           }
         }
         errorCode
+        liveSessionCompletion {
+          liveSessionId
+          generation
+          state
+          revision
+          completedAt
+          mediaCutoff {
+            state
+            scope {
+              kind
+              liveSessionId
+              generation
+              participationId
+            }
+            evidence
+            enforcedAt
+            operationId
+          }
+        }
       }
       blockedReason
     }
@@ -2687,6 +3467,25 @@ mutation ManagementCreateDeployment($context: RequestContextInput!, $input: Crea
         }
       }
       errorCode
+      liveSessionCompletion {
+        liveSessionId
+        generation
+        state
+        revision
+        completedAt
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
     }
   }
 }
@@ -2762,6 +3561,25 @@ mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateP
         }
       }
       errorCode
+      liveSessionCompletion {
+        liveSessionId
+        generation
+        state
+        revision
+        completedAt
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
     }
   }
 }
@@ -2837,6 +3655,25 @@ mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: Issue
         }
       }
       errorCode
+      liveSessionCompletion {
+        liveSessionId
+        generation
+        state
+        revision
+        completedAt
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
     }
   }
 }
@@ -2912,6 +3749,25 @@ mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: Revo
         }
       }
       errorCode
+      liveSessionCompletion {
+        liveSessionId
+        generation
+        state
+        revision
+        completedAt
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
     }
   }
 }
@@ -2987,6 +3843,25 @@ mutation ManagementProjectPolicy($context: RequestContextInput!, $input: Project
         }
       }
       errorCode
+      liveSessionCompletion {
+        liveSessionId
+        generation
+        state
+        revision
+        completedAt
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
     }
   }
 }
@@ -3099,6 +3974,25 @@ mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseO
           }
         }
         errorCode
+        liveSessionCompletion {
+          liveSessionId
+          generation
+          state
+          revision
+          completedAt
+          mediaCutoff {
+            state
+            scope {
+              kind
+              liveSessionId
+              generation
+              participationId
+            }
+            evidence
+            enforcedAt
+            operationId
+          }
+        }
       }
       blockedReason
     }
@@ -3191,6 +4085,25 @@ mutation ManagementResumeOperation($context: RequestContextInput!, $input: Resum
           }
         }
         errorCode
+        liveSessionCompletion {
+          liveSessionId
+          generation
+          state
+          revision
+          completedAt
+          mediaCutoff {
+            state
+            scope {
+              kind
+              liveSessionId
+              generation
+              participationId
+            }
+            evidence
+            enforcedAt
+            operationId
+          }
+        }
       }
       blockedReason
     }
@@ -3268,6 +4181,25 @@ mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: Conf
         }
       }
       errorCode
+      liveSessionCompletion {
+        liveSessionId
+        generation
+        state
+        revision
+        completedAt
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
     }
   }
 }
@@ -3343,6 +4275,25 @@ mutation ManagementDisableWebhook($context: RequestContextInput!, $input: Disabl
         }
       }
       errorCode
+      liveSessionCompletion {
+        liveSessionId
+        generation
+        state
+        revision
+        completedAt
+        mediaCutoff {
+          state
+          scope {
+            kind
+            liveSessionId
+            generation
+            participationId
+          }
+          evidence
+          enforcedAt
+          operationId
+        }
+      }
     }
   }
 }

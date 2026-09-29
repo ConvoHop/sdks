@@ -76,53 +76,80 @@ renewal is your trusted backend's responsibility; the current `V1Client`
 uses one bootstrap, so construct a new client/stream with a fresh session
 and the same authorized recovery storage when it expires.
 
-Calling requires a **ConvoHopAdmissionV1-capable native SFU**. Stock LiveKit,
-legacy GraphQL device grants and a direct cached-token `Room.connect` are not
-compatible substitutes. Start with `client.startCall(conversationId,
-invitedPrincipalIds, video)`; retain its returned call ID and observe
-`client.call(id)` until the room is offering/active. Do not treat preparation
-or an accepted HTTP response as connected media. The initiator can then
-connect; each invitee must first accept its own current invitation:
+Member-open media requires a **participation-aware native SFU**. Stock
+LiveKit, legacy device grants and a cached-token `Room.connect` are not
+substitutes. Conversation membership, durable participation, native connection
+and capture are separate. No invitation array or automatic local capture is
+required. Runtime capabilities and finite qualified media limits must be enabled
+by the service operator; package tests alone do not qualify a deployed service.
 
 ```ts
-import { V1MediaConnection } from "@convohop/browser-sdk";
-
-// In the invitee's explicit foreground accept handler:
-const accepted = await client.accept(currentInvitation);
-let connection = await V1MediaConnection.connect(client, accepted, {
+const thread = client.conversation(conversationId); // Synchronous, not thenable.
+await thread.messages.send({ text: "Can we talk?", props: {} }, { requestId: ids.text });
+const start = await thread.live.startVideo({ requestId: ids.start });
+const live = await start.ready(); // Native preparation; no automatic join.
+const participation = await live.join({ requestId: ids.join });
+let connection = await participation.connect({
   localVideo,
   onTrack: ({ element }) => remoteTracks.append(element),
   onTrackRemoved: ({ element }) => element.remove(),
   onDisconnected: showDisconnected,
   onAudioPlaybackBlocked: showEnableAudioButton,
-});
-await connection.microphone(false);
+}); // Receive-only.
 await connection.microphone(true);
-// Only for a video-capable call:
-// await connection.camera(false);
-// A reconnect returns a new connection with fresh authority credentials:
-connection = await connection.reconnect();
-const stats = await connection.stats(); // Actual received bytes/tracks/frames.
+// Optional later action, in the same AUDIO_VIDEO occurrence:
+await connection.camera(true);
+await live.alerts.send([bobPrincipalId], { requestId: ids.alert });
+// Another current member can discover and join, whether alerted or not:
+const current = await thread.live.current();
+// current is LiveSessionHandle | LegacyInviteOnlyCall | null.
 
-// On leaving: durable authority denial plus unconditional local cleanup.
-try {
-  await client.leave(await client.call(accepted.callId));
-} finally {
-  await connection.disconnect();
-}
+// A fresh admission retains P and returns receive-only; capture is explicit.
+connection = await connection.reconnect();
+await connection.microphone(true);
+const stats = await connection.stats(); // Actual inbound tracks/bytes/frames.
+
+await participation.leave({ requestId: ids.leave }); // Intent; inspect mediaCutoff.
+const ending = await live.end({ requestId: ids.end });
+await ending.completed(); // Proven generation cutoff, not accepted intent.
 ```
 
-Use `connection.enableAudio()` from a user gesture if autoplay is blocked.
-Voice never requests a camera. Microphone/camera choices survive a fresh
-authorized reconnect. `disconnect()` only cleans up the local connection;
-call `client.leave` or authorized `client.end` for durable lifecycle changes.
-No automatic stock cached-token reconnect is enabled. A deliberately closed
-connection cannot reconnect. Expiry, revocation or lost clock confidence
-must stop forwarding; native JWT lifetime is not forwarding permission.
-There is no native v1 broadcast, Egress, recording, screen-share or offline
-ringing implementation.
+`startVoice()` sets the immutable `AUDIO_ONLY` ceiling. `startVideo()` allows
+camera later, not camera capture now. `startBroadcast({mediaProfile:"AUDIO_VIDEO"})`
+requires an independently backend-granted `canStartBroadcast` permission.
+Only the creator publishes; viewers follow join/connect, never capture, and
+still use ordinary conversation messages. SDK controls reject unauthorized
+sources; the native server also enforces empty viewer publication rights.
 
-`V1MediaConnection.connect(client, call, { iceTransportPolicy: "relay" })`
+Use `connection.enableAudio()` from a user gesture if autoplay is blocked.
+A capture denial rejects that control action without discarding the already
+returned receive-only connection. A failed connect retains the reservation;
+explicitly retry `participation.connect()` or leave. It resolves a prior used
+credential before a separately identified fresh attempt and never recaptures
+automatically, reuses a spent bearer, changes P, or extends the original expiry.
+Until an uncertain native admission is known or expired it reports
+`RESOLUTION_REQUIRED`, rather than guessing. `disconnect()` only closes local
+transport; it does not prove durable leave or cutoff.
+
+Use `client.requests.resolve(id)` for the generated typed retained receipt;
+live credential results contain non-secret issuance metadata. Start and end
+have distinct `operationId`s and immutable completions. Handles also expose
+`get()`, `participants({cursor,limit})`, conversation `live.history(...)` and
+`client.liveAlerts.list(...)`. `client.liveSession(id)` obtains an authorized
+handle after recovery. Page tokens remain opaque and epoch-bound.
+
+**Helper migration:** the old asynchronous `client.conversation(id)` read is
+now explicitly `client.getConversation(id)`. The former name is a synchronous
+handle; do not await it as a snapshot. Original stored request paths,
+discriminators, payloads, fingerprints and retry deadlines remain unchanged.
+Existing invitation-only occurrences retain `call/accept/decline/leave/end`
+and `V1MediaConnection.connect`; fresh `startCall` is gated by
+`CLIENT_UPGRADE_REQUIRED`, not translated into a member-open call. Current
+discovery marks the legacy union branch explicitly and aliases its old String
+state to `legacyState`; it does not invent a new profile or publisher role.
+No Egress, recording, screen-share, host transfer or offline ringing is added.
+
+`participation.connect({ iceTransportPolicy: "relay" })`
 uses the maintained WebRTC relay-only policy; the default is `"all"`.
 It still requires the same fresh native admission and current membership.
 The server must offer its authenticated TURN service: do not supply a
@@ -133,7 +160,7 @@ TURN over TLS, assert `localCandidateType === "relay"` and
 `relayProtocol === "tls"`; the candidate's `protocol` can still be UDP.
 Direct ICE TCP is separately identified by `protocol === "tcp"`.
 A server boot change ends the old occurrence after durable ownership
-recovery; use current call state and a fresh authorized call, not old
+recovery; use current occurrence state and a fresh authorized occurrence, not old
 tokens or an assumption that live media survived.
 
 Checked operations are exported as `v1Operations`, with `V1OperationTypes`

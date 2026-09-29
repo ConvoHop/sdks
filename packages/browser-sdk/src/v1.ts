@@ -1,4 +1,6 @@
-import { v1GraphqlRequest, v1GraphqlEnvelope } from "./v1-graphql.js";
+import { v1GraphqlRequest, v1GraphqlEnvelope, operationPayload, validateOperationPayload,
+  type CommunicationOperation, type OperationInput, type OperationPayload } from "./v1-graphql.js";
+import { ConversationHandle, LiveSessionHandle, type PageOptions } from "./live.js";
 import { v1Operations } from "./v1-operations.js";
 import type { CommunicationMembersQuery } from "./v1-generated.js";
 /** Current Cockroach-backed GraphQL protocol. The legacy GraphQL client is separate. */
@@ -37,13 +39,14 @@ export interface V1Route {
 }
 export interface V1Envelope<T> {
   status: "ok" | "committed" | "accepted"; requestId: string; result: T;
-  replayed?: boolean; operation?: V1Record; resourceRef?: V1Record;
+  replayed?: boolean; operation?: V1Record; resourceRef?: V1Record; receiptId?: string; committedAt?: string;
 }
 export interface V1RecoveryState {
   requestId: string; incarnation: string; payloadFingerprint: string;
   method: string; path: string; payload: V1Record;
   firstSubmittedAt: number; retryDeadline: number; attemptCount: number; lastAttemptAt: number;
   lastAttemptClassification: string; resolutionState: "pending" | "unknown" | "committed" | "accepted";
+  mediaAdmissionAttempted?: true;
 }
 export type V1RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 export class V1Problem extends Error {
@@ -209,6 +212,8 @@ export class V1Transport {
         for (const key of ["firstSubmittedAt", "retryDeadline", "attemptCount", "lastAttemptAt"]) {
           if (typeof v[key] !== "number" || !Number.isSafeInteger(v[key]) || v[key] < 0) throw new TypeError("Invalid recovery clock or count");
         }
+        if (v.mediaAdmissionAttempted !== undefined && v.mediaAdmissionAttempted !== true)
+          throw new TypeError("Invalid native admission marker");
         // All fields are checked before this stored record can authorize a resend.
         const state: V1RecoveryState = {
           requestId: v1Id(v.requestId), incarnation: v1String(v.incarnation), payloadFingerprint: v1String(v.payloadFingerprint),
@@ -216,12 +221,23 @@ export class V1Transport {
           firstSubmittedAt: Number(v.firstSubmittedAt), retryDeadline: Number(v.retryDeadline), attemptCount: Number(v.attemptCount),
           lastAttemptAt: Number(v.lastAttemptAt), lastAttemptClassification: v1String(v.lastAttemptClassification),
           resolutionState: v.resolutionState as V1RecoveryState["resolutionState"],
+          ...(v.mediaAdmissionAttempted === true || v.lastAttemptClassification === "nativeAdmissionAttempted"
+            ? { mediaAdmissionAttempted: true } : {}),
         };
         this.#states.set(state.requestId, state);
       }
     }
   }
   get recoveryStates(): readonly V1RecoveryState[] { return [...this.#states.values()].map(state => structuredClone(state)); }
+  /** @internal Persist the native attempt boundary without retaining a bearer grant. */
+  markMediaAdmissionAttempted(requestId: string): void {
+    const state = this.#states.get(v1Id(requestId));
+    if (!state || !state.path.endsWith("/graphql/liveSessionCredentials") || state.resolutionState !== "committed")
+      throw new Error("Native admission requires a committed credential issuance");
+    state.lastAttemptClassification = "nativeAdmissionAttempted";
+    state.mediaAdmissionAttempted = true;
+    this.#persist();
+  }
   #persist(): void {
     while (this.#states.size > 128) {
       const settled = [...this.#states.values()].find(state => ["committed", "accepted"].includes(state.resolutionState));
@@ -232,6 +248,22 @@ export class V1Transport {
   }
   async read(path: string, body?: V1Record): Promise<V1Envelope<unknown>> {
     return this.#request(body === undefined ? "GET" : "POST", path, body, crypto.randomUUID());
+  }
+  async execute<K extends CommunicationOperation>(key: K, projectId: string, input: OperationInput<K>,
+    requestId?: string): Promise<OperationPayload<K>> {
+    const operation = v1Operations[key];
+    const path = `/v1/projects/${v1Id(projectId)}/graphql/${operation.field}`;
+    const body = v1Record(input);
+    const result = operationPayload(key, operation.kind === "mutation"
+      ? await this.mutate("POST", path, body, requestId)
+      : await this.#request("GET", path, body, crypto.randomUUID()));
+    if (key === "communication.resolveRequest") {
+      const state = this.#states.get(v1String(body.requestId)), resolution = v1Record(v1Record(result).result);
+      if (state && (resolution.state === "committed" || resolution.state === "accepted")) {
+        state.resolutionState = resolution.state; state.lastAttemptClassification = "authorityReceipt"; this.#persist();
+      }
+    }
+    return result;
   }
   async mutate(method: "POST" | "PATCH", path: string, payload: V1Record, requestId: string = crypto.randomUUID()): Promise<V1Envelope<unknown>> {
     v1Id(requestId);
@@ -319,10 +351,17 @@ export class V1Transport {
           typeof graphql.outcome === "string" ? graphql.outcome : "unknown", response.status,
           typeof graphql.message === "string" ? graphql.message : "Authority rejected the request");
       }
-      const value = v1GraphqlEnvelope(v1Record(graphql.data)[plan.operation.field], plan.operation);
+      const raw = v1Record(graphql.data)[plan.operation.field];
+      const direct = path.includes("/graphql/");
+      const value = direct ? v1Record(raw) : v1GraphqlEnvelope(raw, plan.operation);
+      if (direct) validateOperationPayload(plan.operation, value);
       if (!["ok", "committed", "accepted"].includes(v1String(value.status))) throw new TypeError("Unrecognized authority envelope");
       if (v1Id(value.requestId) !== requestId) throw new V1Problem("INVALID_RESPONSE", requestId, "unknown", response.status, "Mismatched authority request identity");
+      if (direct) return { ...value, status: value.status as V1Envelope<unknown>["status"],
+        requestId: v1Id(value.requestId), result: value.result };
       return { status: value.status as V1Envelope<unknown>["status"], requestId: v1Id(value.requestId), result: value.result,
+        ...(value.receiptId === undefined ? {} : { receiptId: v1Id(value.receiptId) }),
+        ...(value.committedAt === undefined ? {} : { committedAt: timestamp(value.committedAt) }),
         ...(value.replayed === undefined ? {} : { replayed: boolean(value.replayed) }),
         ...(value.operation === undefined ? {} : { operation: v1Record(value.operation) }),
         ...(value.resourceRef === undefined ? {} : { resourceRef: v1Record(value.resourceRef) }) };
@@ -358,7 +397,17 @@ export class V1Client {
       throw new TypeError("Route cannot redirect this client's credentials to another origin or an unsafe socket");
     this.http.servingEpoch = value.servingEpoch; this.#route = value; return value;
   }
-  async conversation(id: string): Promise<V1Conversation> { return v1Conversation((await this.http.read(`${this.path}/conversations/${v1Id(id)}`)).result); }
+  conversation(id: string): ConversationHandle { return new ConversationHandle(this, v1Id(id)); }
+  async getConversation(id: string): Promise<V1Conversation> { return v1Conversation((await this.http.read(`${this.path}/conversations/${v1Id(id)}`)).result); }
+  readonly requests = {
+    resolve: async (requestId: string) => (await this.http.execute("communication.resolveRequest",
+      this.projectId, { requestId: v1Id(requestId) })).result,
+  };
+  liveSession(id: string) { return LiveSessionHandle.get(this, v1Id(id)); }
+  readonly liveAlerts = {
+    list: async (options: PageOptions = {}) =>
+      (await this.http.execute("communication.liveSessionAlerts", this.projectId, options)).result,
+  };
   async messages(id: string, beforeSequence?: string): Promise<V1Page<V1Message>> {
     const before = beforeSequence === undefined ? "" : "&beforeSequence=" + v1Counter(beforeSequence);
     return v1Page((await this.http.read(`${this.path}/conversations/${v1Id(id)}/messages?limit=100${before}`)).result, v1Message);

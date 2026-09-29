@@ -2,6 +2,30 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { V1ManagementClient, V1ProjectServerClient } from "../dist/index.js";
 
+test("conversation handles grant broadcast permission through generated backend scope, not a moderator toggle", async () => {
+  const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), conversationId = crypto.randomUUID();
+  const principalId = crypto.randomUUID(), requestId = crypto.randomUUID(), requests = [];
+  const member = { conversationId, principalId, role: "member", status: "active", membershipEpoch: "1",
+    visibilityEpoch: "1", revision: "2", visibleFromSequence: "1", canStartBroadcast: true };
+  const server = new V1ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation,
+    backendKey: "fixture-only", fetch: async (url, options) => {
+      const request = JSON.parse(options.body); requests.push(request);
+      assert.equal(url, "http://127.0.0.1:18080/graphql");
+      return Response.json({ data: { setBroadcastPermission: { status: "committed", requestId,
+        receiptId: crypto.randomUUID(), committedAt: new Date().toISOString(), replayed: false,
+        result: { member, mediaCutoff: null } } } });
+    } });
+  const handle = server.conversation(conversationId);
+  assert.equal(handle.then, undefined);
+  assert.equal(requests.length, 0);
+  const result = await handle.members.setBroadcastPermission({ principalId, allowed: true,
+    expectedMembershipRevision: "1" }, { requestId });
+  assert.equal(result.result.member.role, "member");
+  assert.equal(result.result.member.canStartBroadcast, true);
+  assert.equal(requests[0].operationName, "CommunicationSetBroadcastPermission");
+  assert.deepEqual(requests[0].variables.input, { conversationId, principalId, allowed: true, expectedMembershipRevision: "1" });
+});
+
 test("membership batches use generated GraphQL and preserve original identity and decimal revisions", async () => {
   const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), conversationId = crypto.randomUUID();
   const requestId = crypto.randomUUID(), principalId = crypto.randomUUID(), requests = [];

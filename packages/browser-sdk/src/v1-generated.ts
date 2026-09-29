@@ -24,6 +24,12 @@ export type AddMembersInput = {
   members: Array<MemberBatchEntryInput>;
 };
 
+export type AlertLiveSessionInput = {
+  expectedGeneration: string;
+  liveSessionId: string;
+  principalIds: Array<string>;
+};
+
 export type CallInvitationsRequestInput = {
   cursor?: string | null | undefined;
   limit: number;
@@ -40,6 +46,10 @@ export type ConfigureWebhookRequestInput = {
   payloadVersion: string;
   projectId: string;
   url: string;
+};
+
+export type ConversationLiveInput = {
+  conversationId: string;
 };
 
 export type CreateConversationRequestInput = {
@@ -129,6 +139,12 @@ export type EndCallRequestInput = {
   generation: string;
 };
 
+export type EndLiveSessionInput = {
+  expectedGeneration: string;
+  expectedRevision: string;
+  liveSessionId: string;
+};
+
 export type EventsRequestInput = {
   after?: CursorInput | null | undefined;
   conversationId: string;
@@ -200,9 +216,124 @@ export type IssueSessionRequestInput = {
   requestedTtlMs: string;
 };
 
+export type JoinLiveSessionInput = {
+  expectedGeneration: string;
+  liveSessionId: string;
+};
+
 export type LeaveCallRequestInput = {
   callId: string;
   generation: string;
+};
+
+export type LeaveLiveSessionInput = {
+  expectedGeneration: string;
+  liveSessionId: string;
+  participationId: string;
+};
+
+export type LiveAlertsInput = {
+  cursor?: string | null | undefined;
+  limit?: number;
+};
+
+export type LiveConnectionMode =
+  | 'INITIAL'
+  | 'RECONNECT';
+
+export type LiveCutoffEvidence =
+  | 'MONOTONIC_BOOT_RETIREMENT'
+  | 'NATIVE_FENCE'
+  | 'NO_GRANTS_ISSUED';
+
+export type LiveCutoffScopeKind =
+  | 'GENERATION'
+  | 'PARTICIPATION';
+
+export type LiveCutoffState =
+  | 'ENFORCED'
+  | 'PENDING'
+  | 'UNKNOWN';
+
+export type LiveErrorCode =
+  | 'CLIENT_UPGRADE_REQUIRED'
+  | 'CREDENTIAL_REFRESH_REQUIRED'
+  | 'GENERATION_CONFLICT'
+  | 'JOINED_ELSEWHERE'
+  | 'LIVE_ALERT_LIMIT'
+  | 'LIVE_PREPARATION_FAILED'
+  | 'LIVE_SESSION_CAPACITY'
+  | 'LIVE_SESSION_CLOSED'
+  | 'LIVE_SESSION_EXISTS'
+  | 'LIVE_SESSION_INTERRUPTED'
+  | 'LIVE_START_CANCELLED'
+  | 'MEDIA_NOT_READY'
+  | 'PARTICIPATION_DRAINING'
+  | 'PARTICIPATION_MISMATCH';
+
+export type LiveMediaProfile =
+  | 'AUDIO_ONLY'
+  | 'AUDIO_VIDEO';
+
+export type LiveOperationKind =
+  | 'END'
+  | 'START';
+
+export type LiveOperationState =
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'RUNNING';
+
+export type LiveParticipantsInput = {
+  cursor?: string | null | undefined;
+  limit?: number;
+  liveSessionId: string;
+};
+
+export type LiveParticipationState =
+  | 'CONNECTED'
+  | 'CONNECTING'
+  | 'DISCONNECTED'
+  | 'JOINED'
+  | 'LEAVING'
+  | 'LEFT';
+
+export type LiveRole =
+  | 'PUBLISHER'
+  | 'VIEWER';
+
+export type LiveSessionCredentialsInput = {
+  expectedGeneration: string;
+  liveSessionId: string;
+  mode: LiveConnectionMode;
+  participationId: string;
+  replacementOfConnectionId?: string | null | undefined;
+};
+
+export type LiveSessionInput = {
+  liveSessionId: string;
+};
+
+export type LiveSessionKind =
+  | 'BROADCAST'
+  | 'INTERACTIVE';
+
+export type LiveSessionOperationInput = {
+  operationId: string;
+};
+
+export type LiveSessionState =
+  | 'ACTIVE'
+  | 'DRAINING'
+  | 'ENDED'
+  | 'FAILED'
+  | 'PREPARING'
+  | 'READY';
+
+export type LiveSessionsInput = {
+  conversationId: string;
+  cursor?: string | null | undefined;
+  limit?: number;
 };
 
 export type MediaCredentialsRequestInput = {
@@ -336,10 +467,23 @@ export type SendMessageRequestInput = {
   text: string;
 };
 
+export type SetBroadcastPermissionInput = {
+  allowed: boolean;
+  conversationId: string;
+  expectedMembershipRevision: string;
+  principalId: string;
+};
+
 export type StartCallRequestInput = {
   conversationId: string;
   invitedPrincipalIds: Array<string>;
   media: CallMediaInput;
+};
+
+export type StartLiveSessionInput = {
+  conversationId: string;
+  kind?: LiveSessionKind;
+  mediaProfile?: LiveMediaProfile;
 };
 
 export type TypingRequestInput = {
@@ -364,7 +508,7 @@ export type CommunicationCapabilitiesQueryVariables = Exact<{
 }>;
 
 
-export type CommunicationCapabilitiesQuery = { capabilities: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { contractVersion: string, serverRelease: string, publicApiVersion: string, wssVersions: Array<string>, capabilityRevision: string, limitsRevision: string, environment: string, productionQualified: boolean, geoControlAuthorityId: string | null, offerings: Array<string>, geos: Array<string>, installationProfiles: Array<string>, portalIdentity: string | null, features: { chat: boolean, inbox: boolean, lexicalSearch: boolean, typing: boolean, foregroundCalls: boolean, webhooks: boolean } | null, limits: Array<{ key: string, value: { maximum: string | null, unit: string | null, scope: string | null, milliseconds: string | null, policyId: string | null, revision: string | null } }>, mediaPolicy: { leasePolicyId: string, leaseProtocolVersion: string, maxLeaseMs: string, renewAttemptMs: string, preludeMaxBytes: string, preludeTimeoutMs: string, clockProfileId: string } | null } | null } };
+export type CommunicationCapabilitiesQuery = { capabilities: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { contractVersion: string, serverRelease: string, publicApiVersion: string, wssVersions: Array<string>, capabilityRevision: string, limitsRevision: string, environment: string, productionQualified: boolean, geoControlAuthorityId: string | null, offerings: Array<string>, geos: Array<string>, installationProfiles: Array<string>, portalIdentity: string | null, features: { chat: boolean, inbox: boolean, lexicalSearch: boolean, typing: boolean, foregroundCalls: boolean, webhooks: boolean, liveSessions: boolean, liveBroadcast: boolean } | null, limits: Array<{ key: string, value: { maximum: string | null, unit: string | null, scope: string | null, milliseconds: string | null, policyId: string | null, revision: string | null } }>, mediaPolicy: { leasePolicyId: string, leaseProtocolVersion: string, maxLeaseMs: string, renewAttemptMs: string, preludeMaxBytes: string, preludeTimeoutMs: string, clockProfileId: string } | null } | null } };
 
 export type CommunicationRouteQueryVariables = Exact<{
   context: RequestContextInput;
@@ -419,7 +563,7 @@ export type CommunicationEventsQueryVariables = Exact<{
 }>;
 
 
-export type CommunicationEventsQuery = { events: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { complete: boolean, refreshRequired: boolean, items: Array<{ eventId: string, conversationId: string, sequence: string, eventVersion: string, type: string, occurredAt: string, subjectRef: { kind: string, id: string } | null, payload: { messageId: string | null, revision: string | null, revisionSequence: string | null, principalId: string | null, membershipEpoch: string | null, visibilityEpoch: string | null, kind: string | null, throughSequence: string | null, callId: string | null, generation: string | null, state: string | null, cutoffEvidence: string | null } | null }>, nextCursor: { incarnation: string, conversationId: string, sequence: string } | null } | null } };
+export type CommunicationEventsQuery = { events: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { complete: boolean, refreshRequired: boolean, items: Array<{ eventId: string, conversationId: string, sequence: string, eventVersion: string, type: string, occurredAt: string, subjectRef: { kind: string, id: string } | null, payload: { messageId: string | null, revision: string | null, revisionSequence: string | null, principalId: string | null, membershipEpoch: string | null, visibilityEpoch: string | null, kind: string | null, throughSequence: string | null, callId: string | null, generation: string | null, state: string | null, cutoffEvidence: string | null, liveSessionId: string | null } | null }>, nextCursor: { incarnation: string, conversationId: string, sequence: string } | null } | null } };
 
 export type CommunicationReceiptsQueryVariables = Exact<{
   context: RequestContextInput;
@@ -451,7 +595,7 @@ export type CommunicationResolveRequestQueryVariables = Exact<{
 }>;
 
 
-export type CommunicationResolveRequestQuery = { resolveRequest: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { state: string, requestId: string, checkedAt: string, resultWithheld: boolean, receipt: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signedProof: Record<string, unknown> | null, call: { callId: string, conversationId: string, revision: string, generation: string, state: string, creatorId: string, errorCode: string | null, media: { audio: boolean, video: boolean } | null, invitation: { invitationId: string, callId: string, generation: string, principalId: string, status: string, expiresAt: string } | null, participation: { principalId: string, sessionId: string | null, deviceId: string | null, status: string, nativeConnectionId: string | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, callSummary: { callId: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, conversation: { conversationId: string, revision: string, title: string, props: Record<string, unknown> | null, latestSequence: string, membership: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null } | null, conversationMemberBatch: { items: Array<{ conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }> } | null, credentialDeliveryReceipt: { deliveryId: string } | null, deliveryAck: { deliveryId: string, acknowledged: boolean } | null, mediaGrant: { callId: string, generation: string, roomName: string, participantIdentity: string, livekitUrl: string, transportToken: string, forwardingLease: Record<string, unknown> | null, admissionTicket: Record<string, unknown> | null, transportExpiresAt: string, admissionExpiresAt: string, leaseExpiresAt: string, leasePolicyId: string } | null, member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null, message: { messageId: string, conversationId: string, authorId: string, sequence: string, revision: string, revisionSequence: string, createdAt: string, deleted: boolean, text: string | null, props: Record<string, unknown> | null, editedAt: string | null } | null, messageAck: { messageId: string, conversationId: string, sequence: string, revision: string, status: string, cursor: { incarnation: string, conversationId: string, sequence: string } | null } | null, organization: { orgId: string, name: string, status: string, revision: string } | null, principal: { principalId: string, externalUserId: string, status: string, revision: string } | null, readReceipt: { principalId: string, membershipEpoch: string, visibilityEpoch: string, deliveredThroughSequence: string | null, readThroughSequence: string | null, updatedAt: string | null } | null, sessionBootstrap: { tokenExpiresAt: string, sessionToken: string, session: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } | null } | null, sessionRevocation: { sessionId: string, status: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } | null } | null } };
+export type CommunicationResolveRequestQuery = { resolveRequest: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { state: string, requestId: string, checkedAt: string, resultWithheld: boolean, receipt: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signedProof: Record<string, unknown> | null, broadcastPermissionChanged: { member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, call: { callId: string, conversationId: string, revision: string, generation: string, state: string, creatorId: string, errorCode: string | null, media: { audio: boolean, video: boolean } | null, invitation: { invitationId: string, callId: string, generation: string, principalId: string, status: string, expiresAt: string } | null, participation: { principalId: string, sessionId: string | null, deviceId: string | null, status: string, nativeConnectionId: string | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, callSummary: { callId: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, conversation: { conversationId: string, revision: string, title: string, props: Record<string, unknown> | null, latestSequence: string, membership: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null } | null, conversationMemberBatch: { items: Array<{ conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }> } | null, credentialDeliveryReceipt: { deliveryId: string } | null, deliveryAck: { deliveryId: string, acknowledged: boolean } | null, liveAlertBatch: { liveSessionId: string, created: string, suppressed: string } | null, liveCredentialIssuance: { liveSessionId: string, participationId: string, generation: string, leaseId: string, grantOrdinal: string, admissionExpiresAt: string, leaseExpiresAt: string } | null, liveSessionEndRequested: { liveSessionId: string, operationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionJoined: { liveSessionId: string, generation: string, participation: { participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } } | null, liveSessionLeft: { liveSessionId: string, participationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionStarted: { liveSessionId: string, conversationId: string, kind: LiveSessionKind, mediaProfile: LiveMediaProfile, operationId: string } | null, mediaGrant: { callId: string, generation: string, roomName: string, participantIdentity: string, livekitUrl: string, transportToken: string, forwardingLease: Record<string, unknown> | null, admissionTicket: Record<string, unknown> | null, transportExpiresAt: string, admissionExpiresAt: string, leaseExpiresAt: string, leasePolicyId: string } | null, member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null, message: { messageId: string, conversationId: string, authorId: string, sequence: string, revision: string, revisionSequence: string, createdAt: string, deleted: boolean, text: string | null, props: Record<string, unknown> | null, editedAt: string | null } | null, messageAck: { messageId: string, conversationId: string, sequence: string, revision: string, status: string, cursor: { incarnation: string, conversationId: string, sequence: string } | null } | null, organization: { orgId: string, name: string, status: string, revision: string } | null, principal: { principalId: string, externalUserId: string, status: string, revision: string } | null, readReceipt: { principalId: string, membershipEpoch: string, visibilityEpoch: string, deliveredThroughSequence: string | null, readThroughSequence: string | null, updatedAt: string | null } | null, sessionBootstrap: { tokenExpiresAt: string, sessionToken: string, session: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } | null } | null, sessionRevocation: { sessionId: string, status: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } | null } | null } };
 
 export type CommunicationGetOperationQueryVariables = Exact<{
   context: RequestContextInput;
@@ -459,7 +603,58 @@ export type CommunicationGetOperationQueryVariables = Exact<{
 }>;
 
 
-export type CommunicationGetOperationQuery = { getOperation: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { operationId: string, kind: string, state: string, revision: string, requestedAt: string, updatedAt: string, blockedReason: string | null, targetRef: { kind: string, id: string } | null, steps: Array<{ stepId: string, state: string }>, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } };
+export type CommunicationGetOperationQuery = { getOperation: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { operationId: string, kind: string, state: string, revision: string, requestedAt: string, updatedAt: string, blockedReason: string | null, targetRef: { kind: string, id: string } | null, steps: Array<{ stepId: string, state: string }>, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } | null } };
+
+export type CommunicationCurrentLiveSessionQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: ConversationLiveInput;
+}>;
+
+
+export type CommunicationCurrentLiveSessionQuery = { currentLiveSession: { status: string, requestId: string, serverTime: string, result:
+      | { __typename: 'LegacyInviteOnlyCall', callId: string, conversationId: string, creatorId: string, generation: string, revision: string, legacyState: string, media: { audio: boolean, video: boolean }, invitation: { invitationId: string, callId: string, generation: string, principalId: string, status: string, expiresAt: string } | null, participation: { principalId: string, sessionId: string | null, deviceId: string | null, status: string, nativeConnectionId: string | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null }
+      | { __typename: 'LiveSession', liveSessionId: string, conversationId: string, creatorId: string, kind: LiveSessionKind, mediaProfile: LiveMediaProfile, state: LiveSessionState, generation: string, revision: string, createdAt: string, expiresAt: string, myParticipation: { participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null }
+     | null } };
+
+export type CommunicationLiveSessionQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: LiveSessionInput;
+}>;
+
+
+export type CommunicationLiveSessionQuery = { liveSession: { status: string, requestId: string, serverTime: string, result: { liveSessionId: string, conversationId: string, creatorId: string, kind: LiveSessionKind, mediaProfile: LiveMediaProfile, state: LiveSessionState, generation: string, revision: string, createdAt: string, expiresAt: string, myParticipation: { participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } } };
+
+export type CommunicationLiveSessionsQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: LiveSessionsInput;
+}>;
+
+
+export type CommunicationLiveSessionsQuery = { liveSessions: { status: string, requestId: string, serverTime: string, result: { nextCursor: string | null, complete: boolean, partialReason: string | null, refreshRequired: boolean, items: Array<{ liveSessionId: string, conversationId: string, creatorId: string, kind: LiveSessionKind, mediaProfile: LiveMediaProfile, state: LiveSessionState, generation: string, revision: string, createdAt: string, expiresAt: string, myParticipation: { participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null }> } } };
+
+export type CommunicationLiveSessionParticipantsQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: LiveParticipantsInput;
+}>;
+
+
+export type CommunicationLiveSessionParticipantsQuery = { liveSessionParticipants: { status: string, requestId: string, serverTime: string, result: { nextCursor: string | null, complete: boolean, partialReason: string | null, refreshRequired: boolean, items: Array<{ participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null }> } } };
+
+export type CommunicationLiveSessionAlertsQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: LiveAlertsInput;
+}>;
+
+
+export type CommunicationLiveSessionAlertsQuery = { liveSessionAlerts: { status: string, requestId: string, serverTime: string, result: { nextCursor: string | null, complete: boolean, partialReason: string | null, refreshRequired: boolean, items: Array<{ alertId: string, liveSessionId: string, conversationId: string, generation: string, membershipEpoch: string, createdAt: string, expiresAt: string }> } } };
+
+export type CommunicationLiveSessionOperationQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: LiveSessionOperationInput;
+}>;
+
+
+export type CommunicationLiveSessionOperationQuery = { liveSessionOperation: { status: string, requestId: string, serverTime: string, result: { operationId: string, requestId: string, liveSessionId: string, kind: LiveOperationKind, state: LiveOperationState, revision: string, requestedAt: string, completedAt: string | null, completion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, failure: { code: LiveErrorCode, message: string } | null } } };
 
 export type CommunicationGetCallQueryVariables = Exact<{
   context: RequestContextInput;
@@ -605,6 +800,62 @@ export type CommunicationTypingMutationVariables = Exact<{
 
 export type CommunicationTypingMutation = { typing: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { accepted: boolean } | null } };
 
+export type CommunicationSetBroadcastPermissionMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: SetBroadcastPermissionInput;
+}>;
+
+
+export type CommunicationSetBroadcastPermissionMutation = { setBroadcastPermission: { status: string, requestId: string, receiptId: string, committedAt: string, replayed: boolean, result: { member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } } };
+
+export type CommunicationStartLiveSessionMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: StartLiveSessionInput;
+}>;
+
+
+export type CommunicationStartLiveSessionMutation = { startLiveSession: { status: string, requestId: string, receiptId: string, committedAt: string, replayed: boolean, operation: { operationId: string, owner: string, href: string, state: string }, result: { liveSessionId: string, conversationId: string, kind: LiveSessionKind, mediaProfile: LiveMediaProfile, operationId: string } } };
+
+export type CommunicationJoinLiveSessionMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: JoinLiveSessionInput;
+}>;
+
+
+export type CommunicationJoinLiveSessionMutation = { joinLiveSession: { status: string, requestId: string, receiptId: string, committedAt: string, replayed: boolean, result: { liveSessionId: string, generation: string, participation: { participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } } } };
+
+export type CommunicationAlertLiveSessionMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: AlertLiveSessionInput;
+}>;
+
+
+export type CommunicationAlertLiveSessionMutation = { alertLiveSession: { status: string, requestId: string, receiptId: string, committedAt: string, replayed: boolean, result: { liveSessionId: string, created: string, suppressed: string } } };
+
+export type CommunicationLeaveLiveSessionMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: LeaveLiveSessionInput;
+}>;
+
+
+export type CommunicationLeaveLiveSessionMutation = { leaveLiveSession: { status: string, requestId: string, receiptId: string, committedAt: string, replayed: boolean, result: { liveSessionId: string, participationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } } };
+
+export type CommunicationEndLiveSessionMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: EndLiveSessionInput;
+}>;
+
+
+export type CommunicationEndLiveSessionMutation = { endLiveSession: { status: string, requestId: string, receiptId: string, committedAt: string, replayed: boolean, operation: { operationId: string, owner: string, href: string, state: string }, result: { liveSessionId: string, operationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } } };
+
+export type CommunicationLiveSessionCredentialsMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: LiveSessionCredentialsInput;
+}>;
+
+
+export type CommunicationLiveSessionCredentialsMutation = { liveSessionCredentials: { status: string, requestId: string, receiptId: string, committedAt: string, replayed: boolean, result: { liveSessionId: string, participationId: string, generation: string, roomName: string, participantIdentity: string, livekitUrl: string, transportToken: string, admissionTicket: Record<string, unknown>, forwardingLease: Record<string, unknown>, transportExpiresAt: string, admissionExpiresAt: string, leaseExpiresAt: string, leasePolicyId: string } } };
+
 export type CommunicationStartCallMutationVariables = Exact<{
   context: RequestContextInput;
   input: StartCallRequestInput;
@@ -691,14 +942,14 @@ export type CommunicationConversationEventsSubscriptionVariables = Exact<{
 }>;
 
 
-export type CommunicationConversationEventsSubscription = { conversationEvents: { complete: boolean, refreshRequired: boolean, items: Array<{ eventId: string, conversationId: string, sequence: string, eventVersion: string, type: string, occurredAt: string, subjectRef: { kind: string, id: string } | null, payload: { messageId: string | null, revision: string | null, revisionSequence: string | null, principalId: string | null, membershipEpoch: string | null, visibilityEpoch: string | null, kind: string | null, throughSequence: string | null, callId: string | null, generation: string | null, state: string | null, cutoffEvidence: string | null } | null }>, nextCursor: { incarnation: string, conversationId: string, sequence: string } | null } };
+export type CommunicationConversationEventsSubscription = { conversationEvents: { complete: boolean, refreshRequired: boolean, items: Array<{ eventId: string, conversationId: string, sequence: string, eventVersion: string, type: string, occurredAt: string, subjectRef: { kind: string, id: string } | null, payload: { messageId: string | null, revision: string | null, revisionSequence: string | null, principalId: string | null, membershipEpoch: string | null, visibilityEpoch: string | null, kind: string | null, throughSequence: string | null, callId: string | null, generation: string | null, state: string | null, cutoffEvidence: string | null, liveSessionId: string | null } | null }>, nextCursor: { incarnation: string, conversationId: string, sequence: string } | null } };
 
 export type ManagementCapabilitiesQueryVariables = Exact<{
   context: RequestContextInput;
 }>;
 
 
-export type ManagementCapabilitiesQuery = { capabilities: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { contractVersion: string, serverRelease: string, publicApiVersion: string, wssVersions: Array<string>, capabilityRevision: string, limitsRevision: string, environment: string, productionQualified: boolean, geoControlAuthorityId: string | null, offerings: Array<string>, geos: Array<string>, installationProfiles: Array<string>, portalIdentity: string | null, features: { chat: boolean, inbox: boolean, lexicalSearch: boolean, typing: boolean, foregroundCalls: boolean, webhooks: boolean } | null, limits: Array<{ key: string, value: { maximum: string | null, unit: string | null, scope: string | null, milliseconds: string | null, policyId: string | null, revision: string | null } }>, mediaPolicy: { leasePolicyId: string, leaseProtocolVersion: string, maxLeaseMs: string, renewAttemptMs: string, preludeMaxBytes: string, preludeTimeoutMs: string, clockProfileId: string } | null } | null } };
+export type ManagementCapabilitiesQuery = { capabilities: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { contractVersion: string, serverRelease: string, publicApiVersion: string, wssVersions: Array<string>, capabilityRevision: string, limitsRevision: string, environment: string, productionQualified: boolean, geoControlAuthorityId: string | null, offerings: Array<string>, geos: Array<string>, installationProfiles: Array<string>, portalIdentity: string | null, features: { chat: boolean, inbox: boolean, lexicalSearch: boolean, typing: boolean, foregroundCalls: boolean, webhooks: boolean, liveSessions: boolean, liveBroadcast: boolean } | null, limits: Array<{ key: string, value: { maximum: string | null, unit: string | null, scope: string | null, milliseconds: string | null, policyId: string | null, revision: string | null } }>, mediaPolicy: { leasePolicyId: string, leaseProtocolVersion: string, maxLeaseMs: string, renewAttemptMs: string, preludeMaxBytes: string, preludeTimeoutMs: string, clockProfileId: string } | null } | null } };
 
 export type ManagementOrganizationsQueryVariables = Exact<{
   context: RequestContextInput;
@@ -761,7 +1012,7 @@ export type ManagementResolveRequestQueryVariables = Exact<{
 }>;
 
 
-export type ManagementResolveRequestQuery = { resolveRequest: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { state: string, requestId: string, checkedAt: string, resultWithheld: boolean, receipt: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signedProof: Record<string, unknown> | null, call: { callId: string, conversationId: string, revision: string, generation: string, state: string, creatorId: string, errorCode: string | null, media: { audio: boolean, video: boolean } | null, invitation: { invitationId: string, callId: string, generation: string, principalId: string, status: string, expiresAt: string } | null, participation: { principalId: string, sessionId: string | null, deviceId: string | null, status: string, nativeConnectionId: string | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, callSummary: { callId: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, conversation: { conversationId: string, revision: string, title: string, props: Record<string, unknown> | null, latestSequence: string, membership: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null } | null, conversationMemberBatch: { items: Array<{ conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }> } | null, credentialDeliveryReceipt: { deliveryId: string } | null, deliveryAck: { deliveryId: string, acknowledged: boolean } | null, mediaGrant: { callId: string, generation: string, roomName: string, participantIdentity: string, livekitUrl: string, transportToken: string, forwardingLease: Record<string, unknown> | null, admissionTicket: Record<string, unknown> | null, transportExpiresAt: string, admissionExpiresAt: string, leaseExpiresAt: string, leasePolicyId: string } | null, member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null, message: { messageId: string, conversationId: string, authorId: string, sequence: string, revision: string, revisionSequence: string, createdAt: string, deleted: boolean, text: string | null, props: Record<string, unknown> | null, editedAt: string | null } | null, messageAck: { messageId: string, conversationId: string, sequence: string, revision: string, status: string, cursor: { incarnation: string, conversationId: string, sequence: string } | null } | null, organization: { orgId: string, name: string, status: string, revision: string } | null, principal: { principalId: string, externalUserId: string, status: string, revision: string } | null, readReceipt: { principalId: string, membershipEpoch: string, visibilityEpoch: string, deliveredThroughSequence: string | null, readThroughSequence: string | null, updatedAt: string | null } | null, sessionBootstrap: { tokenExpiresAt: string, sessionToken: string, session: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } | null } | null, sessionRevocation: { sessionId: string, status: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } | null } | null } };
+export type ManagementResolveRequestQuery = { resolveRequest: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { state: string, requestId: string, checkedAt: string, resultWithheld: boolean, receipt: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signedProof: Record<string, unknown> | null, broadcastPermissionChanged: { member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, call: { callId: string, conversationId: string, revision: string, generation: string, state: string, creatorId: string, errorCode: string | null, media: { audio: boolean, video: boolean } | null, invitation: { invitationId: string, callId: string, generation: string, principalId: string, status: string, expiresAt: string } | null, participation: { principalId: string, sessionId: string | null, deviceId: string | null, status: string, nativeConnectionId: string | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, callSummary: { callId: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null, conversation: { conversationId: string, revision: string, title: string, props: Record<string, unknown> | null, latestSequence: string, membership: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null } | null, conversationMemberBatch: { items: Array<{ conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }> } | null, credentialDeliveryReceipt: { deliveryId: string } | null, deliveryAck: { deliveryId: string, acknowledged: boolean } | null, liveAlertBatch: { liveSessionId: string, created: string, suppressed: string } | null, liveCredentialIssuance: { liveSessionId: string, participationId: string, generation: string, leaseId: string, grantOrdinal: string, admissionExpiresAt: string, leaseExpiresAt: string } | null, liveSessionEndRequested: { liveSessionId: string, operationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionJoined: { liveSessionId: string, generation: string, participation: { participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } } | null, liveSessionLeft: { liveSessionId: string, participationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionStarted: { liveSessionId: string, conversationId: string, kind: LiveSessionKind, mediaProfile: LiveMediaProfile, operationId: string } | null, mediaGrant: { callId: string, generation: string, roomName: string, participantIdentity: string, livekitUrl: string, transportToken: string, forwardingLease: Record<string, unknown> | null, admissionTicket: Record<string, unknown> | null, transportExpiresAt: string, admissionExpiresAt: string, leaseExpiresAt: string, leasePolicyId: string } | null, member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null, message: { messageId: string, conversationId: string, authorId: string, sequence: string, revision: string, revisionSequence: string, createdAt: string, deleted: boolean, text: string | null, props: Record<string, unknown> | null, editedAt: string | null } | null, messageAck: { messageId: string, conversationId: string, sequence: string, revision: string, status: string, cursor: { incarnation: string, conversationId: string, sequence: string } | null } | null, organization: { orgId: string, name: string, status: string, revision: string } | null, principal: { principalId: string, externalUserId: string, status: string, revision: string } | null, readReceipt: { principalId: string, membershipEpoch: string, visibilityEpoch: string, deliveredThroughSequence: string | null, readThroughSequence: string | null, updatedAt: string | null } | null, sessionBootstrap: { tokenExpiresAt: string, sessionToken: string, session: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } | null } | null, sessionRevocation: { sessionId: string, status: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } | null } | null } };
 
 export type ManagementGetOperationQueryVariables = Exact<{
   context: RequestContextInput;
@@ -769,7 +1020,7 @@ export type ManagementGetOperationQueryVariables = Exact<{
 }>;
 
 
-export type ManagementGetOperationQuery = { getOperation: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { operationId: string, kind: string, state: string, revision: string, requestedAt: string, updatedAt: string, blockedReason: string | null, targetRef: { kind: string, id: string } | null, steps: Array<{ stepId: string, state: string }>, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } };
+export type ManagementGetOperationQuery = { getOperation: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { operationId: string, kind: string, state: string, revision: string, requestedAt: string, updatedAt: string, blockedReason: string | null, targetRef: { kind: string, id: string } | null, steps: Array<{ stepId: string, state: string }>, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } | null } };
 
 export type ManagementCreateOrganizationMutationVariables = Exact<{
   context: RequestContextInput;
@@ -785,7 +1036,7 @@ export type ManagementCreateDeploymentMutationVariables = Exact<{
 }>;
 
 
-export type ManagementCreateDeploymentMutation = { createDeployment: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } };
+export type ManagementCreateDeploymentMutation = { createDeployment: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } };
 
 export type ManagementCreateProjectMutationVariables = Exact<{
   context: RequestContextInput;
@@ -793,7 +1044,7 @@ export type ManagementCreateProjectMutationVariables = Exact<{
 }>;
 
 
-export type ManagementCreateProjectMutation = { createProject: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } };
+export type ManagementCreateProjectMutation = { createProject: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } };
 
 export type ManagementIssueBackendKeyMutationVariables = Exact<{
   context: RequestContextInput;
@@ -801,7 +1052,7 @@ export type ManagementIssueBackendKeyMutationVariables = Exact<{
 }>;
 
 
-export type ManagementIssueBackendKeyMutation = { issueBackendKey: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } };
+export type ManagementIssueBackendKeyMutation = { issueBackendKey: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } };
 
 export type ManagementRevokeBackendKeyMutationVariables = Exact<{
   context: RequestContextInput;
@@ -809,7 +1060,7 @@ export type ManagementRevokeBackendKeyMutationVariables = Exact<{
 }>;
 
 
-export type ManagementRevokeBackendKeyMutation = { revokeBackendKey: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } };
+export type ManagementRevokeBackendKeyMutation = { revokeBackendKey: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } };
 
 export type ManagementProjectPolicyMutationVariables = Exact<{
   context: RequestContextInput;
@@ -817,7 +1068,7 @@ export type ManagementProjectPolicyMutationVariables = Exact<{
 }>;
 
 
-export type ManagementProjectPolicyMutation = { projectPolicy: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } };
+export type ManagementProjectPolicyMutation = { projectPolicy: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } };
 
 export type ManagementCredentialPermitMutationVariables = Exact<{
   context: RequestContextInput;
@@ -833,7 +1084,7 @@ export type ManagementPauseOperationMutationVariables = Exact<{
 }>;
 
 
-export type ManagementPauseOperationMutation = { pauseOperation: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { operationId: string, kind: string, state: string, revision: string, requestedAt: string, updatedAt: string, blockedReason: string | null, targetRef: { kind: string, id: string } | null, steps: Array<{ stepId: string, state: string }>, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } };
+export type ManagementPauseOperationMutation = { pauseOperation: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { operationId: string, kind: string, state: string, revision: string, requestedAt: string, updatedAt: string, blockedReason: string | null, targetRef: { kind: string, id: string } | null, steps: Array<{ stepId: string, state: string }>, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } | null } };
 
 export type ManagementResumeOperationMutationVariables = Exact<{
   context: RequestContextInput;
@@ -841,7 +1092,7 @@ export type ManagementResumeOperationMutationVariables = Exact<{
 }>;
 
 
-export type ManagementResumeOperationMutation = { resumeOperation: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { operationId: string, kind: string, state: string, revision: string, requestedAt: string, updatedAt: string, blockedReason: string | null, targetRef: { kind: string, id: string } | null, steps: Array<{ stepId: string, state: string }>, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } };
+export type ManagementResumeOperationMutation = { resumeOperation: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { operationId: string, kind: string, state: string, revision: string, requestedAt: string, updatedAt: string, blockedReason: string | null, targetRef: { kind: string, id: string } | null, steps: Array<{ stepId: string, state: string }>, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } | null } };
 
 export type ManagementConfigureWebhookMutationVariables = Exact<{
   context: RequestContextInput;
@@ -849,7 +1100,7 @@ export type ManagementConfigureWebhookMutationVariables = Exact<{
 }>;
 
 
-export type ManagementConfigureWebhookMutation = { configureWebhook: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } };
+export type ManagementConfigureWebhookMutation = { configureWebhook: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } };
 
 export type ManagementDisableWebhookMutationVariables = Exact<{
   context: RequestContextInput;
@@ -857,4 +1108,4 @@ export type ManagementDisableWebhookMutationVariables = Exact<{
 }>;
 
 
-export type ManagementDisableWebhookMutation = { disableWebhook: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } };
+export type ManagementDisableWebhookMutation = { disableWebhook: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, callId: string | null, conversationId: string | null, revision: string | null, generation: string | null, state: string | null, creatorId: string | null, errorCode: string | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, media: { audio: boolean, video: boolean } | null, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } };

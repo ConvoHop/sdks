@@ -70,6 +70,11 @@ trusted servers. Call connections require the compatible native
 ConvoHopAdmissionV1 SFU, not an unmodified stock LiveKit server. The SDK
 obtains fresh one-attempt admission and forwarding proofs; an invitation,
 native JWT or WebSocket upgrade alone does not grant media.
+Conversation-centered `LiveSession` handles add lazy member joins and native
+broadcast viewer rights. Start, join, receive-only connect and capture are
+explicit phases. `conversation(id)` is now a synchronous handle; use
+`getConversation(id)` for the former async snapshot read. See the package
+READMEs for the generated Node/browser API and retained invitation-only calls.
 
 Mutation recovery retains the original UUID, payload, fingerprint and retry
 budget. Application-supplied `recoveryStorage` enables persistence of request

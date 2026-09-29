@@ -1,8 +1,13 @@
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
 import { V1Client, V1Problem, v1Id, v1Record, v1String, type V1Call, type V1MediaGrant } from "./v1.js";
+import type { LiveParticipationHandle, LiveConnectOptions } from "./live.js";
+
+type NativeGrant = Omit<V1MediaGrant, "callId"> & { participationId?: string };
+type MediaBinding = { kind: "legacy"; client: V1Client; call: V1Call }
+  | { kind: "participation"; participation: LiveParticipationHandle };
 
 interface Admission {
-  grant: V1MediaGrant; attemptId: string; used: boolean;
+  grant: NativeGrant; attemptId: string; used: boolean;
   resolve: (value: { admissionId: string; nativeConnectionId: string }) => void;
   reject: (error: Error) => void;
 }
@@ -10,7 +15,7 @@ const pending = new Map<string, Admission>();
 let originalConstructor: typeof WebSocket | undefined;
 let installedConstructor: typeof WebSocket | undefined;
 
-function register(grant: V1MediaGrant) {
+function register(grant: NativeGrant) {
   const url = new URL(grant.livekitUrl);
   if (url.search || url.hash || url.username || url.password ||
       (url.protocol !== "wss:" && !(url.protocol === "ws:" && ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname)))) throw new TypeError("Invalid media origin");
@@ -56,6 +61,8 @@ function register(grant: V1MediaGrant) {
           try {
             const frame = v1Record(JSON.parse(v1String(event.data)));
             if (frame.type !== "convohop.admitted.v1" || frame.leaseExpiresAt !== gate.grant.leaseExpiresAt) throw new Error("Native admission was not accepted");
+            if (gate.grant.participationId && frame.participationId !== gate.grant.participationId)
+              throw new Error("Native admission participation mismatch");
             const value = { admissionId: v1Id(frame.admissionId), nativeConnectionId: v1Id(frame.nativeConnectionId) };
             this.#admitted = true; clearTimeout(timer); gate.resolve(value);
             this.dispatchEvent(new Event("open"));
@@ -118,14 +125,21 @@ export class V1MediaConnection {
   #microphoneEnabled: boolean;
   #cameraEnabled: boolean;
   #reconnecting: Promise<V1MediaConnection> | undefined;
+  readonly #permissions: { microphone: boolean; camera: boolean };
+  readonly options: V1MediaOptions;
   admissionId: string | undefined;
   nativeConnectionId: string | undefined;
-  private constructor(readonly client: V1Client, readonly call: V1Call, readonly options: V1MediaOptions) {
+  private constructor(readonly binding: MediaBinding, options: LiveConnectOptions) {
+    const { requestId: _requestId, ...mediaOptions } = options;
+    this.options = mediaOptions;
     if (options.iceTransportPolicy !== undefined && options.iceTransportPolicy !== "all" && options.iceTransportPolicy !== "relay") {
       throw new TypeError("ICE policy must be all or relay");
     }
-    this.#microphoneEnabled = call.media.audio;
-    this.#cameraEnabled = call.media.video;
+    this.#permissions = binding.kind === "legacy"
+      ? { microphone: binding.call.media.audio, camera: binding.call.media.video }
+      : { ...binding.participation.snapshot.permissions };
+    this.#microphoneEnabled = binding.kind === "legacy" && this.#permissions.microphone;
+    this.#cameraEnabled = binding.kind === "legacy" && this.#permissions.camera;
     this.#room = new Room({
       adaptiveStream: false, dynacast: false, singlePeerConnection: false,
       reconnectPolicy: { nextRetryDelayInMs: () => null },
@@ -159,12 +173,23 @@ export class V1MediaConnection {
     });
   }
   static async connect(client: V1Client, call: V1Call, options: V1MediaOptions = {}): Promise<V1MediaConnection> {
-    const result = new V1MediaConnection(client, call, options);
+    const result = new V1MediaConnection({ kind: "legacy", client, call }, options);
     const grant = await client.mediaCredentials(call);
     await result.#open(grant);
     return result;
   }
-  async #open(grant: V1MediaGrant): Promise<void> {
+  /** @internal New participations use the same native transport, but never implicit capture. */
+  static async connectParticipation(participation: LiveParticipationHandle, options: LiveConnectOptions): Promise<V1MediaConnection> {
+    const result = new V1MediaConnection({ kind: "participation", participation }, options);
+    const { requestId, grant } = await participation.connectionGrant(options);
+    const ticket = v1Record(grant.admissionTicket), lease = v1Record(grant.forwardingLease);
+    if (ticket.participationId !== participation.participationId || lease.participationId !== participation.participationId ||
+        lease.leaseVersion !== "2") throw new TypeError("Native proof is not participation-bound");
+    participation.connectionAttempted();
+    await result.#open({ ...grant, admissionTicket: ticket, forwardingLease: lease }, requestId);
+    return result;
+  }
+  async #open(grant: NativeGrant, requestId: string = crypto.randomUUID()): Promise<void> {
     const result = this;
     result.#registration = register(grant);
     try {
@@ -180,22 +205,30 @@ export class V1MediaConnection {
         const video = result.#room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
         if (result.options.localVideo && video) video.attach(result.options.localVideo);
       }
-      await result.#room.startAudio();
+      if (result.binding.kind === "legacy") await result.#room.startAudio();
     } catch {
       await result.disconnect();
-      throw new V1Problem("MEDIA_CONNECT_FAILED", crypto.randomUUID(), "unknown", 0,
-        "Real media connection failed. End or leave this call before a fresh attempt.");
+      throw new V1Problem("MEDIA_CONNECT_FAILED", requestId, "unknown", 0,
+        "Native connection failed. The participation reservation remains; resolve and retry connect, or explicitly leave.");
     }
   }
   reconnect(): Promise<V1MediaConnection> {
     if (this.#reconnecting) return this.#reconnecting;
     if (this.#left) return Promise.reject(new Error("A deliberately closed connection cannot reconnect"));
     const work = async () => {
-      const call = await this.client.call(this.call.callId);
-      if (call.generation !== this.call.generation) throw new Error("Call generation changed; obtain a fresh invitation before connecting");
+      if (this.binding.kind === "participation") {
+        await this.#close(false);
+        if (this.#left) throw new Error("Connection was closed during reconnect");
+        const next = await this.binding.participation.connect(this.options);
+        if (this.#left) { await next.disconnect(); throw new Error("Connection was closed during reconnect"); }
+        return next;
+      }
+      const { client, call: original } = this.binding;
+      const call = await client.call(original.callId);
+      if (call.generation !== original.generation) throw new Error("Call generation changed; obtain a fresh invitation before connecting");
       const connectionId = v1Id(v1Record(call.participation).nativeConnectionId);
-      const grant = await this.client.mediaCredentials(call, connectionId);
-      const next = new V1MediaConnection(this.client, call, this.options);
+      const grant = await client.mediaCredentials(call, connectionId);
+      const next = new V1MediaConnection({ kind: "legacy", client, call }, this.options);
       next.#microphoneEnabled = this.#microphoneEnabled;
       next.#cameraEnabled = this.#cameraEnabled;
       if (this.#left) throw new Error("Connection was closed during authorization");
@@ -212,12 +245,12 @@ export class V1MediaConnection {
   }
   get connected(): boolean { return !this.#closed && this.nativeConnectionId !== undefined; }
   async microphone(enabled: boolean): Promise<void> {
-    if (!this.connected || !this.call.media.audio) throw new Error("Microphone is not authorized for this call");
+    if (!this.connected || !this.#permissions.microphone) throw new Error("Microphone is not authorized for this participation");
     await this.#room.localParticipant.setMicrophoneEnabled(enabled);
     this.#microphoneEnabled = enabled;
   }
   async camera(enabled: boolean): Promise<void> {
-    if (!this.connected || !this.call.media.video) throw new Error("Camera is not authorized for this call");
+    if (!this.connected || !this.#permissions.camera) throw new Error("Camera is not authorized for this participation");
     await this.#room.localParticipant.setCameraEnabled(enabled);
     this.#cameraEnabled = enabled;
     const track = this.#room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;

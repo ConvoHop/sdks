@@ -1,6 +1,6 @@
 import {
   V1Transport, v1Id, v1Record, v1String, v1Conversation, v1Membership, v1Counter,
-  type V1RecoveryStorage, type V1Record, type V1Conversation, type V1Graphql, type V1Membership,
+  type V1RecoveryStorage, type V1Record, type V1Conversation, type V1Graphql, type V1Membership, type CommandOptions,
 } from "@convohop/browser-sdk";
 
 export type V1DeploymentOptions = Omit<V1Graphql.CreateDeploymentRequestInput, "orgId">;
@@ -55,6 +55,32 @@ export class V1ProjectServerClient {
       ...(options.fetch ? { fetch: options.fetch } : {}) });
   }
   get path(): string { return "/v1/projects/" + this.projectId; }
+  readonly conversations = {
+    create: async (input: V1Graphql.CreateConversationRequestInput, options: CommandOptions = {}) => {
+      const result = (await this.http.execute("communication.createConversation", this.projectId, input, options.requestId)).result;
+      if (!result) throw new TypeError("Missing created conversation");
+      return result;
+    },
+  };
+  conversation(conversationId: string) {
+    v1Id(conversationId);
+    return {
+      get: async () => {
+        const result = (await this.http.execute("communication.getConversation", this.projectId, { conversationId })).result;
+        if (!result) throw new TypeError("Missing authorized conversation");
+        return result;
+      },
+      members: {
+        addBatch: (members: V1Graphql.MemberBatchEntryInput[], options: CommandOptions = {}) =>
+          this.addMembers(conversationId, members, options.requestId),
+        setBroadcastPermission: (input: Omit<V1Graphql.SetBroadcastPermissionInput, "conversationId">,
+          options: CommandOptions = {}) => this.http.execute("communication.setBroadcastPermission",
+            this.projectId, { conversationId, ...input }, options.requestId),
+        list: async (options: { limit?: number; cursor?: string } = {}) =>
+          (await this.http.execute("communication.members", this.projectId, { conversationId, limit: 100, ...options })).result,
+      },
+    };
+  }
   async initialize(): Promise<void> {
     const route = v1Record((await this.http.read(this.path + "/route")).result);
     if (route.projectId !== this.projectId || route.incarnation !== this.http.incarnation) throw new Error("Project incarnation changed; explicit recovery required");
