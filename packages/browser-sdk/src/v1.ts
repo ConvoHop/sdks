@@ -342,6 +342,8 @@ export class V1Client {
   readonly projectId: string; readonly principalId: string; readonly http: V1Transport;
   readonly #token: string; readonly storage: V1RecoveryStorage | undefined;
   #route: V1Route | undefined;
+  readonly #streams = new Set<V1Realtime>();
+  readonly #replayGenerations = new Map<string, number>();
   constructor(options: V1ClientOptions) {
     this.projectId = v1Id(options.projectId); this.principalId = v1Id(options.principalId); this.#token = options.sessionToken; this.storage = options.recoveryStorage;
     this.http = new V1Transport({ baseUrl: options.baseUrl, credential: options.sessionToken,
@@ -423,13 +425,33 @@ export class V1Client {
     }
   }
   async watch(conversationId: string, apply: (events: V1Record[]) => Promise<void>, onError: (error: Error) => void): Promise<V1Realtime> {
+    return this.#openReplay(v1Id(conversationId), apply, onError, false);
+  }
+  async resyncAuthorizedHistory(conversationId: string, apply: (events: V1Record[]) => Promise<void>,
+    onError: (error: Error) => void): Promise<V1Realtime> {
+    const id = v1Id(conversationId);
+    this.#replayGenerations.set(id, (this.#replayGenerations.get(id) ?? 0) + 1);
+    for (const stream of this.#streams) if (stream.conversationId === id) stream.close();
+    return this.#openReplay(id, apply, onError, true);
+  }
+  async #openReplay(conversationId: string, apply: (events: V1Record[]) => Promise<void>,
+    onError: (error: Error) => void, resync: boolean): Promise<V1Realtime> {
+    const generation = this.#replayGenerations.get(conversationId) ?? 0;
     const route = this.#route ?? await this.initialize();
-    const realtime = new V1Realtime(this, v1Id(conversationId), route, this.#token, apply, onError);
-    await realtime.start(); return realtime;
+    if (generation !== (this.#replayGenerations.get(conversationId) ?? 0)) throw new Error("History watcher superseded by explicit resynchronization");
+    const realtime = new V1Realtime(this, conversationId, route, this.#token, apply, onError, () => this.#streams.delete(realtime));
+    this.#streams.add(realtime);
+    try {
+      if (resync) await realtime.resyncAuthorizedHistory(); else await realtime.start();
+      if (generation !== (this.#replayGenerations.get(conversationId) ?? 0)) throw new Error("History watcher superseded by explicit resynchronization");
+      return realtime;
+    }
+    catch (error) { realtime.close(); throw error; }
   }
 }
 export class V1Realtime {
   #socket: WebSocket | undefined; #closed = false; #working: Promise<void> | undefined;
+  #started = false;
   #cursor: V1Cursor | undefined; #timer: ReturnType<typeof setTimeout> | undefined;
   #reconnectAttempts = 0;
   #pendingPages = 0;
@@ -438,7 +460,8 @@ export class V1Realtime {
   readonly #storageKey: string;
   readonly #token: string;
   constructor(readonly client: V1Client, readonly conversationId: string, readonly route: V1Route, token: string,
-    readonly apply: (events: V1Record[]) => Promise<void>, readonly onError: (error: Error) => void) {
+    readonly apply: (events: V1Record[]) => Promise<void>, readonly onError: (error: Error) => void,
+    readonly onClose?: () => void) {
     this.#token = token;
     this.#currentRoute = route;
     this.#storageKey = `convohop.v1.cursor:${client.projectId}:${client.principalId}:${conversationId}`;
@@ -446,7 +469,17 @@ export class V1Realtime {
     if (saved) this.#cursor = v1Cursor(JSON.parse(saved));
   }
   get cursor(): V1Cursor | undefined { return this.#cursor; }
+  async resyncAuthorizedHistory(): Promise<void> {
+    if (this.#closed || this.#started || this.#working) throw new Error("History resynchronization requires a new idle replay");
+    this.#currentRoute = await this.client.initialize();
+    await this.client.getConversation(this.conversationId);
+    if (this.#closed) throw new Error("History resynchronization was superseded");
+    this.#cursor = undefined;
+    await this.start();
+  }
   async start(): Promise<void> {
+    if (this.#closed || this.#started) throw new Error("Replay is already started or closed");
+    this.#started = true;
     await this.client.recoverPending(this.onError);
     await this.reconcile();
     if (!this.#closed) this.#connect();
@@ -563,8 +596,10 @@ export class V1Realtime {
     try { await pending; } finally { if (this.#working === pending) this.#working = undefined; }
   }
   close(): void {
+    if (this.#closed) return;
     this.#closed = true; this.#queueGeneration++;
     if (this.#timer) clearTimeout(this.#timer);
     const socket = this.#socket; this.#socket = undefined; socket?.close(1000);
+    this.onClose?.();
   }
 }

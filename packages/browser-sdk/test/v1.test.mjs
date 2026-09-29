@@ -194,6 +194,126 @@ test("v1 replay advances and persists the cursor only after the application appl
   replay.close();
 });
 
+test("expired replay requires explicit current-membership resync and preserves evidence until authorized application", async t => {
+  const original = globalThis.WebSocket;
+  class Socket {
+    static OPEN = 1;
+    readyState = 1;
+    send() {}
+    close() { this.readyState = 3; }
+  }
+  globalThis.WebSocket = Socket;
+  t.after(() => { globalThis.WebSocket = original; });
+  const saved = storage(), projectId = id(), principalId = id(), conversationId = id(), incarnation = id();
+  const key = `convohop.v1.cursor:${projectId}:${principalId}:${conversationId}`;
+  const old = { incarnation, conversationId, sequence: "5" }, current = { ...old, sequence: "20" };
+  saved.setItem(key, JSON.stringify(old));
+  saved.setItem("unrelated-mutation-recovery", "keep original command");
+  let member = false, applyFails = true, membershipReads = 0;
+  const afters = [];
+  const client = new V1Client({ projectId, principalId, incarnation, sessionToken: "private",
+    baseUrl: "http://localhost:18080", recoveryStorage: saved });
+  client.initialize = async () => ({ projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" });
+  client.getConversation = async requested => {
+    assert.equal(requested, conversationId); membershipReads++;
+    if (!member) throw new V1Problem("NOT_FOUND", id(), "rejected", 404, "Current membership required");
+    return full("Conversation", { conversationId });
+  };
+  client.recoverPending = async () => {};
+  client.events = async (requested, after) => {
+    assert.equal(requested, conversationId); afters.push(after);
+    if (after?.sequence === old.sequence) throw new V1Problem("CURSOR_EXPIRED", id(), "rejected", 409, "Expired frontier");
+    return { items: [], nextCursor: current, complete: true, refreshRequired: false };
+  };
+  const apply = async () => { if (applyFails) throw new Error("application failed"); };
+  await assert.rejects(client.watch(conversationId, apply, () => {}), { code: "CURSOR_EXPIRED" });
+  assert.deepEqual(afters, [old]);
+  assert.equal(membershipReads, 0);
+
+  await assert.rejects(client.resyncAuthorizedHistory(conversationId, apply, () => {}), { code: "NOT_FOUND" });
+  assert.deepEqual(afters, [old]);
+  assert.deepEqual(JSON.parse(saved.getItem(key)), old);
+  member = true;
+  await assert.rejects(client.resyncAuthorizedHistory(conversationId, apply, () => {}), /application failed/);
+  assert.deepEqual(JSON.parse(saved.getItem(key)), old);
+  applyFails = false;
+  const explicit = await client.resyncAuthorizedHistory(conversationId, apply, () => {});
+  assert.deepEqual(explicit.cursor, current);
+  assert.deepEqual(JSON.parse(saved.getItem(key)), current);
+  assert.equal(saved.getItem("unrelated-mutation-recovery"), "keep original command");
+  assert.deepEqual(afters, [old, undefined, undefined]);
+  assert.equal(membershipReads, 3);
+  explicit.close();
+  const resumed = await client.watch(conversationId, apply, () => {});
+  assert.deepEqual(afters.at(-1), current);
+  resumed.close();
+});
+
+test("history resync retires only this client's conversation and keeps other scopes and command evidence", async t => {
+  const original = globalThis.WebSocket, sockets = [];
+  class Socket {
+    static OPEN = 1;
+    readyState = 1;
+    constructor() { sockets.push(this); }
+    send() {}
+    close() { this.readyState = 3; }
+  }
+  globalThis.WebSocket = Socket;
+  t.after(() => { globalThis.WebSocket = original; });
+  const saved = storage(), projectId = id(), principalId = id(), conversationId = id(), otherConversationId = id(), incarnation = id();
+  const makeClient = projectId => {
+    const client = new V1Client({ projectId, principalId, incarnation, sessionToken: "private",
+      baseUrl: "http://localhost:18080", recoveryStorage: saved });
+    client.initialize = async () => ({ projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" });
+    client.getConversation = async conversationId => full("Conversation", { conversationId });
+    client.recoverPending = async () => {};
+    client.events = async (conversationId, after) => ({ items: [], nextCursor: {
+      incarnation, conversationId, sequence: after?.sequence ?? "5",
+    }, complete: true, refreshRequired: false });
+    return client;
+  };
+  const client = makeClient(projectId), otherProject = makeClient(id());
+  const target = await client.watch(conversationId, async () => {}, () => {});
+  const otherConversation = await client.watch(otherConversationId, async () => {}, () => {});
+  const foreign = await otherProject.watch(conversationId, async () => {}, () => {});
+  const otherKey = `convohop.v1.cursor:${projectId}:${principalId}:${otherConversationId}`;
+  const foreignKey = `convohop.v1.cursor:${otherProject.projectId}:${principalId}:${conversationId}`;
+  const before = [saved.getItem(otherKey), saved.getItem(foreignKey)];
+  saved.setItem("original-request-recovery", "unchanged");
+  const recovered = await client.resyncAuthorizedHistory(conversationId, async () => {}, () => {});
+  assert.deepEqual(sockets.map(socket => socket.readyState), [3, 1, 1, 1]);
+  assert.deepEqual([saved.getItem(otherKey), saved.getItem(foreignKey)], before);
+  assert.equal(saved.getItem("original-request-recovery"), "unchanged");
+  for (const stream of [target, otherConversation, foreign, recovered]) stream.close();
+});
+
+test("an initializing watcher cannot reopen after explicit history resynchronization", async t => {
+  const original = globalThis.WebSocket, sockets = [];
+  class Socket {
+    static OPEN = 1;
+    readyState = 1;
+    constructor() { sockets.push(this); }
+    send() {}
+    close() { this.readyState = 3; }
+  }
+  globalThis.WebSocket = Socket;
+  t.after(() => { globalThis.WebSocket = original; });
+  const projectId = id(), principalId = id(), conversationId = id(), incarnation = id();
+  const client = new V1Client({ projectId, principalId, incarnation, sessionToken: "private", baseUrl: "http://localhost:18080" });
+  const route = { projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" };
+  let release, calls = 0;
+  client.initialize = async () => ++calls === 1 ? new Promise(resolve => { release = resolve; }) : route;
+  client.getConversation = async () => full("Conversation", { conversationId });
+  client.recoverPending = async () => {};
+  client.events = async () => ({ items: [], nextCursor: { incarnation, conversationId, sequence: "5" }, complete: true, refreshRequired: false });
+  const pending = client.watch(conversationId, async () => {}, () => {});
+  const recovered = await client.resyncAuthorizedHistory(conversationId, async () => {}, () => {});
+  release(route);
+  await assert.rejects(pending, /superseded by explicit resynchronization/);
+  assert.equal(sockets.length, 1);
+  recovered.close();
+});
+
 test("HTTP 200 GraphQL errors and malformed envelopes never become successful mutation evidence", async () => {
   for (const [value, code] of [
     [{ errors: [{ message: "Resolve the same request", extensions: { code: "OUTCOME_UNKNOWN", outcome: "unknown", status: 503 } }] }, "OUTCOME_UNKNOWN"],

@@ -53,6 +53,17 @@ pages may await application work; reconnect resumes at the applied frontier.
 Close the stream on view teardown. Expiry/revocation closes the stream;
 session renewal belongs to your authenticated backend.
 
+After an explicit user choice to recover an expired/ahead replay position,
+invalidate the displayed history cache and call
+`client.resyncAuthorizedHistory(id, apply, onError)`. This closes that client's
+old conversation watchers, revalidates the route and current conversation
+membership, and obtains bounded authorized history without the old cursor.
+Replace the displayed snapshot in `apply`; only a successfully applied
+server-issued frontier replaces the saved cursor. On authorization/application
+failure the saved cursor remains rejected, not silently discarded by ordinary
+`watch`. Other conversation/project watchers, mutation recovery identities and
+media participation are not reset. There is no ignore-expiry configuration.
+
 HTTP/WSS credentials never follow a route to another origin. Recovery storage
 contains original application inputs, including possible message text; use
 a trusted profile/origin, not shared public-machine storage. Tokens and native
