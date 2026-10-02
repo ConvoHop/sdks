@@ -1,0 +1,13 @@
+instructions: |
+  Follow .github/copilot-instructions.md.
+  Use sdk-code-review and sdk-testing for reviews and regression work.
+  This repository is the canonical SDK source; do not copy private backend code here.
+  Use maintained test frameworks and never commit credentials or claim untested parity.
+scripts:
+  - name: Build JavaScript SDKs
+    command: npm run build
+  - name: Test JavaScript SDKs
+    command: npm test
+  - name: Check generated GraphQL
+    command: npm run check:graphql
+auto_open_in_browser: false

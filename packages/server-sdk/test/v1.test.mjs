@@ -1,0 +1,127 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { V1ManagementClient, V1ProjectServerClient } from "../dist/index.js";
+import { full, reply } from "../../../test/graphql-fixtures.mjs";
+
+test("conversation handles grant broadcast permission through generated backend scope, not a moderator toggle", async () => {
+  const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), conversationId = crypto.randomUUID();
+  const principalId = crypto.randomUUID(), requestId = crypto.randomUUID(), requests = [];
+  const member = { conversationId, principalId, role: "member", status: "active", membershipEpoch: "1",
+    visibilityEpoch: "1", revision: "2", visibleFromSequence: "1", canStartBroadcast: true };
+  const server = new V1ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation,
+    backendKey: "fixture-only", fetch: async (url, options) => {
+      const request = JSON.parse(options.body); requests.push(request);
+      assert.equal(url, "http://127.0.0.1:18080/graphql");
+      return reply(request, { result: { member, mediaCutoff: null } });
+    } });
+  const handle = server.conversation(conversationId);
+  assert.equal(handle.then, undefined);
+  assert.equal(requests.length, 0);
+  const result = await handle.members.setBroadcastPermission({ principalId, allowed: true,
+    expectedMembershipRevision: "1" }, { requestId });
+  assert.equal(result.result.member.role, "member");
+  assert.equal(result.result.member.canStartBroadcast, true);
+  assert.equal(requests[0].operationName, "CommunicationSetBroadcastPermission");
+  assert.deepEqual(requests[0].variables.input, { conversationId, principalId, allowed: true, expectedMembershipRevision: "1" });
+});
+
+test("backend onboarding uses current generated operations and returns the typed scoped bootstrap", async () => {
+  const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), principalId = crypto.randomUUID();
+  const deviceId = crypto.randomUUID(), conversationId = crypto.randomUUID(), requests = [];
+  const session = { sessionId: crypto.randomUUID(), principalId, deviceId, incarnation,
+    sessionRevision: "1", expiresAt: new Date(Date.now() + 900000).toISOString(), status: "active" };
+  const issued = { session, sessionToken: "fixture-user-session", tokenExpiresAt: session.expiresAt };
+  const client = new V1ProjectServerClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
+    backendKey: "fixture-backend", fetch: async (url, options) => {
+      assert.equal(url, "http://localhost:18080/graphql");
+      assert.equal(options.headers.authorization, "Bearer fixture-backend");
+      const request = JSON.parse(options.body); requests.push(request);
+      assert.equal(request.variables.context.projectId, projectId);
+      assert.equal(request.variables.context.incarnation, incarnation);
+      switch (request.operationName) {
+        case "CommunicationRoute": return reply(request, { result: { projectId, incarnation, servingEpoch: "2" } });
+        case "CommunicationCreatePrincipal": return reply(request, { result: {
+          principalId, externalUserId: "authenticated-account", status: "active", revision: "1",
+        } });
+        case "CommunicationIssueSession": return reply(request, { result: issued });
+        case "CommunicationCreateConversation": return reply(request, { result: full("Conversation", {
+          conversationId, revision: "1", title: "Support", props: {}, latestSequence: "1",
+        }) });
+        default: throw new Error("Unexpected operation");
+      }
+    } });
+  await client.initialize();
+  assert.equal(await client.createPrincipal("authenticated-account"), principalId);
+  assert.deepEqual(await client.issueSession(principalId, deviceId), issued);
+  assert.equal((await client.createConversation("Support", [{ principalId, role: "member" }])).conversationId, conversationId);
+  assert.deepEqual(requests[2].variables.input, { principalId, deviceId, requestedTtlMs: "900000" });
+  assert.ok(requests.slice(1).every(request => request.variables.context.observedServingEpoch === "2"));
+  assert.ok(client.http.recoveryStates.every(state => !JSON.stringify(state).includes("fixture-user-session")));
+});
+
+test("management key issuance and permits retain generated inputs, not result secrets", async () => {
+  const projectId = crypto.randomUUID(), deliveryId = crypto.randomUUID(), redemptionRequestId = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 60000).toISOString(), requests = [];
+  const client = new V1ManagementClient({ baseUrl: "http://localhost:18081", actorId: crypto.randomUUID(),
+    accessToken: "fixture-operator", fetch: async (_url, options) => {
+      assert.equal(options.headers.authorization, "Bearer fixture-operator");
+      const request = JSON.parse(options.body); requests.push(request);
+      assert.equal(request.variables.context.projectId, undefined);
+      if (request.operationName === "ManagementIssueBackendKey")
+        return reply(request, { status: "accepted",
+          operation: { operationId: crypto.randomUUID(), owner: "management", href: "/graphql", state: "requested" },
+          resourceRef: { kind: "project", id: projectId } });
+      if (request.operationName === "ManagementCredentialPermit")
+        return reply(request, { result: { signature: "fixture-secret-permit" } });
+      throw new Error("Unexpected operation");
+    } });
+  await client.issueBackendKey(projectId, "backend", ["membershipManage"], expiresAt);
+  assert.deepEqual(await client.deliveryPermit(projectId, deliveryId, redemptionRequestId), { signature: "fixture-secret-permit" });
+  assert.deepEqual(requests[0].variables.input, { projectId, name: "backend", scopes: ["membershipManage"], expiresAt });
+  assert.deepEqual(requests[1].variables.input, { projectId, deliveryId, redemptionRequestId });
+  assert.ok(client.http.recoveryStates.every(state => !JSON.stringify(state).includes("fixture-secret-permit")));
+});
+
+test("membership batches use generated GraphQL and preserve original identity and decimal revisions", async () => {
+  const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), conversationId = crypto.randomUUID();
+  const requestId = crypto.randomUUID(), principalId = crypto.randomUUID(), requests = [];
+  const client = new V1ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation,
+    backendKey: "pk_fixture-only", fetch: async (url, options) => {
+      const request = JSON.parse(options.body); requests.push({ url, request });
+      return reply(request, { result: { items: [{
+          conversationId, principalId, role: "member", status: "active", membershipEpoch: "1",
+          visibilityEpoch: "1", revision: "1", visibleFromSequence: "1", canStartBroadcast: false,
+        }] } });
+    } });
+  const members = [{ principalId, role: "member", expectedRevision: "9223372036854775807" }];
+  assert.equal((await client.addMembers(conversationId, members, requestId))[0].canStartBroadcast, false);
+  assert.equal(requests[0].url, "http://127.0.0.1:18080/graphql");
+  assert.equal(requests[0].request.operationName, "CommunicationAddMembers");
+  assert.equal(requests[0].request.variables.context.requestId, requestId);
+  assert.deepEqual(requests[0].request.variables.input, { conversationId, members });
+  for (const invalid of [[], Array(101).fill(members[0]), [members[0], members[0]]])
+    await assert.rejects(client.addMembers(conversationId, invalid), /1\.\.100 distinct/);
+  assert.equal(requests.length, 1);
+});
+
+test("hosted management requires explicit deployment and project inputs without local fallback", async () => {
+  const calls = [];
+  const client = new V1ManagementClient({ baseUrl: "https://management.example.test", actorId: crypto.randomUUID(),
+    accessToken: "fixture-only", fetch: async (url, options) => {
+      const request = JSON.parse(options.body); calls.push({ url, request });
+      const field = request.operationName === "ManagementCreateProject" ? "createProject" : "createDeployment";
+      return reply(request, { status: "accepted",
+        operation: { operationId: crypto.randomUUID(), owner: "management", href: "/graphql", state: "requested" },
+        resourceRef: { kind: field === "createProject" ? "project" : "deployment", id: crypto.randomUUID() } });
+    } });
+  const identity = crypto.randomUUID();
+  await assert.rejects(client.createDeployment(identity), /explicit/);
+  await assert.rejects(client.createProject(identity, "Pilot"), /explicit/);
+  assert.equal(calls.length, 0);
+  const configuration = { offering: "managedShared", geoId: "fixture-region", installationProfileId: "fixture-profile", consentRef: "fixture-consent" };
+  await client.createDeployment(identity, configuration);
+  await client.createProject(identity, "Pilot", { environment: "prod", backendPrincipalName: "pilot-server" });
+  assert.deepEqual(calls[0].request.variables.input, { ...configuration, orgId: identity });
+  assert.deepEqual(calls[1].request.variables.input, { deploymentId: identity, name: "Pilot", environment: "prod", backendPrincipalName: "pilot-server" });
+  assert.ok(calls.every(call => call.url === "https://management.example.test/graphql"));
+});

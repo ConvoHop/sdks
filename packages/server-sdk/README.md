@@ -1,117 +1,127 @@
 # ConvoHop Node server SDK
 
-`@convohop/server-sdk` is an unpublished Node.js 24+ TypeScript/ESM source
-package for project provisioning and issuing user sessions. The source is
-licensed under the [Apache License, Version 2.0](../../LICENSE); no hosted
-service is included. It distinguishes **two privileged credentials and
-services**, then hands a short-lived user token to the browser SDK:
+`@convohop/server-sdk` is unpublished Node.js 24+ TypeScript/ESM source for
+the current Management and Conversation APIs. Source license:
+[Apache-2.0](../../LICENSE). No hosted service, cloud provisioner or privileged
+browser client is included.
 
-| Client | Service | Credential | Allowed calls |
-|---|---|---|---|
-| `ManagementClient` | Operator-provided loopback Management API | Local `adm_` bootstrap token | Create/list/suspend projects |
-| `ProjectServerClient` | Operator-provided Communication API | One project's `pk_` key | Register project identities and issue short-lived `st_` tokens for authenticated application users |
-| `ConvoHopClient` from `@convohop/browser-sdk` | Communication API | An identity's `st_` token | Threads, JSON message props, GraphQL subscriptions, calls, broadcasts and LiveKit grants |
+## Application backend
 
-The server SDK has a Node-only package export, requires root HTTP(S) service
-origins (no URL paths, credentials or query strings), allows plain HTTP only on
-`localhost`, `127.0.0.1` or `[::1]`, and restricts the Management API to those
-loopback hosts even over HTTPS. Requests never follow redirects, omit cookies,
-and time out after 30 seconds by default (`timeoutMs` accepts 1-600000).
-No services are shipped in this repository. A remote Communication
-deployment needs HTTPS and a separately configured secure server.
+Authenticate the application user before looking up its project-scoped
+principal. A caller-supplied principal ID is not proof of login.
 
-From the repository root (the unpublished browser SDK resolves locally
-through the npm workspace):
+```ts
+import { V1ProjectServerClient } from "@convohop/server-sdk";
+
+const server = new V1ProjectServerClient({
+  baseUrl: communicationBase,
+  projectId,
+  incarnation,
+  backendKey, // Trusted secret storage only.
+});
+await server.initialize();
+const principalId = await server.createPrincipal(authenticatedAccountId);
+const bootstrap = await server.issueSession(principalId, deviceId);
+// Return only this user's bootstrap and public project/route metadata.
+const conversation = await server.conversations.create({
+  title: "Support", props: {},
+  members: [
+    { principalId, role: "member" },
+    { principalId: teammatePrincipalId, role: "member" },
+  ],
+}, { requestId: ids.create });
+await server.conversation(conversation.conversationId).members.setBroadcastPermission({
+  principalId, allowed: true, expectedMembershipRevision: "1",
+}, { requestId: ids.permission });
+```
+
+The independent broadcast grant requires backend `membershipManage`, not
+moderator status. Only the creator publishes; native-enforced viewers can
+chat. The backend never creates an end-user media connection.
+`members.addBatch(entries, {requestId})` atomically accepts 1..100 distinct,
+revision-guarded entries; `members.list({limit,cursor})` returns bounded pages.
+A conversation supports 2,000 memberships; finite media seat/publisher
+limits are separate. Removal/re-add clears the broadcast grant.
+`createConversation` and `addMembers` are conveniences for the same generated
+operations, not alternate APIs.
+
+Backend scopes/project boundaries still apply; a backend key does not grant
+unrestricted end-user message browsing. Session lifetime defaults to 15
+minutes. Operator/backend credentials never belong in client bundles, URLs
+or logs.
+
+## Management and credential delivery
+
+`V1ManagementClient` uses its separately configured Management origin's
+unversioned `/graphql`, with an authorized portal credential. The project
+client uses Communication `/graphql`. Both reject redirects and unsafe
+origins; only explicit loopback HTTP is permitted without TLS.
+
+```ts
+import { V1ManagementClient } from "@convohop/server-sdk";
+
+const management = new V1ManagementClient({
+  baseUrl: managementBase,
+  actorId: operatorId,
+  accessToken: operatorToken,
+  recoveryStorage: privateRequestStorage,
+});
+const organization = await management.createOrganization("Local team", termsRef);
+const accepted = await management.createDeployment(organization.orgId);
+// Retain accepted.operation.operationId and poll management.operation(id).
+```
+
+Only an explicit loopback origin permits omitted local deployment/project
+configuration. Hosted origins require reviewed offering, geoId,
+installationProfileId, consentRef, environment and backendPrincipalName.
+No local token fallback or qualification-flag shortcut is provided.
+Deployment/project readiness precedes dependent operations.
+
+`createProject`, `issueBackendKey` and `deliveryPermit` expose the remaining
+provisioning flow. Accepted management work has a durable operation ID, not
+a completion promise. Backend credentials use one-time delivery, never an
+ordinary retained result. Redeem using a bearer-less `V1Transport`:
+
+```ts
+const result = await deliveryTransport.execute(
+  "communication.redeemCredential", projectId, { deliveryId },
+  originalRedemptionRequestId, currentPermit,
+);
+// Persist the capsule in trusted secret storage before acknowledging delivery.
+```
+
+The permit is transient authorization for both redemption and
+`communication.acknowledgeCredential`, not saved command input. An unknown
+delivery command requires a fresh permit and the same original command ID
+within its remaining retry budget. Delivery permits cannot authorize generic
+request lookup; `http.retry` reports `CREDENTIAL_REQUIRED` rather than making
+an unauthorized lookup or fabricating a bearer.
+
+## Generated operations and bounded recovery
+
+Use `http.execute("management.operation", undefined, input, requestId)` or
+`http.execute("communication.operation", projectId, input, requestId)`.
+Inputs/results derive from the exported schema; there are no REST-shaped
+path aliases or payload-shape guessing.
+
+Resolve read-only with the generated `management.resolveRequest` or
+`communication.resolveRequest`. `http.retry(id)` resolves first, then only
+retries the original unobserved command inside its unchanged finite budget.
+Keep the original command ID/input/incarnation; do not substitute a new ID
+after uncertainty. Storage may contain application inputs, not tokens,
+credential permits or redeemed capsules. GraphQL errors under HTTP 200 and
+malformed receipt metadata remain errors.
+
+Build/test from the root npm workspace:
 
 ```sh
 npm ci
-npm test --workspace @convohop/server-sdk
+npm run check:graphql
+npm run build
+npm test
 ```
 
-All customer operations use `/graphql`; the only native media URL is
-bearer-protected `/media/{id}/hls/{name}`. The build compiles its browser-SDK
-dependency from this npm workspace. Tests use mocks and a temporary loopback
-HTTP server; no external cloud account is needed. For a compatible service
-you operate separately, configure `COMMS_API_URL` and
-`COMMS_MANAGEMENT_URL` from your service operator, and store
-`COMMS_ADMIN_TOKEN` privately. Never expose the Management service publicly.
-
-## Provisioning and token handoff
-
-Run this code **only in a trusted Node backend**. Configure secrets from a
-private secret store or environment, not from a browser bundle. Management
-returns a project key **only once**: securely persist it for use by your
-backend, and do not return it in an HTTP response or log it.
-
-```ts
-import { ManagementClient, ProjectServerClient } from "@convohop/server-sdk";
-
-const management = new ManagementClient({
-  baseUrl: process.env.COMMS_MANAGEMENT_URL!,
-  adminToken: process.env.COMMS_ADMIN_TOKEN!,
-});
-const provisioned = await management.createProject("Support");
-// Store provisioned.projectKey in a server-only secret store.
-const page = await management.listProjects({ limit: 50 });
-// Pass page.nextAfter as `after` to fetch the next page until items is empty.
-
-const server = new ProjectServerClient({
-  baseUrl: process.env.COMMS_API_URL!,
-  projectKey: process.env.COMMS_PROJECT_KEY!,
-});
-// Authenticate the caller in YOUR application. On first registration,
-// persist a non-nil UUID requestId before calling createIdentity.
-const identity = await server.createIdentity(requestId);
-// Persist identity.id against that authenticated app account; on later
-// logins reuse it instead of creating another identity.
-const session = await server.mintIdentityToken(identity.id);
-// Send ONLY {token: session.token, expiresAt: session.expiresAt} to that account.
-```
-
-Later, `await management.suspendProject(provisioned.id)` blocks new
-tokens and further requests for that project. Use an active project when
-minting them. `createIdentity(requestId)` returns the same project-scoped
-opaque `ci_` ID when the same non-nil UUID request ID is retried. A `pk_` key
-can impersonate **any registered identity in its own project**, so never accept
-a client-supplied identity ID as proof of login: look up the ID bound to your
-authenticated account. Tokens expire after 15 minutes; request a new one
-from your backend when needed. No SDK call silently refreshes a token.
-
-In the browser, use the **separate browser SDK** with the short-lived token:
-
-```ts
-import { ConvoHopClient } from "@convohop/browser-sdk";
-
-const user = new ConvoHopClient({
-  baseUrl: publicCommunicationUrl,
-  sessionToken: sessionFromYourBackend.token, // st_ only; never a pk_ key
-});
-const thread = await user.createThread("Support");
-await user.sendMessage(thread.id, "Hello", { props: { ticketId: "case-42" } });
-const page = await user.threadEvents(thread.id);
-const subscription = user.subscribeThread(thread.id, {
-  after: page.cursor,
-  onEvent: (event) => console.log(event.kind, event.message?.props),
-  onError: (error) => console.error(error),
-});
-const call = await user.createCall(thread.id, "Support", "audio");
-await user.startMedia(call.id);
-const join = await user.joinMedia(call.id); // a short-lived LiveKit grant
-// subscription.close() when done
-```
-
-For server-side jobs acting as an authorized identity,
-`await server.asIdentity(identity.id)` mints an `st_` token and returns a
-`ConvoHopClient` with the **identity's token only**. Its
-`createThread`, `sendMessage`, `threadMessages`, `subscribeThread`, `createCall`,
-`joinMedia` and other methods are the browser SDK GraphQL API. Do not send
-the server client, `adm_` token or `pk_` key to a client. The server SDK does
-not call LiveKit directly and does not implement billing or checkout.
-
-All methods reject invalid inputs. GraphQL execution errors may arrive with
-HTTP 200; `ApiError` exposes the HTTP `status`, uppercase GraphQL `code`
-(such as `NOT_FOUND`) and `message`. HTTP-layer failures retain their
-lowercase code. `InvalidResponseError` exposes the HTTP `status` for
-malformed/unexpected responses or redirects; `TransportError` reports network
-failures or timeouts without including credentials. The SDK does not log
-credentials or place them in URLs.
+The Browser package is the local workspace dependency. Isolated SDK unit
+tests do not establish CockroachDB/WebRTC or hosted-release qualification;
+that acceptance belongs to the compatible service's maintained suite.
+`V1*` is a current SDK/domain name, not a selectable endpoint version.

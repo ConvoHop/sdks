@@ -1,0 +1,1537 @@
+type AcknowledgeCredentialReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: DeliveryAck
+}
+
+input AcknowledgeCredentialRequestInput {
+	deliveryId: UUID!
+}
+
+type ActorRef {
+	tenantId: String!
+	objectId: String!
+}
+
+type AddMemberReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Member
+}
+
+input AddMemberRequestInput {
+	conversationId: UUID!
+	principalId: UUID!
+	role: String!
+	expectedRevision: Decimal!
+}
+
+input AddMembersInput {
+	conversationId: UUID!
+	members: [MemberBatchEntryInput!]!
+}
+
+type AddMembersPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: ConversationMemberBatch!
+}
+
+input AlertLiveSessionInput {
+	liveSessionId: UUID!
+	expectedGeneration: Decimal!
+	principalIds: [UUID!]!
+}
+
+type AlertLiveSessionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: LiveAlertBatch!
+}
+
+type BroadcastPermissionChanged {
+	member: Member!
+	mediaCutoff: LiveMediaCutoff
+}
+
+type Capabilities {
+	contractVersion: String!
+	serverRelease: String!
+	publicApiVersion: String!
+	wssVersions: [String!]!
+	capabilityRevision: Decimal!
+	limitsRevision: Decimal!
+	features: Features
+	limits: [LimitEntry!]!
+	environment: String!
+	productionQualified: Boolean!
+	mediaPolicy: MediaPolicy
+	geoControlAuthorityId: String
+	offerings: [String!]!
+	geos: [String!]!
+	installationProfiles: [String!]!
+	portalIdentity: String
+}
+
+type CapabilitiesReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Capabilities
+}
+
+type Conversation {
+	conversationId: UUID!
+	revision: Decimal!
+	title: String!
+	props: Properties
+	latestSequence: Decimal!
+	membership: Member
+}
+
+input ConversationLiveInput {
+	conversationId: UUID!
+}
+
+type ConversationMemberBatch {
+	items: [Member!]!
+}
+
+type CreateConversationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Conversation
+}
+
+input CreateConversationRequestInput {
+	title: String!
+	props: Properties!
+	members: [MemberInputInput!]!
+}
+
+type CreatePrincipalReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Principal
+}
+
+input CreatePrincipalRequestInput {
+	externalUserId: String!
+}
+
+type CredentialCapsule {
+	kind: String!
+	keyId: String
+	backendPrincipalId: String
+	backendKey: String
+	expiresAt: String
+	endpointId: UUID
+	secretVersion: String
+	secret: String
+}
+
+type CredentialDelivery {
+	deliveryId: UUID!
+	kind: String!
+	projectId: UUID!
+	installationId: String!
+	resourceRef: ResourceRef
+	expiresAt: String!
+	payloadDigest: String!
+	recipientActorRef: ActorRef
+}
+
+type CredentialDeliveryReceipt {
+	deliveryId: UUID!
+}
+
+type CurrentLiveSessionReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveSession
+}
+
+type Cursor {
+	incarnation: UUID!
+	conversationId: UUID!
+	sequence: Decimal!
+}
+
+input CursorInput {
+	incarnation: UUID!
+	conversationId: UUID!
+	sequence: Decimal!
+}
+
+type CutoffScope {
+	kind: String!
+	principalId: UUID
+	sessionId: UUID
+	deviceId: UUID
+	callId: UUID
+}
+
+scalar Decimal
+
+type DeleteMessageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Message
+}
+
+input DeleteMessageRequestInput {
+	conversationId: UUID!
+	messageId: UUID!
+	expectedRevision: Decimal!
+}
+
+type DeliveryAck {
+	deliveryId: UUID!
+	acknowledged: Boolean!
+}
+
+type Deployment {
+	deploymentId: UUID!
+	orgId: UUID!
+	offering: String!
+	geoId: String!
+	installationId: String!
+	resourceOwner: String!
+	approvedRegions: [String!]!
+	readiness: String!
+	revision: Decimal!
+	consentRef: String!
+	environment: String!
+}
+
+type DeploymentHealth {
+	deploymentId: UUID!
+	readiness: String!
+	observedAt: String!
+	services: [ServiceObservation!]!
+}
+
+type DeploymentUsage {
+	deploymentId: UUID!
+	source: String!
+	observedAt: String!
+	complete: Boolean!
+	reason: String!
+}
+
+type DisablePrincipalReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Principal
+}
+
+input DisablePrincipalRequestInput {
+	principalId: UUID!
+	expectedRevision: Decimal!
+}
+
+type EditMessageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Message
+}
+
+input EditMessageRequestInput {
+	conversationId: UUID!
+	messageId: UUID!
+	expectedRevision: Decimal!
+	text: String
+	props: Properties
+}
+
+input EndLiveSessionInput {
+	liveSessionId: UUID!
+	expectedGeneration: Decimal!
+	expectedRevision: Decimal!
+}
+
+type EndLiveSessionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	operation: OperationRef!
+	result: LiveSessionEndRequested!
+}
+
+type Event {
+	eventId: UUID!
+	conversationId: UUID!
+	sequence: Decimal!
+	eventVersion: String!
+	type: String!
+	occurredAt: String!
+	subjectRef: ResourceRef
+	payload: EventPayload
+}
+
+type EventPage {
+	items: [Event!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: Cursor
+}
+
+type EventPayload {
+	messageId: UUID
+	revision: Decimal
+	revisionSequence: Decimal
+	principalId: UUID
+	membershipEpoch: Decimal
+	visibilityEpoch: Decimal
+	kind: String
+	throughSequence: Decimal
+	callId: UUID
+	generation: Decimal
+	state: String
+	cutoffEvidence: String
+	liveSessionId: UUID
+}
+
+type EventsReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: EventPage
+}
+
+input EventsRequestInput {
+	conversationId: UUID!
+	limit: PageSize!
+	after: CursorInput
+}
+
+type Features {
+	chat: Boolean!
+	inbox: Boolean!
+	lexicalSearch: Boolean!
+	typing: Boolean!
+	webhooks: Boolean!
+	liveSessions: Boolean!
+	liveBroadcast: Boolean!
+}
+
+type GetConversationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Conversation
+}
+
+input GetConversationRequestInput {
+	conversationId: UUID!
+}
+
+type GetMessageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Message
+}
+
+input GetMessageRequestInput {
+	conversationId: UUID!
+	messageId: UUID!
+}
+
+type GetOperationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Operation
+}
+
+input GetOperationRequestInput {
+	operationId: UUID!
+}
+
+type GetPrincipalReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Principal
+}
+
+input GetPrincipalRequestInput {
+	principalId: UUID!
+}
+
+type HistoryGrantReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Member
+}
+
+input HistoryGrantRequestInput {
+	conversationId: UUID!
+	principalId: UUID!
+	membershipEpoch: Decimal!
+	expectedRevision: Decimal!
+	fromSequence: Decimal!
+}
+
+type InboxItem {
+	conversationId: UUID!
+	title: String!
+	activityAt: String
+	visibilityEpoch: Decimal!
+	latestVisibleMessage: Message
+	hasUnread: Boolean!
+}
+
+type InboxPage {
+	items: [InboxItem!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+	partialReason: String
+}
+
+type InboxReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: InboxPage
+}
+
+input InboxRequestInput {
+	limit: PageSize!
+	cursor: String
+}
+
+type IssueSessionReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: SessionBootstrap
+}
+
+input IssueSessionRequestInput {
+	principalId: UUID!
+	deviceId: UUID!
+	requestedTtlMs: Decimal!
+}
+
+input JoinLiveSessionInput {
+	liveSessionId: UUID!
+	expectedGeneration: Decimal!
+}
+
+type JoinLiveSessionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: LiveSessionJoined!
+}
+
+input LeaveLiveSessionInput {
+	liveSessionId: UUID!
+	expectedGeneration: Decimal!
+	participationId: UUID!
+}
+
+type LeaveLiveSessionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: LiveSessionLeft!
+}
+
+type Limit {
+	maximum: Decimal
+	unit: String
+	scope: String
+	milliseconds: Decimal
+	policyId: String
+	revision: Decimal
+}
+
+type LimitEntry {
+	key: String!
+	value: Limit!
+}
+
+type LiveAlert {
+	alertId: UUID!
+	liveSessionId: UUID!
+	conversationId: UUID!
+	generation: Decimal!
+	membershipEpoch: Decimal!
+	createdAt: String!
+	expiresAt: String!
+}
+
+type LiveAlertBatch {
+	liveSessionId: UUID!
+	created: Decimal!
+	suppressed: Decimal!
+}
+
+type LiveAlertPage {
+	items: [LiveAlert!]!
+	nextCursor: String
+	complete: Boolean!
+	partialReason: String
+	refreshRequired: Boolean!
+}
+
+type LiveAlertPageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveAlertPage!
+}
+
+input LiveAlertsInput {
+	limit: PageSize! = 50
+	cursor: String
+}
+
+type LiveConnectionGrant {
+	liveSessionId: UUID!
+	participationId: UUID!
+	generation: Decimal!
+	roomName: String!
+	participantIdentity: String!
+	livekitUrl: String!
+	transportToken: String!
+	admissionTicket: SignedProof!
+	forwardingLease: SignedProof!
+	transportExpiresAt: String!
+	admissionExpiresAt: String!
+	leaseExpiresAt: String!
+	leasePolicyId: String!
+}
+
+enum LiveConnectionMode {
+	INITIAL
+	RECONNECT
+}
+
+type LiveCredentialIssuance {
+	liveSessionId: UUID!
+	participationId: UUID!
+	generation: Decimal!
+	leaseId: UUID!
+	grantOrdinal: Decimal!
+	admissionExpiresAt: String!
+	leaseExpiresAt: String!
+}
+
+enum LiveCutoffEvidence {
+	NATIVE_FENCE
+	MONOTONIC_BOOT_RETIREMENT
+	NO_GRANTS_ISSUED
+}
+
+type LiveCutoffScope {
+	kind: LiveCutoffScopeKind!
+	liveSessionId: UUID!
+	generation: Decimal!
+	participationId: UUID
+}
+
+enum LiveCutoffScopeKind {
+	PARTICIPATION
+	GENERATION
+}
+
+enum LiveCutoffState {
+	PENDING
+	ENFORCED
+	UNKNOWN
+}
+
+enum LiveErrorCode {
+	LIVE_SESSION_EXISTS
+	LIVE_SESSION_CLOSED
+	LIVE_SESSION_INTERRUPTED
+	LIVE_SESSION_CAPACITY
+	LIVE_ALERT_LIMIT
+	JOINED_ELSEWHERE
+	PARTICIPATION_DRAINING
+	PARTICIPATION_MISMATCH
+	GENERATION_CONFLICT
+	MEDIA_NOT_READY
+	CREDENTIAL_REFRESH_REQUIRED
+	LIVE_START_CANCELLED
+	LIVE_PREPARATION_FAILED
+}
+
+type LiveMediaCutoff {
+	state: LiveCutoffState!
+	scope: LiveCutoffScope!
+	evidence: LiveCutoffEvidence
+	enforcedAt: String
+	operationId: UUID
+}
+
+type LiveMediaPermissions {
+	microphone: Boolean!
+	camera: Boolean!
+	subscribe: Boolean!
+}
+
+enum LiveMediaProfile {
+	AUDIO_ONLY
+	AUDIO_VIDEO
+}
+
+type LiveOperationFailure {
+	code: LiveErrorCode!
+	message: String!
+}
+
+enum LiveOperationKind {
+	START
+	END
+}
+
+enum LiveOperationState {
+	RUNNING
+	COMPLETED
+	FAILED
+}
+
+type LiveParticipantPage {
+	items: [LiveParticipation!]!
+	nextCursor: String
+	complete: Boolean!
+	partialReason: String
+	refreshRequired: Boolean!
+}
+
+type LiveParticipantPageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveParticipantPage!
+}
+
+input LiveParticipantsInput {
+	liveSessionId: UUID!
+	limit: PageSize! = 50
+	cursor: String
+}
+
+type LiveParticipation {
+	participationId: UUID!
+	principalId: UUID!
+	membershipEpoch: Decimal!
+	role: LiveRole!
+	state: LiveParticipationState!
+	permissions: LiveMediaPermissions!
+	reservationExpiresAt: String
+	nativeConnectionId: UUID
+	mediaCutoff: LiveMediaCutoff
+}
+
+enum LiveParticipationState {
+	JOINED
+	CONNECTING
+	CONNECTED
+	DISCONNECTED
+	LEAVING
+	LEFT
+}
+
+enum LiveRole {
+	PUBLISHER
+	VIEWER
+}
+
+type LiveSession {
+	liveSessionId: UUID!
+	conversationId: UUID!
+	creatorId: UUID!
+	kind: LiveSessionKind!
+	mediaProfile: LiveMediaProfile!
+	state: LiveSessionState!
+	generation: Decimal!
+	revision: Decimal!
+	createdAt: String!
+	expiresAt: String!
+	myParticipation: LiveParticipation
+	mediaCutoff: LiveMediaCutoff
+}
+
+input LiveSessionCredentialsInput {
+	liveSessionId: UUID!
+	participationId: UUID!
+	expectedGeneration: Decimal!
+	mode: LiveConnectionMode!
+	replacementOfConnectionId: UUID
+}
+
+type LiveSessionCredentialsPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: LiveConnectionGrant!
+}
+
+type LiveSessionEndRequested {
+	liveSessionId: UUID!
+	operationId: UUID!
+	mediaCutoff: LiveMediaCutoff!
+}
+
+input LiveSessionInput {
+	liveSessionId: UUID!
+}
+
+type LiveSessionJoined {
+	liveSessionId: UUID!
+	generation: Decimal!
+	participation: LiveParticipation!
+}
+
+enum LiveSessionKind {
+	INTERACTIVE
+	BROADCAST
+}
+
+type LiveSessionLeft {
+	liveSessionId: UUID!
+	participationId: UUID!
+	mediaCutoff: LiveMediaCutoff!
+}
+
+type LiveSessionOperation {
+	operationId: UUID!
+	requestId: UUID!
+	liveSessionId: UUID!
+	kind: LiveOperationKind!
+	state: LiveOperationState!
+	revision: Decimal!
+	requestedAt: String!
+	completedAt: String
+	completion: LiveSessionOperationCompletion
+	failure: LiveOperationFailure
+}
+
+type LiveSessionOperationCompletion {
+	liveSessionId: UUID!
+	generation: Decimal!
+	state: LiveSessionState!
+	revision: Decimal!
+	completedAt: String!
+	mediaCutoff: LiveMediaCutoff
+}
+
+input LiveSessionOperationInput {
+	operationId: UUID!
+}
+
+type LiveSessionOperationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveSessionOperation!
+}
+
+type LiveSessionPage {
+	items: [LiveSession!]!
+	nextCursor: String
+	complete: Boolean!
+	partialReason: String
+	refreshRequired: Boolean!
+}
+
+type LiveSessionPageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveSessionPage!
+}
+
+type LiveSessionReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: LiveSession!
+}
+
+type LiveSessionStarted {
+	liveSessionId: UUID!
+	conversationId: UUID!
+	kind: LiveSessionKind!
+	mediaProfile: LiveMediaProfile!
+	operationId: UUID!
+}
+
+enum LiveSessionState {
+	PREPARING
+	READY
+	ACTIVE
+	DRAINING
+	ENDED
+	FAILED
+}
+
+input LiveSessionsInput {
+	conversationId: UUID!
+	limit: PageSize! = 50
+	cursor: String
+}
+
+type MediaCutoff {
+	state: String!
+	scope: CutoffScope
+}
+
+type MediaPolicy {
+	leasePolicyId: String!
+	leaseProtocolVersion: String!
+	maxLeaseMs: Decimal!
+	renewAttemptMs: Decimal!
+	preludeMaxBytes: String!
+	preludeTimeoutMs: String!
+	clockProfileId: String!
+}
+
+type Member {
+	conversationId: UUID!
+	principalId: UUID!
+	role: String!
+	status: String!
+	membershipEpoch: Decimal!
+	visibilityEpoch: Decimal!
+	revision: Decimal!
+	visibleFromSequence: Decimal!
+	canStartBroadcast: Boolean!
+}
+
+input MemberBatchEntryInput {
+	principalId: UUID!
+	role: String!
+	expectedRevision: Decimal!
+}
+
+input MemberInputInput {
+	principalId: UUID!
+	role: String!
+}
+
+type MemberPage {
+	items: [Member!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type MembersReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: MemberPage
+}
+
+input MembersRequestInput {
+	conversationId: UUID!
+	limit: PageSize!
+	cursor: String
+}
+
+type Message {
+	messageId: UUID!
+	conversationId: UUID!
+	authorId: String!
+	sequence: Decimal!
+	revision: Decimal!
+	revisionSequence: Decimal!
+	createdAt: String!
+	deleted: Boolean!
+	text: String
+	props: Properties
+	editedAt: String
+}
+
+type MessageAck {
+	messageId: UUID!
+	conversationId: UUID!
+	sequence: Decimal!
+	revision: Decimal!
+	status: String!
+	cursor: Cursor
+}
+
+type MessagePage {
+	items: [Message!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type MessagesReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: MessagePage
+}
+
+input MessagesRequestInput {
+	conversationId: UUID!
+	limit: PageSize!
+	beforeSequence: Decimal
+}
+
+type Mutation {
+	createPrincipal(context: RequestContextInput!, input: CreatePrincipalRequestInput!): CreatePrincipalReply!
+	disablePrincipal(context: RequestContextInput!, input: DisablePrincipalRequestInput!): DisablePrincipalReply!
+	issueSession(context: RequestContextInput!, input: IssueSessionRequestInput!): IssueSessionReply!
+	renewSession(context: RequestContextInput!, input: RenewSessionRequestInput!): RenewSessionReply!
+	revokeSession(context: RequestContextInput!, input: RevokeSessionRequestInput!): RevokeSessionReply!
+	createConversation(context: RequestContextInput!, input: CreateConversationRequestInput!): CreateConversationReply!
+	updateConversation(context: RequestContextInput!, input: UpdateConversationRequestInput!): UpdateConversationReply!
+	addMember(context: RequestContextInput!, input: AddMemberRequestInput!): AddMemberReply!
+	addMembers(context: RequestContextInput!, input: AddMembersInput!): AddMembersPayload!
+	removeMember(context: RequestContextInput!, input: RemoveMemberRequestInput!): RemoveMemberReply!
+	historyGrant(context: RequestContextInput!, input: HistoryGrantRequestInput!): HistoryGrantReply!
+	sendMessage(context: RequestContextInput!, input: SendMessageRequestInput!): SendMessageReply!
+	editMessage(context: RequestContextInput!, input: EditMessageRequestInput!): EditMessageReply!
+	deleteMessage(context: RequestContextInput!, input: DeleteMessageRequestInput!): DeleteMessageReply!
+	reportReceipt(context: RequestContextInput!, input: ReportReceiptRequestInput!): ReportReceiptReply!
+	typing(context: RequestContextInput!, input: TypingRequestInput!): TypingReply!
+	setBroadcastPermission(context: RequestContextInput!, input: SetBroadcastPermissionInput!): SetBroadcastPermissionPayload!
+	startLiveSession(context: RequestContextInput!, input: StartLiveSessionInput!): StartLiveSessionPayload!
+	joinLiveSession(context: RequestContextInput!, input: JoinLiveSessionInput!): JoinLiveSessionPayload!
+	alertLiveSession(context: RequestContextInput!, input: AlertLiveSessionInput!): AlertLiveSessionPayload!
+	leaveLiveSession(context: RequestContextInput!, input: LeaveLiveSessionInput!): LeaveLiveSessionPayload!
+	endLiveSession(context: RequestContextInput!, input: EndLiveSessionInput!): EndLiveSessionPayload!
+	liveSessionCredentials(context: RequestContextInput!, input: LiveSessionCredentialsInput!): LiveSessionCredentialsPayload!
+	redeemCredential(context: RequestContextInput!, input: RedeemCredentialRequestInput!): RedeemCredentialReply!
+	acknowledgeCredential(context: RequestContextInput!, input: AcknowledgeCredentialRequestInput!): AcknowledgeCredentialReply!
+}
+
+type Operation {
+	operationId: UUID!
+	kind: String!
+	targetRef: ResourceRef
+	state: String!
+	revision: Decimal!
+	requestedAt: String!
+	updatedAt: String!
+	steps: [OperationStep!]!
+	result: OperationResult
+	blockedReason: String
+}
+
+type OperationRef {
+	operationId: UUID!
+	owner: String!
+	href: String!
+	state: String!
+}
+
+type OperationResult {
+	projectId: UUID
+	incarnation: UUID
+	status: String
+	backend: String
+	environment: String
+	policyRevision: Decimal
+	expiresAt: String
+	kind: String
+	resourceRef: ResourceRef
+	delivery: CredentialDelivery
+	keyId: String
+	endpointId: UUID
+	enabled: Boolean
+	liveSessionCompletion: LiveSessionOperationCompletion
+}
+
+type OperationStep {
+	stepId: String!
+	state: String!
+}
+
+type Organization {
+	orgId: UUID!
+	name: String!
+	status: String!
+	revision: Decimal!
+}
+
+type OrganizationPage {
+	items: [Organization!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+scalar PageSize
+
+input PolicyChangeInput {
+	kind: String!
+	reason: String
+	holdId: String
+}
+
+type Principal {
+	principalId: UUID!
+	externalUserId: String!
+	status: String!
+	revision: Decimal!
+}
+
+type Project {
+	projectId: UUID!
+	deploymentId: UUID!
+	name: String!
+	environment: String!
+	incarnation: UUID!
+	servingRegion: String!
+	servingEpoch: Decimal!
+	status: String!
+	revision: Decimal!
+	policyRevision: Decimal!
+}
+
+scalar Properties
+
+type Query {
+	capabilities(context: RequestContextInput!): CapabilitiesReply!
+	route(context: RequestContextInput!): RouteReply!
+	getPrincipal(context: RequestContextInput!, input: GetPrincipalRequestInput!): GetPrincipalReply!
+	getConversation(context: RequestContextInput!, input: GetConversationRequestInput!): GetConversationReply!
+	members(context: RequestContextInput!, input: MembersRequestInput!): MembersReply!
+	messages(context: RequestContextInput!, input: MessagesRequestInput!): MessagesReply!
+	getMessage(context: RequestContextInput!, input: GetMessageRequestInput!): GetMessageReply!
+	events(context: RequestContextInput!, input: EventsRequestInput!): EventsReply!
+	receipts(context: RequestContextInput!, input: ReceiptsRequestInput!): ReceiptsReply!
+	inbox(context: RequestContextInput!, input: InboxRequestInput!): InboxReply!
+	search(context: RequestContextInput!, input: SearchRequestInput!): SearchReply!
+	resolveRequest(context: RequestContextInput!, input: ResolveRequestRequestInput!): ResolveRequestReply!
+	getOperation(context: RequestContextInput!, input: GetOperationRequestInput!): GetOperationReply!
+	currentLiveSession(context: RequestContextInput!, input: ConversationLiveInput!): CurrentLiveSessionReply!
+	liveSession(context: RequestContextInput!, input: LiveSessionInput!): LiveSessionReply!
+	liveSessions(context: RequestContextInput!, input: LiveSessionsInput!): LiveSessionPageReply!
+	liveSessionParticipants(context: RequestContextInput!, input: LiveParticipantsInput!): LiveParticipantPageReply!
+	liveSessionAlerts(context: RequestContextInput!, input: LiveAlertsInput!): LiveAlertPageReply!
+	liveSessionOperation(context: RequestContextInput!, input: LiveSessionOperationInput!): LiveSessionOperationReply!
+}
+
+type ReadReceipt {
+	principalId: UUID!
+	membershipEpoch: Decimal!
+	visibilityEpoch: Decimal!
+	deliveredThroughSequence: Decimal
+	readThroughSequence: Decimal
+	updatedAt: String
+}
+
+type ReceiptPage {
+	items: [ReadReceipt!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type ReceiptsReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: ReceiptPage
+}
+
+input ReceiptsRequestInput {
+	conversationId: UUID!
+	limit: PageSize!
+	cursor: String
+}
+
+type RedeemCredentialReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: CredentialCapsule
+}
+
+input RedeemCredentialRequestInput {
+	deliveryId: UUID!
+}
+
+type RemoveMemberReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Member
+}
+
+input RemoveMemberRequestInput {
+	conversationId: UUID!
+	principalId: UUID!
+	expectedRevision: Decimal!
+}
+
+type RenewSessionReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: SessionBootstrap
+}
+
+input RenewSessionRequestInput {
+	sessionId: UUID!
+	principalId: UUID!
+	deviceId: UUID!
+	expectedRevision: Decimal!
+	requestedTtlMs: Decimal!
+}
+
+type ReportReceiptReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: ReadReceipt
+}
+
+input ReportReceiptRequestInput {
+	conversationId: UUID!
+	kind: String!
+	membershipEpoch: Decimal!
+	visibilityEpoch: Decimal!
+	throughSequence: Decimal!
+}
+
+input RequestContextInput {
+	requestId: UUID!
+	projectId: UUID
+	incarnation: UUID
+	observedServingEpoch: Decimal
+	credentialDeliveryPermit: SignedProof
+}
+
+type RequestResolution {
+	state: String!
+	requestId: UUID!
+	checkedAt: String!
+	resultWithheld: Boolean!
+	receipt: ResolvedReceipt
+}
+
+type ResolveRequestReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: RequestResolution
+}
+
+input ResolveRequestRequestInput {
+	requestId: UUID!
+}
+
+type ResolvedReceipt {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: RetainedResult
+}
+
+type ResourceRef {
+	kind: String!
+	id: String!
+}
+
+"""
+Exactly one typed field contains the retained, currently authorized receipt result.
+"""
+type RetainedResult {
+	broadcastPermissionChanged: BroadcastPermissionChanged
+	conversation: Conversation
+	conversationMemberBatch: ConversationMemberBatch
+	credentialDeliveryReceipt: CredentialDeliveryReceipt
+	deliveryAck: DeliveryAck
+	liveAlertBatch: LiveAlertBatch
+	liveCredentialIssuance: LiveCredentialIssuance
+	liveSessionEndRequested: LiveSessionEndRequested
+	liveSessionJoined: LiveSessionJoined
+	liveSessionLeft: LiveSessionLeft
+	liveSessionStarted: LiveSessionStarted
+	member: Member
+	message: Message
+	messageAck: MessageAck
+	organization: Organization
+	principal: Principal
+	readReceipt: ReadReceipt
+	sessionBootstrap: SessionBootstrap
+	sessionRevocation: SessionRevocation
+	signedProof: SignedProof
+}
+
+type RevokeSessionReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: SessionRevocation
+}
+
+input RevokeSessionRequestInput {
+	sessionId: UUID!
+	expectedRevision: Decimal!
+}
+
+type RouteReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: SignedProof
+}
+
+type SearchHit {
+	conversationId: UUID!
+	message: Message
+}
+
+type SearchPage {
+	items: [SearchHit!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type SearchReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: SearchPage
+}
+
+input SearchRequestInput {
+	query: String!
+	pageSize: PageSize!
+	scope: SearchScopeInput
+	cursor: String
+}
+
+input SearchScopeInput {
+	conversationIds: [UUID!]!
+}
+
+type SendMessageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: MessageAck
+}
+
+input SendMessageRequestInput {
+	conversationId: UUID!
+	text: String!
+	props: Properties!
+}
+
+type ServiceDetails {
+	status: String!
+}
+
+type ServiceObservation {
+	role: String!
+	observedAt: String!
+	details: ServiceDetails
+}
+
+type Session {
+	sessionId: UUID!
+	principalId: UUID!
+	deviceId: UUID!
+	incarnation: UUID!
+	sessionRevision: Decimal!
+	expiresAt: String!
+	status: String!
+}
+
+type SessionBootstrap {
+	session: Session
+	tokenExpiresAt: String!
+	sessionToken: String!
+}
+
+type SessionRevocation {
+	sessionId: UUID!
+	status: String!
+	mediaCutoff: MediaCutoff
+}
+
+input SetBroadcastPermissionInput {
+	conversationId: UUID!
+	principalId: UUID!
+	allowed: Boolean!
+	expectedMembershipRevision: Decimal!
+}
+
+type SetBroadcastPermissionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: BroadcastPermissionChanged!
+}
+
+scalar SignedProof
+
+input StartLiveSessionInput {
+	conversationId: UUID!
+	kind: LiveSessionKind! = INTERACTIVE
+	mediaProfile: LiveMediaProfile! = AUDIO_ONLY
+}
+
+type StartLiveSessionPayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	operation: OperationRef!
+	result: LiveSessionStarted!
+}
+
+type Subscription {
+	conversationEvents(context: RequestContextInput!, input: EventsRequestInput!): EventPage!
+}
+
+type TypingReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: TypingStatus
+}
+
+input TypingRequestInput {
+	conversationId: UUID!
+	isTyping: Boolean!
+}
+
+type TypingStatus {
+	accepted: Boolean!
+}
+
+scalar UUID
+
+type UpdateConversationReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: Conversation
+}
+
+input UpdateConversationRequestInput {
+	conversationId: UUID!
+	expectedRevision: Decimal!
+	title: String
+	props: Properties
+}
+
+type WebhookDelivery {
+	effectId: UUID!
+	eventId: UUID!
+	state: String!
+	attempts: Decimal!
+	lastOutcome: String
+	nextAttemptAt: String!
+}
+
+type WebhookDeliveryPage {
+	items: [WebhookDelivery!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+"""
+Directs the executor to include this field or fragment only when the `if` argument is true.
+"""
+directive @include(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+"""
+Directs the executor to skip this field or fragment when the `if` argument is true.
+"""
+directive @skip(if: Boolean!) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+schema {
+	query: Query
+	mutation: Mutation
+	subscription: Subscription
+}
