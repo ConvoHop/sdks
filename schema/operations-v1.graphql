@@ -85,6 +85,23 @@ query CommunicationRoute($context: RequestContextInput!) {
   }
 }
 
+query CommunicationCurrentSession($context: RequestContextInput!) {
+  currentSession(context: $context) {
+    status
+    requestId
+    serverTime
+    result {
+      sessionId
+      principalId
+      deviceId
+      incarnation
+      sessionRevision
+      expiresAt
+      status
+    }
+  }
+}
+
 query CommunicationGetPrincipal($context: RequestContextInput!, $input: GetPrincipalRequestInput!) {
   getPrincipal(context: $context, input: $input) {
     status

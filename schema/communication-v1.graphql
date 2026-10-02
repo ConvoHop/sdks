@@ -187,6 +187,13 @@ type CurrentLiveSessionReply {
 	result: LiveSession
 }
 
+type CurrentSessionReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: Session!
+}
+
 type Cursor {
 	incarnation: UUID!
 	conversationId: UUID!
@@ -1110,6 +1117,7 @@ scalar Properties
 type Query {
 	capabilities(context: RequestContextInput!): CapabilitiesReply!
 	route(context: RequestContextInput!): RouteReply!
+	currentSession(context: RequestContextInput!): CurrentSessionReply!
 	getPrincipal(context: RequestContextInput!, input: GetPrincipalRequestInput!): GetPrincipalReply!
 	getConversation(context: RequestContextInput!, input: GetConversationRequestInput!): GetConversationReply!
 	members(context: RequestContextInput!, input: MembersRequestInput!): MembersReply!

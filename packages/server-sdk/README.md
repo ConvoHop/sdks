@@ -50,6 +50,19 @@ unrestricted end-user message browsing. Session lifetime defaults to 15
 minutes. Operator/backend credentials never belong in client bundles, URLs
 or logs.
 
+Browser clients can opt into the
+[authority-bound session refresh lifecycle](../browser-sdk/README.md#session-credential-lifetime).
+Configure its hook before original-bearer initialization and invoke your
+authenticated, account/device-bound renewal endpoint inside that hook:
+`communication.renewSession` can invalidate the previous JWT immediately.
+Keep the original backend renewal request and its expected revision through
+unknown outcomes; SDK hook rejection is not proof of rollback. The additive
+`communication.currentSession` query is restricted to the authenticated
+current ClientSession, not backend/portal readers or selected session IDs.
+`V1SessionBootstrap` remains the same exported generated bootstrap type.
+Its `tokenExpiresAt` equals session `expiresAt`, while effective bearer
+expiry is floored to integer seconds and may be up to 999 ms earlier.
+
 ## Management and credential delivery
 
 `V1ManagementClient` uses its separately configured Management origin's

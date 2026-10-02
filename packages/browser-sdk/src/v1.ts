@@ -10,6 +10,11 @@ export type V1SendReceipt = NonNullable<OperationPayload<"communication.sendMess
 export type V1SearchHit = NonNullable<OperationPayload<"communication.search">["result"]>["items"][number] & { message: V1Message };
 export type V1Membership = NonNullable<OperationPayload<"communication.members">["result"]>["items"][number];
 export type V1Conversation = NonNullable<OperationPayload<"communication.getConversation">["result"]>;
+export type V1Session = OperationPayload<"communication.currentSession">["result"];
+type SessionResult = NonNullable<OperationPayload<"communication.issueSession">["result"]>;
+export type V1SessionBootstrap = SessionResult & { session: NonNullable<SessionResult["session"]> };
+export type V1SessionRefresh = (current: Readonly<V1Session>) => Promise<V1SessionBootstrap>;
+export type V1SessionRefreshState = "disabled" | "uninitialized" | "ready" | "refreshing" | "blocked";
 export interface V1Route {
   projectId: string; incarnation: string; servingEpoch: string; communicationBase: string;
   wssUrl: string; expiresAt: string; signature: string;
@@ -106,6 +111,29 @@ function route(value: unknown): V1Route {
     communicationBase: v1String(v.communicationBase), wssUrl: v1String(v.wssUrl),
     expiresAt: timestamp(v.expiresAt), signature: v1String(v.signature) };
 }
+function sessionMetadata(value: unknown): V1Session {
+  validateOutput(value, "Session!");
+  const v = v1Record(value), expiresAt = timestamp(v.expiresAt), revision = v1Counter(v.sessionRevision);
+  if (new Date(expiresAt).toISOString() !== expiresAt || revision === "0")
+    throw new TypeError("Invalid session expiry or revision");
+  return { sessionId: v1Id(v.sessionId), principalId: v1Id(v.principalId), deviceId: v1Id(v.deviceId),
+    incarnation: v1Id(v.incarnation), sessionRevision: revision, expiresAt, status: v1String(v.status) };
+}
+function sessionExpiry(value: V1Session): number {
+  // The authority also enforces its signed JWT's integer-second expiry without leeway.
+  return Math.floor(Date.parse(value.expiresAt) / 1000) * 1000;
+}
+function currentSession(proof: OperationPayload<"communication.currentSession">): V1Session {
+  const value = sessionMetadata(proof.result);
+  if (proof.status !== "ok" || value.status !== "active" ||
+      sessionExpiry(value) <= Date.now() || sessionExpiry(value) <= Date.parse(timestamp(proof.serverTime)))
+    throw new TypeError("Expected current live session authority evidence");
+  return value;
+}
+function sameSession(left: V1Session, right: V1Session): boolean {
+  return left.sessionId === right.sessionId && left.principalId === right.principalId &&
+    left.deviceId === right.deviceId && left.incarnation === right.incarnation;
+}
 function origin(value: string): string {
   const url = new URL(value);
   if (url.username || url.password || url.search || url.hash || url.pathname !== "/" ||
@@ -132,10 +160,18 @@ export interface V1TransportOptions {
   baseUrl: string; credential?: string; namespace: string; incarnation?: string;
   recoveryStorage?: V1RecoveryStorage; asyncRecoveryStorage?: V1AsyncRecoveryStorage; fetch?: typeof fetch;
 }
+type SessionProbe = "communication.route" | "communication.currentSession";
+interface TransportAuthentication {
+  credential: string | undefined; barrier: Promise<void> | undefined; blocked: boolean;
+  active: Set<Promise<unknown>>;
+  probe: <K extends SessionProbe>(key: K, projectId: string, credential: string,
+    observedServingEpoch?: string) => Promise<OperationPayload<K>>;
+}
+const transportAuthentication = new WeakMap<V1Transport, TransportAuthentication>();
 export class V1Transport {
   readonly baseUrl: string;
   readonly durableRecovery: boolean;
-  readonly #credential: string | undefined;
+  readonly #authentication: TransportAuthentication;
   readonly #fetch: typeof fetch;
   readonly #storage: V1RecoveryStorage | undefined;
   readonly #asyncStorage: V1AsyncRecoveryStorage | undefined;
@@ -150,7 +186,11 @@ export class V1Transport {
   constructor(options: V1TransportOptions) {
     if (options.recoveryStorage !== undefined && options.asyncRecoveryStorage !== undefined)
       throw new TypeError("Choose recoveryStorage or asyncRecoveryStorage, not both");
-    this.baseUrl = origin(options.baseUrl); this.#credential = options.credential;
+    this.baseUrl = origin(options.baseUrl);
+    this.#authentication = { credential: options.credential, barrier: undefined, blocked: false, active: new Set(),
+      probe: (key, projectId, credential, observedServingEpoch) =>
+        this.#execute(key, projectId, {}, crypto.randomUUID(), undefined, this.incarnation, credential, observedServingEpoch) };
+    transportAuthentication.set(this, this.#authentication);
     this.incarnation = options.incarnation ?? "management";
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
     this.#storage = options.recoveryStorage; this.#asyncStorage = options.asyncRecoveryStorage;
@@ -242,16 +282,37 @@ export class V1Transport {
   }
   async execute<K extends V1OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>,
     requestId: string = crypto.randomUUID(), credentialDeliveryPermit?: V1Record): Promise<OperationPayload<K>> {
-    const operation = v1Operations[operationKey(key)];
     const incarnation = this.incarnation;
     const body = structuredClone(Object.fromEntries(Object.entries(v1Record(input)).filter(([, value]) => value !== undefined)));
+    const permit = credentialDeliveryPermit === undefined ? undefined : structuredClone(credentialDeliveryPermit);
+    this.#plan(key, projectId, body, requestId, permit);
+    return this.#authorized(requestId, credential =>
+      this.#execute(key, projectId, body, requestId, permit, incarnation, credential));
+  }
+  #authorized<T>(requestId: string, work: (credential: string | undefined) => Promise<T>): Promise<T> {
+    const authentication = this.#authentication;
+    if (authentication.blocked) {
+      const state = this.#states.get(requestId);
+      return Promise.reject(new V1Problem("SESSION_REFRESH_REQUIRED", requestId,
+        state ? state.resolutionState === "pending" ? "unknown" : state.resolutionState : "rejected", 409,
+        "Session authority is unverified; recover the original renewal or explicitly retire this client"));
+    }
+    if (authentication.barrier) return authentication.barrier.then(() => this.#authorized(requestId, work));
+    const pending = work(authentication.credential);
+    authentication.active.add(pending);
+    return pending.finally(() => authentication.active.delete(pending));
+  }
+  async #execute<K extends V1OperationKey>(key: K, projectId: string | undefined, body: V1Record,
+    requestId: string, credentialDeliveryPermit: V1Record | undefined, incarnation: string,
+    credential: string | undefined, observedServingEpoch: string | undefined = this.servingEpoch): Promise<OperationPayload<K>> {
+    const operation = v1Operations[operationKey(key)];
     this.#plan(key, projectId, body, requestId, credentialDeliveryPermit);
     await this.initializeRecovery();
     if (this.incarnation !== incarnation)
       throw new V1Problem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
     const result = operationPayload(key, operation.kind === "mutation"
-      ? await this.#mutate(key, projectId, body, requestId, credentialDeliveryPermit)
-      : await this.#request(key, projectId, body, requestId, credentialDeliveryPermit));
+      ? await this.#mutate(key, projectId, body, requestId, credential, credentialDeliveryPermit)
+      : await this.#request(key, projectId, body, requestId, credential, credentialDeliveryPermit, observedServingEpoch));
     if (key === "communication.resolveRequest" || key === "management.resolveRequest") {
       const state = this.#states.get(v1String(body.requestId)), resolution = v1Record(v1Record(result).result);
       if (resolution.requestId !== body.requestId ||
@@ -267,7 +328,7 @@ export class V1Transport {
     return result;
   }
   async #mutate(operation: V1OperationKey, projectId: string | undefined, input: V1Record,
-    requestId: string, credentialDeliveryPermit?: V1Record, retry = false): Promise<V1Record> {
+    requestId: string, credential: string | undefined, credentialDeliveryPermit?: V1Record, retry = false): Promise<V1Record> {
     v1Id(requestId);
     const incarnation = this.incarnation, identity = canonical({ operation, projectId: projectId ?? null, input, incarnation });
     const active = this.#active.get(requestId);
@@ -301,12 +362,13 @@ export class V1Transport {
         this.#states.set(requestId, state);
         await this.#persist(state);
       }
-      return this.#submit(state, credentialDeliveryPermit, retry);
+      return this.#submit(state, credential, credentialDeliveryPermit, retry);
     })();
     this.#active.set(requestId, { identity, work });
     try { return await work; } finally { this.#active.delete(requestId); }
   }
-  async #submit(state: V1RecoveryState, credentialDeliveryPermit?: V1Record, retry = false): Promise<V1Record> {
+  async #submit(state: V1RecoveryState, credential: string | undefined,
+    credentialDeliveryPermit?: V1Record, retry = false): Promise<V1Record> {
     if (state.incarnation !== this.incarnation)
       throw new V1Problem("INCARNATION_MISMATCH", state.requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
     const now = Date.now();
@@ -323,7 +385,7 @@ export class V1Transport {
       throw new V1Problem("RESOLUTION_REQUIRED", state.requestId, "unknown", 409, "The original request is no longer eligible for resend");
     let result: V1Record, outcome: "committed" | "accepted";
     try {
-      result = await this.#request(state.operation, state.projectId, state.input, state.requestId, credentialDeliveryPermit);
+      result = await this.#request(state.operation, state.projectId, state.input, state.requestId, credential, credentialDeliveryPermit);
       if (result.status !== "committed" && result.status !== "accepted") throw new TypeError("A mutation requires authority receipt evidence");
       outcome = result.status;
     } catch (error) {
@@ -335,6 +397,9 @@ export class V1Transport {
   }
   async retry(requestId: string): Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>> {
     v1Id(requestId);
+    return this.#authorized(requestId, credential => this.#retry(requestId, credential));
+  }
+  async #retry(requestId: string, credential: string | undefined): Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>> {
     await this.initializeRecovery();
     const state = this.#states.get(requestId);
     if (!state) throw new Error("No recovery record exists; do not invent a replacement identity");
@@ -343,7 +408,8 @@ export class V1Transport {
       throw new V1Problem("CREDENTIAL_REQUIRED", requestId, "unknown", 409,
         "Delivery permits cannot authorize request lookup; obtain a current permit and submit the same delivery identity explicitly");
     const key = v1Operations[state.operation].plane === "management" ? "management.resolveRequest" : "communication.resolveRequest";
-    const resolution = (await this.execute(key, state.projectId, { requestId })).result;
+    const resolution = (await this.#execute(key, state.projectId, { requestId }, crypto.randomUUID(),
+      undefined, this.incarnation, credential)).result;
     if (!resolution) throw new TypeError("Missing current request resolution");
     if (resolution.state === "committed" || resolution.state === "accepted") return resolution;
     if (resolution.state !== "notObservedYet") throw new TypeError("Unknown request resolution state");
@@ -353,29 +419,32 @@ export class V1Transport {
     }
     if (await fingerprint({ operation: state.operation, projectId: state.projectId ?? null, input: state.input }) !== state.payloadFingerprint)
       throw new Error("Recovery input fingerprint changed");
-    await this.#mutate(state.operation, state.projectId, state.input, state.requestId, undefined, true);
-    const current = (await this.execute(key, state.projectId, { requestId })).result;
+    await this.#mutate(state.operation, state.projectId, state.input, state.requestId, credential, undefined, true);
+    const current = (await this.#execute(key, state.projectId, { requestId }, crypto.randomUUID(),
+      undefined, this.incarnation, credential)).result;
     if (!current) throw new TypeError("Missing current request resolution");
     return current;
   }
   #plan(key: V1OperationKey, projectId: string | undefined, input: V1Record,
-    requestId: string, credentialDeliveryPermit?: V1Record): ReturnType<typeof v1GraphqlRequest> {
+    requestId: string, credentialDeliveryPermit?: V1Record,
+    observedServingEpoch: string | undefined = this.servingEpoch): ReturnType<typeof v1GraphqlRequest> {
     try {
       return v1GraphqlRequest(key, input, { requestId: v1Id(requestId),
         ...(projectId === undefined ? {} : { projectId: v1Id(projectId) }),
         ...(credentialDeliveryPermit === undefined ? {} : { credentialDeliveryPermit }),
         ...(this.incarnation === "management" ? {} : { incarnation: this.incarnation }),
-        ...(this.servingEpoch === undefined ? {} : { observedServingEpoch: this.servingEpoch }) });
+        ...(observedServingEpoch === undefined ? {} : { observedServingEpoch }) });
     } catch (error) {
       throw new V1Problem("INVALID_REQUEST", requestId, "rejected", 400,
         error instanceof Error ? error.message : "Invalid SDK operation");
     }
   }
   async #request(key: V1OperationKey, projectId: string | undefined, input: V1Record,
-    requestId: string, credentialDeliveryPermit?: V1Record): Promise<V1Record> {
-    const plan = this.#plan(key, projectId, input, requestId, credentialDeliveryPermit);
+    requestId: string, credential: string | undefined, credentialDeliveryPermit?: V1Record,
+    observedServingEpoch: string | undefined = this.servingEpoch): Promise<V1Record> {
+    const plan = this.#plan(key, projectId, input, requestId, credentialDeliveryPermit, observedServingEpoch);
     const headers: Record<string, string> = { accept: "application/json", "content-type": "application/json" };
-    if (this.#credential !== undefined) headers.authorization = "Bearer " + this.#credential;
+    if (credential !== undefined) headers.authorization = "Bearer " + credential;
     let response: Response;
     try {
       response = await this.#fetch(this.baseUrl + "/graphql", { method: "POST", headers, redirect: "error", cache: "no-store", credentials: "omit",
@@ -423,30 +492,175 @@ export class V1Transport {
 }
 export interface V1ClientOptions {
   baseUrl: string; projectId: string; sessionToken: string; incarnation: string; principalId: string;
-  recoveryStorage?: V1RecoveryStorage; fetch?: typeof fetch;
+  recoveryStorage?: V1RecoveryStorage; fetch?: typeof fetch; sessionRefresh?: V1SessionRefresh;
 }
+interface ReplayRefresh {
+  suspend: () => Promise<void>;
+  resume: (route: V1Route, token: string) => Promise<void>;
+}
+const replayRefresh = new WeakMap<V1Realtime, ReplayRefresh>();
 export class V1Client {
   readonly projectId: string; readonly principalId: string; readonly http: V1Transport;
-  readonly #token: string; readonly storage: V1RecoveryStorage | undefined;
+  #token: string; readonly storage: V1RecoveryStorage | undefined;
+  readonly #authentication: TransportAuthentication;
+  readonly #sessionRefresh: V1SessionRefresh | undefined;
+  #session: V1Session | undefined;
+  #sessionInitialization: Promise<void> | undefined;
+  #refreshing: Promise<V1Session> | undefined;
+  #quiescing: { replays: Map<V1Realtime, ReplayRefresh>; work: Promise<void>[] } | undefined;
   #route: V1Route | undefined;
   readonly #streams = new Set<V1Realtime>();
   readonly #replayGenerations = new Map<string, number>();
   constructor(options: V1ClientOptions) {
+    if (options.sessionRefresh !== undefined && typeof options.sessionRefresh !== "function")
+      throw new TypeError("sessionRefresh must be an asynchronous backend renewal hook");
     this.projectId = v1Id(options.projectId); this.principalId = v1Id(options.principalId); this.#token = options.sessionToken; this.storage = options.recoveryStorage;
+    this.#sessionRefresh = options.sessionRefresh;
     this.http = new V1Transport({ baseUrl: options.baseUrl, credential: options.sessionToken,
       namespace: options.projectId + ":" + options.principalId, incarnation: v1Id(options.incarnation),
       ...(options.recoveryStorage ? { recoveryStorage: options.recoveryStorage } : {}),
       ...(options.fetch ? { fetch: options.fetch } : {}) });
+    const authentication = transportAuthentication.get(this.http);
+    if (!authentication) throw new Error("Missing transport authentication state");
+    this.#authentication = authentication;
   }
-  async initialize(): Promise<V1Route> {
-    const value = route((await this.http.execute("communication.route", this.projectId, {})).result);
+  get sessionBinding(): Readonly<V1Session> | undefined {
+    return this.#session === undefined ? undefined : structuredClone(this.#session);
+  }
+  get sessionRefreshState(): V1SessionRefreshState {
+    if (!this.#sessionRefresh) return "disabled";
+    if (this.#refreshing) return "refreshing";
+    if (this.#authentication.blocked) return "blocked";
+    return this.#session && this.#route ? "ready" : "uninitialized";
+  }
+  #validateRoute(input: unknown): V1Route {
+    const value = route(input);
     if (value.projectId !== this.projectId || value.incarnation !== this.http.incarnation) throw new V1Problem("INCARNATION_MISMATCH", crypto.randomUUID(), "rejected", 409, "Explicit session/route recovery required");
     const socket = new URL(value.wssUrl), base = new URL(this.http.baseUrl);
     if (origin(value.communicationBase) !== this.http.baseUrl || socket.host !== base.host ||
         socket.protocol !== (base.protocol === "https:" ? "wss:" : "ws:") ||
         socket.pathname !== "/graphql" || socket.username || socket.password || socket.search || socket.hash)
       throw new TypeError("Route cannot redirect this client's credentials to another origin or an unsafe socket");
+    return value;
+  }
+  async initialize(): Promise<V1Route> {
+    const value = this.#validateRoute((await this.http.execute("communication.route", this.projectId, {})).result);
+    this.http.servingEpoch = value.servingEpoch;
+    if (this.#sessionRefresh) {
+      this.#sessionInitialization ??= this.http.execute("communication.currentSession", this.projectId, {}).then(proof => {
+        const binding = currentSession(proof);
+        if (binding.principalId !== this.principalId || binding.incarnation !== this.http.incarnation)
+          throw new V1Problem("SESSION_REFRESH_REJECTED", proof.requestId, "rejected", 409,
+            "Original session authority does not match this client's principal and incarnation");
+        this.#session = binding;
+      });
+      await this.#sessionInitialization;
+    }
     this.http.servingEpoch = value.servingEpoch; this.#route = value; return value;
+  }
+  refreshSession(): Promise<V1Session> {
+    if (this.#refreshing) return this.#refreshing;
+    const hook = this.#sessionRefresh, binding = this.#session, currentRoute = this.#route;
+    if (!hook || !binding || !currentRoute || sessionExpiry(binding) <= Date.now() ||
+        binding.incarnation !== this.http.incarnation)
+      return Promise.reject(new V1Problem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+        "Configure sessionRefresh and initialize with the original valid bearer before renewal or expiry"));
+    const pending = this.#refreshSession(hook, structuredClone(binding), currentRoute).finally(() => {
+      if (this.#refreshing === pending) this.#refreshing = undefined;
+    });
+    this.#refreshing = pending;
+    return pending;
+  }
+  #suspendReplay(stream: V1Realtime): void {
+    const quiescing = this.#quiescing, controls = replayRefresh.get(stream);
+    if (!quiescing || !controls) throw new Error("Missing replay refresh state");
+    if (!quiescing.replays.has(stream)) {
+      quiescing.replays.set(stream, controls);
+      quiescing.work.push(controls.suspend());
+    }
+  }
+  async #refreshSession(hook: V1SessionRefresh, binding: V1Session, oldRoute: V1Route): Promise<V1Session> {
+    const authentication = this.#authentication, oldToken = this.#token;
+    const quiescing: { replays: Map<V1Realtime, ReplayRefresh>; work: Promise<void>[] } = { replays: new Map(), work: [] };
+    this.#quiescing = quiescing;
+    let release: (() => void) | undefined, replacement: V1Session | undefined;
+    let invalidated = false, failure: V1Problem | undefined, replayRoute = oldRoute;
+    const drain = async () => {
+      if (!release) {
+        let resume: () => void = () => { throw new Error("Uninitialized refresh barrier"); };
+        const barrier = new Promise<void>(resolve => { resume = resolve; });
+        authentication.barrier = barrier;
+        release = () => { authentication.barrier = undefined; resume(); };
+      }
+      // Original callers still receive their errors; refresh only waits for custody to settle.
+      await Promise.allSettled([...authentication.active]);
+    };
+    try {
+      for (const stream of this.#streams) this.#suspendReplay(stream);
+      const retired = await Promise.allSettled(quiescing.work);
+      for (const result of retired) if (result.status === "rejected") throw result.reason;
+      await drain();
+      if (sessionExpiry(binding) <= Date.now()) throw new V1Problem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(),
+        "rejected", 409, "Original bearer expired while work drained; explicitly retire and bootstrap a new client");
+      let supplied: V1SessionBootstrap;
+      try { supplied = await hook(structuredClone(binding)); }
+      catch { throw new V1Problem("SESSION_REFRESH_FAILED", crypto.randomUUID(), "unknown", 0,
+        "Session renewal hook failed; retain the original renewal request and verify its outcome"); }
+      validateOutput(supplied, "SessionBootstrap!");
+      const candidate = { session: sessionMetadata(supplied.session),
+        sessionToken: v1String(supplied.sessionToken), tokenExpiresAt: timestamp(supplied.tokenExpiresAt) };
+      if (!candidate.sessionToken || candidate.sessionToken.length > 16384 || /[\r\n]/.test(candidate.sessionToken))
+        throw new TypeError("Invalid replacement credential");
+      const nextRoute = this.#validateRoute((await authentication.probe("communication.route", this.projectId, candidate.sessionToken)).result);
+      const proof = await authentication.probe("communication.currentSession", this.projectId, candidate.sessionToken, nextRoute.servingEpoch);
+      const metadata = sessionMetadata(proof.result);
+      invalidated = proof.status === "ok" && sameSession(binding, metadata) &&
+        BigInt(metadata.sessionRevision) > BigInt(binding.sessionRevision);
+      const verified = currentSession(proof);
+      if (!sameSession(binding, verified) || binding.incarnation !== this.http.incarnation ||
+          BigInt(verified.sessionRevision) <= BigInt(binding.sessionRevision) ||
+          sessionExpiry(verified) <= sessionExpiry(binding) || canonical(verified) !== canonical(candidate.session) ||
+          candidate.tokenExpiresAt !== verified.expiresAt || Date.parse(nextRoute.expiresAt) <= Date.now())
+        throw new V1Problem("SESSION_REFRESH_REJECTED", proof.requestId, "unknown", 409,
+          "Replacement must preserve the original session, advance its live revision and expiry, and match authority metadata");
+      this.#token = candidate.sessionToken; authentication.credential = candidate.sessionToken;
+      this.#session = verified; replacement = verified; this.#route = nextRoute;
+      replayRoute = nextRoute;
+      this.http.servingEpoch = nextRoute.servingEpoch;
+      authentication.blocked = false;
+    } catch (error) {
+      failure = error instanceof V1Problem ? error : new V1Problem("SESSION_REFRESH_REJECTED", crypto.randomUUID(),
+        "unknown", 409, "Session replacement or application retirement could not be verified");
+      await drain();
+      authentication.blocked = true;
+      if (!invalidated) {
+        try {
+          const old = currentSession(await authentication.probe("communication.currentSession", this.projectId, oldToken));
+          if (canonical(old) !== canonical(binding)) throw new TypeError("Original session authority changed");
+          authentication.blocked = false;
+        } catch {
+          failure = new V1Problem("SESSION_REFRESH_UNVERIFIED", failure.requestId, "unknown", 0,
+            "Renewal and original session authority are unverified; HTTP and realtime remain refresh-blocked", { cause: failure });
+        }
+      } else {
+        failure = new V1Problem("SESSION_REFRESH_UNVERIFIED", failure.requestId, "unknown", 0,
+          "Authority observed a renewed original session; the old bearer cannot be restored", { cause: failure });
+      }
+    } finally {
+      this.#quiescing = undefined;
+      release?.();
+    }
+    if (!authentication.blocked) {
+      const resumed = await Promise.allSettled([...quiescing.replays.values()].map(controls =>
+        controls.resume(replayRoute, this.#token)));
+      const errors: unknown[] = failure ? [failure] : [];
+      for (const result of resumed) if (result.status === "rejected") errors.push(result.reason);
+      if (errors.length > 1) throw new AggregateError(errors, "Session refresh or replay restoration failed");
+      if (errors.length) throw errors[0];
+    }
+    if (failure) throw failure;
+    if (!replacement) throw new Error("Missing verified session replacement");
+    return structuredClone(replacement);
   }
   conversation(id: string): ConversationHandle { return new ConversationHandle(this, v1Id(id)); }
   async getConversation(id: string): Promise<V1Conversation> {
@@ -516,23 +730,33 @@ export class V1Client {
   }
   async resyncAuthorizedHistory(conversationId: string, apply: (events: V1Record[]) => Promise<void>,
     onError: (error: Error) => void): Promise<V1Realtime> {
+    this.#checkReplayAdmission();
     const id = v1Id(conversationId);
     this.#replayGenerations.set(id, (this.#replayGenerations.get(id) ?? 0) + 1);
     for (const stream of this.#streams) if (stream.conversationId === id) stream.close();
     return this.#openReplay(id, apply, onError, true);
   }
+  #checkReplayAdmission(): void {
+    if (this.#authentication.blocked || this.#quiescing)
+      throw new V1Problem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+        "Session refresh holds replay admission; await verified refresh before opening or resynchronizing history");
+  }
   async #openReplay(conversationId: string, apply: (events: V1Record[]) => Promise<void>,
     onError: (error: Error) => void, resync: boolean): Promise<V1Realtime> {
+    this.#checkReplayAdmission();
     const generation = this.#replayGenerations.get(conversationId) ?? 0;
     await Promise.all([...this.#streams]
       .filter(stream => stream.conversationId === conversationId && stream.closed)
       .map(stream => stream.retire()));
     const route = this.#route ?? await this.initialize();
+    this.#checkReplayAdmission();
     if (generation !== (this.#replayGenerations.get(conversationId) ?? 0)) throw new Error("History watcher superseded by explicit resynchronization");
     const realtime = new V1Realtime(this, conversationId, route, this.#token, apply, onError, () => this.#streams.delete(realtime));
     this.#streams.add(realtime);
+    if (this.#quiescing) this.#suspendReplay(realtime);
     try {
       if (resync) await realtime.resyncAuthorizedHistory(); else await realtime.start();
+      this.#checkReplayAdmission();
       if (generation !== (this.#replayGenerations.get(conversationId) ?? 0)) throw new Error("History watcher superseded by explicit resynchronization");
       return realtime;
     }
@@ -541,7 +765,8 @@ export class V1Client {
 }
 export class V1Realtime {
   #socket: WebSocket | undefined; #closed = false; #working: Promise<void> | undefined;
-  #applying: Promise<void> | undefined;
+  #applying: Promise<boolean> | undefined;
+  #paused = false;
   #started = false;
   #cursor: V1Cursor | undefined; #timer: ReturnType<typeof setTimeout> | undefined;
   #reconnectAttempts = 0;
@@ -549,12 +774,14 @@ export class V1Realtime {
   #queueGeneration = 0;
   #currentRoute: V1Route;
   readonly #storageKey: string;
-  readonly #token: string;
+  #token: string;
   constructor(readonly client: V1Client, readonly conversationId: string, readonly route: V1Route, token: string,
     readonly apply: (events: V1Record[]) => Promise<void>, readonly onError: (error: Error) => void,
     readonly onClose?: () => void) {
     this.#token = token;
     this.#currentRoute = route;
+    replayRefresh.set(this, { suspend: () => this.#suspendSessionRefresh(),
+      resume: (route, token) => this.#resumeSessionRefresh(route, token) });
     this.#storageKey = `convohop.v1.cursor:${client.projectId}:${client.principalId}:${conversationId}`;
     const saved = client.storage?.getItem(this.#storageKey);
     if (saved) this.#cursor = v1Cursor(JSON.parse(saved));
@@ -565,12 +792,34 @@ export class V1Realtime {
     this.close();
     await this.#applying;
   }
-  async #apply(events: V1Record[]): Promise<void> {
-    const applying = Promise.resolve().then(() => {
-      if (!this.#closed) return this.apply(events);
+  async #suspendSessionRefresh(): Promise<void> {
+    this.#paused = true;
+    if (this.#timer) { clearTimeout(this.#timer); this.#timer = undefined; }
+    const socket = this.#socket; this.#socket = undefined;
+    let closing: Error | undefined;
+    try { socket?.close(1000); }
+    catch (error) { closing = error instanceof Error ? error : new Error("Realtime suspension failed"); }
+    const settled = await Promise.allSettled([this.#applying, this.#working]);
+    this.#queueGeneration++;
+    if (closing) throw closing;
+    for (const result of settled) if (result.status === "rejected") throw result.reason;
+  }
+  async #resumeSessionRefresh(route: V1Route, token: string): Promise<void> {
+    if (this.#closed) return;
+    this.#currentRoute = route; this.#token = token; this.#paused = false;
+    try {
+      await this.reconcile();
+      if (!this.#closed) this.#connect();
+    } catch (error) { this.#fail(error); throw error; }
+  }
+  async #apply(events: V1Record[]): Promise<boolean> {
+    const applying = Promise.resolve().then(async () => {
+      if (this.#closed || this.#paused) return false;
+      await this.apply(events);
+      return true;
     });
     this.#applying = applying;
-    try { await applying; }
+    try { return await applying; }
     finally {
       this.#applying = undefined;
       if (this.#closed) this.onClose?.();
@@ -588,20 +837,24 @@ export class V1Realtime {
     if (this.#closed || this.#started) throw new Error("Replay is already started or closed");
     this.#started = true;
     await this.client.recoverPending(this.onError);
+    if (this.#paused) throw new V1Problem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+      "Replay startup was paused by session refresh; open it after verified refresh");
     await this.reconcile();
-    if (!this.#closed) this.#connect();
+    if (this.#paused) throw new V1Problem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+      "Replay startup was paused by session refresh; open it after verified refresh");
+    if (!this.#closed && !this.#paused) this.#connect();
   }
   #connect(): void {
-    if (this.#closed) return;
+    if (this.#closed || this.#paused || this.#socket) return;
     const ws = new WebSocket(this.#currentRoute.wssUrl, "graphql-transport-ws"); this.#socket = ws;
     const subscriptionId = crypto.randomUUID();
     ws.onopen = () => {
-      if (this.#closed || this.#socket !== ws) { ws.close(1000); return; }
+      if (this.#closed || this.#paused || this.#socket !== ws) { ws.close(1000); return; }
       ws.send(JSON.stringify({ type: "connection_init", payload: {
         projectId: this.client.projectId, incarnation: this.#currentRoute.incarnation, token: this.#token } }));
     };
     ws.onmessage = event => {
-      if (this.#closed || this.#socket !== ws) return;
+      if (this.#closed || this.#paused || this.#socket !== ws) return;
       try {
         const text = v1String(event.data);
         if (text.length > 65536) throw new V1Problem("ADMISSION_LIMIT", subscriptionId, "rejected", 503, "Subscription frame exceeds its budget");
@@ -631,12 +884,15 @@ export class V1Realtime {
         }
       } catch (error) { this.#fail(error); }
     };
-    ws.onerror = () => this.onError(new Error("Realtime connection unavailable; current history remains authoritative"));
+    ws.onerror = () => {
+      if (!this.#closed && !this.#paused && this.#socket === ws)
+        this.onError(new Error("Realtime connection unavailable; current history remains authoritative"));
+    };
     ws.onclose = event => {
       if (this.#socket !== ws) return;
       this.#socket = undefined;
-      if (!this.#closed && ![4400, 4401, 4403, 4408, 4409].includes(event.code)) this.#retry();
-      else if (!this.#closed) this.#fail(new V1Problem("UNAUTHENTICATED", subscriptionId, "rejected", 401, "Realtime authorization ended; obtain a current session"));
+      if (!this.#closed && !this.#paused && ![4400, 4401, 4403, 4408, 4409].includes(event.code)) this.#retry();
+      else if (!this.#closed && !this.#paused) this.#fail(new V1Problem("UNAUTHENTICATED", subscriptionId, "rejected", 401, "Realtime authorization ended; obtain a current session"));
     };
   }
   #page(value: unknown): void {
@@ -646,11 +902,11 @@ export class V1Realtime {
     const generation = this.#queueGeneration;
     this.#pendingPages++;
     const work = (this.#working ?? Promise.resolve()).then(async () => {
-      if (this.#closed || generation !== this.#queueGeneration ||
+      if (this.#closed || this.#paused || generation !== this.#queueGeneration ||
           (this.#cursor && BigInt(page.nextCursor.sequence) < BigInt(this.#cursor.sequence))) return;
       const events = this.#cursor ? page.items.filter(event => BigInt(v1Counter(event.sequence)) > BigInt(this.#cursor!.sequence)) : page.items;
-      await this.#apply(events);
-      if (this.#closed || generation !== this.#queueGeneration) return;
+      const applied = await this.#apply(events);
+      if (!applied || this.#closed || generation !== this.#queueGeneration) return;
       this.#cursor = page.nextCursor;
       this.client.storage?.setItem(this.#storageKey, JSON.stringify(this.#cursor));
     }).catch(error => { if (generation === this.#queueGeneration) this.#fail(error); }).finally(() => {
@@ -660,20 +916,29 @@ export class V1Realtime {
     this.#working = work;
   }
   #retry(): void {
-    if (this.#closed || this.#timer) return;
+    if (this.#closed || this.#paused || this.#timer) return;
     const delay = Math.min(1000 * 2 ** Math.min(this.#reconnectAttempts++, 4), 10000) + Math.floor(Math.random() * 500);
     this.#timer = setTimeout(() => {
       this.#timer = undefined;
-      if (this.#closed) return;
+      if (this.#closed || this.#paused) return;
+      const generation = this.#queueGeneration;
+      const current = () => !this.#closed && !this.#paused && generation === this.#queueGeneration;
       this.client.initialize().then(route => {
+        if (!current()) return;
         this.#currentRoute = route;
-        if (!this.#closed) return this.client.recoverPending(this.onError);
-      }).then(() => this.reconcile()).then(() => this.#connect()).catch(error => this.#fail(error));
+        return this.client.recoverPending(this.onError);
+      }).then(() => { if (current()) return this.reconcile(); })
+        .then(() => { if (current()) this.#connect(); })
+        .catch(error => { if (current()) this.#fail(error); });
     }, delay);
   }
   #fail(error: unknown): void {
     if (this.#closed) return;
     this.#queueGeneration++;
+    if (this.#paused) {
+      this.onError(error instanceof Error ? error : new Error("Realtime reconciliation failed"));
+      return;
+    }
     if (error instanceof V1Problem && ([0, 429, 503].includes(error.status) || error.code === "WRONG_REGION")) {
       const socket = this.#socket; this.#socket = undefined;
       socket?.close(4000, "Retrying authoritative connection");
@@ -684,19 +949,22 @@ export class V1Realtime {
   }
   async reconcile(): Promise<void> {
     if (this.#closed) return;
+    if (this.#paused) throw new V1Problem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+      "Realtime application work is paused until session authority is verified");
     if (this.#working) return this.#working;
     const generation = this.#queueGeneration;
     const work = async () => {
-      for (let page = 0; page < 10 && !this.#closed; page++) {
+      for (let page = 0; page < 10 && !this.#closed && !this.#paused; page++) {
         const result = await this.client.events(this.conversationId, this.#cursor);
-        if (this.#closed || generation !== this.#queueGeneration) return;
+        if (this.#closed || this.#paused || generation !== this.#queueGeneration) return;
         if (result.refreshRequired) throw new Error("Explicit authorized history resynchronization required");
-        await this.#apply(result.items);
-        if (this.#closed || generation !== this.#queueGeneration) return;
+        const applied = await this.#apply(result.items);
+        if (!applied || this.#closed || generation !== this.#queueGeneration) return;
         this.#cursor = result.nextCursor;
         this.client.storage?.setItem(this.#storageKey, JSON.stringify(this.#cursor));
         if (result.complete) return;
       }
+      if (this.#closed || this.#paused || generation !== this.#queueGeneration) return;
       throw new Error("Replay work limit reached; explicitly reconcile again");
     };
     const pending = work(); this.#working = pending;

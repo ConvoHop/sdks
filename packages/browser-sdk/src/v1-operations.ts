@@ -3,6 +3,7 @@ import type * as Generated from "./v1-generated.js";
 export interface V1OperationTypes {
   "communication.capabilities": { variables: Generated.CommunicationCapabilitiesQueryVariables; result: Generated.CommunicationCapabilitiesQuery };
   "communication.route": { variables: Generated.CommunicationRouteQueryVariables; result: Generated.CommunicationRouteQuery };
+  "communication.currentSession": { variables: Generated.CommunicationCurrentSessionQueryVariables; result: Generated.CommunicationCurrentSessionQuery };
   "communication.getPrincipal": { variables: Generated.CommunicationGetPrincipalQueryVariables; result: Generated.CommunicationGetPrincipalQuery };
   "communication.getConversation": { variables: Generated.CommunicationGetConversationQueryVariables; result: Generated.CommunicationGetConversationQuery };
   "communication.members": { variables: Generated.CommunicationMembersQueryVariables; result: Generated.CommunicationMembersQuery };
@@ -261,6 +262,15 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
       "requestId": "UUID!",
       "serverTime": "String!",
       "result": "LiveSession"
+    }
+  },
+  "CurrentSessionReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String!",
+      "result": "Session!"
     }
   },
   "Cursor": {
@@ -1803,6 +1813,15 @@ export const v1Operations: Record<V1OperationKey, V1Operation> = {
     "operationName": "CommunicationRoute",
     "query": "query CommunicationRoute($context: RequestContextInput!) {\n  route(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result\n  }\n}",
     "resultType": "RouteReply!",
+    "inputFields": []
+  },
+  "communication.currentSession": {
+    "plane": "communication",
+    "kind": "query",
+    "field": "currentSession",
+    "operationName": "CommunicationCurrentSession",
+    "query": "query CommunicationCurrentSession($context: RequestContextInput!) {\n  currentSession(context: $context) {\n    status\n    requestId\n    serverTime\n    result {\n      sessionId\n      principalId\n      deviceId\n      incarnation\n      sessionRevision\n      expiresAt\n      status\n    }\n  }\n}",
+    "resultType": "CurrentSessionReply!",
     "inputFields": []
   },
   "communication.getPrincipal": {

@@ -18,6 +18,15 @@
       "resultType": "RouteReply!",
       "inputFields": []
     },
+    "communication.currentSession": {
+      "plane": "communication",
+      "kind": "query",
+      "field": "currentSession",
+      "operationName": "CommunicationCurrentSession",
+      "query": "query CommunicationCurrentSession($context: RequestContextInput!) {\n  currentSession(context: $context) {\n    status\n    requestId\n    serverTime\n    result {\n      sessionId\n      principalId\n      deviceId\n      incarnation\n      sessionRevision\n      expiresAt\n      status\n    }\n  }\n}",
+      "resultType": "CurrentSessionReply!",
+      "inputFields": []
+    },
     "communication.getPrincipal": {
       "plane": "communication",
       "kind": "query",

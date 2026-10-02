@@ -155,32 +155,110 @@ authority exports; `npm run check:graphql` detects document/type drift.
 
 ## Session credential lifetime
 
-`V1Client`, its request transport and realtime streams retain their
-constructor credentials. Existing live/participation/media handles retain
-that original client. There is no supported in-place credential-refresh API;
-do not patch SDK internals or substitute a backend credential.
+Optional, awaited in-place refresh uses the compatible authority's read-only
+`currentSession(context: RequestContextInput!): CurrentSessionReply!`.
+Its `result: Session!` contains existing session metadata only, for the
+authenticated current ClientSession. Backend/portal credentials and
+caller-selected session identities are not supported. Project/incarnation
+and serving-epoch binding are enforced through the authenticated request
+context; `Session` itself has no project field. The exported schema matches
+authority revision `fa847a72e93c0f30c8ee5b741621e677e1c6bedf`.
 
-The current public authority queries cannot prove a replacement bearer's
-exact principal/device/session/revision binding. A route proof establishes
-routing scope, not that session identity; a principal lookup is not a
-self-session projection. Backend session-renewal receipts are not available
-as a browser self-binding proof. Comparing caller-asserted bootstrap fields
-or decoding an opaque token would not establish this missing authority
-evidence, even when the proposed revision and expiry increase.
+```ts
+import {
+  V1Client, type V1Session, type V1SessionBootstrap,
+} from "@convohop/browser-sdk";
 
-Obtain finite bootstraps from your authenticated backend. A renewed revision
-can invalidate the old token immediately. With the existing public API,
-retire old realtime work, settle outstanding request work, then reconstruct
-the client with the current bootstrap and original recovery storage. Keep
-unknown request IDs, payloads and budgets; never invent replacement commands.
-Reacquire authorized live/participation handles through the new client
-instead of claiming the old handles now use the new credential.
+const client = new V1Client({
+  baseUrl: bootstrap.baseUrl,
+  projectId: bootstrap.projectId,
+  incarnation: bootstrap.session.incarnation,
+  principalId: bootstrap.session.principalId,
+  sessionToken: bootstrap.sessionToken,
+  recoveryStorage: localStorage,
+  sessionRefresh: (current: Readonly<V1Session>): Promise<V1SessionBootstrap> =>
+    renewThroughAuthenticatedApplicationBackend(current),
+});
+await client.initialize(); // Proves ORIGINAL binding while its bearer is valid.
+const renewed: V1Session = await client.refreshSession();
+```
 
-Session renewal does not itself prove that media must rejoin or that an old
-native lease became valid again. Continuity depends on the service's normal
-current-session/native-lease checks. Any explicitly chosen new native
-connection still requires fresh admission and starts receive-only; it must
-not reuse a spent grant, revive an expired lease or silently restore capture.
+`V1Session`, `V1SessionRefresh` and `V1SessionRefreshState` are exported.
+`V1SessionBootstrap` is the same generated bootstrap type also exported by
+the Server SDK. Initialization obtains the original authority binding once
+only when `sessionRefresh` is configured. Without that hook, constructors
+and ordinary initialization keep their existing behavior and never require
+`currentSession`. Legacy providers lacking this capability support that
+unchanged path, not in-place refresh; enabling the hook against them fails
+explicitly rather than accepting asserted bootstrap fields or decoded JWTs.
+
+**Renew inside the hook, not before calling `refreshSession()`.** The SDK
+first pauses its managed realtime streams, waits for application callbacks,
+and drains already-started HTTP work with its original authentication.
+Only then does it invoke the hook once with cloned, credential-free verified
+metadata. Your authenticated backend must bind the account/device/project,
+check the expected revision, enforce CSRF protection where applicable, and
+retain the original SQL renewal request/outcome for uncertain retries.
+The hook uses that backend's endpoint, never a backend key in the browser,
+and must bound its own I/O. Do not await this same client from the hook or
+call refresh from a replay application callback: either can await its own
+retirement/admission barrier. There is no SDK automatic renewal timer or
+retry loop; concurrent explicit refresh calls share the same work.
+
+Before replacement, the SDK probes the candidate through generated queries
+at the fixed trusted origin and checks the original session, principal,
+device, project and incarnation. Revision and effective expiry must
+strictly increase, and bootstrap session metadata and `tokenExpiresAt` must
+match the live authority projection. Counters stay canonical decimal
+strings. `tokenExpiresAt` equals `Session.expiresAt`, but the authority also
+enforces a signed integer-second JWT expiry without leeway: effective
+bearer expiry is `Math.floor(Date.parse(expiresAt) / 1000) * 1000`, up to
+999 ms earlier than the displayed millisecond deadline. Renew before that
+boundary; this API does not resurrect an already-expired enrollment.
+
+Successful replacement retains the original transport, storage namespace,
+request IDs/inputs/fingerprints/budgets, handles and spent native markers.
+Already-applied replay work advances its original frontier before renewal;
+queued old pages and stale socket/reconnect callbacks cannot advance it
+after replacement. The same managed replay resumes from its applied cursor
+under the verified credential, without resetting history or automatically
+retrying uncertain mutations. New `watch`/resync admission during the
+quiescence rejects with `SESSION_REFRESH_REQUIRED`; retry after the awaited
+refresh. Manually constructed low-level realtime instances remain
+caller-managed. Socket creation is not a server acknowledgement or hosted
+transport qualification.
+
+`client.sessionBinding` is a cloned, credential-free **last verified**
+projection, not continuous proof of authorization.
+`client.sessionRefreshState` reports `disabled`, `uninitialized`, `ready`,
+`refreshing` or `blocked`. A hook rejection can happen after server renewal
+committed. On hook/probe failure, the SDK resumes old HTTP/realtime admission
+only if an authenticated old-bearer query proves the unchanged original
+binding/revision/deadline still live. A known renewed old bearer is never a
+fallback. Otherwise `SESSION_REFRESH_UNVERIFIED` leaves admission blocked,
+and ordinary calls reject `SESSION_REFRESH_REQUIRED` without network or
+new mutation intent. Explicit retry must retrieve the original backend
+renewal outcome, not invent another renewal ID. Hook failures use the
+credential-free `SESSION_REFRESH_FAILED` error; invalid replacements are
+rejected, and old callback failures prevent renewal.
+
+A candidate can be verified and installed before replay restoration fails.
+That failure still rejects refresh and reaches the stream's error callback;
+the new `sessionBinding` remains inspectable. An expired/rejected cursor is
+not reset: use the explicit authorized-history resync flow. After expiry or
+an unrecoverable blocked renewal, retire old replay callbacks, settle
+outstanding requests and explicitly bootstrap a new client with original
+recovery storage. Keep unknown commands and finite budgets; reacquire
+authorized live handles rather than pretending reconstruction rebinds them.
+
+Refresh never reconnects native media, requests another grant, changes a
+native deadline, replays spent admission or restores capture. Existing
+native continuity remains subject to the service's normal current-session
+and finite-lease checks, including cutoff during a stalled drain/hook/proof.
+An expired lease or disconnected native connection is not revived by a
+browser bearer replacement. Any explicitly chosen new native connection
+requires fresh admission and starts receive-only. SDK framework regressions
+do not qualify actual SQL, native forwarding or a deployed service.
 
 ## Network fallback and limits
 

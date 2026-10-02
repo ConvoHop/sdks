@@ -454,6 +454,13 @@ export type CommunicationRouteQueryVariables = Exact<{
 
 export type CommunicationRouteQuery = { route: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, result: Record<string, unknown> | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null } };
 
+export type CommunicationCurrentSessionQueryVariables = Exact<{
+  context: RequestContextInput;
+}>;
+
+
+export type CommunicationCurrentSessionQuery = { currentSession: { status: string, requestId: string, serverTime: string, result: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } } };
+
 export type CommunicationGetPrincipalQueryVariables = Exact<{
   context: RequestContextInput;
   input: GetPrincipalRequestInput;

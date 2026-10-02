@@ -1,9 +1,9 @@
 import {
   V1Transport, v1Id, v1Record, v1String, v1Conversation, v1Counter,
-  type V1RecoveryStorage, type V1AsyncRecoveryStorage, type V1Record, type V1Conversation, type V1Graphql, type V1Membership, type CommandOptions, type OperationPayload,
+  type V1RecoveryStorage, type V1AsyncRecoveryStorage, type V1SessionBootstrap, type V1Record, type V1Conversation, type V1Graphql, type V1Membership, type CommandOptions,
 } from "@convohop/browser-sdk";
 
-export type { V1RecoveryStorage, V1AsyncRecoveryStorage } from "@convohop/browser-sdk";
+export type { V1RecoveryStorage, V1AsyncRecoveryStorage, V1SessionBootstrap } from "@convohop/browser-sdk";
 
 export type V1DeploymentOptions = Omit<V1Graphql.CreateDeploymentRequestInput, "orgId">;
 export type V1ProjectOptions = Omit<V1Graphql.CreateProjectRequestInput, "deploymentId" | "name">;
@@ -48,8 +48,6 @@ export class V1ManagementClient {
       { projectId: v1Id(projectId), deliveryId: v1Id(deliveryId), redemptionRequestId: v1Id(redemptionRequestId) })).result);
   }
 }
-type SessionResult = NonNullable<OperationPayload<"communication.issueSession">["result"]>;
-export type V1SessionBootstrap = SessionResult & { session: NonNullable<SessionResult["session"]> };
 export class V1ProjectServerClient {
   readonly projectId: string; readonly http: V1Transport;
   constructor(options: { baseUrl: string; projectId: string; backendKey: string; incarnation: string; recoveryStorage?: V1RecoveryStorage; asyncRecoveryStorage?: V1AsyncRecoveryStorage; fetch?: typeof fetch }) {

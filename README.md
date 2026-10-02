@@ -65,6 +65,12 @@ with awaited restoration and durable writes. Existing Browser
 `sessionStorage`/`localStorage` recovery stays synchronous. The application
 must coordinate journal writers across processes and overlapping deployments.
 
+Browser clients may separately opt into
+[authority-bound session refresh](packages/browser-sdk/README.md#session-credential-lifetime).
+Original-bearer initialization precedes backend renewal; verified replacement
+preserves existing request/replay/native custody. Legacy constructors and
+providers do not automatically require the additive self-session query.
+
 `client.requests.resolve(id)` reads current typed receipt evidence.
 `client.requests.retry(id)` resolves first, then resends only an unobserved
 original command within its unchanged three-attempt/60-second budget.
