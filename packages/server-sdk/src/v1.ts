@@ -1,7 +1,9 @@
 import {
   V1Transport, v1Id, v1Record, v1String, v1Conversation, v1Counter,
-  type V1RecoveryStorage, type V1Record, type V1Conversation, type V1Graphql, type V1Membership, type CommandOptions, type OperationPayload,
+  type V1RecoveryStorage, type V1AsyncRecoveryStorage, type V1Record, type V1Conversation, type V1Graphql, type V1Membership, type CommandOptions, type OperationPayload,
 } from "@convohop/browser-sdk";
+
+export type { V1RecoveryStorage, V1AsyncRecoveryStorage } from "@convohop/browser-sdk";
 
 export type V1DeploymentOptions = Omit<V1Graphql.CreateDeploymentRequestInput, "orgId">;
 export type V1ProjectOptions = Omit<V1Graphql.CreateProjectRequestInput, "deploymentId" | "name">;
@@ -13,10 +15,11 @@ function required<T>(value: T | null | undefined): T {
 
 export class V1ManagementClient {
   readonly http: V1Transport;
-  constructor(options: { baseUrl: string; accessToken: string; actorId: string; recoveryStorage?: V1RecoveryStorage; fetch?: typeof fetch }) {
+  constructor(options: { baseUrl: string; accessToken: string; actorId: string; recoveryStorage?: V1RecoveryStorage; asyncRecoveryStorage?: V1AsyncRecoveryStorage; fetch?: typeof fetch }) {
     this.http = new V1Transport({ baseUrl: options.baseUrl, credential: options.accessToken,
       namespace: "management:" + v1Id(options.actorId),
-      ...(options.recoveryStorage ? { recoveryStorage: options.recoveryStorage } : {}),
+      ...(options.recoveryStorage === undefined ? {} : { recoveryStorage: options.recoveryStorage }),
+      ...(options.asyncRecoveryStorage === undefined ? {} : { asyncRecoveryStorage: options.asyncRecoveryStorage }),
       ...(options.fetch ? { fetch: options.fetch } : {}) });
   }
   async createOrganization(name: string, termsRef: string) {
@@ -49,11 +52,12 @@ type SessionResult = NonNullable<OperationPayload<"communication.issueSession">[
 export type V1SessionBootstrap = SessionResult & { session: NonNullable<SessionResult["session"]> };
 export class V1ProjectServerClient {
   readonly projectId: string; readonly http: V1Transport;
-  constructor(options: { baseUrl: string; projectId: string; backendKey: string; incarnation: string; recoveryStorage?: V1RecoveryStorage; fetch?: typeof fetch }) {
+  constructor(options: { baseUrl: string; projectId: string; backendKey: string; incarnation: string; recoveryStorage?: V1RecoveryStorage; asyncRecoveryStorage?: V1AsyncRecoveryStorage; fetch?: typeof fetch }) {
     this.projectId = v1Id(options.projectId);
     this.http = new V1Transport({ baseUrl: options.baseUrl, credential: options.backendKey,
       namespace: "backend:" + options.projectId, incarnation: v1Id(options.incarnation),
-      ...(options.recoveryStorage ? { recoveryStorage: options.recoveryStorage } : {}),
+      ...(options.recoveryStorage === undefined ? {} : { recoveryStorage: options.recoveryStorage }),
+      ...(options.asyncRecoveryStorage === undefined ? {} : { asyncRecoveryStorage: options.asyncRecoveryStorage }),
       ...(options.fetch ? { fetch: options.fetch } : {}) });
   }
   readonly conversations = {

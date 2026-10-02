@@ -22,9 +22,14 @@ export interface V1RecoveryState {
   mediaAdmissionAttempted?: true;
 }
 export type V1RecoveryStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+export interface V1AsyncRecoveryStorage {
+  getItem(key: string): Promise<string | null>;
+  setItem(key: string, value: string): Promise<void>;
+  removeItem(key: string): Promise<void>;
+}
 export class V1Problem extends Error {
   constructor(readonly code: string, readonly requestId: string, readonly outcome: string,
-    readonly status: number, message: string) { super(message); this.name = "V1Problem"; }
+    readonly status: number, message: string, options?: ErrorOptions) { super(message, options); this.name = "V1Problem"; }
 }
 export function v1Record(value: unknown): V1Record {
   if (value === null || typeof value !== "object" || Array.isArray(value)) throw new TypeError("Invalid protocol object");
@@ -125,7 +130,7 @@ async function fingerprint(value: unknown): Promise<string> {
 }
 export interface V1TransportOptions {
   baseUrl: string; credential?: string; namespace: string; incarnation?: string;
-  recoveryStorage?: V1RecoveryStorage; fetch?: typeof fetch;
+  recoveryStorage?: V1RecoveryStorage; asyncRecoveryStorage?: V1AsyncRecoveryStorage; fetch?: typeof fetch;
 }
 export class V1Transport {
   readonly baseUrl: string;
@@ -133,26 +138,51 @@ export class V1Transport {
   readonly #credential: string | undefined;
   readonly #fetch: typeof fetch;
   readonly #storage: V1RecoveryStorage | undefined;
+  readonly #asyncStorage: V1AsyncRecoveryStorage | undefined;
   readonly #storageKey: string;
   readonly #states = new Map<string, V1RecoveryState>();
-  readonly #active = new Map<string, Promise<V1Record>>();
+  readonly #active = new Map<string, { identity: string; work: Promise<V1Record> }>();
+  #recoveryInitialized = false;
+  #initialization: Promise<void> | undefined;
+  #writes: Promise<void> | undefined;
   incarnation: string;
   servingEpoch: string | undefined;
   constructor(options: V1TransportOptions) {
+    if (options.recoveryStorage !== undefined && options.asyncRecoveryStorage !== undefined)
+      throw new TypeError("Choose recoveryStorage or asyncRecoveryStorage, not both");
     this.baseUrl = origin(options.baseUrl); this.#credential = options.credential;
     this.incarnation = options.incarnation ?? "management";
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
-    this.#storage = options.recoveryStorage; this.durableRecovery = this.#storage !== undefined;
+    this.#storage = options.recoveryStorage; this.#asyncStorage = options.asyncRecoveryStorage;
+    this.durableRecovery = this.#storage !== undefined || this.#asyncStorage !== undefined;
     this.#storageKey = "convohop.requests:" + options.namespace;
-    const saved = this.#storage?.getItem(this.#storageKey);
+    if (this.#asyncStorage === undefined) {
+      this.#restore(this.#storage?.getItem(this.#storageKey));
+      this.#recoveryInitialized = true;
+    }
+  }
+  initializeRecovery(): Promise<void> {
+    const storage = this.#asyncStorage;
+    if (storage === undefined) return Promise.resolve();
+    this.#initialization ??= Promise.resolve().then(() => storage.getItem(this.#storageKey)).then(saved => {
+      if (saved !== null && (typeof saved !== "string" || saved.length === 0))
+        throw new TypeError("Invalid asynchronous mutation recovery storage");
+      this.#restore(saved);
+      this.#recoveryInitialized = true;
+    });
+    return this.#initialization;
+  }
+  #restore(saved: string | null | undefined): void {
     if (saved) {
       const values: unknown = JSON.parse(saved);
       if (!Array.isArray(values) || values.length > 128) throw new TypeError("Invalid mutation recovery storage");
+      const restored = new Map<string, V1RecoveryState>();
       for (const item of values) {
         const v = v1Record(item);
-        const operation = operationKey(v.operation);
+        const operation = operationKey(v.operation), resolutionState = v.resolutionState;
         if (v1Operations[operation].kind !== "mutation" ||
-            !["pending", "unknown", "committed", "accepted"].includes(v1String(v.resolutionState))) throw new TypeError("Invalid recovery record");
+            (resolutionState !== "pending" && resolutionState !== "unknown" &&
+             resolutionState !== "committed" && resolutionState !== "accepted")) throw new TypeError("Invalid recovery record");
         const projectId = v.projectId === undefined ? undefined : v1Id(v.projectId);
         if ((v1Operations[operation].plane === "communication") !== (projectId !== undefined))
           throw new TypeError("Invalid recovery project scope");
@@ -167,36 +197,58 @@ export class V1Transport {
           operation, ...(projectId === undefined ? {} : { projectId }), input: v1Record(v.input),
           firstSubmittedAt: Number(v.firstSubmittedAt), retryDeadline: Number(v.retryDeadline), attemptCount: Number(v.attemptCount),
           lastAttemptAt: Number(v.lastAttemptAt), lastAttemptClassification: v1String(v.lastAttemptClassification),
-          resolutionState: v.resolutionState as V1RecoveryState["resolutionState"],
+          resolutionState,
           ...(v.mediaAdmissionAttempted === true ? { mediaAdmissionAttempted: true } : {}),
         };
-        this.#states.set(state.requestId, state);
+        if (restored.has(state.requestId)) throw new TypeError("Duplicate mutation recovery identity");
+        restored.set(state.requestId, state);
       }
+      for (const [requestId, state] of restored) this.#states.set(requestId, state);
     }
   }
-  get recoveryStates(): readonly V1RecoveryState[] { return [...this.#states.values()].map(state => structuredClone(state)); }
+  get recoveryStates(): readonly V1RecoveryState[] {
+    if (!this.#recoveryInitialized) throw new Error("Await initializeRecovery() before inspecting asynchronous recovery state");
+    return [...this.#states.values()].map(state => structuredClone(state));
+  }
   /** @internal Persist the native attempt boundary without retaining a bearer grant. */
-  markMediaAdmissionAttempted(requestId: string): void {
-    const state = this.#states.get(v1Id(requestId));
+  markMediaAdmissionAttempted(requestId: string): void | Promise<void> {
+    v1Id(requestId);
+    if (!this.#recoveryInitialized)
+      return this.initializeRecovery().then(() => this.markMediaAdmissionAttempted(requestId));
+    const state = this.#states.get(requestId);
     if (!state || state.operation !== "communication.liveSessionCredentials" || state.resolutionState !== "committed")
       throw new Error("Native admission requires a committed credential issuance");
     state.lastAttemptClassification = "nativeAdmissionAttempted";
     state.mediaAdmissionAttempted = true;
-    this.#persist();
+    return this.#persist(state);
   }
-  #persist(): void {
-    while (this.#states.size > 128) {
-      const settled = [...this.#states.values()].find(state => ["committed", "accepted"].includes(state.resolutionState));
-      if (!settled) throw new Error("Resolve outstanding mutations before creating more");
-      this.#states.delete(settled.requestId);
+  #persist(state: V1RecoveryState): void | Promise<void> {
+    const storage = this.#asyncStorage;
+    if (storage !== undefined) {
+      const snapshot = JSON.stringify([...this.#states.values()]);
+      const write = async () => {
+        try { await storage.setItem(this.#storageKey, snapshot); }
+        catch (cause) {
+          throw new V1Problem("RECOVERY_STORAGE_FAILURE", state.requestId,
+            state.resolutionState === "pending" ? "unknown" : state.resolutionState, 0,
+            "Recovery storage did not confirm durability; retain the original request and its outcome", { cause });
+        }
+      };
+      // A failed snapshot rejects its caller; a later complete snapshot may repair it.
+      this.#writes = this.#writes ? this.#writes.then(write, write) : write();
+      return this.#writes;
     }
     this.#storage?.setItem(this.#storageKey, JSON.stringify([...this.#states.values()]));
   }
   async execute<K extends V1OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>,
     requestId: string = crypto.randomUUID(), credentialDeliveryPermit?: V1Record): Promise<OperationPayload<K>> {
     const operation = v1Operations[operationKey(key)];
-    const body = Object.fromEntries(Object.entries(v1Record(input)).filter(([, value]) => value !== undefined));
+    const incarnation = this.incarnation;
+    const body = structuredClone(Object.fromEntries(Object.entries(v1Record(input)).filter(([, value]) => value !== undefined)));
     this.#plan(key, projectId, body, requestId, credentialDeliveryPermit);
+    await this.initializeRecovery();
+    if (this.incarnation !== incarnation)
+      throw new V1Problem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
     const result = operationPayload(key, operation.kind === "mutation"
       ? await this.#mutate(key, projectId, body, requestId, credentialDeliveryPermit)
       : await this.#request(key, projectId, body, requestId, credentialDeliveryPermit));
@@ -208,48 +260,83 @@ export class V1Transport {
       if (state && (state.projectId !== projectId || state.incarnation !== this.incarnation))
         throw new V1Problem("RESOLUTION_REQUIRED", requestId, "unknown", 409, "Resolve within the original project and incarnation");
       if (state && (resolution.state === "committed" || resolution.state === "accepted")) {
-        state.resolutionState = resolution.state; state.lastAttemptClassification = "authorityReceipt"; this.#persist();
+        if (state.resolutionState !== "committed") state.resolutionState = resolution.state;
+        state.lastAttemptClassification = "authorityReceipt"; await this.#persist(state);
       }
     }
     return result;
   }
   async #mutate(operation: V1OperationKey, projectId: string | undefined, input: V1Record,
-    requestId: string, credentialDeliveryPermit?: V1Record): Promise<V1Record> {
+    requestId: string, credentialDeliveryPermit?: V1Record, retry = false): Promise<V1Record> {
     v1Id(requestId);
-    const hash = await fingerprint({ operation, projectId: projectId ?? null, input });
-    let state = this.#states.get(requestId);
-    if (state && (state.payloadFingerprint !== hash || state.incarnation !== this.incarnation)) throw new V1Problem("IDEMPOTENCY_CONFLICT", requestId, "unknown", 409, "Preserve the original request and payload");
-    if (!state) {
-      const now = Date.now();
-      state = { requestId, incarnation: this.incarnation, payloadFingerprint: hash, operation,
-        ...(projectId === undefined ? {} : { projectId }), input: structuredClone(input),
-        firstSubmittedAt: now, retryDeadline: now + 60000,
-        attemptCount: 0, lastAttemptAt: now, lastAttemptClassification: "notSubmitted", resolutionState: "pending" };
-      this.#states.set(requestId, state); this.#persist();
+    const incarnation = this.incarnation, identity = canonical({ operation, projectId: projectId ?? null, input, incarnation });
+    const active = this.#active.get(requestId);
+    if (active) {
+      if (active.identity !== identity)
+        throw new V1Problem("IDEMPOTENCY_CONFLICT", requestId, "unknown", 409, "Preserve the original request and payload");
+      return active.work;
     }
-    const active = this.#active.get(requestId); if (active) return active;
-    const work = this.#submit(state, credentialDeliveryPermit);
-    this.#active.set(requestId, work);
+    const work = (async () => {
+      const hash = await fingerprint({ operation, projectId: projectId ?? null, input });
+      if (this.incarnation !== incarnation)
+        throw new V1Problem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
+      let state = this.#states.get(requestId);
+      if (state && (state.payloadFingerprint !== hash || state.incarnation !== incarnation ||
+          state.operation !== operation || state.projectId !== projectId || canonical(state.input) !== canonical(input)))
+        throw new V1Problem("IDEMPOTENCY_CONFLICT", requestId, "unknown", 409, "Preserve the original request and payload");
+      if (retry && (!state || ["committed", "accepted"].includes(state.resolutionState) || state.mediaAdmissionAttempted))
+        throw new V1Problem("RESOLUTION_REQUIRED", requestId, "unknown", 409, "The original request is no longer eligible for resend");
+      if (!state) {
+        if (this.#states.size >= 128) {
+          const settled = [...this.#states.values()].find(value =>
+            ["committed", "accepted"].includes(value.resolutionState) && !this.#active.has(value.requestId));
+          if (!settled) throw new Error("Resolve outstanding mutations before creating more");
+          this.#states.delete(settled.requestId);
+        }
+        const now = Date.now();
+        state = { requestId, incarnation, payloadFingerprint: hash, operation,
+          ...(projectId === undefined ? {} : { projectId }), input: structuredClone(input),
+          firstSubmittedAt: now, retryDeadline: now + 60000,
+          attemptCount: 0, lastAttemptAt: now, lastAttemptClassification: "notSubmitted", resolutionState: "pending" };
+        this.#states.set(requestId, state);
+        await this.#persist(state);
+      }
+      return this.#submit(state, credentialDeliveryPermit, retry);
+    })();
+    this.#active.set(requestId, { identity, work });
     try { return await work; } finally { this.#active.delete(requestId); }
   }
-  async #submit(state: V1RecoveryState, credentialDeliveryPermit?: V1Record): Promise<V1Record> {
+  async #submit(state: V1RecoveryState, credentialDeliveryPermit?: V1Record, retry = false): Promise<V1Record> {
+    if (state.incarnation !== this.incarnation)
+      throw new V1Problem("INCARNATION_MISMATCH", state.requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
     const now = Date.now();
     if (state.attemptCount >= 3 || now > state.retryDeadline || now < state.firstSubmittedAt || now < state.lastAttemptAt)
       throw new V1Problem("RESOLUTION_REQUIRED", state.requestId, "unknown", 409, "Retry budget expired or clock changed; resolve this request read-only");
     state.attemptCount += 1; state.lastAttemptAt = now;
     if (state.resolutionState === "pending") state.resolutionState = "unknown";
-    state.lastAttemptClassification = "submitted"; this.#persist();
+    state.lastAttemptClassification = "submitted"; await this.#persist(state);
+    if (state.incarnation !== this.incarnation)
+      throw new V1Problem("INCARNATION_MISMATCH", state.requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
+    const submittingAt = Date.now();
+    if (submittingAt > state.retryDeadline || submittingAt < state.firstSubmittedAt || submittingAt < state.lastAttemptAt ||
+        (retry && (["committed", "accepted"].includes(state.resolutionState) || state.mediaAdmissionAttempted)))
+      throw new V1Problem("RESOLUTION_REQUIRED", state.requestId, "unknown", 409, "The original request is no longer eligible for resend");
+    let result: V1Record, outcome: "committed" | "accepted";
     try {
-      const result = await this.#request(state.operation, state.projectId, state.input, state.requestId, credentialDeliveryPermit);
+      result = await this.#request(state.operation, state.projectId, state.input, state.requestId, credentialDeliveryPermit);
       if (result.status !== "committed" && result.status !== "accepted") throw new TypeError("A mutation requires authority receipt evidence");
-      state.resolutionState = result.status; state.lastAttemptClassification = "authorityReceipt"; this.#persist(); return result;
+      outcome = result.status;
     } catch (error) {
       state.lastAttemptClassification = error instanceof V1Problem ? error.code : "opaqueTransportFailure";
-      this.#persist(); throw error;
+      await this.#persist(state); throw error;
     }
+    if (state.resolutionState !== "committed") state.resolutionState = outcome;
+    state.lastAttemptClassification = "authorityReceipt"; await this.#persist(state); return result;
   }
   async retry(requestId: string): Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>> {
-    const state = this.#states.get(v1Id(requestId));
+    v1Id(requestId);
+    await this.initializeRecovery();
+    const state = this.#states.get(requestId);
     if (!state) throw new Error("No recovery record exists; do not invent a replacement identity");
     if (state.incarnation !== this.incarnation) throw new V1Problem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
     if (state.operation === "communication.redeemCredential" || state.operation === "communication.acknowledgeCredential")
@@ -266,7 +353,7 @@ export class V1Transport {
     }
     if (await fingerprint({ operation: state.operation, projectId: state.projectId ?? null, input: state.input }) !== state.payloadFingerprint)
       throw new Error("Recovery input fingerprint changed");
-    await this.#mutate(state.operation, state.projectId, state.input, state.requestId);
+    await this.#mutate(state.operation, state.projectId, state.input, state.requestId, undefined, true);
     const current = (await this.execute(key, state.projectId, { requestId })).result;
     if (!current) throw new TypeError("Missing current request resolution");
     return current;

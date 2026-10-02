@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { V1ManagementClient, V1ProjectServerClient } from "../dist/index.js";
-import { full, reply } from "../../../test/graphql-fixtures.mjs";
+import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
+import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
 test("conversation handles grant broadcast permission through generated backend scope, not a moderator toggle", async () => {
   const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), conversationId = crypto.randomUUID();
@@ -124,4 +125,105 @@ test("hosted management requires explicit deployment and project inputs without 
   assert.deepEqual(calls[0].request.variables.input, { ...configuration, orgId: identity });
   assert.deepEqual(calls[1].request.variables.input, { deploymentId: identity, name: "Pilot", environment: "prod", backendPrincipalName: "pilot-server" });
   assert.ok(calls.every(call => call.url === "https://management.example.test/graphql"));
+});
+
+test("async project recovery restores before route access and survives scoped backend-key rotation", async () => {
+  const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), principalId = crypto.randomUUID();
+  const requestId = crypto.randomUUID(), conversationId = crypto.randomUUID();
+  const key = "convohop.requests:backend:" + projectId;
+  const read = Promise.withResolvers(), entered = Promise.withResolvers();
+  const saved = asyncStorage({ onRead: async () => {
+    if (saved.reads.length === 2) { entered.resolve(); await read.promise; }
+  } });
+  const input = { title: "original", props: {}, members: [{ principalId, role: "member" }] };
+  const clientOptions = { baseUrl: "http://localhost:18080", projectId, incarnation, asyncRecoveryStorage: saved };
+  const first = new V1ProjectServerClient({ ...clientOptions, backendKey: "fixture-original-backend",
+    fetch: async (_url, init) => {
+      assert.equal(init.headers.authorization, "Bearer " + "fixture-original-backend");
+      throw new Error("response lost");
+    } });
+  await assert.rejects(first.conversations.create(input, { requestId }), { code: "TRANSPORT_UNKNOWN" });
+  const original = first.http.recoveryStates[0], requests = [];
+  let committed = false, mutations = 0;
+  const refreshedKey = "fixture-refreshed-backend";
+  const restarted = new V1ProjectServerClient({ ...clientOptions, backendKey: refreshedKey, fetch: async (_url, init) => {
+    assert.equal(init.headers.authorization, "Bearer " + refreshedKey);
+    const request = JSON.parse(init.body); requests.push(request);
+    assert.equal(request.variables.context.projectId, projectId);
+    assert.equal(request.variables.context.incarnation, incarnation);
+    if (request.operationName === "CommunicationRoute")
+      return reply(request, { result: { projectId, incarnation, servingEpoch: "2" } });
+    if (request.operationName === "CommunicationResolveRequest")
+      return reply(request, { result: resolution(requestId, committed ? "committed" : "notObservedYet") });
+    assert.equal(request.operationName, "CommunicationCreateConversation");
+    assert.equal(request.variables.context.requestId, requestId);
+    assert.deepEqual(request.variables.input, input);
+    mutations++; committed = true;
+    return reply(request, { result: full("Conversation", { conversationId, revision: "1",
+      title: "original", props: {}, latestSequence: "1" }) });
+  } });
+  assert.throws(() => restarted.http.recoveryStates, /initializeRecovery/);
+  const initialized = restarted.initialize();
+  await entered.promise;
+  assert.equal(requests.length, 0);
+  assert.deepEqual(saved.reads, [key, key]);
+  read.resolve();
+  await initialized;
+  assert.deepEqual(restarted.http.recoveryStates, first.http.recoveryStates);
+  assert.equal(restarted.http.servingEpoch, "2");
+  assert.equal((await restarted.http.retry(requestId)).state, "committed");
+  const current = restarted.http.recoveryStates[0];
+  for (const field of ["requestId", "payloadFingerprint", "firstSubmittedAt", "retryDeadline", "incarnation", "projectId"])
+    assert.equal(current[field], original[field]);
+  assert.deepEqual(current.input, original.input);
+  assert.equal(current.attemptCount, 2);
+  assert.equal(mutations, 1);
+  assert.equal(restarted.http.durableRecovery, true);
+  assert.deepEqual(requests.map(request => request.operationName), [
+    "CommunicationRoute", "CommunicationResolveRequest", "CommunicationCreateConversation", "CommunicationResolveRequest",
+  ]);
+  assert.ok(saved.writes.every(({ key: namespace, value }) => namespace === key && !value.includes("fixture-")));
+  assert.equal(saved.removals.length, 0);
+});
+
+test("project async write failure prevents authority effects and retains the supplied command identity", async () => {
+  const requestId = crypto.randomUUID(), projectId = crypto.randomUUID(), incarnation = crypto.randomUUID();
+  const saved = asyncStorage({ onWrite: async () => { throw new Error("database unavailable"); } });
+  let fetches = 0;
+  const client = new V1ProjectServerClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
+    backendKey: "fixture-backend", asyncRecoveryStorage: saved, fetch: async () => { fetches++; } });
+  await assert.rejects(client.conversations.create({ title: "original", props: {}, members: [] }, { requestId }),
+    { code: "RECOVERY_STORAGE_FAILURE", requestId, outcome: "unknown" });
+  assert.equal(fetches, 0);
+  assert.equal(client.http.recoveryStates[0].requestId, requestId);
+  assert.equal(client.http.recoveryStates[0].projectId, projectId);
+  assert.equal(client.http.recoveryStates[0].incarnation, incarnation);
+  assert.equal(client.http.recoveryStates[0].attemptCount, 0);
+});
+
+test("management forwards async storage and scopes the journal to the actor rather than credentials", async () => {
+  const actorId = crypto.randomUUID(), saved = asyncStorage();
+  const client = new V1ManagementClient({ baseUrl: "http://localhost:18081", actorId,
+    accessToken: "fixture-operator", asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+      return reply(JSON.parse(init.body), { result: {
+        orgId: crypto.randomUUID(), name: "original", status: "active", revision: "1",
+      } });
+    } });
+  await client.createOrganization("original", "fixture");
+  const key = "convohop.requests:management:" + actorId;
+  assert.deepEqual(saved.reads, [key]);
+  assert.ok(saved.writes.every(value => value.key === key && !value.value.includes("fixture-operator")));
+});
+
+test("both Server SDK constructors reject conflicting storage before loading either adapter", () => {
+  let reads = 0;
+  const recoveryStorage = { getItem: () => { reads++; return null; }, setItem() {}, removeItem() {} };
+  const saved = asyncStorage();
+  const common = { baseUrl: "http://localhost:18080", recoveryStorage, asyncRecoveryStorage: saved };
+  assert.throws(() => new V1ProjectServerClient({ ...common, projectId: crypto.randomUUID(), incarnation: crypto.randomUUID(),
+    backendKey: "fixture-backend" }), /recoveryStorage.*asyncRecoveryStorage/);
+  assert.throws(() => new V1ManagementClient({ ...common, actorId: crypto.randomUUID(),
+    accessToken: "fixture-operator" }), /recoveryStorage.*asyncRecoveryStorage/);
+  assert.equal(reads, 0);
+  assert.equal(saved.reads.length, 0);
 });

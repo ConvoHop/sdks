@@ -59,6 +59,12 @@ incarnation, fingerprints and finite retry deadlines. It can contain message
 text and must be treated as application data, but does not retain bearer
 headers, native grants or credential-delivery permits.
 
+Trusted database adapters can use the Server SDK's optional
+[`asyncRecoveryStorage`](packages/server-sdk/README.md#asynchronous-database-recovery-storage),
+with awaited restoration and durable writes. Existing Browser
+`sessionStorage`/`localStorage` recovery stays synchronous. The application
+must coordinate journal writers across processes and overlapping deployments.
+
 `client.requests.resolve(id)` reads current typed receipt evidence.
 `client.requests.retry(id)` resolves first, then resends only an unobserved
 original command within its unchanged three-attempt/60-second budget.

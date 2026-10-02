@@ -252,10 +252,10 @@ export class LiveParticipationHandle {
     return { requestId, grant };
   }
   /** @internal Once signaling starts, an uncertain admission is resolved, never blindly reused. */
-  connectionAttempted(): void {
+  connectionAttempted(): void | Promise<void> {
     if (!this.#attempt) throw new Error("No credential attempt exists");
-    this.live.client.http.markMediaAdmissionAttempted(this.#attempt.requestId);
     this.#attempt.used = true;
+    return this.live.client.http.markMediaAdmissionAttempted(this.#attempt.requestId);
   }
   async leave(options: CommandOptions = {}) {
     if (this.#leaveRequest && options.requestId && options.requestId !== this.#leaveRequest)

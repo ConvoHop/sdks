@@ -171,7 +171,7 @@ export class V1MediaConnection {
     const ticket = v1Record(grant.admissionTicket), lease = v1Record(grant.forwardingLease);
     if (ticket.participationId !== participation.participationId || lease.participationId !== participation.participationId ||
         lease.leaseVersion !== "2") throw new TypeError("Native proof is not participation-bound");
-    participation.connectionAttempted();
+    await participation.connectionAttempted();
     await result.#open({ ...grant, admissionTicket: ticket, forwardingLease: lease }, requestId);
     return result;
   }

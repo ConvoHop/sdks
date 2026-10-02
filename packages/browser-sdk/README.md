@@ -132,6 +132,17 @@ budget. `recoverPending(showError)` runs that bounded recovery on startup or
 foreground. Never replace an uncertain command with a new UUID. Native-use
 markers survive reconstruction without persisting the grant.
 
+Browser `V1Client` keeps its existing synchronous `recoveryStorage`
+(`sessionStorage` or `localStorage`) for request recovery and replay cursors.
+For trusted database-backed use, `V1Transport` separately exports
+`V1AsyncRecoveryStorage` and accepts optional `asyncRecoveryStorage`.
+Do not pass a Promise-returning adapter as synchronous storage. Explicit
+`await transport.initializeRecovery()` loads its journal once; `execute` and
+`retry` also await initialization and durable writes. Until that restore
+succeeds, synchronous `recoveryStates` throws instead of reporting empty.
+The [Server SDK storage contract](../server-sdk/README.md#asynchronous-database-recovery-storage)
+describes failure custody, durable commit and cross-process writer ownership.
+
 The low-level surface is
 `client.http.execute("communication.operation", projectId, input, requestId)`.
 It accepts generated operation keys and exact inputs, not REST paths or

@@ -112,6 +112,85 @@ after uncertainty. Storage may contain application inputs, not tokens,
 credential permits or redeemed capsules. GraphQL errors under HTTP 200 and
 malformed receipt metadata remain errors.
 
+### Asynchronous database recovery storage
+
+`V1ProjectServerClient`, `V1ManagementClient` and the low-level `V1Transport`
+accept optional `asyncRecoveryStorage`, mutually exclusive with the existing
+synchronous `recoveryStorage`. Both Server SDK storage types are exported:
+
+```ts
+export interface V1AsyncRecoveryStorage {
+  getItem(key: string): Promise<string | null>;
+  setItem(key: string, value: string): Promise<void>;
+  removeItem(key: string): Promise<void>;
+}
+```
+
+Implement that interface using your application's database transactions;
+it is not a bundled SQL adapter or migration:
+
+```ts
+import { V1ProjectServerClient, type V1AsyncRecoveryStorage } from "@convohop/server-sdk";
+
+const storage: V1AsyncRecoveryStorage = applicationSqlRecoveryStorage;
+const server = new V1ProjectServerClient({
+  baseUrl: communicationBase, projectId, incarnation, backendKey,
+  asyncRecoveryStorage: storage,
+});
+await server.initialize(); // Restores recovery before querying the route.
+const recovery = server.http.recoveryStates;
+```
+
+`getItem` returns the complete committed JSON snapshot, or `null` only when
+the journal is absent. Read/parse failures reject initialization, never load
+an empty fallback. The constructor does not start asynchronous I/O.
+`await http.initializeRecovery()` explicitly restores once; `execute`,
+`retry` and project `initialize` automatically await the same restore.
+Synchronous `http.recoveryStates` throws until restoration succeeds.
+A failed restore remains failed for that transport; repair storage and
+construct a new client rather than reusing an uninitialized snapshot.
+
+`setItem` must atomically replace the complete snapshot and resolve **only
+after durable database commit**. `removeItem` must likewise await a durable
+delete; the transport currently never calls it or deletes the journal.
+Retention replaces snapshots with at most 128 records, pruning only settled
+inactive commands, never unresolved ones. Do not implement these methods
+with fire-and-forget writes or success-shaped error handling.
+
+The SDK awaits pending-intent and submitted-attempt writes before sending a
+mutation, and awaits receipt/resolution writes before returning success.
+Native admission likewise awaits its saved use marker before opening.
+An async write failure raises local `V1Problem` code
+`RECOVERY_STORAGE_FAILURE` with the original `requestId`, retained
+`outcome` (`unknown`, `committed` or `accepted`) and storage error `cause`.
+No mutation is sent when its pre-submit write fails. An attempted submission
+can conservatively consume an attempt even if storage failure or elapsed
+time prevents network submission; the original three-attempt/60-second
+budget is never rolled back or renewed. After authority success, a failed
+receipt write does not regress in-memory settled evidence, but a restart
+can see only the last durable snapshot. Retain the original identity and
+resolve it; inspection is not proof that an in-memory update was persisted.
+Tokens, native grants, delivery permits and capsules are never journaled.
+
+Project journals use `convohop.requests:backend:<projectId>`; Management uses
+`convohop.requests:management:<actorId>`; low-level transports use
+`convohop.requests:<namespace>`. Backend-key rotation does not change the
+namespace or stored project/incarnation/identity/budget. A different
+incarnation still requires explicit recovery, not deletion of old records.
+
+Snapshot writes are serialized **within one transport only**. The
+application must coordinate exclusive, fenced ownership of each journal key
+across its whole restore/read-modify-write lifetime, including all outstanding
+requests and persistence. Acquire ownership before initialization, reject
+stale owners in SQL, and discard the client before releasing ownership.
+Construct a fresh client from the current journal for the next owner.
+Locking each `setItem` alone, an unconditional transactional upsert, or a
+last-write-wins store can still lose another client's pending commands.
+One small app-service instance can have overlapping deployments/processes;
+it does not guarantee a single writer. The SDK supplies no distributed lock,
+snapshot merge, SQL schema or migration. Browser `V1Client` recovery/cursor
+storage remains synchronous, including existing `sessionStorage` usage.
+
 Build/test from the root npm workspace:
 
 ```sh
