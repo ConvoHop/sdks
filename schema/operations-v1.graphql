@@ -1109,6 +1109,41 @@ query CommunicationLiveSessionOperation($context: RequestContextInput!, $input: 
   }
 }
 
+query CommunicationSessionRequestOutcome($context: RequestContextInput!, $input: SessionRequestOutcomeRequestInput!) {
+  sessionRequestOutcome(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    result {
+      state
+      requestId
+      checkedAt
+      operation
+      receiptId
+      committedAt
+      originalSession {
+        sessionId
+        principalId
+        deviceId
+        incarnation
+        sessionRevision
+        expiresAt
+        status
+      }
+      currentSession {
+        sessionId
+        principalId
+        deviceId
+        incarnation
+        sessionRevision
+        expiresAt
+        status
+      }
+      currentState
+    }
+  }
+}
+
 mutation CommunicationCreatePrincipal($context: RequestContextInput!, $input: CreatePrincipalRequestInput!) {
   createPrincipal(context: $context, input: $input) {
     status

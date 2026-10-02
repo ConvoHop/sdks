@@ -21,6 +21,7 @@ export interface V1OperationTypes {
   "communication.liveSessionParticipants": { variables: Generated.CommunicationLiveSessionParticipantsQueryVariables; result: Generated.CommunicationLiveSessionParticipantsQuery };
   "communication.liveSessionAlerts": { variables: Generated.CommunicationLiveSessionAlertsQueryVariables; result: Generated.CommunicationLiveSessionAlertsQuery };
   "communication.liveSessionOperation": { variables: Generated.CommunicationLiveSessionOperationQueryVariables; result: Generated.CommunicationLiveSessionOperationQuery };
+  "communication.sessionRequestOutcome": { variables: Generated.CommunicationSessionRequestOutcomeQueryVariables; result: Generated.CommunicationSessionRequestOutcomeQuery };
   "communication.createPrincipal": { variables: Generated.CommunicationCreatePrincipalMutationVariables; result: Generated.CommunicationCreatePrincipalMutation };
   "communication.disablePrincipal": { variables: Generated.CommunicationDisablePrincipalMutationVariables; result: Generated.CommunicationDisablePrincipalMutation };
   "communication.issueSession": { variables: Generated.CommunicationIssueSessionMutationVariables; result: Generated.CommunicationIssueSessionMutation };
@@ -1452,6 +1453,29 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
       "sessionToken": "String!"
     }
   },
+  "SessionRequestOutcome": {
+    "kind": "object",
+    "fields": {
+      "state": "String!",
+      "requestId": "UUID!",
+      "checkedAt": "String!",
+      "operation": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "originalSession": "Session",
+      "currentSession": "Session",
+      "currentState": "String"
+    }
+  },
+  "SessionRequestOutcomeReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String!",
+      "result": "SessionRequestOutcome!"
+    }
+  },
   "SessionRevocation": {
     "kind": "object",
     "fields": {
@@ -2027,6 +2051,17 @@ export const v1Operations: Record<V1OperationKey, V1Operation> = {
     "resultType": "LiveSessionOperationReply!",
     "inputFields": [
       "operationId"
+    ]
+  },
+  "communication.sessionRequestOutcome": {
+    "plane": "communication",
+    "kind": "query",
+    "field": "sessionRequestOutcome",
+    "operationName": "CommunicationSessionRequestOutcome",
+    "query": "query CommunicationSessionRequestOutcome($context: RequestContextInput!, $input: SessionRequestOutcomeRequestInput!) {\n  sessionRequestOutcome(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      state\n      requestId\n      checkedAt\n      operation\n      receiptId\n      committedAt\n      originalSession {\n        sessionId\n        principalId\n        deviceId\n        incarnation\n        sessionRevision\n        expiresAt\n        status\n      }\n      currentSession {\n        sessionId\n        principalId\n        deviceId\n        incarnation\n        sessionRevision\n        expiresAt\n        status\n      }\n      currentState\n    }\n  }\n}",
+    "resultType": "SessionRequestOutcomeReply!",
+    "inputFields": [
+      "requestId"
     ]
   },
   "communication.createPrincipal": {

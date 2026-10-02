@@ -1135,6 +1135,7 @@ type Query {
 	liveSessionParticipants(context: RequestContextInput!, input: LiveParticipantsInput!): LiveParticipantPageReply!
 	liveSessionAlerts(context: RequestContextInput!, input: LiveAlertsInput!): LiveAlertPageReply!
 	liveSessionOperation(context: RequestContextInput!, input: LiveSessionOperationInput!): LiveSessionOperationReply!
+	sessionRequestOutcome(context: RequestContextInput!, input: SessionRequestOutcomeRequestInput!): SessionRequestOutcomeReply!
 }
 
 type ReadReceipt {
@@ -1426,6 +1427,29 @@ type SessionBootstrap {
 	session: Session
 	tokenExpiresAt: String!
 	sessionToken: String!
+}
+
+type SessionRequestOutcome {
+	state: String!
+	requestId: UUID!
+	checkedAt: String!
+	operation: String
+	receiptId: UUID
+	committedAt: String
+	originalSession: Session
+	currentSession: Session
+	currentState: String
+}
+
+type SessionRequestOutcomeReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: SessionRequestOutcome!
+}
+
+input SessionRequestOutcomeRequestInput {
+	requestId: UUID!
 }
 
 type SessionRevocation {

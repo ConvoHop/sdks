@@ -410,6 +410,10 @@ export type SendMessageRequestInput = {
   text: string;
 };
 
+export type SessionRequestOutcomeRequestInput = {
+  requestId: string;
+};
+
 export type SetBroadcastPermissionInput = {
   allowed: boolean;
   conversationId: string;
@@ -596,6 +600,14 @@ export type CommunicationLiveSessionOperationQueryVariables = Exact<{
 
 
 export type CommunicationLiveSessionOperationQuery = { liveSessionOperation: { status: string, requestId: string, serverTime: string, result: { operationId: string, requestId: string, liveSessionId: string, kind: LiveOperationKind, state: LiveOperationState, revision: string, requestedAt: string, completedAt: string | null, completion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, failure: { code: LiveErrorCode, message: string } | null } } };
+
+export type CommunicationSessionRequestOutcomeQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: SessionRequestOutcomeRequestInput;
+}>;
+
+
+export type CommunicationSessionRequestOutcomeQuery = { sessionRequestOutcome: { status: string, requestId: string, serverTime: string, result: { state: string, requestId: string, checkedAt: string, operation: string | null, receiptId: string | null, committedAt: string | null, currentState: string | null, originalSession: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } | null, currentSession: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } | null } } };
 
 export type CommunicationCreatePrincipalMutationVariables = Exact<{
   context: RequestContextInput;

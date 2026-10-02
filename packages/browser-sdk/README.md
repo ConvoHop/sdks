@@ -161,8 +161,10 @@ Its `result: Session!` contains existing session metadata only, for the
 authenticated current ClientSession. Backend/portal credentials and
 caller-selected session identities are not supported. Project/incarnation
 and serving-epoch binding are enforced through the authenticated request
-context; `Session` itself has no project field. The exported schema matches
-authority revision `fa847a72e93c0f30c8ee5b741621e677e1c6bedf`.
+context; `Session` itself has no project field. This self-session capability
+was introduced at authority revision `fa847a72e93c0f30c8ee5b741621e677e1c6bedf`.
+The current export at `ce86e4bb6d23dbbe73ae99d70b2d44e9d2a0570c` adds the
+separate backend-only session-outcome read without changing that capability.
 
 ```ts
 import {

@@ -232,6 +232,17 @@
         "operationId"
       ]
     },
+    "communication.sessionRequestOutcome": {
+      "plane": "communication",
+      "kind": "query",
+      "field": "sessionRequestOutcome",
+      "operationName": "CommunicationSessionRequestOutcome",
+      "query": "query CommunicationSessionRequestOutcome($context: RequestContextInput!, $input: SessionRequestOutcomeRequestInput!) {\n  sessionRequestOutcome(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      state\n      requestId\n      checkedAt\n      operation\n      receiptId\n      committedAt\n      originalSession {\n        sessionId\n        principalId\n        deviceId\n        incarnation\n        sessionRevision\n        expiresAt\n        status\n      }\n      currentSession {\n        sessionId\n        principalId\n        deviceId\n        incarnation\n        sessionRevision\n        expiresAt\n        status\n      }\n      currentState\n    }\n  }\n}",
+      "resultType": "SessionRequestOutcomeReply!",
+      "inputFields": [
+        "requestId"
+      ]
+    },
     "communication.createPrincipal": {
       "plane": "communication",
       "kind": "mutation",

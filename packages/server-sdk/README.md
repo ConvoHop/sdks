@@ -125,6 +125,79 @@ after uncertainty. Storage may contain application inputs, not tokens,
 credential permits or redeemed capsules. GraphQL errors under HTTP 200 and
 malformed receipt metadata remain errors.
 
+### Read-only session request outcomes
+
+The optional backend-facing helper reads credential-free evidence for an
+**original** `issueSession` or `renewSession` mutation:
+
+```ts
+import { type V1SessionRequestOutcome } from "@convohop/server-sdk";
+
+await server.initialize(); // Establish the configured project route/epoch.
+const evidence: V1SessionRequestOutcome =
+  await server.sessionRequestOutcome(originalSqlRenewalRequestId);
+```
+
+Its exact signature is
+`sessionRequestOutcome(requestId: string): Promise<V1SessionRequestOutcome>`.
+The only query input is the original mutation ID; the SDK generates a
+different `context.requestId` for each read. Communication project,
+incarnation and the initialized serving epoch use the existing transport
+context. The provider requires a current Backend with **both** `sessionIssue`
+and `sessionManage`, plus its normal project/policy/key/epoch/incarnation
+guards. Receipt lookup is scoped to that project's incarnation, backend
+actor kind, stable backend principal and original request ID. Replacing a
+finite backend key must preserve that authority principal, not merely the
+SDK's storage namespace.
+
+The exported discriminated union has these shapes:
+
+| State | Returned fields beyond `requestId` and `checkedAt` |
+| --- | --- |
+| `notObservedYet` | None |
+| `committed`, `currentState: "missing"` | `operation: "issueSession" \| "renewSession"`, `receiptId`, `committedAt`, `originalSession` |
+| `committed`, `currentState: "active" \| "expired" \| "revoked"` | The same commit fields plus `currentSession` |
+
+Both session projections contain only the existing seven fields:
+`sessionId`, `principalId`, `deviceId`, `incarnation`, `sessionRevision`,
+`expiresAt`, `status`. Original `status: "active"` is **historical receipt
+evidence**, not present authorization. A present current row preserves the
+original tuple and has a revision no lower than the original. Its status
+equals its current disposition, including `"expired"`; revocation wins
+even after expiry. Equal revisions preserve expiry. A higher-revision,
+shorter-TTL renewal may legitimately shorten expiry.
+
+`checkedAt`, `serverTime` and `committedAt` are independently sampled UTC
+millisecond timestamps, without guaranteed wall-clock ordering. The
+provider evaluates current expiry against SQL time, not `checkedAt`.
+The SDK does not recompute disposition from those timestamps or local time.
+An active row does **not** prove a valid minted bearer. This read does not
+return tokens, claims, delivery permits, raw receipts or bootstrap material,
+and cannot renew a session, extend a lease or admit native media.
+
+The helper rejects malformed/contradictory projections, extra fields
+(including credential material), wrong identities/incarnations, invalid
+positive signed-64-bit revisions and noncanonical timestamps with sanitized
+`INVALID_RESPONSE` errors. When the original command is still in the SDK
+journal, operation/payload/scope must also match that custody. Selected
+nullable GraphQL fields must be present: null commit details are valid only
+for `notObservedYet`, and null `currentSession` only for missing/absent
+observations. Inapplicable null fields are omitted from the public union.
+
+Absence is **not proof of noncommit or permission to resubmit**. Even a
+committed observation never implicitly settles/evicts the SDK journal,
+resets its retry budget, substitutes IDs, retries a mutation or invokes
+browser refresh. Keep the application's original transactional request and
+payload custody. Ordinary `resolveRequest` documents and result withholding
+are unchanged; this separate read does not make withheld credentials
+materializable. Constructors/default Browser behavior do not call it, and
+legacy providers remain usable until this optional helper is invoked.
+
+The generated contract exactly matches authority
+`ce86e4bb6d23dbbe73ae99d70b2d44e9d2a0570c`. SDK regressions are source-level
+evidence only; managed-database eligibility, maintained Linux/native
+qualification and public deployment remain separate publication gates.
+
 ### Asynchronous database recovery storage
 
 `V1ProjectServerClient`, `V1ManagementClient` and the low-level `V1Transport`

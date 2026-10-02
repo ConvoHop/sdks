@@ -79,6 +79,11 @@ permission to resend. Credential redemption and acknowledgement instead
 require an explicit fresh transient permit with their original command IDs;
 that permit cannot authorize generic request lookup.
 
+Trusted backends can separately read
+[credential-free session request outcomes](packages/server-sdk/README.md#read-only-session-request-outcomes)
+for original issuance/renewal IDs. This never settles the recovery journal or
+returns a bearer; absent observations are not proof of noncommit.
+
 Live start, join, native connect and microphone/camera capture are separate
 actions. Discovery returns a nullable LiveSession directly. Native admission
 requires the matching participation-aware ConvoHop SFU and current
