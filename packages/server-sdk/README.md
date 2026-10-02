@@ -177,6 +177,11 @@ Project journals use `convohop.requests:backend:<projectId>`; Management uses
 `convohop.requests:<namespace>`. Backend-key rotation does not change the
 namespace or stored project/incarnation/identity/budget. A different
 incarnation still requires explicit recovery, not deletion of old records.
+Reconstruct the trusted client after its previous work settles when replacing
+its constructor-owned key. The new key must belong to the same authority
+backend principal: a stable project-scoped SDK journal does not prove an
+unchanged service actor. Qualify resolution of an old unknown request under
+the refreshed key against the real authority, not only a unit transport.
 
 Snapshot writes are serialized **within one transport only**. The
 application must coordinate exclusive, fenced ownership of each journal key

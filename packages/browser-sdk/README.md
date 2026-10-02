@@ -153,6 +153,35 @@ malformed metadata cannot become successful mutation evidence.
 the `V1Graphql` namespace are generated/aligned exports. Schema files are
 authority exports; `npm run check:graphql` detects document/type drift.
 
+## Session credential lifetime
+
+`V1Client`, its request transport and realtime streams retain their
+constructor credentials. Existing live/participation/media handles retain
+that original client. There is no supported in-place credential-refresh API;
+do not patch SDK internals or substitute a backend credential.
+
+The current public authority queries cannot prove a replacement bearer's
+exact principal/device/session/revision binding. A route proof establishes
+routing scope, not that session identity; a principal lookup is not a
+self-session projection. Backend session-renewal receipts are not available
+as a browser self-binding proof. Comparing caller-asserted bootstrap fields
+or decoding an opaque token would not establish this missing authority
+evidence, even when the proposed revision and expiry increase.
+
+Obtain finite bootstraps from your authenticated backend. A renewed revision
+can invalidate the old token immediately. With the existing public API,
+retire old realtime work, settle outstanding request work, then reconstruct
+the client with the current bootstrap and original recovery storage. Keep
+unknown request IDs, payloads and budgets; never invent replacement commands.
+Reacquire authorized live/participation handles through the new client
+instead of claiming the old handles now use the new credential.
+
+Session renewal does not itself prove that media must rejoin or that an old
+native lease became valid again. Continuity depends on the service's normal
+current-session/native-lease checks. Any explicitly chosen new native
+connection still requires fresh admission and starts receive-only; it must
+not reuse a spent grant, revive an expired lease or silently restore capture.
+
 ## Network fallback and limits
 
 `participation.connect({iceTransportPolicy: "relay"})` requests maintained
