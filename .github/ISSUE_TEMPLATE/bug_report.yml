@@ -29,7 +29,7 @@ body:
     attributes:
       label: Package and version
       description: The package name and version, or the commit SHA if you built from source.
-      placeholder: "@convohop/browser-sdk 0.1.0, or commit 1a2b3c4"
+      placeholder: "@convohop/client 0.1.0, or commit 1a2b3c4"
     validations:
       required: true
   - type: textarea

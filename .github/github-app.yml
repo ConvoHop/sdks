@@ -10,4 +10,6 @@ scripts:
     command: npm test
   - name: Check generated GraphQL
     command: npm run check:graphql
+  - name: Check package metadata
+    command: npm run check:packages
 auto_open_in_browser: false

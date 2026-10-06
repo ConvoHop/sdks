@@ -2,7 +2,7 @@ export default {
   schema: ["schema/communication-v1.graphql", "schema/management-v1.graphql"],
   documents: ["schema/operations-v1.graphql"],
   generates: {
-    "packages/browser-sdk/src/v1-generated.ts": {
+    "packages/core/src/generated/v1-generated.ts": {
       plugins: ["typescript-operations"],
       config: {
         useTypeImports: true,

@@ -2,21 +2,40 @@
   "name": "@convohop/browser-sdk",
   "version": "0.1.0",
   "private": true,
+  "description": "Deprecated transitional re-export of @convohop/client. Use @convohop/client instead.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ConvoHop/sdks.git",
+    "directory": "packages/browser-sdk"
+  },
   "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo"
+  ],
   "scripts": {
-    "build": "tsc --project tsconfig.json",
-    "test": "npm run build && node --test test/*.test.mjs"
+    "build": "tsc --build",
+    "test": "npm run build && tsc --project test && node --test test/*.test.mjs",
+    "check:package": "publint --strict && attw --pack . --profile esm-only"
+  },
+  "dependencies": {
+    "@convohop/client": "0.1.0",
+    "@convohop/core": "0.1.0"
   },
   "devDependencies": {
     "typescript": "^7.0.2"
-  },
-  "dependencies": {
-    "livekit-client": "^2.22.3"
   }
 }

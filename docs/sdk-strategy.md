@@ -13,8 +13,8 @@ work, what the packages are called, and how they're versioned and supported.
 
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
-| Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`packages/server-sdk`](../packages/server-sdk/README.md) |
-| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`packages/browser-sdk`](../packages/browser-sdk/README.md) |
+| Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md) |
+| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
 
@@ -133,7 +133,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 | React | Hooks on top of the Web SDK | Same as Web | Planned |
 | iOS and macOS | Swift | LiveKit Swift SDK | Planned |
 | Android | Kotlin | LiveKit Android SDK | Planned |
-| React Native | TypeScript, sharing the Web SDK's core | LiveKit React Native SDK | Planned |
+| React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | Planned |
 | Flutter | Dart | LiveKit Flutter SDK | Planned |
 
 ### How the SDKs are built
@@ -164,7 +164,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
   reference implementation. An SDK isn't released until it passes the suite.
 
 Today the TypeScript SDKs already generate their operations and types from
-[`schema/`](../schema) with `npm run generate:graphql`. The IR, the generators
+[`schema/`](../schema) into `@convohop/core` with `npm run generate:graphql`. The IR, the generators
 for other languages and the conformance suite are in development. Later, the
 same IR could also generate a command-line tool and tools for AI agents.
 
@@ -235,9 +235,11 @@ Notes:
 
 - **npm.** `@convohop/core` holds the shared TypeScript protocol and runtime.
   It's installed as a dependency of the other packages, but it isn't a
-  supported entry point, so don't import it directly. The current workspace
-  packages, `@convohop/browser-sdk` and `@convohop/server-sdk`, are
-  transitional and won't be published under those names.
+  supported entry point, so don't import it directly. `@convohop/core`,
+  `@convohop/client` and `@convohop/server` are available as source in this
+  repository. The earlier workspace names, `@convohop/browser-sdk` and
+  `@convohop/server-sdk`, remain only as deprecated re-exports for existing
+  source consumers. They'll be removed and won't be published.
 - **PyPI.** A single distribution, `convohop`, with the import package
   `convohop`. It includes both the synchronous and the `asyncio` clients.
 - **NuGet.** `ConvoHop`. Optional add-ons, such as framework integrations,
@@ -312,7 +314,7 @@ release.
 
 | SDK | Supported versions |
 | --- | --- |
-| Node.js | Active LTS and Maintenance LTS releases. Today the packages need Node.js 24 or later; Node.js 22 support is planned. Odd-numbered releases aren't supported. |
+| Node.js | Active LTS and Maintenance LTS releases: Node.js 22 and 24 today. Odd-numbered releases aren't supported. |
 | Python | 3.11 and later |
 | .NET | Targets `netstandard2.0`, for .NET Framework 4.7.2 and later, and the current .NET LTS release (`net10.0` today). Tested on the .NET releases that Microsoft supports. |
 | Java and Kotlin | Java 11 and later, tested on Java LTS releases |
@@ -324,7 +326,7 @@ release.
 | React Native | 0.76 and later, with the New Architecture |
 | Flutter | The current stable release |
 
-Today, CI verifies only the TypeScript packages, and only on Node.js 24. Each
+Today, CI verifies only the TypeScript packages, on Node.js 22 and 24. Each
 other row becomes a CI requirement when that SDK lands.
 
 ## Releases and distribution

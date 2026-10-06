@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { V1Transport, V1Client, V1Realtime, V1Problem, v1Id, v1Counter, v1Message, v1Membership, v1Conversation, v1SearchHit } from "../dist/v1.js";
+import { V1Transport, V1Client, V1Realtime, V1Problem, v1Id, v1Counter, v1Message, v1Membership, v1Conversation, v1SearchHit } from "@convohop/client";
 import { event, full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID();

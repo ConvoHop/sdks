@@ -2,25 +2,40 @@
   "name": "@convohop/server-sdk",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "engines": {
-    "node": ">=24"
+  "description": "Deprecated transitional re-export of @convohop/server. Use @convohop/server instead.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ConvoHop/sdks.git",
+    "directory": "packages/server-sdk"
   },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "node": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo"
+  ],
   "scripts": {
-    "build": "tsc --project ../browser-sdk/tsconfig.json && tsc --project tsconfig.json",
-    "test": "npm run build && node --test test/*.test.mjs"
+    "build": "tsc --build",
+    "test": "npm run build && tsc --project test && node --test test/*.test.mjs",
+    "check:package": "publint --strict && attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "@convohop/browser-sdk": "0.1.0"
+    "@convohop/server": "0.1.0"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
+    "@types/node": "^22.0.0",
     "typescript": "^7.0.2"
   }
 }
