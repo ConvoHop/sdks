@@ -1,0 +1,22 @@
+name: Question
+description: Ask how to use the SDKs.
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the [README](https://github.com/ConvoHop/sdks/blob/main/README.md), the package READMEs and the [SDK strategy](https://github.com/ConvoHop/sdks/blob/main/docs/sdk-strategy.md) first.
+
+        Never paste tokens, backend keys, session credentials or personal data.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: Relevant code with credentials redacted, the docs you read, and what happened.

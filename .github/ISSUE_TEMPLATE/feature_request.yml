@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest a new capability, an API change, or a new language or platform.
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the [SDK strategy](https://github.com/ConvoHop/sdks/blob/main/docs/sdk-strategy.md) first. It lists the planned languages, platforms and capabilities.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Server SDK
+        - Client SDK
+        - New language or platform
+        - Code generation or schema
+        - Documentation
+        - Build, CI or tooling
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what stops you today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: The API or behavior you'd like. Code sketches are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context

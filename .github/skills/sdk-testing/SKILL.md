@@ -10,8 +10,9 @@ Use the existing package test suites:
 - Browser/Node: root `npm test` builds packages and runs `node:test`.
 - Generated contract: root `npm run check:graphql`.
 
-Prototype clients and unsupported Python/Go implementations were deliberately
-removed. Test the current exported contract, not compatibility aliases.
+Prototype clients and the earlier Python/Go implementations were deliberately
+removed. New language SDKs follow `docs/sdk-strategy.md`. Test the current
+exported contract, not compatibility aliases.
 
 Reuse fixtures and transport seams. Do not deliver standalone assertion
 scripts or a second SDK-shaped test client. Keep unit stubs deterministic

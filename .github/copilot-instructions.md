@@ -12,8 +12,11 @@ checks actual authority-exported schemas and generated operations/types.
 
 Only the current Conversation/LiveSession/Participation model is supported.
 The zero-customer consolidation deliberately removed prototype clients and
-Python/Go SDKs. Do not restore compatibility adapters or REST-shaped logical
-routes: HTTP and graphql-transport-ws use unversioned `/graphql`.
+the earlier Python/Go SDKs; do not restore them. Add new language SDKs only
+as planned in `docs/sdk-strategy.md`, generated from the shared schema and
+passing the shared conformance tests. Do not restore compatibility adapters
+or REST-shaped logical routes: HTTP and graphql-transport-ws use unversioned
+`/graphql`.
 `V1*` is a current SDK/domain name, not a selectable API version.
 Do not advertise registry publication without release evidence.
 

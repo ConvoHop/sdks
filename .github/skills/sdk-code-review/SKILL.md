@@ -23,7 +23,8 @@ caller-visible state together. Prioritize:
   reconnect, source rights and cleanup of media tracks/elements/listeners.
 - Current generated exports/builds, matching types/runtime behavior, Node 24
   and honest capability/publication documentation. Do not reintroduce removed
-  prototype clients, invitation-only calls or unsupported Python/Go SDKs.
+  prototype clients, invitation-only calls or the earlier Python/Go SDKs. New
+  language SDKs must follow `docs/sdk-strategy.md`.
 
 Reproduce suspected defects with the existing test frameworks. Add a failing
 regression before fixing behavior where practical. Inspect consumer effects
