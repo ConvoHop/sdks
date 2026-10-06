@@ -1,0 +1,42 @@
+# Dependabot version updates.
+# Add an entry for each ecosystem when its language directory lands, for
+# example pip, nuget, maven or gradle, gomod, swift and pub.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # Libraries keep their declared ranges; only the lockfile moves unless a
+    # new version falls outside the range.
+    versioning-strategy: increase-if-necessary
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
+    groups:
+      npm-production:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      npm-development:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        patterns:
+          - "*"

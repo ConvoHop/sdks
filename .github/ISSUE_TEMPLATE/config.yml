@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/ConvoHop/sdks/security/advisories/new
+    about: Report vulnerabilities privately. Don't open a public issue.
+  - name: SDK strategy and roadmap
+    url: https://github.com/ConvoHop/sdks/blob/main/docs/sdk-strategy.md
+    about: Planned languages and platforms, package names and the support policy.
