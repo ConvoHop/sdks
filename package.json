@@ -7,6 +7,13 @@
   ],
   "scripts": {
     "build": "npm run build --workspace @convohop/browser-sdk && npm run build --workspace @convohop/server-sdk",
-    "test": "npm test --workspace @convohop/browser-sdk && npm test --workspace @convohop/server-sdk"
+    "test": "npm test --workspace @convohop/browser-sdk && npm test --workspace @convohop/server-sdk",
+    "generate:graphql": "node scripts/generate-v1-operations.mjs && graphql-codegen --config codegen.mjs",
+    "check:graphql": "node scripts/generate-v1-operations.mjs --check && graphql-codegen --config codegen.mjs --check"
+  },
+  "devDependencies": {
+    "graphql": "17.0.2",
+    "@graphql-codegen/cli": "7.4.3",
+    "@graphql-codegen/typescript-operations": "6.1.7"
   }
 }
