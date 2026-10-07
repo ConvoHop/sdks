@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import docSnippets, { DEFAULT_DIRECTORY, SNIPPETS_VERSION, code, escapeMarkdown } from "../emitters/doc-snippets.mjs";
+import docSnippets, { DEFAULT_DIRECTORY, code, escapeMarkdown } from "../emitters/doc-snippets.mjs";
 import { EmitterError, renderEmitters } from "../lib/emitter.mjs";
 import { buildIr } from "../lib/ir.mjs";
 import { codeUnitCompare } from "../lib/naming.mjs";
@@ -75,9 +75,7 @@ test("index.json lists exactly the operation snippets, in IR order", () => {
     const ir = buildIr(sources);
     const files = snippets(ir);
     const index = JSON.parse(files.find(file => file.path === `${DEFAULT_DIRECTORY}/index.json`).contents);
-    assert.deepEqual(Object.keys(index), ["snippetsVersion", "irVersion", "source", "operations"]);
-    assert.equal(index.snippetsVersion, SNIPPETS_VERSION);
-    assert.equal(index.irVersion, ir.irVersion);
+    assert.deepEqual(Object.keys(index), ["source", "operations"]);
     assert.equal(index.source, "schema/ir.json");
     assert.deepEqual(index.operations.map(entry => entry.id), ir.operations.map(operation => operation.id));
     const listed = index.operations.map(entry => `${DEFAULT_DIRECTORY}/${entry.path}`).sort(codeUnitCompare);
@@ -90,7 +88,6 @@ test("index.json lists exactly the operation snippets, in IR order", () => {
       assert.ok(snippetOf(files, operation.plane, operation.field).startsWith(`## ${code(operation.field)}\n\n`), entry.id);
     }
   }
-  assert.equal(SNIPPETS_VERSION, 1);
 });
 
 test("descriptions become escaped paragraphs that cannot start lists, quotes, headings or code blocks", () => {

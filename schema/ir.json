@@ -1,9 +1,7 @@
 {
   "$schema": "./ir.schema.json",
-  "irVersion": "1.0.0",
   "api": {
     "name": "convohop",
-    "model": "v1",
     "summary": "ConvoHop communication plane (conversations, messages, realtime events and live sessions) and management plane (organizations, deployments and projects)."
   },
   "sources": {

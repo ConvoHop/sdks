@@ -1,6 +1,4 @@
 {
-  "snippetsVersion": 1,
-  "irVersion": "1.0.0",
   "source": "schema/ir.json",
   "operations": [
     {

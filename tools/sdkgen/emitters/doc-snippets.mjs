@@ -10,7 +10,6 @@ import { formatJson } from "../lib/json.mjs";
  * the same files render as Markdown and as MDX. index.json lists them.
  */
 export const DEFAULT_DIRECTORY = "docs/snippets";
-export const SNIPPETS_VERSION = 1;
 
 const LAYERS = { client: "client SDKs", server: "server SDKs", both: "client and server SDKs" };
 const ERROR_ORIGINS = [["server", "Returned by the authority"], ["both", "Returned by the authority or raised by SDKs"], ["sdk", "Raised by SDKs"]];
@@ -208,7 +207,7 @@ export default defineEmitter({
       ...(operation.deprecated ? { deprecated: true } : {}),
       path: `${operation.plane}/${operation.field}.md`,
     }));
-    const index = { snippetsVersion: SNIPPETS_VERSION, irVersion: ir.irVersion, source: "schema/ir.json", operations: entries };
+    const index = { source: "schema/ir.json", operations: entries };
     return [
       { path: `${DEFAULT_DIRECTORY}/README.md`, contents: README },
       { path: `${DEFAULT_DIRECTORY}/index.json`, contents: formatJson(index) },

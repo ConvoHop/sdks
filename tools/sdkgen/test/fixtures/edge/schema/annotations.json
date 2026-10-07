@@ -1,9 +1,7 @@
 {
   "$schema": "./annotations.schema.json",
-  "annotationsVersion": 1,
   "api": {
     "name": "edge",
-    "model": "v1",
     "summary": "Edge-case fixture for the sdkgen tests. It is not a ConvoHop API."
   },
   "transport": {

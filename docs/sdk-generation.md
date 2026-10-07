@@ -71,8 +71,7 @@ themselves, so every language sees the same facts.
 
 | Key | Contents |
 | --- | --- |
-| `irVersion` | Semantic version of the IR format |
-| `api`, `sources` | API name and model, and the input files the IR was built from |
+| `api`, `sources` | API name and summary, and the input files the IR was built from |
 | `transport` | HTTP and WebSocket transport, the GraphQL error extensions and the document size limit |
 | `planes` | Each plane's schema file, summary, request-context argument and context rules, and the operation that resolves an unknown outcome |
 | `credentials`, `scopes`, `conditions` | The authorization catalog |
@@ -88,16 +87,14 @@ Each custom scalar has a `representation` (`string`, `integer`, `number`,
 `boolean` or `object`) and optional constraints, such as a pattern or a
 maximum, so that emitters can map it to a native type without knowing GraphQL.
 
-### Versioning
+### Changing the IR
 
-`irVersion` follows [semantic versioning](https://semver.org/):
-
-- Additive changes, such as a new optional key, bump the minor version.
-- Changes that can break an emitter, such as removing or renaming a key or
-  changing its meaning, bump the major version.
-
-Each emitter declares the IR major version it understands. The runner refuses
-to run an emitter against another major version.
+The IR carries no format version. Every emitter lives in this repository, so
+the IR, its schema and the emitters change together in one commit, and the
+golden tests and `npm run check:graphql` fail when they disagree. Add a format
+marker only when two IR formats must coexist for a named consumer, such as an
+emitter maintained outside this repository. Treat an IR without the marker as
+the original format.
 
 ## Emitter plugin API
 
@@ -109,7 +106,6 @@ import { defineEmitter } from "../lib/emitter.mjs";
 export default defineEmitter({
   name: "python-models",                 // kebab-case, unique
   description: "Python models and operations",
-  irMajor: 1,                            // the IR major version this emitter understands
   owns: ["packages/python/src/convohop/_generated"], // optional
   emit(ir, options) {
     return [{ path: "packages/python/src/convohop/_generated/models.py", contents: "...\n" }];
@@ -249,8 +245,8 @@ The `doc-snippets` emitter writes one Markdown snippet per operation to
 [`docs/snippets`](snippets), for the documentation site. Each snippet
 describes the operation's layer, authorization, idempotency, pagination,
 realtime behavior, context, input, result, errors and GraphQL document.
-`index.json` lists every operation with its snippet path, and includes
-`snippetsVersion` and `irVersion`.
+`index.json` names the IR it was built from and lists every operation with
+its snippet path.
 
 Snippets are language-neutral. Language-specific examples are expected to be
 added by the documentation pipeline. Snippets use only CommonMark and GFM

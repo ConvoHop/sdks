@@ -1,9 +1,7 @@
 {
   "$schema": "./ir.schema.json",
-  "irVersion": "1.0.0",
   "api": {
     "name": "edge",
-    "model": "v1",
     "summary": "Edge-case fixture for the sdkgen tests. It is not a ConvoHop API."
   },
   "sources": {

@@ -4,14 +4,13 @@ import { isPlainObject } from "./json.mjs";
 import { codeUnitCompare } from "./naming.mjs";
 
 /**
- * Emitter plugin API, version 1.
+ * Emitter plugin API.
  *
  * An emitter is a pure function from the IR (schema/ir.json) to files:
  *
  *   export default defineEmitter({
  *     name: "python-models",
  *     description: "Python models and operations",
- *     irMajor: 1,                       // the IR major version this emitter understands
  *     owns: ["packages/python/src/convohop/_generated"], // optional: directories only it writes to
  *     emit(ir, options) { return [{ path: "relative/posix/path", contents: "text\n" }]; },
  *   });
@@ -24,8 +23,6 @@ import { codeUnitCompare } from "./naming.mjs";
  * they leave empty (write mode), or reported (check mode). Entries that no
  * emitter could produce, such as .DS_Store, are left alone.
  */
-export const EMITTER_API_VERSION = 1;
-
 export class EmitterError extends Error {}
 
 const NAME = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
@@ -33,16 +30,15 @@ const SEGMENT = /^[A-Za-z0-9_@+=,-][A-Za-z0-9_.@+=,-]*$/;
 
 export function defineEmitter(definition) {
   if (!isPlainObject(definition)) throw new EmitterError("defineEmitter expects an object");
-  const { name, description, irMajor = 1, owns = [], emit, ...rest } = definition;
+  const { name, description, owns = [], emit, ...rest } = definition;
   const unknown = Object.keys(rest);
   if (unknown.length) throw new EmitterError(`emitter ${JSON.stringify(name)}: unknown option(s) ${unknown.join(", ")}`);
   if (typeof name !== "string" || !NAME.test(name)) throw new EmitterError(`emitter name must be kebab-case, got ${JSON.stringify(name)}`);
   if (typeof description !== "string" || !description.trim()) throw new EmitterError(`emitter "${name}" needs a description`);
-  if (!Number.isInteger(irMajor) || irMajor < 1) throw new EmitterError(`emitter "${name}": irMajor must be a positive integer`);
   if (!Array.isArray(owns)) throw new EmitterError(`emitter "${name}": owns must be an array of directories`);
   for (const directory of owns) assertSafePath(directory, `emitter "${name}" owns`);
   if (typeof emit !== "function") throw new EmitterError(`emitter "${name}" needs an emit(ir, options) function`);
-  return Object.freeze({ name, description, irMajor, owns: Object.freeze([...owns]), emit });
+  return Object.freeze({ name, description, owns: Object.freeze([...owns]), emit });
 }
 
 /** Repository-relative POSIX path whose segments use letters, digits and `_.@+=,-` and do not start with a dot. */
@@ -52,12 +48,6 @@ export function assertSafePath(path, label) {
     throw new EmitterError(`${label}: unsafe path ${JSON.stringify(path)}; use a relative POSIX path whose segments use only letters, digits and _.@+=,- and do not start with a dot`);
   }
   return path;
-}
-
-export function irMajorOf(ir) {
-  const match = typeof ir?.irVersion === "string" ? /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(ir.irVersion) : null;
-  if (!match) throw new EmitterError(`IR has no valid irVersion (got ${JSON.stringify(ir?.irVersion)})`);
-  return Number(match[1]);
 }
 
 function deepFreeze(value) {
@@ -74,7 +64,6 @@ function deepFreeze(value) {
  */
 export function renderEmitters(ir, emitters, { options = {} } = {}) {
   const frozen = deepFreeze(structuredClone(ir));
-  const major = irMajorOf(frozen);
   const names = new Set();
   for (const emitter of emitters) {
     if (!Object.isFrozen(emitter) || typeof emitter.emit !== "function") {
@@ -82,9 +71,6 @@ export function renderEmitters(ir, emitters, { options = {} } = {}) {
     }
     if (names.has(emitter.name)) throw new EmitterError(`emitter names must be unique; "${emitter.name}" is registered twice`);
     names.add(emitter.name);
-    if (emitter.irMajor !== major) {
-      throw new EmitterError(`emitter "${emitter.name}" supports IR major version ${emitter.irMajor}, but the IR is ${frozen.irVersion}`);
-    }
   }
   const owned = emitters.flatMap(emitter => emitter.owns.map(directory => ({ directory, owner: emitter.name })));
   const owners = new Map();

@@ -126,9 +126,9 @@ test("schema violations are reported without semantic checks", () => {
   });
   assert.deepEqual(result.schemaErrors, [{ path: "/operations/alpha.items/layer", message: 'must be one of "client", "server", "both" (got "edge")' }]);
   assert.deepEqual(result.problems, []);
-  const malformed = check({ annotations: () => ({ annotationsVersion: 2 }) });
+  const malformed = check({ annotations: () => ({ $schema: "./other.schema.json" }) });
   assert.equal(malformed.missing.length, 14);
-  assert.ok(malformed.schemaErrors.some(error => error.message === "must equal 1"));
+  assert.ok(malformed.schemaErrors.some(error => error.path === "/$schema" && error.message === 'must equal "./annotations.schema.json"'));
   assert.match(formatAnnotationReport(malformed), /\n {2}"alpha\.ping": \{\n {4}"summary": "<One sentence that says what the operation does\.>",\n {4}"layer"/);
 });
 

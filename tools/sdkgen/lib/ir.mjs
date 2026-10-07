@@ -13,11 +13,6 @@ import { canonicalJson } from "./json.mjs";
 import { codeUnitCompare } from "./naming.mjs";
 import { planeOrder, schemaOperations } from "./sources.mjs";
 
-/**
- * Semantic version of the IR format (schema/ir.schema.json). Bump the minor
- * version for additive changes and the major version for breaking changes.
- */
-export const IR_VERSION = "1.0.0";
 export const IR_SCHEMA_REF = "./ir.schema.json";
 export const GENERATION_DOCS = "docs/sdk-generation.md";
 
@@ -44,7 +39,6 @@ export function buildIr(sources) {
   const operationEntries = operations.map(operation => buildOperation(operation, annotations));
   const ir = {
     $schema: IR_SCHEMA_REF,
-    irVersion: IR_VERSION,
     api: annotations.api,
     sources: { graphql: planes.map(plane => plane.path), annotations: sources.annotationsPath },
     transport: annotations.transport,

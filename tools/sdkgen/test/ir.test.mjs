@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { checkAnnotations, formatAnnotationReport } from "../lib/annotations.mjs";
-import { IR_VERSION, IrBuildError, buildIr } from "../lib/ir.mjs";
+import { IrBuildError, buildIr } from "../lib/ir.mjs";
 import { createValidator } from "../lib/json-schema.mjs";
 import { formatJson } from "../lib/json.mjs";
 import { SourceError, loadSources } from "../lib/sources.mjs";
@@ -21,19 +21,16 @@ test("the committed repository IR is current, complete and valid", () => {
   const committed = JSON.parse(readFileSync(join(REPO_ROOT, "schema/ir.json"), "utf8"));
   assert.deepEqual(ir, committed, "schema/ir.json is stale. Run npm run generate:graphql.");
   assert.deepEqual(createValidator(sources.irSchema)(committed), []);
-  assert.equal(ir.irVersion, IR_VERSION);
   assert.deepEqual(ir.operations.map(operation => operation.id).sort(), Object.keys(sources.annotations.operations).sort());
   assert.deepEqual(ir.realtime.events.map(event => event.type).sort(), Object.keys(sources.annotations.realtime.events).sort());
   assert.ok(ir.realtime.events.length > 0 && ir.realtime.channels.length > 0);
 });
 
-test("the IR version is semantic and the IR schema accepts only its major version", () => {
-  assert.equal(IR_VERSION, "1.0.0");
+test("the IR schema accepts the built IR and reports each violation by path", () => {
   const sources = fixtureSources();
   const ir = buildIr(sources);
   const validate = createValidator(sources.irSchema);
-  assert.deepEqual(validate({ ...ir, irVersion: "1.7.0" }), []);
-  assert.deepEqual(validate({ ...ir, irVersion: "2.0.0" }).map(error => error.path), ["/irVersion"]);
+  assert.deepEqual(validate(ir), []);
   const broken = structuredClone(ir);
   broken.operations[0].layer = "edge";
   broken.extra = true;
@@ -220,9 +217,9 @@ test("the build stops with the annotation report or the IR schema violations", (
 
   const strict = fixtureSources();
   strict.irSchema = structuredClone(strict.irSchema);
-  strict.irSchema.properties.irVersion.pattern = "^2\\.";
+  strict.irSchema.$defs.transport.properties.path.pattern = "^/rpc$";
   assert.throws(() => buildIr(strict), error => error instanceof IrBuildError
-    && error.message === 'The generated IR violates schema/ir.schema.json:\n  /irVersion: must match pattern ^2\\. (got "1.0.0")');
+    && error.message === 'The generated IR violates schema/ir.schema.json:\n  /transport/path: must match pattern ^/rpc$ (got "/graphql")');
 });
 
 test("input files that cannot be loaded are reported by repository path", t => {
@@ -231,7 +228,7 @@ test("input files that cannot be loaded are reported by repository path", t => {
   const sourceError = prefix => error => error instanceof SourceError && error.message.startsWith(prefix);
 
   writeFileSync(join(root, "schema/operations.graphql"), "query Q {\n  a\n}\n");
-  writeFileSync(join(root, "schema/notes.graphql"), "type Query {\n  a: Int\n}\n");
+  writeFileSync(join(root, "schema/notes-draft.graphql"), "type Query {\n  a: Int\n}\n");
   assert.deepEqual(load()().planes.map(plane => plane.path), ["schema/alpha.graphql", "schema/beta.graphql"]);
 
   const alpha = join(root, "schema/alpha.graphql");

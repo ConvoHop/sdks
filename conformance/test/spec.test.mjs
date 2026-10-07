@@ -122,7 +122,6 @@ describe("the operation catalog and scenarios agree with schema/ir.json", () => 
   });
 
   test("every operation maps to an IR operation that accepts each of its roles", t => {
-    assert.match(ir.irVersion, /^1\./, "the IR format changed; review these checks");
     for (const [name, entry] of Object.entries(spec.catalog)) {
       const operation = irOperations.get(entry.irOperation);
       assert.ok(operation, `${name}: ${entry.irOperation} is not an IR operation`);

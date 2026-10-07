@@ -5,22 +5,17 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "$schema", "annotationsVersion", "api", "transport", "planes", "scalars", "credentials", "scopes", "conditions",
+    "$schema", "api", "transport", "planes", "scalars", "credentials", "scopes", "conditions",
     "idempotency", "pagination", "errorCodes", "errorSets", "realtime", "operations"
   ],
   "properties": {
     "$schema": { "const": "./annotations.schema.json" },
-    "annotationsVersion": { "const": 1 },
     "api": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "model", "summary"],
+      "required": ["name", "summary"],
       "properties": {
         "name": { "$ref": "#/$defs/identifier" },
-        "model": {
-          "description": "Domain-model identifier used in generated names such as OperationCatalogEntry. It is not a selectable API version: the wire endpoint is unversioned.",
-          "const": "v1"
-        },
         "summary": { "$ref": "#/$defs/summary" }
       }
     },
