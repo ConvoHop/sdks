@@ -201,6 +201,29 @@ who use the SDKs.
   model is supported. Don't add compatibility adapters or REST-style aliases.
   HTTP and WebSocket traffic use the unversioned `/graphql` endpoint.
 
+## Versioning
+
+Ask whether a version marker makes sense before you add one. Add a version
+only when two versions must coexist and you can name the consumer that has
+to tell them apart, or when an external specification requires one.
+Otherwise, leave the marker out and add one at the first real breaking
+change. An absent marker then means the original.
+
+- **GraphQL evolves in place.** Make additive changes, mark what they replace
+  `@deprecated`, and remove it once nothing uses it.
+- **No version markers in names.** Don't put versions in file or directory
+  names, type or export names, routes, configuration keys, format or mode
+  tags, schema-version payload fields, pull request titles or documentation
+  headings. Existing `v1` and `V1` names predate this rule and are being
+  removed. Don't add new ones.
+- **Keep legitimate versions.** These stay: the Standard Webhooks `v1,`
+  signature prefix, LiveKit's `/rtc/v1` paths, npm package versions and
+  release tags (see [RELEASING.md](RELEASING.md)), Go module majors, GitHub
+  Actions `@vN` references, dependency majors, versions that external
+  specifications or vendors define (such as SLSA and in-toto type URIs),
+  signing-key rotation versions, database row versions, sequence numbers, and
+  tests that check that retired `/v1` paths fail.
+
 ## Adding a language or platform
 
 New SDKs follow the [SDK strategy](docs/sdk-strategy.md). Each one is
