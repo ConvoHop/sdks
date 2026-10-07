@@ -11,11 +11,11 @@ export const VECTOR_FILE = specFile("vectors/webhooks.json");
 
 const NOW = 1767225600; // 2026-01-01T00:00:00Z
 const TOLERANCE = 300;
-// Fixture-only keys (base64 of "fixture-key-a", "-b", "-c"); they protect nothing.
+// Fixture-only 32-byte keys (base64 of "fixture-key-a-for-conformance-32", "-b-", "-c-"); they protect nothing.
 const SECRETS = Object.freeze({
-  a: "whsec_Zml4dHVyZS1rZXktYQ==",
-  b: "whsec_Zml4dHVyZS1rZXktYg==",
-  c: "whsec_Zml4dHVyZS1rZXktYw==",
+  a: "whsec_Zml4dHVyZS1rZXktYS1mb3ItY29uZm9ybWFuY2UtMzI=",
+  b: "whsec_Zml4dHVyZS1rZXktYi1mb3ItY29uZm9ybWFuY2UtMzI=",
+  c: "whsec_Zml4dHVyZS1rZXktYy1mb3ItY29uZm9ybWFuY2UtMzI=",
 });
 const ID = "msg_conformance_0001";
 // Non-ASCII text makes verifiers prove they sign the UTF-8 bytes of the raw body.

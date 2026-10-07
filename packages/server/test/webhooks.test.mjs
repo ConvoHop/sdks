@@ -95,6 +95,71 @@ test("unknown event types and fields pass through and never throw", async () => 
   assert.deepEqual([misfiled.event.known, misfiled.event.subjectRef.kind], [false, "conversation"]);
 });
 
+/** A notification event under the push payload contract (spec/push-payload/). */
+function notification(eventType, fields = {}) {
+  const common = { eventId: randomUUID(), eventType, eventVersion: "1", occurredAt: now.toISOString(), projectId: randomUUID(),
+    recipientId: randomUUID(), conversationId: randomUUID(), senderId: randomUUID(), connected: false };
+  if (eventType === "notification.message") {
+    const messageId = randomUUID();
+    return { ...common, subjectRef: { id: messageId, kind: "message" }, messageId, ...fields };
+  }
+  const liveSessionId = randomUUID();
+  return { ...common, subjectRef: { id: liveSessionId, kind: "liveSession" }, liveSessionId, alertId: randomUUID(),
+    expiresAt: new Date(now.getTime() + 45_000).toISOString(), mediaProfile: "AUDIO_VIDEO",
+    ...eventType === "notification.callCancelled" ? { reason: "answered" } : {}, ...fields };
+}
+
+test("notification events verify as known events with only their contract fields", async () => {
+  const events = [notification("notification.message"),
+    notification("notification.message", { connected: true, preview: { text: "Grüße, 世界 👋", truncated: true } }),
+    notification("notification.message", { preview: { text: "👋".repeat(512), truncated: false } }),
+    notification("notification.call"), notification("notification.call", { mediaProfile: "AUDIO_ONLY", connected: true }),
+    ...["answered", "declined", "ended", "expired"].map(reason => notification("notification.callCancelled", { reason })),
+    // Media profiles and cancel reasons are open enumerations.
+    notification("notification.callCancelled", { mediaProfile: "SCREEN_SHARE", reason: "transferred" }),
+    notification("notification.call", { occurredAt: "2026-10-10T13:59:59.123456789+02:00", expiresAt: "2028-02-29T00:00:00Z" })];
+  for (const event of events) {
+    const verified = await webhooks.verify(delivery(JSON.stringify({ ...event, addedLater: { nested: [1] }, subjectRef: {
+      ...event.subjectRef, label: "ignored" } })));
+    assert.deepEqual(verified, { webhookId, timestamp, event: { ...event, known: true } }, event.eventType);
+  }
+});
+
+test("the largest notification event fits in a webhook body", async () => {
+  const largest = notification("notification.message", { occurredAt: "2026-10-10T23:59:59.999999999-23:59",
+    preview: { text: "\u0001".repeat(512), truncated: false } });
+  const body = JSON.stringify(largest);
+  assert.ok(Buffer.byteLength(body) <= 4096, String(Buffer.byteLength(body)));
+  assert.deepEqual((await webhooks.verify(delivery(body))).event, { ...largest, known: true });
+});
+
+test("notification events that break the push payload contract verify as unknown events", async () => {
+  const message = notification("notification.message"), call = notification("notification.call");
+  const cancelled = notification("notification.callCancelled"), { eventVersion: _version, ...unversioned } = message;
+  const { reason: _reason, ...reasonless } = cancelled;
+  const malformed = [unversioned, { ...message, eventVersion: 1 }, { ...message, eventVersion: "2" },
+    { ...message, subjectRef: { id: randomUUID(), kind: "message" } },
+    { ...message, subjectRef: { id: message.messageId, kind: "liveSession" } },
+    { ...call, subjectRef: { id: call.liveSessionId, kind: "message" } },
+    { ...message, recipientId: message.recipientId.toUpperCase() },
+    { ...message, senderId: "00000000-0000-0000-0000-000000000000" }, { ...message, conversationId: undefined },
+    { ...message, connected: "false" }, { ...message, preview: null }, { ...message, preview: { text: "hi" } },
+    { ...message, preview: { text: "", truncated: false } }, { ...message, preview: { text: "x".repeat(513), truncated: true } },
+    { ...message, preview: { text: "a\uD800", truncated: false } },
+    { ...message, occurredAt: "2026-10-10t12:00:00z" }, { ...message, occurredAt: "2026-02-29T00:00:00Z" },
+    { ...message, occurredAt: "2026-10-10T12:00:00.1234567890Z" }, { ...call, expiresAt: "2026-10-10T23:59:60Z" },
+    { ...call, mediaProfile: "audio-video" }, { ...call, mediaProfile: `A${"b".repeat(64)}` }, { ...call, alertId: undefined },
+    { ...cancelled, reason: "" }, reasonless, { ...call, eventType: "notification.callCancelled" }];
+  for (const event of malformed) {
+    const verified = await webhooks.verify(delivery(JSON.stringify(event)));
+    assert.deepEqual(verified.event, { known: false, eventId: event.eventId, eventType: event.eventType,
+      occurredAt: event.occurredAt, projectId: event.projectId, subjectRef: event.subjectRef }, JSON.stringify(event));
+  }
+  // The envelope rules still apply first.
+  for (const event of [{ ...message, subjectRef: { id: message.messageId } }, { ...call, projectId: "" }])
+    await rejects(webhooks.verify(delivery(JSON.stringify(event))), "INVALID_BODY");
+});
+
 test("tampering with the body, id or timestamp fails the signature", async () => {
   const body = JSON.stringify(envelope()), signed = delivery(body);
   const withHeader = (name, value) => ({ ...signed, headers: { ...signed.headers, [name]: value } });
@@ -209,12 +274,18 @@ test("bodies over 4096 bytes and bodies that are not event envelopes are rejecte
 });
 
 test("malformed secrets are configuration errors, reported before the delivery is read", async () => {
-  const body = JSON.stringify(envelope());
-  for (const secrets of [[], undefined, {}, "", "whsec_", current.slice("whsec_".length), "whsec_not*base64", "whsec_YQ",
-    "whsec_YR==", newSecret(65), [current, "whsec_"], [current, 7]])
+  const body = JSON.stringify(envelope()), encoded = current.slice("whsec_".length);
+  // A 32-byte secret's Base64 ends in one pad character, and the character before it has two zero low bits.
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  const nonCanonical = `whsec_${encoded.slice(0, -2)}${alphabet[alphabet.indexOf(encoded.at(-2)) | 1]}=`;
+  assert.deepEqual(Buffer.from(nonCanonical.slice("whsec_".length), "base64"), Buffer.from(encoded, "base64"));
+  for (const secrets of [[], undefined, {}, "", "whsec_", encoded, "whsec_not*base64", "whsec_YQ", "whsec_YR==", nonCanonical,
+    current.slice(0, -1), ` ${current}`, `${current} `, `WHSEC_${encoded}`, ...[1, 13, 23, 65].map(bytes => newSecret(bytes)),
+    [current, "whsec_"], [current, 7]])
     await rejects(webhooks.verify({ ...delivery(body), secrets }), "INVALID_SECRET");
   await rejects(webhooks.verify({ headers: {}, body, secrets: "whsec_", now }), "INVALID_SECRET");
-  for (const bytes of [1, 13, 24, 32, 64]) {
+  // Standard Webhooks secrets are 24 to 64 bytes; ConvoHop issues 32-byte secrets.
+  for (const bytes of [24, 32, 64]) {
     const secret = newSecret(bytes);
     assert.ok(await webhooks.verify(delivery(body, { secrets: secret, signers: [secret] })), String(bytes));
   }
