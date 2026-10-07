@@ -72,8 +72,15 @@ epochs and records device coverage, not human-read attestation.
 
 `watch` catches up with an authority-issued cursor, applies ordered event
 pages and persists the frontier only after the application callback succeeds.
-It does not silently reset invalid/ahead/expired cursors. At most four pushed
-pages may await application work; reconnect resumes at the applied frontier.
+It does not silently reset invalid/ahead/expired cursors. Catch-up runs in
+bounded rounds of at most ten pages: `watch` resolves after the first round,
+then the stream paces further rounds until the authority reports the replay
+complete and only then subscribes at the applied frontier. Later round
+failures reach `onError`; an incomplete page that does not advance the
+frontier closes the stream. An explicit `stream.reconcile()` runs one bounded
+round and rejects with a work-limit error while more history remains; call it
+again to continue. At most four pushed pages may await application work;
+overflow and reconnect resume at the applied frontier.
 Close the stream on view teardown. Expiry/revocation closes the stream;
 session renewal belongs to your authenticated backend.
 
