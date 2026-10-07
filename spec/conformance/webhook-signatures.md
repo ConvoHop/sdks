@@ -21,7 +21,10 @@ A delivery carries three headers:
 | `webhook-signature` | One or more space-separated signatures, each `<version>,<base64 signature>`. |
 
 An endpoint secret is `whsec_` followed by base64. The signing key is the
-base64-decoded part after the prefix. The signature is the base64 of
+base64-decoded part after the prefix: 24 to 64 bytes, the range Standard
+Webhooks allows. ConvoHop issues 32-byte keys. A verifier given a secret
+outside that range reports a configuration error, not an invalid delivery.
+The signature is the base64 of
 HMAC-SHA256, with that key, over the UTF-8 bytes of
 
 ```text

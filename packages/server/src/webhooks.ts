@@ -1,14 +1,23 @@
 /**
  * Webhook event types the authority sends.
  *
- * @experimental Provisional until the ConvoHop webhook contract (ConvoHop/ConveHop#10) merges.
+ * @experimental Provisional until the ConvoHop webhook contract (ConvoHop/ConveHop#10) merges. The `notification.*`
+ * types follow the provisional push payload contract in `spec/push-payload/`.
  */
 export type WebhookEventType =
   | "conversation.created" | "conversation.updated"
   | "member.added" | "member.roleChanged" | "member.historyExpanded" | "member.removed" | "member.broadcastPermissionChanged"
   | "message.created" | "message.edited" | "message.deleted" | "receipt.reported"
   | "live.started" | "live.participationChanged" | "live.alerted" | "live.ready" | "live.connected" | "live.ended"
-  | "webhook.endpointDisabled";
+  | "webhook.endpointDisabled"
+  | WebhookNotificationEventType;
+/**
+ * Per-recipient notification event types, for your push notifications: a message for the recipient, an incoming
+ * call, and a call that stopped ringing for the recipient.
+ *
+ * @experimental Provisional: the contract is `spec/push-payload/`, and the authority doesn't send these events yet.
+ */
+export type WebhookNotificationEventType = "notification.message" | "notification.call" | "notification.callCancelled";
 
 /** The metadata-only envelope every delivery carries. Fetch the resource through the API when you need its content. */
 interface WebhookEnvelope {
@@ -17,24 +26,94 @@ interface WebhookEnvelope {
 }
 /** @experimental Provisional until ConvoHop/ConveHop#10 merges. */
 export interface WebhookResourceEvent extends WebhookEnvelope {
-  known: true; eventType: Exclude<WebhookEventType, "webhook.endpointDisabled">;
+  known: true; eventType: Exclude<WebhookEventType, "webhook.endpointDisabled" | WebhookNotificationEventType>;
 }
 /** @experimental Provisional until ConvoHop/ConveHop#10 merges. */
 export interface WebhookEndpointDisabledEvent extends WebhookEnvelope {
   known: true; eventType: "webhook.endpointDisabled"; subjectRef: { id: string; kind: "webhookEndpoint" };
 }
-/** An event this SDK does not know. Acknowledge it; it never makes `verify()` throw. */
+
+/** A call's media profile. Unknown profiles pass through. */
+export type WebhookCallMediaProfile = "AUDIO_ONLY" | "AUDIO_VIDEO" | (string & {});
+/**
+ * Why a call stopped ringing for the recipient. `answered` and `declined` (by the recipient, on any device) only stop
+ * the ringing. `ended` (the call ended or stopped ringing before the recipient answered) and `expired` (nobody answered
+ * by `expiresAt`) are missed calls. Treat an unknown reason as stop ringing, without a missed-call alert.
+ */
+export type WebhookCallCancelReason = "answered" | "declined" | "ended" | "expired" | (string & {});
+/** The start of the message text. Present only when the project opts in to previews and the message has text. */
+export interface WebhookNotificationPreview {
+  /** 1 to 512 Unicode code points. */
+  text: string;
+  /** Whether the message text continues after `text`. */
+  truncated: boolean;
+}
+/** Fields every notification event carries besides the envelope. */
+interface WebhookNotificationFields extends WebhookEnvelope {
+  known: true;
+  /** The contract version. An event with another version is a `WebhookUnknownEvent`. */
+  eventVersion: "1";
+  /** The principal to notify. Each recipient gets its own event. */
+  recipientId: string;
+  conversationId: string;
+  /** The principal who sent the message or started the ringing. */
+  senderId: string;
+  /**
+   * Whether the recipient had an active realtime connection when the event was produced. It is a hint for your sending
+   * policy: it isn't per device, and it can change before you send. The push builders ignore it.
+   */
+  connected: boolean;
+}
+/** @experimental Provisional: see `spec/push-payload/`. */
+export interface WebhookMessageNotificationEvent extends WebhookNotificationFields {
+  eventType: "notification.message"; subjectRef: { id: string; kind: "message" };
+  messageId: string;
+  preview?: WebhookNotificationPreview;
+}
+/** @experimental Provisional: see `spec/push-payload/`. */
+export interface WebhookCallNotificationEvent extends WebhookNotificationFields {
+  eventType: "notification.call"; subjectRef: { id: string; kind: "liveSession" };
+  liveSessionId: string;
+  /** This ring for this recipient. A later ring of the same call has a new `alertId`. */
+  alertId: string;
+  /** When the ringing stops (RFC 3339). */
+  expiresAt: string;
+  mediaProfile: WebhookCallMediaProfile;
+}
+/** @experimental Provisional: see `spec/push-payload/`. */
+export interface WebhookCallCancelledNotificationEvent extends WebhookNotificationFields {
+  eventType: "notification.callCancelled"; subjectRef: { id: string; kind: "liveSession" };
+  liveSessionId: string;
+  /** The `alertId` of the ring that stopped. */
+  alertId: string;
+  /** The stopped ring's original deadline (RFC 3339). */
+  expiresAt: string;
+  mediaProfile: WebhookCallMediaProfile;
+  reason: WebhookCallCancelReason;
+}
+/**
+ * A per-recipient notification event: the input of the push payload builders.
+ *
+ * @experimental Provisional: the contract is `spec/push-payload/`, and the authority doesn't send these events yet.
+ */
+export type WebhookNotificationEvent =
+  | WebhookMessageNotificationEvent | WebhookCallNotificationEvent | WebhookCallCancelledNotificationEvent;
+
+/**
+ * An event this SDK does not know, including a `notification.*` event that doesn't match the push payload contract.
+ * Acknowledge it; it never makes `verify()` throw.
+ */
 export interface WebhookUnknownEvent extends WebhookEnvelope { known: false }
 /**
  * A verified delivery's event. Narrow on `known`, then on `eventType`.
  *
  * @experimental Provisional until ConvoHop/ConveHop#10 merges.
  */
-export type WebhookEvent = WebhookResourceEvent | WebhookEndpointDisabledEvent | WebhookUnknownEvent;
+export type WebhookEvent = WebhookResourceEvent | WebhookEndpointDisabledEvent | WebhookNotificationEvent | WebhookUnknownEvent;
 
 /**
  * Why a delivery failed verification. Checks run in this order and stop at the first failure:
- * - `INVALID_SECRET`: no secret is given, or one is not `whsec_` followed by padded standard Base64 of 1 to 64 bytes.
+ * - `INVALID_SECRET`: no secret is given, or one is not `whsec_` followed by padded standard Base64 of 24 to 64 bytes.
  *   This is your configuration, not the sender.
  * - `MISSING_HEADER`: `webhook-id`, `webhook-timestamp` or `webhook-signature` is absent or empty.
  * - `INVALID_HEADER`: one of those headers is repeated.
@@ -78,13 +157,16 @@ export interface WebhookSignature { webhookId: string; timestamp: number }
 export interface WebhookDelivery extends WebhookSignature { event: WebhookEvent }
 
 const BODY_LIMIT = 4096, SIGNATURE_LIMIT = 8, SIGNATURE_BYTES = 32, SECRET_PREFIX = "whsec_";
+const SECRET_MIN_BYTES = 24, SECRET_MAX_BYTES = 64;
 const BASE64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
-const eventTypes: ReadonlySet<string> = new Set<WebhookEventType>([
+const resourceEventTypes: ReadonlySet<string> = new Set<WebhookResourceEvent["eventType"]>([
   "conversation.created", "conversation.updated",
   "member.added", "member.roleChanged", "member.historyExpanded", "member.removed", "member.broadcastPermissionChanged",
   "message.created", "message.edited", "message.deleted", "receipt.reported",
   "live.started", "live.participationChanged", "live.alerted", "live.ready", "live.connected", "live.ended",
-  "webhook.endpointDisabled",
+]);
+const notificationEventTypes: ReadonlySet<string> = new Set<WebhookNotificationEventType>([
+  "notification.message", "notification.call", "notification.callCancelled",
 ]);
 
 function failure(code: WebhookVerificationCode, message: string): WebhookVerificationError {
@@ -105,8 +187,8 @@ function secretKeys(secrets: string | readonly string[]): Uint8Array[] {
   return list.map(secret => {
     const key = typeof secret === "string" && secret.startsWith(SECRET_PREFIX)
       ? base64Bytes(secret.slice(SECRET_PREFIX.length)) : undefined;
-    if (!key?.length || key.length > 64)
-      throw failure("INVALID_SECRET", "A webhook secret must be whsec_ followed by padded standard Base64 of 1 to 64 bytes");
+    if (!key || key.length < SECRET_MIN_BYTES || key.length > SECRET_MAX_BYTES)
+      throw failure("INVALID_SECRET", "A webhook secret must be whsec_ followed by padded standard Base64 of 24 to 64 bytes");
     return key;
   });
 }
@@ -171,7 +253,9 @@ function text(record: Readonly<Record<string, unknown>>, field: string): string 
   if (typeof value !== "string" || value === "") throw failure("INVALID_BODY", "Webhook body is not a ConvoHop event envelope");
   return value;
 }
-function knownType(eventType: string): eventType is WebhookEventType { return eventTypes.has(eventType); }
+function resourceType(eventType: string): eventType is WebhookResourceEvent["eventType"] {
+  return resourceEventTypes.has(eventType);
+}
 function envelopeRecord(value: unknown): Readonly<Record<string, unknown>> {
   if (typeof value !== "object" || value === null || Array.isArray(value))
     throw failure("INVALID_BODY", "Webhook body is not a ConvoHop event envelope");
@@ -185,11 +269,108 @@ function event(body: Uint8Array): WebhookEvent {
   const eventType = text(envelope, "eventType"), id = text(subject, "id"), kind = text(subject, "kind");
   const fields = { eventId: text(envelope, "eventId"), occurredAt: text(envelope, "occurredAt"),
     projectId: text(envelope, "projectId") };
-  if (knownType(eventType)) {
-    if (eventType !== "webhook.endpointDisabled") return { ...fields, known: true, eventType, subjectRef: { id, kind } };
-    if (kind === "webhookEndpoint") return { ...fields, known: true, eventType, subjectRef: { id, kind } };
+  if (resourceType(eventType)) return { ...fields, known: true, eventType, subjectRef: { id, kind } };
+  if (eventType === "webhook.endpointDisabled" && kind === "webhookEndpoint")
+    return { ...fields, known: true, eventType, subjectRef: { id, kind } };
+  if (notificationEventTypes.has(eventType)) {
+    const parsed = notificationEvent(envelope);
+    if (typeof parsed !== "string") return parsed;
   }
   return { ...fields, known: false, eventType, subjectRef: { id, kind } };
+}
+
+// Notification events follow spec/push-payload/push-payload.schema.json. The checks below mirror that schema.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, NIL_UUID = "00000000-0000-0000-0000-000000000000";
+const TIMESTAMP = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.[0-9]{1,9})?(?:Z|([+-])([0-9]{2}):([0-9]{2}))$/;
+const IDENTIFIER = /^[A-Za-z][A-Za-z0-9_]{0,63}$/, LONE_SURROGATE = /[\uD800-\uDFFF]/u, PREVIEW_LIMIT = 512;
+
+/**
+ * Unix seconds of an RFC 3339 timestamp with an uppercase `T`, and `Z` or an offset, ignoring any fraction, or
+ * `undefined` when the value isn't one. The date must exist, and second 60 isn't accepted.
+ */
+export function epochSeconds(value: string): number | undefined {
+  const match = TIMESTAMP.exec(value);
+  if (!match) return undefined;
+  const [year, month, day, hour, minute, second, offsetHour, offsetMinute] =
+    [1, 2, 3, 4, 5, 6, 8, 9].map(index => Number(match[index] ?? 0)) as [number, number, number, number, number, number, number, number];
+  const date = new Date(0);
+  date.setUTCFullYear(year, month - 1, day);
+  date.setUTCHours(hour, minute, second, 0);
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day
+    || date.getUTCHours() !== hour || date.getUTCMinutes() !== minute || date.getUTCSeconds() !== second
+    || offsetHour > 23 || offsetMinute > 59) return undefined;
+  return date.getTime() / 1000 - (match[7] === "-" ? -1 : 1) * (offsetHour * 3600 + offsetMinute * 60);
+}
+
+class MalformedNotification { constructor(readonly problem: string) {} }
+function need(condition: boolean, problem: string): asserts condition {
+  if (!condition) throw new MalformedNotification(problem);
+}
+type Fields = Readonly<Record<string, unknown>>;
+function asObject(value: unknown, field: string): Fields {
+  need(typeof value === "object" && value !== null && !Array.isArray(value), `${field} must be an object`);
+  return value as Fields;
+}
+function uuid(source: Fields, field: string): string {
+  const value = source[field];
+  need(typeof value === "string" && UUID.test(value) && value !== NIL_UUID, `${field} must be a lowercase, non-nil UUID`);
+  return value;
+}
+function timestamp(source: Fields, field: string): string {
+  const value = source[field];
+  need(typeof value === "string" && epochSeconds(value) !== undefined, `${field} must be an RFC 3339 timestamp`);
+  return value;
+}
+function identifier(source: Fields, field: string): string {
+  const value = source[field];
+  need(typeof value === "string" && IDENTIFIER.test(value), `${field} must be an ASCII letter followed by up to 63 ASCII letters, digits or _`);
+  return value;
+}
+function flag(source: Fields, field: string): boolean {
+  const value = source[field];
+  need(typeof value === "boolean", `${field} must be a boolean`);
+  return value;
+}
+function preview(value: unknown): WebhookNotificationPreview {
+  const source = asObject(value, "preview"), text = source.text;
+  need(typeof text === "string" && text !== "" && text.length <= 2 * PREVIEW_LIMIT && !LONE_SURROGATE.test(text)
+    && Array.from(text).length <= PREVIEW_LIMIT, `preview.text must be 1 to ${PREVIEW_LIMIT} Unicode code points`);
+  return { text, truncated: flag(source, "truncated") };
+}
+function subject(source: Fields, kind: "message" | "liveSession", id: string): void {
+  const value = asObject(source.subjectRef, "subjectRef");
+  need(value.kind === kind && value.id === id, `subjectRef must be the ${kind} the event names`);
+}
+function notification(value: unknown): WebhookNotificationEvent {
+  const source = asObject(value, "event"), eventType = source.eventType;
+  need(typeof eventType === "string" && notificationEventTypes.has(eventType), "eventType must be a notification event type");
+  need(source.eventVersion === "1", "eventVersion must be \"1\"");
+  const fields = { eventId: uuid(source, "eventId"), eventVersion: "1" as const, occurredAt: timestamp(source, "occurredAt"),
+    projectId: uuid(source, "projectId"), known: true as const, recipientId: uuid(source, "recipientId"),
+    conversationId: uuid(source, "conversationId"), senderId: uuid(source, "senderId"), connected: flag(source, "connected") };
+  if (eventType === "notification.message") {
+    const messageId = uuid(source, "messageId");
+    subject(source, "message", messageId);
+    return { ...fields, eventType, subjectRef: { id: messageId, kind: "message" }, messageId,
+      ...(source.preview === undefined ? {} : { preview: preview(source.preview) }) };
+  }
+  const liveSessionId = uuid(source, "liveSessionId");
+  subject(source, "liveSession", liveSessionId);
+  const call = { ...fields, subjectRef: { id: liveSessionId, kind: "liveSession" as const }, liveSessionId,
+    alertId: uuid(source, "alertId"), expiresAt: timestamp(source, "expiresAt"), mediaProfile: identifier(source, "mediaProfile") };
+  return eventType === "notification.call" ? { ...call, eventType }
+    : { ...call, eventType: "notification.callCancelled", reason: identifier(source, "reason") };
+}
+/**
+ * Validates a notification event against the push payload contract and returns its known fields, or a problem that
+ * names the first invalid field without echoing values. Ignores fields the contract doesn't define.
+ */
+export function notificationEvent(value: unknown): WebhookNotificationEvent | string {
+  try { return notification(value); }
+  catch (error) {
+    if (error instanceof MalformedNotification) return error.problem;
+    throw error;
+  }
 }
 
 /**
