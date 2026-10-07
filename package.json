@@ -4,9 +4,7 @@
   "workspaces": [
     "packages/core",
     "packages/client",
-    "packages/server",
-    "packages/browser-sdk",
-    "packages/server-sdk"
+    "packages/server"
   ],
   "scripts": {
     "build": "npm run build --workspaces",

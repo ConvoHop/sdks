@@ -4,11 +4,10 @@ This is the canonical public `ConvoHop/sdks` repository. The TypeScript
 packages live under `packages/`: `core` (generated types/operations and the
 isomorphic transport; not a supported entry point), `client` (user-session
 SDK for browsers and React Native) and `server` (backend-key/management SDK
-for Node.js). `client` and `server` depend only on `core`. `browser-sdk` and
-`server-sdk` are deprecated, frozen re-export shims for existing consumers;
-never add API to them. The private backend consumes this repository through
-a pinned submodule; never create a second SDK in a consumer or include
-private service implementation/configuration here.
+for Node.js). `client` and `server` depend only on `core`. The private backend
+consumes this repository through a pinned submodule; never create a second
+SDK in a consumer or include private service implementation/configuration
+here.
 
 All packages are root npm workspaces. Use Node 22 or later (CI: 22 and 24)
 and the root `package-lock.json`: `npm ci`, `npm run build`, `npm test`.

@@ -25,7 +25,7 @@ caller-visible state together. Prioritize:
   and 24, and honest capability/publication documentation.
 - Package boundaries: `client` and `server` import only `@convohop/core`
   entry points, never each other; `server` holds no browser/media code;
-  backend-key code never reaches `client`; deprecated shims stay frozen.
+  backend-key code never reaches `client`.
   Exports maps, `types`, `sideEffects` and `engines` stay accurate
   (`npm run check:packages`). Do not reintroduce removed
   prototype clients, invitation-only calls or the earlier Python/Go SDKs. New

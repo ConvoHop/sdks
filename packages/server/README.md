@@ -6,9 +6,6 @@ runtimes, because it holds secret backend keys and operator credentials.
 Source license: [Apache-2.0](../../LICENSE). No hosted service, cloud
 provisioner or privileged browser client is included.
 
-It replaces `@convohop/server-sdk`. See
-[Migrating from `@convohop/server-sdk`](#migrating-from-convohopserver-sdk).
-
 ## Runtime and entry point
 
 - `@convohop/server` has one ESM entry point with bundled TypeScript
@@ -327,16 +324,3 @@ Isolated SDK unit
 tests do not establish CockroachDB/WebRTC or hosted-release qualification;
 that acceptance belongs to the compatible service's maintained suite.
 `V1*` is a current SDK/domain name, not a selectable endpoint version.
-
-## Migrating from `@convohop/server-sdk`
-
-`@convohop/server-sdk` is deprecated. It's a frozen shim that re-exports this
-package for existing source consumers, and it will be removed.
-
-- Change the import specifier from `@convohop/server-sdk` to
-  `@convohop/server`. Every name that the old package exported is exported
-  here with the same behavior.
-- Server code no longer needs the client package. Import `V1Problem`,
-  `V1Transport` and generated types from `@convohop/server` instead of
-  `@convohop/browser-sdk`.
-- Node.js 22 or later is supported; the old package required Node.js 24.
