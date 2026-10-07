@@ -132,6 +132,7 @@ export type GetDeploymentRequestInput = {
 };
 
 export type GetMessageRequestInput = {
+  actAsPrincipalId?: string | null | undefined;
   conversationId: string;
   messageId: string;
 };
@@ -161,6 +162,7 @@ export type HistoryGrantRequestInput = {
 };
 
 export type InboxRequestInput = {
+  actAsPrincipalId?: string | null | undefined;
   cursor?: string | null | undefined;
   limit: number;
 };
@@ -310,6 +312,7 @@ export type MembersRequestInput = {
 };
 
 export type MessagesRequestInput = {
+  actAsPrincipalId?: string | null | undefined;
   beforeSequence?: string | null | undefined;
   conversationId: string;
   limit: number;
@@ -394,6 +397,7 @@ export type RevokeSessionRequestInput = {
 };
 
 export type SearchRequestInput = {
+  actAsPrincipalId?: string | null | undefined;
   cursor?: string | null | undefined;
   pageSize: number;
   query: string;
@@ -405,6 +409,7 @@ export type SearchScopeInput = {
 };
 
 export type SendMessageRequestInput = {
+  actAsPrincipalId?: string | null | undefined;
   conversationId: string;
   props: Record<string, unknown>;
   text: string;

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { V1ManagementClient, V1ProjectServerClient } from "@convohop/server";
+import { V1ManagementClient, V1ProjectServerClient, V1Problem, v1Operations } from "@convohop/server";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -24,6 +24,50 @@ test("conversation handles grant broadcast permission through generated backend 
   assert.equal(result.result.member.canStartBroadcast, true);
   assert.equal(requests[0].operationName, "CommunicationSetBroadcastPermission");
   assert.deepEqual(requests[0].variables.input, { conversationId, principalId, allowed: true, expectedMembershipRevision: "1" });
+});
+
+test("backend data-plane calls carry generated actAsPrincipalId and surface SCOPE_REQUIRED as a typed problem", async () => {
+  const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), conversationId = crypto.randomUUID();
+  const actAsPrincipalId = crypto.randomUUID(), backendKey = "fixture-backend-key-never-in-errors", requests = [];
+  const server = new V1ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation, backendKey,
+    fetch: async (_url, options) => {
+      const request = JSON.parse(options.body); requests.push(request);
+      if (request.operationName === "CommunicationInbox")
+        return Response.json({ errors: [{ message: "The backend key requires the current messageRead scope",
+          extensions: { code: "SCOPE_REQUIRED", requestId: request.variables.context.requestId, outcome: "rejected",
+            retryable: false, status: 403 } }] });
+      assert.equal(request.operationName, "CommunicationSendMessage");
+      return reply(request, { result: { messageId: crypto.randomUUID(), conversationId, sequence: "1", revision: "1",
+        status: "sent", cursor: { incarnation, conversationId, sequence: "1" } } });
+    } });
+  for (const key of ["communication.sendMessage", "communication.messages", "communication.getMessage",
+    "communication.inbox", "communication.search"])
+    assert.ok(v1Operations[key].inputFields.includes("actAsPrincipalId"), key);
+  for (const key of ["communication.editMessage", "communication.deleteMessage", "communication.events"])
+    assert.ok(!v1Operations[key].inputFields.includes("actAsPrincipalId"), key);
+
+  const requestId = crypto.randomUUID(), send = { conversationId, text: "fixture", props: {}, actAsPrincipalId };
+  const sent = await server.http.execute("communication.sendMessage", projectId, send, requestId);
+  assert.equal(sent.result.conversationId, conversationId);
+  assert.deepEqual(requests[0].variables.input, send);
+  await assert.rejects(server.http.execute("communication.sendMessage", projectId,
+    { ...send, actAsPrincipalId: crypto.randomUUID() }, requestId), { code: "IDEMPOTENCY_CONFLICT" });
+  await assert.rejects(server.http.execute("communication.editMessage", projectId, { conversationId,
+    messageId: sent.result.messageId, expectedRevision: "1", text: "fixture", props: {}, actAsPrincipalId }),
+  { code: "INVALID_REQUEST", message: "Unknown GraphQL input field" });
+  assert.equal(requests.length, 1);
+
+  await assert.rejects(server.http.execute("communication.inbox", projectId, { limit: 10, actAsPrincipalId }), error => {
+    assert.ok(error instanceof V1Problem);
+    assert.equal(error.code, "SCOPE_REQUIRED");
+    assert.equal(error.outcome, "rejected");
+    assert.equal(error.status, 403);
+    assert.ok(!String(error).includes(backendKey));
+    assert.ok(!JSON.stringify(error).includes(backendKey));
+    return true;
+  });
+  assert.deepEqual(requests[1].variables.input, { limit: 10, actAsPrincipalId });
+  assert.equal(requests.length, 2);
 });
 
 test("backend onboarding uses current generated operations and returns the typed scoped bootstrap", async () => {
