@@ -39,8 +39,6 @@ None of these commands need service credentials.
 | `packages/core` | Shared core (`@convohop/core`): generated GraphQL types and operations, protocol validation and the isomorphic transport |
 | `packages/client` | Client SDK (`@convohop/client`) for browsers and React Native, with realtime and media |
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
-| `packages/browser-sdk` | Deprecated, frozen re-export of `@convohop/client` under the old name |
-| `packages/server-sdk` | Deprecated, frozen re-export of `@convohop/server` under the old name |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, plus generated operation documents |
 | `scripts/`, `codegen.mjs` | Code generation |
 | `test/` | Fixtures shared by the package test suites |
@@ -56,9 +54,6 @@ Each package has its own tests in `packages/<name>/test/`.
   `core`.
 - `@convohop/core` isn't a supported entry point. Re-export its public API
   from `client` and `server` instead of asking users to import it.
-- Don't add features to `browser-sdk` or `server-sdk`. They keep the old
-  names and module layout working for existing consumers until those
-  consumers move, and then they'll be removed.
 
 ## Generated code
 

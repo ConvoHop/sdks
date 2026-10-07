@@ -49,14 +49,6 @@ These names match the planned published names under
 [package names](docs/sdk-strategy.md#package-names), but nothing is published
 yet.
 
-> [!NOTE]
-> `@convohop/browser-sdk` and `@convohop/server-sdk` are deprecated. They're
-> frozen shims that re-export `@convohop/client` and `@convohop/server` for
-> existing source consumers, and they'll be removed. To migrate, change the
-> import specifier. See the [client](packages/client/README.md#migrating-from-convohopbrowser-sdk)
-> and [server](packages/server/README.md#migrating-from-convohopserver-sdk)
-> migration notes.
-
 ### Planned
 
 | Layer | Languages and platforms |

@@ -271,9 +271,9 @@ Notes:
   It's installed as a dependency of the other packages, but it isn't a
   supported entry point, so don't import it directly. `@convohop/core`,
   `@convohop/client` and `@convohop/server` are available as source in this
-  repository. The earlier workspace names, `@convohop/browser-sdk` and
-  `@convohop/server-sdk`, remain only as deprecated re-exports for existing
-  source consumers. They'll be removed and won't be published.
+  repository. The earlier transitional workspace names,
+  `@convohop/browser-sdk` and `@convohop/server-sdk`, were removed before any
+  release and were never published.
 - **PyPI.** A single distribution, `convohop`, with the import package
   `convohop`. It includes both the synchronous and the `asyncio` clients.
 - **NuGet.** `ConvoHop`. Optional add-ons, such as framework integrations,

@@ -6,9 +6,6 @@ with a short-lived session for one signed-in user, which your backend issues.
 It never holds a backend key. No hosted service is included. Source license:
 [Apache-2.0](../../LICENSE).
 
-It replaces `@convohop/browser-sdk`. See
-[Migrating from `@convohop/browser-sdk`](#migrating-from-convohopbrowser-sdk).
-
 Build and test from the repository's root npm workspace with Node.js 22+:
 
 ```sh
@@ -309,22 +306,3 @@ occurrence after durable recovery; explicitly start/join a new occurrence.
 No transparent cross-boot continuity, invitation-only compatibility API,
 HLS, Egress, recording, screen-share, host transfer or offline ringing is
 provided. Unit tests do not qualify real media or a hosted deployment.
-
-## Migrating from `@convohop/browser-sdk`
-
-`@convohop/browser-sdk` is deprecated. It's a frozen shim that re-exports this
-package for existing source consumers, and it will be removed.
-
-- Change the import specifier from `@convohop/browser-sdk` to
-  `@convohop/client`. Every name that the old package exported from its root
-  is exported here with the same behavior. While both names are installed,
-  they resolve to the same classes, so `instanceof V1Problem` works with
-  either.
-- Deep imports of the old package's `dist/` modules, such as
-  `dist/v1-graphql.js`, aren't supported by `@convohop/client`. It has a
-  single entry point.
-- The low-level helpers that only those modules exposed, such as
-  `operationPayload`, `validateOutput` and `v1OutputShapes`, are internal.
-  `http.execute(...)` already validates every response against the generated
-  schema. If you need one of them directly, open an issue that describes the
-  use case.
