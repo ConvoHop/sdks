@@ -63,11 +63,12 @@ backend, bots and AI agents can work with conversations directly:
 - Verify and parse webhook events.
 
 > [!NOTE]
-> Most data-plane operations for backend keys depend on new backend-key
-> permissions that are in development. Each one is granted explicitly. A
-> backend key doesn't give unrestricted access to everyone's messages. The
-> Node.js server SDK covers management, identities and sessions,
-> conversations and membership today.
+> Backend keys reach the data plane through three backend-key scopes:
+> `messageRead`, `messageWrite` and `callRead`. Each one is granted
+> explicitly, so a backend key doesn't get access to everyone's messages by
+> default. The Node.js server SDK covers management, identities and
+> sessions, conversations and membership today. Its data-plane methods are
+> in development.
 
 Server SDKs don't open end-user media connections. Joining calls from
 server-side agents might come later.

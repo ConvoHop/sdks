@@ -72,7 +72,8 @@
       "inputFields": [
         "conversationId",
         "limit",
-        "beforeSequence"
+        "beforeSequence",
+        "actAsPrincipalId"
       ]
     },
     "communication.getMessage": {
@@ -84,7 +85,8 @@
       "resultType": "GetMessageReply!",
       "inputFields": [
         "conversationId",
-        "messageId"
+        "messageId",
+        "actAsPrincipalId"
       ]
     },
     "communication.events": {
@@ -122,7 +124,8 @@
       "resultType": "InboxReply!",
       "inputFields": [
         "limit",
-        "cursor"
+        "cursor",
+        "actAsPrincipalId"
       ]
     },
     "communication.search": {
@@ -136,7 +139,8 @@
         "query",
         "pageSize",
         "scope",
-        "cursor"
+        "cursor",
+        "actAsPrincipalId"
       ]
     },
     "communication.resolveRequest": {
@@ -397,7 +401,8 @@
       "inputFields": [
         "conversationId",
         "text",
-        "props"
+        "props",
+        "actAsPrincipalId"
       ]
     },
     "communication.editMessage": {

@@ -86,10 +86,10 @@ function sessionOutcome(proof: OperationPayload<"communication.sessionRequestOut
 /**
  * Backend-key client for one project. Runs only in trusted server runtimes; never ship a backend key to a browser.
  *
- * Data plane: project-wide message history, events, search and inbox reads (`messageRead` scope), bot/system or
- * act-as sends (`messageWrite`) and live-session and call history reads (`callRead`) belong on this client, next to
- * `conversations` and the `conversation(id)` handle. They are added only once the authority exposes those scopes in
- * the exported schema; until then the methods are deliberately absent rather than stubbed.
+ * Data plane: message history, single-message, search and act-as inbox reads (`messageRead` scope), service-identity
+ * or act-as sends (`messageWrite`) and live-session and call history reads (`callRead`) belong on this client, next to
+ * `conversations` and the `conversation(id)` handle. The authority exposes those scopes and the generated operations
+ * accept `actAsPrincipalId`; until the typed methods are added they are deliberately absent rather than stubbed.
  */
 export class V1ProjectServerClient {
   readonly projectId: string; readonly http: V1Transport;
