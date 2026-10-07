@@ -1,0 +1,93 @@
+"""
+Second edge-case plane. Types it shares with alpha are identical.
+"""
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"""
+Non-negative counter as a decimal string.
+Descriptions keep their line breaks, and a closing comment marker */ stays escaped.
+"""
+scalar Counter
+
+"Request metadata that every root field takes."
+input ContextInput {
+  "Tenant that owns the request."
+  tenant: String
+  requestId: ID!
+  attempt: Int = 1
+  "Single-use permit. Only alpha.redeem accepts it."
+  permit: String
+  tags: [String!] = ["a", "b|c"]
+}
+
+type Capabilities {
+  version: String!
+  wssUrl: String
+  features: [String!]!
+}
+
+input ResolveInput {
+  requestId: ID!
+}
+
+type Receipt {
+  requestId: ID!
+  committed: Boolean!
+  sequence: Counter
+}
+
+scalar Ratio
+
+enum WidgetState {
+  ACTIVE
+  ARCHIVED
+}
+
+type Widget {
+  id: ID!
+  label: String
+  state: WidgetState!
+  revision: Counter!
+}
+
+type WidgetPage {
+  items: [Widget!]!
+  complete: Boolean!
+  refreshRequired: Boolean!
+}
+
+type WidgetsPayload {
+  requestId: ID!
+  result: WidgetPage
+}
+
+input WidgetsInput {
+  states: [WidgetState!]
+}
+
+input ShapeInput {
+  kind: String!
+  sides: [Int!]!
+}
+
+input CreateWidgetInput {
+  label: String!
+  state: WidgetState = ACTIVE
+  ratio: Ratio = 0.5
+  nested: [[Int!]!]
+  shape: ShapeInput = {kind: "box", sides: [1, 2]}
+}
+
+type Query {
+  "Server capabilities."
+  capabilities(context: ContextInput!): Capabilities!
+  resolveRequest(context: ContextInput!, input: ResolveInput!): Receipt!
+  widgets(context: ContextInput!, input: WidgetsInput): WidgetsPayload!
+}
+
+type Mutation {
+  createWidget(context: ContextInput!, input: CreateWidgetInput!): Widget!
+}
