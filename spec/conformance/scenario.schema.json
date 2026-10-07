@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:convohop:conformance:scenario",
+  "title": "ConvoHop conformance scenario suite",
+  "description": "One file under spec/conformance/scenarios/ named <suite>.json. See spec/conformance/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["suite", "title", "scenarios"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "suite": { "$ref": "#/$defs/suiteName" },
+    "title": { "$ref": "#/$defs/text" },
+    "description": { "type": "string" },
+    "scenarios": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/scenario" } }
+  },
+  "$defs": {
+    "suiteName": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$", "maxLength": 40 },
+    "scenarioId": {
+      "description": "<suite>.<name>[.<name>...] in lower kebab case; unique across all suites.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*(\\.[a-z0-9]+(-[a-z0-9]+)*)+$",
+      "maxLength": 120
+    },
+    "handle": {
+      "description": "Runner-chosen name for a driver-side client or subscription.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{1,64}$"
+    },
+    "saveName": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$" },
+    "text": { "type": "string", "minLength": 1 },
+    "note": { "description": "Free-form explanation for readers; ignored by the runner.", "type": "string" },
+    "role": { "enum": ["user", "backend", "management"] },
+    "operation": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)+$", "maxLength": 64 },
+    "coverage": {
+      "enum": [
+        "auth.userToken", "auth.backendKey", "auth.scopes", "auth.expiry", "crud", "pagination", "errors",
+        "errors.rateLimited", "idempotency", "recovery", "webhooks.signature", "realtime.ordering",
+        "realtime.reconnect", "realtime.resume"
+      ]
+    },
+    "capability": {
+      "description": "Target capabilities; see spec/conformance/targets.md#capabilities.",
+      "enum": [
+        "auth.shortSessionTtl", "control.fault", "control.realtimeDrop", "control.reset", "control.waitLog",
+        "pagination.serverCappedPages"
+      ]
+    },
+    "feature": {
+      "description": "Driver features; see spec/conformance/driver-protocol.md#features.",
+      "enum": ["realtime", "recovery.storage", "retryAfter", "webhooks.verify"]
+    },
+    "matcher": { "description": "A value pattern; see spec/conformance/README.md#matchers." },
+    "errorExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["error"],
+      "properties": { "error": { "type": "object" } }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "covers", "steps"],
+      "properties": {
+        "id": { "$ref": "#/$defs/scenarioId" },
+        "title": { "$ref": "#/$defs/text" },
+        "description": { "type": "string" },
+        "covers": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/coverage" } },
+        "requires": {
+          "description": "Target capabilities the runner cannot infer from the steps. Missing ones skip the scenario.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "capabilities": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/capability" } }
+          }
+        },
+        "steps": { "type": "array", "minItems": 1, "maxItems": 200, "items": { "$ref": "#/$defs/step" } }
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": ["do"],
+      "properties": {
+        "do": {
+          "enum": [
+            "client.create", "client.close", "invoke", "realtime.subscribe", "realtime.collect", "realtime.close",
+            "webhooks.verify", "control.fault", "control.realtimeDrop", "control.waitLog", "sleep"
+          ]
+        }
+      },
+      "allOf": [
+        { "if": { "required": ["do"], "properties": { "do": { "const": "client.create" } } }, "then": { "$ref": "#/$defs/clientCreate" } },
+        { "if": { "required": ["do"], "properties": { "do": { "const": "client.close" } } }, "then": { "$ref": "#/$defs/clientClose" } },
+        { "if": { "required": ["do"], "properties": { "do": { "const": "invoke" } } }, "then": { "$ref": "#/$defs/invoke" } },
+        { "if": { "required": ["do"], "properties": { "do": { "const": "realtime.subscribe" } } }, "then": { "$ref": "#/$defs/realtimeSubscribe" } },
+        { "if": { "required": ["do"], "properties": { "do": { "const": "realtime.collect" } } }, "then": { "$ref": "#/$defs/realtimeCollect" } },
+        { "if": { "required": ["do"], "properties": { "do": { "const": "realtime.close" } } }, "then": { "$ref": "#/$defs/realtimeClose" } },
+        { "if": { "required": ["do"], "properties": { "do": { "const": "webhooks.verify" } } }, "then": { "$ref": "#/$defs/webhooksVerify" } },
+        { "if": { "required": ["do"], "properties": { "do": { "const": "control.fault" } } }, "then": { "$ref": "#/$defs/controlFault" } },
+        { "if": { "required": ["do"], "properties": { "do": { "const": "control.realtimeDrop" } } }, "then": { "$ref": "#/$defs/controlRealtimeDrop" } },
+        { "if": { "required": ["do"], "properties": { "do": { "const": "control.waitLog" } } }, "then": { "$ref": "#/$defs/controlWaitLog" } },
+        { "if": { "required": ["do"], "properties": { "do": { "const": "sleep" } } }, "then": { "$ref": "#/$defs/sleep" } }
+      ]
+    },
+    "clientCreate": {
+      "description": "Creates a driver-side SDK client. baseUrl, projectId, incarnation and actorId default from the target.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do", "client", "role", "credential"],
+      "properties": {
+        "do": { "const": "client.create" },
+        "note": { "$ref": "#/$defs/note" },
+        "client": { "$ref": "#/$defs/handle" },
+        "role": { "$ref": "#/$defs/role" },
+        "credential": { "$ref": "#/$defs/text" },
+        "principalId": { "$ref": "#/$defs/text" },
+        "projectId": { "$ref": "#/$defs/text" },
+        "incarnation": { "$ref": "#/$defs/text" },
+        "actorId": { "$ref": "#/$defs/text" },
+        "baseUrl": { "$ref": "#/$defs/text" },
+        "storage": { "$ref": "#/$defs/handle" }
+      }
+    },
+    "clientClose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do", "client"],
+      "properties": {
+        "do": { "const": "client.close" },
+        "note": { "$ref": "#/$defs/note" },
+        "client": { "$ref": "#/$defs/handle" }
+      }
+    },
+    "invoke": {
+      "description": "Runs a catalog operation. Without expect the step only requires success.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do", "client", "operation"],
+      "properties": {
+        "do": { "const": "invoke" },
+        "note": { "$ref": "#/$defs/note" },
+        "client": { "$ref": "#/$defs/handle" },
+        "operation": { "$ref": "#/$defs/operation" },
+        "args": { "type": "object" },
+        "requires": {
+          "description": "Driver features the driver serving this client's role must declare; otherwise the scenario is skipped.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/feature" }
+        },
+        "expect": {
+          "oneOf": [
+            { "type": "object", "additionalProperties": false, "required": ["value"], "properties": { "value": { "$ref": "#/$defs/matcher" } } },
+            { "$ref": "#/$defs/errorExpectation" }
+          ]
+        },
+        "save": { "$ref": "#/$defs/saveName" }
+      }
+    },
+    "realtimeSubscribe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do", "client", "subscription", "conversationId"],
+      "properties": {
+        "do": { "const": "realtime.subscribe" },
+        "note": { "$ref": "#/$defs/note" },
+        "client": { "$ref": "#/$defs/handle" },
+        "subscription": { "$ref": "#/$defs/handle" },
+        "conversationId": { "$ref": "#/$defs/text" },
+        "expect": { "$ref": "#/$defs/errorExpectation" }
+      }
+    },
+    "realtimeCollect": {
+      "description": "Waits until the condition holds, the subscription closes or timeoutMs elapses. By default expects no errors, no close and no timeout.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do", "subscription"],
+      "properties": {
+        "do": { "const": "realtime.collect" },
+        "note": { "$ref": "#/$defs/note" },
+        "subscription": { "$ref": "#/$defs/handle" },
+        "until": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "count": { "type": "integer", "minimum": 0, "maximum": 100000 },
+            "sequence": { "$ref": "#/$defs/text" },
+            "closed": { "const": true, "description": "Also wait until the subscription has ended permanently; expect.closed then defaults to true." }
+          }
+        },
+        "timeoutMs": { "type": "integer", "minimum": 0, "maximum": 60000 },
+        "settleMs": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "expect": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "events": { "$ref": "#/$defs/matcher" },
+            "errors": { "$ref": "#/$defs/matcher" },
+            "closed": { "type": "boolean" },
+            "timedOut": { "type": "boolean" }
+          }
+        },
+        "save": { "$ref": "#/$defs/saveName" }
+      }
+    },
+    "realtimeClose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do", "subscription"],
+      "properties": {
+        "do": { "const": "realtime.close" },
+        "note": { "$ref": "#/$defs/note" },
+        "subscription": { "$ref": "#/$defs/handle" }
+      }
+    },
+    "webhooksVerify": {
+      "description": "Verifies one vector from spec/conformance/vectors/webhooks.json; the result must equal the vector's expected value.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do", "vector"],
+      "properties": {
+        "do": { "const": "webhooks.verify" },
+        "note": { "$ref": "#/$defs/note" },
+        "vector": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" }
+      }
+    },
+    "controlFault": {
+      "description": "Queues a one-shot fault for the next request to a GraphQL root field.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do", "field", "action"],
+      "properties": {
+        "do": { "const": "control.fault" },
+        "note": { "$ref": "#/$defs/note" },
+        "plane": { "enum": ["communication", "management"] },
+        "field": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" },
+        "action": { "enum": ["rateLimit", "dropBeforeCommit", "dropAfterCommit"] },
+        "retryAfterSeconds": { "type": "integer", "minimum": 1, "maximum": 3600 }
+      },
+      "if": { "required": ["action"], "properties": { "action": { "const": "rateLimit" } } },
+      "then": { "required": ["retryAfterSeconds"] },
+      "else": { "not": { "required": ["retryAfterSeconds"] } }
+    },
+    "controlRealtimeDrop": {
+      "description": "Closes the target's realtime sockets, optionally only those subscribed to one conversation.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do"],
+      "properties": {
+        "do": { "const": "control.realtimeDrop" },
+        "note": { "$ref": "#/$defs/note" },
+        "conversationId": { "$ref": "#/$defs/text" },
+        "code": { "type": "integer", "minimum": 1000, "maximum": 4999 },
+        "reason": { "type": "string", "maxLength": 120 },
+        "expect": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["closed"],
+          "properties": { "closed": { "$ref": "#/$defs/matcher" } }
+        }
+      }
+    },
+    "controlWaitLog": {
+      "description": "Waits until the target's observation log has count entries of kind whose fields equal match.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do", "kind"],
+      "properties": {
+        "do": { "const": "control.waitLog" },
+        "note": { "$ref": "#/$defs/note" },
+        "kind": { "enum": ["request", "subscribe", "close"] },
+        "match": { "type": "object" },
+        "count": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "timeoutMs": { "type": "integer", "minimum": 1, "maximum": 30000 },
+        "expect": { "$ref": "#/$defs/matcher" },
+        "save": { "$ref": "#/$defs/saveName" }
+      }
+    },
+    "sleep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["do", "ms"],
+      "properties": {
+        "do": { "const": "sleep" },
+        "note": { "$ref": "#/$defs/note" },
+        "ms": { "type": "integer", "minimum": 0, "maximum": 10000 }
+      }
+    }
+  }
+}

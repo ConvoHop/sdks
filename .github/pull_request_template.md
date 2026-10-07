@@ -30,6 +30,7 @@ database or hosted-service behavior.
 - [ ] `npm test`
 - [ ] `npm run check:packages`
 - [ ] `npm run check:release`
+- [ ] `npm run conformance`
 
 ## Checklist
 

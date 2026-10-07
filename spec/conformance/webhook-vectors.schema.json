@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:convohop:conformance:webhook-vectors",
+  "title": "ConvoHop webhook signature test vectors",
+  "description": "Inputs and expected results for webhook verification; see spec/conformance/webhook-signatures.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scheme", "vectors"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "description": { "type": "string" },
+    "scheme": { "const": "standard-webhooks-v1" },
+    "vectors": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/vector" } }
+  },
+  "$defs": {
+    "secret": { "type": "string", "pattern": "^whsec_[A-Za-z0-9+/]+={0,2}$" },
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "payload", "headers", "secrets", "nowSeconds", "toleranceSeconds", "expected"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$", "maxLength": 64 },
+        "title": { "type": "string", "minLength": 1 },
+        "payload": { "description": "Raw request body exactly as received (UTF-8).", "type": "string" },
+        "headers": {
+          "description": "Request headers as received. Names compare case-insensitively.",
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "secrets": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/secret" } },
+        "nowSeconds": { "description": "Verifier clock, Unix seconds.", "type": "integer", "minimum": 0 },
+        "toleranceSeconds": { "type": "integer", "minimum": 0 },
+        "expected": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["valid", "code"],
+          "properties": {
+            "valid": { "type": "boolean" },
+            "code": {
+              "enum": [
+                null, "WEBHOOK_HEADERS_MISSING", "WEBHOOK_TIMESTAMP_INVALID", "WEBHOOK_TIMESTAMP_EXPIRED",
+                "WEBHOOK_TIMESTAMP_FUTURE", "WEBHOOK_SIGNATURE_INVALID"
+              ]
+            }
+          },
+          "if": { "required": ["valid"], "properties": { "valid": { "const": true } } },
+          "then": { "properties": { "code": { "type": "null" } } },
+          "else": { "properties": { "code": { "type": "string" } } }
+        }
+      }
+    }
+  }
+}

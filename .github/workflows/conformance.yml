@@ -1,0 +1,81 @@
+# Runs the language-neutral conformance scenarios in spec/conformance through
+# the TypeScript reference driver and uploads the JUnit and summary reports.
+# See spec/conformance/README.md and spec/conformance/targets.md.
+name: Conformance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  mock:
+    name: TypeScript reference driver (mock target)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Run the conformance scenarios against the mock target
+        run: npm run conformance
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-mock
+          path: conformance/reports/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # TODO(DEV-1): the dev-stack container image for SDK CI does not exist yet.
+  # This job stays skipped until the CONVOHOP_DEV_STACK_IMAGE repository
+  # variable names that image. Then replace the "Start the dev stack" step with
+  # the image's start, readiness and credential contract;
+  # conformance/targets/dev-stack.json lists the variables it must export.
+  # Fork pull requests are skipped because they cannot pull the image.
+  dev-stack:
+    name: TypeScript reference driver (dev stack)
+    if: vars.CONVOHOP_DEV_STACK_IMAGE != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+      packages: read # pull the dev-stack image from GitHub Packages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Start the dev stack
+        env:
+          CONVOHOP_DEV_STACK_IMAGE: ${{ vars.CONVOHOP_DEV_STACK_IMAGE }}
+        run: |
+          # TODO(DEV-1): start "$CONVOHOP_DEV_STACK_IMAGE", wait until it is ready and append the
+          # CONVOHOP_DEV_* values named in conformance/targets/dev-stack.json to "$GITHUB_ENV".
+          echo "::error::The dev-stack start step is a placeholder until DEV-1 defines the image contract."
+          exit 1
+      - name: Run the conformance scenarios against the dev stack
+        run: npm run conformance -- --target conformance/targets/dev-stack.json
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-dev-stack
+          path: conformance/reports/
+          if-no-files-found: ignore
+          retention-days: 14
