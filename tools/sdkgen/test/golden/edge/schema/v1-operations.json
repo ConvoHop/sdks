@@ -1,0 +1,171 @@
+{
+  "operations": {
+    "alpha.capabilities": {
+      "plane": "alpha",
+      "kind": "query",
+      "field": "capabilities",
+      "operationName": "AlphaCapabilities",
+      "query": "query AlphaCapabilities($context: ContextInput!) {\n  capabilities(context: $context) {\n    version\n    wssUrl\n    features\n  }\n}",
+      "resultType": "Capabilities!",
+      "inputFields": []
+    },
+    "alpha.resolveRequest": {
+      "plane": "alpha",
+      "kind": "query",
+      "field": "resolveRequest",
+      "operationName": "AlphaResolveRequest",
+      "query": "query AlphaResolveRequest($context: ContextInput!, $input: ResolveInput!) {\n  resolveRequest(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
+      "resultType": "Receipt!",
+      "inputFields": [
+        "requestId"
+      ]
+    },
+    "alpha.items": {
+      "plane": "alpha",
+      "kind": "query",
+      "field": "items",
+      "operationName": "AlphaItems",
+      "query": "query AlphaItems($context: ContextInput!, $input: ItemsInput!) {\n  items(context: $context, input: $input) {\n    items {\n      id\n      name\n      fruit\n      weight\n      ripe\n      oldName\n      legacyCode\n      grid\n      aliases\n      history\n    }\n    complete\n    refreshRequired\n    nextCursor\n  }\n}",
+      "resultType": "ItemPage!",
+      "inputFields": [
+        "limit",
+        "cursor",
+        "fruits",
+        "minWeight",
+        "includeDeprecated",
+        "method",
+        "box",
+        "legacyFilter",
+        "item2",
+        "item10"
+      ]
+    },
+    "alpha.events": {
+      "plane": "alpha",
+      "kind": "query",
+      "field": "events",
+      "operationName": "AlphaEvents",
+      "query": "query AlphaEvents($context: ContextInput!, $input: EventsInput!) {\n  events(context: $context, input: $input) {\n    items {\n      sequence\n      type\n      subjectRef {\n        kind\n        id\n      }\n      payload {\n        itemId\n        jobId\n        revision\n        note\n      }\n    }\n    complete\n    refreshRequired\n    nextCursor\n  }\n}",
+      "resultType": "EventPage!",
+      "inputFields": [
+        "after",
+        "limit"
+      ]
+    },
+    "alpha.job": {
+      "plane": "alpha",
+      "kind": "query",
+      "field": "job",
+      "operationName": "AlphaJob",
+      "query": "query AlphaJob($context: ContextInput!, $input: JobInput!) {\n  job(context: $context, input: $input) {\n    operationId\n    state\n    progress\n    output\n  }\n}",
+      "resultType": "Job",
+      "inputFields": [
+        "operationId"
+      ]
+    },
+    "alpha.fetchHTTPStatus": {
+      "plane": "alpha",
+      "kind": "query",
+      "field": "fetchHTTPStatus",
+      "operationName": "AlphaFetchHTTPStatus",
+      "query": "query AlphaFetchHTTPStatus($context: ContextInput!, $input: FetchInput) {\n  fetchHTTPStatus(context: $context, input: $input)\n}",
+      "resultType": "Int",
+      "inputFields": [
+        "method"
+      ]
+    },
+    "alpha.startJob": {
+      "plane": "alpha",
+      "kind": "mutation",
+      "field": "startJob",
+      "operationName": "AlphaStartJob",
+      "query": "mutation AlphaStartJob($context: ContextInput!, $input: StartJobInput!) {\n  startJob(context: $context, input: $input) {\n    requestId\n    receipt {\n      requestId\n      committed\n      sequence\n    }\n    job {\n      operationId\n      state\n    }\n  }\n}",
+      "resultType": "StartJobPayload!",
+      "inputFields": [
+        "itemId",
+        "repeat",
+        "props"
+      ]
+    },
+    "alpha.ping": {
+      "plane": "alpha",
+      "kind": "mutation",
+      "field": "ping",
+      "operationName": "AlphaPing",
+      "query": "mutation AlphaPing($context: ContextInput!, $input: PingInput) {\n  ping(context: $context, input: $input)\n}",
+      "resultType": "Boolean!",
+      "inputFields": [
+        "note"
+      ]
+    },
+    "alpha.redeem": {
+      "plane": "alpha",
+      "kind": "mutation",
+      "field": "redeem",
+      "operationName": "AlphaRedeem",
+      "query": "mutation AlphaRedeem($context: ContextInput!, $input: RedeemInput!) {\n  redeem(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
+      "resultType": "Receipt!",
+      "inputFields": [
+        "deliveryId"
+      ]
+    },
+    "alpha.eventStream": {
+      "plane": "alpha",
+      "kind": "subscription",
+      "field": "eventStream",
+      "operationName": "AlphaEventStream",
+      "query": "subscription AlphaEventStream($context: ContextInput!, $input: EventsInput!) {\n  eventStream(context: $context, input: $input) {\n    items {\n      sequence\n      type\n      subjectRef {\n        kind\n        id\n      }\n      payload {\n        itemId\n        jobId\n        revision\n        note\n      }\n    }\n    complete\n    refreshRequired\n    nextCursor\n  }\n}",
+      "resultType": "EventPage!",
+      "inputFields": [
+        "after",
+        "limit"
+      ]
+    },
+    "beta.capabilities": {
+      "plane": "beta",
+      "kind": "query",
+      "field": "capabilities",
+      "operationName": "BetaCapabilities",
+      "query": "query BetaCapabilities($context: ContextInput!) {\n  capabilities(context: $context) {\n    version\n    wssUrl\n    features\n  }\n}",
+      "resultType": "Capabilities!",
+      "inputFields": []
+    },
+    "beta.resolveRequest": {
+      "plane": "beta",
+      "kind": "query",
+      "field": "resolveRequest",
+      "operationName": "BetaResolveRequest",
+      "query": "query BetaResolveRequest($context: ContextInput!, $input: ResolveInput!) {\n  resolveRequest(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
+      "resultType": "Receipt!",
+      "inputFields": [
+        "requestId"
+      ]
+    },
+    "beta.widgets": {
+      "plane": "beta",
+      "kind": "query",
+      "field": "widgets",
+      "operationName": "BetaWidgets",
+      "query": "query BetaWidgets($context: ContextInput!, $input: WidgetsInput) {\n  widgets(context: $context, input: $input) {\n    requestId\n    result {\n      items {\n        id\n        label\n        state\n        revision\n      }\n      complete\n      refreshRequired\n    }\n  }\n}",
+      "resultType": "WidgetsPayload!",
+      "inputFields": [
+        "states"
+      ]
+    },
+    "beta.createWidget": {
+      "plane": "beta",
+      "kind": "mutation",
+      "field": "createWidget",
+      "operationName": "BetaCreateWidget",
+      "query": "mutation BetaCreateWidget($context: ContextInput!, $input: CreateWidgetInput!) {\n  createWidget(context: $context, input: $input) {\n    id\n    label\n    state\n    revision\n  }\n}",
+      "resultType": "Widget!",
+      "inputFields": [
+        "label",
+        "state",
+        "ratio",
+        "nested",
+        "shape"
+      ]
+    }
+  }
+}

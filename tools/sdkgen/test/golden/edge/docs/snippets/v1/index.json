@@ -1,0 +1,148 @@
+{
+  "snippetsVersion": 1,
+  "irVersion": "1.0.0",
+  "source": "schema/v1-ir.json",
+  "operations": [
+    {
+      "id": "alpha.capabilities",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "capabilities",
+      "operationName": "AlphaCapabilities",
+      "summary": "Read the server capabilities.",
+      "layer": "both",
+      "path": "alpha/capabilities.md"
+    },
+    {
+      "id": "alpha.resolveRequest",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "resolveRequest",
+      "operationName": "AlphaResolveRequest",
+      "summary": "Look up the outcome of an earlier alpha mutation by requestId.",
+      "layer": "both",
+      "path": "alpha/resolveRequest.md"
+    },
+    {
+      "id": "alpha.items",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "items",
+      "operationName": "AlphaItems",
+      "summary": "List items in server order.",
+      "layer": "client",
+      "path": "alpha/items.md"
+    },
+    {
+      "id": "alpha.events",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "events",
+      "operationName": "AlphaEvents",
+      "summary": "Replay alpha events after a cursor.",
+      "layer": "client",
+      "path": "alpha/events.md"
+    },
+    {
+      "id": "alpha.job",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "job",
+      "operationName": "AlphaJob",
+      "summary": "Poll a job that alpha.startJob started.",
+      "layer": "server",
+      "path": "alpha/job.md"
+    },
+    {
+      "id": "alpha.fetchHTTPStatus",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "fetchHTTPStatus",
+      "operationName": "AlphaFetchHTTPStatus",
+      "summary": "Fetch a <status> for `GET` | *POST* calls, with #tags, {braces}, [links], ~tildes~, & a back\\slash for _escaping_ in snake_case.",
+      "layer": "both",
+      "deprecated": true,
+      "path": "alpha/fetchHTTPStatus.md"
+    },
+    {
+      "id": "alpha.startJob",
+      "plane": "alpha",
+      "kind": "mutation",
+      "field": "startJob",
+      "operationName": "AlphaStartJob",
+      "summary": "Start a job. It finishes asynchronously.",
+      "layer": "server",
+      "path": "alpha/startJob.md"
+    },
+    {
+      "id": "alpha.ping",
+      "plane": "alpha",
+      "kind": "mutation",
+      "field": "ping",
+      "operationName": "AlphaPing",
+      "summary": "1. Send an ephemeral ping.",
+      "layer": "client",
+      "path": "alpha/ping.md"
+    },
+    {
+      "id": "alpha.redeem",
+      "plane": "alpha",
+      "kind": "mutation",
+      "field": "redeem",
+      "operationName": "AlphaRedeem",
+      "summary": "Redeem a delivery with its permit.",
+      "layer": "server",
+      "path": "alpha/redeem.md"
+    },
+    {
+      "id": "alpha.eventStream",
+      "plane": "alpha",
+      "kind": "subscription",
+      "field": "eventStream",
+      "operationName": "AlphaEventStream",
+      "summary": "Subscribe to alpha events after a cursor.",
+      "layer": "client",
+      "path": "alpha/eventStream.md"
+    },
+    {
+      "id": "beta.capabilities",
+      "plane": "beta",
+      "kind": "query",
+      "field": "capabilities",
+      "operationName": "BetaCapabilities",
+      "summary": "Read the server capabilities.",
+      "layer": "server",
+      "path": "beta/capabilities.md"
+    },
+    {
+      "id": "beta.resolveRequest",
+      "plane": "beta",
+      "kind": "query",
+      "field": "resolveRequest",
+      "operationName": "BetaResolveRequest",
+      "summary": "Look up the outcome of an earlier beta mutation by requestId.",
+      "layer": "server",
+      "path": "beta/resolveRequest.md"
+    },
+    {
+      "id": "beta.widgets",
+      "plane": "beta",
+      "kind": "query",
+      "field": "widgets",
+      "operationName": "BetaWidgets",
+      "summary": "List widgets in one bounded page.",
+      "layer": "server",
+      "path": "beta/widgets.md"
+    },
+    {
+      "id": "beta.createWidget",
+      "plane": "beta",
+      "kind": "mutation",
+      "field": "createWidget",
+      "operationName": "BetaCreateWidget",
+      "summary": "Create a widget.",
+      "layer": "server",
+      "path": "beta/createWidget.md"
+    }
+  ]
+}

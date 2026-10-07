@@ -1,0 +1,87 @@
+## `receipts`
+
+List the delivery and read receipts of a conversation.
+
+- **Operation:** `communication.receipts`, a query sent as `CommunicationReceipts`.
+- **Layer:** client (client SDKs).
+- **Authorization:** `userSession`, when `member`: The caller is an active member of the conversation.
+- **Idempotency:** `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+- **Pagination:** `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. Uses page `ReceiptPage` at `receipts.result`, items `ReadReceipt`, page size `input.limit` and cursor `input.cursor`.
+
+**Context** (`context: RequestContextInput!`)
+
+| Field | Type | Use |
+| --- | --- | --- |
+| `requestId` | `UUID!` | required |
+| `projectId` | `UUID` | required |
+| `incarnation` | `UUID` | required |
+| `observedServingEpoch` | `Decimal` | required |
+| `credentialDeliveryPermit` | `SignedProof` | forbidden |
+
+**Input** (`input: ReceiptsRequestInput!`)
+
+| Field | Type |
+| --- | --- |
+| `conversationId` | `UUID!` |
+| `limit` | `PageSize!` |
+| `cursor` | `String` |
+
+**Result** (`ReceiptsReply!`)
+
+| Field | Type |
+| --- | --- |
+| `status` | `String!` |
+| `requestId` | `UUID!` |
+| `serverTime` | `String` |
+| `receiptId` | `UUID` |
+| `committedAt` | `String` |
+| `replayed` | `Boolean` |
+| `operation` | `OperationRef` |
+| `resourceRef` | `ResourceRef` |
+| `result` | `ReceiptPage` |
+
+**Errors**
+
+- Returned by the authority: `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `WRONG_REGION`.
+- Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `INCARNATION_MISMATCH`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
+- Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `TRANSPORT_UNKNOWN`.
+- Transient, so repeating the request may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.
+- Error sets: `request`, `http`, `communication`.
+
+**GraphQL**
+
+```graphql
+query CommunicationReceipts($context: RequestContextInput!, $input: ReceiptsRequestInput!) {
+  receipts(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        principalId
+        membershipEpoch
+        visibilityEpoch
+        deliveredThroughSequence
+        readThroughSequence
+        updatedAt
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}
+```

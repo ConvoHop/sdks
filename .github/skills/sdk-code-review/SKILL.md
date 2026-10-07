@@ -23,6 +23,11 @@ caller-visible state together. Prioritize:
   reconnect, source rights and cleanup of media tracks/elements/listeners.
 - Current generated exports/builds, matching types/runtime behavior, Node 22
   and 24, and honest capability/publication documentation.
+- Operation annotations in `schema/v1-annotations.json` that match real
+  backend behavior: layer versus accepted credentials, required backend-key
+  scopes, mutation idempotency class, pagination fields and emitted events.
+  Generator changes keep the IR versioned and validated, and regenerate
+  every emitter output and golden instead of hand-editing.
 - Package boundaries: `client` and `server` import only `@convohop/core`
   entry points, never each other; `server` holds no browser/media code;
   backend-key code never reaches `client`.

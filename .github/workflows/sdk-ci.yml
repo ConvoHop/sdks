@@ -27,8 +27,11 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - run: npm run check:graphql
-      - name: Build and test core, client and server
+      - name: Check that every schema operation is annotated
+        run: npm run check:annotations
+      - name: Check generated IR, TypeScript, operations and doc snippets
+        run: npm run check:graphql
+      - name: Build and test core, client, server and sdkgen
         run: npm test
       - name: Check package metadata with publint and attw
         run: npm run check:packages

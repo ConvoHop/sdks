@@ -8,6 +8,8 @@ scripts:
     command: npm run build
   - name: Test JavaScript SDKs
     command: npm test
+  - name: Check operation annotations
+    command: npm run check:annotations
   - name: Check generated GraphQL
     command: npm run check:graphql
   - name: Check package metadata

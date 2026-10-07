@@ -28,7 +28,7 @@ on Node.js 22 and 24 only. Browsers and React Native aren't verified in CI.
 
 ## Generated code
 
-`npm run generate:graphql` writes `src/generated/` from the schemas in
-[`schema/`](../../schema). Don't edit these files by hand.
-`npm run check:graphql` fails when they're stale. For details, see
+`npm run generate:graphql` writes `src/generated/` from the schemas and
+operation annotations in [`schema/`](../../schema). Don't edit these files by
+hand. `npm run check:graphql` fails when they're stale. For details, see
 [Generated code](../../CONTRIBUTING.md#generated-code).
