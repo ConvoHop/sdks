@@ -393,7 +393,10 @@ and 24 as part of `npm test`. The `mock` job of the
 [Conformance workflow](../../.github/workflows/conformance.yml) runs
 `npm run conformance` on Node.js 24 and uploads the reports as the
 `conformance-reports-mock` artifact. Its `dev-stack` job is described under
-[dev-stack target](targets.md#dev-stack-target).
+[dev-stack target](targets.md#dev-stack-target). The
+[release workflow](../../.github/workflows/release.yml) runs every npm check
+that CI runs, so it also runs `npm run conformance` before it packs a
+release; `npm run check:release` enforces that.
 
 ### Current results
 

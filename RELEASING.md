@@ -79,8 +79,9 @@ the bundle files.
    1. **Plan** checks that every new tag points to the commit that started
       the run.
    2. **Build, check and pack** checks out that commit, installs the locked
-      dependencies without lifecycle scripts, runs every check and test, and
-      packs each released package with its SBOM and `SHA256SUMS`.
+      dependencies without lifecycle scripts, runs every check and test,
+      including the conformance scenarios against the mock, and packs each
+      released package with its SBOM and `SHA256SUMS`.
    3. **Attest** signs build provenance and an SBOM attestation for each
       package, then verifies them as a user would.
    4. **Attach the assets to the draft releases** checks the complete asset
