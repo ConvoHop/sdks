@@ -479,4 +479,3 @@ npm test
 Isolated SDK unit
 tests do not establish CockroachDB/WebRTC or hosted-release qualification;
 that acceptance belongs to the compatible service's maintained suite.
-`V1*` is a current SDK/domain name, not a selectable endpoint version.

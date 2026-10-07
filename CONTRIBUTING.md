@@ -214,13 +214,15 @@ change. An absent marker then means the original.
 - **No version markers in names.** Don't put versions in file or directory
   names, type or export names, routes, configuration keys, format or mode
   tags, schema-version payload fields, pull request titles or documentation
-  headings. Existing `v1` and `V1` names predate this rule and are being
-  removed. Don't add new ones.
+  headings. `npm test` runs `test/names.test.mjs`, which fails when a
+  tracked path or exported identifier gains a version marker. Its allowlist
+  names the reason for each version that stays.
 - **Keep legitimate versions.** These stay: the Standard Webhooks `v1,`
   signature prefix, LiveKit's `/rtc/v1` paths, npm package versions and
   release tags (see [RELEASING.md](RELEASING.md)), Go module majors, GitHub
   Actions `@vN` references, dependency majors, versions that external
   specifications or vendors define (such as SLSA and in-toto type URIs),
+  versions that are data (such as `catalogVersion` and `secretVersion`),
   signing-key rotation versions, database row versions, sequence numbers, and
   tests that check that retired `/v1` paths fail.
 

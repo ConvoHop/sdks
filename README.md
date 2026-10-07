@@ -145,8 +145,6 @@ scenarios on Node.js 24. Neither workflow publishes or deploys anything.
   realtime behavior and error codes. The schemas and annotations compile into
   a language-neutral IR that every SDK generator reads. See
   [SDK generation](docs/sdk-generation.md).
-- `V1` in type names identifies the current domain model. It isn't an API
-  version that you select.
 - Every generated operation is available through the low-level transport:
   `http.execute("communication.<operation>", projectId, input, requestId)` or
   `http.execute("management.<operation>", undefined, input, requestId)`.

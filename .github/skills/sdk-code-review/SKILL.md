@@ -6,8 +6,8 @@ description: Review current ConvoHop SDK changes for schema alignment, authoriza
 # SDK review
 
 Read `.github/copilot-instructions.md`, affected public declarations,
-implementations, examples and tests. Establish which client/language and
-protocol version the change actually supports.
+implementations, examples and tests. Establish which clients, languages and
+service capabilities the change actually supports.
 
 Trace request construction, transport behavior, response validation and
 caller-visible state together. Prioritize:
@@ -26,8 +26,8 @@ caller-visible state together. Prioritize:
 - Operation annotations in `schema/annotations.json` that match real
   backend behavior: layer versus accepted credentials, required backend-key
   scopes, mutation idempotency class, pagination fields and emitted events.
-  Generator changes keep the IR versioned and validated, and regenerate
-  every emitter output and golden instead of hand-editing.
+  Generator changes keep the IR validated against `schema/ir.schema.json`,
+  and regenerate every emitter output and golden instead of hand-editing.
 - Package boundaries: `client` and `server` import only `@convohop/core`
   entry points, never each other; `server` holds no browser/media code;
   backend-key code never reaches `client`.

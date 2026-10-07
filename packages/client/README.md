@@ -44,7 +44,6 @@ Your authenticated backend returns a scoped user bootstrap, never its backend
 or operator credentials. IDs are canonical nonzero UUIDs; SQL counters are
 decimal strings. Configure an HTTPS origin, or explicit loopback HTTP for
 local development. HTTP and `graphql-transport-ws` use unversioned `/graphql`.
-`V1*` names do not select an API/schema version.
 
 ```ts
 import { ConvoHopClient } from "@convohop/client";

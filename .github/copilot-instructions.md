@@ -23,7 +23,7 @@ grant each job least-privilege `permissions`. npm publishing stays a dry run
 until registry publishing (REL-PUB) is approved.
 
 `tools/sdkgen` generates from the schemas plus `schema/annotations.json`
-through a versioned language-neutral IR (`schema/ir.json`); see
+through a language-neutral IR (`schema/ir.json`); see
 `docs/sdk-generation.md`. Every schema operation needs an annotation entry
 (`npm run check:annotations`; see CONTRIBUTING "Annotating operations").
 Annotate real behavior: layer must match the accepted credentials, and
@@ -82,13 +82,16 @@ removal once usage is zero.
 
 Do not put version markers in file or directory names, type or export names,
 routes, config keys, format or mode tags, schema-version payload fields, PR
-titles or doc headings. Existing `v1`/`V1` names predate this rule and are
-being removed; do not add new ones. These versions are legitimate and stay:
+titles or doc headings. `npm test` runs `test/names.test.mjs`, which fails
+when a tracked path or exported identifier gains a version marker; its
+allowlist names the reason for each kept version. These versions are
+legitimate and stay:
 
 - the Standard Webhooks `v1,` signature prefix and LiveKit `/rtc/v1` paths;
 - npm semver, release tags and `*-v*` tag rules, Go module majors, GitHub
   Actions `@vN` and dependency majors;
 - versions owned by external specifications or vendors, such as SLSA and
   in-toto type URIs and pinned third-party API versions;
-- signing-key rotation versions, database row versions and sequence numbers;
+- versions that are data, such as `catalogVersion` and `secretVersion`,
+  signing-key rotation versions, database row versions and sequence numbers;
 - negative tests that assert retired `/v1` paths fail.
