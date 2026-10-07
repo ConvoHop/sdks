@@ -81,14 +81,22 @@ npm ci
 npm run check:annotations
 npm run check:graphql
 npm run build
-npm test
+npm test                 # package, generator and conformance harness tests
 npm run check:packages   # publint and Are the Types Wrong? package checks
+npm run conformance      # shared conformance scenarios against a local mock
 ```
 
-The unit tests don't need service credentials. They don't prove real WebRTC
-media, database persistence or the behavior of a hosted service.
-[CI](.github/workflows/sdk-ci.yml) runs the same checks on Node.js 22 and 24 for
-every pull request. It doesn't publish packages or deploy anything.
+The [conformance suite](spec/conformance/README.md) holds language-neutral
+scenarios that every SDK must pass. `npm run conformance` runs them through
+the TypeScript reference driver against a deterministic mock, and can also
+run them against a real deployment.
+
+The unit tests and the mock don't need service credentials. They don't prove
+real WebRTC media, database persistence or the behavior of a hosted service.
+[CI](.github/workflows/sdk-ci.yml) runs the other checks on Node.js 22 and 24
+for every pull request, and the
+[Conformance workflow](.github/workflows/conformance.yml) runs the scenarios
+on Node.js 24. Neither workflow publishes packages or deploys anything.
 
 ## API contract
 
@@ -156,6 +164,8 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - [Client SDK](packages/client/README.md)
 - [Node.js server SDK](packages/server/README.md)
 - [Shared core package](packages/core/README.md)
+- [Conformance suite](spec/conformance/README.md): scenarios, the driver
+  protocol, targets and webhook signature vectors
 - [Contributing](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)

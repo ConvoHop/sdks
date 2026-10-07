@@ -24,6 +24,9 @@ Annotate real behavior: layer must match the accepted credentials, and
 mutations need an accurate idempotency class. Regenerate with
 `npm run generate:graphql`; never hand-edit or hand-merge generated files.
 Generator changes update goldens with `UPDATE_GOLDEN=1 npm run test:sdkgen`.
+`npm run conformance` runs the language-neutral scenarios in
+`spec/conformance/` through the TypeScript reference driver against the
+deterministic mock; the runner, driver and mock live in `conformance/`.
 
 Only the current Conversation/LiveSession/Participation model is supported.
 The zero-customer consolidation deliberately removed prototype clients and

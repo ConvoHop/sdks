@@ -29,6 +29,7 @@ database or hosted-service behavior.
 - [ ] `npm run build`
 - [ ] `npm test`
 - [ ] `npm run check:packages`
+- [ ] `npm run conformance`
 
 ## Checklist
 

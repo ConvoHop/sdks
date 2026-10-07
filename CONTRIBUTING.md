@@ -27,8 +27,9 @@ npm ci                     # install from the root package-lock.json
 npm run check:annotations  # every schema operation is annotated
 npm run check:graphql      # generated code matches the schemas
 npm run build              # strict TypeScript builds
-npm test                   # builds, then runs the package and generator test suites
+npm test                   # builds, then runs the package, generator and conformance harness tests
 npm run check:packages     # publint and Are the Types Wrong? on every package
+npm run conformance        # conformance scenarios, reference driver against the mock
 ```
 
 None of these commands need service credentials.
@@ -42,7 +43,9 @@ None of these commands need service credentials.
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
 | `tools/sdkgen/` | The SDK generator: annotation check, IR builder, emitters and their tests. See [SDK generation](docs/sdk-generation.md) |
-| `test/` | Fixtures shared by the package test suites |
+| `spec/conformance/` | Language-neutral conformance scenarios, the driver protocol, target descriptors and webhook vectors, with their JSON Schemas |
+| `conformance/` | The conformance runner, the TypeScript reference driver, the mock target and the harness's tests. A private npm workspace that is never published |
+| `test/` | Fixtures shared by the package and conformance test suites |
 | `docs/` | Public design and policy documents, and generated operation snippets |
 
 Each package has its own tests in `packages/<name>/test/`.
@@ -159,6 +162,10 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
 - Unit tests use deterministic stubs. They don't prove real network, WebRTC
   media or database behavior. If your change needs that kind of verification,
   say so in the pull request.
+- Behavior that every SDK must share belongs in a
+  [conformance scenario](spec/conformance/README.md#adding-a-scenario).
+  Run `npm run conformance` when you change a scenario or SDK behavior that
+  one covers.
 
 ## SDK design rules
 
@@ -189,8 +196,9 @@ who use the SDKs.
 
 New SDKs follow the [SDK strategy](docs/sdk-strategy.md). Each one is
 generated from the shared schema, has a small idiomatic hand-written runtime,
-and must pass the shared conformance suite before release. Its generator is an
-emitter for the shared IR. See
+and must pass the shared [conformance suite](spec/conformance/README.md)
+through its own [driver](spec/conformance/README.md#adding-a-driver) before
+release. Its generator is an emitter for the shared IR. See
 [Adding a language emitter](docs/sdk-generation.md#adding-a-language-emitter).
 Open a feature request to discuss the design before you start.
 

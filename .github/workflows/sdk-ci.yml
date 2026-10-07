@@ -31,7 +31,7 @@ jobs:
         run: npm run check:annotations
       - name: Check generated IR, TypeScript, operations and doc snippets
         run: npm run check:graphql
-      - name: Build and test core, client, server and sdkgen
+      - name: Build and test core, client, server, sdkgen and the conformance harness
         run: npm test
       - name: Check package metadata with publint and attw
         run: npm run check:packages

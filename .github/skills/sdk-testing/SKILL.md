@@ -20,6 +20,9 @@ Use the existing package test suites:
 - Package metadata and export maps: root `npm run check:packages` (publint
   and attw). Each package's `surface.test.mjs` pins its runtime exports and
   allowed imports.
+- Cross-SDK behavior: scenarios in `spec/conformance/scenarios/`, run with
+  root `npm run conformance` (reference driver against the mock). The
+  harness's own tests in `conformance/test/` run as part of `npm test`.
 
 Prototype clients and the earlier Python/Go implementations were deliberately
 removed. New language SDKs follow `docs/sdk-strategy.md`. Test the current

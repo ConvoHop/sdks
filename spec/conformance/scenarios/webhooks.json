@@ -1,0 +1,92 @@
+{
+  "$schema": "../scenario.schema.json",
+  "suite": "webhooks",
+  "title": "Webhook signature verification",
+  "description": "Each scenario verifies one shared vector from spec/conformance/vectors/webhooks.json offline: no target or network is involved. Drivers expose their SDK's verifier through the webhooks.verify feature; see spec/conformance/webhook-signatures.md.",
+  "scenarios": [
+    {
+      "id": "webhooks.valid-single-secret",
+      "title": "Signed with the only configured secret",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "valid-single-secret" }]
+    },
+    {
+      "id": "webhooks.valid-multiple-signatures",
+      "title": "Any one of several space-separated signatures may match",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "valid-multiple-signatures" }]
+    },
+    {
+      "id": "webhooks.valid-at-tolerance-edge",
+      "title": "A timestamp exactly toleranceSeconds old is accepted",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "valid-at-tolerance-edge" }]
+    },
+    {
+      "id": "webhooks.rotation-new-secret",
+      "title": "During rotation a delivery signed with the new secret verifies",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "rotation-new-secret" }]
+    },
+    {
+      "id": "webhooks.rotation-old-secret",
+      "title": "During rotation a delivery signed with the previous secret still verifies",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "rotation-old-secret" }]
+    },
+    {
+      "id": "webhooks.header-names-case-insensitive",
+      "title": "Header names compare case-insensitively",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "header-names-case-insensitive" }]
+    },
+    {
+      "id": "webhooks.wrong-secret",
+      "title": "A signature made with a different secret is rejected with WEBHOOK_SIGNATURE_INVALID",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "wrong-secret" }]
+    },
+    {
+      "id": "webhooks.tampered-payload",
+      "title": "A body that differs from the signed body is rejected with WEBHOOK_SIGNATURE_INVALID",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "tampered-payload" }]
+    },
+    {
+      "id": "webhooks.expired-timestamp",
+      "title": "A correctly signed delivery older than the tolerance is rejected with WEBHOOK_TIMESTAMP_EXPIRED",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "expired-timestamp" }]
+    },
+    {
+      "id": "webhooks.future-timestamp",
+      "title": "A correctly signed delivery too far in the future is rejected with WEBHOOK_TIMESTAMP_FUTURE",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "future-timestamp" }]
+    },
+    {
+      "id": "webhooks.multiple-secrets-none-match",
+      "title": "Several configured secrets, none of which signed the delivery with WEBHOOK_SIGNATURE_INVALID",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "multiple-secrets-none-match" }]
+    },
+    {
+      "id": "webhooks.missing-signature-header",
+      "title": "A delivery without webhook-signature is rejected with WEBHOOK_HEADERS_MISSING",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "missing-signature-header" }]
+    },
+    {
+      "id": "webhooks.invalid-timestamp",
+      "title": "A non-integer webhook-timestamp is rejected even when signed with WEBHOOK_TIMESTAMP_INVALID",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "invalid-timestamp" }]
+    },
+    {
+      "id": "webhooks.unknown-signature-version",
+      "title": "Signatures with an unknown version prefix are ignored with WEBHOOK_SIGNATURE_INVALID",
+      "covers": ["webhooks.signature"],
+      "steps": [{ "do": "webhooks.verify", "vector": "unknown-signature-version" }]
+    }
+  ]
+}

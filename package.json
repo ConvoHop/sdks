@@ -4,12 +4,16 @@
   "workspaces": [
     "packages/core",
     "packages/client",
-    "packages/server"
+    "packages/server",
+    "conformance"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "npm test --workspaces && npm run test:sdkgen",
-    "check:packages": "npm run build && npm run check:package --workspaces",
+    "test:conformance": "npm test -w conformance",
+    "conformance": "npm run build && node conformance/runner.mjs",
+    "generate:conformance": "node conformance/lib/webhook-vectors.mjs --write",
+    "check:packages": "npm run build && npm run check:package -w packages",
     "generate:graphql": "node tools/sdkgen/cli.mjs generate",
     "check:graphql": "node tools/sdkgen/cli.mjs generate --check",
     "check:annotations": "node tools/sdkgen/cli.mjs check-annotations",
