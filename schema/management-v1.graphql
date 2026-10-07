@@ -944,7 +944,7 @@ type Query {
 }
 
 """
-GraphQL error `extensions` when `code` is `QUOTA_EXCEEDED`. A hard usage quota refused new work until the period ends (HTTP 429, WebSocket close 4429). Admitted calls and connections continue. Not retryable before `periodEnd`.
+GraphQL error `extensions` when `code` is `QUOTA_EXCEEDED`. A hard usage quota refused new work until the period ends (HTTP 429, WebSocket close 4429). Calls and connections already in progress continue. Not retryable before `periodEnd`.
 """
 type QuotaExceededProblem {
 	"""
