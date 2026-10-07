@@ -5,12 +5,12 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import config from "../sdkgen.config.mjs";
-import { EmitterError, renderEmitters } from "../lib/emitter.mjs";
+import { EmitterError, listEmittableFiles, renderEmitters } from "../lib/emitter.mjs";
 import { buildIr } from "../lib/ir.mjs";
 import { formatJson } from "../lib/json.mjs";
 import { codeUnitCompare } from "../lib/naming.mjs";
 import { operationTypeNames, scalarTsType } from "../emitters/typescript.mjs";
-import { REPO_ROOT, assertGoldenTree, fixtureSources, listTree, repoSources } from "./helpers.mjs";
+import { REPO_ROOT, assertGoldenTree, fixtureSources, repoSources } from "./helpers.mjs";
 
 const render = sources => renderEmitters(buildIr(sources), config.emitters, { options: config.options });
 
@@ -28,7 +28,7 @@ test("the committed generated files match a fresh render of the repository schem
   }
   for (const directory of config.emitters.flatMap(emitter => emitter.owns)) {
     const expected = files.filter(file => file.path.startsWith(`${directory}/`)).map(file => file.path).sort(codeUnitCompare);
-    assert.deepEqual(listTree(REPO_ROOT, directory), expected, `${directory} has stale files. Run npm run generate:graphql.`);
+    assert.deepEqual(listEmittableFiles(REPO_ROOT, directory), expected, `${directory} has stale files. Run npm run generate:graphql.`);
   }
 });
 

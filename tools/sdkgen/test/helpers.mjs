@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildASTSchema, parse } from "graphql";
+import { listEmittableFiles } from "../lib/emitter.mjs";
 import { loadSources } from "../lib/sources.mjs";
 import { codeUnitCompare } from "../lib/naming.mjs";
 
@@ -86,7 +87,7 @@ export function assertGoldenTree(name, files) {
     return;
   }
   const hint = "Run UPDATE_GOLDEN=1 npm run test:sdkgen and review the golden diff.";
-  assert.deepEqual(listTree(root), files.map(file => file.path).sort(codeUnitCompare), `golden ${name} lists different files. ${hint}`);
+  assert.deepEqual(listEmittableFiles(root), files.map(file => file.path).sort(codeUnitCompare), `golden ${name} lists different files. ${hint}`);
   for (const file of files) {
     assert.equal(file.contents, readFileSync(join(root, file.path), "utf8"), `${file.path} differs from golden ${name}. ${hint}`);
   }

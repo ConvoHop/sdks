@@ -126,10 +126,15 @@ The runner enforces these rules:
 - No two files, from any emitters, may have the same path or paths that
   differ only in case.
 - An emitter may claim directories in `owns`. Only that emitter can write
-  there, and the runner deletes (or, with `--check`, reports) files in those
-  directories that it no longer produces. Directories outside `owns` are
-  never cleaned up.
+  there. The runner deletes (or, with `--check`, reports) files in those
+  directories that the emitter no longer produces, and removes directories
+  left empty. It ignores names that no emitter could produce, such as
+  `.DS_Store`. Directories outside `owns` are never cleaned up.
 - Files are written only when their contents change.
+
+[`.gitattributes`](../.gitattributes) checks out text files with LF line
+endings on every platform, so generated files and golden files compare byte
+for byte on Windows too.
 
 Options come from [`tools/sdkgen/sdkgen.config.mjs`](../tools/sdkgen/sdkgen.config.mjs),
 keyed by emitter name. Register new emitters there. They run in the listed

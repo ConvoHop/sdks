@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, rmdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { isPlainObject } from "./json.mjs";
 import { codeUnitCompare } from "./naming.mjs";
@@ -20,7 +20,9 @@ import { codeUnitCompare } from "./naming.mjs";
  * paths and writes into another emitter's `owns` directories, requires
  * LF-terminated text, writes only files whose contents changed and, in check
  * mode, reports drift without writing. Files under `owns` directories that
- * the emitter no longer produces are deleted (write mode) or reported (check mode).
+ * the emitter no longer produces are deleted, together with the directories
+ * they leave empty (write mode), or reported (check mode). Entries that no
+ * emitter could produce, such as .DS_Store, are left alone.
  */
 export const EMITTER_API_VERSION = 1;
 
@@ -117,13 +119,29 @@ export function renderEmitters(ir, emitters, { options = {} } = {}) {
   return files;
 }
 
-function listFiles(root, directory) {
+/**
+ * Sorted paths of the files below `directory` that an emitter could have
+ * written. Names that aren't safe path segments, such as .DS_Store, editor
+ * swap files and dot-directories, are skipped because they can't be output.
+ */
+export function listEmittableFiles(root, directory = "") {
   const absolute = join(root, directory);
   if (!existsSync(absolute)) return [];
   return readdirSync(absolute, { withFileTypes: true }).flatMap(entry => {
-    const path = `${directory}/${entry.name}`;
-    return entry.isDirectory() ? listFiles(root, path) : [path];
-  });
+    if (!SEGMENT.test(entry.name)) return [];
+    const path = directory ? `${directory}/${entry.name}` : entry.name;
+    return entry.isDirectory() ? listEmittableFiles(root, path) : [path];
+  }).sort(codeUnitCompare);
+}
+
+function pruneEmptyDirectories(absolute) {
+  if (!existsSync(absolute)) return;
+  for (const entry of readdirSync(absolute, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !SEGMENT.test(entry.name)) continue;
+    const child = join(absolute, entry.name);
+    pruneEmptyDirectories(child);
+    if (readdirSync(child).length === 0) rmdirSync(child);
+  }
 }
 
 /**
@@ -133,6 +151,14 @@ function listFiles(root, directory) {
 export function syncFiles(root, files, { check = false, owns = [] } = {}) {
   const result = { written: [], unchanged: [], removed: [], drift: [] };
   const emitted = new Set(files.map(file => file.path));
+  const stale = [...new Set(owns.flatMap(directory => listEmittableFiles(root, directory)))].filter(path => !emitted.has(path));
+  if (!check) {
+    // Delete before writing. On a case-insensitive file system, a file or directory renamed only in
+    // letter case is the same entry as its replacement, so deleting it afterwards would delete the output.
+    for (const path of stale) rmSync(join(root, path));
+    for (const directory of owns) pruneEmptyDirectories(join(root, directory));
+    result.removed.push(...stale);
+  }
   for (const { path, contents } of files) {
     const absolute = join(root, path);
     const current = existsSync(absolute) ? readFileSync(absolute, "utf8") : undefined;
@@ -146,16 +172,7 @@ export function syncFiles(root, files, { check = false, owns = [] } = {}) {
       result.written.push(path);
     }
   }
-  for (const directory of owns) {
-    for (const path of listFiles(root, directory).sort(codeUnitCompare)) {
-      if (emitted.has(path)) continue;
-      if (check) result.drift.push(`${path} (stale)`);
-      else {
-        rmSync(join(root, path));
-        result.removed.push(path);
-      }
-    }
-  }
+  if (check) result.drift.push(...stale.map(path => `${path} (stale)`));
   return result;
 }
 
