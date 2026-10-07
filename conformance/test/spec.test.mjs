@@ -364,7 +364,7 @@ describe("webhook signature vectors", () => {
     assert.ok(valid.length >= 3);
     for (const vector of valid) {
       assert.deepEqual(verify({ ...vector, payload: `${vector.payload} ` }), { valid: false, code: "WEBHOOK_SIGNATURE_INVALID" }, vector.id);
-      assert.deepEqual(verify({ ...vector, secrets: ["whsec_dW5yZWxhdGVkLWZpeHR1cmUta2V5"] }),
+      assert.deepEqual(verify({ ...vector, secrets: ["whsec_dW5yZWxhdGVkLWZpeHR1cmUta2V5LXBhZGRlZC0wMzI="] }),
         { valid: false, code: "WEBHOOK_SIGNATURE_INVALID" }, vector.id);
       const [, timestamp] = Object.entries(vector.headers).find(([name]) => name.toLowerCase() === "webhook-timestamp");
       assert.deepEqual(verify({ ...vector, nowSeconds: Number(timestamp) + vector.toleranceSeconds + 1 }),

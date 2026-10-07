@@ -122,6 +122,8 @@ mutation ManagementCreateDeployment($context: RequestContextInput!, $input: Crea
           operationId
         }
       }
+      replayedDeliveries
+      skippedDeliveries
     }
   }
 }

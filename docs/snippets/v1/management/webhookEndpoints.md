@@ -1,12 +1,12 @@
-## `webhookDeliveries`
+## `webhookEndpoints`
 
-List recent deliveries of a webhook endpoint.
+List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.
 
-- **Operation:** `management.webhookDeliveries`, a query sent as `ManagementWebhookDeliveries`.
+- **Operation:** `management.webhookEndpoints`, a query sent as `ManagementWebhookEndpoints`.
 - **Layer:** server (server SDKs).
 - **Authorization:** `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
 - **Idempotency:** `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
-- **Pagination:** `bounded`. One bounded page without a cursor input. complete reports whether every item fit. Uses page `WebhookDeliveryPage` at `webhookDeliveries.result` and items `WebhookDelivery`.
+- **Pagination:** `bounded`. One bounded page without a cursor input. complete reports whether every item fit. Uses page `WebhookEndpointPage` at `webhookEndpoints.result` and items `WebhookEndpoint`.
 
 **Context** (`context: RequestContextInput!`)
 
@@ -18,14 +18,13 @@ List recent deliveries of a webhook endpoint.
 | `observedServingEpoch` | `Decimal` | optional |
 | `credentialDeliveryPermit` | `SignedProof` | forbidden |
 
-**Input** (`input: WebhookDeliveriesRequestInput!`)
+**Input** (`input: WebhookEndpointsRequestInput!`)
 
 | Field | Type |
 | --- | --- |
 | `projectId` | `UUID!` |
-| `endpointId` | `UUID!` |
 
-**Result** (`WebhookDeliveriesReply!`)
+**Result** (`WebhookEndpointsReply!`)
 
 | Field | Type |
 | --- | --- |
@@ -37,7 +36,7 @@ List recent deliveries of a webhook endpoint.
 | `replayed` | `Boolean` |
 | `operation` | `OperationRef` |
 | `resourceRef` | `ResourceRef` |
-| `result` | `WebhookDeliveryPage` |
+| `result` | `WebhookEndpointPage` |
 
 **Errors**
 
@@ -50,8 +49,8 @@ List recent deliveries of a webhook endpoint.
 **GraphQL**
 
 ```graphql
-query ManagementWebhookDeliveries($context: RequestContextInput!, $input: WebhookDeliveriesRequestInput!) {
-  webhookDeliveries(context: $context, input: $input) {
+query ManagementWebhookEndpoints($context: RequestContextInput!, $input: WebhookEndpointsRequestInput!) {
+  webhookEndpoints(context: $context, input: $input) {
     status
     requestId
     serverTime
@@ -70,26 +69,26 @@ query ManagementWebhookDeliveries($context: RequestContextInput!, $input: Webhoo
     }
     result {
       items {
-        effectId
-        eventId
-        state
-        attempts
-        lastOutcome
-        nextAttemptAt
-        eventType
-        createdAt
-        replayedAt
-        lastAttemptAt
-        lastHttpStatus
-        lastLatencyMs
-        lastErrorCode
+        endpointId
+        url
+        eventTypes
+        enabled
+        status
+        disabledReason
+        revision
+        secretVersion
+        rotationPending
+        rotationOverlapUntil
+        consecutiveFailures
+        failingSince
+        lastSuccessAt
+        lastFailureAt
       }
       complete
       refreshRequired
       nextCursor
       observedAt
       partialReason
-      sourceRevision
     }
   }
 }

@@ -121,6 +121,8 @@ mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: Revo
           operationId
         }
       }
+      replayedDeliveries
+      skippedDeliveries
     }
   }
 }
