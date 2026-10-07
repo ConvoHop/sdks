@@ -165,6 +165,14 @@ budget. `recoverPending(showError)` runs that bounded recovery on startup or
 foreground. Never replace an uncertain command with a new UUID. Native-use
 markers survive reconstruction without persisting the grant.
 
+Failures are `V1Problem` errors. `retryAfter` is the number of whole seconds
+the authority asks you to wait before resending, for example with
+`RATE_LIMITED`. It comes from the error's `retryAfter` extension, or else
+from an HTTP `Retry-After` header given in seconds. It is `undefined` when
+the authority gives no delay, and the SDK never waits or resends because of
+it. `ScopeRequiredProblem` is re-exported for completeness, but user
+sessions never get it: only backend keys have scopes.
+
 Browser `V1Client` keeps its existing synchronous `recoveryStorage`
 (`sessionStorage` or `localStorage`) for request recovery and replay cursors.
 For trusted database-backed use, `V1Transport` separately exports

@@ -142,10 +142,12 @@ behaviour, and only enough of it for the scenarios:
 - Backend keys with the IR's scopes and expiry, user sessions with expiry,
   membership-based visibility, author-or-moderator message changes,
   revisions and request-id idempotency. A backend key without a scope the
-  operation requires gets `SCOPE_REQUIRED`. Sending, editing and deleting
-  messages with a backend key that has the scope fails with
-  `FEATURE_UNSUPPORTED`, because the mock implements them for user
-  sessions only.
+  operation requires gets `SCOPE_REQUIRED`, with the authority's message,
+  which names the scope. Backend keys send and read messages as an active
+  member named by `actAsPrincipalId` (otherwise `NOT_FOUND`), or without it
+  send as the mock's backend service principal and read the whole history,
+  and they edit and delete messages with the `moderation` scope. User
+  sessions that pass `actAsPrincipalId` get `FORBIDDEN`.
 - Realtime events over `graphql-transport-ws`: replay from a cursor, then
   live delivery.
 - All four [credentials](#credentials), every [capability](#capabilities)

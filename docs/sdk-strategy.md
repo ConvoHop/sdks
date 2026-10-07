@@ -66,11 +66,12 @@ backend, bots and AI agents can work with conversations directly:
 
 > [!NOTE]
 > Backend keys reach the data plane through three backend-key scopes:
-> `messageRead`, `messageWrite` and `callRead`. Each one is granted
-> explicitly, so a backend key doesn't get access to everyone's messages by
-> default. The Node.js server SDK covers management, identities and
-> sessions, conversations and membership today. Its data-plane methods are
-> in development.
+> `messageRead`, `messageWrite` and `callRead`. `callManage` also grants
+> call reads. Each one is granted explicitly, so a backend key doesn't get
+> access to everyone's messages by default. The Node.js server SDK covers
+> management, identities and sessions, conversations and membership, the
+> data plane and webhook verification today. See its
+> [data-plane methods](../packages/server/README.md#data-plane-methods).
 
 Server SDKs don't open end-user media connections. Joining calls from
 server-side agents might come later.
@@ -241,7 +242,10 @@ How it works:
 
 > [!NOTE]
 > Per-recipient notification events, and webhook delivery to your endpoints,
-> are in development. Event names and fields aren't final.
+> are in development. Event names and fields aren't final. The Node.js
+> server SDK already verifies webhook signatures, with
+> [`webhooks.verify()`](../packages/server/README.md#webhooks). Its typed
+> events are provisional, and its payload builders are planned.
 
 The SDK helpers are all optional:
 
@@ -421,7 +425,8 @@ other row becomes a CI requirement when that SDK lands.
   outcome, not as success or failure.
 - Recovery state that your app chooses to persist never contains tokens.
 - Webhooks are signed. Verify the signature of every delivery before you
-  trust it. The server SDKs will include verification helpers.
+  trust it. `@convohop/server` provides `webhooks.verify()`, and the other
+  server SDKs will include the same check.
 
 To report a vulnerability, see [SECURITY.md](../SECURITY.md).
 

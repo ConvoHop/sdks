@@ -108,6 +108,61 @@
           "note": "A deleted message stays in history as a tombstone without content.",
           "expect": { "value": { "items": [{ "messageId": "${saved.m1.messageId}", "sequence": "${saved.m1.sequence}", "revision": "3", "deleted": true, "text": "" }] } } }
       ]
+    },
+    {
+      "id": "crud.messages.backend-act-as",
+      "title": "A backend sends and reads as a member, sends as its own service principal and moderates a member's message",
+      "covers": ["crud", "auth.backendKey"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "carol-${nonce}" }, "save": "carol" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Acting ${nonce}", "props": {},
+            "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }, { "principalId": "${saved.bob.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "messages.send",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "text": "From alice ${nonce}", "actAs": "${saved.alice.principalId}" },
+          "expect": { "value": { "messageId": { "$type": "uuid" }, "conversationId": "${saved.conversation.conversationId}", "sequence": { "$type": "counter" },
+            "revision": "1", "status": "sent",
+            "cursor": { "incarnation": "${target.incarnation}", "conversationId": "${saved.conversation.conversationId}", "sequence": { "$type": "counter" } } } },
+          "save": "m1" },
+        { "do": "invoke", "client": "backend", "operation": "messages.send",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "text": "From the service ${nonce}" },
+          "expect": { "value": { "messageId": { "$type": "uuid" }, "revision": "1", "status": "sent" } },
+          "save": "m2" },
+        { "do": "invoke", "client": "backend", "operation": "messages.list",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "actAs": "${saved.bob.principalId}" },
+          "note": "Newest first. Without actAs the backend sends as its own service principal, which is not a member.",
+          "expect": { "value": { "complete": true, "nextCursor": null, "items": [
+            { "messageId": "${saved.m2.messageId}", "authorId": { "$type": "uuid", "$ne": "${saved.alice.principalId}" }, "text": "From the service ${nonce}" },
+            { "messageId": "${saved.m1.messageId}", "authorId": "${saved.alice.principalId}", "sequence": "${saved.m1.sequence}", "revision": "1",
+              "deleted": false, "text": "From alice ${nonce}" }] } } },
+        { "do": "invoke", "client": "backend", "operation": "messages.list",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "actAs": "${saved.alice.principalId}" },
+          "expect": { "value": { "complete": true, "items": [
+            { "messageId": "${saved.m2.messageId}", "authorId": { "$type": "uuid", "$ne": "${saved.bob.principalId}" } },
+            { "messageId": "${saved.m1.messageId}", "authorId": "${saved.alice.principalId}" }] } },
+          "save": "page" },
+        { "do": "invoke", "client": "backend", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "note": "Without actAs a backend reads the whole history.",
+          "expect": { "value": { "complete": true, "items": { "$length": 2 } } } },
+        { "do": "invoke", "client": "backend", "operation": "messages.edit", "args": { "message": "${saved.page.items.1}", "text": "Moderated ${nonce}" },
+          "note": "Backend keys change any member's message with the moderation scope.",
+          "expect": { "value": { "messageId": "${saved.m1.messageId}", "authorId": "${saved.alice.principalId}", "revision": "2", "deleted": false,
+            "text": "Moderated ${nonce}" } },
+          "save": "edited" },
+        { "do": "invoke", "client": "backend", "operation": "messages.delete", "args": { "message": "${saved.edited}" },
+          "expect": { "value": { "messageId": "${saved.m1.messageId}", "revision": "3", "deleted": true, "text": "" } } },
+        { "do": "invoke", "client": "backend", "operation": "messages.send",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "text": "Not a member ${nonce}", "actAs": "${saved.carol.principalId}" },
+          "note": "A backend acts only as an active member; anyone else is NOT_FOUND.",
+          "expect": { "error": { "code": "NOT_FOUND", "status": 404, "outcome": "rejected" } } },
+        { "do": "invoke", "client": "backend", "operation": "messages.list",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "actAs": "${saved.carol.principalId}" },
+          "expect": { "error": { "code": "NOT_FOUND", "status": 404, "outcome": "rejected" } } }
+      ]
     }
   ]
 }

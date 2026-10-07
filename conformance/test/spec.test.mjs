@@ -255,7 +255,7 @@ describe("the operation catalog and scenarios agree with schema/v1-ir.json", () 
     // A fresh authority per call, with a conversation in which alice, a member, wrote a message.
     const fixture = () => {
       const domain = new Domain();
-      const admin = { kind: "backend", scopes: new Set(SCOPES), scope: `backend:${domain.projectId}` };
+      const admin = { kind: "backend", scopes: new Set(SCOPES), principalId: domain.backendPrincipalId, scope: `backend:${domain.projectId}` };
       const principal = externalUserId => domain.createPrincipal(admin, { externalUserId }).result.principalId;
       const alice = principal("alice"), bob = principal("bob");
       const { conversationId } = domain.createConversation(admin,
@@ -295,7 +295,8 @@ describe("the operation catalog and scenarios agree with schema/v1-ir.json", () 
       try { calls[id](context, actorFor(context)); return null; }
       catch (error) { if (error instanceof Problem) return [error.code, error.status]; throw error; }
     };
-    const backendKey = scopes => ({ domain }) => ({ kind: "backend", scopes: new Set(scopes), scope: `backend:${domain.projectId}` });
+    const backendKey = scopes => ({ domain }) =>
+      ({ kind: "backend", scopes: new Set(scopes), principalId: domain.backendPrincipalId, scope: `backend:${domain.projectId}` });
     for (const id of Object.keys(calls)) {
       const { auth } = irOperations.get(id);
       const userRules = auth.filter(rule => rule.credential === ROLE_CREDENTIALS.user);
@@ -311,9 +312,7 @@ describe("the operation catalog and scenarios agree with schema/v1-ir.json", () 
       }
       for (const rule of rules) {
         const result = failure(id, backendKey(rule.scopes ?? []));
-        // The mock leaves the backend data plane out, but only after authorizing the key.
-        assert.ok(result === null || result[0] === "FEATURE_UNSUPPORTED",
-          `${id} should accept a backend key with ${rule.scopes?.join(" and ") || "no scopes"}, not fail with ${result}`);
+        assert.equal(result, null, `${id} should accept a backend key with ${rule.scopes?.join(" and ") || "no scopes"}, not fail with ${result}`);
       }
       for (const scope of new Set(rules.flatMap(rule => rule.scopes ?? []))) {
         const held = SCOPES.filter(candidate => candidate !== scope);

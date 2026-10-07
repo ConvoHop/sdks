@@ -18,6 +18,7 @@ const REFERENCE = "convohop-typescript-reference";
 const ALL_IDS = readdirSync(SCENARIO_DIR).filter(name => name.endsWith(".json")).sort()
   .flatMap(name => JSON.parse(readFileSync(join(SCENARIO_DIR, name), "utf8")).scenarios.map(scenario => scenario.id));
 const VECTORS = JSON.parse(readFileSync(specFile("vectors/webhooks.json"), "utf8")).vectors;
+const FEATURES = JSON.parse(readFileSync(specFile("scenario.schema.json"), "utf8")).$defs.feature.enum;
 const DEV_STACK_VARIABLES = Object.keys(process.env).filter(name => name.startsWith("CONVOHOP_DEV_"));
 
 const fake = (...args) => [`"${process.execPath}"`, `"${FAKE}"`, ...args].join(" ");
@@ -171,8 +172,8 @@ describe("setup errors exit 2 before any scenario runs", () => {
 });
 
 describe("the TypeScript reference driver against the mock", () => {
-  test("runs every scenario; only scenarios needing undeclared features skip", async () => {
-    const result = await cli([]);
+  test("declares every driver feature and passes every scenario with --strict", async () => {
+    const result = await cli(["--strict"]);
     assert.equal(result.code, 0, result.output);
     assert.equal(result.stderr, "");
     const [driverLine, targetLine] = result.stdout.split("\n");
@@ -183,29 +184,23 @@ describe("the TypeScript reference driver against the mock", () => {
     const { summary } = await assertConsistent(result);
     assert.deepEqual(results(summary).map(scenario => scenario.id), ALL_IDS);
     assert.equal(summary.driver.name, REFERENCE);
+    assert.deepEqual([...summary.driver.features].sort(), [...FEATURES].sort());
     assert.equal(summary.fixtureDriver, null);
     assert.equal(summary.target.kind, "mock");
-    assert.equal(results(summary).filter(scenario => scenario.status === "failed").length, 0);
-    assert.ok(results(summary).filter(scenario => scenario.status === "passed").length >= ALL_IDS.length / 2);
-    for (const scenario of results(summary).filter(entry => entry.status === "skipped")) {
-      for (const part of scenario.reason.split("; ")) {
-        const [, feature] = part.match(new RegExp(`^driver ${REFERENCE} does not declare feature (\\S+)$`)) ?? [];
-        assert.ok(feature, `${scenario.id} skipped for a reason other than an undeclared feature: ${scenario.reason}`);
-        assert.ok(!summary.driver.features.includes(feature), feature);
-      }
-    }
+    assert.deepEqual(results(summary).filter(scenario => scenario.status !== "passed").map(scenario => scenario.id), []);
   });
 
   test("--strict turns skips into failure and appends the CI step summary", async () => {
     const stepSummary = join(work, "step-summary.md");
     await writeFile(stepSummary, "previous step\n");
-    const result = await cli(["--strict", "--filter", "webhooks.valid-single-secret"], { env: { GITHUB_STEP_SUMMARY: stepSummary } });
+    const result = await cli(["--driver", fake(), "--fixture-driver", "none", "--strict", "--filter", "webhooks.valid-single-secret"],
+      { env: { GITHUB_STEP_SUMMARY: stepSummary } });
     assert.equal(result.code, 1, result.output);
-    assert.match(result.stdout, /\nSKIP webhooks\.valid-single-secret: driver convohop-typescript-reference does not declare feature webhooks\.verify\n/);
+    assert.match(result.stdout, /\nSKIP webhooks\.valid-single-secret: driver fake-driver does not declare feature webhooks\.verify\n/);
     assert.match(result.stdout, /\n--strict: skipped scenarios count as failures\n$/);
     const appended = await readFile(stepSummary, "utf8");
     assert.ok(appended.startsWith("previous step\n## ConvoHop conformance\n"), appended);
-    assert.match(appended, /\| `webhooks\.valid-single-secret` \| driver convohop-typescript-reference does not declare feature webhooks\.verify \|/);
+    assert.match(appended, /\| `webhooks\.valid-single-secret` \| driver fake-driver does not declare feature webhooks\.verify \|/);
   });
 });
 

@@ -3,7 +3,7 @@ import { createInterface } from "node:readline";
 import { setTimeout as delay } from "node:timers/promises";
 import { parseArgs } from "node:util";
 import { ParamsError, counter, handle, integer, isRecord, optionalText, record, text, type Args } from "./params.mjs";
-import { FEATURES, MemoryStorage, OPERATIONS, PACKAGES, ROLES, createClient, driverError, operation, watch,
+import { FEATURES, MemoryStorage, OPERATIONS, PACKAGES, ROLES, createClient, driverError, operation, verifyWebhook, watch,
   type DriverError, type RealtimeHandle, type Role, type SdkClient } from "./sdk.mjs";
 
 const PROTOCOL_VERSION = 1;
@@ -182,7 +182,7 @@ function dispatch(method: string, args: Args): unknown {
     case "realtime.subscribe": return subscribe(args);
     case "realtime.collect": return collect(args);
     case "realtime.close": return closeSubscription(args);
-    case "webhooks.verify": throw new ProtocolError("UNSUPPORTED", "The TypeScript SDK does not expose webhook verification");
+    case "webhooks.verify": return verifyWebhook(args);
     case "reset": return reset();
     case "shutdown": return {};
     default: throw new ProtocolError("UNKNOWN_METHOD", `Unknown method ${method}`);

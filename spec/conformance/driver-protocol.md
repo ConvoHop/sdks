@@ -307,6 +307,5 @@ node conformance/drivers/ts/dist/driver.mjs --roles user   # behave like a clien
 runner uses the fixture driver for the others. `sdk.mts` is the only module
 that imports SDK packages: it maps catalog operations to SDK calls, SDK
 errors to `sdkError` and SDK streams to subscriptions. A driver for another
-SDK can follow the same split. The reference driver does not yet declare
-`retryAfter` or `webhooks.verify`, because the TypeScript SDK does not
-expose them.
+SDK can follow the same split. The reference driver declares every feature,
+including `retryAfter` and `webhooks.verify`.
