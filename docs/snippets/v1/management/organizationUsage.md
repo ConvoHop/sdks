@@ -1,8 +1,8 @@
-## `deploymentUsage`
+## `organizationUsage`
 
-Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.
+Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.
 
-- **Operation:** `management.deploymentUsage`, a query sent as `ManagementDeploymentUsage`.
+- **Operation:** `management.organizationUsage`, a query sent as `ManagementOrganizationUsage`.
 - **Layer:** server (server SDKs).
 - **Authorization:** `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
 - **Idempotency:** `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
@@ -17,15 +17,15 @@ Read the metered usage of a deployment, summed over its projects. The range defa
 | `observedServingEpoch` | `Decimal` | optional |
 | `credentialDeliveryPermit` | `SignedProof` | forbidden |
 
-**Input** (`input: DeploymentUsageRequestInput!`)
+**Input** (`input: OrganizationUsageRequestInput!`)
 
 | Field | Type |
 | --- | --- |
-| `deploymentId` | `UUID!` |
+| `orgId` | `UUID!` |
 | `from` | `String` |
 | `to` | `String` |
 
-**Result** (`DeploymentUsageReply!`)
+**Result** (`OrganizationUsageReply!`)
 
 | Field | Type |
 | --- | --- |
@@ -37,7 +37,7 @@ Read the metered usage of a deployment, summed over its projects. The range defa
 | `replayed` | `Boolean` |
 | `operation` | `OperationRef` |
 | `resourceRef` | `ResourceRef` |
-| `result` | `DeploymentUsage` |
+| `result` | `OrganizationUsage` |
 
 **Errors**
 
@@ -50,8 +50,8 @@ Read the metered usage of a deployment, summed over its projects. The range defa
 **GraphQL**
 
 ```graphql
-query ManagementDeploymentUsage($context: RequestContextInput!, $input: DeploymentUsageRequestInput!) {
-  deploymentUsage(context: $context, input: $input) {
+query ManagementOrganizationUsage($context: RequestContextInput!, $input: OrganizationUsageRequestInput!) {
+  organizationUsage(context: $context, input: $input) {
     status
     requestId
     serverTime
@@ -69,7 +69,7 @@ query ManagementDeploymentUsage($context: RequestContextInput!, $input: Deployme
       id
     }
     result {
-      deploymentId
+      orgId
       source
       observedAt
       complete
