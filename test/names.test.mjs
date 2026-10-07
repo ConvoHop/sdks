@@ -29,10 +29,12 @@ const EXPORTS = [
   /export\s+(?:type\s+)?\*\s+as\s+([A-Za-z_$][\w$]*)/g,
 ];
 const EXPORT_LIST = /export\s+(?:type\s+)?\{([^}]*)\}/g;
-const GRAPHQL_TYPE = /^\s*(?:extend\s+)?(?:type|input|enum|interface|union|scalar)\s+([A-Za-z_][A-Za-z0-9_]*)/gm;
+// Every identifier in a GraphQL schema is public contract: types, fields, arguments and enum values.
+const GRAPHQL_NOISE = /"""[\s\S]*?"""|"(?:\\.|[^"\\\n])*"|#[^\n]*/g;
 
 function exportedNames(path, text) {
-  if (path.endsWith(".graphql")) return [...text.matchAll(GRAPHQL_TYPE)].map(match => match[1]);
+  if (path.endsWith(".graphql"))
+    return [...new Set(text.replace(GRAPHQL_NOISE, " ").match(/[A-Za-z_]\w*/g) ?? [])];
   const names = EXPORTS.flatMap(pattern => [...text.matchAll(pattern)].map(match => match[1]));
   for (const [, list] of text.matchAll(EXPORT_LIST))
     for (const entry of list.split(",")) names.push(entry.replace(/^\s*type\s+/, "").split(/\s+as\s+/).pop().trim());
@@ -53,6 +55,13 @@ test("the marker check flags version markers and spares kept versions", () => {
   for (const name of ["schema/communication.graphql", "release/v1.2.3-rc.1/notes.md", "standard-webhooks-v1.json",
     "mock/rtc/v1/validate.json", "provenance/v1/statement.json", "uuidV5", "IPv4", "Version", "h264", "base64"])
     assert.equal(marked(name), false, name);
+});
+
+test("every GraphQL schema identifier counts as exported, but descriptions and comments do not", () => {
+  const schema = '"""Mentions v1 in prose."""\ntype WidgetV2 {\n  nameV3(firstV4: Int): String # v5\n}\n'
+    + "enum Format {\n  WIRE_V6\n}\n";
+  assert.deepEqual(exportedNames("schema/widget.graphql", schema).filter(marked),
+    ["WidgetV2", "nameV3", "firstV4", "WIRE_V6"]);
 });
 
 test("tracked paths carry no version markers", () => {

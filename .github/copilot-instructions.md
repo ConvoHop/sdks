@@ -83,9 +83,9 @@ removal once usage is zero.
 Do not put version markers in file or directory names, type or export names,
 routes, config keys, format or mode tags, schema-version payload fields, PR
 titles or doc headings. `npm test` runs `test/names.test.mjs`, which fails
-when a tracked path or exported identifier gains a version marker; its
-allowlist names the reason for each kept version. These versions are
-legitimate and stay:
+when a tracked path, an exported identifier or a GraphQL schema identifier
+gains a version marker; its allowlist names the reason for each kept
+version. These versions are legitimate and stay:
 
 - the Standard Webhooks `v1,` signature prefix and LiveKit `/rtc/v1` paths;
 - npm semver, release tags and `*-v*` tag rules, Go module majors, GitHub

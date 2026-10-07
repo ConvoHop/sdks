@@ -215,8 +215,9 @@ change. An absent marker then means the original.
   names, type or export names, routes, configuration keys, format or mode
   tags, schema-version payload fields, pull request titles or documentation
   headings. `npm test` runs `test/names.test.mjs`, which fails when a
-  tracked path or exported identifier gains a version marker. Its allowlist
-  names the reason for each version that stays.
+  tracked path, an exported identifier or a GraphQL schema identifier gains
+  a version marker. Its allowlist names the reason for each version that
+  stays.
 - **Keep legitimate versions.** These stay: the Standard Webhooks `v1,`
   signature prefix, LiveKit's `/rtc/v1` paths, npm package versions and
   release tags (see [RELEASING.md](RELEASING.md)), Go module majors, GitHub
