@@ -899,7 +899,7 @@ input PauseOperationRequestInput {
 }
 
 """
-GraphQL error `extensions` when `code` is `PLAN_LIMIT_EXCEEDED`. The plan does not permit the resource or feature (HTTP 403, WebSocket close 4403). Not retryable without a plan or limit change.
+GraphQL error `extensions` when `code` is `PLAN_LIMIT_EXCEEDED`. The plan does not permit the resource or feature (`status` 403 in an HTTP 200 GraphQL response, WebSocket close 4403). Not retryable without a plan or limit change.
 """
 type PlanLimitExceededProblem {
 	"""
