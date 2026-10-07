@@ -133,6 +133,8 @@ mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseO
             operationId
           }
         }
+        replayedDeliveries
+        skippedDeliveries
       }
       blockedReason
     }

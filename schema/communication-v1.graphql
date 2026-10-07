@@ -1071,6 +1071,8 @@ type OperationResult {
 	endpointId: UUID
 	enabled: Boolean
 	liveSessionCompletion: LiveSessionOperationCompletion
+	replayedDeliveries: Int
+	skippedDeliveries: Int
 }
 
 type OperationStep {
@@ -1586,6 +1588,13 @@ type WebhookDelivery {
 	attempts: Decimal!
 	lastOutcome: String
 	nextAttemptAt: String!
+	eventType: String
+	createdAt: String
+	replayedAt: String
+	lastAttemptAt: String
+	lastHttpStatus: Int
+	lastLatencyMs: Int
+	lastErrorCode: String
 }
 
 type WebhookDeliveryPage {
@@ -1593,6 +1602,35 @@ type WebhookDeliveryPage {
 	complete: Boolean!
 	refreshRequired: Boolean!
 	nextCursor: String
+	observedAt: String
+	partialReason: String
+	sourceRevision: Decimal
+}
+
+type WebhookEndpoint {
+	endpointId: UUID!
+	url: String!
+	eventTypes: [String!]!
+	enabled: Boolean!
+	status: String!
+	disabledReason: String
+	revision: Decimal!
+	secretVersion: String!
+	rotationPending: Boolean!
+	rotationOverlapUntil: String
+	consecutiveFailures: Int!
+	failingSince: String
+	lastSuccessAt: String
+	lastFailureAt: String
+}
+
+type WebhookEndpointPage {
+	items: [WebhookEndpoint!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+	observedAt: String
+	partialReason: String
 }
 
 """

@@ -600,9 +600,33 @@
       "status": 401,
       "retryable": false
     },
+    "WEBHOOK_DESTINATION_DENIED": {
+      "summary": "The webhook URL is not a public HTTPS destination.",
+      "origin": "server",
+      "status": 400,
+      "retryable": false
+    },
+    "WEBHOOK_ENDPOINT_DISABLED": {
+      "summary": "The webhook endpoint is disabled. Enable it, then replay its deliveries.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
     "WEBHOOK_ENDPOINT_LIMIT": {
       "summary": "The project reached its webhook endpoint limit.",
       "origin": "server",
+      "retryable": false
+    },
+    "WEBHOOK_ROTATION_PENDING": {
+      "summary": "A signing-secret rotation is already waiting for acknowledgement.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "WEBHOOK_SECRET_UNACKNOWLEDGED": {
+      "summary": "The endpoint's signing secret has not been acknowledged yet.",
+      "origin": "server",
+      "status": 409,
       "retryable": false
     },
     "WRONG_REGION": {
@@ -1612,6 +1636,18 @@
       "realtime": {"mode": "none"},
       "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
     },
+    "management.webhookEndpoints": {
+      "summary": "List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "bounded", "pagePath": ["result"]},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["NOT_FOUND"]
+      }
+    },
     "management.resolveRequest": {
       "summary": "Look up the stored outcome of an earlier management mutation by its requestId.",
       "layer": "server",
@@ -1744,7 +1780,7 @@
       "longRunning": {"poll": "management.getOperation", "refField": "operation"},
       "errors": {
         "sets": ["request", "http", "mutation"],
-        "codes": ["NOT_FOUND", "WEBHOOK_ENDPOINT_LIMIT"]
+        "codes": ["NOT_FOUND", "WEBHOOK_DESTINATION_DENIED", "WEBHOOK_ENDPOINT_LIMIT"]
       }
     },
     "management.disableWebhook": {
@@ -1758,6 +1794,45 @@
       "errors": {
         "sets": ["request", "http", "mutation"],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "management.updateWebhook": {
+      "summary": "Change the event types of a webhook endpoint, or enable or disable it.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "WEBHOOK_ENDPOINT_LIMIT", "WEBHOOK_SECRET_UNACKNOWLEDGED"]
+      }
+    },
+    "management.rotateWebhookSecret": {
+      "summary": "Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "WEBHOOK_ROTATION_PENDING", "WEBHOOK_SECRET_UNACKNOWLEDGED"]
+      }
+    },
+    "management.replayWebhookDeliveries": {
+      "summary": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "WEBHOOK_ENDPOINT_DISABLED"]
       }
     }
   }

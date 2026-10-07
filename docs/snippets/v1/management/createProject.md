@@ -121,6 +121,8 @@ mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateP
           operationId
         }
       }
+      replayedDeliveries
+      skippedDeliveries
     }
   }
 }

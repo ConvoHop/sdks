@@ -132,6 +132,8 @@ query ManagementGetOperation($context: RequestContextInput!, $input: GetOperatio
             operationId
           }
         }
+        replayedDeliveries
+        skippedDeliveries
       }
       blockedReason
     }
