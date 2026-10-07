@@ -544,6 +544,16 @@
       "path": "management/deploymentUsage.md"
     },
     {
+      "id": "management.webhookEndpoints",
+      "plane": "management",
+      "kind": "query",
+      "field": "webhookEndpoints",
+      "operationName": "ManagementWebhookEndpoints",
+      "summary": "List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.",
+      "layer": "server",
+      "path": "management/webhookEndpoints.md"
+    },
+    {
       "id": "management.webhookDeliveries",
       "plane": "management",
       "kind": "query",
@@ -674,6 +684,26 @@
       "path": "management/configureWebhook.md"
     },
     {
+      "id": "management.updateWebhook",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "updateWebhook",
+      "operationName": "ManagementUpdateWebhook",
+      "summary": "Change the event types of a webhook endpoint, or enable or disable it.",
+      "layer": "server",
+      "path": "management/updateWebhook.md"
+    },
+    {
+      "id": "management.rotateWebhookSecret",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "rotateWebhookSecret",
+      "operationName": "ManagementRotateWebhookSecret",
+      "summary": "Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.",
+      "layer": "server",
+      "path": "management/rotateWebhookSecret.md"
+    },
+    {
       "id": "management.disableWebhook",
       "plane": "management",
       "kind": "mutation",
@@ -682,6 +712,16 @@
       "summary": "Disable a webhook endpoint.",
       "layer": "server",
       "path": "management/disableWebhook.md"
+    },
+    {
+      "id": "management.replayWebhookDeliveries",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "replayWebhookDeliveries",
+      "operationName": "ManagementReplayWebhookDeliveries",
+      "summary": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.",
+      "layer": "server",
+      "path": "management/replayWebhookDeliveries.md"
     }
   ]
 }

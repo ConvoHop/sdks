@@ -120,6 +120,8 @@ mutation ManagementProjectPolicy($context: RequestContextInput!, $input: Project
           operationId
         }
       }
+      replayedDeliveries
+      skippedDeliveries
     }
   }
 }

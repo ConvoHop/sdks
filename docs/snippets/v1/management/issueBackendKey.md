@@ -121,6 +121,8 @@ mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: Issue
           operationId
         }
       }
+      replayedDeliveries
+      skippedDeliveries
     }
   }
 }

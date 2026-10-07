@@ -133,6 +133,8 @@ mutation ManagementResumeOperation($context: RequestContextInput!, $input: Resum
             operationId
           }
         }
+        replayedDeliveries
+        skippedDeliveries
       }
       blockedReason
     }

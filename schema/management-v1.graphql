@@ -772,7 +772,10 @@ type Mutation {
 	pauseOperation(context: RequestContextInput!, input: PauseOperationRequestInput!): PauseOperationReply!
 	resumeOperation(context: RequestContextInput!, input: ResumeOperationRequestInput!): ResumeOperationReply!
 	configureWebhook(context: RequestContextInput!, input: ConfigureWebhookRequestInput!): ConfigureWebhookReply!
+	updateWebhook(context: RequestContextInput!, input: UpdateWebhookRequestInput!): UpdateWebhookReply!
+	rotateWebhookSecret(context: RequestContextInput!, input: RotateWebhookSecretRequestInput!): RotateWebhookSecretReply!
 	disableWebhook(context: RequestContextInput!, input: DisableWebhookRequestInput!): DisableWebhookReply!
+	replayWebhookDeliveries(context: RequestContextInput!, input: ReplayWebhookDeliveriesRequestInput!): ReplayWebhookDeliveriesReply!
 }
 
 type Operation {
@@ -810,6 +813,8 @@ type OperationResult {
 	endpointId: UUID
 	enabled: Boolean
 	liveSessionCompletion: LiveSessionOperationCompletion
+	replayedDeliveries: Int
+	skippedDeliveries: Int
 }
 
 type OperationStep {
@@ -916,6 +921,7 @@ type Query {
 	getProject(context: RequestContextInput!, input: GetProjectRequestInput!): GetProjectReply!
 	deploymentHealth(context: RequestContextInput!, input: DeploymentHealthRequestInput!): DeploymentHealthReply!
 	deploymentUsage(context: RequestContextInput!, input: DeploymentUsageRequestInput!): DeploymentUsageReply!
+	webhookEndpoints(context: RequestContextInput!, input: WebhookEndpointsRequestInput!): WebhookEndpointsReply!
 	webhookDeliveries(context: RequestContextInput!, input: WebhookDeliveriesRequestInput!): WebhookDeliveriesReply!
 	resolveRequest(context: RequestContextInput!, input: ResolveRequestRequestInput!): ResolveRequestReply!
 	getOperation(context: RequestContextInput!, input: GetOperationRequestInput!): GetOperationReply!
@@ -935,6 +941,26 @@ type ReceiptPage {
 	complete: Boolean!
 	refreshRequired: Boolean!
 	nextCursor: String
+}
+
+type ReplayWebhookDeliveriesReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input ReplayWebhookDeliveriesRequestInput {
+	projectId: UUID!
+	endpointId: UUID!
+	effectId: UUID
+	since: String
+	until: String
 }
 
 input RequestContextInput {
@@ -1048,6 +1074,24 @@ input RevokeBackendKeyRequestInput {
 	revokeIssuedSessions: Boolean!
 }
 
+type RotateWebhookSecretReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input RotateWebhookSecretRequestInput {
+	projectId: UUID!
+	endpointId: UUID!
+	expectedRevision: Decimal!
+}
+
 type SearchHit {
 	conversationId: UUID!
 	message: Message
@@ -1104,6 +1148,26 @@ type TypingStatus {
 
 scalar UUID
 
+type UpdateWebhookReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input UpdateWebhookRequestInput {
+	projectId: UUID!
+	endpointId: UUID!
+	expectedRevision: Decimal!
+	eventTypes: [String!]!
+	enabled: Boolean!
+}
+
 type WebhookDeliveriesReply {
 	status: String!
 	requestId: UUID!
@@ -1128,6 +1192,13 @@ type WebhookDelivery {
 	attempts: Decimal!
 	lastOutcome: String
 	nextAttemptAt: String!
+	eventType: String
+	createdAt: String
+	replayedAt: String
+	lastAttemptAt: String
+	lastHttpStatus: Int
+	lastLatencyMs: Int
+	lastErrorCode: String
 }
 
 type WebhookDeliveryPage {
@@ -1135,6 +1206,51 @@ type WebhookDeliveryPage {
 	complete: Boolean!
 	refreshRequired: Boolean!
 	nextCursor: String
+	observedAt: String
+	partialReason: String
+	sourceRevision: Decimal
+}
+
+type WebhookEndpoint {
+	endpointId: UUID!
+	url: String!
+	eventTypes: [String!]!
+	enabled: Boolean!
+	status: String!
+	disabledReason: String
+	revision: Decimal!
+	secretVersion: String!
+	rotationPending: Boolean!
+	rotationOverlapUntil: String
+	consecutiveFailures: Int!
+	failingSince: String
+	lastSuccessAt: String
+	lastFailureAt: String
+}
+
+type WebhookEndpointPage {
+	items: [WebhookEndpoint!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+	observedAt: String
+	partialReason: String
+}
+
+type WebhookEndpointsReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: WebhookEndpointPage
+}
+
+input WebhookEndpointsRequestInput {
+	projectId: UUID!
 }
 
 """
