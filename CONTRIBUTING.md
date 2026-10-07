@@ -54,8 +54,10 @@ Each package has its own tests in `packages/<name>/test/`.
 - `@convohop/client` and `@convohop/server` depend on `@convohop/core` with
   an exact version in `dependencies`. They never depend on each other, not
   even as a development dependency.
-- A workspace that isn't released, such as a test harness, stays
-  `"private": true` and depends on the packages with `"*"`.
+- A workspace or tool that isn't released, such as a test harness or a tool
+  under `tools/`, stays `"private": true` and out of
+  `release-please-config.json`. Such a workspace depends on the packages
+  with `"*"`. `npm run check:release` enforces these rules.
 - Code that runs on end-user devices belongs in `client`. Code that needs a
   backend key or a management credential belongs in `server`. Code that both
   need, and that runs in browsers, React Native and Node.js alike, belongs in

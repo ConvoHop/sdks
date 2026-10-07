@@ -10,7 +10,7 @@
   "draft": true,
   "force-tag-creation": true,
   "separate-pull-requests": false,
-  "pull-request-header": ":robot: release-please maintains this pull request. Checks don't start on it automatically, so close and reopen it to run them before merging. Merge it only after the release is approved. See RELEASING.md.",
+  "pull-request-header": ":robot: release-please maintains this pull request. Its checks don't start by themselves: after each update, select Approve workflows to run in the merge box, or close and reopen it. Merge it only after the release is approved. See RELEASING.md.",
   "changelog-sections": [
     { "type": "feat", "section": "Features" },
     { "type": "fix", "section": "Bug Fixes" },

@@ -25,9 +25,10 @@ last released version of each one, where `0.0.0` means not released yet.
 | `@convohop/server` | `packages/server` | `server-vX.Y.Z` | `packages/server/CHANGELOG.md` |
 
 Nothing else is released, including the root workspace, `schema/`,
-`scripts/`, `test/`, `docs/` and test harnesses such as the conformance
-suite. A workspace that isn't released stays `"private": true` and out of
-the release configuration. `npm run check:release` enforces both.
+`tools/`, `scripts/`, `test/`, `docs/` and test harnesses such as the
+conformance suite. Any other directory with a `package.json`, such as a
+tool or a harness, stays `"private": true` and out of the release
+configuration. `npm run check:release` enforces both.
 
 Each GitHub Release has these assets. `<base>` is the tarball name without
 its extension, for example `convohop-client-0.1.0`.
@@ -55,10 +56,20 @@ the bundle files.
    with releasable changes, the exact `@convohop/core` dependency of the
    packages that use it, `package-lock.json`, the manifest and each
    package's `CHANGELOG.md`.
-3. Checks don't start on a pull request that a workflow opened or updated
-   with `GITHUB_TOKEN`. Close and reopen the release pull request to run
-   them, and again whenever release-please updates it. On Node.js 24, CI
-   packs the bumped packages and dry-runs `npm publish`.
+3. release-please opens and updates the release pull request with
+   `GITHUB_TOKEN`, so GitHub
+   [doesn't start its checks by itself](https://docs.github.com/en/actions/concepts/security/github_token#when-github_token-triggers-workflow-runs),
+   and the required checks block the merge. Start them when the pull
+   request opens and after each push to it, in one of these ways:
+   - In the pull request's merge box, select **Approve workflows to run**.
+     Anyone with write access can approve.
+   - Close and reopen the pull request, for example with `gh pr close` and
+     `gh pr reopen`. Checks start normally when a person reopens it.
+   - As a last resort, an administrator who can bypass the `main` ruleset
+     merges without the checks. The release workflow still runs CI's checks
+     and tests on the merge commit before it attests or attaches anything.
+
+   On Node.js 24, CI packs the bumped packages and dry-runs `npm publish`.
 4. A maintainer reviews the versions and changelogs and merges the release
    pull request once the release is approved.
 5. That merge is another push to `main`. This time release-please tags the
@@ -171,7 +182,9 @@ END_COMMIT_OVERRIDE
   because release-please doesn't start a new message at a header with `!`.
 - Every message applies to all the packages that the pull request changed.
 - A `Release-As: X.Y.Z` footer sets the next version of every package that
-  the pull request changed, whatever the commit type.
+  the pull request changed, whatever the commit type. The changelog always
+  lists a message with this footer, even when its type is hidden, such as
+  `chore`.
 
 ## Prereleases
 
@@ -208,7 +221,8 @@ END_COMMIT_OVERRIDE
   Without it, `@convohop/server` would start at 0.1.1. It has no releasable
   changes of its own, so it would be released only because
   `@convohop/core` is, with a patch bump from the 0.1.0 in its
-  `package.json`.
+  `package.json`. Each package's first changelog lists the override as
+  "release 0.1.0" under Miscellaneous Chores.
 
 ## Recovering a release
 
@@ -280,10 +294,11 @@ npm install ./convohop/core/convohop-core-0.1.0.tgz ./convohop/client/convohop-c
 The workflows depend on these settings, which a repository administrator
 applies:
 
-- **Actions:** allow GitHub Actions to create and approve pull requests,
-  in the organization settings too, so release-please can open the release
-  pull request. The default workflow token can stay read-only, because
-  every workflow declares its permissions.
+- **Actions:** allow GitHub Actions to create and approve pull requests.
+  An organization policy can block this setting, so allow it there first.
+  Without it, the Release PR and tags job fails when it opens or updates
+  the release pull request. The default workflow token can stay read-only,
+  because every workflow declares its permissions.
 - **Pull requests:** allow squash merging only, with the pull request title
   as the default commit message and no commit body.
 - **`npm` environment:** create it before the first release. Otherwise
@@ -293,7 +308,10 @@ applies:
 - **`main` branch ruleset:** require pull requests and the status checks
   "TypeScript packages (Node 22)", "TypeScript packages (Node 24)",
   "Conventional Commit title" and "zizmor", and block force pushes and
-  deletion.
+  deletion. Checks on the release pull request have to be started by hand,
+  as step 3 of [How a release happens](#how-a-release-happens) describes.
+  For the last-resort merge, allow only administrators to bypass the
+  ruleset, and only through pull requests.
 - **Release tag ruleset** for `*-v*`: block updates and deletion. Don't
   restrict creation, because release-please creates the tags.
 - **Optional:** turn on immutable releases. This works because the workflow

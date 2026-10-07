@@ -14,4 +14,6 @@ scripts:
     command: npm run check:graphql
   - name: Check package metadata
     command: npm run check:packages
+  - name: Check release pipeline
+    command: npm run check:release
 auto_open_in_browser: false

@@ -209,6 +209,24 @@ test('release.yml publishes from the npm environment at the release commit', () 
   }
 });
 
+test('the release build runs every npm check that CI runs', () => {
+  const ci = workflows.find(({ name }) => name.endsWith('/sdk-ci.yml'));
+  assert.ok(ci, 'sdk-ci.yml is missing');
+  const npmChecks = (workflow, job) => {
+    const jobLines = sections(workflow.lines).jobs.get(job);
+    assert.ok(jobLines, `${workflow.name}: job ${job} is missing`);
+    return runScripts(jobLines)
+      .flatMap(({ commands }) => commands)
+      .filter((command) => /^npm (?:test|run)(?:\s|$)/.test(command));
+  };
+  const ciChecks = npmChecks(ci, 'node');
+  assert.ok(ciChecks.length >= 4, `expected the CI checks, found: ${ciChecks.join(', ')}`);
+  const releaseChecks = new Set(npmChecks(release, 'build'));
+  for (const check of ciChecks) {
+    assert.ok(releaseChecks.has(check), `release.yml build must also run \`${check}\` before attesting`);
+  }
+});
+
 test('PR titles use exactly the commit types release-please knows', () => {
   const { config } = loadReleaseConfig(REPO_ROOT);
   const prTitle = readFileSync(join(WORKFLOWS_DIR, 'pr-title.yml'), 'utf8');

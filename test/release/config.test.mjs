@@ -45,6 +45,20 @@ const released = workspaces.filter(({ pkg }) => pkg.private !== true);
 const unreleased = workspaces.filter(({ pkg }) => pkg.private === true);
 const releasedNames = new Set(released.map(({ pkg }) => pkg.name));
 const DEPENDENCY_FIELDS = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'];
+// Top-level directories that hold tooling, tests, schemas and docs, never a released package.
+const NON_PACKAGE_DIRECTORIES = ['tools', 'scripts', 'test', 'schema', 'docs', 'conformance'];
+
+// Directories with a package.json, skipping dependencies, build output and dot-directories.
+function packageDirectories(base = '.') {
+  const paths = [];
+  for (const entry of readdirSync(join(REPO_ROOT, base), { withFileTypes: true })) {
+    if (entry.isFile() && entry.name === 'package.json') paths.push(base);
+    if (entry.isDirectory() && !entry.name.startsWith('.') && !['node_modules', 'dist', 'build'].includes(entry.name)) {
+      paths.push(...packageDirectories(posix.join(base, entry.name)));
+    }
+  }
+  return paths.sort();
+}
 
 test('release-please releases exactly the public npm workspaces', () => {
   const configured = Object.keys(config.packages).filter((path) => releaseTypeOf(config, path) === 'node');
@@ -52,6 +66,21 @@ test('release-please releases exactly the public npm workspaces', () => {
   assert.deepEqual(released.map(({ path }) => path).sort(), ['packages/client', 'packages/core', 'packages/server']);
   // Workspaces such as test harnesses stay private and out of the release config.
   for (const { path } of unreleased) assert.equal(config.packages[path], undefined, `${path} is private`);
+});
+
+test('tooling, harnesses and the root are never released', () => {
+  const releasedPaths = new Set(released.map(({ path }) => path));
+  const others = packageDirectories().filter((path) => !releasedPaths.has(path));
+  assert.ok(others.includes('.'));
+  // Covers tools/ and test harnesses whether or not they are root workspaces.
+  for (const path of others) {
+    assert.equal(readPackageManifest(REPO_ROOT, path).private, true, `${path}/package.json must be "private": true`);
+    assert.equal(config.packages[path], undefined, `${path} must stay out of release-please-config.json`);
+  }
+  for (const path of Object.keys(config.packages)) {
+    const [top] = posix.normalize(path).split('/');
+    assert.ok(path !== '.' && !NON_PACKAGE_DIRECTORIES.includes(top), `${path} is not a package directory`);
+  }
 });
 
 test('every configured package can be built by release.yml', () => {

@@ -7,7 +7,7 @@ import { readJson, readPackageManifest, REPO_ROOT } from '../../scripts/release/
 import { createSbom, purl } from '../../scripts/release/sbom.mjs';
 
 const lock = readJson(join(REPO_ROOT, 'package-lock.json'));
-const DEV_ONLY = ['typescript', '@types/node', 'publint', '@arethetypeswrong/cli', '@graphql-codegen/cli', 'graphql'];
+const DEV_ONLY = ['typescript', '@types/node', 'publint', '@arethetypeswrong/cli', 'graphql'];
 
 function names(sbom) {
   return sbom.components.map((component) => (component.group ? `${component.group}/${component.name}` : component.name));
@@ -24,6 +24,10 @@ function checkGraph(sbom) {
 }
 
 test('SBOMs cover each package runtime closure and nothing else', () => {
+  // A name that's no longer installed would make the exclusion check below pass vacuously.
+  for (const name of DEV_ONLY) {
+    assert.equal(lock.packages[`node_modules/${name}`]?.dev, true, `${name} is not a locked dev dependency; update DEV_ONLY`);
+  }
   const core = createSbom({ lock, path: 'packages/core' });
   assert.deepEqual(core.components, []);
   const server = createSbom({ lock, path: 'packages/server' });
