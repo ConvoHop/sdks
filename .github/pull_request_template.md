@@ -24,6 +24,7 @@ Say what you didn't verify, for example real network, WebRTC media,
 database or hosted-service behavior.
 -->
 
+- [ ] `npm run check:annotations`
 - [ ] `npm run check:graphql`
 - [ ] `npm run build`
 - [ ] `npm test`

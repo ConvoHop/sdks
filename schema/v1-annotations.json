@@ -1,0 +1,1671 @@
+{
+  "$schema": "./v1-annotations.schema.json",
+  "annotationsVersion": 1,
+  "api": {
+    "name": "convohop",
+    "model": "v1",
+    "summary": "ConvoHop communication plane (conversations, messages, realtime events and live sessions) and management plane (organizations, deployments and projects)."
+  },
+  "transport": {
+    "path": "/graphql",
+    "http": {
+      "method": "POST",
+      "contentType": "application/json",
+      "accept": "application/json",
+      "body": ["query", "operationName", "variables"],
+      "maxDocumentBytes": 32768
+    },
+    "websocket": {"subprotocol": "graphql-transport-ws"},
+    "errors": {
+      "summary": "GraphQL errors carry these extensions. Classify errors by extensions, never by message text. Errors may arrive with HTTP 200.",
+      "extensions": {
+        "code": {"type": "string", "summary": "Stable machine-readable error code."},
+        "requestId": {"type": "string", "summary": "requestId of the failed request."},
+        "outcome": {
+          "type": "string",
+          "summary": "rejected: the request did not commit. unknown: it may have committed; resolve or retry it with the same requestId.",
+          "values": ["rejected", "unknown"]
+        },
+        "retryable": {
+          "type": "boolean",
+          "summary": "Whether a later attempt with the same requestId may succeed."
+        },
+        "status": {"type": "integer", "summary": "HTTP-equivalent status."}
+      }
+    }
+  },
+  "planes": {
+    "communication": {
+      "schema": "communication-v1.graphql",
+      "summary": "Conversations, members, messages, receipts, realtime events and live sessions inside one project.",
+      "context": {
+        "argument": "context",
+        "input": "RequestContextInput",
+        "rules": [
+          {
+            "fields": ["projectId"],
+            "use": "required",
+            "summary": "Communication requests always name their project explicitly."
+          },
+          {
+            "fields": ["incarnation", "observedServingEpoch"],
+            "use": "required",
+            "except": ["communication.capabilities", "communication.route"],
+            "summary": "Copy incarnation and servingEpoch from the current signed route. Stale values fail with INCARNATION_MISMATCH or WRONG_REGION."
+          },
+          {
+            "fields": ["credentialDeliveryPermit"],
+            "use": "forbidden",
+            "except": ["communication.acknowledgeCredential", "communication.redeemCredential"],
+            "summary": "Delivery permits authorize only credential redemption and acknowledgement."
+          }
+        ]
+      },
+      "resolveOperation": "communication.resolveRequest"
+    },
+    "management": {
+      "schema": "management-v1.graphql",
+      "summary": "Organizations, deployments, projects, backend keys and webhooks.",
+      "context": {
+        "argument": "context",
+        "input": "RequestContextInput",
+        "rules": [
+          {
+            "fields": ["projectId"],
+            "use": "forbidden",
+            "summary": "Management operations select projects through operation input."
+          },
+          {
+            "fields": ["credentialDeliveryPermit"],
+            "use": "forbidden",
+            "summary": "Delivery permits never authorize management operations."
+          }
+        ]
+      },
+      "resolveOperation": "management.resolveRequest"
+    }
+  },
+  "scalars": {
+    "Decimal": {
+      "representation": "string",
+      "summary": "Non-negative 64-bit counter as a canonical decimal string. Never convert it to a floating-point number.",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "maximumDecimal": "9223372036854775807"
+    },
+    "PageSize": {
+      "representation": "integer",
+      "summary": "Requested page size.",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "Properties": {
+      "representation": "object",
+      "summary": "Application-defined JSON object. Numbers must stay within the interoperable safe-integer range.",
+      "maxCanonicalJsonBytes": 8192
+    },
+    "SignedProof": {
+      "representation": "object",
+      "summary": "Server-signed JSON object. Treat it as opaque and pass it back unchanged.",
+      "maxCanonicalJsonBytes": 32768,
+      "requiredStringProperties": ["signature"]
+    },
+    "UUID": {
+      "representation": "string",
+      "summary": "Canonical lowercase UUID. The nil UUID is rejected.",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "disallowed": ["00000000-0000-0000-0000-000000000000"]
+    }
+  },
+  "credentials": {
+    "backendKey": {
+      "summary": "Scoped project backend key. Server runtimes only; never ship it to clients.",
+      "runtime": "server",
+      "carrier": "bearer",
+      "scoped": true
+    },
+    "deliveryPermit": {
+      "summary": "Signed permit from management.credentialPermit, sent in the request context of a request without a bearer token.",
+      "runtime": "server",
+      "carrier": "context",
+      "contextField": "credentialDeliveryPermit",
+      "scoped": false
+    },
+    "portalCredential": {
+      "summary": "Operator credential for the management plane. Server runtimes only.",
+      "runtime": "server",
+      "carrier": "bearer",
+      "scoped": false
+    },
+    "userSession": {
+      "summary": "Short-lived user session token that your backend obtains with issueSession. Safe for client runtimes.",
+      "runtime": "client",
+      "carrier": "bearer",
+      "scoped": false
+    }
+  },
+  "scopes": {
+    "callManage": {"summary": "Read, alert and end any live session in the project."},
+    "conversationManage": {"summary": "Create, read and update any conversation in the project."},
+    "historyManage": {"summary": "Expand the history visible to members."},
+    "membershipManage": {
+      "summary": "Read and change conversation membership and broadcast permissions."
+    },
+    "moderation": {"summary": "Edit or delete any message."},
+    "principalManage": {"summary": "Create, read and disable principals."},
+    "sessionIssue": {"summary": "Issue and renew user sessions."},
+    "sessionManage": {"summary": "Revoke user sessions and inspect session request outcomes."}
+  },
+  "conditions": {
+    "authorOrModerator": {"summary": "The caller wrote the message or moderates the conversation."},
+    "creatorOrModerator": {
+      "summary": "The caller started the live session or moderates its conversation."
+    },
+    "member": {"summary": "The caller is an active member of the conversation."},
+    "moderator": {"summary": "The caller moderates the conversation."},
+    "operationParticipant": {
+      "summary": "The caller started the operation or can access its target."
+    },
+    "ownRequest": {"summary": "The caller made the original request."},
+    "ownSession": {"summary": "The session belongs to the caller."},
+    "owner": {"summary": "The caller owns the organization, deployment or project."},
+    "participant": {"summary": "The caller holds the referenced participation in the live session."}
+  },
+  "idempotency": {
+    "safe": {
+      "summary": "Read-only. Repeat freely; each attempt may use a new requestId.",
+      "retry": "repeat",
+      "resolvable": false
+    },
+    "idempotent": {
+      "summary": "Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.",
+      "retry": "sameRequest",
+      "resolvable": true,
+      "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
+    },
+    "singleUse": {
+      "summary": "Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.",
+      "retry": "sameRequest",
+      "resolvable": true,
+      "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
+    },
+    "permitBound": {
+      "summary": "Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.",
+      "retry": "sameRequest",
+      "resolvable": false,
+      "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
+    },
+    "ephemeral": {
+      "summary": "Transient signal. Not deduplicated or retried; send a fresh signal instead.",
+      "retry": "none",
+      "resolvable": false
+    }
+  },
+  "pagination": {
+    "none": {"summary": "Not paged.", "order": "none", "cursorInput": false, "pageFields": []},
+    "cursor": {
+      "summary": "Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.",
+      "order": "server",
+      "cursorInput": true,
+      "pageFields": ["items", "complete", "refreshRequired", "nextCursor"]
+    },
+    "sequence": {
+      "summary": "Newest first. Pass nextCursor back as the sequence cursor input to read older items until complete is true.",
+      "order": "descending",
+      "cursorInput": true,
+      "pageFields": ["items", "complete", "refreshRequired", "nextCursor"]
+    },
+    "replay": {
+      "summary": "Committed events in ascending sequence after a cursor. Persist the last applied cursor; invalid or expired cursors fail and are never reset silently.",
+      "order": "ascending",
+      "cursorInput": true,
+      "pageFields": ["items", "complete", "refreshRequired", "nextCursor"]
+    },
+    "bounded": {
+      "summary": "One bounded page without a cursor input. complete reports whether every item fit.",
+      "order": "server",
+      "cursorInput": false,
+      "pageFields": ["items", "complete", "refreshRequired"]
+    }
+  },
+  "errorCodes": {
+    "ADMISSION_LIMIT": {
+      "summary": "A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId.",
+      "origin": "both",
+      "status": 429,
+      "retryable": true
+    },
+    "ALREADY_CONNECTED": {
+      "summary": "The participation already has an active media connection.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "ALREADY_EXISTS": {
+      "summary": "A resource with the same unique key already exists.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "AUTHORITY_UNAVAILABLE": {
+      "summary": "The authority is temporarily unavailable. Retry with the same requestId.",
+      "origin": "both",
+      "status": 503,
+      "retryable": true
+    },
+    "CREDENTIAL_DELIVERY_EXPIRED": {
+      "summary": "The credential delivery expired or can no longer be redeemed.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "CREDENTIAL_EXPIRED": {
+      "summary": "The credential carried by the stored result has expired. Request a new one.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "CREDENTIAL_REFRESH_REQUIRED": {
+      "summary": "The media credential must be refreshed before connecting.",
+      "origin": "both",
+      "status": 409,
+      "retryable": false
+    },
+    "CREDENTIAL_REQUIRED": {
+      "summary": "Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.",
+      "origin": "sdk",
+      "status": 409,
+      "retryable": false
+    },
+    "CURSOR_AHEAD": {
+      "summary": "The cursor is ahead of the committed events of the conversation.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "CURSOR_EXPIRED": {
+      "summary": "The cursor is older than retained history. Resynchronize from current state; never reset the cursor silently.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "CURSOR_INVALID": {
+      "summary": "The cursor is malformed or was not issued for this query.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "CURSOR_MISMATCH": {
+      "summary": "The cursor does not continue the subscribed stream.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "CURSOR_SCOPE_MISMATCH": {
+      "summary": "The cursor was issued for a different scope, caller or visibility.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "DELIVERY_CONSUMED": {
+      "summary": "The delivery was already redeemed by a different request.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "DELIVERY_NOT_REDEEMED": {
+      "summary": "The delivery must be redeemed before it can be acknowledged.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "DEPLOYMENT_NOT_READY": {
+      "summary": "The deployment cannot host projects yet.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "FEATURE_UNSUPPORTED": {
+      "summary": "The feature is not available in this deployment.",
+      "origin": "server",
+      "retryable": false
+    },
+    "FORBIDDEN": {
+      "summary": "The credential is valid but not allowed to perform this operation.",
+      "origin": "server",
+      "status": 403,
+      "retryable": false
+    },
+    "GENERATION_CONFLICT": {
+      "summary": "The live session generation changed. Read the current generation and retry.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "GRAPHQL_ERROR": {
+      "summary": "A GraphQL error arrived without a recognized code.",
+      "origin": "sdk",
+      "retryable": false
+    },
+    "GRAPHQL_INVALID_REQUEST": {
+      "summary": "The GraphQL request is malformed or fails validation.",
+      "origin": "server",
+      "status": 400,
+      "retryable": false
+    },
+    "GRAPHQL_QUERY_LIMIT": {
+      "summary": "The GraphQL document exceeds a depth, complexity or size limit.",
+      "origin": "server",
+      "status": 400,
+      "retryable": false
+    },
+    "GRAPHQL_RESPONSE_LIMIT": {
+      "summary": "The query response exceeds the response limit. Request a smaller page.",
+      "origin": "server",
+      "status": 413,
+      "retryable": false
+    },
+    "HTTP_FAILURE": {
+      "summary": "The HTTP exchange failed without a usable GraphQL error.",
+      "origin": "sdk",
+      "retryable": true
+    },
+    "IDEMPOTENCY_CONFLICT": {
+      "summary": "The requestId was already used with a different payload or caller.",
+      "origin": "both",
+      "status": 409,
+      "retryable": false
+    },
+    "INCARNATION_MISMATCH": {
+      "summary": "The project incarnation changed. Discard state from the old incarnation and recover explicitly.",
+      "origin": "both",
+      "status": 409,
+      "retryable": false
+    },
+    "INVALID_REPLACEMENT": {
+      "summary": "The connection to replace is not a current connection of this participation.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "INVALID_REQUEST": {
+      "summary": "The input or request context failed validation.",
+      "origin": "both",
+      "status": 400,
+      "retryable": false
+    },
+    "INVALID_RESPONSE": {
+      "summary": "The response did not match the expected shape or identity. The outcome is unknown.",
+      "origin": "sdk",
+      "retryable": true
+    },
+    "LIVE_ALERT_LIMIT": {
+      "summary": "The live session reached its alert limit.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "LIVE_SESSION_CLOSED": {
+      "summary": "The live session has ended or is ending.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "LIVE_SESSION_EXISTS": {
+      "summary": "The conversation already has an active live session.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "MEDIA_CONNECT_FAILED": {
+      "summary": "The native media connection failed. The participation remains; resolve and reconnect, or leave explicitly.",
+      "origin": "sdk",
+      "retryable": false
+    },
+    "MEDIA_FENCE_REQUIRED": {
+      "summary": "Media cutoff is not enforced yet for this live session. Retry after the cutoff completes.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "MEDIA_NOT_READY": {
+      "summary": "Media for the live session is not ready yet.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "MEDIA_RECOVERING": {
+      "summary": "Media for the live session is recovering.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "MEMBERSHIP_COUNT_INVALID": {
+      "summary": "Membership accounting needs operator reconciliation.",
+      "origin": "server",
+      "status": 503,
+      "retryable": false
+    },
+    "MEMBER_LIMIT": {
+      "summary": "The conversation reached its member limit.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "MESSAGE_DELETED": {
+      "summary": "The message was deleted.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "NOT_A_SESSION_REQUEST": {
+      "summary": "The requestId does not belong to an issueSession or renewSession request.",
+      "origin": "server",
+      "status": 400,
+      "retryable": false
+    },
+    "NOT_FOUND": {
+      "summary": "The resource does not exist or is not visible to the caller.",
+      "origin": "server",
+      "status": 404,
+      "retryable": false
+    },
+    "OUTCOME_UNKNOWN": {
+      "summary": "The mutation may have committed. Retry with the same requestId or resolve it.",
+      "origin": "server",
+      "status": 503,
+      "retryable": true
+    },
+    "PAGE_ITEM_TOO_LARGE": {
+      "summary": "A single item exceeds the page response limit.",
+      "origin": "server",
+      "status": 413,
+      "retryable": false
+    },
+    "PARTICIPATION_MISMATCH": {
+      "summary": "The participation does not belong to the caller or the current live session generation.",
+      "origin": "both",
+      "status": 409,
+      "retryable": false
+    },
+    "PERMIT_EXPIRED": {
+      "summary": "The stored delivery permit has expired. Request a new permit.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "RECOVERY_STORAGE_FAILURE": {
+      "summary": "Caller-provided recovery storage did not confirm durability. Keep the original request and its outcome.",
+      "origin": "sdk",
+      "retryable": false
+    },
+    "REQUEST_EXPIRED": {
+      "summary": "The original request is too old to replay.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "REQUEST_TOO_LARGE": {
+      "summary": "The request body exceeds the size limit.",
+      "origin": "server",
+      "status": 413,
+      "retryable": false
+    },
+    "RESOLUTION_REQUIRED": {
+      "summary": "The outcome is still unresolved and the retry budget is spent. Resolve the original request before continuing.",
+      "origin": "sdk",
+      "status": 409,
+      "retryable": false
+    },
+    "RESPONSE_TOO_LARGE": {
+      "summary": "The response exceeds the size limit.",
+      "origin": "server",
+      "status": 413,
+      "retryable": false
+    },
+    "RESYNC_REQUIRED": {
+      "summary": "The subscription cannot continue. Replay from the last applied cursor.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "RETRY_EXHAUSTED": {
+      "summary": "The authority exhausted its internal retry budget. Retry later with the same requestId.",
+      "origin": "server",
+      "status": 503,
+      "retryable": true
+    },
+    "REVISION_CONFLICT": {
+      "summary": "The expected revision or epoch is stale. Read the current state and retry with a new request.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "SESSION_RECEIPT_BINDING_MISMATCH": {
+      "summary": "The stored session receipt does not match its binding.",
+      "origin": "server",
+      "status": 503,
+      "retryable": false
+    },
+    "SESSION_RECEIPT_INVALID": {
+      "summary": "The stored session receipt failed validation.",
+      "origin": "server",
+      "status": 503,
+      "retryable": false
+    },
+    "SESSION_REFRESH_FAILED": {
+      "summary": "The application session refresh callback failed.",
+      "origin": "sdk",
+      "retryable": false
+    },
+    "SESSION_REFRESH_REJECTED": {
+      "summary": "The refreshed session was rejected because it does not match the current session.",
+      "origin": "sdk",
+      "status": 409,
+      "retryable": false
+    },
+    "SESSION_REFRESH_REQUIRED": {
+      "summary": "The user session needs renewal and no refresh is configured, or it expired.",
+      "origin": "sdk",
+      "status": 409,
+      "retryable": false
+    },
+    "SESSION_REFRESH_UNVERIFIED": {
+      "summary": "The refreshed session could not be verified.",
+      "origin": "sdk",
+      "retryable": false
+    },
+    "TRANSPORT_UNKNOWN": {
+      "summary": "The transport failed after the request may have been sent. Resolve or retry the original request.",
+      "origin": "sdk",
+      "retryable": true
+    },
+    "UNAUTHENTICATED": {
+      "summary": "The credential is missing, invalid or expired.",
+      "origin": "both",
+      "status": 401,
+      "retryable": false
+    },
+    "WEBHOOK_ENDPOINT_LIMIT": {
+      "summary": "The project reached its webhook endpoint limit.",
+      "origin": "server",
+      "retryable": false
+    },
+    "WRONG_REGION": {
+      "summary": "The observed serving epoch is stale. Route again, then retry.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    }
+  },
+  "errorSets": {
+    "communication": {
+      "summary": "Communication operations after route.",
+      "codes": ["WRONG_REGION", "INCARNATION_MISMATCH"]
+    },
+    "communicationMutation": {
+      "summary": "Communication mutations with stored receipts.",
+      "codes": ["REQUEST_EXPIRED"]
+    },
+    "credentialDelivery": {
+      "summary": "Credential delivery redemption and acknowledgement.",
+      "codes": ["CREDENTIAL_DELIVERY_EXPIRED", "DELIVERY_CONSUMED", "CREDENTIAL_REQUIRED"]
+    },
+    "http": {
+      "summary": "Request and response handling over HTTP.",
+      "codes": [
+        "REQUEST_TOO_LARGE",
+        "RESPONSE_TOO_LARGE",
+        "TRANSPORT_UNKNOWN",
+        "INVALID_RESPONSE",
+        "HTTP_FAILURE",
+        "GRAPHQL_ERROR"
+      ]
+    },
+    "live": {
+      "summary": "Operations on an existing live session.",
+      "codes": ["LIVE_SESSION_CLOSED", "GENERATION_CONFLICT", "PARTICIPATION_MISMATCH"]
+    },
+    "mutation": {
+      "summary": "Deduplicated mutations.",
+      "codes": [
+        "IDEMPOTENCY_CONFLICT",
+        "OUTCOME_UNKNOWN",
+        "RESOLUTION_REQUIRED",
+        "RECOVERY_STORAGE_FAILURE"
+      ]
+    },
+    "request": {
+      "summary": "Every operation.",
+      "codes": [
+        "INVALID_REQUEST",
+        "UNAUTHENTICATED",
+        "FORBIDDEN",
+        "ADMISSION_LIMIT",
+        "AUTHORITY_UNAVAILABLE",
+        "RETRY_EXHAUSTED",
+        "GRAPHQL_INVALID_REQUEST",
+        "GRAPHQL_QUERY_LIMIT",
+        "GRAPHQL_RESPONSE_LIMIT",
+        "FEATURE_UNSUPPORTED"
+      ]
+    }
+  },
+  "realtime": {
+    "envelope": {
+      "plane": "communication",
+      "type": "Event",
+      "discriminator": "type",
+      "payload": "payload",
+      "subject": "subjectRef",
+      "unknownTypes": "deliverAsUnknown"
+    },
+    "channels": {
+      "conversationEvents": {
+        "summary": "Ordered events of one conversation over graphql-transport-ws, gap-filled with the replay query.",
+        "subscription": "communication.conversationEvents",
+        "replay": "communication.events",
+        "endpoint": {"operation": "communication.route", "resultField": "wssUrl"},
+        "connectionInit": ["projectId", "incarnation", "token"],
+        "ordering": "Events arrive in ascending sequence per conversation. Apply each page, then persist its nextCursor; resume after the last applied cursor.",
+        "limits": {
+          "maxFrameBytes": 65536,
+          "maxPendingPages": 4,
+          "subscribeLimit": 50,
+          "replayLimit": 100
+        },
+        "reconnect": {
+          "baseDelayMs": 1000,
+          "maxDelayMs": 10000,
+          "jitterMs": 500,
+          "terminalCloseCodes": [4400, 4401, 4403, 4408, 4409]
+        }
+      }
+    },
+    "events": {
+      "conversation.created": {
+        "summary": "A conversation was created.",
+        "subject": "conversation",
+        "payload": {"required": ["revision"], "optional": []}
+      },
+      "conversation.updated": {
+        "summary": "A conversation's title or properties changed.",
+        "subject": "conversation",
+        "payload": {"required": ["revision"], "optional": []}
+      },
+      "live.alerted": {
+        "summary": "Members were alerted about a live session.",
+        "subject": "liveSession",
+        "payload": {"required": ["liveSessionId", "generation"], "optional": []}
+      },
+      "live.connected": {
+        "summary": "Media reported a participant connection.",
+        "subject": "liveSession",
+        "payload": {"required": ["liveSessionId", "generation", "revision"], "optional": []}
+      },
+      "live.ended": {
+        "summary": "A live session ended.",
+        "subject": "liveSession",
+        "payload": {"required": ["liveSessionId", "generation", "revision"], "optional": []}
+      },
+      "live.participationChanged": {
+        "summary": "A participant joined or left a live session.",
+        "subject": "liveSession",
+        "payload": {"required": ["liveSessionId"], "optional": ["generation"]}
+      },
+      "live.ready": {
+        "summary": "A live session became ready for media.",
+        "subject": "liveSession",
+        "payload": {"required": ["liveSessionId", "generation", "revision"], "optional": []}
+      },
+      "live.started": {
+        "summary": "A live session started.",
+        "subject": "liveSession",
+        "payload": {"required": ["liveSessionId", "generation", "revision"], "optional": []}
+      },
+      "member.added": {
+        "summary": "A member was added.",
+        "subject": "member",
+        "payload": {
+          "required": ["principalId", "membershipEpoch", "visibilityEpoch", "revision"],
+          "optional": []
+        }
+      },
+      "member.broadcastPermissionChanged": {
+        "summary": "A member's live session broadcast permission changed.",
+        "subject": "member",
+        "payload": {"required": ["principalId", "revision"], "optional": []}
+      },
+      "member.historyExpanded": {
+        "summary": "A member's visible history was expanded.",
+        "subject": "member",
+        "payload": {
+          "required": ["principalId", "membershipEpoch", "visibilityEpoch", "revision"],
+          "optional": []
+        }
+      },
+      "member.removed": {
+        "summary": "A member was removed.",
+        "subject": "member",
+        "payload": {
+          "required": ["principalId", "membershipEpoch", "visibilityEpoch", "revision"],
+          "optional": []
+        }
+      },
+      "member.roleChanged": {
+        "summary": "An active member's role changed.",
+        "subject": "member",
+        "payload": {
+          "required": ["principalId", "membershipEpoch", "visibilityEpoch", "revision"],
+          "optional": []
+        }
+      },
+      "message.created": {
+        "summary": "A message was sent.",
+        "subject": "message",
+        "payload": {"required": ["messageId", "revision", "revisionSequence"], "optional": []}
+      },
+      "message.deleted": {
+        "summary": "A message was deleted.",
+        "subject": "message",
+        "payload": {"required": ["messageId", "revision", "revisionSequence"], "optional": []}
+      },
+      "message.edited": {
+        "summary": "A message was edited.",
+        "subject": "message",
+        "payload": {"required": ["messageId", "revision", "revisionSequence"], "optional": []}
+      },
+      "receipt.reported": {
+        "summary": "A member reported delivery or read progress.",
+        "subject": "member",
+        "payload": {
+          "required": [
+            "principalId",
+            "membershipEpoch",
+            "visibilityEpoch",
+            "kind",
+            "throughSequence"
+          ],
+          "optional": []
+        }
+      }
+    }
+  },
+  "operations": {
+    "communication.capabilities": {
+      "summary": "Describe the features, limits and API model the authority supports.",
+      "layer": "both",
+      "auth": [{"credential": "userSession"}, {"credential": "backendKey"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": []}
+    },
+    "communication.route": {
+      "summary": "Return the signed route: project incarnation, serving epoch and realtime endpoint. Call it before other communication operations and again after WRONG_REGION.",
+      "layer": "both",
+      "auth": [{"credential": "userSession"}, {"credential": "backendKey"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": []}
+    },
+    "communication.currentSession": {
+      "summary": "Return the calling user session.",
+      "layer": "client",
+      "auth": [{"credential": "userSession"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": []}
+    },
+    "communication.getPrincipal": {
+      "summary": "Read a principal (an application user).",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["principalManage"]}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+    },
+    "communication.getConversation": {
+      "summary": "Read a conversation.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["conversationManage"]}
+      ],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+    },
+    "communication.members": {
+      "summary": "List the members of a conversation.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["membershipManage"]}
+      ],
+      "idempotency": "safe",
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": ["result"]
+      },
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+    },
+    "communication.messages": {
+      "summary": "List the messages of a conversation, newest first.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "member"}],
+      "idempotency": "safe",
+      "pagination": {
+        "style": "sequence",
+        "limitField": "limit",
+        "cursorField": "beforeSequence",
+        "pagePath": ["result"]
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication"],
+        "codes": ["NOT_FOUND", "PAGE_ITEM_TOO_LARGE"]
+      }
+    },
+    "communication.getMessage": {
+      "summary": "Read one message.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "member"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication"],
+        "codes": ["NOT_FOUND", "MESSAGE_DELETED"]
+      }
+    },
+    "communication.events": {
+      "summary": "Replay committed conversation events after a cursor, in sequence order.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "member"}],
+      "idempotency": "safe",
+      "pagination": {
+        "style": "replay",
+        "limitField": "limit",
+        "cursorField": "after",
+        "pagePath": ["result"]
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication"],
+        "codes": ["NOT_FOUND", "CURSOR_SCOPE_MISMATCH", "CURSOR_AHEAD", "CURSOR_EXPIRED"]
+      }
+    },
+    "communication.receipts": {
+      "summary": "List the delivery and read receipts of a conversation.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "member"}],
+      "idempotency": "safe",
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": ["result"]
+      },
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+    },
+    "communication.inbox": {
+      "summary": "List the conversations visible to the calling user.",
+      "layer": "client",
+      "auth": [{"credential": "userSession"}],
+      "idempotency": "safe",
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": ["result"]
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication"],
+        "codes": ["CURSOR_SCOPE_MISMATCH", "CURSOR_EXPIRED", "PAGE_ITEM_TOO_LARGE"]
+      }
+    },
+    "communication.search": {
+      "summary": "Search the messages visible to the calling user.",
+      "layer": "client",
+      "auth": [{"credential": "userSession"}],
+      "idempotency": "safe",
+      "pagination": {
+        "style": "cursor",
+        "limitField": "pageSize",
+        "cursorField": "cursor",
+        "pagePath": ["result"]
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication"],
+        "codes": ["CURSOR_SCOPE_MISMATCH", "PAGE_ITEM_TOO_LARGE"]
+      }
+    },
+    "communication.resolveRequest": {
+      "summary": "Look up the stored outcome of an earlier communication mutation by its requestId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "ownRequest"},
+        {"credential": "backendKey", "condition": "ownRequest"}
+      ],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication"],
+        "codes": ["NOT_FOUND", "CREDENTIAL_EXPIRED"]
+      }
+    },
+    "communication.getOperation": {
+      "summary": "Read the state of a long-running communication operation.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "operationParticipant"},
+        {"credential": "backendKey", "condition": "operationParticipant"}
+      ],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+    },
+    "communication.currentLiveSession": {
+      "summary": "Return the active live session of a conversation, if any.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callManage"]}
+      ],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+    },
+    "communication.liveSession": {
+      "summary": "Read a live session.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callManage"]}
+      ],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+    },
+    "communication.liveSessions": {
+      "summary": "List the live sessions of a conversation.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callManage"]}
+      ],
+      "idempotency": "safe",
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": ["result"]
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication"],
+        "codes": ["NOT_FOUND", "CURSOR_INVALID"]
+      }
+    },
+    "communication.liveSessionParticipants": {
+      "summary": "List the participants of a live session.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callManage"]}
+      ],
+      "idempotency": "safe",
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": ["result"]
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication"],
+        "codes": ["NOT_FOUND", "CURSOR_INVALID"]
+      }
+    },
+    "communication.liveSessionAlerts": {
+      "summary": "List the live session alerts addressed to the calling user.",
+      "layer": "client",
+      "auth": [{"credential": "userSession"}],
+      "idempotency": "safe",
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": ["result"]
+      },
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": ["CURSOR_INVALID"]}
+    },
+    "communication.liveSessionOperation": {
+      "summary": "Read the state of a live session start or end operation.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callManage"]}
+      ],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+    },
+    "communication.sessionRequestOutcome": {
+      "summary": "Look up the outcome of an earlier issueSession or renewSession request, including the session it produced.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["sessionIssue", "sessionManage"]}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication"],
+        "codes": [
+          "NOT_FOUND",
+          "NOT_A_SESSION_REQUEST",
+          "SESSION_RECEIPT_INVALID",
+          "SESSION_RECEIPT_BINDING_MISMATCH"
+        ]
+      }
+    },
+    "communication.createPrincipal": {
+      "summary": "Create a principal for an application user.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["principalManage"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["ALREADY_EXISTS"]
+      }
+    },
+    "communication.disablePrincipal": {
+      "summary": "Disable a principal.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["principalManage"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "communication.issueSession": {
+      "summary": "Issue a short-lived user session token for a principal and device.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["sessionIssue"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "CREDENTIAL_EXPIRED"]
+      }
+    },
+    "communication.renewSession": {
+      "summary": "Renew a user session before it expires.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["sessionIssue"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "CREDENTIAL_EXPIRED"]
+      }
+    },
+    "communication.revokeSession": {
+      "summary": "Revoke a user session.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "ownSession"},
+        {"credential": "backendKey", "scopes": ["sessionManage"]}
+      ],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "communication.createConversation": {
+      "summary": "Create a conversation with its initial members.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["conversationManage"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["conversation.created"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "MEMBER_LIMIT", "MEMBERSHIP_COUNT_INVALID"]
+      }
+    },
+    "communication.updateConversation": {
+      "summary": "Update the title or properties of a conversation.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "moderator"},
+        {"credential": "backendKey", "scopes": ["conversationManage"]}
+      ],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["conversation.updated"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "communication.addMember": {
+      "summary": "Add a member, or change the role of an active member.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["membershipManage"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["member.added", "member.roleChanged"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEMBER_LIMIT", "MEMBERSHIP_COUNT_INVALID"]
+      }
+    },
+    "communication.addMembers": {
+      "summary": "Add several members in one request.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["membershipManage"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["member.added", "member.roleChanged"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEMBER_LIMIT", "MEMBERSHIP_COUNT_INVALID"]
+      }
+    },
+    "communication.removeMember": {
+      "summary": "Remove a member from a conversation.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["membershipManage"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["member.removed"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEMBERSHIP_COUNT_INVALID"]
+      }
+    },
+    "communication.historyGrant": {
+      "summary": "Expand the history a member can see to an earlier sequence.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["historyManage"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["member.historyExpanded"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "communication.sendMessage": {
+      "summary": "Send a message.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "member"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["message.created"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND"]
+      }
+    },
+    "communication.editMessage": {
+      "summary": "Edit a message.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "authorOrModerator"},
+        {"credential": "backendKey", "scopes": ["moderation"]}
+      ],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["message.edited"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MESSAGE_DELETED"]
+      }
+    },
+    "communication.deleteMessage": {
+      "summary": "Delete a message.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "authorOrModerator"},
+        {"credential": "backendKey", "scopes": ["moderation"]}
+      ],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["message.deleted"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MESSAGE_DELETED"]
+      }
+    },
+    "communication.reportReceipt": {
+      "summary": "Report delivery or read progress through a sequence.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "member"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["receipt.reported"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "communication.typing": {
+      "summary": "Send an ephemeral typing signal.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "member"}],
+      "idempotency": "ephemeral",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+    },
+    "communication.setBroadcastPermission": {
+      "summary": "Allow or deny a member to publish media in live sessions.",
+      "layer": "server",
+      "auth": [{"credential": "backendKey", "scopes": ["membershipManage"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["member.broadcastPermissionChanged"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "communication.startLiveSession": {
+      "summary": "Start a live session (a call) in a conversation. Readiness completes asynchronously.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "member"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["live.started", "live.ready"]},
+      "longRunning": {"poll": "communication.liveSessionOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "codes": ["NOT_FOUND", "LIVE_SESSION_EXISTS", "MEDIA_RECOVERING"]
+      }
+    },
+    "communication.joinLiveSession": {
+      "summary": "Join a live session.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "member"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["live.participationChanged"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "codes": ["NOT_FOUND"]
+      }
+    },
+    "communication.alertLiveSession": {
+      "summary": "Alert (ring) conversation members about a live session.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "creatorOrModerator"},
+        {"credential": "backendKey", "scopes": ["callManage"]}
+      ],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["live.alerted"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "codes": ["NOT_FOUND", "LIVE_ALERT_LIMIT"]
+      }
+    },
+    "communication.leaveLiveSession": {
+      "summary": "Leave a live session.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "participant"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["live.participationChanged", "live.ended"]},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "codes": ["NOT_FOUND", "MEDIA_FENCE_REQUIRED"]
+      }
+    },
+    "communication.endLiveSession": {
+      "summary": "End a live session for every participant. Completes asynchronously.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "creatorOrModerator"},
+        {"credential": "backendKey", "scopes": ["callManage"]}
+      ],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["live.ended"]},
+      "longRunning": {"poll": "communication.liveSessionOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEDIA_FENCE_REQUIRED"]
+      }
+    },
+    "communication.liveSessionCredentials": {
+      "summary": "Obtain a media credential for one connection of the caller's participation.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "participant"}],
+      "idempotency": "singleUse",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "codes": [
+          "NOT_FOUND",
+          "MEDIA_NOT_READY",
+          "MEDIA_RECOVERING",
+          "ALREADY_CONNECTED",
+          "INVALID_REPLACEMENT",
+          "CREDENTIAL_REFRESH_REQUIRED",
+          "CREDENTIAL_EXPIRED"
+        ]
+      }
+    },
+    "communication.redeemCredential": {
+      "summary": "Redeem a delivered credential with its delivery permit.",
+      "layer": "server",
+      "auth": [{"credential": "deliveryPermit"}],
+      "idempotency": "permitBound",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "credentialDelivery"
+        ],
+        "codes": ["NOT_FOUND"]
+      }
+    },
+    "communication.acknowledgeCredential": {
+      "summary": "Acknowledge that a redeemed credential is stored, closing the delivery.",
+      "layer": "server",
+      "auth": [{"credential": "deliveryPermit"}],
+      "idempotency": "permitBound",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "credentialDelivery"
+        ],
+        "codes": ["NOT_FOUND", "DELIVERY_NOT_REDEEMED"]
+      }
+    },
+    "communication.conversationEvents": {
+      "summary": "Subscribe to conversation events in sequence order, resuming after a cursor.",
+      "layer": "client",
+      "auth": [{"credential": "userSession", "condition": "member"}],
+      "idempotency": "safe",
+      "pagination": {
+        "style": "replay",
+        "limitField": "limit",
+        "cursorField": "after",
+        "pagePath": []
+      },
+      "realtime": {"mode": "subscription", "channel": "conversationEvents"},
+      "errors": {
+        "sets": ["request", "communication"],
+        "codes": [
+          "NOT_FOUND",
+          "CURSOR_SCOPE_MISMATCH",
+          "CURSOR_AHEAD",
+          "CURSOR_EXPIRED",
+          "CURSOR_MISMATCH",
+          "RESYNC_REQUIRED"
+        ]
+      }
+    },
+    "management.capabilities": {
+      "summary": "Describe the management features and limits the authority supports.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": []}
+    },
+    "management.organizations": {
+      "summary": "List the organizations the caller can access.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential"}],
+      "idempotency": "safe",
+      "pagination": {"style": "bounded", "pagePath": ["result"]},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": []}
+    },
+    "management.getOrganization": {
+      "summary": "Read an organization.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "management.getDeployment": {
+      "summary": "Read a deployment.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "management.getProject": {
+      "summary": "Read a project.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "management.deploymentHealth": {
+      "summary": "Read the health of a deployment.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "management.deploymentUsage": {
+      "summary": "Read the usage of a deployment.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "management.webhookDeliveries": {
+      "summary": "List recent deliveries of a webhook endpoint.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "bounded", "pagePath": ["result"]},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "management.resolveRequest": {
+      "summary": "Look up the stored outcome of an earlier management mutation by its requestId.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "ownRequest"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND", "PERMIT_EXPIRED"]}
+    },
+    "management.getOperation": {
+      "summary": "Read the state of a long-running management operation.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "management.createOrganization": {
+      "summary": "Create an organization.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "mutation"], "codes": ["ALREADY_EXISTS"]}
+    },
+    "management.createDeployment": {
+      "summary": "Create a deployment in an organization. Completes asynchronously.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {"sets": ["request", "http", "mutation"], "codes": ["NOT_FOUND", "ALREADY_EXISTS"]}
+    },
+    "management.createProject": {
+      "summary": "Create a project in a ready deployment. Completes asynchronously.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "ALREADY_EXISTS", "DEPLOYMENT_NOT_READY"]
+      }
+    },
+    "management.issueBackendKey": {
+      "summary": "Issue a scoped backend key. The secret is delivered once through a credential delivery.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {"sets": ["request", "http", "mutation"], "codes": ["NOT_FOUND"]}
+    },
+    "management.revokeBackendKey": {
+      "summary": "Revoke a backend key, optionally revoking the sessions it issued.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "management.projectPolicy": {
+      "summary": "Change the policy of a project.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "management.credentialPermit": {
+      "summary": "Issue a signed permit that authorizes redeeming one credential delivery.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "PERMIT_EXPIRED", "CREDENTIAL_DELIVERY_EXPIRED"]
+      }
+    },
+    "management.pauseOperation": {
+      "summary": "Pause a long-running operation.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "management.resumeOperation": {
+      "summary": "Resume a paused operation.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    },
+    "management.configureWebhook": {
+      "summary": "Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "WEBHOOK_ENDPOINT_LIMIT"]
+      }
+    },
+    "management.disableWebhook": {
+      "summary": "Disable a webhook endpoint.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+      }
+    }
+  }
+}

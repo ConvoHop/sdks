@@ -8,15 +8,15 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "test": "npm test --workspaces",
+    "test": "npm test --workspaces && npm run test:sdkgen",
     "check:packages": "npm run build && npm run check:package --workspaces",
-    "generate:graphql": "node scripts/generate-v1-operations.mjs && graphql-codegen --config codegen.mjs",
-    "check:graphql": "node scripts/generate-v1-operations.mjs --check && graphql-codegen --config codegen.mjs --check"
+    "generate:graphql": "node tools/sdkgen/cli.mjs generate",
+    "check:graphql": "node tools/sdkgen/cli.mjs generate --check",
+    "check:annotations": "node tools/sdkgen/cli.mjs check-annotations",
+    "test:sdkgen": "node --test \"tools/sdkgen/test/*.test.mjs\""
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
-    "@graphql-codegen/cli": "7.4.3",
-    "@graphql-codegen/typescript-operations": "6.1.7",
     "@types/node": "^22.20.5",
     "graphql": "17.0.2",
     "publint": "0.3.25"

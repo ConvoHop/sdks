@@ -23,11 +23,12 @@ You need Node.js 22 or later and the npm version that comes with it. CI runs
 on Ubuntu with Node.js 22 and 24.
 
 ```sh
-npm ci                  # install from the root package-lock.json
-npm run check:graphql   # generated code matches the schemas
-npm run build           # strict TypeScript builds
-npm test                # builds, then runs the package test suites
-npm run check:packages  # publint and Are the Types Wrong? on every package
+npm ci                     # install from the root package-lock.json
+npm run check:annotations  # every schema operation is annotated
+npm run check:graphql      # generated code matches the schemas
+npm run build              # strict TypeScript builds
+npm test                   # builds, then runs the package and generator test suites
+npm run check:packages     # publint and Are the Types Wrong? on every package
 ```
 
 None of these commands need service credentials.
@@ -39,10 +40,10 @@ None of these commands need service credentials.
 | `packages/core` | Shared core (`@convohop/core`): generated GraphQL types and operations, protocol validation and the isomorphic transport |
 | `packages/client` | Client SDK (`@convohop/client`) for browsers and React Native, with realtime and media |
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
-| `schema/` | GraphQL schemas exported by the ConvoHop API, plus generated operation documents |
-| `scripts/`, `codegen.mjs` | Code generation |
+| `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
+| `tools/sdkgen/` | The SDK generator: annotation check, IR builder, emitters and their tests. See [SDK generation](docs/sdk-generation.md) |
 | `test/` | Fixtures shared by the package test suites |
-| `docs/` | Public design and policy documents |
+| `docs/` | Public design and policy documents, and generated operation snippets |
 
 Each package has its own tests in `packages/<name>/test/`.
 
@@ -58,31 +59,97 @@ Each package has its own tests in `packages/<name>/test/`.
 ## Generated code
 
 `schema/communication-v1.graphql` and `schema/management-v1.graphql` are
-exported by the ConvoHop API and are the source of truth. These files are
-generated from them:
+exported by the ConvoHop API and are the source of truth.
+`schema/v1-annotations.json` adds the facts that GraphQL can't express. See
+[Annotating operations](#annotating-operations). The generator in
+`tools/sdkgen` builds a language-neutral IR from them and generates these
+files from the IR:
 
+- `schema/v1-ir.json`
 - `schema/operations-v1.graphql`
 - `schema/v1-operations.json`
 - `packages/core/src/generated/v1-operations.ts`
 - `packages/core/src/generated/v1-generated.ts`
+- `docs/snippets/v1/`
 
 ```sh
-npm run generate:graphql   # regenerate after a schema change
-npm run check:graphql      # fails if any generated file is stale
+npm run generate:graphql   # regenerate after a schema or annotation change
+npm run check:graphql      # fails if any generated file is missing, stale or edited
 ```
 
 - Don't edit generated files by hand.
-- If a rebase or merge conflicts in a generated file, resolve the schema
-  files first. Then run `npm run generate:graphql` and commit the output.
-  Don't merge generated files by hand.
-- A dependency update to the code generators can change the generated output.
-  Run `npm run generate:graphql` on those branches too.
+- If a rebase or merge conflicts in a generated file, resolve the schema and
+  annotation files first. Then run `npm run generate:graphql` and commit the
+  output. Don't merge generated files by hand.
+- A change to the generator can change the generated output. Run
+  `npm run generate:graphql`, and refresh the generator's golden files with
+  `UPDATE_GOLDEN=1 npm run test:sdkgen`. Review both diffs.
+
+[SDK generation](docs/sdk-generation.md) describes the IR, the emitter plugin
+API and how to add a language.
+
+## Annotating operations
+
+Each root field of each GraphQL schema in `schema/` is an operation with the
+ID `<plane>.<field>`, for example `communication.sendMessage`. Every operation
+needs an entry under `operations` in
+[`schema/v1-annotations.json`](schema/v1-annotations.json). The entry records
+which SDKs expose the operation, who can call it, and how it retries,
+paginates, streams and fails. Every language's generator relies on it.
+
+`npm run check:annotations` fails when a schema operation has no entry
+(MISSING) or an entry doesn't match any schema operation (UNKNOWN), and lists
+each one. `npm run generate:graphql` and `npm run check:graphql` run the same
+check first, and CI runs it on every pull request.
+
+When you add, rename or remove an operation:
+
+1. Put the exported schema in `schema/` and run `npm run generate:graphql`.
+2. For each MISSING operation, copy the starter entry that the check prints
+   into `operations`. Replace every `<placeholder>` and review every default.
+   For example, the starter's `errors.sets` copies the most common error sets
+   of the plane.
+3. Rename or delete each UNKNOWN entry. When a renamed root field looks
+   similar, the check suggests the new name.
+4. If the operation needs a new credential, scope, condition, error code,
+   error set, scalar or realtime event, add it to its catalog at the top of
+   the file. Entries can only refer to catalog items.
+5. Run `npm run generate:graphql` until it passes. Commit the schema, the
+   annotations and every regenerated file together, including
+   `schema/v1-ir.json` and `docs/snippets/v1/`.
+
+If you include this repository as a Git submodule, run the commands inside the
+submodule.
+
+Each entry has these fields:
+
+| Field | Values |
+| --- | --- |
+| `summary` | One sentence that says what the operation does. |
+| `layer` | `client`: client SDKs only, and the operation accepts only client credentials. `server`: server SDKs only, and it accepts no client credentials. `both`: every SDK, and `auth` lists at least one client credential and one server credential. |
+| `auth` | Alternative ways to authorize the call. Any one of them is enough. Each is `{ "credential": ..., "scopes": [...], "condition": ... }`. `scopes` lists every scope a backend key needs. `scopes` and `condition` are optional. |
+| `idempotency` | Queries and subscriptions are `safe`. A mutation is `idempotent` (deduplicated by request ID, so an unknown outcome can be resolved), `singleUse` (like `idempotent`, but returns a short-lived credential for one connection), `permitBound` (authorized by a permit in the request context) or `ephemeral` (a transient signal that's never retried). |
+| `pagination` | `{ "style": "none" }`, or a style from `cursor`, `sequence`, `replay` and `bounded` with `pagePath`, the path from the result to the page object (`[]` when the result is the page). `cursor`, `sequence` and `replay` also name the input's `limitField` and `cursorField`. |
+| `realtime` | `{ "mode": "none" }`, with an optional `emits` list of event types for mutations, or `{ "mode": "subscription", "channel": ... }` for subscriptions. |
+| `longRunning` | Optional. `{ "poll": ..., "refField": ... }` for a mutation that starts work that finishes later. |
+| `errors` | `{ "sets": [...], "codes": [...] }`. Error sets from `errorSets`, plus other codes from `errorCodes` that callers should handle. The list isn't exhaustive. |
+
+The check also catches inconsistencies, such as a mutation marked `safe`, a
+`layer` that doesn't match the credentials in `auth`, or a paged result that
+lacks the fields its style needs. `planes.<plane>.context.rules` decide which
+request-context fields each operation must send or must not send. If a new
+operation needs different rules, add it to a rule's `only` or `except` list.
+
+The generators don't support every GraphQL feature. For example, unions,
+interfaces, `@oneOf` inputs and custom directives are rejected. See
+[Unsupported GraphQL features](docs/sdk-generation.md#unsupported-graphql-features).
 
 ## Tests
 
 - Tests use Node.js's built-in test runner (`node:test`) and run against the
   output of each package's strict TypeScript build. They live in
-  `packages/*/test/`.
+  `packages/*/test/`. The generator's tests live in `tools/sdkgen/test/` and
+  compare the emitters' output with golden files.
 - Add or update a regression test in the existing package suite for every
   bug fix and behavior change. Don't add standalone assertion scripts or a
   second test client.
@@ -122,8 +189,10 @@ who use the SDKs.
 
 New SDKs follow the [SDK strategy](docs/sdk-strategy.md). Each one is
 generated from the shared schema, has a small idiomatic hand-written runtime,
-and must pass the shared conformance suite before release. Open a feature
-request to discuss the design before you start.
+and must pass the shared conformance suite before release. Its generator is an
+emitter for the shared IR. See
+[Adding a language emitter](docs/sdk-generation.md#adding-a-language-emitter).
+Open a feature request to discuss the design before you start.
 
 ## Commits and pull requests
 
