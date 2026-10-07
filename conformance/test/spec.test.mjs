@@ -71,8 +71,7 @@ describe("enumerations agree across the spec, the mock and the reference driver"
 });
 
 // Scenario expectations that schema/v1-ir.json does not define yet.
-// TODO(#9): remove RATE_LIMITED (HTTP 429 with Retry-After) once the rate-limit problem types land.
-const PENDING_ERROR_CODES = new Set(["RATE_LIMITED"]);
+const PENDING_ERROR_CODES = new Set();
 // HTTP guards that generated SDK requests never trip, and the mock's own internal failures.
 const MOCK_ONLY_CODES = new Set(["METHOD_NOT_ALLOWED", "UNSUPPORTED_MEDIA_TYPE", "MOCK_FAILURE"]);
 const ROLE_CREDENTIALS = { user: "userSession", backend: "backendKey", management: "portalCredential" };

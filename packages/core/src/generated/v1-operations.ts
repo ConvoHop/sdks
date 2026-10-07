@@ -1190,6 +1190,18 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
   "PageSize": {
     "kind": "scalar"
   },
+  "PlanLimitExceededProblem": {
+    "kind": "object",
+    "fields": {
+      "code": "String!",
+      "status": "Int!",
+      "requestId": "UUID!",
+      "outcome": "String!",
+      "retryable": "Boolean!",
+      "planLimit": "String!",
+      "limit": "String!"
+    }
+  },
   "Principal": {
     "kind": "object",
     "fields": {
@@ -1230,6 +1242,31 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
   },
   "Properties": {
     "kind": "scalar"
+  },
+  "QuotaExceededProblem": {
+    "kind": "object",
+    "fields": {
+      "code": "String!",
+      "status": "Int!",
+      "requestId": "UUID!",
+      "outcome": "String!",
+      "retryable": "Boolean!",
+      "retryAfter": "Int!",
+      "meter": "String!",
+      "limit": "Decimal!",
+      "periodEnd": "String!"
+    }
+  },
+  "RateLimitedProblem": {
+    "kind": "object",
+    "fields": {
+      "code": "String!",
+      "status": "Int!",
+      "requestId": "UUID!",
+      "outcome": "String!",
+      "retryable": "Boolean!",
+      "retryAfter": "Int!"
+    }
   },
   "ReadReceipt": {
     "kind": "object",

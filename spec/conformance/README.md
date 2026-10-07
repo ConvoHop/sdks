@@ -252,8 +252,8 @@ against the IR, so `npm test` fails when they drift apart:
   `requests.retry` step may expect any IR code, because the retry resends
   the original mutation. Error code names appear only in the code fields of
   `expect.error` and `expect.errors`, so none escapes this check.
-  `RATE_LIMITED` is accepted until the rate-limit problem types reach
-  `schema/`; the test then reports that the exception can go.
+  Codes listed in the test's `PENDING_ERROR_CODES` are accepted until the
+  IR defines them; the test then reports that the exception can go.
 - An expected error that pins an HTTP `status` uses the status the IR gives
   its code.
 - The mock's backend-key scopes and GraphQL document size limit
@@ -265,7 +265,7 @@ against the IR, so `npm test` fails when they drift apart:
   leaves no rule satisfied gets `SCOPE_REQUIRED`, with a message that names
   the scope.
 - Every problem the mock raises has a literal code that the IR defines, with
-  the IR's HTTP status for that code. The exceptions are `RATE_LIMITED`, as
+  the IR's HTTP status for that code. The exceptions are pending codes, as
   above, and the mock's own `METHOD_NOT_ALLOWED`, `UNSUPPORTED_MEDIA_TYPE`
   and `MOCK_FAILURE`, which generated SDK requests never trigger unless the
   mock itself fails.

@@ -561,6 +561,27 @@
         "retryable": false
       },
       {
+        "name": "PLAN_LIMIT_EXCEEDED",
+        "summary": "The plan does not permit the resource or feature. extensions.planLimit names the limit and extensions.limit holds the plan's value. Change the plan or the limit before trying again.",
+        "origin": "server",
+        "status": 403,
+        "retryable": false
+      },
+      {
+        "name": "QUOTA_EXCEEDED",
+        "summary": "A hard usage quota refused new work until the quota period ends. extensions.meter, extensions.limit and extensions.periodEnd describe the quota, and extensions.retryAfter (HTTP Retry-After) counts the seconds until it resets. Work already in progress continues.",
+        "origin": "server",
+        "status": 429,
+        "retryable": false
+      },
+      {
+        "name": "RATE_LIMITED",
+        "summary": "A per-second rate limit refused the request before it had any effect. Wait extensions.retryAfter seconds (HTTP Retry-After), then resend the request with the same requestId.",
+        "origin": "server",
+        "status": 429,
+        "retryable": true
+      },
+      {
         "name": "RECOVERY_STORAGE_FAILURE",
         "summary": "Caller-provided recovery storage did not confirm durability. Keep the original request and its outcome.",
         "origin": "sdk",
@@ -759,6 +780,11 @@
           "RESOLUTION_REQUIRED",
           "RECOVERY_STORAGE_FAILURE"
         ]
+      },
+      {
+        "name": "rateLimited",
+        "summary": "Operations charged against a per-second rate limit of the caller, project or client address.",
+        "codes": ["RATE_LIMITED"]
       },
       {
         "name": "request",
@@ -996,7 +1022,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http"],
+        "sets": ["request", "http", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1009,6 +1035,7 @@
           "HTTP_FAILURE",
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1056,7 +1083,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http"],
+        "sets": ["request", "http", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1069,6 +1096,7 @@
           "HTTP_FAILURE",
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1116,7 +1144,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1130,6 +1158,7 @@
           "INCARNATION_MISMATCH",
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1183,7 +1212,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1198,6 +1227,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1255,7 +1285,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1270,6 +1300,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1334,7 +1365,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1349,6 +1380,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1413,7 +1445,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1429,6 +1461,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "PAGE_ITEM_TOO_LARGE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1486,7 +1519,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1502,6 +1535,7 @@
           "INVALID_RESPONSE",
           "MESSAGE_DELETED",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1563,7 +1597,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1581,6 +1615,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1641,7 +1676,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1656,6 +1691,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1719,7 +1755,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1737,6 +1773,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "PAGE_ITEM_TOO_LARGE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1801,7 +1838,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1818,6 +1855,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "PAGE_ITEM_TOO_LARGE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1875,7 +1913,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1891,6 +1929,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1947,7 +1986,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1962,6 +2001,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2020,7 +2060,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2035,6 +2075,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2093,7 +2134,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2108,6 +2149,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2173,7 +2215,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2189,6 +2231,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2254,7 +2297,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2270,6 +2313,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2331,7 +2375,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2346,6 +2390,7 @@
           "INCARNATION_MISMATCH",
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2403,7 +2448,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2418,6 +2463,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2474,7 +2520,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2490,6 +2536,7 @@
           "INVALID_RESPONSE",
           "NOT_A_SESSION_REQUEST",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2546,7 +2593,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "ALREADY_EXISTS",
@@ -2563,6 +2617,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2620,7 +2675,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2637,6 +2699,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2695,7 +2758,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2713,6 +2783,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2770,7 +2841,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2788,6 +2866,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2849,7 +2928,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2866,6 +2952,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2924,7 +3011,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["conversation.created"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2943,6 +3037,7 @@
           "MEMBER_LIMIT",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3003,7 +3098,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["conversation.updated"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3020,6 +3122,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3078,7 +3181,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.added", "member.roleChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3097,6 +3207,7 @@
           "MEMBER_LIMIT",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3155,7 +3266,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.added", "member.roleChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3174,6 +3292,7 @@
           "MEMBER_LIMIT",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3232,7 +3351,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.removed"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3250,6 +3376,7 @@
           "MEMBERSHIP_COUNT_INVALID",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3308,7 +3435,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.historyExpanded"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3325,6 +3459,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3386,7 +3521,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.created"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3403,6 +3545,9 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "PLAN_LIMIT_EXCEEDED",
+          "QUOTA_EXCEEDED",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3463,7 +3608,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.edited"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3481,6 +3633,7 @@
           "MESSAGE_DELETED",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3542,7 +3695,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.deleted"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3560,6 +3720,7 @@
           "MESSAGE_DELETED",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3618,7 +3779,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["receipt.reported"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3635,6 +3803,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3692,7 +3861,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3707,6 +3876,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -3762,7 +3932,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.broadcastPermissionChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3779,6 +3956,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3838,7 +4016,14 @@
       "realtime": {"mode": "none", "emits": ["live.started", "live.ready"]},
       "longRunning": {"poll": "communication.liveSessionOperation", "refField": "operation"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3857,6 +4042,9 @@
           "MEDIA_RECOVERING",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "PLAN_LIMIT_EXCEEDED",
+          "QUOTA_EXCEEDED",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3913,7 +4101,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.participationChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3933,6 +4129,9 @@
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
           "PARTICIPATION_MISMATCH",
+          "PLAN_LIMIT_EXCEEDED",
+          "QUOTA_EXCEEDED",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3992,7 +4191,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.alerted"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -4013,6 +4220,7 @@
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
           "PARTICIPATION_MISMATCH",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4070,7 +4278,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.participationChanged", "live.ended"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -4091,6 +4307,7 @@
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
           "PARTICIPATION_MISMATCH",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4151,7 +4368,15 @@
       "realtime": {"mode": "none", "emits": ["live.ended"]},
       "longRunning": {"poll": "communication.liveSessionOperation", "refField": "operation"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -4172,6 +4397,7 @@
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
           "PARTICIPATION_MISMATCH",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4232,7 +4458,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "ALREADY_CONNECTED",
@@ -4258,6 +4492,7 @@
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
           "PARTICIPATION_MISMATCH",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4320,7 +4555,8 @@
           "communication",
           "mutation",
           "communicationMutation",
-          "credentialDelivery"
+          "credentialDelivery",
+          "rateLimited"
         ],
         "codes": [
           "ADMISSION_LIMIT",
@@ -4341,6 +4577,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4405,7 +4642,8 @@
           "communication",
           "mutation",
           "communicationMutation",
-          "credentialDelivery"
+          "credentialDelivery",
+          "rateLimited"
         ],
         "codes": [
           "ADMISSION_LIMIT",
@@ -4427,6 +4665,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4490,7 +4729,7 @@
       },
       "realtime": {"mode": "subscription", "channel": "conversationEvents"},
       "errors": {
-        "sets": ["request", "communication"],
+        "sets": ["request", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -4506,6 +4745,9 @@
           "INCARNATION_MISMATCH",
           "INVALID_REQUEST",
           "NOT_FOUND",
+          "PLAN_LIMIT_EXCEEDED",
+          "QUOTA_EXCEEDED",
+          "RATE_LIMITED",
           "RESYNC_REQUIRED",
           "RETRY_EXHAUSTED",
           "UNAUTHENTICATED",
@@ -5419,7 +5661,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "mutation"],
+        "sets": ["request", "http", "mutation", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "ALREADY_EXISTS",
@@ -5435,6 +5677,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_TOO_LARGE",
           "RESOLUTION_REQUIRED",
@@ -5580,6 +5823,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "PLAN_LIMIT_EXCEEDED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_TOO_LARGE",
           "RESOLUTION_REQUIRED",
@@ -8390,6 +8634,33 @@
       "constraints": {"minimum": 1, "maximum": 100}
     },
     {
+      "name": "PlanLimitExceededProblem",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "description": "GraphQL error `extensions` when `code` is `PLAN_LIMIT_EXCEEDED`. The plan does not permit the resource or feature (`status` 403 in an HTTP 200 GraphQL response, WebSocket close 4403). Not retryable without a plan or limit change.",
+      "fields": [
+        {
+          "name": "code",
+          "description": "PLAN_LIMIT_EXCEEDED",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "status", "type": {"kind": "scalar", "name": "Int", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "outcome", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "retryable", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "planLimit",
+          "description": "`maxProjects`, `broadcastEnabled`, or a canonical usage meter key whose allowance is zero.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {
+          "name": "limit",
+          "description": "The plan's value for `planLimit`: a decimal count, or `false` for a disabled feature.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        }
+      ]
+    },
+    {
       "name": "PolicyChangeInput",
       "kind": "input",
       "planes": ["communication", "management"],
@@ -8461,6 +8732,65 @@
       "representation": "object",
       "summary": "Application-defined JSON object. Numbers must stay within the interoperable safe-integer range.",
       "constraints": {"maxCanonicalJsonBytes": 8192}
+    },
+    {
+      "name": "QuotaExceededProblem",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "description": "GraphQL error `extensions` when `code` is `QUOTA_EXCEEDED`. A hard usage quota refused new work until the period ends (HTTP 429, WebSocket close 4429). Calls and connections already in progress continue. Not retryable before `periodEnd`.",
+      "fields": [
+        {
+          "name": "code",
+          "description": "QUOTA_EXCEEDED",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "status", "type": {"kind": "scalar", "name": "Int", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "outcome", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "retryable", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "retryAfter",
+          "description": "Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.",
+          "type": {"kind": "scalar", "name": "Int", "nullable": false}
+        },
+        {
+          "name": "meter",
+          "description": "Canonical usage meter key, such as `connection_minutes`.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {
+          "name": "limit",
+          "description": "The exhausted allowance.",
+          "type": {"kind": "scalar", "name": "Decimal", "nullable": false}
+        },
+        {
+          "name": "periodEnd",
+          "description": "RFC 3339 UTC end of the quota period.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        }
+      ]
+    },
+    {
+      "name": "RateLimitedProblem",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "description": "GraphQL error `extensions` when `code` is `RATE_LIMITED`. A per-second limit refused the request before any effect (HTTP 429, WebSocket close 4429). Resend the same request identity after `retryAfter` seconds.",
+      "fields": [
+        {
+          "name": "code",
+          "description": "RATE_LIMITED",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "status", "type": {"kind": "scalar", "name": "Int", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "outcome", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "retryable", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "retryAfter",
+          "description": "Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.",
+          "type": {"kind": "scalar", "name": "Int", "nullable": false}
+        }
+      ]
     },
     {
       "name": "ReadReceipt",

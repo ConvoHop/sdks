@@ -502,6 +502,24 @@
       "status": 409,
       "retryable": false
     },
+    "PLAN_LIMIT_EXCEEDED": {
+      "summary": "The plan does not permit the resource or feature. extensions.planLimit names the limit and extensions.limit holds the plan's value. Change the plan or the limit before trying again.",
+      "origin": "server",
+      "status": 403,
+      "retryable": false
+    },
+    "QUOTA_EXCEEDED": {
+      "summary": "A hard usage quota refused new work until the quota period ends. extensions.meter, extensions.limit and extensions.periodEnd describe the quota, and extensions.retryAfter (HTTP Retry-After) counts the seconds until it resets. Work already in progress continues.",
+      "origin": "server",
+      "status": 429,
+      "retryable": false
+    },
+    "RATE_LIMITED": {
+      "summary": "A per-second rate limit refused the request before it had any effect. Wait extensions.retryAfter seconds (HTTP Retry-After), then resend the request with the same requestId.",
+      "origin": "server",
+      "status": 429,
+      "retryable": true
+    },
     "RECOVERY_STORAGE_FAILURE": {
       "summary": "Caller-provided recovery storage did not confirm durability. Keep the original request and its outcome.",
       "origin": "sdk",
@@ -673,6 +691,10 @@
         "RECOVERY_STORAGE_FAILURE"
       ]
     },
+    "rateLimited": {
+      "summary": "Operations charged against a per-second rate limit of the caller, project or client address.",
+      "codes": ["RATE_LIMITED"]
+    },
     "request": {
       "summary": "Every operation.",
       "codes": [
@@ -837,7 +859,7 @@
       "idempotency": "safe",
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
-      "errors": {"sets": ["request", "http"], "codes": []}
+      "errors": {"sets": ["request", "http", "rateLimited"], "codes": []}
     },
     "communication.route": {
       "summary": "Return the signed route: project incarnation, serving epoch and realtime endpoint. Call it before other communication operations and again after WRONG_REGION.",
@@ -846,7 +868,7 @@
       "idempotency": "safe",
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
-      "errors": {"sets": ["request", "http"], "codes": []}
+      "errors": {"sets": ["request", "http", "rateLimited"], "codes": []}
     },
     "communication.currentSession": {
       "summary": "Return the calling user session.",
@@ -855,7 +877,7 @@
       "idempotency": "safe",
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
-      "errors": {"sets": ["request", "http", "communication"], "codes": []}
+      "errors": {"sets": ["request", "http", "communication", "rateLimited"], "codes": []}
     },
     "communication.getPrincipal": {
       "summary": "Read a principal (an application user).",
@@ -865,7 +887,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
@@ -880,7 +902,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
@@ -900,7 +922,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
@@ -920,7 +942,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "PAGE_ITEM_TOO_LARGE", "SCOPE_REQUIRED"]
       }
     },
@@ -935,7 +957,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "MESSAGE_DELETED", "SCOPE_REQUIRED"]
       }
     },
@@ -952,7 +974,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "CURSOR_SCOPE_MISMATCH", "CURSOR_AHEAD", "CURSOR_EXPIRED"]
       }
     },
@@ -968,7 +990,10 @@
         "pagePath": ["result"]
       },
       "realtime": {"mode": "none"},
-      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+      "errors": {
+        "sets": ["request", "http", "communication", "rateLimited"],
+        "codes": ["NOT_FOUND"]
+      }
     },
     "communication.inbox": {
       "summary": "List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.",
@@ -986,7 +1011,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "NOT_FOUND",
           "CURSOR_SCOPE_MISMATCH",
@@ -1012,7 +1037,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "CURSOR_SCOPE_MISMATCH", "PAGE_ITEM_TOO_LARGE", "SCOPE_REQUIRED"]
       }
     },
@@ -1027,7 +1052,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "CREDENTIAL_EXPIRED"]
       }
     },
@@ -1042,7 +1067,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
@@ -1058,7 +1083,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
@@ -1074,7 +1099,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
@@ -1095,7 +1120,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "CURSOR_INVALID", "SCOPE_REQUIRED"]
       }
     },
@@ -1116,7 +1141,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "CURSOR_INVALID", "SCOPE_REQUIRED"]
       }
     },
@@ -1132,7 +1157,10 @@
         "pagePath": ["result"]
       },
       "realtime": {"mode": "none"},
-      "errors": {"sets": ["request", "http", "communication"], "codes": ["CURSOR_INVALID"]}
+      "errors": {
+        "sets": ["request", "http", "communication", "rateLimited"],
+        "codes": ["CURSOR_INVALID"]
+      }
     },
     "communication.liveSessionOperation": {
       "summary": "Read the state of a live session start or end operation.",
@@ -1146,7 +1174,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
@@ -1158,7 +1186,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "NOT_FOUND",
           "NOT_A_SESSION_REQUEST",
@@ -1176,7 +1204,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["ALREADY_EXISTS", "SCOPE_REQUIRED"]
       }
     },
@@ -1188,7 +1223,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
       }
     },
@@ -1200,7 +1242,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "CREDENTIAL_EXPIRED", "SCOPE_REQUIRED"]
       }
     },
@@ -1212,7 +1261,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "CREDENTIAL_EXPIRED", "SCOPE_REQUIRED"]
       }
     },
@@ -1227,7 +1283,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
       }
     },
@@ -1239,7 +1302,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["conversation.created"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "MEMBER_LIMIT", "MEMBERSHIP_COUNT_INVALID", "SCOPE_REQUIRED"]
       }
     },
@@ -1254,7 +1324,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["conversation.updated"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
       }
     },
@@ -1266,7 +1343,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.added", "member.roleChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "NOT_FOUND",
           "REVISION_CONFLICT",
@@ -1284,7 +1368,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.added", "member.roleChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "NOT_FOUND",
           "REVISION_CONFLICT",
@@ -1302,7 +1393,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.removed"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEMBERSHIP_COUNT_INVALID", "SCOPE_REQUIRED"]
       }
     },
@@ -1314,7 +1412,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.historyExpanded"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
       }
     },
@@ -1329,8 +1434,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.created"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
-        "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
+        "codes": ["NOT_FOUND", "QUOTA_EXCEEDED", "PLAN_LIMIT_EXCEEDED", "SCOPE_REQUIRED"]
       }
     },
     "communication.editMessage": {
@@ -1344,7 +1456,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.edited"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MESSAGE_DELETED", "SCOPE_REQUIRED"]
       }
     },
@@ -1359,7 +1478,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.deleted"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MESSAGE_DELETED", "SCOPE_REQUIRED"]
       }
     },
@@ -1371,7 +1497,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["receipt.reported"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
       }
     },
@@ -1382,7 +1515,10 @@
       "idempotency": "ephemeral",
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
-      "errors": {"sets": ["request", "http", "communication"], "codes": ["NOT_FOUND"]}
+      "errors": {
+        "sets": ["request", "http", "communication", "rateLimited"],
+        "codes": ["NOT_FOUND"]
+      }
     },
     "communication.setBroadcastPermission": {
       "summary": "Allow or deny a member to publish media in live sessions.",
@@ -1392,7 +1528,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.broadcastPermissionChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
       }
     },
@@ -1405,8 +1548,21 @@
       "realtime": {"mode": "none", "emits": ["live.started", "live.ready"]},
       "longRunning": {"poll": "communication.liveSessionOperation", "refField": "operation"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
-        "codes": ["NOT_FOUND", "LIVE_SESSION_EXISTS", "MEDIA_RECOVERING"]
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
+        "codes": [
+          "NOT_FOUND",
+          "LIVE_SESSION_EXISTS",
+          "MEDIA_RECOVERING",
+          "QUOTA_EXCEEDED",
+          "PLAN_LIMIT_EXCEEDED"
+        ]
       }
     },
     "communication.joinLiveSession": {
@@ -1417,8 +1573,16 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.participationChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
-        "codes": ["NOT_FOUND"]
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
+        "codes": ["NOT_FOUND", "QUOTA_EXCEEDED", "PLAN_LIMIT_EXCEEDED"]
       }
     },
     "communication.alertLiveSession": {
@@ -1432,7 +1596,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.alerted"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "LIVE_ALERT_LIMIT", "SCOPE_REQUIRED"]
       }
     },
@@ -1444,7 +1616,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.participationChanged", "live.ended"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "MEDIA_FENCE_REQUIRED"]
       }
     },
@@ -1460,7 +1640,15 @@
       "realtime": {"mode": "none", "emits": ["live.ended"]},
       "longRunning": {"poll": "communication.liveSessionOperation", "refField": "operation"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEDIA_FENCE_REQUIRED", "SCOPE_REQUIRED"]
       }
     },
@@ -1472,7 +1660,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "NOT_FOUND",
           "MEDIA_NOT_READY",
@@ -1498,7 +1694,8 @@
           "communication",
           "mutation",
           "communicationMutation",
-          "credentialDelivery"
+          "credentialDelivery",
+          "rateLimited"
         ],
         "codes": ["NOT_FOUND"]
       }
@@ -1517,7 +1714,8 @@
           "communication",
           "mutation",
           "communicationMutation",
-          "credentialDelivery"
+          "credentialDelivery",
+          "rateLimited"
         ],
         "codes": ["NOT_FOUND", "DELIVERY_NOT_REDEEMED"]
       }
@@ -1535,14 +1733,16 @@
       },
       "realtime": {"mode": "subscription", "channel": "conversationEvents"},
       "errors": {
-        "sets": ["request", "communication"],
+        "sets": ["request", "communication", "rateLimited"],
         "codes": [
           "NOT_FOUND",
           "CURSOR_SCOPE_MISMATCH",
           "CURSOR_AHEAD",
           "CURSOR_EXPIRED",
           "CURSOR_MISMATCH",
-          "RESYNC_REQUIRED"
+          "RESYNC_REQUIRED",
+          "QUOTA_EXCEEDED",
+          "PLAN_LIMIT_EXCEEDED"
         ]
       }
     },
@@ -1673,7 +1873,10 @@
       "idempotency": "idempotent",
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
-      "errors": {"sets": ["request", "http", "mutation"], "codes": ["ALREADY_EXISTS"]}
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": ["ALREADY_EXISTS"]
+      }
     },
     "management.createDeployment": {
       "summary": "Create a deployment in an organization. Completes asynchronously.",
@@ -1695,7 +1898,7 @@
       "longRunning": {"poll": "management.getOperation", "refField": "operation"},
       "errors": {
         "sets": ["request", "http", "mutation"],
-        "codes": ["NOT_FOUND", "ALREADY_EXISTS", "DEPLOYMENT_NOT_READY"]
+        "codes": ["NOT_FOUND", "ALREADY_EXISTS", "DEPLOYMENT_NOT_READY", "PLAN_LIMIT_EXCEEDED"]
       }
     },
     "management.issueBackendKey": {
