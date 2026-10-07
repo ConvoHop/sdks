@@ -69,8 +69,8 @@
       "kind": "query",
       "field": "messages",
       "operationName": "CommunicationMessages",
-      "summary": "List the messages of a conversation, newest first.",
-      "layer": "client",
+      "summary": "List the messages of a conversation, newest first. A backend key reads the full history, or the history visible to the member named by actAsPrincipalId.",
+      "layer": "both",
       "path": "communication/messages.md"
     },
     {
@@ -79,8 +79,8 @@
       "kind": "query",
       "field": "getMessage",
       "operationName": "CommunicationGetMessage",
-      "summary": "Read one message.",
-      "layer": "client",
+      "summary": "Read one message. A backend key reads any message, or reads as the member named by actAsPrincipalId.",
+      "layer": "both",
       "path": "communication/getMessage.md"
     },
     {
@@ -109,8 +109,8 @@
       "kind": "query",
       "field": "inbox",
       "operationName": "CommunicationInbox",
-      "summary": "List the conversations visible to the calling user.",
-      "layer": "client",
+      "summary": "List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.",
+      "layer": "both",
       "path": "communication/inbox.md"
     },
     {
@@ -119,8 +119,8 @@
       "kind": "query",
       "field": "search",
       "operationName": "CommunicationSearch",
-      "summary": "Search the messages visible to the calling user.",
-      "layer": "client",
+      "summary": "Search the messages visible to the calling user. A backend key searches as the member named by actAsPrincipalId, or within scope.conversationIds.",
+      "layer": "both",
       "path": "communication/search.md"
     },
     {
@@ -329,8 +329,8 @@
       "kind": "mutation",
       "field": "sendMessage",
       "operationName": "CommunicationSendMessage",
-      "summary": "Send a message.",
-      "layer": "client",
+      "summary": "Send a message. A backend key sends as its service principal, or as the member named by actAsPrincipalId.",
+      "layer": "both",
       "path": "communication/sendMessage.md"
     },
     {

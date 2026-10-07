@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { V1ManagementClient, V1ProjectServerClient } from "@convohop/server";
+import { readFileSync } from "node:fs";
+import { V1ManagementClient, V1ProjectServerClient, V1Problem, v1Operations } from "@convohop/server";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -24,6 +25,83 @@ test("conversation handles grant broadcast permission through generated backend 
   assert.equal(result.result.member.canStartBroadcast, true);
   assert.equal(requests[0].operationName, "CommunicationSetBroadcastPermission");
   assert.deepEqual(requests[0].variables.input, { conversationId, principalId, allowed: true, expectedMembershipRevision: "1" });
+});
+
+test("backend data-plane calls carry generated actAsPrincipalId and surface SCOPE_REQUIRED as a typed problem", async () => {
+  const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), conversationId = crypto.randomUUID();
+  const actAsPrincipalId = crypto.randomUUID(), backendKey = "fixture-backend-key-never-in-errors", requests = [];
+  const server = new V1ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation, backendKey,
+    fetch: async (_url, options) => {
+      const request = JSON.parse(options.body); requests.push(request);
+      if (request.operationName === "CommunicationInbox")
+        return Response.json({ errors: [{ message: "The backend key requires the current messageRead scope",
+          extensions: { code: "SCOPE_REQUIRED", requestId: request.variables.context.requestId, outcome: "rejected",
+            retryable: false, status: 403 } }] });
+      assert.equal(request.operationName, "CommunicationSendMessage");
+      return reply(request, { result: { messageId: crypto.randomUUID(), conversationId, sequence: "1", revision: "1",
+        status: "sent", cursor: { incarnation, conversationId, sequence: "1" } } });
+    } });
+  for (const key of ["communication.sendMessage", "communication.messages", "communication.getMessage",
+    "communication.inbox", "communication.search"])
+    assert.ok(v1Operations[key].inputFields.includes("actAsPrincipalId"), key);
+  for (const key of ["communication.editMessage", "communication.deleteMessage", "communication.events"])
+    assert.ok(!v1Operations[key].inputFields.includes("actAsPrincipalId"), key);
+
+  const requestId = crypto.randomUUID(), send = { conversationId, text: "fixture", props: {}, actAsPrincipalId };
+  const sent = await server.http.execute("communication.sendMessage", projectId, send, requestId);
+  assert.equal(sent.result.conversationId, conversationId);
+  assert.deepEqual(requests[0].variables.input, send);
+  await assert.rejects(server.http.execute("communication.sendMessage", projectId,
+    { ...send, actAsPrincipalId: crypto.randomUUID() }, requestId), { code: "IDEMPOTENCY_CONFLICT" });
+  await assert.rejects(server.http.execute("communication.editMessage", projectId, { conversationId,
+    messageId: sent.result.messageId, expectedRevision: "1", text: "fixture", props: {}, actAsPrincipalId }),
+  { code: "INVALID_REQUEST", message: "Unknown GraphQL input field" });
+  assert.equal(requests.length, 1);
+
+  await assert.rejects(server.http.execute("communication.inbox", projectId, { limit: 10, actAsPrincipalId }), error => {
+    assert.ok(error instanceof V1Problem);
+    assert.equal(error.code, "SCOPE_REQUIRED");
+    assert.equal(error.outcome, "rejected");
+    assert.equal(error.status, 403);
+    assert.ok(!String(error).includes(backendKey));
+    assert.ok(!JSON.stringify(error).includes(backendKey));
+    return true;
+  });
+  assert.deepEqual(requests[1].variables.input, { limit: 10, actAsPrincipalId });
+  assert.equal(requests.length, 2);
+});
+
+test("the IR grants backend keys only the explicit data-plane scopes and documents SCOPE_REQUIRED", () => {
+  const ir = JSON.parse(readFileSync(new URL("../../../schema/v1-ir.json", import.meta.url), "utf8"));
+  const operation = id => {
+    const found = ir.operations.find(item => item.id === id);
+    assert.ok(found, id);
+    return found;
+  };
+  const backendScopes = id => operation(id).auth.filter(entry => entry.credential === "backendKey").map(entry => entry.scopes);
+  for (const name of ["messageRead", "messageWrite", "callRead"]) assert.ok(ir.scopes.some(scope => scope.name === name), name);
+
+  for (const [id, scope] of [["communication.sendMessage", "messageWrite"], ["communication.messages", "messageRead"],
+    ["communication.getMessage", "messageRead"], ["communication.inbox", "messageRead"], ["communication.search", "messageRead"]]) {
+    assert.equal(operation(id).layer, "both", id);
+    assert.deepEqual(backendScopes(id), [[scope]], id);
+  }
+  for (const id of ["communication.currentLiveSession", "communication.liveSession", "communication.liveSessions",
+    "communication.liveSessionParticipants", "communication.liveSessionOperation"])
+    assert.deepEqual(backendScopes(id), [["callRead"], ["callManage"]], id);
+  // Read scopes never authorize moderation or live-session control.
+  for (const id of ["communication.editMessage", "communication.deleteMessage"]) assert.deepEqual(backendScopes(id), [["moderation"]], id);
+  for (const id of ["communication.alertLiveSession", "communication.endLiveSession"]) assert.deepEqual(backendScopes(id), [["callManage"]], id);
+  for (const id of ["communication.events", "communication.receipts", "communication.reportReceipt", "communication.typing"]) {
+    assert.equal(operation(id).layer, "client", id);
+    assert.deepEqual(backendScopes(id), [], id);
+  }
+
+  const scopeRequired = ir.errors.codes.find(code => code.name === "SCOPE_REQUIRED");
+  assert.deepEqual([scopeRequired?.origin, scopeRequired?.status, scopeRequired?.retryable], ["server", 403, false]);
+  for (const item of ir.operations)
+    if (item.auth.some(entry => entry.credential === "backendKey" && entry.scopes))
+      assert.ok(item.errors.codes.includes("SCOPE_REQUIRED"), item.id);
 });
 
 test("backend onboarding uses current generated operations and returns the typed scoped bootstrap", async () => {
