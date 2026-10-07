@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { V1ManagementClient, V1ProjectServerClient, V1Problem, v1Operations } from "@convohop/server";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
@@ -68,6 +69,39 @@ test("backend data-plane calls carry generated actAsPrincipalId and surface SCOP
   });
   assert.deepEqual(requests[1].variables.input, { limit: 10, actAsPrincipalId });
   assert.equal(requests.length, 2);
+});
+
+test("the IR grants backend keys only the explicit data-plane scopes and documents SCOPE_REQUIRED", () => {
+  const ir = JSON.parse(readFileSync(new URL("../../../schema/v1-ir.json", import.meta.url), "utf8"));
+  const operation = id => {
+    const found = ir.operations.find(item => item.id === id);
+    assert.ok(found, id);
+    return found;
+  };
+  const backendScopes = id => operation(id).auth.filter(entry => entry.credential === "backendKey").map(entry => entry.scopes);
+  for (const name of ["messageRead", "messageWrite", "callRead"]) assert.ok(ir.scopes.some(scope => scope.name === name), name);
+
+  for (const [id, scope] of [["communication.sendMessage", "messageWrite"], ["communication.messages", "messageRead"],
+    ["communication.getMessage", "messageRead"], ["communication.inbox", "messageRead"], ["communication.search", "messageRead"]]) {
+    assert.equal(operation(id).layer, "both", id);
+    assert.deepEqual(backendScopes(id), [[scope]], id);
+  }
+  for (const id of ["communication.currentLiveSession", "communication.liveSession", "communication.liveSessions",
+    "communication.liveSessionParticipants", "communication.liveSessionOperation"])
+    assert.deepEqual(backendScopes(id), [["callRead"], ["callManage"]], id);
+  // Read scopes never authorize moderation or live-session control.
+  for (const id of ["communication.editMessage", "communication.deleteMessage"]) assert.deepEqual(backendScopes(id), [["moderation"]], id);
+  for (const id of ["communication.alertLiveSession", "communication.endLiveSession"]) assert.deepEqual(backendScopes(id), [["callManage"]], id);
+  for (const id of ["communication.events", "communication.receipts", "communication.reportReceipt", "communication.typing"]) {
+    assert.equal(operation(id).layer, "client", id);
+    assert.deepEqual(backendScopes(id), [], id);
+  }
+
+  const scopeRequired = ir.errors.codes.find(code => code.name === "SCOPE_REQUIRED");
+  assert.deepEqual([scopeRequired?.origin, scopeRequired?.status, scopeRequired?.retryable], ["server", 403, false]);
+  for (const item of ir.operations)
+    if (item.auth.some(entry => entry.credential === "backendKey" && entry.scopes))
+      assert.ok(item.errors.codes.includes("SCOPE_REQUIRED"), item.id);
 });
 
 test("backend onboarding uses current generated operations and returns the typed scoped bootstrap", async () => {

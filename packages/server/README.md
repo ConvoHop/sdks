@@ -85,11 +85,14 @@ scopes:
 | --- | --- |
 | `messageRead` | History and single-message reads in any project conversation, and search in listed conversations. A user's inbox, and search across their conversations, through `actAsPrincipalId`. |
 | `messageWrite` | Sends as the backend's service identity, or as one user through `actAsPrincipalId`. |
-| `callRead` | Live session and call history reads. |
+| `callRead` | Live session reads, including ended sessions, with their participants and operations. `callManage` also grants these reads. |
 
-The authority audits every committed `actAsPrincipalId` call and rejects a
-key that lacks the scope with a `SCOPE_REQUIRED` problem. The generated
-operations already accept `actAsPrincipalId`. The typed methods will live on
+The authority audits every committed `actAsPrincipalId` call. On every
+scoped backend-key operation, a key that lacks a required scope gets a
+`SCOPE_REQUIRED` problem (403, not retryable); `FORBIDDEN` remains for other
+authorization failures. `schema/v1-annotations.json` lists the scopes each
+operation accepts. The generated operations already accept
+`actAsPrincipalId`. The typed methods will live on
 `V1ProjectServerClient`, next to `conversations` and `conversation(id)`.
 Until they're added, they're deliberately absent rather than stubbed.
 

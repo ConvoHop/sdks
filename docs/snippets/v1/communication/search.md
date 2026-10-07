@@ -1,10 +1,12 @@
 ## `search`
 
-Search the messages visible to the calling user.
+Search the messages visible to the calling user. A backend key searches as the member named by actAsPrincipalId, or within scope.conversationIds.
 
 - **Operation:** `communication.search`, a query sent as `CommunicationSearch`.
-- **Layer:** client (client SDKs).
-- **Authorization:** `userSession`.
+- **Layer:** both (client and server SDKs).
+- **Authorization** (any one of):
+  - `userSession`.
+  - `backendKey` with scope `messageRead`.
 - **Idempotency:** `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 - **Pagination:** `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. Uses page `SearchPage` at `search.result`, items `SearchHit`, page size `input.pageSize` and cursor `input.cursor`.
 
@@ -26,6 +28,7 @@ Search the messages visible to the calling user.
 | `pageSize` | `PageSize!` |
 | `scope` | `SearchScopeInput` |
 | `cursor` | `String` |
+| `actAsPrincipalId` | `UUID` |
 
 **Result** (`SearchReply!`)
 
@@ -43,7 +46,7 @@ Search the messages visible to the calling user.
 
 **Errors**
 
-- Returned by the authority: `CURSOR_SCOPE_MISMATCH`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `PAGE_ITEM_TOO_LARGE`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `WRONG_REGION`.
+- Returned by the authority: `CURSOR_SCOPE_MISMATCH`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `PAGE_ITEM_TOO_LARGE`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `SCOPE_REQUIRED`, `WRONG_REGION`.
 - Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `INCARNATION_MISMATCH`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
 - Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `TRANSPORT_UNKNOWN`.
 - Transient, so repeating the request may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.

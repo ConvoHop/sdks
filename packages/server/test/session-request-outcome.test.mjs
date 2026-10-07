@@ -352,10 +352,10 @@ test("authority rejection and network uncertainty remain read failures without a
     backendKey: secret, fetch: async (_url, init) => {
       requests.push(JSON.parse(init.body));
       if (unavailable) throw new Error(secret);
-      return Response.json({ errors: [{ message: "Both backend session scopes required",
-        extensions: { code: "FORBIDDEN", outcome: "rejected", status: 403 } }] });
+      return Response.json({ errors: [{ message: "The backend key requires the current sessionManage scope",
+        extensions: { code: "SCOPE_REQUIRED", outcome: "rejected", status: 403 } }] });
     } });
-  await assert.rejects(client.sessionRequestOutcome(requestId), { code: "FORBIDDEN", outcome: "rejected" });
+  await assert.rejects(client.sessionRequestOutcome(requestId), { code: "SCOPE_REQUIRED", outcome: "rejected" });
   unavailable = true;
   await assert.rejects(client.sessionRequestOutcome(requestId), error => {
     assert.equal(error.code, "TRANSPORT_UNKNOWN");
