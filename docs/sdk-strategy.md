@@ -164,10 +164,13 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
   pagination, replay, errors and webhook verification. TypeScript is the
   reference implementation. An SDK isn't released until it passes the suite.
 
-Today the TypeScript SDKs already generate their operations and types from
-[`schema/`](../schema) into `@convohop/core` with `npm run generate:graphql`. The IR, the generators
-for other languages and the conformance suite are in development. Later, the
-same IR could also generate a command-line tool and tools for AI agents.
+Today the annotations, the IR and its TypeScript and reference-snippet
+generators exist. `npm run generate:graphql` generates the operations and
+types in `@convohop/core` and one reference snippet per operation from
+[`schema/`](../schema). See [SDK generation](sdk-generation.md). The
+generators for other languages and the conformance suite are in development.
+Later, the same IR could also generate a command-line tool and tools for AI
+agents.
 
 ### Calls with the official LiveKit SDKs
 

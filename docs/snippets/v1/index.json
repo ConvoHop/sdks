@@ -1,0 +1,687 @@
+{
+  "snippetsVersion": 1,
+  "irVersion": "1.0.0",
+  "source": "schema/v1-ir.json",
+  "operations": [
+    {
+      "id": "communication.capabilities",
+      "plane": "communication",
+      "kind": "query",
+      "field": "capabilities",
+      "operationName": "CommunicationCapabilities",
+      "summary": "Describe the features, limits and API model the authority supports.",
+      "layer": "both",
+      "path": "communication/capabilities.md"
+    },
+    {
+      "id": "communication.route",
+      "plane": "communication",
+      "kind": "query",
+      "field": "route",
+      "operationName": "CommunicationRoute",
+      "summary": "Return the signed route: project incarnation, serving epoch and realtime endpoint. Call it before other communication operations and again after WRONG_REGION.",
+      "layer": "both",
+      "path": "communication/route.md"
+    },
+    {
+      "id": "communication.currentSession",
+      "plane": "communication",
+      "kind": "query",
+      "field": "currentSession",
+      "operationName": "CommunicationCurrentSession",
+      "summary": "Return the calling user session.",
+      "layer": "client",
+      "path": "communication/currentSession.md"
+    },
+    {
+      "id": "communication.getPrincipal",
+      "plane": "communication",
+      "kind": "query",
+      "field": "getPrincipal",
+      "operationName": "CommunicationGetPrincipal",
+      "summary": "Read a principal (an application user).",
+      "layer": "server",
+      "path": "communication/getPrincipal.md"
+    },
+    {
+      "id": "communication.getConversation",
+      "plane": "communication",
+      "kind": "query",
+      "field": "getConversation",
+      "operationName": "CommunicationGetConversation",
+      "summary": "Read a conversation.",
+      "layer": "both",
+      "path": "communication/getConversation.md"
+    },
+    {
+      "id": "communication.members",
+      "plane": "communication",
+      "kind": "query",
+      "field": "members",
+      "operationName": "CommunicationMembers",
+      "summary": "List the members of a conversation.",
+      "layer": "both",
+      "path": "communication/members.md"
+    },
+    {
+      "id": "communication.messages",
+      "plane": "communication",
+      "kind": "query",
+      "field": "messages",
+      "operationName": "CommunicationMessages",
+      "summary": "List the messages of a conversation, newest first.",
+      "layer": "client",
+      "path": "communication/messages.md"
+    },
+    {
+      "id": "communication.getMessage",
+      "plane": "communication",
+      "kind": "query",
+      "field": "getMessage",
+      "operationName": "CommunicationGetMessage",
+      "summary": "Read one message.",
+      "layer": "client",
+      "path": "communication/getMessage.md"
+    },
+    {
+      "id": "communication.events",
+      "plane": "communication",
+      "kind": "query",
+      "field": "events",
+      "operationName": "CommunicationEvents",
+      "summary": "Replay committed conversation events after a cursor, in sequence order.",
+      "layer": "client",
+      "path": "communication/events.md"
+    },
+    {
+      "id": "communication.receipts",
+      "plane": "communication",
+      "kind": "query",
+      "field": "receipts",
+      "operationName": "CommunicationReceipts",
+      "summary": "List the delivery and read receipts of a conversation.",
+      "layer": "client",
+      "path": "communication/receipts.md"
+    },
+    {
+      "id": "communication.inbox",
+      "plane": "communication",
+      "kind": "query",
+      "field": "inbox",
+      "operationName": "CommunicationInbox",
+      "summary": "List the conversations visible to the calling user.",
+      "layer": "client",
+      "path": "communication/inbox.md"
+    },
+    {
+      "id": "communication.search",
+      "plane": "communication",
+      "kind": "query",
+      "field": "search",
+      "operationName": "CommunicationSearch",
+      "summary": "Search the messages visible to the calling user.",
+      "layer": "client",
+      "path": "communication/search.md"
+    },
+    {
+      "id": "communication.resolveRequest",
+      "plane": "communication",
+      "kind": "query",
+      "field": "resolveRequest",
+      "operationName": "CommunicationResolveRequest",
+      "summary": "Look up the stored outcome of an earlier communication mutation by its requestId.",
+      "layer": "both",
+      "path": "communication/resolveRequest.md"
+    },
+    {
+      "id": "communication.getOperation",
+      "plane": "communication",
+      "kind": "query",
+      "field": "getOperation",
+      "operationName": "CommunicationGetOperation",
+      "summary": "Read the state of a long-running communication operation.",
+      "layer": "both",
+      "path": "communication/getOperation.md"
+    },
+    {
+      "id": "communication.currentLiveSession",
+      "plane": "communication",
+      "kind": "query",
+      "field": "currentLiveSession",
+      "operationName": "CommunicationCurrentLiveSession",
+      "summary": "Return the active live session of a conversation, if any.",
+      "layer": "both",
+      "path": "communication/currentLiveSession.md"
+    },
+    {
+      "id": "communication.liveSession",
+      "plane": "communication",
+      "kind": "query",
+      "field": "liveSession",
+      "operationName": "CommunicationLiveSession",
+      "summary": "Read a live session.",
+      "layer": "both",
+      "path": "communication/liveSession.md"
+    },
+    {
+      "id": "communication.liveSessions",
+      "plane": "communication",
+      "kind": "query",
+      "field": "liveSessions",
+      "operationName": "CommunicationLiveSessions",
+      "summary": "List the live sessions of a conversation.",
+      "layer": "both",
+      "path": "communication/liveSessions.md"
+    },
+    {
+      "id": "communication.liveSessionParticipants",
+      "plane": "communication",
+      "kind": "query",
+      "field": "liveSessionParticipants",
+      "operationName": "CommunicationLiveSessionParticipants",
+      "summary": "List the participants of a live session.",
+      "layer": "both",
+      "path": "communication/liveSessionParticipants.md"
+    },
+    {
+      "id": "communication.liveSessionAlerts",
+      "plane": "communication",
+      "kind": "query",
+      "field": "liveSessionAlerts",
+      "operationName": "CommunicationLiveSessionAlerts",
+      "summary": "List the live session alerts addressed to the calling user.",
+      "layer": "client",
+      "path": "communication/liveSessionAlerts.md"
+    },
+    {
+      "id": "communication.liveSessionOperation",
+      "plane": "communication",
+      "kind": "query",
+      "field": "liveSessionOperation",
+      "operationName": "CommunicationLiveSessionOperation",
+      "summary": "Read the state of a live session start or end operation.",
+      "layer": "both",
+      "path": "communication/liveSessionOperation.md"
+    },
+    {
+      "id": "communication.sessionRequestOutcome",
+      "plane": "communication",
+      "kind": "query",
+      "field": "sessionRequestOutcome",
+      "operationName": "CommunicationSessionRequestOutcome",
+      "summary": "Look up the outcome of an earlier issueSession or renewSession request, including the session it produced.",
+      "layer": "server",
+      "path": "communication/sessionRequestOutcome.md"
+    },
+    {
+      "id": "communication.createPrincipal",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "createPrincipal",
+      "operationName": "CommunicationCreatePrincipal",
+      "summary": "Create a principal for an application user.",
+      "layer": "server",
+      "path": "communication/createPrincipal.md"
+    },
+    {
+      "id": "communication.disablePrincipal",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "disablePrincipal",
+      "operationName": "CommunicationDisablePrincipal",
+      "summary": "Disable a principal.",
+      "layer": "server",
+      "path": "communication/disablePrincipal.md"
+    },
+    {
+      "id": "communication.issueSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "issueSession",
+      "operationName": "CommunicationIssueSession",
+      "summary": "Issue a short-lived user session token for a principal and device.",
+      "layer": "server",
+      "path": "communication/issueSession.md"
+    },
+    {
+      "id": "communication.renewSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "renewSession",
+      "operationName": "CommunicationRenewSession",
+      "summary": "Renew a user session before it expires.",
+      "layer": "server",
+      "path": "communication/renewSession.md"
+    },
+    {
+      "id": "communication.revokeSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "revokeSession",
+      "operationName": "CommunicationRevokeSession",
+      "summary": "Revoke a user session.",
+      "layer": "both",
+      "path": "communication/revokeSession.md"
+    },
+    {
+      "id": "communication.createConversation",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "createConversation",
+      "operationName": "CommunicationCreateConversation",
+      "summary": "Create a conversation with its initial members.",
+      "layer": "server",
+      "path": "communication/createConversation.md"
+    },
+    {
+      "id": "communication.updateConversation",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "updateConversation",
+      "operationName": "CommunicationUpdateConversation",
+      "summary": "Update the title or properties of a conversation.",
+      "layer": "both",
+      "path": "communication/updateConversation.md"
+    },
+    {
+      "id": "communication.addMember",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "addMember",
+      "operationName": "CommunicationAddMember",
+      "summary": "Add a member, or change the role of an active member.",
+      "layer": "server",
+      "path": "communication/addMember.md"
+    },
+    {
+      "id": "communication.addMembers",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "addMembers",
+      "operationName": "CommunicationAddMembers",
+      "summary": "Add several members in one request.",
+      "layer": "server",
+      "path": "communication/addMembers.md"
+    },
+    {
+      "id": "communication.removeMember",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "removeMember",
+      "operationName": "CommunicationRemoveMember",
+      "summary": "Remove a member from a conversation.",
+      "layer": "server",
+      "path": "communication/removeMember.md"
+    },
+    {
+      "id": "communication.historyGrant",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "historyGrant",
+      "operationName": "CommunicationHistoryGrant",
+      "summary": "Expand the history a member can see to an earlier sequence.",
+      "layer": "server",
+      "path": "communication/historyGrant.md"
+    },
+    {
+      "id": "communication.sendMessage",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "sendMessage",
+      "operationName": "CommunicationSendMessage",
+      "summary": "Send a message.",
+      "layer": "client",
+      "path": "communication/sendMessage.md"
+    },
+    {
+      "id": "communication.editMessage",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "editMessage",
+      "operationName": "CommunicationEditMessage",
+      "summary": "Edit a message.",
+      "layer": "both",
+      "path": "communication/editMessage.md"
+    },
+    {
+      "id": "communication.deleteMessage",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "deleteMessage",
+      "operationName": "CommunicationDeleteMessage",
+      "summary": "Delete a message.",
+      "layer": "both",
+      "path": "communication/deleteMessage.md"
+    },
+    {
+      "id": "communication.reportReceipt",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "reportReceipt",
+      "operationName": "CommunicationReportReceipt",
+      "summary": "Report delivery or read progress through a sequence.",
+      "layer": "client",
+      "path": "communication/reportReceipt.md"
+    },
+    {
+      "id": "communication.typing",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "typing",
+      "operationName": "CommunicationTyping",
+      "summary": "Send an ephemeral typing signal.",
+      "layer": "client",
+      "path": "communication/typing.md"
+    },
+    {
+      "id": "communication.setBroadcastPermission",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "setBroadcastPermission",
+      "operationName": "CommunicationSetBroadcastPermission",
+      "summary": "Allow or deny a member to publish media in live sessions.",
+      "layer": "server",
+      "path": "communication/setBroadcastPermission.md"
+    },
+    {
+      "id": "communication.startLiveSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "startLiveSession",
+      "operationName": "CommunicationStartLiveSession",
+      "summary": "Start a live session (a call) in a conversation. Readiness completes asynchronously.",
+      "layer": "client",
+      "path": "communication/startLiveSession.md"
+    },
+    {
+      "id": "communication.joinLiveSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "joinLiveSession",
+      "operationName": "CommunicationJoinLiveSession",
+      "summary": "Join a live session.",
+      "layer": "client",
+      "path": "communication/joinLiveSession.md"
+    },
+    {
+      "id": "communication.alertLiveSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "alertLiveSession",
+      "operationName": "CommunicationAlertLiveSession",
+      "summary": "Alert (ring) conversation members about a live session.",
+      "layer": "both",
+      "path": "communication/alertLiveSession.md"
+    },
+    {
+      "id": "communication.leaveLiveSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "leaveLiveSession",
+      "operationName": "CommunicationLeaveLiveSession",
+      "summary": "Leave a live session.",
+      "layer": "client",
+      "path": "communication/leaveLiveSession.md"
+    },
+    {
+      "id": "communication.endLiveSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "endLiveSession",
+      "operationName": "CommunicationEndLiveSession",
+      "summary": "End a live session for every participant. Completes asynchronously.",
+      "layer": "both",
+      "path": "communication/endLiveSession.md"
+    },
+    {
+      "id": "communication.liveSessionCredentials",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "liveSessionCredentials",
+      "operationName": "CommunicationLiveSessionCredentials",
+      "summary": "Obtain a media credential for one connection of the caller's participation.",
+      "layer": "client",
+      "path": "communication/liveSessionCredentials.md"
+    },
+    {
+      "id": "communication.redeemCredential",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "redeemCredential",
+      "operationName": "CommunicationRedeemCredential",
+      "summary": "Redeem a delivered credential with its delivery permit.",
+      "layer": "server",
+      "path": "communication/redeemCredential.md"
+    },
+    {
+      "id": "communication.acknowledgeCredential",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "acknowledgeCredential",
+      "operationName": "CommunicationAcknowledgeCredential",
+      "summary": "Acknowledge that a redeemed credential is stored, closing the delivery.",
+      "layer": "server",
+      "path": "communication/acknowledgeCredential.md"
+    },
+    {
+      "id": "communication.conversationEvents",
+      "plane": "communication",
+      "kind": "subscription",
+      "field": "conversationEvents",
+      "operationName": "CommunicationConversationEvents",
+      "summary": "Subscribe to conversation events in sequence order, resuming after a cursor.",
+      "layer": "client",
+      "path": "communication/conversationEvents.md"
+    },
+    {
+      "id": "management.capabilities",
+      "plane": "management",
+      "kind": "query",
+      "field": "capabilities",
+      "operationName": "ManagementCapabilities",
+      "summary": "Describe the management features and limits the authority supports.",
+      "layer": "server",
+      "path": "management/capabilities.md"
+    },
+    {
+      "id": "management.organizations",
+      "plane": "management",
+      "kind": "query",
+      "field": "organizations",
+      "operationName": "ManagementOrganizations",
+      "summary": "List the organizations the caller can access.",
+      "layer": "server",
+      "path": "management/organizations.md"
+    },
+    {
+      "id": "management.getOrganization",
+      "plane": "management",
+      "kind": "query",
+      "field": "getOrganization",
+      "operationName": "ManagementGetOrganization",
+      "summary": "Read an organization.",
+      "layer": "server",
+      "path": "management/getOrganization.md"
+    },
+    {
+      "id": "management.getDeployment",
+      "plane": "management",
+      "kind": "query",
+      "field": "getDeployment",
+      "operationName": "ManagementGetDeployment",
+      "summary": "Read a deployment.",
+      "layer": "server",
+      "path": "management/getDeployment.md"
+    },
+    {
+      "id": "management.getProject",
+      "plane": "management",
+      "kind": "query",
+      "field": "getProject",
+      "operationName": "ManagementGetProject",
+      "summary": "Read a project.",
+      "layer": "server",
+      "path": "management/getProject.md"
+    },
+    {
+      "id": "management.deploymentHealth",
+      "plane": "management",
+      "kind": "query",
+      "field": "deploymentHealth",
+      "operationName": "ManagementDeploymentHealth",
+      "summary": "Read the health of a deployment.",
+      "layer": "server",
+      "path": "management/deploymentHealth.md"
+    },
+    {
+      "id": "management.deploymentUsage",
+      "plane": "management",
+      "kind": "query",
+      "field": "deploymentUsage",
+      "operationName": "ManagementDeploymentUsage",
+      "summary": "Read the usage of a deployment.",
+      "layer": "server",
+      "path": "management/deploymentUsage.md"
+    },
+    {
+      "id": "management.webhookDeliveries",
+      "plane": "management",
+      "kind": "query",
+      "field": "webhookDeliveries",
+      "operationName": "ManagementWebhookDeliveries",
+      "summary": "List recent deliveries of a webhook endpoint.",
+      "layer": "server",
+      "path": "management/webhookDeliveries.md"
+    },
+    {
+      "id": "management.resolveRequest",
+      "plane": "management",
+      "kind": "query",
+      "field": "resolveRequest",
+      "operationName": "ManagementResolveRequest",
+      "summary": "Look up the stored outcome of an earlier management mutation by its requestId.",
+      "layer": "server",
+      "path": "management/resolveRequest.md"
+    },
+    {
+      "id": "management.getOperation",
+      "plane": "management",
+      "kind": "query",
+      "field": "getOperation",
+      "operationName": "ManagementGetOperation",
+      "summary": "Read the state of a long-running management operation.",
+      "layer": "server",
+      "path": "management/getOperation.md"
+    },
+    {
+      "id": "management.createOrganization",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "createOrganization",
+      "operationName": "ManagementCreateOrganization",
+      "summary": "Create an organization.",
+      "layer": "server",
+      "path": "management/createOrganization.md"
+    },
+    {
+      "id": "management.createDeployment",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "createDeployment",
+      "operationName": "ManagementCreateDeployment",
+      "summary": "Create a deployment in an organization. Completes asynchronously.",
+      "layer": "server",
+      "path": "management/createDeployment.md"
+    },
+    {
+      "id": "management.createProject",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "createProject",
+      "operationName": "ManagementCreateProject",
+      "summary": "Create a project in a ready deployment. Completes asynchronously.",
+      "layer": "server",
+      "path": "management/createProject.md"
+    },
+    {
+      "id": "management.issueBackendKey",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "issueBackendKey",
+      "operationName": "ManagementIssueBackendKey",
+      "summary": "Issue a scoped backend key. The secret is delivered once through a credential delivery.",
+      "layer": "server",
+      "path": "management/issueBackendKey.md"
+    },
+    {
+      "id": "management.revokeBackendKey",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "revokeBackendKey",
+      "operationName": "ManagementRevokeBackendKey",
+      "summary": "Revoke a backend key, optionally revoking the sessions it issued.",
+      "layer": "server",
+      "path": "management/revokeBackendKey.md"
+    },
+    {
+      "id": "management.projectPolicy",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "projectPolicy",
+      "operationName": "ManagementProjectPolicy",
+      "summary": "Change the policy of a project.",
+      "layer": "server",
+      "path": "management/projectPolicy.md"
+    },
+    {
+      "id": "management.credentialPermit",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "credentialPermit",
+      "operationName": "ManagementCredentialPermit",
+      "summary": "Issue a signed permit that authorizes redeeming one credential delivery.",
+      "layer": "server",
+      "path": "management/credentialPermit.md"
+    },
+    {
+      "id": "management.pauseOperation",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "pauseOperation",
+      "operationName": "ManagementPauseOperation",
+      "summary": "Pause a long-running operation.",
+      "layer": "server",
+      "path": "management/pauseOperation.md"
+    },
+    {
+      "id": "management.resumeOperation",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "resumeOperation",
+      "operationName": "ManagementResumeOperation",
+      "summary": "Resume a paused operation.",
+      "layer": "server",
+      "path": "management/resumeOperation.md"
+    },
+    {
+      "id": "management.configureWebhook",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "configureWebhook",
+      "operationName": "ManagementConfigureWebhook",
+      "summary": "Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.",
+      "layer": "server",
+      "path": "management/configureWebhook.md"
+    },
+    {
+      "id": "management.disableWebhook",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "disableWebhook",
+      "operationName": "ManagementDisableWebhook",
+      "summary": "Disable a webhook endpoint.",
+      "layer": "server",
+      "path": "management/disableWebhook.md"
+    }
+  ]
+}

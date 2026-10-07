@@ -1,0 +1,471 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ConvoHop SDK operation annotations",
+  "description": "Hand-maintained, language-neutral facts that the GraphQL schema cannot express: SDK layer, authorization, idempotency, pagination, realtime behaviour and documented error codes for every operation. Validated by `npm run check:annotations`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema", "annotationsVersion", "api", "transport", "planes", "scalars", "credentials", "scopes", "conditions",
+    "idempotency", "pagination", "errorCodes", "errorSets", "realtime", "operations"
+  ],
+  "properties": {
+    "$schema": { "const": "./v1-annotations.schema.json" },
+    "annotationsVersion": { "const": 1 },
+    "api": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "model", "summary"],
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "model": {
+          "description": "Domain-model identifier used in generated names such as V1Operation. It is not a selectable API version: the wire endpoint is unversioned.",
+          "const": "v1"
+        },
+        "summary": { "$ref": "#/$defs/summary" }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "http", "websocket", "errors"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^/[a-z][a-z0-9/-]*$" },
+        "http": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "contentType", "accept", "body", "maxDocumentBytes"],
+          "properties": {
+            "method": { "const": "POST" },
+            "contentType": { "const": "application/json" },
+            "accept": { "const": "application/json" },
+            "body": { "type": "array", "items": { "enum": ["query", "operationName", "variables"] }, "uniqueItems": true, "minItems": 1 },
+            "maxDocumentBytes": { "description": "Largest accepted UTF-8 GraphQL document. Generation fails when an operation document exceeds it.", "type": "integer", "minimum": 1 }
+          }
+        },
+        "websocket": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["subprotocol"],
+          "properties": { "subprotocol": { "const": "graphql-transport-ws" } }
+        },
+        "errors": {
+          "description": "Shape of GraphQL errors[].extensions on every failure, including failures delivered with HTTP 200.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["summary", "extensions"],
+          "properties": {
+            "summary": { "$ref": "#/$defs/summary" },
+            "extensions": {
+              "type": "object",
+              "minProperties": 1,
+              "propertyNames": { "$ref": "#/$defs/fieldName" },
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "summary"],
+                "properties": {
+                  "type": { "enum": ["string", "integer", "boolean"] },
+                  "summary": { "$ref": "#/$defs/summary" },
+                  "values": { "type": "array", "items": { "$ref": "#/$defs/identifier" }, "uniqueItems": true, "minItems": 1 }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "planes": {
+      "description": "GraphQL planes in generation order. Each key must match schema/<plane>-v1.graphql.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/identifier" },
+      "additionalProperties": { "$ref": "#/$defs/plane" }
+    },
+    "scalars": {
+      "description": "Every custom scalar declared by any plane. Built-in GraphQL scalars are implied.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/typeName" },
+      "additionalProperties": { "$ref": "#/$defs/scalar" }
+    },
+    "credentials": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/identifier" },
+      "additionalProperties": { "$ref": "#/$defs/credential" }
+    },
+    "scopes": {
+      "description": "Backend-key scopes, keyed by their exact wire string.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/identifier" },
+      "additionalProperties": { "$ref": "#/$defs/described" }
+    },
+    "conditions": {
+      "description": "Resource-level conditions the authority evaluates in addition to the credential and scopes.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/identifier" },
+      "additionalProperties": { "$ref": "#/$defs/described" }
+    },
+    "idempotency": {
+      "description": "Semantics of each idempotency mode. The set of modes is closed because emitters implement each one.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["safe", "idempotent", "singleUse", "permitBound", "ephemeral"],
+      "properties": {
+        "safe": { "$ref": "#/$defs/idempotencyMode" },
+        "idempotent": { "$ref": "#/$defs/idempotencyMode" },
+        "singleUse": { "$ref": "#/$defs/idempotencyMode" },
+        "permitBound": { "$ref": "#/$defs/idempotencyMode" },
+        "ephemeral": { "$ref": "#/$defs/idempotencyMode" }
+      }
+    },
+    "pagination": {
+      "description": "Semantics of each pagination style. The set of styles is closed because emitters implement each one.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["none", "cursor", "sequence", "replay", "bounded"],
+      "properties": {
+        "none": { "$ref": "#/$defs/paginationStyle" },
+        "cursor": { "$ref": "#/$defs/paginationStyle" },
+        "sequence": { "$ref": "#/$defs/paginationStyle" },
+        "replay": { "$ref": "#/$defs/paginationStyle" },
+        "bounded": { "$ref": "#/$defs/paginationStyle" }
+      }
+    },
+    "errorCodes": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/errorCode" },
+      "additionalProperties": { "$ref": "#/$defs/errorCodeDefinition" }
+    },
+    "errorSets": {
+      "description": "Named groups of error codes that operations reference instead of repeating codes.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/identifier" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["summary", "codes"],
+        "properties": {
+          "summary": { "$ref": "#/$defs/summary" },
+          "codes": { "$ref": "#/$defs/errorCodeList" }
+        }
+      }
+    },
+    "realtime": { "$ref": "#/$defs/realtime" },
+    "operations": {
+      "description": "One entry per GraphQL root field, keyed `<plane>.<field>`.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/operationId" },
+      "additionalProperties": { "$ref": "#/$defs/operation" }
+    }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" },
+    "typeName": { "type": "string", "pattern": "^[_A-Za-z][_0-9A-Za-z]*$" },
+    "fieldName": { "type": "string", "pattern": "^[_A-Za-z][_0-9A-Za-z]*$" },
+    "operationId": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*\\.[_A-Za-z][_0-9A-Za-z]*$" },
+    "errorCode": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+    "eventType": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)+$" },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 400, "pattern": "^\\S(.*\\S)?$" },
+    "described": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary"],
+      "properties": { "summary": { "$ref": "#/$defs/summary" } }
+    },
+    "fieldList": { "type": "array", "items": { "$ref": "#/$defs/fieldName" }, "uniqueItems": true },
+    "errorCodeList": { "type": "array", "items": { "$ref": "#/$defs/errorCode" }, "uniqueItems": true },
+    "plane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "summary", "context", "resolveOperation"],
+      "properties": {
+        "schema": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*-v1\\.graphql$" },
+        "summary": { "$ref": "#/$defs/summary" },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["argument", "input", "rules"],
+          "properties": {
+            "argument": { "description": "Root-field argument that carries the request context.", "$ref": "#/$defs/fieldName" },
+            "input": { "description": "GraphQL input type of the context argument.", "$ref": "#/$defs/typeName" },
+            "rules": {
+              "description": "Applied in order on top of schema nullability; a later matching rule overrides an earlier one for the same field.",
+              "type": "array",
+              "items": { "$ref": "#/$defs/contextRule" }
+            }
+          }
+        },
+        "resolveOperation": { "description": "Query that looks up the stored outcome of an earlier mutation by requestId.", "$ref": "#/$defs/operationId" }
+      }
+    },
+    "contextRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fields", "use", "summary"],
+      "properties": {
+        "fields": { "$ref": "#/$defs/fieldList", "minItems": 1 },
+        "use": { "description": "required: callers must send the fields. forbidden: callers must not send them.", "enum": ["required", "forbidden"] },
+        "only": { "description": "Apply the rule only to these operations of the plane.", "$ref": "#/$defs/operationList" },
+        "except": { "description": "Apply the rule to every operation of the plane except these.", "$ref": "#/$defs/operationList" },
+        "summary": { "$ref": "#/$defs/summary" }
+      },
+      "not": { "required": ["only", "except"] }
+    },
+    "operationList": { "type": "array", "items": { "$ref": "#/$defs/operationId" }, "uniqueItems": true, "minItems": 1 },
+    "scalar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["representation", "summary"],
+      "properties": {
+        "representation": { "enum": ["string", "integer", "number", "boolean", "object"] },
+        "summary": { "$ref": "#/$defs/summary" },
+        "pattern": { "type": "string", "minLength": 1 },
+        "disallowed": { "type": "array", "items": { "type": "string" }, "uniqueItems": true, "minItems": 1 },
+        "minimum": { "type": "integer" },
+        "maximum": { "type": "integer" },
+        "maximumDecimal": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+        "maxCanonicalJsonBytes": { "type": "integer", "minimum": 1 },
+        "requiredStringProperties": { "$ref": "#/$defs/fieldList" }
+      }
+    },
+    "credential": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "runtime", "carrier", "scoped"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/summary" },
+        "runtime": { "enum": ["client", "server"] },
+        "carrier": { "enum": ["bearer", "context"] },
+        "contextField": { "$ref": "#/$defs/fieldName" },
+        "scoped": { "type": "boolean" }
+      },
+      "if": { "properties": { "carrier": { "const": "context" } } },
+      "then": { "required": ["contextField"] },
+      "else": { "not": { "required": ["contextField"] } }
+    },
+    "idempotencyMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "retry", "resolvable"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/summary" },
+        "retry": {
+          "description": "repeat: may be re-sent freely. sameRequest: re-send only with the original requestId, payload and incarnation, within retryBudget. none: never re-send automatically.",
+          "enum": ["repeat", "sameRequest", "none"]
+        },
+        "resolvable": {
+          "description": "True when SDKs resolve an unknown outcome by looking up the original requestId with the plane's resolveOperation.",
+          "type": "boolean"
+        },
+        "retryBudget": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxAttempts", "windowMs"],
+          "properties": {
+            "maxAttempts": { "type": "integer", "minimum": 1 },
+            "windowMs": { "type": "integer", "minimum": 1 }
+          }
+        }
+      },
+      "if": { "properties": { "retry": { "const": "sameRequest" } } },
+      "then": { "required": ["retryBudget"] },
+      "else": { "not": { "required": ["retryBudget"] } }
+    },
+    "paginationStyle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "order", "cursorInput", "pageFields"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/summary" },
+        "order": { "enum": ["none", "server", "ascending", "descending"] },
+        "cursorInput": { "type": "boolean" },
+        "pageFields": { "$ref": "#/$defs/fieldList" }
+      }
+    },
+    "errorCodeDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "origin", "retryable"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/summary" },
+        "origin": { "description": "server: returned by the authority. sdk: raised locally by SDKs. both: either.", "enum": ["server", "sdk", "both"] },
+        "status": { "description": "HTTP-equivalent status when it is fixed.", "type": "integer", "minimum": 400, "maximum": 599 },
+        "retryable": {
+          "description": "true when the failure is transient and SDK recovery may resend the original request (same requestId and payload) within its retry budget. false means resolve the request or surface the failure. Matches the transient classification of the reference TypeScript client; a retryable code cannot have a 4xx status other than 429.",
+          "type": "boolean"
+        }
+      }
+    },
+    "realtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["envelope", "channels", "events"],
+      "properties": {
+        "envelope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["plane", "type", "discriminator", "payload", "subject", "unknownTypes"],
+          "properties": {
+            "plane": { "$ref": "#/$defs/identifier" },
+            "type": { "$ref": "#/$defs/typeName" },
+            "discriminator": { "$ref": "#/$defs/fieldName" },
+            "payload": { "$ref": "#/$defs/fieldName" },
+            "subject": { "$ref": "#/$defs/fieldName" },
+            "unknownTypes": { "description": "How clients treat event types they do not know.", "const": "deliverAsUnknown" }
+          }
+        },
+        "channels": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/identifier" },
+          "additionalProperties": { "$ref": "#/$defs/channel" }
+        },
+        "events": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/eventType" },
+          "additionalProperties": { "$ref": "#/$defs/event" }
+        }
+      }
+    },
+    "channel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "subscription", "replay", "endpoint", "connectionInit", "ordering", "limits", "reconnect"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/summary" },
+        "subscription": { "$ref": "#/$defs/operationId" },
+        "replay": { "$ref": "#/$defs/operationId" },
+        "endpoint": {
+          "description": "Query whose result (a signed object scalar) carries the WebSocket URL in resultField.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["operation", "resultField"],
+          "properties": {
+            "operation": { "$ref": "#/$defs/operationId" },
+            "resultField": { "$ref": "#/$defs/fieldName" }
+          }
+        },
+        "connectionInit": { "description": "Fields of the graphql-transport-ws connection_init payload.", "$ref": "#/$defs/fieldList" },
+        "ordering": { "$ref": "#/$defs/summary" },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxFrameBytes", "maxPendingPages", "subscribeLimit", "replayLimit"],
+          "properties": {
+            "maxFrameBytes": { "description": "Largest frame a client accepts before failing with ADMISSION_LIMIT.", "type": "integer", "minimum": 1 },
+            "maxPendingPages": { "description": "Unapplied pages a client buffers before requiring the application to resume from its applied cursor.", "type": "integer", "minimum": 1 },
+            "subscribeLimit": { "description": "Page size clients request when subscribing.", "type": "integer", "minimum": 1 },
+            "replayLimit": { "description": "Page size clients request when gap-filling with the replay query.", "type": "integer", "minimum": 1 }
+          }
+        },
+        "reconnect": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["baseDelayMs", "maxDelayMs", "jitterMs", "terminalCloseCodes"],
+          "properties": {
+            "baseDelayMs": { "type": "integer", "minimum": 1 },
+            "maxDelayMs": { "type": "integer", "minimum": 1 },
+            "jitterMs": { "type": "integer", "minimum": 0 },
+            "terminalCloseCodes": { "type": "array", "items": { "type": "integer", "minimum": 1000, "maximum": 4999 }, "uniqueItems": true }
+          }
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "subject", "payload"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/summary" },
+        "subject": { "description": "Expected subjectRef.kind.", "$ref": "#/$defs/identifier" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required", "optional"],
+          "properties": {
+            "required": { "$ref": "#/$defs/fieldList" },
+            "optional": { "$ref": "#/$defs/fieldList" }
+          }
+        }
+      }
+    },
+    "authRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["credential"],
+      "properties": {
+        "credential": { "$ref": "#/$defs/identifier" },
+        "scopes": { "description": "All listed scopes are required.", "type": "array", "items": { "$ref": "#/$defs/identifier" }, "uniqueItems": true, "minItems": 1 },
+        "condition": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "layer", "auth", "idempotency", "pagination", "realtime", "errors"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/summary" },
+        "layer": { "description": "client: client SDKs only. server: server SDKs only. both: every SDK.", "enum": ["client", "server", "both"] },
+        "auth": {
+          "description": "Alternative ways to authorize the operation; any one entry suffices.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/authRequirement" },
+          "minItems": 1
+        },
+        "idempotency": { "enum": ["safe", "idempotent", "singleUse", "permitBound", "ephemeral"] },
+        "pagination": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["style"],
+          "properties": {
+            "style": { "enum": ["none", "cursor", "sequence", "replay", "bounded"] },
+            "limitField": { "$ref": "#/$defs/fieldName" },
+            "cursorField": { "$ref": "#/$defs/fieldName" },
+            "pagePath": { "description": "Field path from the operation result to the page object; [] when the result is the page.", "$ref": "#/$defs/fieldList" }
+          },
+          "if": { "properties": { "style": { "const": "none" } } },
+          "then": { "not": { "anyOf": [{ "required": ["limitField"] }, { "required": ["cursorField"] }, { "required": ["pagePath"] }] } },
+          "else": {
+            "required": ["pagePath"],
+            "if": { "properties": { "style": { "const": "bounded" } } },
+            "then": { "not": { "anyOf": [{ "required": ["limitField"] }, { "required": ["cursorField"] }] } },
+            "else": { "required": ["limitField", "cursorField"] }
+          }
+        },
+        "realtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": {
+            "mode": { "enum": ["none", "subscription"] },
+            "channel": { "$ref": "#/$defs/identifier" },
+            "emits": { "type": "array", "items": { "$ref": "#/$defs/eventType" }, "uniqueItems": true, "minItems": 1 }
+          },
+          "if": { "properties": { "mode": { "const": "subscription" } } },
+          "then": { "required": ["channel"], "not": { "required": ["emits"] } },
+          "else": { "not": { "required": ["channel"] } }
+        },
+        "longRunning": {
+          "description": "The operation accepts work that completes later. Poll the `poll` query with input.operationId taken from result.<refField>.operationId.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["poll", "refField"],
+          "properties": {
+            "poll": { "$ref": "#/$defs/operationId" },
+            "refField": { "$ref": "#/$defs/fieldName" }
+          }
+        },
+        "errors": {
+          "description": "Documented, non-exhaustive error codes. Clients must still handle unknown codes.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sets", "codes"],
+          "properties": {
+            "sets": { "type": "array", "items": { "$ref": "#/$defs/identifier" }, "uniqueItems": true },
+            "codes": { "$ref": "#/$defs/errorCodeList" }
+          }
+        }
+      }
+    }
+  }
+}

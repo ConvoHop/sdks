@@ -1,0 +1,160 @@
+query AlphaCapabilities($context: ContextInput!) {
+  capabilities(context: $context) {
+    version
+    wssUrl
+    features
+  }
+}
+
+query AlphaResolveRequest($context: ContextInput!, $input: ResolveInput!) {
+  resolveRequest(context: $context, input: $input) {
+    requestId
+    committed
+    sequence
+  }
+}
+
+query AlphaItems($context: ContextInput!, $input: ItemsInput!) {
+  items(context: $context, input: $input) {
+    items {
+      id
+      name
+      fruit
+      weight
+      ripe
+      oldName
+      legacyCode
+      grid
+      aliases
+      history
+    }
+    complete
+    refreshRequired
+    nextCursor
+  }
+}
+
+query AlphaEvents($context: ContextInput!, $input: EventsInput!) {
+  events(context: $context, input: $input) {
+    items {
+      sequence
+      type
+      subjectRef {
+        kind
+        id
+      }
+      payload {
+        itemId
+        jobId
+        revision
+        note
+      }
+    }
+    complete
+    refreshRequired
+    nextCursor
+  }
+}
+
+query AlphaJob($context: ContextInput!, $input: JobInput!) {
+  job(context: $context, input: $input) {
+    operationId
+    state
+    progress
+    output
+  }
+}
+
+query AlphaFetchHTTPStatus($context: ContextInput!, $input: FetchInput) {
+  fetchHTTPStatus(context: $context, input: $input)
+}
+
+mutation AlphaStartJob($context: ContextInput!, $input: StartJobInput!) {
+  startJob(context: $context, input: $input) {
+    requestId
+    receipt {
+      requestId
+      committed
+      sequence
+    }
+    job {
+      operationId
+      state
+    }
+  }
+}
+
+mutation AlphaPing($context: ContextInput!, $input: PingInput) {
+  ping(context: $context, input: $input)
+}
+
+mutation AlphaRedeem($context: ContextInput!, $input: RedeemInput!) {
+  redeem(context: $context, input: $input) {
+    requestId
+    committed
+    sequence
+  }
+}
+
+subscription AlphaEventStream($context: ContextInput!, $input: EventsInput!) {
+  eventStream(context: $context, input: $input) {
+    items {
+      sequence
+      type
+      subjectRef {
+        kind
+        id
+      }
+      payload {
+        itemId
+        jobId
+        revision
+        note
+      }
+    }
+    complete
+    refreshRequired
+    nextCursor
+  }
+}
+
+query BetaCapabilities($context: ContextInput!) {
+  capabilities(context: $context) {
+    version
+    wssUrl
+    features
+  }
+}
+
+query BetaResolveRequest($context: ContextInput!, $input: ResolveInput!) {
+  resolveRequest(context: $context, input: $input) {
+    requestId
+    committed
+    sequence
+  }
+}
+
+query BetaWidgets($context: ContextInput!, $input: WidgetsInput) {
+  widgets(context: $context, input: $input) {
+    requestId
+    result {
+      items {
+        id
+        label
+        state
+        revision
+      }
+      complete
+      refreshRequired
+    }
+  }
+}
+
+mutation BetaCreateWidget($context: ContextInput!, $input: CreateWidgetInput!) {
+  createWidget(context: $context, input: $input) {
+    id
+    label
+    state
+    revision
+  }
+}

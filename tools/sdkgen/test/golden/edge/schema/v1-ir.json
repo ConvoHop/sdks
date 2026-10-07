@@ -1,0 +1,1509 @@
+{
+  "$schema": "./v1-ir.schema.json",
+  "irVersion": "1.0.0",
+  "api": {
+    "name": "edge",
+    "model": "v1",
+    "summary": "Edge-case fixture for the sdkgen tests. It is not a ConvoHop API."
+  },
+  "sources": {
+    "graphql": ["schema/alpha-v1.graphql", "schema/beta-v1.graphql"],
+    "annotations": "schema/v1-annotations.json"
+  },
+  "transport": {
+    "path": "/graphql",
+    "http": {
+      "method": "POST",
+      "contentType": "application/json",
+      "accept": "application/json",
+      "body": ["query", "operationName", "variables"],
+      "maxDocumentBytes": 4096
+    },
+    "websocket": {"subprotocol": "graphql-transport-ws"},
+    "errors": {
+      "summary": "GraphQL errors carry these extensions.",
+      "extensions": {
+        "code": {"type": "string", "summary": "Stable machine-readable error code."},
+        "outcome": {
+          "type": "string",
+          "summary": "Whether the request committed.",
+          "values": ["rejected", "unknown"]
+        }
+      }
+    }
+  },
+  "planes": [
+    {
+      "name": "alpha",
+      "schema": "schema/alpha-v1.graphql",
+      "summary": "Items, jobs and realtime events.",
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "rules": [
+          {
+            "fields": ["tenant"],
+            "use": "required",
+            "except": ["alpha.capabilities"],
+            "summary": "Name the tenant explicitly."
+          },
+          {
+            "fields": ["permit"],
+            "use": "forbidden",
+            "except": ["alpha.redeem"],
+            "summary": "Permits authorize only alpha.redeem."
+          }
+        ]
+      },
+      "resolveOperation": "alpha.resolveRequest"
+    },
+    {
+      "name": "beta",
+      "schema": "schema/beta-v1.graphql",
+      "summary": "Widgets.",
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "rules": [
+          {
+            "fields": ["permit"],
+            "use": "forbidden",
+            "summary": "Permits never authorize beta operations."
+          }
+        ]
+      },
+      "resolveOperation": "beta.resolveRequest"
+    }
+  ],
+  "credentials": [
+    {
+      "name": "permit",
+      "summary": "Single-use permit sent in the request context.",
+      "runtime": "server",
+      "carrier": "context",
+      "contextField": "permit",
+      "scoped": false
+    },
+    {
+      "name": "serverKey",
+      "summary": "Scoped key for server runtimes.",
+      "runtime": "server",
+      "carrier": "bearer",
+      "scoped": true
+    },
+    {
+      "name": "userToken",
+      "summary": "Short-lived token for client runtimes.",
+      "runtime": "client",
+      "carrier": "bearer",
+      "scoped": false
+    }
+  ],
+  "scopes": [
+    {"name": "itemRead", "summary": "Read items and jobs."},
+    {"name": "widgetWrite", "summary": "Create widgets and start jobs."}
+  ],
+  "conditions": [{"name": "owner", "summary": "The caller made the original request."}],
+  "idempotency": [
+    {
+      "name": "ephemeral",
+      "summary": "Transient signal. Never retried.",
+      "retry": "none",
+      "resolvable": false
+    },
+    {
+      "name": "idempotent",
+      "summary": "Retry with the same requestId and input; resolve an unknown outcome with resolveRequest.",
+      "retry": "sameRequest",
+      "resolvable": true,
+      "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
+    },
+    {
+      "name": "permitBound",
+      "summary": "Authorized by a single-use permit. Retry with the same requestId and permit.",
+      "retry": "sameRequest",
+      "resolvable": false,
+      "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
+    },
+    {"name": "safe", "summary": "Read-only. Repeat freely.", "retry": "repeat", "resolvable": false},
+    {
+      "name": "singleUse",
+      "summary": "Like idempotent, but the result is good for one use.",
+      "retry": "sameRequest",
+      "resolvable": true,
+      "retryBudget": {"maxAttempts": 2, "windowMs": 1000}
+    }
+  ],
+  "pagination": [
+    {
+      "name": "bounded",
+      "summary": "One bounded page.",
+      "order": "server",
+      "cursorInput": false,
+      "pageFields": ["items", "complete", "refreshRequired"]
+    },
+    {
+      "name": "cursor",
+      "summary": "Server-ordered pages.",
+      "order": "server",
+      "cursorInput": true,
+      "pageFields": ["items", "complete", "refreshRequired", "nextCursor"]
+    },
+    {
+      "name": "none",
+      "summary": "Not paged.",
+      "order": "none",
+      "cursorInput": false,
+      "pageFields": []
+    },
+    {
+      "name": "replay",
+      "summary": "Events in ascending sequence after a cursor.",
+      "order": "ascending",
+      "cursorInput": true,
+      "pageFields": ["items", "complete", "refreshRequired", "nextCursor"]
+    },
+    {
+      "name": "sequence",
+      "summary": "Newest first.",
+      "order": "descending",
+      "cursorInput": true,
+      "pageFields": ["items", "complete", "refreshRequired", "nextCursor"]
+    }
+  ],
+  "errors": {
+    "codes": [
+      {
+        "name": "CURSOR_EXPIRED",
+        "summary": "The cursor is too old.",
+        "origin": "server",
+        "status": 410,
+        "retryable": false
+      },
+      {
+        "name": "INVALID_REQUEST",
+        "summary": "The request is malformed.",
+        "origin": "both",
+        "status": 400,
+        "retryable": false
+      },
+      {
+        "name": "NOT_FOUND",
+        "summary": "The resource does not exist.",
+        "origin": "server",
+        "status": 404,
+        "retryable": false
+      },
+      {
+        "name": "TRANSPORT_UNKNOWN",
+        "summary": "The transport failed after sending.",
+        "origin": "sdk",
+        "retryable": true
+      },
+      {
+        "name": "UNAVAILABLE",
+        "summary": "Temporarily unavailable.",
+        "origin": "server",
+        "status": 503,
+        "retryable": true
+      }
+    ],
+    "sets": [
+      {"name": "http", "summary": "HTTP transport failures.", "codes": ["TRANSPORT_UNKNOWN"]},
+      {
+        "name": "request",
+        "summary": "Every operation.",
+        "codes": ["INVALID_REQUEST", "UNAVAILABLE"]
+      }
+    ]
+  },
+  "realtime": {
+    "envelope": {
+      "plane": "alpha",
+      "type": "Event",
+      "discriminator": "type",
+      "payload": "payload",
+      "payloadType": "EventPayload",
+      "subject": "subjectRef",
+      "subjectType": "SubjectRef",
+      "unknownTypes": "deliverAsUnknown"
+    },
+    "channels": [
+      {
+        "name": "eventStream",
+        "summary": "Ordered alpha events, gap-filled with alpha.events.",
+        "subscription": "alpha.eventStream",
+        "replay": "alpha.events",
+        "pageType": "EventPage",
+        "endpoint": {"operation": "alpha.capabilities", "resultField": "wssUrl"},
+        "connectionInit": ["tenant", "token"],
+        "ordering": "Events arrive in ascending sequence. Persist the last applied cursor.",
+        "limits": {
+          "maxFrameBytes": 4096,
+          "maxPendingPages": 2,
+          "subscribeLimit": 10,
+          "replayLimit": 20
+        },
+        "reconnect": {
+          "baseDelayMs": 100,
+          "maxDelayMs": 1000,
+          "jitterMs": 0,
+          "terminalCloseCodes": [4401, 4403]
+        }
+      }
+    ],
+    "events": [
+      {
+        "type": "item.changed",
+        "summary": "An item changed.",
+        "subject": "item",
+        "payload": {"required": ["itemId"], "optional": ["note"]},
+        "emittedBy": ["alpha.ping"]
+      },
+      {
+        "type": "job.finished",
+        "summary": "A job finished.",
+        "subject": "job",
+        "payload": {"required": ["jobId", "revision"], "optional": []},
+        "emittedBy": ["alpha.startJob"]
+      },
+      {
+        "type": "job.started",
+        "summary": "A job started.",
+        "subject": "job",
+        "payload": {"required": ["jobId"], "optional": []},
+        "emittedBy": ["alpha.startJob"]
+      }
+    ]
+  },
+  "operations": [
+    {
+      "id": "alpha.capabilities",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "capabilities",
+      "operationName": "AlphaCapabilities",
+      "summary": "Read the server capabilities.",
+      "description": "Server capabilities.",
+      "layer": "both",
+      "auth": [{"credential": "userToken"}, {"credential": "serverKey"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "optional"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": null,
+      "result": {"type": {"kind": "object", "name": "Capabilities", "nullable": false}},
+      "document": {
+        "text": "query AlphaCapabilities($context: ContextInput!) {\n  capabilities(context: $context) {\n    version\n    wssUrl\n    features\n  }\n}",
+        "bytes": 128,
+        "selectedFields": 4,
+        "depth": 1
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
+    },
+    {
+      "id": "alpha.resolveRequest",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "resolveRequest",
+      "operationName": "AlphaResolveRequest",
+      "summary": "Look up the outcome of an earlier alpha mutation by requestId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userToken", "condition": "owner"},
+        {"credential": "serverKey", "scopes": ["itemRead"]}
+      ],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "ResolveInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "required"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "ResolveInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "Receipt", "nullable": false}},
+      "document": {
+        "text": "query AlphaResolveRequest($context: ContextInput!, $input: ResolveInput!) {\n  resolveRequest(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
+        "bytes": 175,
+        "selectedFields": 4,
+        "depth": 1
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["INVALID_REQUEST", "NOT_FOUND", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
+    },
+    {
+      "id": "alpha.items",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "items",
+      "operationName": "AlphaItems",
+      "summary": "List items in server order.",
+      "description": "List items.\n\nPages follow the cursor style.",
+      "layer": "client",
+      "auth": [{"credential": "userToken"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "ItemsInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "required"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "ItemsInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "ItemPage", "nullable": false}},
+      "document": {
+        "text": "query AlphaItems($context: ContextInput!, $input: ItemsInput!) {\n  items(context: $context, input: $input) {\n    items {\n      id\n      name\n      fruit\n      weight\n      ripe\n      oldName\n      legacyCode\n      grid\n      aliases\n      history\n    }\n    complete\n    refreshRequired\n    nextCursor\n  }\n}",
+        "bytes": 306,
+        "selectedFields": 15,
+        "depth": 2
+      },
+      "idempotency": "safe",
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": [],
+        "pageType": "ItemPage",
+        "itemType": "Item"
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["CURSOR_EXPIRED", "INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
+    },
+    {
+      "id": "alpha.events",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "events",
+      "operationName": "AlphaEvents",
+      "summary": "Replay alpha events after a cursor.",
+      "layer": "client",
+      "auth": [{"credential": "userToken"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "EventsInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "required"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "EventsInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "EventPage", "nullable": false}},
+      "document": {
+        "text": "query AlphaEvents($context: ContextInput!, $input: EventsInput!) {\n  events(context: $context, input: $input) {\n    items {\n      sequence\n      type\n      subjectRef {\n        kind\n        id\n      }\n      payload {\n        itemId\n        jobId\n        revision\n        note\n      }\n    }\n    complete\n    refreshRequired\n    nextCursor\n  }\n}",
+        "bytes": 343,
+        "selectedFields": 15,
+        "depth": 3
+      },
+      "idempotency": "safe",
+      "pagination": {
+        "style": "replay",
+        "limitField": "limit",
+        "cursorField": "after",
+        "pagePath": [],
+        "pageType": "EventPage",
+        "itemType": "Event"
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["CURSOR_EXPIRED", "INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
+    },
+    {
+      "id": "alpha.job",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "job",
+      "operationName": "AlphaJob",
+      "summary": "Poll a job that alpha.startJob started.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey", "scopes": ["itemRead"]}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "JobInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "required"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "JobInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "Job", "nullable": true}},
+      "document": {
+        "text": "query AlphaJob($context: ContextInput!, $input: JobInput!) {\n  job(context: $context, input: $input) {\n    operationId\n    state\n    progress\n    output\n  }\n}",
+        "bytes": 158,
+        "selectedFields": 5,
+        "depth": 1
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["INVALID_REQUEST", "NOT_FOUND", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
+    },
+    {
+      "id": "alpha.fetchHTTPStatus",
+      "plane": "alpha",
+      "kind": "query",
+      "field": "fetchHTTPStatus",
+      "operationName": "AlphaFetchHTTPStatus",
+      "summary": "Fetch a <status> for `GET` | *POST* calls, with #tags, {braces}, [links], ~tildes~, & a back\\slash for _escaping_ in snake_case.",
+      "deprecated": {"reason": "Use capabilities."},
+      "layer": "both",
+      "auth": [
+        {"credential": "userToken"},
+        {"credential": "serverKey", "scopes": ["itemRead", "widgetWrite"]}
+      ],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "FetchInput", "nullable": true}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "required"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "FetchInput", "required": false},
+      "result": {"type": {"kind": "scalar", "name": "Int", "nullable": true}},
+      "document": {
+        "text": "query AlphaFetchHTTPStatus($context: ContextInput!, $input: FetchInput) {\n  fetchHTTPStatus(context: $context, input: $input)\n}",
+        "bytes": 127,
+        "selectedFields": 1,
+        "depth": 0
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": [], "codes": ["UNAVAILABLE"]}
+    },
+    {
+      "id": "alpha.startJob",
+      "plane": "alpha",
+      "kind": "mutation",
+      "field": "startJob",
+      "operationName": "AlphaStartJob",
+      "summary": "Start a job. It finishes asynchronously.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey", "scopes": ["widgetWrite"]}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "StartJobInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "required"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "StartJobInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "StartJobPayload", "nullable": false}},
+      "document": {
+        "text": "mutation AlphaStartJob($context: ContextInput!, $input: StartJobInput!) {\n  startJob(context: $context, input: $input) {\n    requestId\n    receipt {\n      requestId\n      committed\n      sequence\n    }\n    job {\n      operationId\n      state\n    }\n  }\n}",
+        "bytes": 253,
+        "selectedFields": 9,
+        "depth": 2
+      },
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["job.started", "job.finished"]},
+      "longRunning": {"poll": "alpha.job", "refField": "job"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["INVALID_REQUEST", "NOT_FOUND", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
+    },
+    {
+      "id": "alpha.ping",
+      "plane": "alpha",
+      "kind": "mutation",
+      "field": "ping",
+      "operationName": "AlphaPing",
+      "summary": "1. Send an ephemeral ping.",
+      "layer": "client",
+      "auth": [{"credential": "userToken"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "PingInput", "nullable": true}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "required"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "PingInput", "required": false},
+      "result": {"type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+      "document": {
+        "text": "mutation AlphaPing($context: ContextInput!, $input: PingInput) {\n  ping(context: $context, input: $input)\n}",
+        "bytes": 107,
+        "selectedFields": 1,
+        "depth": 0
+      },
+      "idempotency": "ephemeral",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["item.changed"]},
+      "errors": {"sets": ["request"], "codes": ["INVALID_REQUEST", "UNAVAILABLE"]}
+    },
+    {
+      "id": "alpha.redeem",
+      "plane": "alpha",
+      "kind": "mutation",
+      "field": "redeem",
+      "operationName": "AlphaRedeem",
+      "summary": "Redeem a delivery with its permit.",
+      "layer": "server",
+      "auth": [{"credential": "permit"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "RedeemInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "required"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "required"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "RedeemInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "Receipt", "nullable": false}},
+      "document": {
+        "text": "mutation AlphaRedeem($context: ContextInput!, $input: RedeemInput!) {\n  redeem(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
+        "bytes": 161,
+        "selectedFields": 4,
+        "depth": 1
+      },
+      "idempotency": "permitBound",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["INVALID_REQUEST", "NOT_FOUND", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
+    },
+    {
+      "id": "alpha.eventStream",
+      "plane": "alpha",
+      "kind": "subscription",
+      "field": "eventStream",
+      "operationName": "AlphaEventStream",
+      "summary": "Subscribe to alpha events after a cursor.",
+      "layer": "client",
+      "auth": [{"credential": "userToken"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "EventsInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "required"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "EventsInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "EventPage", "nullable": false}},
+      "document": {
+        "text": "subscription AlphaEventStream($context: ContextInput!, $input: EventsInput!) {\n  eventStream(context: $context, input: $input) {\n    items {\n      sequence\n      type\n      subjectRef {\n        kind\n        id\n      }\n      payload {\n        itemId\n        jobId\n        revision\n        note\n      }\n    }\n    complete\n    refreshRequired\n    nextCursor\n  }\n}",
+        "bytes": 360,
+        "selectedFields": 15,
+        "depth": 3
+      },
+      "idempotency": "safe",
+      "pagination": {
+        "style": "replay",
+        "limitField": "limit",
+        "cursorField": "after",
+        "pagePath": [],
+        "pageType": "EventPage",
+        "itemType": "Event"
+      },
+      "realtime": {"mode": "subscription", "channel": "eventStream"},
+      "errors": {"sets": ["request"], "codes": ["CURSOR_EXPIRED", "INVALID_REQUEST", "UNAVAILABLE"]}
+    },
+    {
+      "id": "beta.capabilities",
+      "plane": "beta",
+      "kind": "query",
+      "field": "capabilities",
+      "operationName": "BetaCapabilities",
+      "summary": "Read the server capabilities.",
+      "description": "Server capabilities.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "optional"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": null,
+      "result": {"type": {"kind": "object", "name": "Capabilities", "nullable": false}},
+      "document": {
+        "text": "query BetaCapabilities($context: ContextInput!) {\n  capabilities(context: $context) {\n    version\n    wssUrl\n    features\n  }\n}",
+        "bytes": 127,
+        "selectedFields": 4,
+        "depth": 1
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request"], "codes": ["INVALID_REQUEST", "UNAVAILABLE"]}
+    },
+    {
+      "id": "beta.resolveRequest",
+      "plane": "beta",
+      "kind": "query",
+      "field": "resolveRequest",
+      "operationName": "BetaResolveRequest",
+      "summary": "Look up the outcome of an earlier beta mutation by requestId.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey", "scopes": ["widgetWrite"]}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "ResolveInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "optional"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "ResolveInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "Receipt", "nullable": false}},
+      "document": {
+        "text": "query BetaResolveRequest($context: ContextInput!, $input: ResolveInput!) {\n  resolveRequest(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
+        "bytes": 174,
+        "selectedFields": 4,
+        "depth": 1
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request"], "codes": ["INVALID_REQUEST", "NOT_FOUND", "UNAVAILABLE"]}
+    },
+    {
+      "id": "beta.widgets",
+      "plane": "beta",
+      "kind": "query",
+      "field": "widgets",
+      "operationName": "BetaWidgets",
+      "summary": "List widgets in one bounded page.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey", "scopes": ["itemRead"]}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "WidgetsInput", "nullable": true}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "optional"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "WidgetsInput", "required": false},
+      "result": {"type": {"kind": "object", "name": "WidgetsPayload", "nullable": false}},
+      "document": {
+        "text": "query BetaWidgets($context: ContextInput!, $input: WidgetsInput) {\n  widgets(context: $context, input: $input) {\n    requestId\n    result {\n      items {\n        id\n        label\n        state\n        revision\n      }\n      complete\n      refreshRequired\n    }\n  }\n}",
+        "bytes": 266,
+        "selectedFields": 10,
+        "depth": 3
+      },
+      "idempotency": "safe",
+      "pagination": {
+        "style": "bounded",
+        "pagePath": ["result"],
+        "pageType": "WidgetPage",
+        "itemType": "Widget"
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
+    },
+    {
+      "id": "beta.createWidget",
+      "plane": "beta",
+      "kind": "mutation",
+      "field": "createWidget",
+      "operationName": "BetaCreateWidget",
+      "summary": "Create a widget.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey", "scopes": ["widgetWrite"]}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "CreateWidgetInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "optional"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "CreateWidgetInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "Widget", "nullable": false}},
+      "document": {
+        "text": "mutation BetaCreateWidget($context: ContextInput!, $input: CreateWidgetInput!) {\n  createWidget(context: $context, input: $input) {\n    id\n    label\n    state\n    revision\n  }\n}",
+        "bytes": 177,
+        "selectedFields": 5,
+        "depth": 1
+      },
+      "idempotency": "singleUse",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "Counter",
+      "kind": "scalar",
+      "planes": ["alpha", "beta"],
+      "description": "Non-negative counter as a decimal string.\nDescriptions keep their line breaks, and a closing comment marker */ stays escaped.",
+      "builtIn": false,
+      "representation": "string",
+      "summary": "Non-negative counter as a canonical decimal string.",
+      "constraints": {"pattern": "^(0|[1-9][0-9]*)$", "maximumDecimal": "9223372036854775807"}
+    },
+    {
+      "name": "Blob",
+      "kind": "scalar",
+      "planes": ["alpha"],
+      "description": "Server-signed JSON object.",
+      "builtIn": false,
+      "representation": "object",
+      "summary": "Server-signed JSON object. Pass it back unchanged.",
+      "constraints": {"maxCanonicalJsonBytes": 1024, "requiredStringProperties": ["signature"]}
+    },
+    {
+      "name": "PageSize",
+      "kind": "scalar",
+      "planes": ["alpha"],
+      "description": "Requested page size.",
+      "builtIn": false,
+      "representation": "integer",
+      "summary": "Requested page size.",
+      "constraints": {"minimum": 1, "maximum": 50}
+    },
+    {
+      "name": "ContextInput",
+      "kind": "input",
+      "planes": ["alpha", "beta"],
+      "description": "Request metadata that every root field takes.",
+      "fields": [
+        {
+          "name": "tenant",
+          "description": "Tenant that owns the request.",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        },
+        {"name": "requestId", "type": {"kind": "scalar", "name": "ID", "nullable": false}},
+        {
+          "name": "attempt",
+          "type": {"kind": "scalar", "name": "Int", "nullable": true},
+          "defaultValue": 1
+        },
+        {
+          "name": "permit",
+          "description": "Single-use permit. Only alpha.redeem accepts it.",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        },
+        {
+          "name": "tags",
+          "type": {
+            "kind": "list",
+            "nullable": true,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          },
+          "defaultValue": ["a", "b|c"]
+        }
+      ]
+    },
+    {
+      "name": "String",
+      "kind": "scalar",
+      "planes": ["alpha", "beta"],
+      "builtIn": true,
+      "representation": "string"
+    },
+    {
+      "name": "ID",
+      "kind": "scalar",
+      "planes": ["alpha", "beta"],
+      "builtIn": true,
+      "representation": "string"
+    },
+    {
+      "name": "Int",
+      "kind": "scalar",
+      "planes": ["alpha", "beta"],
+      "builtIn": true,
+      "representation": "integer"
+    },
+    {
+      "name": "Capabilities",
+      "kind": "object",
+      "planes": ["alpha", "beta"],
+      "fields": [
+        {"name": "version", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "wssUrl", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {
+          "name": "features",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        }
+      ]
+    },
+    {
+      "name": "ResolveInput",
+      "kind": "input",
+      "planes": ["alpha", "beta"],
+      "fields": [{"name": "requestId", "type": {"kind": "scalar", "name": "ID", "nullable": false}}]
+    },
+    {
+      "name": "Receipt",
+      "kind": "object",
+      "planes": ["alpha", "beta"],
+      "fields": [
+        {"name": "requestId", "type": {"kind": "scalar", "name": "ID", "nullable": false}},
+        {"name": "committed", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {"name": "sequence", "type": {"kind": "scalar", "name": "Counter", "nullable": true}}
+      ]
+    },
+    {
+      "name": "Boolean",
+      "kind": "scalar",
+      "planes": ["alpha", "beta"],
+      "builtIn": true,
+      "representation": "boolean"
+    },
+    {
+      "name": "Fruit",
+      "kind": "enum",
+      "planes": ["alpha"],
+      "description": "Kinds of fruit.\nThe values are deliberately unsorted.",
+      "values": [
+        {"name": "BANANA", "description": "Curved and yellow."},
+        {"name": "APPLE"},
+        {"name": "cherry"},
+        {"name": "apple10"},
+        {"name": "apple9"},
+        {"name": "DATE", "deprecated": {}},
+        {"name": "ELDER", "description": "Elderberries.", "deprecated": {"reason": "Use APPLE."}}
+      ]
+    },
+    {
+      "name": "HTTPMethod",
+      "kind": "enum",
+      "planes": ["alpha"],
+      "values": [{"name": "POST"}, {"name": "GET"}]
+    },
+    {
+      "name": "Item",
+      "kind": "object",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "id", "type": {"kind": "scalar", "name": "ID", "nullable": false}},
+        {"name": "name", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "fruit", "type": {"kind": "enum", "name": "Fruit", "nullable": true}},
+        {"name": "weight", "type": {"kind": "scalar", "name": "Float", "nullable": true}},
+        {"name": "ripe", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "oldName",
+          "deprecated": {},
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        },
+        {
+          "name": "legacyCode",
+          "description": "Legacy numeric code.",
+          "deprecated": {"reason": "Use id."},
+          "type": {"kind": "scalar", "name": "Int", "nullable": true}
+        },
+        {
+          "name": "grid",
+          "description": "Nested and nullable lists.",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {
+              "kind": "list",
+              "nullable": true,
+              "ofType": {"kind": "scalar", "name": "Int", "nullable": false}
+            }
+          }
+        },
+        {
+          "name": "aliases",
+          "type": {
+            "kind": "list",
+            "nullable": true,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": true}
+          }
+        },
+        {
+          "name": "history",
+          "type": {
+            "kind": "list",
+            "nullable": true,
+            "ofType": {
+              "kind": "list",
+              "nullable": false,
+              "ofType": {"kind": "enum", "name": "Fruit", "nullable": true}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Float",
+      "kind": "scalar",
+      "planes": ["alpha"],
+      "builtIn": true,
+      "representation": "number"
+    },
+    {
+      "name": "ItemsInput",
+      "kind": "input",
+      "planes": ["alpha"],
+      "description": "Filters for alpha.items.\nA closing comment marker */ must not end a generated comment.",
+      "fields": [
+        {
+          "name": "limit",
+          "description": "Page size.\nDefaults to 20.",
+          "type": {"kind": "scalar", "name": "Int", "nullable": true},
+          "defaultValue": 20
+        },
+        {"name": "cursor", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {
+          "name": "fruits",
+          "type": {
+            "kind": "list",
+            "nullable": true,
+            "ofType": {"kind": "enum", "name": "Fruit", "nullable": false}
+          }
+        },
+        {"name": "minWeight", "type": {"kind": "scalar", "name": "Float", "nullable": true}},
+        {
+          "name": "includeDeprecated",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": true},
+          "defaultValue": false
+        },
+        {
+          "name": "method",
+          "type": {"kind": "enum", "name": "HTTPMethod", "nullable": true},
+          "defaultValue": "GET"
+        },
+        {"name": "box", "type": {"kind": "input", "name": "Box_3dInput", "nullable": true}},
+        {
+          "name": "legacyFilter",
+          "deprecated": {"reason": "Use fruits."},
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        },
+        {"name": "item2", "type": {"kind": "scalar", "name": "Int", "nullable": true}},
+        {"name": "item10", "type": {"kind": "scalar", "name": "Int", "nullable": true}}
+      ]
+    },
+    {
+      "name": "Box_3dInput",
+      "kind": "input",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "width", "type": {"kind": "scalar", "name": "Float", "nullable": false}},
+        {"name": "height", "type": {"kind": "scalar", "name": "Float", "nullable": false}},
+        {"name": "depth", "type": {"kind": "scalar", "name": "Float", "nullable": false}}
+      ]
+    },
+    {
+      "name": "ItemPage",
+      "kind": "object",
+      "planes": ["alpha"],
+      "fields": [
+        {
+          "name": "items",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "Item", "nullable": false}
+          }
+        },
+        {"name": "complete", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "refreshRequired",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
+        },
+        {"name": "nextCursor", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "SubjectRef",
+      "kind": "object",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "kind", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "id", "type": {"kind": "scalar", "name": "ID", "nullable": false}}
+      ]
+    },
+    {
+      "name": "EventPayload",
+      "kind": "object",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "itemId", "type": {"kind": "scalar", "name": "ID", "nullable": true}},
+        {"name": "jobId", "type": {"kind": "scalar", "name": "ID", "nullable": true}},
+        {"name": "revision", "type": {"kind": "scalar", "name": "Counter", "nullable": true}},
+        {"name": "note", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "Event",
+      "kind": "object",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "sequence", "type": {"kind": "scalar", "name": "Counter", "nullable": false}},
+        {"name": "type", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "subjectRef", "type": {"kind": "object", "name": "SubjectRef", "nullable": false}},
+        {"name": "payload", "type": {"kind": "object", "name": "EventPayload", "nullable": false}}
+      ]
+    },
+    {
+      "name": "EventPage",
+      "kind": "object",
+      "planes": ["alpha"],
+      "fields": [
+        {
+          "name": "items",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "Event", "nullable": false}
+          }
+        },
+        {"name": "complete", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "refreshRequired",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
+        },
+        {"name": "nextCursor", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "EventsInput",
+      "kind": "input",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "after", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "limit", "type": {"kind": "scalar", "name": "PageSize", "nullable": false}}
+      ]
+    },
+    {
+      "name": "JobRef",
+      "kind": "object",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "operationId", "type": {"kind": "scalar", "name": "ID", "nullable": false}},
+        {"name": "state", "type": {"kind": "scalar", "name": "String", "nullable": false}}
+      ]
+    },
+    {
+      "name": "StartJobPayload",
+      "kind": "object",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "requestId", "type": {"kind": "scalar", "name": "ID", "nullable": false}},
+        {"name": "receipt", "type": {"kind": "object", "name": "Receipt", "nullable": false}},
+        {"name": "job", "type": {"kind": "object", "name": "JobRef", "nullable": true}}
+      ]
+    },
+    {
+      "name": "StartJobInput",
+      "kind": "input",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "itemId", "type": {"kind": "scalar", "name": "ID", "nullable": false}},
+        {
+          "name": "repeat",
+          "description": "How many times to run.",
+          "type": {"kind": "scalar", "name": "Int", "nullable": true},
+          "defaultValue": 1
+        },
+        {"name": "props", "type": {"kind": "scalar", "name": "Blob", "nullable": true}}
+      ]
+    },
+    {
+      "name": "JobInput",
+      "kind": "input",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "operationId", "type": {"kind": "scalar", "name": "ID", "nullable": false}}
+      ]
+    },
+    {
+      "name": "Job",
+      "kind": "object",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "operationId", "type": {"kind": "scalar", "name": "ID", "nullable": false}},
+        {"name": "state", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "progress", "type": {"kind": "scalar", "name": "Float", "nullable": true}},
+        {"name": "output", "type": {"kind": "scalar", "name": "Blob", "nullable": true}}
+      ]
+    },
+    {
+      "name": "PingInput",
+      "kind": "input",
+      "planes": ["alpha"],
+      "fields": [{"name": "note", "type": {"kind": "scalar", "name": "String", "nullable": true}}]
+    },
+    {
+      "name": "FetchInput",
+      "kind": "input",
+      "planes": ["alpha"],
+      "fields": [
+        {
+          "name": "method",
+          "type": {"kind": "enum", "name": "HTTPMethod", "nullable": true},
+          "defaultValue": "GET"
+        }
+      ]
+    },
+    {
+      "name": "RedeemInput",
+      "kind": "input",
+      "planes": ["alpha"],
+      "fields": [
+        {"name": "deliveryId", "type": {"kind": "scalar", "name": "ID", "nullable": false}}
+      ]
+    },
+    {
+      "name": "Ratio",
+      "kind": "scalar",
+      "planes": ["beta"],
+      "builtIn": false,
+      "representation": "number",
+      "summary": "Fraction between 0 and 1.",
+      "constraints": {"minimum": 0, "maximum": 1}
+    },
+    {
+      "name": "WidgetState",
+      "kind": "enum",
+      "planes": ["beta"],
+      "values": [{"name": "ACTIVE"}, {"name": "ARCHIVED"}]
+    },
+    {
+      "name": "Widget",
+      "kind": "object",
+      "planes": ["beta"],
+      "fields": [
+        {"name": "id", "type": {"kind": "scalar", "name": "ID", "nullable": false}},
+        {"name": "label", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "state", "type": {"kind": "enum", "name": "WidgetState", "nullable": false}},
+        {"name": "revision", "type": {"kind": "scalar", "name": "Counter", "nullable": false}}
+      ]
+    },
+    {
+      "name": "WidgetPage",
+      "kind": "object",
+      "planes": ["beta"],
+      "fields": [
+        {
+          "name": "items",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "Widget", "nullable": false}
+          }
+        },
+        {"name": "complete", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "refreshRequired",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
+        }
+      ]
+    },
+    {
+      "name": "WidgetsPayload",
+      "kind": "object",
+      "planes": ["beta"],
+      "fields": [
+        {"name": "requestId", "type": {"kind": "scalar", "name": "ID", "nullable": false}},
+        {"name": "result", "type": {"kind": "object", "name": "WidgetPage", "nullable": true}}
+      ]
+    },
+    {
+      "name": "WidgetsInput",
+      "kind": "input",
+      "planes": ["beta"],
+      "fields": [
+        {
+          "name": "states",
+          "type": {
+            "kind": "list",
+            "nullable": true,
+            "ofType": {"kind": "enum", "name": "WidgetState", "nullable": false}
+          }
+        }
+      ]
+    },
+    {
+      "name": "ShapeInput",
+      "kind": "input",
+      "planes": ["beta"],
+      "fields": [
+        {"name": "kind", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "sides",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "Int", "nullable": false}
+          }
+        }
+      ]
+    },
+    {
+      "name": "CreateWidgetInput",
+      "kind": "input",
+      "planes": ["beta"],
+      "fields": [
+        {"name": "label", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "state",
+          "type": {"kind": "enum", "name": "WidgetState", "nullable": true},
+          "defaultValue": "ACTIVE"
+        },
+        {
+          "name": "ratio",
+          "type": {"kind": "scalar", "name": "Ratio", "nullable": true},
+          "defaultValue": 0.5
+        },
+        {
+          "name": "nested",
+          "type": {
+            "kind": "list",
+            "nullable": true,
+            "ofType": {
+              "kind": "list",
+              "nullable": false,
+              "ofType": {"kind": "scalar", "name": "Int", "nullable": false}
+            }
+          }
+        },
+        {
+          "name": "shape",
+          "type": {"kind": "input", "name": "ShapeInput", "nullable": true},
+          "defaultValue": {"kind": "box", "sides": [1, 2]}
+        }
+      ]
+    }
+  ]
+}
