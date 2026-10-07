@@ -60,7 +60,7 @@
       "required": ["conversationId"],
       "optional": ["limit", "cursor"],
       "arguments": {
-        "limit": "Integer page size (1..1000). Targets may cap it lower.",
+        "limit": "Integer page size (1..100, the schema's PageSize).",
         "cursor": "nextCursor from the previous page."
       },
       "returns": "MemberPage { items: [Member], complete, refreshRequired, nextCursor }"
@@ -78,36 +78,42 @@
       "returns": "[Member] in request order"
     },
     "messages.send": {
-      "roles": ["user"],
+      "roles": ["user", "backend"],
       "irOperation": "communication.sendMessage",
-      "description": "Send a text message as the client's principal.",
+      "description": "Send a text message. User clients send as their own principal; backend clients send as actAs, or without it as the project's service principal.",
       "required": ["conversationId", "text"],
-      "optional": ["requestId"],
-      "arguments": { "requestId": "Idempotency key (UUID). Omitted means the SDK generates one." },
+      "optional": ["actAs", "requestId"],
+      "arguments": {
+        "actAs": "Backend clients only: the principal (UUID) of an active member to send as. The authority audits it.",
+        "requestId": "Idempotency key (UUID). Omitted means the SDK generates one."
+      },
       "returns": "MessageAck { messageId, conversationId, sequence, revision, status, cursor: Cursor }"
     },
     "messages.list": {
-      "roles": ["user"],
+      "roles": ["user", "backend"],
       "irOperation": "communication.messages",
-      "description": "Read one page of messages, newest first.",
+      "description": "Read one page of messages, newest first. User clients, and backend clients with actAs, see that member's visible history; backend clients without actAs see all of it.",
       "required": ["conversationId"],
-      "optional": ["beforeSequence"],
-      "arguments": { "beforeSequence": "Exclusive upper bound; pass the previous page's nextCursor." },
+      "optional": ["beforeSequence", "actAs"],
+      "arguments": {
+        "beforeSequence": "Exclusive upper bound; pass the previous page's nextCursor.",
+        "actAs": "Backend clients only: the principal (UUID) of an active member to read as. The authority audits it."
+      },
       "returns": "MessagePage { items: [Message], complete, refreshRequired, nextCursor }"
     },
     "messages.edit": {
-      "roles": ["user"],
+      "roles": ["user", "backend"],
       "irOperation": "communication.editMessage",
-      "description": "Replace a message's text, conditional on the message revision passed in.",
+      "description": "Replace a message's text, conditional on the message revision passed in. User clients must be its author or a moderator; backend clients moderate with the moderation scope.",
       "required": ["message", "text"],
       "optional": ["requestId"],
       "arguments": { "message": "A Message value previously returned by messages.list or messages.edit." },
       "returns": "Message"
     },
     "messages.delete": {
-      "roles": ["user"],
+      "roles": ["user", "backend"],
       "irOperation": "communication.deleteMessage",
-      "description": "Delete a message, conditional on the message revision passed in.",
+      "description": "Delete a message, conditional on the message revision passed in. User clients must be its author or a moderator; backend clients moderate with the moderation scope.",
       "required": ["message"],
       "optional": ["requestId"],
       "arguments": { "message": "A Message value previously returned by messages.list or messages.edit." },

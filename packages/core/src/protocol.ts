@@ -38,8 +38,43 @@ export interface V1AsyncRecoveryStorage {
 export interface CommandOptions { requestId?: string }
 export interface PageOptions { cursor?: string; limit?: number }
 export class V1Problem extends Error {
+  /**
+   * Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
+   * `RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds.
+   * The SDK never waits or resends on its own because of it.
+   */
+  declare readonly retryAfter?: number;
   constructor(readonly code: string, readonly requestId: string, readonly outcome: string,
-    readonly status: number, message: string, options?: ErrorOptions) { super(message, options); this.name = "V1Problem"; }
+    readonly status: number, message: string, options?: ErrorOptions & { retryAfter?: number }) {
+    super(message, options); this.name = "V1Problem";
+    if (options?.retryAfter !== undefined) this.retryAfter = options.retryAfter;
+  }
+}
+/**
+ * `SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable).
+ * Classify it by `instanceof V1Problem` and `code`; `scope` is a diagnostic detail.
+ */
+export class ScopeRequiredProblem extends V1Problem {
+  declare readonly code: "SCOPE_REQUIRED";
+  /**
+   * The missing scope. The authority names it only in the message, so this is `undefined` when the message does not
+   * match the documented wording. A missing read scope is reported as the read scope even where its manage scope
+   * (for example `callManage` for `callRead`) would also satisfy the operation.
+   */
+  readonly scope: string | undefined;
+  constructor(requestId: string, outcome: string, status: number, message: string,
+    options?: ErrorOptions & { retryAfter?: number }) {
+    super("SCOPE_REQUIRED", requestId, outcome, status, message, options);
+    this.name = "ScopeRequiredProblem";
+    this.scope = /^The backend key requires the current ([a-z][A-Za-z0-9]{0,63}) scope$/.exec(message)?.[1];
+  }
+}
+/** Builds the most specific problem class for an authority error code. */
+export function authorityProblem(code: string, requestId: string, outcome: string, status: number, message: string,
+  retryAfter?: number): V1Problem {
+  const options = retryAfter === undefined ? undefined : { retryAfter };
+  return code === "SCOPE_REQUIRED" ? new ScopeRequiredProblem(requestId, outcome, status, message, options)
+    : new V1Problem(code, requestId, outcome, status, message, options);
 }
 export function v1Record(value: unknown): V1Record {
   if (value === null || typeof value !== "object" || Array.isArray(value)) throw new TypeError("Invalid protocol object");

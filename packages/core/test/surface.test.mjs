@@ -6,13 +6,12 @@ import * as generated from "@convohop/core/internal/generated";
 import { builtImportSpecifiers, sortedKeys } from "../../../test/package-fixtures.mjs";
 
 const publicValues = [
-  "V1Problem", "V1Transport", "v1Conversation", "v1Counter", "v1Cursor", "v1Id", "v1Membership", "v1Message",
-  "v1Operations", "v1Page", "v1Record", "v1SearchHit", "v1String",
+  "ScopeRequiredProblem", "V1Problem", "V1Transport", "v1Conversation", "v1Counter", "v1Cursor", "v1Id", "v1Membership",
+  "v1Message", "v1Operations", "v1Page", "v1Record", "v1SearchHit", "v1String",
 ];
 const internalValues = [
-  "authenticatedTransport", "canonical", "currentSession", "eventPage", "fingerprint", "operationKey", "operationPayload",
-  "origin", "route", "sameSession", "sessionExpiry", "sessionMetadata", "timestamp", "v1GraphqlRequest", "v1OutputShapes",
-  "validateOperationPayload", "validateOutput",
+  "authenticatedTransport", "canonical", "currentSession", "eventPage", "origin", "route", "sameSession",
+  "sessionExpiry", "sessionMetadata", "timestamp", "validateOutput",
 ];
 
 test("public core exports are pinned and exclude implementation helpers", () => {

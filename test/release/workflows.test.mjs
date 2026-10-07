@@ -226,6 +226,8 @@ test('the release build runs every npm check that CI runs', () => {
   assert.ok(ciChecks.length >= 4, `expected the CI checks, found: ${ciChecks.join(', ')}`);
   const conformanceChecks = npmChecks(conformance, 'mock');
   assert.ok(conformanceChecks.length >= 1, 'expected the conformance check in conformance.yml');
+  // The mock offers every capability and the reference driver every feature, so any skip is a regression.
+  assert.ok(conformanceChecks.includes('npm run conformance -- --strict'), 'the mock conformance job must run with --strict');
   const releaseChecks = new Set(npmChecks(release, 'build'));
   for (const check of [...ciChecks, ...conformanceChecks]) {
     assert.ok(releaseChecks.has(check), `release.yml build must also run \`${check}\` before attesting`);

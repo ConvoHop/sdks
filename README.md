@@ -37,7 +37,7 @@ planned languages, push notifications, package names, versioning and support.
 | SDK | Package | Runtime | Covers |
 | --- | --- | --- | --- |
 | [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, and calls with explicit connect and capture |
-| [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership |
+| [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, and webhook verification |
 
 Both packages depend on [`@convohop/core`](packages/core/README.md), which
 holds the generated GraphQL types and operations and the shared transport.
@@ -70,7 +70,8 @@ package registry yet. [Install a release](#install-a-release) or
    server SDK and can, for example, send push notifications with your own
    APNs, FCM or Web Push credentials.
 
-Notification events and the webhook verification helpers for step 4 are in
+`@convohop/server` verifies webhook signatures today, and its typed events
+are provisional. Webhook delivery and notification events for step 4 are in
 development. See
 [push notifications](docs/sdk-strategy.md#push-notifications-bring-your-own).
 The package READMEs have code samples.

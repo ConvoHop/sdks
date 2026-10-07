@@ -199,6 +199,7 @@ describe("static scenario checks", () => {
       { do: "realtime.collect", subscription: "missing" },
       { do: "webhooks.verify", vector: "no-such-vector" },
       { do: "invoke", client: "u", operation: "events.list", args: { conversationId: "${env.HOME}" } },
+      { do: "invoke", client: "b", operation: "events.list", args: { conversationId: "c" } },
     ]);
     const expected = [
       /^probe\.case step 1 \(invoke\): client ghost is not open$/,
@@ -210,7 +211,6 @@ describe("static scenario checks", () => {
       /step 7 \(invoke\): unknown operation messages\.fly; see spec\/conformance\/operations\.json$/,
       /step 8 \(invoke\): messages\.send has no argument colour$/,
       /step 8 \(invoke\): messages\.send needs argument text$/,
-      /step 8 \(invoke\): messages\.send is not available to backend clients$/,
       /step 8 \(invoke\): save name x is already used$/,
       /step 9 \(invoke\): \$\{saved\.nothing\.id\} reads nothing, which no earlier step saves$/,
       /step 9 \(invoke\): expect\.value: \/\$type: must name one or more of/,
@@ -218,6 +218,7 @@ describe("static scenario checks", () => {
       /step 11 \(realtime\.collect\): subscription missing is not open$/,
       /step 12 \(webhooks\.verify\): unknown webhook vector no-such-vector/,
       /step 13 \(invoke\): \$\{env\.HOME\} uses unknown root "env"/,
+      /step 14 \(invoke\): events\.list is not available to backend clients$/,
     ];
     assert.equal(problems.length, expected.length, problems.join("\n"));
     expected.forEach((pattern, index) => assert.match(problems[index], pattern));

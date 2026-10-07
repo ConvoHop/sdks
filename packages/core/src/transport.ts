@@ -1,13 +1,18 @@
 import { v1GraphqlRequest, operationPayload, operationKey, validateOperationPayload,
   type OperationInput, type OperationPayload } from "./graphql.js";
 import { v1Operations, type V1OperationKey } from "./generated/v1-operations.js";
-import { V1Problem, boolean, canonical, fingerprint, origin, timestamp, v1Counter, v1Id, v1Record, v1String,
+import { V1Problem, authorityProblem, boolean, canonical, fingerprint, origin, timestamp, v1Counter, v1Id, v1Record, v1String,
   type V1AsyncRecoveryStorage, type V1Record, type V1RecoveryState, type V1RecoveryStorage } from "./protocol.js";
 export interface V1TransportOptions {
   baseUrl: string; credential?: string; namespace: string; incarnation?: string;
   recoveryStorage?: V1RecoveryStorage; asyncRecoveryStorage?: V1AsyncRecoveryStorage; fetch?: typeof fetch;
 }
 type SessionProbe = "communication.route" | "communication.currentSession";
+/** Whole-second retry delay from `extensions.retryAfter` or an HTTP `Retry-After` delta; anything else is ignored. */
+function retryDelay(value: unknown): number | undefined {
+  if (typeof value === "string" && /^[0-9]{1,10}$/.test(value)) value = Number(value);
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : undefined;
+}
 export interface TransportAuthentication {
   credential: string | undefined; barrier: Promise<void> | undefined; blocked: boolean;
   active: Set<Promise<unknown>>;
@@ -308,15 +313,17 @@ export class V1Transport {
       if (Array.isArray(graphql.errors) && graphql.errors.length) {
         const error = v1Record(graphql.errors[0]);
         const extensions = error.extensions == null ? {} : v1Record(error.extensions);
-        throw new V1Problem(typeof extensions.code === "string" ? extensions.code : "GRAPHQL_ERROR", requestId,
+        throw authorityProblem(typeof extensions.code === "string" ? extensions.code : "GRAPHQL_ERROR", requestId,
           typeof extensions.outcome === "string" ? extensions.outcome : "unknown",
           typeof extensions.status === "number" ? extensions.status : 503,
-          typeof error.message === "string" ? error.message : "GraphQL rejected the request");
+          typeof error.message === "string" ? error.message : "GraphQL rejected the request",
+          retryDelay(extensions.retryAfter) ?? retryDelay(response.headers.get("retry-after")));
       }
       if (!response.ok) {
-        throw new V1Problem(typeof graphql.code === "string" ? graphql.code : "HTTP_FAILURE", requestId,
+        throw authorityProblem(typeof graphql.code === "string" ? graphql.code : "HTTP_FAILURE", requestId,
           typeof graphql.outcome === "string" ? graphql.outcome : "unknown", response.status,
-          typeof graphql.message === "string" ? graphql.message : "Authority rejected the request");
+          typeof graphql.message === "string" ? graphql.message : "Authority rejected the request",
+          retryDelay(graphql.retryAfter) ?? retryDelay(response.headers.get("retry-after")));
       }
       const raw = v1Record(graphql.data)[plan.operation.field];
       const value = v1Record(raw);

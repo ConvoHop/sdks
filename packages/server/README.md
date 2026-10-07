@@ -78,25 +78,175 @@ current ClientSession, not backend/portal readers or selected session IDs.
 Its `tokenExpiresAt` equals session `expiresAt`, while effective bearer
 expiry is floored to integer seconds and may be up to 999 ms earlier.
 
-## Planned data-plane methods
+## Data-plane methods
 
-Backend keys also cover the data plane, through three opt-in backend-key
-scopes:
+`V1ProjectServerClient` has a typed method for every backend-key operation
+in `schema/v1-annotations.json`. A package test fails if an operation is
+added without one. The handles that `conversation(id)`, `liveSession(id)`
+and `liveOperation(id)` return send nothing until you call a method. Each
+method needs the backend-key scope listed:
 
-| Scope | Access |
+| Method | Operation | Scope |
+| --- | --- | --- |
+| `initialize()` | `route` | None |
+| `capabilities()` | `capabilities` | None |
+| `requests.resolve(requestId)` | `resolveRequest` | None |
+| `operation(operationId)` | `getOperation` | None |
+| `principals.create(input)`, `createPrincipal(externalUserId)` | `createPrincipal` | `principalManage` |
+| `principals.get(principalId)` | `getPrincipal` | `principalManage` |
+| `principals.disable(input)` | `disablePrincipal` | `principalManage` |
+| `sessions.issue(input)`, `issueSession(principalId, deviceId)` | `issueSession` | `sessionIssue` |
+| `sessions.renew(input)` | `renewSession` | `sessionIssue` |
+| `sessions.revoke(input)` | `revokeSession` | `sessionManage` |
+| `sessions.outcome(requestId)`, `sessionRequestOutcome(requestId)` | `sessionRequestOutcome` | `sessionIssue` and `sessionManage` |
+| `conversations.create(input)`, `createConversation(title, members)` | `createConversation` | `conversationManage` |
+| `conversation(id).get()` | `getConversation` | `conversationManage` |
+| `conversation(id).update(input)` | `updateConversation` | `conversationManage` |
+| `conversation(id).members.list(page)` | `members` | `membershipManage` |
+| `conversation(id).members.add(input)` | `addMember` | `membershipManage` |
+| `conversation(id).members.addBatch(entries)`, `addMembers(conversationId, entries)` | `addMembers` | `membershipManage` |
+| `conversation(id).members.remove(input)` | `removeMember` | `membershipManage` |
+| `conversation(id).members.setBroadcastPermission(input)` | `setBroadcastPermission` | `membershipManage` |
+| `conversation(id).members.grantHistory(input)` | `historyGrant` | `historyManage` |
+| `conversation(id).messages.list(options)` | `messages` | `messageRead` |
+| `conversation(id).messages.get(messageId, options)` | `getMessage` | `messageRead` |
+| `inbox({ actAs, cursor, limit })` | `inbox` | `messageRead` |
+| `search(query, options)` | `search` | `messageRead` |
+| `conversation(id).messages.send(message, options)` | `sendMessage` | `messageWrite` |
+| `conversation(id).messages.edit(input)` | `editMessage` | `moderation` |
+| `conversation(id).messages.delete(input)` | `deleteMessage` | `moderation` |
+| `conversation(id).live.current()` | `currentLiveSession` | `callRead` or `callManage` |
+| `conversation(id).live.history(page)` | `liveSessions` | `callRead` or `callManage` |
+| `liveSession(id).get()` | `liveSession` | `callRead` or `callManage` |
+| `liveSession(id).participants(page)` | `liveSessionParticipants` | `callRead` or `callManage` |
+| `liveOperation(id).get()`, `liveOperation(id).completed(options)` | `liveSessionOperation` | `callRead` or `callManage` |
+| `liveSession(id).alert(input)` | `alertLiveSession` | `callManage` |
+| `liveSession(id).end(input)` | `endLiveSession` | `callManage` |
+
+- `callManage` satisfies `callRead`: a key with either scope can read live
+  sessions, including ended ones, with their participants and operations.
+- Commands take an optional `{ requestId }`. Keep the original ID through
+  an unknown outcome, as described in
+  [bounded recovery](#generated-operations-and-bounded-recovery).
+  `requests.retry(requestId)` is `http.retry`: the resend needs the
+  original command's scope.
+- Live commands take the `expectedGeneration` and `expectedRevision` you
+  observed, so a retry resends the original payload. `liveSession(id).end()`
+  returns its operation. `completed()` resolves only after the authority
+  reports the media cutoff as enforced. Its timeout throws
+  `RESOLUTION_REQUIRED`, which isn't a cutoff.
+- Each result is checked against its request, for example the conversation,
+  message or principal ID. A mismatch throws instead of being returned.
+
+### Acting as a member
+
+Message reads and sends take `{ actAs: principalId }`, which the SDK sends
+as `actAsPrincipalId`. The authority audits every committed call that uses
+it.
+
+- `messages.list`, `messages.get` and `search` with `actAs` see only what
+  that member can see. Without it, `messages.list` and `messages.get` read
+  any conversation in the project, and `search` requires `conversationIds`.
+  When given, `conversationIds` must name at least one conversation, and
+  every hit is checked to be in one of them.
+- `inbox` always reads as one member, so `actAs` is required.
+- `messages.send` with `actAs` sends as that member. Without it, the backend's
+  service principal is the sender.
+
+`actAs` is a per-call option rather than a client bound to one member, so
+every call names the principal it acts for:
+
+```ts
+const chat = server.conversation(conversationId);
+const history = await chat.messages.list({ actAs: principalId, limit: 50 });
+await chat.messages.send({ text: "Your order shipped" }, { requestId: ids.notice });
+const inbox = await server.inbox({ actAs: principalId });
+```
+
+### Errors
+
+Failures are `V1Problem` errors, re-exported from `@convohop/core`.
+
+- A key without a required scope gets `ScopeRequiredProblem`, a `V1Problem`
+  with `code: "SCOPE_REQUIRED"`, status 403 and outcome `rejected`. Grant
+  the scope instead of retrying. `scope` names the missing scope, parsed from
+  the authority's message, and is `undefined` if the wording differs. For
+  live reads it names `callRead`, although `callManage` also satisfies them.
+  `FORBIDDEN` remains for other authorization failures.
+- `retryAfter` is the number of whole seconds the authority asks you to wait
+  before resending, for example with `RATE_LIMITED`. It comes from the error's
+  `retryAfter` extension, or else from an HTTP `Retry-After` header given in
+  seconds. The SDK never waits or resends because of it.
+
+## Webhooks
+
+`webhooks.verify()` checks a delivery with Web Crypto and returns its event.
+ConvoHop signs deliveries with the Standard Webhooks symmetric `v1` scheme.
+
+```ts
+import { webhooks, WebhookVerificationError } from "@convohop/server";
+
+export async function receive(request: Request): Promise<Response> {
+  const body = new Uint8Array(await request.arrayBuffer()); // Raw bytes, never re-serialized JSON.
+  let delivery;
+  try {
+    delivery = await webhooks.verify({ headers: request.headers, body, secrets: webhookSecrets });
+  } catch (error) {
+    if (error instanceof WebhookVerificationError) return new Response(null, { status: 400 });
+    throw error;
+  }
+  queue.addOnce(delivery.webhookId, delivery.event); // Process after responding.
+  return new Response(null, { status: 204 });
+}
+```
+
+Respond `2xx` within 5 s, then process; de-duplicate on `webhook-id`.
+Delivery is at least once. Retries and replays keep the `webhook-id`. One
+event delivered to two endpoints has the same `eventId` and different
+`webhook-id` values.
+
+- `headers` is a `Headers` object or a plain record, such as Node's
+  `request.headers`. Names match case-insensitively.
+- `body` is the raw body as a `Uint8Array`, or a string that is its exact
+  UTF-8 decoding. The SDK verifies those bytes as received and never
+  re-serializes them.
+- `secrets` is one `whsec_` secret or an array of them. Pass every secret you
+  hold. ConvoHop signs with the current secret, with the next secret while a
+  rotation is pending (at most 5 minutes), and with the replaced secret for
+  24 hours after the rotation. A `v1` entry that matches any secret is
+  accepted. Entries with other version prefixes are ignored.
+- `toleranceSeconds` defaults to 300, and `now` defaults to the current time.
+
+`verify()` returns `{ webhookId, timestamp, event }`. The event carries
+metadata only: `eventId`, `eventType`, `occurredAt`, `projectId` and
+`subjectRef: { id, kind }`. Fetch content through the data plane, for example
+with `conversation(id).messages.get()`. Narrow on `event.known`, then on
+`event.eventType`. An event type that this SDK doesn't know returns
+`known: false` and never throws, so acknowledge it. The event types are
+provisional until the webhook contract (ConvoHop/ConveHop#10) merges.
+`webhooks.verifySignature()` checks only the headers, timestamp and
+signature, and returns `{ webhookId, timestamp }` for bodies you parse
+yourself.
+
+A failed check throws `WebhookVerificationError`. Checks run in this order,
+and `code` names the first one that failed. The message never contains
+secrets, signatures or the body.
+
+| Code | Cause |
 | --- | --- |
-| `messageRead` | History and single-message reads in any project conversation, and search in listed conversations. A user's inbox, and search across their conversations, through `actAsPrincipalId`. |
-| `messageWrite` | Sends as the backend's service identity, or as one user through `actAsPrincipalId`. |
-| `callRead` | Live session reads, including ended sessions, with their participants and operations. `callManage` also grants these reads. |
+| `INVALID_SECRET` | No secret, or a secret that isn't `whsec_` followed by padded standard Base64 of 1 to 64 bytes. Fix your configuration. |
+| `MISSING_HEADER` | `webhook-id`, `webhook-timestamp` or `webhook-signature` is absent or empty. |
+| `INVALID_HEADER` | One of those headers is repeated in a header record. A `Headers` object joins repeated values, which then fail a later check. |
+| `INVALID_TIMESTAMP` | `webhook-timestamp` isn't 1 to 15 digits of Unix seconds. |
+| `TIMESTAMP_EXPIRED` | The timestamp is more than the tolerance before `now`. |
+| `TIMESTAMP_FUTURE` | The timestamp is more than the tolerance after `now`. |
+| `BODY_TOO_LARGE` | The body is over 4096 bytes. |
+| `TOO_MANY_SIGNATURES` | `webhook-signature` has more than 8 entries. ConvoHop sends 1 to 3. |
+| `NO_MATCHING_SIGNATURE` | No `v1` entry matches any secret. |
+| `INVALID_BODY` | `verify()` only: the signed body isn't a UTF-8 JSON event envelope. |
 
-The authority audits every committed `actAsPrincipalId` call. On every
-scoped backend-key operation, a key that lacks a required scope gets a
-`SCOPE_REQUIRED` problem (403, not retryable); `FORBIDDEN` remains for other
-authorization failures. `schema/v1-annotations.json` lists the scopes each
-operation accepts. The generated operations already accept
-`actAsPrincipalId`. The typed methods will live on
-`V1ProjectServerClient`, next to `conversations` and `conversation(id)`.
-Until they're added, they're deliberately absent rather than stubbed.
+Invalid arguments throw `RangeError` or `TypeError` instead, for example a
+negative tolerance or a body that is neither a string nor a `Uint8Array`.
 
 ## Management and credential delivery
 
