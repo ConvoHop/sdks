@@ -1,10 +1,12 @@
 ## `getMessage`
 
-Read one message.
+Read one message. A backend key reads any message, or reads as the member named by actAsPrincipalId.
 
 - **Operation:** `communication.getMessage`, a query sent as `CommunicationGetMessage`.
-- **Layer:** client (client SDKs).
-- **Authorization:** `userSession`, when `member`: The caller is an active member of the conversation.
+- **Layer:** both (client and server SDKs).
+- **Authorization** (any one of):
+  - `userSession`, when `member`: The caller is an active member of the conversation.
+  - `backendKey` with scope `messageRead`.
 - **Idempotency:** `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
 **Context** (`context: RequestContextInput!`)
@@ -23,6 +25,7 @@ Read one message.
 | --- | --- |
 | `conversationId` | `UUID!` |
 | `messageId` | `UUID!` |
+| `actAsPrincipalId` | `UUID` |
 
 **Result** (`GetMessageReply!`)
 
@@ -40,7 +43,7 @@ Read one message.
 
 **Errors**
 
-- Returned by the authority: `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `MESSAGE_DELETED`, `NOT_FOUND`, `RATE_LIMITED`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `WRONG_REGION`.
+- Returned by the authority: `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `MESSAGE_DELETED`, `NOT_FOUND`, `RATE_LIMITED`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `SCOPE_REQUIRED`, `WRONG_REGION`.
 - Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `INCARNATION_MISMATCH`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
 - Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `TRANSPORT_UNKNOWN`.
 - Transient, so repeating the request may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RATE_LIMITED`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.

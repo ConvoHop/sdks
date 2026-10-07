@@ -1934,7 +1934,8 @@ export const v1Operations: Record<V1OperationKey, V1Operation> = {
     "inputFields": [
       "conversationId",
       "limit",
-      "beforeSequence"
+      "beforeSequence",
+      "actAsPrincipalId"
     ]
   },
   "communication.getMessage": {
@@ -1946,7 +1947,8 @@ export const v1Operations: Record<V1OperationKey, V1Operation> = {
     "resultType": "GetMessageReply!",
     "inputFields": [
       "conversationId",
-      "messageId"
+      "messageId",
+      "actAsPrincipalId"
     ]
   },
   "communication.events": {
@@ -1984,7 +1986,8 @@ export const v1Operations: Record<V1OperationKey, V1Operation> = {
     "resultType": "InboxReply!",
     "inputFields": [
       "limit",
-      "cursor"
+      "cursor",
+      "actAsPrincipalId"
     ]
   },
   "communication.search": {
@@ -1998,7 +2001,8 @@ export const v1Operations: Record<V1OperationKey, V1Operation> = {
       "query",
       "pageSize",
       "scope",
-      "cursor"
+      "cursor",
+      "actAsPrincipalId"
     ]
   },
   "communication.resolveRequest": {
@@ -2259,7 +2263,8 @@ export const v1Operations: Record<V1OperationKey, V1Operation> = {
     "inputFields": [
       "conversationId",
       "text",
-      "props"
+      "props",
+      "actAsPrincipalId"
     ]
   },
   "communication.editMessage": {

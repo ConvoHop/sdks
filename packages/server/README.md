@@ -78,19 +78,23 @@ expiry is floored to integer seconds and may be up to 999 ms earlier.
 
 ## Planned data-plane methods
 
-Backend keys will also cover the data plane, through three new backend-key
+Backend keys also cover the data plane, through three opt-in backend-key
 scopes:
 
-| Scope | Planned access |
+| Scope | Access |
 | --- | --- |
-| `messageRead` | Project-wide message history, events, search and inbox reads. |
-| `messageWrite` | Bot, system and act-as sends. |
-| `callRead` | Live session and call history reads. |
+| `messageRead` | History and single-message reads in any project conversation, and search in listed conversations. A user's inbox, and search across their conversations, through `actAsPrincipalId`. |
+| `messageWrite` | Sends as the backend's service identity, or as one user through `actAsPrincipalId`. |
+| `callRead` | Live session reads, including ended sessions, with their participants and operations. `callManage` also grants these reads. |
 
-These methods will live on `V1ProjectServerClient`, next to `conversations`
-and `conversation(id)`. The scopes aren't in the exported schema yet, so the
-methods are deliberately absent rather than stubbed. They're added once the
-authority exposes the scopes.
+The authority audits every committed `actAsPrincipalId` call. On every
+scoped backend-key operation, a key that lacks a required scope gets a
+`SCOPE_REQUIRED` problem (403, not retryable); `FORBIDDEN` remains for other
+authorization failures. `schema/v1-annotations.json` lists the scopes each
+operation accepts. The generated operations already accept
+`actAsPrincipalId`. The typed methods will live on
+`V1ProjectServerClient`, next to `conversations` and `conversation(id)`.
+Until they're added, they're deliberately absent rather than stubbed.
 
 ## Management and credential delivery
 

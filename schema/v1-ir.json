@@ -125,6 +125,10 @@
   "scopes": [
     {"name": "callManage", "summary": "Read, alert and end any live session in the project."},
     {
+      "name": "callRead",
+      "summary": "Read any live session in the project, with its participants and operations."
+    },
+    {
       "name": "conversationManage",
       "summary": "Create, read and update any conversation in the project."
     },
@@ -132,6 +136,14 @@
     {
       "name": "membershipManage",
       "summary": "Read and change conversation membership and broadcast permissions."
+    },
+    {
+      "name": "messageRead",
+      "summary": "Read history, get messages and search in any conversation of the project, or read as the member named by actAsPrincipalId. The inbox requires actAsPrincipalId. Requests that use actAsPrincipalId are audited."
+    },
+    {
+      "name": "messageWrite",
+      "summary": "Send messages as the backend's service principal, or as the member named by actAsPrincipalId. Requests that use actAsPrincipalId are audited."
     },
     {"name": "moderation", "summary": "Edit or delete any message."},
     {"name": "principalManage", "summary": "Create, read and disable principals."},
@@ -622,6 +634,13 @@
         "summary": "The expected revision or epoch is stale. Read the current state and retry with a new request.",
         "origin": "server",
         "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "SCOPE_REQUIRED",
+        "summary": "The backend key lacks a scope this operation requires. The message names the scope.",
+        "origin": "server",
+        "status": 403,
         "retryable": false
       },
       {
@@ -1184,6 +1203,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -1256,6 +1276,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -1335,6 +1356,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -1347,9 +1369,12 @@
       "kind": "query",
       "field": "messages",
       "operationName": "CommunicationMessages",
-      "summary": "List the messages of a conversation, newest first.",
-      "layer": "client",
-      "auth": [{"credential": "userSession", "condition": "member"}],
+      "summary": "List the messages of a conversation, newest first. A backend key reads the full history, or the history visible to the member named by actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["messageRead"]}
+      ],
       "arguments": [
         {
           "name": "context",
@@ -1412,6 +1437,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -1424,9 +1450,12 @@
       "kind": "query",
       "field": "getMessage",
       "operationName": "CommunicationGetMessage",
-      "summary": "Read one message.",
-      "layer": "client",
-      "auth": [{"credential": "userSession", "condition": "member"}],
+      "summary": "Read one message. A backend key reads any message, or reads as the member named by actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["messageRead"]}
+      ],
       "arguments": [
         {
           "name": "context",
@@ -1482,6 +1511,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -1649,9 +1679,12 @@
       "kind": "query",
       "field": "inbox",
       "operationName": "CommunicationInbox",
-      "summary": "List the conversations visible to the calling user.",
-      "layer": "client",
-      "auth": [{"credential": "userSession"}],
+      "summary": "List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession"},
+        {"credential": "backendKey", "scopes": ["messageRead"]}
+      ],
       "arguments": [
         {
           "name": "context",
@@ -1710,11 +1743,13 @@
           "INCARNATION_MISMATCH",
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
+          "NOT_FOUND",
           "PAGE_ITEM_TOO_LARGE",
           "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -1727,9 +1762,12 @@
       "kind": "query",
       "field": "search",
       "operationName": "CommunicationSearch",
-      "summary": "Search the messages visible to the calling user.",
-      "layer": "client",
-      "auth": [{"credential": "userSession"}],
+      "summary": "Search the messages visible to the calling user. A backend key searches as the member named by actAsPrincipalId, or within scope.conversationIds.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession"},
+        {"credential": "backendKey", "scopes": ["messageRead"]}
+      ],
       "arguments": [
         {
           "name": "context",
@@ -1787,11 +1825,13 @@
           "INCARNATION_MISMATCH",
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
+          "NOT_FOUND",
           "PAGE_ITEM_TOO_LARGE",
           "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -1937,6 +1977,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -1953,6 +1994,7 @@
       "layer": "both",
       "auth": [
         {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callRead"]},
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "arguments": [
@@ -2009,6 +2051,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -2025,6 +2068,7 @@
       "layer": "both",
       "auth": [
         {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callRead"]},
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "arguments": [
@@ -2081,6 +2125,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -2097,6 +2142,7 @@
       "layer": "both",
       "auth": [
         {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callRead"]},
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "arguments": [
@@ -2161,6 +2207,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -2177,6 +2224,7 @@
       "layer": "both",
       "auth": [
         {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callRead"]},
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "arguments": [
@@ -2241,6 +2289,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -2333,6 +2382,7 @@
       "layer": "both",
       "auth": [
         {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callRead"]},
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "arguments": [
@@ -2389,6 +2439,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -2461,6 +2512,7 @@
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "SESSION_RECEIPT_BINDING_MISMATCH",
           "SESSION_RECEIPT_INVALID",
           "TRANSPORT_UNKNOWN",
@@ -2544,6 +2596,7 @@
           "RESOLUTION_REQUIRED",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -2626,6 +2679,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -2708,6 +2762,7 @@
           "RESOLUTION_REQUIRED",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -2791,6 +2846,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -2876,6 +2932,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -2959,6 +3016,7 @@
           "RESOLUTION_REQUIRED",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -3044,6 +3102,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -3128,6 +3187,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -3212,6 +3272,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -3295,6 +3356,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -3377,6 +3439,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -3389,9 +3452,12 @@
       "kind": "mutation",
       "field": "sendMessage",
       "operationName": "CommunicationSendMessage",
-      "summary": "Send a message.",
-      "layer": "client",
-      "auth": [{"credential": "userSession", "condition": "member"}],
+      "summary": "Send a message. A backend key sends as its service principal, or as the member named by actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["messageWrite"]}
+      ],
       "arguments": [
         {
           "name": "context",
@@ -3460,6 +3526,7 @@
           "RESOLUTION_REQUIRED",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -3546,6 +3613,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -3632,6 +3700,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -3867,6 +3936,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -4129,6 +4199,7 @@
           "RESOLUTION_REQUIRED",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -4306,6 +4377,7 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "SCOPE_REQUIRED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -6876,7 +6948,8 @@
       "planes": ["communication"],
       "fields": [
         {"name": "conversationId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
-        {"name": "messageId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}}
+        {"name": "messageId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "actAsPrincipalId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}}
       ]
     },
     {
@@ -7024,7 +7097,8 @@
       "planes": ["communication"],
       "fields": [
         {"name": "limit", "type": {"kind": "scalar", "name": "PageSize", "nullable": false}},
-        {"name": "cursor", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+        {"name": "cursor", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "actAsPrincipalId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}}
       ]
     },
     {
@@ -7932,7 +8006,8 @@
       "fields": [
         {"name": "conversationId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
         {"name": "limit", "type": {"kind": "scalar", "name": "PageSize", "nullable": false}},
-        {"name": "beforeSequence", "type": {"kind": "scalar", "name": "Decimal", "nullable": true}}
+        {"name": "beforeSequence", "type": {"kind": "scalar", "name": "Decimal", "nullable": true}},
+        {"name": "actAsPrincipalId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}}
       ]
     },
     {
@@ -8633,7 +8708,8 @@
         {"name": "query", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "pageSize", "type": {"kind": "scalar", "name": "PageSize", "nullable": false}},
         {"name": "scope", "type": {"kind": "input", "name": "SearchScopeInput", "nullable": true}},
-        {"name": "cursor", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+        {"name": "cursor", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "actAsPrincipalId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}}
       ]
     },
     {
@@ -8674,7 +8750,8 @@
       "fields": [
         {"name": "conversationId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
         {"name": "text", "type": {"kind": "scalar", "name": "String", "nullable": false}},
-        {"name": "props", "type": {"kind": "scalar", "name": "Properties", "nullable": false}}
+        {"name": "props", "type": {"kind": "scalar", "name": "Properties", "nullable": false}},
+        {"name": "actAsPrincipalId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}}
       ]
     },
     {

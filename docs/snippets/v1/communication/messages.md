@@ -1,10 +1,12 @@
 ## `messages`
 
-List the messages of a conversation, newest first.
+List the messages of a conversation, newest first. A backend key reads the full history, or the history visible to the member named by actAsPrincipalId.
 
 - **Operation:** `communication.messages`, a query sent as `CommunicationMessages`.
-- **Layer:** client (client SDKs).
-- **Authorization:** `userSession`, when `member`: The caller is an active member of the conversation.
+- **Layer:** both (client and server SDKs).
+- **Authorization** (any one of):
+  - `userSession`, when `member`: The caller is an active member of the conversation.
+  - `backendKey` with scope `messageRead`.
 - **Idempotency:** `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 - **Pagination:** `sequence`. Newest first. Pass nextCursor back as the sequence cursor input to read older items until complete is true. Uses page `MessagePage` at `messages.result`, items `Message`, page size `input.limit` and cursor `input.beforeSequence`.
 
@@ -25,6 +27,7 @@ List the messages of a conversation, newest first.
 | `conversationId` | `UUID!` |
 | `limit` | `PageSize!` |
 | `beforeSequence` | `Decimal` |
+| `actAsPrincipalId` | `UUID` |
 
 **Result** (`MessagesReply!`)
 
@@ -42,7 +45,7 @@ List the messages of a conversation, newest first.
 
 **Errors**
 
-- Returned by the authority: `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `PAGE_ITEM_TOO_LARGE`, `RATE_LIMITED`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `WRONG_REGION`.
+- Returned by the authority: `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `PAGE_ITEM_TOO_LARGE`, `RATE_LIMITED`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `SCOPE_REQUIRED`, `WRONG_REGION`.
 - Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `INCARNATION_MISMATCH`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
 - Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `TRANSPORT_UNKNOWN`.
 - Transient, so repeating the request may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RATE_LIMITED`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.

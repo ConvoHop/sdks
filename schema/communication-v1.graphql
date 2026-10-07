@@ -414,6 +414,7 @@ type GetMessageReply {
 input GetMessageRequestInput {
 	conversationId: UUID!
 	messageId: UUID!
+	actAsPrincipalId: UUID
 }
 
 type GetOperationReply {
@@ -500,6 +501,7 @@ type InboxReply {
 input InboxRequestInput {
 	limit: PageSize!
 	cursor: String
+	actAsPrincipalId: UUID
 }
 
 type IssueSessionReply {
@@ -999,6 +1001,7 @@ input MessagesRequestInput {
 	conversationId: UUID!
 	limit: PageSize!
 	beforeSequence: Decimal
+	actAsPrincipalId: UUID
 }
 
 type Mutation {
@@ -1450,6 +1453,7 @@ input SearchRequestInput {
 	pageSize: PageSize!
 	scope: SearchScopeInput
 	cursor: String
+	actAsPrincipalId: UUID
 }
 
 input SearchScopeInput {
@@ -1472,6 +1476,7 @@ input SendMessageRequestInput {
 	conversationId: UUID!
 	text: String!
 	props: Properties!
+	actAsPrincipalId: UUID
 }
 
 type ServiceDetails {

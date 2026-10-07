@@ -1,10 +1,12 @@
 ## `inbox`
 
-List the conversations visible to the calling user.
+List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.
 
 - **Operation:** `communication.inbox`, a query sent as `CommunicationInbox`.
-- **Layer:** client (client SDKs).
-- **Authorization:** `userSession`.
+- **Layer:** both (client and server SDKs).
+- **Authorization** (any one of):
+  - `userSession`.
+  - `backendKey` with scope `messageRead`.
 - **Idempotency:** `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 - **Pagination:** `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. Uses page `InboxPage` at `inbox.result`, items `InboxItem`, page size `input.limit` and cursor `input.cursor`.
 
@@ -24,6 +26,7 @@ List the conversations visible to the calling user.
 | --- | --- |
 | `limit` | `PageSize!` |
 | `cursor` | `String` |
+| `actAsPrincipalId` | `UUID` |
 
 **Result** (`InboxReply!`)
 
@@ -41,7 +44,7 @@ List the conversations visible to the calling user.
 
 **Errors**
 
-- Returned by the authority: `CURSOR_EXPIRED`, `CURSOR_SCOPE_MISMATCH`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `PAGE_ITEM_TOO_LARGE`, `RATE_LIMITED`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `WRONG_REGION`.
+- Returned by the authority: `CURSOR_EXPIRED`, `CURSOR_SCOPE_MISMATCH`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `PAGE_ITEM_TOO_LARGE`, `RATE_LIMITED`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `SCOPE_REQUIRED`, `WRONG_REGION`.
 - Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `INCARNATION_MISMATCH`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
 - Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `TRANSPORT_UNKNOWN`.
 - Transient, so repeating the request may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RATE_LIMITED`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.

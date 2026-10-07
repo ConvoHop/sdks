@@ -145,10 +145,19 @@
   },
   "scopes": {
     "callManage": {"summary": "Read, alert and end any live session in the project."},
+    "callRead": {
+      "summary": "Read any live session in the project, with its participants and operations."
+    },
     "conversationManage": {"summary": "Create, read and update any conversation in the project."},
     "historyManage": {"summary": "Expand the history visible to members."},
     "membershipManage": {
       "summary": "Read and change conversation membership and broadcast permissions."
+    },
+    "messageRead": {
+      "summary": "Read history, get messages and search in any conversation of the project, or read as the member named by actAsPrincipalId. The inbox requires actAsPrincipalId. Requests that use actAsPrincipalId are audited."
+    },
+    "messageWrite": {
+      "summary": "Send messages as the backend's service principal, or as the member named by actAsPrincipalId. Requests that use actAsPrincipalId are audited."
     },
     "moderation": {"summary": "Edit or delete any message."},
     "principalManage": {"summary": "Create, read and disable principals."},
@@ -558,6 +567,12 @@
       "status": 409,
       "retryable": false
     },
+    "SCOPE_REQUIRED": {
+      "summary": "The backend key lacks a scope this operation requires. The message names the scope.",
+      "origin": "server",
+      "status": 403,
+      "retryable": false
+    },
     "SESSION_RECEIPT_BINDING_MISMATCH": {
       "summary": "The stored session receipt does not match its binding.",
       "origin": "server",
@@ -849,7 +864,7 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND"]
+        "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
     "communication.getConversation": {
@@ -864,7 +879,7 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND"]
+        "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
     "communication.members": {
@@ -884,13 +899,16 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND"]
+        "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
     "communication.messages": {
-      "summary": "List the messages of a conversation, newest first.",
-      "layer": "client",
-      "auth": [{"credential": "userSession", "condition": "member"}],
+      "summary": "List the messages of a conversation, newest first. A backend key reads the full history, or the history visible to the member named by actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["messageRead"]}
+      ],
       "idempotency": "safe",
       "pagination": {
         "style": "sequence",
@@ -901,19 +919,22 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND", "PAGE_ITEM_TOO_LARGE"]
+        "codes": ["NOT_FOUND", "PAGE_ITEM_TOO_LARGE", "SCOPE_REQUIRED"]
       }
     },
     "communication.getMessage": {
-      "summary": "Read one message.",
-      "layer": "client",
-      "auth": [{"credential": "userSession", "condition": "member"}],
+      "summary": "Read one message. A backend key reads any message, or reads as the member named by actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["messageRead"]}
+      ],
       "idempotency": "safe",
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND", "MESSAGE_DELETED"]
+        "codes": ["NOT_FOUND", "MESSAGE_DELETED", "SCOPE_REQUIRED"]
       }
     },
     "communication.events": {
@@ -951,9 +972,12 @@
       }
     },
     "communication.inbox": {
-      "summary": "List the conversations visible to the calling user.",
-      "layer": "client",
-      "auth": [{"credential": "userSession"}],
+      "summary": "List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession"},
+        {"credential": "backendKey", "scopes": ["messageRead"]}
+      ],
       "idempotency": "safe",
       "pagination": {
         "style": "cursor",
@@ -964,13 +988,22 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["CURSOR_SCOPE_MISMATCH", "CURSOR_EXPIRED", "PAGE_ITEM_TOO_LARGE"]
+        "codes": [
+          "NOT_FOUND",
+          "CURSOR_SCOPE_MISMATCH",
+          "CURSOR_EXPIRED",
+          "PAGE_ITEM_TOO_LARGE",
+          "SCOPE_REQUIRED"
+        ]
       }
     },
     "communication.search": {
-      "summary": "Search the messages visible to the calling user.",
-      "layer": "client",
-      "auth": [{"credential": "userSession"}],
+      "summary": "Search the messages visible to the calling user. A backend key searches as the member named by actAsPrincipalId, or within scope.conversationIds.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession"},
+        {"credential": "backendKey", "scopes": ["messageRead"]}
+      ],
       "idempotency": "safe",
       "pagination": {
         "style": "cursor",
@@ -981,7 +1014,7 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["CURSOR_SCOPE_MISMATCH", "PAGE_ITEM_TOO_LARGE"]
+        "codes": ["NOT_FOUND", "CURSOR_SCOPE_MISMATCH", "PAGE_ITEM_TOO_LARGE", "SCOPE_REQUIRED"]
       }
     },
     "communication.resolveRequest": {
@@ -1011,7 +1044,7 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND"]
+        "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
     "communication.currentLiveSession": {
@@ -1019,6 +1052,7 @@
       "layer": "both",
       "auth": [
         {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callRead"]},
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "idempotency": "safe",
@@ -1026,7 +1060,7 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND"]
+        "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
     "communication.liveSession": {
@@ -1034,6 +1068,7 @@
       "layer": "both",
       "auth": [
         {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callRead"]},
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "idempotency": "safe",
@@ -1041,7 +1076,7 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND"]
+        "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
     "communication.liveSessions": {
@@ -1049,6 +1084,7 @@
       "layer": "both",
       "auth": [
         {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callRead"]},
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "idempotency": "safe",
@@ -1061,7 +1097,7 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND", "CURSOR_INVALID"]
+        "codes": ["NOT_FOUND", "CURSOR_INVALID", "SCOPE_REQUIRED"]
       }
     },
     "communication.liveSessionParticipants": {
@@ -1069,6 +1105,7 @@
       "layer": "both",
       "auth": [
         {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callRead"]},
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "idempotency": "safe",
@@ -1081,7 +1118,7 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND", "CURSOR_INVALID"]
+        "codes": ["NOT_FOUND", "CURSOR_INVALID", "SCOPE_REQUIRED"]
       }
     },
     "communication.liveSessionAlerts": {
@@ -1106,6 +1143,7 @@
       "layer": "both",
       "auth": [
         {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["callRead"]},
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "idempotency": "safe",
@@ -1113,7 +1151,7 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "communication", "rateLimited"],
-        "codes": ["NOT_FOUND"]
+        "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
     "communication.sessionRequestOutcome": {
@@ -1129,7 +1167,8 @@
           "NOT_FOUND",
           "NOT_A_SESSION_REQUEST",
           "SESSION_RECEIPT_INVALID",
-          "SESSION_RECEIPT_BINDING_MISMATCH"
+          "SESSION_RECEIPT_BINDING_MISMATCH",
+          "SCOPE_REQUIRED"
         ]
       }
     },
@@ -1149,7 +1188,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["ALREADY_EXISTS"]
+        "codes": ["ALREADY_EXISTS", "SCOPE_REQUIRED"]
       }
     },
     "communication.disablePrincipal": {
@@ -1168,7 +1207,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
       }
     },
     "communication.issueSession": {
@@ -1187,7 +1226,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "CREDENTIAL_EXPIRED"]
+        "codes": ["NOT_FOUND", "CREDENTIAL_EXPIRED", "SCOPE_REQUIRED"]
       }
     },
     "communication.renewSession": {
@@ -1206,7 +1245,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "CREDENTIAL_EXPIRED"]
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "CREDENTIAL_EXPIRED", "SCOPE_REQUIRED"]
       }
     },
     "communication.revokeSession": {
@@ -1228,7 +1267,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
       }
     },
     "communication.createConversation": {
@@ -1247,7 +1286,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "MEMBER_LIMIT", "MEMBERSHIP_COUNT_INVALID"]
+        "codes": ["NOT_FOUND", "MEMBER_LIMIT", "MEMBERSHIP_COUNT_INVALID", "SCOPE_REQUIRED"]
       }
     },
     "communication.updateConversation": {
@@ -1269,7 +1308,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
       }
     },
     "communication.addMember": {
@@ -1288,7 +1327,13 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEMBER_LIMIT", "MEMBERSHIP_COUNT_INVALID"]
+        "codes": [
+          "NOT_FOUND",
+          "REVISION_CONFLICT",
+          "MEMBER_LIMIT",
+          "MEMBERSHIP_COUNT_INVALID",
+          "SCOPE_REQUIRED"
+        ]
       }
     },
     "communication.addMembers": {
@@ -1307,7 +1352,13 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEMBER_LIMIT", "MEMBERSHIP_COUNT_INVALID"]
+        "codes": [
+          "NOT_FOUND",
+          "REVISION_CONFLICT",
+          "MEMBER_LIMIT",
+          "MEMBERSHIP_COUNT_INVALID",
+          "SCOPE_REQUIRED"
+        ]
       }
     },
     "communication.removeMember": {
@@ -1326,7 +1377,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEMBERSHIP_COUNT_INVALID"]
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEMBERSHIP_COUNT_INVALID", "SCOPE_REQUIRED"]
       }
     },
     "communication.historyGrant": {
@@ -1345,13 +1396,16 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
       }
     },
     "communication.sendMessage": {
-      "summary": "Send a message.",
-      "layer": "client",
-      "auth": [{"credential": "userSession", "condition": "member"}],
+      "summary": "Send a message. A backend key sends as its service principal, or as the member named by actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["messageWrite"]}
+      ],
       "idempotency": "idempotent",
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.created"]},
@@ -1364,7 +1418,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "QUOTA_EXCEEDED", "PLAN_LIMIT_EXCEEDED"]
+        "codes": ["NOT_FOUND", "QUOTA_EXCEEDED", "PLAN_LIMIT_EXCEEDED", "SCOPE_REQUIRED"]
       }
     },
     "communication.editMessage": {
@@ -1386,7 +1440,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MESSAGE_DELETED"]
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MESSAGE_DELETED", "SCOPE_REQUIRED"]
       }
     },
     "communication.deleteMessage": {
@@ -1408,7 +1462,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MESSAGE_DELETED"]
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MESSAGE_DELETED", "SCOPE_REQUIRED"]
       }
     },
     "communication.reportReceipt": {
@@ -1458,7 +1512,7 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
       }
     },
     "communication.startLiveSession": {
@@ -1527,7 +1581,7 @@
           "live",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "LIVE_ALERT_LIMIT"]
+        "codes": ["NOT_FOUND", "LIVE_ALERT_LIMIT", "SCOPE_REQUIRED"]
       }
     },
     "communication.leaveLiveSession": {
@@ -1571,7 +1625,7 @@
           "live",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEDIA_FENCE_REQUIRED"]
+        "codes": ["NOT_FOUND", "REVISION_CONFLICT", "MEDIA_FENCE_REQUIRED", "SCOPE_REQUIRED"]
       }
     },
     "communication.liveSessionCredentials": {
