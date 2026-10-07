@@ -157,7 +157,7 @@ test("credential recovery preserves the original unknown command, and native ret
     roomName: "fixture", participantIdentity: "fixture", livekitUrl: "ws://localhost:17880",
     transportToken: "never-persist-bearer", admissionTicket: { signature: "never-persist-ticket" },
     forwardingLease: { signature: "never-persist-proof" }, transportExpiresAt: expires, admissionExpiresAt: expires,
-    leaseExpiresAt: expires, leasePolicyId: "fixture" };
+    leaseExpiresAt: expires, leasePolicyId: "fixture", connectToken: "never-persist-connect-token" };
   let lost = true, priorRequest;
   const setup = fixture((key, request) => {
     if (key === "communication.liveSession") return { result: session };
@@ -227,7 +227,7 @@ test("expired unknown issuance is resolved before a separately identified fresh 
       return { result: { liveSessionId: session.liveSessionId, participationId: p.participationId, generation: "1",
         roomName: "fixture", participantIdentity: "fixture", livekitUrl: "ws://localhost:17880",
         transportToken: "private-grant", admissionTicket: {}, forwardingLease: {}, transportExpiresAt: expiry,
-        admissionExpiresAt: expiry, leaseExpiresAt: expiry, leasePolicyId: "fixture" } };
+        admissionExpiresAt: expiry, leaseExpiresAt: expiry, leasePolicyId: "fixture", connectToken: "private-connect-token" } };
     }
     if (key === "communication.resolveRequest") return { result: {
       state: "committed", requestId: original, checkedAt: new Date(Date.now()).toISOString(), resultWithheld: false,

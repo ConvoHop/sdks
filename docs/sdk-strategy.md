@@ -168,6 +168,40 @@ Today the TypeScript SDKs already generate their operations and types from
 for other languages and the conformance suite are in development. Later, the
 same IR could also generate a command-line tool and tools for AI agents.
 
+### Calls with the official LiveKit SDKs
+
+The iOS, macOS, Android, React Native and Flutter SDKs join calls with the
+official LiveKit SDK's standard `connect(url, token)`. They send no custom
+frames.
+
+1. Join the call. Read the participation again. If it has a
+   `nativeConnectionId`, call `liveSessionCredentials` with `mode: RECONNECT`
+   and that ID as `replacementOfConnectionId`. Otherwise use `mode: INITIAL`.
+2. Connect with `livekitUrl` and `connectToken` from the result. The token
+   is a LiveKit access token for one room and one participant. It expires
+   with the media lease, within 60 seconds. Its permissions match the
+   participation: broadcast viewers can only subscribe, and publishers can
+   publish only their allowed sources.
+3. A token admits at most one connection. Another new connection with it
+   fails with HTTP 403 before the WebSocket opens. LiveKit SDKs report this
+   as a not-allowed error.
+4. LiveKit's own resume works within the token's lifetime. The media server
+   also sends refresh tokens through LiveKit's standard refresh. A refresh
+   token can only resume that connection.
+5. Anything else needs new credentials. This includes a full reconnect, a
+   not-allowed error, an app restart and a resume after the token expired.
+   Repeat step 1. After a successful join, `room.localParticipant.sid` equals
+   `nativeConnectionId`.
+6. Leaving, removal from the conversation, other membership or policy
+   changes, and the end of the call all stop media. The media server removes
+   the participant at its next lease renewal, every 20 seconds, and resume
+   then fails.
+
+Treat `connectToken` as a password. Don't log or store it, and send it only
+to `livekitUrl`. The Web SDK uses its own first-frame admission with the same
+rules. Only the ConvoHop media server accepts either path; a stock LiveKit
+server can't.
+
 ## Push notifications: bring your own
 
 ConvoHop doesn't send push notifications for you, and it never stores device

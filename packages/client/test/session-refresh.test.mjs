@@ -722,7 +722,7 @@ test("existing live handles use the verified replacement without replaying spent
   const grant = { liveSessionId, participationId, generation: "1", roomName: "fixture", participantIdentity: "fixture",
     livekitUrl: "ws://localhost:17880", transportToken: "native-test-secret", admissionTicket: { signature: "native-ticket-secret" },
     forwardingLease: { signature: "native-lease-secret" }, transportExpiresAt: expiresAt, admissionExpiresAt: expiresAt,
-    leaseExpiresAt: expiresAt, leasePolicyId: "fixture" };
+    leaseExpiresAt: expiresAt, leasePolicyId: "fixture", connectToken: "native-connect-secret" };
   setup.handle = ({ operation, request }) => {
     if (operation === "communication.liveSession") return reply(request, { result: snapshot });
     if (operation === "communication.liveSessionCredentials") return reply(request, { result: grant });
@@ -742,5 +742,5 @@ test("existing live handles use the verified replacement without replaying spent
   await assert.rejects(handle.connectionGrant(), { code: "RESOLUTION_REQUIRED", requestId });
   assert.equal(setup.requests.filter(call => call.operation === "communication.liveSessionCredentials").length, 1);
   assert.equal(setup.client.http.recoveryStates[0].mediaAdmissionAttempted, true);
-  assert.doesNotMatch([...setup.saved.values.values()].join(""), /native-test-secret|native-ticket-secret|native-lease-secret|session-test-secret/);
+  assert.doesNotMatch([...setup.saved.values.values()].join(""), /native-test-secret|native-ticket-secret|native-lease-secret|native-connect-secret|session-test-secret/);
 });
