@@ -222,10 +222,10 @@ change. An absent marker then means the original.
   signature prefix, LiveKit's `/rtc/v1` paths, npm package versions and
   release tags (see [RELEASING.md](RELEASING.md)), Go module majors, GitHub
   Actions `@vN` references, dependency majors, versions that external
-  specifications or vendors define (such as SLSA and in-toto type URIs),
-  versions that are data (such as `catalogVersion` and `secretVersion`),
-  signing-key rotation versions, database row versions, sequence numbers, and
-  tests that check that retired `/v1` paths fail.
+  specifications or vendors define (such as SLSA and in-toto type URIs and
+  the FCM HTTP v1 API), versions that are data (such as `catalogVersion` and
+  `secretVersion`), signing-key rotation versions, database row versions,
+  sequence numbers, and tests that check that retired `/v1` paths fail.
 
 ## Adding a language or platform
 

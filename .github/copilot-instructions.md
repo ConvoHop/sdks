@@ -91,7 +91,8 @@ version. These versions are legitimate and stay:
 - npm semver, release tags and `*-v*` tag rules, Go module majors, GitHub
   Actions `@vN` and dependency majors;
 - versions owned by external specifications or vendors, such as SLSA and
-  in-toto type URIs and pinned third-party API versions;
+  in-toto type URIs, the FCM HTTP v1 API and pinned third-party API
+  versions;
 - versions that are data, such as `catalogVersion` and `secretVersion`,
   signing-key rotation versions, database row versions and sequence numbers;
 - negative tests that assert retired `/v1` paths fail.
