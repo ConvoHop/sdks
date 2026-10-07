@@ -1087,6 +1087,28 @@ type OrganizationPage {
 
 scalar PageSize
 
+"""
+GraphQL error `extensions` when `code` is `PLAN_LIMIT_EXCEEDED`. The plan does not permit the resource or feature (HTTP 403, WebSocket close 4403). Not retryable without a plan or limit change.
+"""
+type PlanLimitExceededProblem {
+	"""
+	PLAN_LIMIT_EXCEEDED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	`maxProjects`, `broadcastEnabled`, or a canonical usage meter key whose allowance is zero.
+	"""
+	planLimit: String!
+	"""
+	The plan's value for `planLimit`: a decimal count, or `false` for a disabled feature.
+	"""
+	limit: String!
+}
+
 input PolicyChangeInput {
 	kind: String!
 	reason: String
@@ -1137,6 +1159,54 @@ type Query {
 	liveSessionAlerts(context: RequestContextInput!, input: LiveAlertsInput!): LiveAlertPageReply!
 	liveSessionOperation(context: RequestContextInput!, input: LiveSessionOperationInput!): LiveSessionOperationReply!
 	sessionRequestOutcome(context: RequestContextInput!, input: SessionRequestOutcomeRequestInput!): SessionRequestOutcomeReply!
+}
+
+"""
+GraphQL error `extensions` when `code` is `QUOTA_EXCEEDED`. A hard usage quota refused new work until the period ends (HTTP 429, WebSocket close 4429). Admitted calls and connections continue. Not retryable before `periodEnd`.
+"""
+type QuotaExceededProblem {
+	"""
+	QUOTA_EXCEEDED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.
+	"""
+	retryAfter: Int!
+	"""
+	Canonical usage meter key, such as `connection_minutes`.
+	"""
+	meter: String!
+	"""
+	The exhausted allowance.
+	"""
+	limit: Decimal!
+	"""
+	RFC 3339 UTC end of the quota period.
+	"""
+	periodEnd: String!
+}
+
+"""
+GraphQL error `extensions` when `code` is `RATE_LIMITED`. A per-second limit refused the request before any effect (HTTP 429, WebSocket close 4429). Resend the same request identity after `retryAfter` seconds.
+"""
+type RateLimitedProblem {
+	"""
+	RATE_LIMITED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.
+	"""
+	retryAfter: Int!
 }
 
 type ReadReceipt {
