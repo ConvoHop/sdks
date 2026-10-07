@@ -1,9 +1,12 @@
 import {
-  V1Transport, V1Problem, v1Id, v1Record, v1String, v1Conversation, v1Counter,
+  V1Transport, V1Problem, v1Id, v1Record, v1String, v1Conversation, v1Counter, v1SearchHit,
   type V1RecoveryStorage, type V1AsyncRecoveryStorage, type V1SessionBootstrap, type V1Session,
   type V1RecoveryState, type V1Conversation, type V1Graphql, type V1Membership, type CommandOptions, type OperationPayload,
+  type PageOptions, type V1SearchHit,
 } from "@convohop/core";
-import { required } from "./result.js";
+import { ServerConversation } from "./conversation.js";
+import { ServerLiveOperation, ServerLiveSession } from "./live.js";
+import { actAsInput, mismatch, pageLimit, required, type ActAsOptions } from "./result.js";
 
 type SessionOutcomeRead = Pick<OperationPayload<"communication.sessionRequestOutcome">["result"], "requestId" | "checkedAt">;
 type CommittedSessionOutcome = SessionOutcomeRead & {
@@ -14,6 +17,17 @@ export type V1SessionRequestOutcome =
   | (SessionOutcomeRead & { state: "notObservedYet" })
   | (CommittedSessionOutcome & { currentState: "missing" })
   | (CommittedSessionOutcome & { currentState: "active" | "expired" | "revoked"; currentSession: V1Session });
+export type Capabilities = NonNullable<OperationPayload<"communication.capabilities">["result"]>;
+export type RequestResolution = NonNullable<OperationPayload<"communication.resolveRequest">["result"]>;
+export type OperationStatus = NonNullable<OperationPayload<"communication.getOperation">["result"]>;
+export type Principal = NonNullable<OperationPayload<"communication.getPrincipal">["result"]>;
+export type SessionRevocation = NonNullable<OperationPayload<"communication.revokeSession">["result"]>;
+export type InboxPage = NonNullable<OperationPayload<"communication.inbox">["result"]>;
+export type SearchPage = Omit<NonNullable<OperationPayload<"communication.search">["result"]>, "items"> & { items: V1SearchHit[] };
+/** The inbox is always read as one member, so `actAs` is required. */
+export interface InboxOptions extends PageOptions { actAs: string }
+/** Search as the `actAs` member, or across `conversationIds` (1 or more) with the backend's own visibility. */
+export interface SearchOptions extends PageOptions, ActAsOptions { conversationIds?: readonly string[] }
 
 
 function outcomeFields(value: unknown, fields: readonly string[]): void {
@@ -86,10 +100,10 @@ function sessionOutcome(proof: OperationPayload<"communication.sessionRequestOut
 /**
  * Backend-key client for one project. Runs only in trusted server runtimes; never ship a backend key to a browser.
  *
- * Data plane: message history, single-message, search and act-as inbox reads (`messageRead` scope), service-identity
- * or act-as sends (`messageWrite`) and live-session and call history reads (`callRead`) belong on this client, next to
- * `conversations` and the `conversation(id)` handle. The authority exposes those scopes and the generated operations
- * accept `actAsPrincipalId`; until the typed methods are added they are deliberately absent rather than stubbed.
+ * Every backend-key operation in `schema/v1-annotations.json` has a typed method here; the README lists each method with
+ * the scope it needs. A key without that scope fails with `ScopeRequiredProblem`. Message reads and sends accept
+ * `{ actAs: principalId }` to act as a member; the inbox requires it. Handles from `conversation(id)`,
+ * `liveSession(id)` and `liveOperation(id)` send nothing until a method is called.
  */
 export class V1ProjectServerClient {
   readonly projectId: string; readonly http: V1Transport;
@@ -102,30 +116,97 @@ export class V1ProjectServerClient {
       ...(options.fetch ? { fetch: options.fetch } : {}) });
   }
   readonly conversations = {
-    create: async (input: V1Graphql.CreateConversationRequestInput, options: CommandOptions = {}) => {
-      const result = (await this.http.execute("communication.createConversation", this.projectId, input, options.requestId)).result;
-      if (!result) throw new TypeError("Missing created conversation");
-      return result;
+    create: async (input: V1Graphql.CreateConversationRequestInput, options: CommandOptions = {}): Promise<V1Conversation> =>
+      required((await this.http.execute("communication.createConversation", this.projectId, input, options.requestId)).result),
+  };
+  conversation(conversationId: string): ServerConversation { return new ServerConversation(this, v1Id(conversationId)); }
+  liveSession(liveSessionId: string): ServerLiveSession { return new ServerLiveSession(this, v1Id(liveSessionId)); }
+  /** Reattaches to a live operation by ID, for example after a restart or a `RESOLUTION_REQUIRED` timeout. */
+  liveOperation(operationId: string): ServerLiveOperation { return new ServerLiveOperation(this, v1Id(operationId)); }
+  readonly principals = {
+    create: async (input: { externalUserId: string }, options: CommandOptions = {}): Promise<Principal> => {
+      const externalUserId = v1String(input.externalUserId);
+      const principal = required((await this.http.execute("communication.createPrincipal", this.projectId,
+        { externalUserId }, options.requestId)).result);
+      if (principal.externalUserId !== externalUserId) throw mismatch("Principal");
+      return principal;
+    },
+    get: async (principalId: string): Promise<Principal> => {
+      const principal = required((await this.http.execute("communication.getPrincipal", this.projectId,
+        { principalId: v1Id(principalId) })).result);
+      if (principal.principalId !== principalId) throw mismatch("Principal");
+      return principal;
+    },
+    disable: async (input: { principalId: string; expectedRevision: string }, options: CommandOptions = {}): Promise<Principal> => {
+      const principal = required((await this.http.execute("communication.disablePrincipal", this.projectId,
+        { principalId: v1Id(input.principalId), expectedRevision: v1Counter(input.expectedRevision) }, options.requestId)).result);
+      if (principal.principalId !== input.principalId) throw mismatch("Principal");
+      return principal;
     },
   };
-  conversation(conversationId: string) {
-    v1Id(conversationId);
-    return {
-      get: async () => {
-        const result = (await this.http.execute("communication.getConversation", this.projectId, { conversationId })).result;
-        if (!result) throw new TypeError("Missing authorized conversation");
-        return result;
-      },
-      members: {
-        addBatch: (members: V1Graphql.MemberBatchEntryInput[], options: CommandOptions = {}) =>
-          this.addMembers(conversationId, members, options.requestId),
-        setBroadcastPermission: (input: Omit<V1Graphql.SetBroadcastPermissionInput, "conversationId">,
-          options: CommandOptions = {}) => this.http.execute("communication.setBroadcastPermission",
-            this.projectId, { conversationId, ...input }, options.requestId),
-        list: async (options: { limit?: number; cursor?: string } = {}) =>
-          (await this.http.execute("communication.members", this.projectId, { conversationId, limit: 100, ...options })).result,
-      },
-    };
+  readonly sessions = {
+    /** Issues a user session (`sessionIssue`). The TTL is a decimal string of milliseconds and defaults to 15 minutes. */
+    issue: async (input: { principalId: string; deviceId: string; requestedTtlMs?: string },
+      options: CommandOptions = {}): Promise<V1SessionBootstrap> => this.#session(await this.http.execute(
+      "communication.issueSession", this.projectId, { principalId: v1Id(input.principalId), deviceId: v1Id(input.deviceId),
+        requestedTtlMs: v1Counter(input.requestedTtlMs ?? "900000") }, options.requestId), input),
+    renew: async (input: { sessionId: string; principalId: string; deviceId: string; expectedRevision: string; requestedTtlMs?: string },
+      options: CommandOptions = {}): Promise<V1SessionBootstrap> => this.#session(await this.http.execute(
+      "communication.renewSession", this.projectId, { sessionId: v1Id(input.sessionId), principalId: v1Id(input.principalId),
+        deviceId: v1Id(input.deviceId), expectedRevision: v1Counter(input.expectedRevision),
+        requestedTtlMs: v1Counter(input.requestedTtlMs ?? "900000") }, options.requestId), input),
+    revoke: async (input: { sessionId: string; expectedRevision: string }, options: CommandOptions = {}): Promise<SessionRevocation> => {
+      const revocation = required((await this.http.execute("communication.revokeSession", this.projectId,
+        { sessionId: v1Id(input.sessionId), expectedRevision: v1Counter(input.expectedRevision) }, options.requestId)).result);
+      if (revocation.sessionId !== input.sessionId) throw mismatch("Session revocation");
+      return revocation;
+    },
+    /** Reads the outcome of an issue or renew request (`sessionIssue` and `sessionManage`). */
+    outcome: (requestId: string): Promise<V1SessionRequestOutcome> => this.sessionRequestOutcome(requestId),
+  };
+  #session(payload: OperationPayload<"communication.issueSession"> | OperationPayload<"communication.renewSession">,
+    input: { principalId: string; deviceId: string; sessionId?: string }): V1SessionBootstrap {
+    const issued = required(payload.result), session = required(issued.session);
+    if (session.principalId !== input.principalId || session.deviceId !== input.deviceId ||
+        session.incarnation !== this.http.incarnation || (input.sessionId !== undefined && session.sessionId !== input.sessionId))
+      throw mismatch("Session");
+    return { ...issued, session };
+  }
+  readonly requests = {
+    resolve: async (requestId: string): Promise<RequestResolution> =>
+      required((await this.http.execute("communication.resolveRequest", this.projectId, { requestId: v1Id(requestId) })).result),
+    retry: (requestId: string): Promise<RequestResolution> => this.http.retry(requestId),
+  };
+  async capabilities(): Promise<Capabilities> {
+    return required((await this.http.execute("communication.capabilities", this.projectId, {})).result);
+  }
+  async operation(operationId: string): Promise<OperationStatus> {
+    const operation = required((await this.http.execute("communication.getOperation", this.projectId,
+      { operationId: v1Id(operationId) })).result);
+    if (operation.operationId !== operationId) throw mismatch("Operation");
+    return operation;
+  }
+  /** Lists the conversations visible to the `actAs` member, as that member's inbox (`messageRead`; audited). */
+  async inbox(options: InboxOptions): Promise<InboxPage> {
+    if (options?.actAs === undefined) throw new TypeError("The inbox requires actAs");
+    const page = required((await this.http.execute("communication.inbox", this.projectId, { limit: pageLimit(options.limit),
+      ...(options.cursor === undefined ? {} : { cursor: v1String(options.cursor) }), ...actAsInput(options) })).result);
+    if (page.items.some(item => item.latestVisibleMessage != null && item.latestVisibleMessage.conversationId !== item.conversationId))
+      throw mismatch("Inbox item");
+    return page;
+  }
+  /** Searches messages (`messageRead`) as the `actAs` member, or within `conversationIds`. */
+  async search(query: string, options: SearchOptions = {}): Promise<SearchPage> {
+    const conversationIds = options.conversationIds?.map(id => v1Id(id));
+    if (conversationIds?.length === 0) throw new TypeError("Search conversationIds must name at least one conversation");
+    if (options.actAs === undefined && conversationIds === undefined)
+      throw new TypeError("Backend search requires actAs or conversationIds");
+    const page = required((await this.http.execute("communication.search", this.projectId, { query: v1String(query),
+      pageSize: pageLimit(options.limit), ...(options.cursor === undefined ? {} : { cursor: v1String(options.cursor) }),
+      ...(conversationIds === undefined ? {} : { scope: { conversationIds } }), ...actAsInput(options) })).result);
+    const items = page.items.map(v1SearchHit);
+    if (conversationIds && items.some(item => !conversationIds.includes(item.conversationId))) throw mismatch("Search hit");
+    return { ...page, items };
   }
   async initialize(): Promise<void> {
     const route = v1Record((await this.http.execute("communication.route", this.projectId, {})).result);
@@ -133,12 +214,10 @@ export class V1ProjectServerClient {
     this.http.servingEpoch = v1String(route.servingEpoch);
   }
   async createPrincipal(externalUserId: string): Promise<string> {
-    return required((await this.http.execute("communication.createPrincipal", this.projectId, { externalUserId })).result).principalId;
+    return (await this.principals.create({ externalUserId })).principalId;
   }
   async issueSession(principalId: string, deviceId: string, requestedTtlMs = "900000"): Promise<V1SessionBootstrap> {
-    const issued = required((await this.http.execute("communication.issueSession", this.projectId,
-      { principalId: v1Id(principalId), deviceId: v1Id(deviceId), requestedTtlMs })).result);
-    return { ...issued, session: required(issued.session) };
+    return this.sessions.issue({ principalId, deviceId, requestedTtlMs });
   }
   async sessionRequestOutcome(requestId: string): Promise<V1SessionRequestOutcome> {
     v1Id(requestId);

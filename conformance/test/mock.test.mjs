@@ -133,6 +133,37 @@ describe("GraphQL endpoint", () => {
     await problem(await post("management.capabilities", { plane: "management", credential: mock.descriptor.credentials.management }),
       422, "FEATURE_UNSUPPORTED");
   });
+
+  test("lets backend keys message as an active member and names a missing scope", async () => {
+    const result = async (response, field) => {
+      assert.equal(response.status, 200);
+      return (await response.json()).data[field].result;
+    };
+    const principal = async () => (await result(await createPrincipal(), "createPrincipal")).principalId;
+    const alice = await principal(), carol = await principal();
+    const { conversationId } = await result(await post("communication.createConversation",
+      { input: { title: "Acting as a member", props: {}, members: [{ principalId: alice, role: "member" }] } }), "createConversation");
+    const send = (input, options = {}) =>
+      post("communication.sendMessage", { input: { conversationId, text: "hello", props: {}, ...input }, ...options });
+    const asAlice = await result(await send({ actAsPrincipalId: alice }), "sendMessage");
+    const asService = await result(await send({}), "sendMessage");
+    const read = (input, options = {}) => post("communication.messages", { input: { conversationId, limit: 10, ...input }, ...options });
+    for (const page of [await result(await read({}), "messages"), await result(await read({ actAsPrincipalId: alice }), "messages")]) {
+      assert.deepEqual(page.items.map(item => item.messageId), [asService.messageId, asAlice.messageId]);
+      assert.equal(page.items[1].authorId, alice);
+      assert.match(page.items[0].authorId, UUID);
+      assert.notEqual(page.items[0].authorId, alice);
+    }
+    await problem(await send({ actAsPrincipalId: carol }), 404, "NOT_FOUND");
+    await problem(await read({ actAsPrincipalId: carol }), 404, "NOT_FOUND");
+    const { sessionToken } = await result(await post("communication.issueSession",
+      { input: { principalId: alice, deviceId: randomUUID(), requestedTtlMs: "60000" } }), "issueSession");
+    await problem(await send({ actAsPrincipalId: alice }, { credential: sessionToken }), 403, "FORBIDDEN");
+    await problem(await read({ actAsPrincipalId: alice }, { credential: sessionToken }), 403, "FORBIDDEN");
+    const missing = await problem(await post("communication.members", { credential: mock.descriptor.credentials.backendLimited,
+      input: { conversationId, limit: 10 } }), 403, "SCOPE_REQUIRED");
+    assert.equal(missing.message, "The backend key requires the current membershipManage scope");
+  });
 });
 
 describe("faults", () => {

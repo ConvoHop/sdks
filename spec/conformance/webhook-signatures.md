@@ -106,6 +106,21 @@ npm run generate:conformance
 ## Drivers
 
 A driver that declares the `webhooks.verify` feature passes each vector's
-inputs to its SDK's verifier and returns the result. Until the TypeScript
-SDK exposes webhook verification, the reference driver does not declare
-the feature, so the `webhooks` scenarios are reported as skipped.
+inputs to its SDK's verifier and returns the result. The TypeScript
+reference driver uses `webhooks.verifySignature()` from `@convohop/server`.
+It maps that SDK's finer
+[error codes](../../packages/server/README.md#webhooks) onto the failure
+codes above:
+
+| `@convohop/server` code | Failure code |
+| --- | --- |
+| `MISSING_HEADER`, `INVALID_HEADER` (a repeated header) | `WEBHOOK_HEADERS_MISSING` |
+| `INVALID_TIMESTAMP` | `WEBHOOK_TIMESTAMP_INVALID` |
+| `TIMESTAMP_EXPIRED` | `WEBHOOK_TIMESTAMP_EXPIRED` |
+| `TIMESTAMP_FUTURE` | `WEBHOOK_TIMESTAMP_FUTURE` |
+| `NO_MATCHING_SIGNATURE`, `BODY_TOO_LARGE`, `TOO_MANY_SIGNATURES` | `WEBHOOK_SIGNATURE_INVALID` |
+
+The SDK also rejects bodies over 4096 bytes and headers with more than 8
+signatures, which ConvoHop never sends, so those deliveries cannot carry a
+valid signature. An `INVALID_SECRET` is a configuration error, not a
+failed delivery, so the driver reports it as `INVALID_PARAMS`.

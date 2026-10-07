@@ -1,6 +1,5 @@
 import { v1Operations, v1OutputShapes, type V1Operation, type V1OperationKey, type V1OperationTypes } from "./generated/v1-operations.js";
 
-export type CommunicationOperation = Extract<V1OperationKey, `communication.${string}`>;
 export type OperationInput<K extends V1OperationKey> =
   V1OperationTypes[K]["variables"] extends { input?: infer I } ? NonNullable<I> : Record<string, never>;
 type FieldName<K> = K extends `${"communication" | "management"}.${infer F}` ? F : never;

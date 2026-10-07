@@ -196,10 +196,10 @@ strings.
 | `conversations.get` | `communication.getConversation` | user, backend | `conversationId` |
 | `members.list` | `communication.members` | backend | `conversationId`, *`limit`*, *`cursor`* |
 | `members.add` | `communication.addMembers` | backend | `conversationId`, `members`, *`requestId`* |
-| `messages.send` | `communication.sendMessage` | user | `conversationId`, `text`, *`requestId`* |
-| `messages.list` | `communication.messages` | user | `conversationId`, *`beforeSequence`* |
-| `messages.edit` | `communication.editMessage` | user | `message`, `text`, *`requestId`* |
-| `messages.delete` | `communication.deleteMessage` | user | `message`, *`requestId`* |
+| `messages.send` | `communication.sendMessage` | user, backend | `conversationId`, `text`, *`actAs`*, *`requestId`* |
+| `messages.list` | `communication.messages` | user, backend | `conversationId`, *`beforeSequence`*, *`actAs`* |
+| `messages.edit` | `communication.editMessage` | user, backend | `message`, `text`, *`requestId`* |
+| `messages.delete` | `communication.deleteMessage` | user, backend | `message`, *`requestId`* |
 | `events.list` | `communication.events` | user | `conversationId`, *`after`* |
 | `requests.resolve` | `communication.resolveRequest` | user | `requestId` |
 | `requests.retry` | `communication.resolveRequest` | user | `requestId` |
@@ -208,6 +208,10 @@ strings.
 The catalog is the contract between scenarios and drivers, so changing it
 means updating every driver. A driver may implement a subset; scenarios that
 use an operation a driver does not declare are skipped, not failed.
+`actAs` is for backend clients only: it names the member principal a backend
+key reads or sends as, and the authority audits it. Scenarios pass it only
+from backend clients, and the reference driver rejects it from user clients
+with `INVALID_PARAMS` rather than ignore it.
 
 ### Alignment with the IR
 
@@ -247,8 +251,8 @@ against the IR, so `npm test` fails when they drift apart:
   `requests.retry` step may expect any IR code, because the retry resends
   the original mutation. Error code names appear only in the code fields of
   `expect.error` and `expect.errors`, so none escapes this check.
-  `RATE_LIMITED` is accepted until the rate-limit problem types reach
-  `schema/`; the test then reports that the exception can go.
+  Codes listed in the test's `PENDING_ERROR_CODES` are accepted until the
+  IR defines them; the test then reports that the exception can go.
 - An expected error that pins an HTTP `status` uses the status the IR gives
   its code.
 - The mock's backend-key scopes and GraphQL document size limit
@@ -257,11 +261,10 @@ against the IR, so `npm test` fails when they drift apart:
   when the IR has a `userSession` rule, and refuses every backend key with
   `FORBIDDEN` when it has no `backendKey` rule. Otherwise a key that holds
   exactly the scopes of a rule is authorized, and a key missing a scope that
-  leaves no rule satisfied gets `SCOPE_REQUIRED`. Authorized keys may still
-  get `FEATURE_UNSUPPORTED` for sending, editing and deleting messages,
-  which the mock implements for user sessions only.
+  leaves no rule satisfied gets `SCOPE_REQUIRED`, with a message that names
+  the scope.
 - Every problem the mock raises has a literal code that the IR defines, with
-  the IR's HTTP status for that code. The exceptions are `RATE_LIMITED`, as
+  the IR's HTTP status for that code. The exceptions are pending codes, as
   above, and the mock's own `METHOD_NOT_ALLOWED`, `UNSUPPORTED_MEDIA_TYPE`
   and `MOCK_FAILURE`, which generated SDK requests never trigger unless the
   mock itself fails.
@@ -391,27 +394,24 @@ dev-stack descriptor pointed at a local mock.
 [SDK CI](../../.github/workflows/sdk-ci.yml) runs those tests on Node.js 22
 and 24 as part of `npm test`. The `mock` job of the
 [Conformance workflow](../../.github/workflows/conformance.yml) runs
-`npm run conformance` on Node.js 24 and uploads the reports as the
-`conformance-reports-mock` artifact. Its `dev-stack` job is described under
+`npm run conformance -- --strict` on Node.js 24 and uploads the reports as
+the `conformance-reports-mock` artifact. The mock offers every capability
+and the reference driver declares every feature, so a skip there is a
+regression. Its `dev-stack` job is described under
 [dev-stack target](targets.md#dev-stack-target). The
 [release workflow](../../.github/workflows/release.yml) runs every npm check
-that CI runs, so it also runs `npm run conformance` before it packs a
-release; `npm run check:release` enforces that.
+that CI runs, so it also runs `npm run conformance -- --strict` before it
+packs a release; `npm run check:release` enforces that.
 
 ### Current results
 
-The TypeScript reference driver against the mock passes 48 scenarios and
-skips 15:
+The TypeScript reference driver passes all 64 scenarios against the mock,
+with none skipped, including the 14 `webhooks` scenarios and
+`errors.rate-limited.retry-after`.
 
-- The 14 `webhooks` scenarios, because the TypeScript SDK does not yet
-  expose webhook verification (`webhooks.verify` feature).
-- `errors.rate-limited.retry-after`, because the TypeScript SDK does not
-  yet surface the retry-after delay (`retryAfter` feature).
-
-These skips are explicit and close as the SDK gains the features. Passing
-against the mock shows that the SDK, driver and scenarios agree on the
-public contract. It does not certify a real deployment; for that, run the
-suite against a real target.
+Passing against the mock shows that the SDK, driver and scenarios agree on
+the public contract. It does not certify a real deployment; for that, run
+the suite against a real target.
 
 ## Adding a scenario
 
