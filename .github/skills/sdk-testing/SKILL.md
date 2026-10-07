@@ -20,6 +20,8 @@ Use the existing package test suites:
 - Package metadata and export maps: root `npm run check:packages` (publint
   and attw). Each package's `surface.test.mjs` pins its runtime exports and
   allowed imports.
+- Release scripts, release-please config and workflow policy: root
+  `npm run check:release` (`node:test` in `test/release/`).
 
 Prototype clients and the earlier Python/Go implementations were deliberately
 removed. New language SDKs follow `docs/sdk-strategy.md`. Test the current

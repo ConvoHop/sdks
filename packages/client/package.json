@@ -1,7 +1,7 @@
 {
   "name": "@convohop/client",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "ConvoHop client SDK for browsers and React Native. Uses short-lived user session tokens for conversations, realtime and media.",
   "license": "Apache-2.0",
   "repository": {
@@ -24,8 +24,14 @@
   },
   "files": [
     "dist",
-    "!dist/.tsbuildinfo"
+    "!dist/.tsbuildinfo",
+    "CHANGELOG.md",
+    "NOTICE"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsc --build",
     "test": "npm run build && node --test test/*.test.mjs",

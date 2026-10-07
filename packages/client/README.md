@@ -1,10 +1,12 @@
 # ConvoHop client SDK
 
-`@convohop/client` is unpublished TypeScript/ESM source for the current
-Conversation, LiveSession and Participation API. It runs on end-user devices
-with a short-lived session for one signed-in user, which your backend issues.
-It never holds a backend key. No hosted service is included. Source license:
-[Apache-2.0](../../LICENSE).
+`@convohop/client` is the TypeScript/ESM SDK for the current Conversation,
+LiveSession and Participation API. It runs on end-user devices with a
+short-lived session for one signed-in user, which your backend issues. It
+never holds a backend key. No hosted service is included. It isn't on a
+package registry yet:
+[install it from a GitHub Release](https://github.com/ConvoHop/sdks#install-a-release).
+License: [Apache-2.0](LICENSE).
 
 Build and test from the repository's root npm workspace with Node.js 22+:
 

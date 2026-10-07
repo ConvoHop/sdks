@@ -35,6 +35,11 @@ caller-visible state together. Prioritize:
   (`npm run check:packages`). Do not reintroduce removed
   prototype clients, invitation-only calls or the earlier Python/Go SDKs. New
   language SDKs must follow `docs/sdk-strategy.md`.
+- Releases and workflows (`RELEASING.md`, `npm run check:release`): actions
+  pinned to full commit SHAs, least-privilege job `permissions`, expressions
+  passed to `run:` through `env`, released packages matching
+  `release-please-config.json` and the manifest, exact internal dependency
+  pins, and npm publishing kept a dry run until REL-PUB.
 
 Reproduce suspected defects with the existing test frameworks. Add a failing
 regression before fixing behavior where practical. Inspect consumer effects
