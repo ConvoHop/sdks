@@ -216,7 +216,7 @@ with `INVALID_PARAMS` rather than ignore it.
 ### Alignment with the IR
 
 Each operation names the operation it exercises in
-[`schema/v1-ir.json`](../../schema/v1-ir.json), the language-neutral IR
+[`schema/ir.json`](../../schema/ir.json), the language-neutral IR
 that SDK generators read (see [SDK generation](../../docs/sdk-generation.md)),
 and `realtime.irChannel` names the IR channel that subscriptions use.
 `requests.retry` maps to `communication.resolveRequest` because it resolves

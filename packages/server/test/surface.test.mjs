@@ -8,9 +8,10 @@ import { builtImportSpecifiers, sortedKeys } from "../../../test/package-fixture
 
 test("server runtime exports are pinned", () => {
   assert.deepEqual(sortedKeys(server), [
-    "ScopeRequiredProblem", "V1ManagementClient", "V1Problem", "V1ProjectServerClient", "V1Transport",
-    "WebhookVerificationError", "v1Conversation", "v1Counter", "v1Cursor", "v1Id", "v1Membership", "v1Message",
-    "v1Operations", "v1Page", "v1Record", "v1SearchHit", "v1String", "webhooks",
+    "ConvoHopManagementClient", "ConvoHopProblem", "ConvoHopTransport", "ProjectServerClient",
+    "ScopeRequiredProblem", "WebhookVerificationError", "operationCatalog", "parseConversation",
+    "parseCounter", "parseCursor", "parseId", "parseMembership", "parseMessage", "parseObject", "parsePage",
+    "parseSearchHit", "parseString", "webhooks",
   ]);
 });
 

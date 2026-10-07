@@ -6,7 +6,7 @@ import { codeUnitCompare } from "./naming.mjs";
 /**
  * Emitter plugin API, version 1.
  *
- * An emitter is a pure function from the IR (schema/v1-ir.json) to files:
+ * An emitter is a pure function from the IR (schema/ir.json) to files:
  *
  *   export default defineEmitter({
  *     name: "python-models",

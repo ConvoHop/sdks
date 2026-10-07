@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { after, before, describe, test } from "node:test";
-import { v1Operations } from "../../packages/core/dist/generated/v1-operations.js";
+import { operationCatalog } from "../../packages/core/dist/generated/operations.js";
 import { ControlClient, ControlError } from "../lib/control.mjs";
 import { loadSpec } from "../lib/spec.mjs";
 import { checkDescriptor } from "../lib/target.mjs";
@@ -21,7 +21,7 @@ after(() => mock?.close());
 
 function post(operationKey, { plane = "communication", credential = mock.descriptor.credentials.backend, requestId = randomUUID(),
   context, input, headers = {}, body } = {}) {
-  const operation = v1Operations[operationKey];
+  const operation = operationCatalog[operationKey];
   const url = plane === "management" ? mock.descriptor.managementUrl : mock.descriptor.communicationUrl;
   const variables = { context: context ?? { requestId, projectId: mock.descriptor.projectId, incarnation: mock.descriptor.incarnation },
     ...(input === undefined ? {} : { input }) };
@@ -117,7 +117,7 @@ describe("GraphQL endpoint", () => {
     assert.equal(two.message, "Requests must select exactly one root field");
     await problem(await post("communication.createPrincipal", { plane: "management", credential: mock.descriptor.credentials.management,
       input: { externalUserId: "x" } }), 400, "GRAPHQL_INVALID_REQUEST");
-    const { query, operationName } = v1Operations["communication.createPrincipal"];
+    const { query, operationName } = operationCatalog["communication.createPrincipal"];
     const padded = bytes => JSON.stringify({ query: `${query}\n#${"x".repeat(bytes - Buffer.byteLength(query) - 2)}`, operationName,
       variables: { context: { requestId: randomUUID(), projectId: mock.descriptor.projectId, incarnation: mock.descriptor.incarnation },
         input: { externalUserId: `user-${randomUUID()}` } } });

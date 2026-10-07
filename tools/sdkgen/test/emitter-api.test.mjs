@@ -52,7 +52,7 @@ test("defineEmitter validates the definition and returns a frozen emitter", () =
 });
 
 test("assertSafePath accepts only relative POSIX paths without dot segments", () => {
-  for (const path of ["a", "docs/snippets/v1/alpha/fetchHTTPStatus.md", "packages/@scope/pkg/v1-generated.ts", "a/b_c+d=e,f-g.h", "a/b..c"]) {
+  for (const path of ["a", "docs/snippets/alpha/fetchHTTPStatus.md", "packages/@scope/pkg/graphql-types.ts", "a/b_c+d=e,f-g.h", "a/b..c"]) {
     assert.equal(assertSafePath(path, "test"), path);
   }
   for (const path of ["", "/abs/file", "a//b", "a/", "./a", "a/../b", "..", ".github/workflows/ci.yml", "a\\b", "C:/a", "a b", "naïve.md", "a/.hidden"]) {

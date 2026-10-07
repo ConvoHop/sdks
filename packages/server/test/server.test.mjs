@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { V1ManagementClient, V1ProjectServerClient, V1Problem, v1Operations } from "@convohop/server";
+import { ConvoHopManagementClient, ProjectServerClient, ConvoHopProblem, operationCatalog } from "@convohop/server";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -10,7 +10,7 @@ test("conversation handles grant broadcast permission through generated backend 
   const principalId = crypto.randomUUID(), requestId = crypto.randomUUID(), requests = [];
   const member = { conversationId, principalId, role: "member", status: "active", membershipEpoch: "1",
     visibilityEpoch: "1", revision: "2", visibleFromSequence: "1", canStartBroadcast: true };
-  const server = new V1ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation,
+  const server = new ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation,
     backendKey: "fixture-only", fetch: async (url, options) => {
       const request = JSON.parse(options.body); requests.push(request);
       assert.equal(url, "http://127.0.0.1:18080/graphql");
@@ -30,7 +30,7 @@ test("conversation handles grant broadcast permission through generated backend 
 test("backend data-plane calls carry generated actAsPrincipalId and surface SCOPE_REQUIRED as a typed problem", async () => {
   const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), conversationId = crypto.randomUUID();
   const actAsPrincipalId = crypto.randomUUID(), backendKey = "fixture-backend-key-never-in-errors", requests = [];
-  const server = new V1ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation, backendKey,
+  const server = new ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation, backendKey,
     fetch: async (_url, options) => {
       const request = JSON.parse(options.body); requests.push(request);
       if (request.operationName === "CommunicationInbox")
@@ -43,9 +43,9 @@ test("backend data-plane calls carry generated actAsPrincipalId and surface SCOP
     } });
   for (const key of ["communication.sendMessage", "communication.messages", "communication.getMessage",
     "communication.inbox", "communication.search"])
-    assert.ok(v1Operations[key].inputFields.includes("actAsPrincipalId"), key);
+    assert.ok(operationCatalog[key].inputFields.includes("actAsPrincipalId"), key);
   for (const key of ["communication.editMessage", "communication.deleteMessage", "communication.events"])
-    assert.ok(!v1Operations[key].inputFields.includes("actAsPrincipalId"), key);
+    assert.ok(!operationCatalog[key].inputFields.includes("actAsPrincipalId"), key);
 
   const requestId = crypto.randomUUID(), send = { conversationId, text: "fixture", props: {}, actAsPrincipalId };
   const sent = await server.http.execute("communication.sendMessage", projectId, send, requestId);
@@ -59,7 +59,7 @@ test("backend data-plane calls carry generated actAsPrincipalId and surface SCOP
   assert.equal(requests.length, 1);
 
   await assert.rejects(server.http.execute("communication.inbox", projectId, { limit: 10, actAsPrincipalId }), error => {
-    assert.ok(error instanceof V1Problem);
+    assert.ok(error instanceof ConvoHopProblem);
     assert.equal(error.code, "SCOPE_REQUIRED");
     assert.equal(error.outcome, "rejected");
     assert.equal(error.status, 403);
@@ -72,7 +72,7 @@ test("backend data-plane calls carry generated actAsPrincipalId and surface SCOP
 });
 
 test("the IR grants backend keys only the explicit data-plane scopes and documents SCOPE_REQUIRED", () => {
-  const ir = JSON.parse(readFileSync(new URL("../../../schema/v1-ir.json", import.meta.url), "utf8"));
+  const ir = JSON.parse(readFileSync(new URL("../../../schema/ir.json", import.meta.url), "utf8"));
   const operation = id => {
     const found = ir.operations.find(item => item.id === id);
     assert.ok(found, id);
@@ -110,7 +110,7 @@ test("backend onboarding uses current generated operations and returns the typed
   const session = { sessionId: crypto.randomUUID(), principalId, deviceId, incarnation,
     sessionRevision: "1", expiresAt: new Date(Date.now() + 900000).toISOString(), status: "active" };
   const issued = { session, sessionToken: "fixture-user-session", tokenExpiresAt: session.expiresAt };
-  const client = new V1ProjectServerClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
+  const client = new ProjectServerClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
     backendKey: "fixture-backend", fetch: async (url, options) => {
       assert.equal(url, "http://localhost:18080/graphql");
       assert.equal(options.headers.authorization, "Bearer fixture-backend");
@@ -141,7 +141,7 @@ test("backend onboarding uses current generated operations and returns the typed
 test("management key issuance and permits retain generated inputs, not result secrets", async () => {
   const projectId = crypto.randomUUID(), deliveryId = crypto.randomUUID(), redemptionRequestId = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 60000).toISOString(), requests = [];
-  const client = new V1ManagementClient({ baseUrl: "http://localhost:18081", actorId: crypto.randomUUID(),
+  const client = new ConvoHopManagementClient({ baseUrl: "http://localhost:18081", actorId: crypto.randomUUID(),
     accessToken: "fixture-operator", fetch: async (_url, options) => {
       assert.equal(options.headers.authorization, "Bearer fixture-operator");
       const request = JSON.parse(options.body); requests.push(request);
@@ -167,7 +167,7 @@ test("usage queries use generated management operations and keep meter quantitie
   const scopes = { ManagementDeploymentUsage: ["DeploymentUsage", { deploymentId }],
     ManagementProjectUsage: ["ProjectUsage", { projectId }], ManagementOrganizationUsage: ["OrganizationUsage", { orgId }] };
   let quantity = "9223372036854775807";
-  const client = new V1ManagementClient({ baseUrl: "http://localhost:18081", actorId: crypto.randomUUID(),
+  const client = new ConvoHopManagementClient({ baseUrl: "http://localhost:18081", actorId: crypto.randomUUID(),
     accessToken: "fixture-operator", fetch: async (_url, options) => {
       const request = JSON.parse(options.body); requests.push(request);
       if (!Object.hasOwn(scopes, request.operationName)) throw new Error("Unexpected operation");
@@ -196,7 +196,7 @@ test("usage queries use generated management operations and keep meter quantitie
   for (const malformed of [5, "-1", "1.5", "01", "9223372036854775808"]) {
     quantity = malformed;
     await assert.rejects(client.http.execute("management.projectUsage", undefined, { projectId }),
-      { name: "V1Problem", code: "INVALID_RESPONSE" }, String(malformed));
+      { name: "ConvoHopProblem", code: "INVALID_RESPONSE" }, String(malformed));
   }
   assert.equal(requests.length, 8);
 });
@@ -204,7 +204,7 @@ test("usage queries use generated management operations and keep meter quantitie
 test("membership batches use generated GraphQL and preserve original identity and decimal revisions", async () => {
   const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), conversationId = crypto.randomUUID();
   const requestId = crypto.randomUUID(), principalId = crypto.randomUUID(), requests = [];
-  const client = new V1ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation,
+  const client = new ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation,
     backendKey: "pk_fixture-only", fetch: async (url, options) => {
       const request = JSON.parse(options.body); requests.push({ url, request });
       return reply(request, { result: { items: [{
@@ -225,7 +225,7 @@ test("membership batches use generated GraphQL and preserve original identity an
 
 test("hosted management requires explicit deployment and project inputs without local fallback", async () => {
   const calls = [];
-  const client = new V1ManagementClient({ baseUrl: "https://management.example.test", actorId: crypto.randomUUID(),
+  const client = new ConvoHopManagementClient({ baseUrl: "https://management.example.test", actorId: crypto.randomUUID(),
     accessToken: "fixture-only", fetch: async (url, options) => {
       const request = JSON.parse(options.body); calls.push({ url, request });
       const field = request.operationName === "ManagementCreateProject" ? "createProject" : "createDeployment";
@@ -255,7 +255,7 @@ test("async project recovery restores before route access and survives scoped ba
   } });
   const input = { title: "original", props: {}, members: [{ principalId, role: "member" }] };
   const clientOptions = { baseUrl: "http://localhost:18080", projectId, incarnation, asyncRecoveryStorage: saved };
-  const first = new V1ProjectServerClient({ ...clientOptions, backendKey: "fixture-original-backend",
+  const first = new ProjectServerClient({ ...clientOptions, backendKey: "fixture-original-backend",
     fetch: async (_url, init) => {
       assert.equal(init.headers.authorization, "Bearer " + "fixture-original-backend");
       throw new Error("response lost");
@@ -264,7 +264,7 @@ test("async project recovery restores before route access and survives scoped ba
   const original = first.http.recoveryStates[0], requests = [];
   let committed = false, mutations = 0;
   const refreshedKey = "fixture-refreshed-backend";
-  const restarted = new V1ProjectServerClient({ ...clientOptions, backendKey: refreshedKey, fetch: async (_url, init) => {
+  const restarted = new ProjectServerClient({ ...clientOptions, backendKey: refreshedKey, fetch: async (_url, init) => {
     assert.equal(init.headers.authorization, "Bearer " + refreshedKey);
     const request = JSON.parse(init.body); requests.push(request);
     assert.equal(request.variables.context.projectId, projectId);
@@ -308,7 +308,7 @@ test("project async write failure prevents authority effects and retains the sup
   const requestId = crypto.randomUUID(), projectId = crypto.randomUUID(), incarnation = crypto.randomUUID();
   const saved = asyncStorage({ onWrite: async () => { throw new Error("database unavailable"); } });
   let fetches = 0;
-  const client = new V1ProjectServerClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
+  const client = new ProjectServerClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
     backendKey: "fixture-backend", asyncRecoveryStorage: saved, fetch: async () => { fetches++; } });
   await assert.rejects(client.conversations.create({ title: "original", props: {}, members: [] }, { requestId }),
     { code: "RECOVERY_STORAGE_FAILURE", requestId, outcome: "unknown" });
@@ -321,7 +321,7 @@ test("project async write failure prevents authority effects and retains the sup
 
 test("management forwards async storage and scopes the journal to the actor rather than credentials", async () => {
   const actorId = crypto.randomUUID(), saved = asyncStorage();
-  const client = new V1ManagementClient({ baseUrl: "http://localhost:18081", actorId,
+  const client = new ConvoHopManagementClient({ baseUrl: "http://localhost:18081", actorId,
     accessToken: "fixture-operator", asyncRecoveryStorage: saved, fetch: async (_url, init) => {
       return reply(JSON.parse(init.body), { result: {
         orgId: crypto.randomUUID(), name: "original", status: "active", revision: "1",
@@ -338,9 +338,9 @@ test("both Server SDK constructors reject conflicting storage before loading eit
   const recoveryStorage = { getItem: () => { reads++; return null; }, setItem() {}, removeItem() {} };
   const saved = asyncStorage();
   const common = { baseUrl: "http://localhost:18080", recoveryStorage, asyncRecoveryStorage: saved };
-  assert.throws(() => new V1ProjectServerClient({ ...common, projectId: crypto.randomUUID(), incarnation: crypto.randomUUID(),
+  assert.throws(() => new ProjectServerClient({ ...common, projectId: crypto.randomUUID(), incarnation: crypto.randomUUID(),
     backendKey: "fixture-backend" }), /recoveryStorage.*asyncRecoveryStorage/);
-  assert.throws(() => new V1ManagementClient({ ...common, actorId: crypto.randomUUID(),
+  assert.throws(() => new ConvoHopManagementClient({ ...common, actorId: crypto.randomUUID(),
     accessToken: "fixture-operator" }), /recoveryStorage.*asyncRecoveryStorage/);
   assert.equal(reads, 0);
   assert.equal(saved.reads.length, 0);

@@ -70,7 +70,7 @@ describe("enumerations agree across the spec, the mock and the reference driver"
   });
 });
 
-// Scenario expectations that schema/v1-ir.json does not define yet.
+// Scenario expectations that schema/ir.json does not define yet.
 // TODO(#9): remove RATE_LIMITED (HTTP 429 with Retry-After) once the rate-limit problem types land.
 const PENDING_ERROR_CODES = new Set(["RATE_LIMITED"]);
 // HTTP guards that generated SDK requests never trip, and the mock's own internal failures.
@@ -113,10 +113,10 @@ function namedStrings(value, names, found = new Set()) {
 /** Whether a realtime.collect step expects its subscription to have ended, as the runner evaluates it. */
 const expectsEnd = step => step.expect?.closed ?? (step.until?.closed === true);
 
-describe("the operation catalog and scenarios agree with schema/v1-ir.json", () => {
+describe("the operation catalog and scenarios agree with schema/ir.json", () => {
   let ir, irOperations, channel;
   before(async () => {
-    ir = await readJson(join(REPO_ROOT, "schema", "v1-ir.json"));
+    ir = await readJson(join(REPO_ROOT, "schema", "ir.json"));
     irOperations = new Map(ir.operations.map(operation => [operation.id, operation]));
     channel = ir.realtime.channels.find(candidate => candidate.name === files.operations.realtime.irChannel);
   });

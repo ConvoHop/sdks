@@ -1,8 +1,8 @@
 // The only driver module that imports SDK packages: retarget the reference driver here.
 import { createRequire } from "node:module";
-import { V1Client, V1Problem, v1Cursor, v1Message } from "@convohop/client";
-import type { V1Cursor, V1Graphql, V1Message, V1Record, V1RecoveryStorage } from "@convohop/client";
-import { V1ManagementClient, V1ProjectServerClient, WebhookVerificationError, webhooks } from "@convohop/server";
+import { ConvoHopClient, ConvoHopProblem, parseCursor, parseMessage } from "@convohop/client";
+import type { ConversationCursor, GraphqlTypes, ConversationMessage, ProtocolObject, RecoveryStorage } from "@convohop/client";
+import { ConvoHopManagementClient, ProjectServerClient, WebhookVerificationError, webhooks } from "@convohop/server";
 import type { WebhookVerificationCode } from "@convohop/server";
 import { ParamsError, entries, integer, isRecord, optionalText, record, strings, text, type Args } from "./params.mjs";
 
@@ -19,7 +19,7 @@ export const FEATURES: readonly string[] = ["realtime", "recovery.storage", "ret
 
 export function driverError(error: unknown): DriverError {
   // The SDK reports transport failures with status 0; the protocol uses null for "no authority HTTP status".
-  if (error instanceof V1Problem) return { code: error.code, status: error.status === 0 ? null : error.status,
+  if (error instanceof ConvoHopProblem) return { code: error.code, status: error.status === 0 ? null : error.status,
     outcome: error.outcome, requestId: error.requestId,
     retryAfterMs: error.retryAfter === undefined ? null : error.retryAfter * 1000, message: error.message };
   return { code: "SDK_ERROR", status: null, outcome: null, requestId: null, retryAfterMs: null,
@@ -27,7 +27,7 @@ export function driverError(error: unknown): DriverError {
 }
 
 /** Synchronous in-memory recovery storage; one named instance is shared by every client created with that name. */
-export class MemoryStorage implements V1RecoveryStorage {
+export class MemoryStorage implements RecoveryStorage {
   readonly #values = new Map<string, string>();
   getItem(key: string): string | null { return this.#values.get(key) ?? null; }
   setItem(key: string, value: string): void { this.#values.set(key, value); }
@@ -41,9 +41,9 @@ export interface ClientSpec {
 }
 
 export type SdkClient =
-  | { role: "user"; sdk: V1Client }
-  | { role: "backend"; sdk: V1ProjectServerClient }
-  | { role: "management"; sdk: V1ManagementClient };
+  | { role: "user"; sdk: ConvoHopClient }
+  | { role: "backend"; sdk: ProjectServerClient }
+  | { role: "management"; sdk: ConvoHopManagementClient };
 
 function required(value: string | undefined, name: string): string {
   if (value === undefined) throw new ParamsError(`${name} is required for this role`);
@@ -55,13 +55,13 @@ export function createClient(spec: ClientSpec): SdkClient {
   const storage = spec.storage === undefined ? {} : { recoveryStorage: spec.storage };
   try {
     switch (spec.role) {
-      case "user": return { role: "user", sdk: new V1Client({ baseUrl: spec.baseUrl,
+      case "user": return { role: "user", sdk: new ConvoHopClient({ baseUrl: spec.baseUrl,
         projectId: required(spec.projectId, "projectId"), incarnation: required(spec.incarnation, "incarnation"),
         principalId: required(spec.principalId, "principalId"), sessionToken: spec.credential, ...storage }) };
-      case "backend": return { role: "backend", sdk: new V1ProjectServerClient({ baseUrl: spec.baseUrl,
+      case "backend": return { role: "backend", sdk: new ProjectServerClient({ baseUrl: spec.baseUrl,
         projectId: required(spec.projectId, "projectId"), incarnation: required(spec.incarnation, "incarnation"),
         backendKey: spec.credential, ...storage }) };
-      case "management": return { role: "management", sdk: new V1ManagementClient({ baseUrl: spec.baseUrl,
+      case "management": return { role: "management", sdk: new ConvoHopManagementClient({ baseUrl: spec.baseUrl,
         accessToken: spec.credential, actorId: required(spec.actorId, "actorId"), ...storage }) };
     }
   } catch (error) {
@@ -77,16 +77,16 @@ function decode<T>(parse: (value: unknown) => T, value: unknown, name: string): 
   catch { throw new ParamsError(`${name} is not a valid protocol value`); }
 }
 
-const message = (args: Args): V1Message => decode(v1Message, args.message, "message");
-const cursor = (args: Args): V1Cursor | undefined => args.after === undefined ? undefined : decode(v1Cursor, args.after, "after");
+const message = (args: Args): ConversationMessage => decode(parseMessage, args.message, "message");
+const cursor = (args: Args): ConversationCursor | undefined => args.after === undefined ? undefined : decode(parseCursor, args.after, "after");
 
-function conversationInput(args: Args): V1Graphql.CreateConversationRequestInput {
+function conversationInput(args: Args): GraphqlTypes.CreateConversationRequestInput {
   const input = record(args.input, "input");
   return { title: text(input, "title"), props: record(input.props, "input.props"),
     members: entries(input, "members").map(member => ({ principalId: text(member, "principalId"), role: text(member, "role") })) };
 }
 
-function batch(args: Args): V1Graphql.MemberBatchEntryInput[] {
+function batch(args: Args): GraphqlTypes.MemberBatchEntryInput[] {
   return entries(args, "members").map(member => ({ principalId: text(member, "principalId"), role: text(member, "role"),
     expectedRevision: text(member, "expectedRevision") }));
 }
@@ -112,7 +112,7 @@ function own(args: Args): Args {
   return args;
 }
 
-const user = new Map<string, Operation<V1Client>>(Object.entries({
+const user = new Map<string, Operation<ConvoHopClient>>(Object.entries({
   "route.initialize": client => client.initialize(),
   "conversations.get": (client, args) => client.getConversation(text(args, "conversationId")),
   "messages.list": (client, args) => client.messages(text(own(args), "conversationId"), optionalText(args, "beforeSequence")),
@@ -123,9 +123,9 @@ const user = new Map<string, Operation<V1Client>>(Object.entries({
   "events.list": (client, args) => client.events(text(args, "conversationId"), cursor(args)),
   "requests.resolve": (client, args) => client.requests.resolve(text(args, "requestId")),
   "requests.retry": (client, args) => client.requests.retry(text(args, "requestId")),
-} satisfies Record<string, Operation<V1Client>>));
+} satisfies Record<string, Operation<ConvoHopClient>>));
 
-const backend = new Map<string, Operation<V1ProjectServerClient>>(Object.entries({
+const backend = new Map<string, Operation<ProjectServerClient>>(Object.entries({
   "route.initialize": async client => { await client.initialize(); return null; },
   "principals.create": async (client, args) => ({ principalId: await client.createPrincipal(text(args, "externalUserId")) }),
   "sessions.issue": (client, args) =>
@@ -151,12 +151,12 @@ const backend = new Map<string, Operation<V1ProjectServerClient>>(Object.entries
     return client.conversation(current.conversationId).messages.delete({ messageId: current.messageId,
       expectedRevision: current.revision }, idempotency(args));
   },
-} satisfies Record<string, Operation<V1ProjectServerClient>>));
+} satisfies Record<string, Operation<ProjectServerClient>>));
 
-const management = new Map<string, Operation<V1ManagementClient>>(Object.entries({
+const management = new Map<string, Operation<ConvoHopManagementClient>>(Object.entries({
   "backendKeys.issue": (client, args) =>
     client.issueBackendKey(text(args, "projectId"), text(args, "name"), strings(args, "scopes"), text(args, "expiresAt")),
-} satisfies Record<string, Operation<V1ManagementClient>>));
+} satisfies Record<string, Operation<ConvoHopManagementClient>>));
 
 export const OPERATIONS: Readonly<Record<Role, readonly string[]>> = {
   user: [...user.keys()], backend: [...backend.keys()], management: [...management.keys()],
@@ -171,7 +171,7 @@ export function operation(client: SdkClient, name: string, args: Args): Promise<
   }
 }
 
-export interface RealtimeSink { events(events: readonly V1Record[]): void; error(error: DriverError): void }
+export interface RealtimeSink { events(events: readonly ProtocolObject[]): void; error(error: DriverError): void }
 export interface RealtimeHandle { close(): void; readonly closed: boolean }
 
 /** Opens the SDK's replay-then-subscribe watcher; resolves once initial reconciliation has been applied. */

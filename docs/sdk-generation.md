@@ -8,9 +8,9 @@ and has no dependencies other than `graphql`.
 
 ```mermaid
 flowchart LR
-  S["schema/*-v1.graphql"] --> C{"Annotation check"}
-  A["schema/v1-annotations.json"] --> C
-  C --> I["IR: schema/v1-ir.json"]
+  S["schema/*.graphql"] --> C{"Annotation check"}
+  A["schema/annotations.json"] --> C
+  C --> I["IR: schema/ir.json"]
   I --> E1["ir"]
   I --> E2["graphql-operations"]
   I --> E3["typescript"]
@@ -39,14 +39,14 @@ byte-identical files.
 
 ## Inputs
 
-- **`schema/<plane>-v1.graphql`**: one GraphQL schema per plane, exported by
+- **`schema/<plane>.graphql`**: one GraphQL schema per plane, exported by
   the ConvoHop API. Today the planes are `communication` and `management`.
   Each root field of a plane is an operation with the ID `<plane>.<field>`,
   for example `communication.sendMessage`.
-- **`schema/v1-annotations.json`**: facts that GraphQL can't express, such as
+- **`schema/annotations.json`**: facts that GraphQL can't express, such as
   which SDK layer exposes an operation, the credentials and scopes it needs,
   and how it retries, paginates and streams. It's validated by
-  [`schema/v1-annotations.schema.json`](../schema/v1-annotations.schema.json)
+  [`schema/annotations.schema.json`](../schema/annotations.schema.json)
   and by cross-checks against the schemas. See
   [Annotating operations](../CONTRIBUTING.md#annotating-operations).
 
@@ -57,15 +57,15 @@ Don't edit generated files by hand. Change the inputs and run
 
 | Emitter | Files | Contents |
 | --- | --- | --- |
-| `ir` | `schema/v1-ir.json` | The IR that every emitter reads |
-| `graphql-operations` | `schema/operations-v1.graphql`, `schema/v1-operations.json` | One GraphQL document per operation, and a JSON catalog of them |
-| `typescript` | `packages/core/src/generated/v1-generated.ts`, `packages/core/src/generated/v1-operations.ts` | Operation types and the operation catalog of `@convohop/core` |
-| `doc-snippets` | `docs/snippets/v1/` | One reference snippet per operation, for the documentation site |
+| `ir` | `schema/ir.json` | The IR that every emitter reads |
+| `graphql-operations` | `schema/operations.graphql`, `schema/operations.json` | One GraphQL document per operation, and a JSON catalog of them |
+| `typescript` | `packages/core/src/generated/graphql-types.ts`, `packages/core/src/generated/operations.ts` | Operation types and the operation catalog of `@convohop/core` |
+| `doc-snippets` | `docs/snippets/` | One reference snippet per operation, for the documentation site |
 
 ## The IR
 
-[`schema/v1-ir.json`](../schema/v1-ir.json) is plain JSON, validated against
-[`schema/v1-ir.schema.json`](../schema/v1-ir.schema.json) every time it's
+[`schema/ir.json`](../schema/ir.json) is plain JSON, validated against
+[`schema/ir.schema.json`](../schema/ir.schema.json) every time it's
 built. Emitters read only the IR. They never parse GraphQL or the annotations
 themselves, so every language sees the same facts.
 
@@ -225,7 +225,7 @@ target language, or the authority doesn't accept them:
 
 ## JSON Schema validation
 
-`schema/v1-annotations.schema.json` and `schema/v1-ir.schema.json` use a
+`schema/annotations.schema.json` and `schema/ir.schema.json` use a
 subset of JSON Schema draft 2020-12. A small built-in validator
 ([`tools/sdkgen/lib/json-schema.mjs`](../tools/sdkgen/lib/json-schema.mjs))
 checks them, so the generator needs no extra dependencies. It supports:
@@ -246,7 +246,7 @@ can also read both files.
 ## Documentation snippets
 
 The `doc-snippets` emitter writes one Markdown snippet per operation to
-[`docs/snippets/v1`](snippets/v1), for the documentation site. Each snippet
+[`docs/snippets`](snippets), for the documentation site. Each snippet
 describes the operation's layer, authorization, idempotency, pagination,
 realtime behavior, context, input, result, errors and GraphQL document.
 `index.json` lists every operation with its snippet path, and includes

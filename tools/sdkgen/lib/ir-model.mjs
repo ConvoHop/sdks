@@ -1,7 +1,7 @@
 import { EmitterError } from "./emitter.mjs";
 
 /**
- * Pure helpers over the IR (schema/v1-ir.json). Emitters read only the IR, so
+ * Pure helpers over the IR (schema/ir.json). Emitters read only the IR, so
  * they use these helpers instead of graphql-js.
  */
 
@@ -30,7 +30,7 @@ export function requireType(types, name, where) {
 
 /**
  * The runtime operation catalog keyed by operation id, as published in
- * schema/v1-operations.json and @convohop/core's `v1Operations`.
+ * schema/operations.json and @convohop/core's `operationCatalog`.
  */
 export function operationCatalog(ir) {
   const types = byName(ir.types);

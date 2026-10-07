@@ -22,8 +22,8 @@ unreleased workspaces `private`; pin every action to a full commit SHA and
 grant each job least-privilege `permissions`. npm publishing stays a dry run
 until registry publishing (REL-PUB) is approved.
 
-`tools/sdkgen` generates from the schemas plus `schema/v1-annotations.json`
-through a versioned language-neutral IR (`schema/v1-ir.json`); see
+`tools/sdkgen` generates from the schemas plus `schema/annotations.json`
+through a versioned language-neutral IR (`schema/ir.json`); see
 `docs/sdk-generation.md`. Every schema operation needs an annotation entry
 (`npm run check:annotations`; see CONTRIBUTING "Annotating operations").
 Annotate real behavior: layer must match the accepted credentials, and

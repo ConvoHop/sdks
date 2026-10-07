@@ -23,7 +23,7 @@ caller-visible state together. Prioritize:
   reconnect, source rights and cleanup of media tracks/elements/listeners.
 - Current generated exports/builds, matching types/runtime behavior, Node 22
   and 24, and honest capability/publication documentation.
-- Operation annotations in `schema/v1-annotations.json` that match real
+- Operation annotations in `schema/annotations.json` that match real
   backend behavior: layer versus accepted credentials, required backend-key
   scopes, mutation idempotency class, pagination fields and emitted events.
   Generator changes keep the IR versioned and validated, and regenerate

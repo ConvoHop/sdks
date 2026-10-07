@@ -12,12 +12,12 @@ test("the repository and fixture annotations cover every operation", () => {
   const result = checkAnnotations(sources);
   assert.equal(formatAnnotationReport(result), [
     `Annotations OK: ${Object.keys(sources.annotations.operations).length} operations across ${sources.planes.length} planes`,
-    "are annotated in schema/v1-annotations.json.",
+    "are annotated in schema/annotations.json.",
   ].join(" "));
   assert.equal(result.ok, true);
   assert.equal(result.operationCount, Object.keys(sources.annotations.operations).length);
 
-  assert.equal(formatAnnotationReport(check()), "Annotations OK: 14 operations across 2 planes are annotated in schema/v1-annotations.json.");
+  assert.equal(formatAnnotationReport(check()), "Annotations OK: 14 operations across 2 planes are annotated in schema/annotations.json.");
 });
 
 test("the failure report lists missing, unknown, invalid and inconsistent entries in that order", () => {
@@ -31,20 +31,20 @@ test("the failure report lists missing, unknown, invalid and inconsistent entrie
     planes: { beta: text => replaceOnce(text, "type Mutation {\n", "type Mutation {\n  widgets(context: ContextInput!): Boolean!\n") },
   });
   assert.equal(result.ok, false);
-  assert.equal(formatAnnotationReport(result), `Annotation check failed for schema/v1-annotations.json: 1 missing, 2 unknown, 1 invalid, 1 inconsistent.
+  assert.equal(formatAnnotationReport(result), `Annotation check failed for schema/annotations.json: 1 missing, 2 unknown, 1 invalid, 1 inconsistent.
 
 MISSING: 1 schema operation(s) have no entry under "operations":
-  alpha.ping  mutation      schema/alpha-v1.graphql
+  alpha.ping  mutation      schema/alpha.graphql
 
 UNKNOWN: 2 annotation(s) match no schema operation. Remove or rename them:
-  gamma.x     no schema/gamma-v1.graphql plane schema exists
-  alpha.pong  schema/alpha-v1.graphql has no root field "pong" (renamed to alpha.ping?)
+  gamma.x     no schema/gamma.graphql plane schema exists
+  alpha.pong  schema/alpha.graphql has no root field "pong" (renamed to alpha.ping?)
 
-INVALID: 1 violation(s) of schema/v1-annotations.schema.json:
+INVALID: 1 violation(s) of schema/annotations.schema.json:
   /operations/alpha.items/layer: must be one of "client", "server", "both" (got "edge")
 
 INCONSISTENT: 1 problem(s):
-  schema/beta-v1.graphql: mutation field "widgets" and query field "widgets" both map to operation id "beta.widgets"; root field names must be unique within a plane
+  schema/beta.graphql: mutation field "widgets" and query field "widgets" both map to operation id "beta.widgets"; root field names must be unique within a plane
 
 Starter entries for the missing operations. Paste them under "operations", replace every <placeholder>,
 check each default, then run \`npm run check:annotations\` again:
@@ -69,12 +69,12 @@ test("starter entries default what the schema implies and fail until every place
   };
   const result = check({ annotations: remove });
   assert.deepEqual(result.missing.map(item => [item.id, item.kind, item.schemaPath]), [
-    ["alpha.ping", "mutation", "schema/alpha-v1.graphql"],
-    ["beta.widgets", "query", "schema/beta-v1.graphql"],
+    ["alpha.ping", "mutation", "schema/alpha.graphql"],
+    ["beta.widgets", "query", "schema/beta.graphql"],
   ]);
   const report = formatAnnotationReport(result);
-  assert.match(report, /^Annotation check failed for schema\/v1-annotations\.json: 2 missing\.\n/);
-  assert.match(report, /\n {2}alpha\.ping {4}mutation {6}schema\/alpha-v1\.graphql\n {2}beta\.widgets {2}query {9}schema\/beta-v1\.graphql\n/);
+  assert.match(report, /^Annotation check failed for schema\/annotations\.json: 2 missing\.\n/);
+  assert.match(report, /\n {2}alpha\.ping {4}mutation {6}schema\/alpha\.graphql\n {2}beta\.widgets {2}query {9}schema\/beta\.graphql\n/);
   const [ping, widgets] = result.missing.map(item => item.stub);
   assert.deepEqual(widgets, {
     summary: "<One sentence that says what the operation does.>",
@@ -135,13 +135,13 @@ test("schema violations are reported without semantic checks", () => {
 const forPlane = (plane, edit) => ({ planes: { [plane]: edit } });
 const SEMANTIC_CASES = [
   ["a discovered plane needs an entry", { annotations: a => { delete a.planes.beta; } }, [
-    ["/planes", 'missing entry "beta" for schema/beta-v1.graphql'],
+    ["/planes", 'missing entry "beta" for schema/beta.graphql'],
   ]],
   ["a plane entry needs a schema", { annotations: a => { a.planes.gamma = structuredClone(a.planes.beta); } }, [
-    ["/planes/gamma", "no schema/gamma-v1.graphql plane schema exists"],
+    ["/planes/gamma", "no schema/gamma.graphql plane schema exists"],
   ]],
-  ["plane schema file", { annotations: a => { a.planes.beta.schema = "alpha-v1.graphql"; } }, [
-    ["/planes/beta/schema", 'must be "beta-v1.graphql"'],
+  ["plane schema file", { annotations: a => { a.planes.beta.schema = "alpha.graphql"; } }, [
+    ["/planes/beta/schema", 'must be "beta.graphql"'],
   ]],
   ["resolveOperation plane and kind", { annotations: a => { a.planes.beta.resolveOperation = "alpha.ping"; } }, [
     ["/planes/beta/resolveOperation", '"alpha.ping" must be in the beta plane'],
@@ -151,9 +151,9 @@ const SEMANTIC_CASES = [
     ["/planes/beta/resolveOperation", 'unknown operation "beta.nothing"'],
   ]],
   ["context input type", { annotations: a => { a.planes.beta.context.input = "Widget"; } }, [
-    ["/planes/beta/context/input", "Widget is not an input type in schema/beta-v1.graphql"],
+    ["/planes/beta/context/input", "Widget is not an input type in schema/beta.graphql"],
     ...["query capabilities", "query resolveRequest", "query widgets", "mutation createWidget"]
-      .map(field => [`schema/beta-v1.graphql ${field}`, "must take context: Widget!"]),
+      .map(field => [`schema/beta.graphql ${field}`, "must take context: Widget!"]),
   ]],
   ["context rule fields", { annotations: a => { a.planes.alpha.context.rules[1].fields.push("nope", "requestId"); } }, [
     ["/planes/alpha/context/rules/1/fields/1", 'ContextInput has no field "nope"'],
@@ -163,7 +163,7 @@ const SEMANTIC_CASES = [
     ["/planes/beta/context/rules/0/except/0", '"alpha.redeem" must be in the beta plane'],
   ]],
   ["custom scalars", { annotations: a => { a.scalars.Extra = a.scalars.Ratio; delete a.scalars.Ratio; } }, [
-    ["/scalars", 'missing entry for custom scalar "Ratio" declared in schema/beta-v1.graphql'],
+    ["/scalars", 'missing entry for custom scalar "Ratio" declared in schema/beta.graphql'],
     ["/scalars/Extra", 'no plane schema declares scalar "Extra"'],
   ]],
   ["retryable error codes", { annotations: a => { a.errorCodes.NOT_FOUND.retryable = true; } }, [
@@ -173,7 +173,7 @@ const SEMANTIC_CASES = [
     ["/errorSets/http/codes/1", 'unknown error code "NOPE"'],
   ]],
   ["envelope plane", { annotations: a => { a.realtime.envelope.plane = "beta"; } }, [
-    ["/realtime/envelope/type", "Event is not an object type in schema/beta-v1.graphql"],
+    ["/realtime/envelope/type", "Event is not an object type in schema/beta.graphql"],
     ["/realtime/channels/eventStream/subscription", '"alpha.eventStream" must be in the beta plane'],
     ["/realtime/channels/eventStream/replay", '"alpha.events" must be in the beta plane'],
   ]],
@@ -321,9 +321,9 @@ const SEMANTIC_CASES = [
   ]],
   ["root field arguments", forPlane("alpha", text => replaceOnce(text,
     "ping(context: ContextInput!, input: PingInput): Boolean!", "ping(context: ContextInput, input: String, dryRun: Boolean): Boolean!")), [
-    ["schema/alpha-v1.graphql mutation ping", "must take context: ContextInput!"],
-    ["schema/alpha-v1.graphql mutation ping", "input must be an input object type, not String"],
-    ["schema/alpha-v1.graphql mutation ping", 'unsupported argument "dryRun"; root fields take only context and input'],
+    ["schema/alpha.graphql mutation ping", "must take context: ContextInput!"],
+    ["schema/alpha.graphql mutation ping", "input must be an input object type, not String"],
+    ["schema/alpha.graphql mutation ping", 'unsupported argument "dryRun"; root fields take only context and input'],
   ]],
 ];
 

@@ -1,5 +1,5 @@
 {
-  "$schema": "./v1-annotations.schema.json",
+  "$schema": "./annotations.schema.json",
   "annotationsVersion": 1,
   "api": {
     "name": "convohop",
@@ -36,7 +36,7 @@
   },
   "planes": {
     "communication": {
-      "schema": "communication-v1.graphql",
+      "schema": "communication.graphql",
       "summary": "Conversations, members, messages, receipts, realtime events and live sessions inside one project.",
       "context": {
         "argument": "context",
@@ -64,7 +64,7 @@
       "resolveOperation": "communication.resolveRequest"
     },
     "management": {
-      "schema": "management-v1.graphql",
+      "schema": "management.graphql",
       "summary": "Organizations, deployments, projects, backend keys and webhooks.",
       "context": {
         "argument": "context",

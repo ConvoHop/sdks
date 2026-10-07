@@ -1,5 +1,5 @@
 {
-  "$schema": "./v1-annotations.schema.json",
+  "$schema": "./annotations.schema.json",
   "annotationsVersion": 1,
   "api": {
     "name": "edge",
@@ -26,7 +26,7 @@
   },
   "planes": {
     "alpha": {
-      "schema": "alpha-v1.graphql",
+      "schema": "alpha.graphql",
       "summary": "Items, jobs and realtime events.",
       "context": {
         "argument": "context",
@@ -49,7 +49,7 @@
       "resolveOperation": "alpha.resolveRequest"
     },
     "beta": {
-      "schema": "beta-v1.graphql",
+      "schema": "beta.graphql",
       "summary": "Widgets.",
       "context": {
         "argument": "context",

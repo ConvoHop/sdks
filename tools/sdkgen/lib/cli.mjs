@@ -15,7 +15,7 @@ const REGENERATE = "Run npm run generate:graphql and commit the result.";
 const USAGE = `Usage: node tools/sdkgen/cli.mjs <command> [--check] [--root <dir>]
 
 Commands:
-  check-annotations         Check schema/v1-annotations.json against the GraphQL schemas.
+  check-annotations         Check schema/annotations.json against the GraphQL schemas.
   generate [--check]        Build the IR and run every configured emitter. With --check, write
                             nothing and fail if a generated file is missing, stale or edited.
   emit <name>... [--check]  Run only the named emitters: ${config.emitters.map(emitter => emitter.name).join(", ")}.

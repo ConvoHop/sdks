@@ -1,5 +1,5 @@
 import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
-import { V1Problem, v1Id, v1Record, v1String } from "@convohop/core";
+import { ConvoHopProblem, parseId, parseObject, parseString } from "@convohop/core";
 import type { LiveParticipationHandle, LiveConnectOptions, LiveConnectionGrant } from "./live.js";
 
 type NativeGrant = LiveConnectionGrant;
@@ -57,11 +57,11 @@ function register(grant: NativeGrant) {
           if (this.#admitted) return;
           event.stopImmediatePropagation();
           try {
-            const frame = v1Record(JSON.parse(v1String(event.data)));
+            const frame = parseObject(JSON.parse(parseString(event.data)));
             if (frame.type !== "convohop.admitted.v1" || frame.leaseExpiresAt !== gate.grant.leaseExpiresAt) throw new Error("Native admission was not accepted");
             if (frame.participationId !== gate.grant.participationId)
               throw new Error("Native admission participation mismatch");
-            const value = { admissionId: v1Id(frame.admissionId), nativeConnectionId: v1Id(frame.nativeConnectionId) };
+            const value = { admissionId: parseId(frame.admissionId), nativeConnectionId: parseId(frame.nativeConnectionId) };
             this.#admitted = true; clearTimeout(timer); gate.resolve(value);
             this.dispatchEvent(new Event("open"));
           } catch {
@@ -97,32 +97,32 @@ function register(grant: NativeGrant) {
     }
   } };
 }
-export interface V1RemoteMedia {
+export interface RemoteMedia {
   trackId: string; participantIdentity: string; kind: "audio" | "video"; element: HTMLMediaElement;
 }
-export interface V1MediaOptions {
+export interface MediaOptions {
   iceTransportPolicy?: "all" | "relay";
   localVideo?: HTMLVideoElement;
-  onTrack?: (track: V1RemoteMedia) => void;
-  onTrackRemoved?: (track: V1RemoteMedia) => void;
+  onTrack?: (track: RemoteMedia) => void;
+  onTrackRemoved?: (track: RemoteMedia) => void;
   onDisconnected?: () => void;
   onAudioPlaybackBlocked?: () => void;
 }
-export interface V1MediaStats {
+export interface MediaStats {
   audioTracks: number; videoTracks: number; audioBytesReceived: number;
   videoBytesReceived: number; framesDecoded: number; localAudioEnabled: boolean; localVideoEnabled: boolean;
   tracks: { trackId: string; participantIdentity: string; kind: "audio" | "video"; bytesReceived: number; framesDecoded: number }[];
   transports?: { localCandidateType: string; remoteCandidateType: string; protocol: string; relayProtocol?: string }[];
 }
-export class V1MediaConnection {
+export class MediaConnection {
   readonly #room: Room;
-  readonly #tracks = new Map<string, { remote: V1RemoteMedia; track: RemoteTrack }>();
+  readonly #tracks = new Map<string, { remote: RemoteMedia; track: RemoteTrack }>();
   #registration: ReturnType<typeof register> | undefined;
   #closed = false;
   #left = false;
-  #reconnecting: Promise<V1MediaConnection> | undefined;
+  #reconnecting: Promise<MediaConnection> | undefined;
   readonly #permissions: { microphone: boolean; camera: boolean };
-  readonly options: V1MediaOptions;
+  readonly options: MediaOptions;
   admissionId: string | undefined;
   nativeConnectionId: string | undefined;
   private constructor(readonly participation: LiveParticipationHandle, options: LiveConnectOptions) {
@@ -145,7 +145,7 @@ export class V1MediaConnection {
       if (element instanceof HTMLVideoElement) element.playsInline = true;
       element.setAttribute("data-remote-kind", track.kind);
       element.setAttribute("data-participant-identity", participant.identity);
-      const remote: V1RemoteMedia = { trackId: publication.trackSid, participantIdentity: participant.identity, kind: track.kind, element };
+      const remote: RemoteMedia = { trackId: publication.trackSid, participantIdentity: participant.identity, kind: track.kind, element };
       this.#tracks.set(publication.trackSid, { remote, track }); options.onTrack?.(remote);
     });
     this.#room.on(RoomEvent.TrackUnsubscribed, (track, publication) => {
@@ -165,10 +165,10 @@ export class V1MediaConnection {
     });
   }
   /** @internal Connect never starts capture. */
-  static async connectParticipation(participation: LiveParticipationHandle, options: LiveConnectOptions): Promise<V1MediaConnection> {
-    const result = new V1MediaConnection(participation, options);
+  static async connectParticipation(participation: LiveParticipationHandle, options: LiveConnectOptions): Promise<MediaConnection> {
+    const result = new MediaConnection(participation, options);
     const { requestId, grant } = await participation.connectionGrant(options);
-    const ticket = v1Record(grant.admissionTicket), lease = v1Record(grant.forwardingLease);
+    const ticket = parseObject(grant.admissionTicket), lease = parseObject(grant.forwardingLease);
     if (ticket.participationId !== participation.participationId || lease.participationId !== participation.participationId ||
         lease.leaseVersion !== "2") throw new TypeError("Native proof is not participation-bound");
     await participation.connectionAttempted();
@@ -187,11 +187,11 @@ export class V1MediaConnection {
       result.admissionId = admission.admissionId; result.nativeConnectionId = admission.nativeConnectionId;
     } catch {
       await result.disconnect();
-      throw new V1Problem("MEDIA_CONNECT_FAILED", requestId, "unknown", 0,
+      throw new ConvoHopProblem("MEDIA_CONNECT_FAILED", requestId, "unknown", 0,
         "Native connection failed. The participation reservation remains; resolve and retry connect, or explicitly leave.");
     }
   }
-  reconnect(): Promise<V1MediaConnection> {
+  reconnect(): Promise<MediaConnection> {
     if (this.#reconnecting) return this.#reconnecting;
     if (this.#left) return Promise.reject(new Error("A deliberately closed connection cannot reconnect"));
     const work = async () => {
@@ -216,8 +216,8 @@ export class V1MediaConnection {
     if (enabled && track && this.options.localVideo) track.attach(this.options.localVideo);
   }
   async enableAudio(): Promise<void> { await this.#room.startAudio(); }
-  async stats(): Promise<V1MediaStats> {
-    const result: V1MediaStats = { audioTracks: 0, videoTracks: 0, audioBytesReceived: 0, videoBytesReceived: 0,
+  async stats(): Promise<MediaStats> {
+    const result: MediaStats = { audioTracks: 0, videoTracks: 0, audioBytesReceived: 0, videoBytesReceived: 0,
       framesDecoded: 0, localAudioEnabled: this.#room.localParticipant.isMicrophoneEnabled,
       localVideoEnabled: this.#room.localParticipant.isCameraEnabled, tracks: [] };
     result.transports = [];
@@ -226,14 +226,14 @@ export class V1MediaConnection {
       const report = await track.getRTCStatsReport();
       const inbound = { trackId: remote.trackId, participantIdentity: remote.participantIdentity, kind: remote.kind, bytesReceived: 0, framesDecoded: 0 };
       report?.forEach(value => {
-        const stat = v1Record(value);
+        const stat = parseObject(value);
         if (stat.type === "transport" && typeof stat.selectedCandidatePairId === "string") {
           const pair = report?.get(stat.selectedCandidatePairId);
           const local = pair && report?.get(pair.localCandidateId);
           const remote = pair && report?.get(pair.remoteCandidateId);
           if (local && remote) {
-            const transport = { localCandidateType: v1String(local.candidateType),
-              remoteCandidateType: v1String(remote.candidateType), protocol: v1String(local.protocol),
+            const transport = { localCandidateType: parseString(local.candidateType),
+              remoteCandidateType: parseString(remote.candidateType), protocol: parseString(local.protocol),
               ...(typeof local.relayProtocol === "string" ? { relayProtocol: local.relayProtocol } : {}) };
             if (!result.transports?.some(value => JSON.stringify(value) === JSON.stringify(transport))) result.transports?.push(transport);
           }

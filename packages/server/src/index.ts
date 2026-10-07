@@ -1,10 +1,10 @@
 export * from "@convohop/core";
-export { V1ManagementClient } from "./management.js";
-export type { V1DeploymentOptions, V1ProjectOptions } from "./management.js";
-export { V1ProjectServerClient } from "./project.js";
+export { ConvoHopManagementClient } from "./management.js";
+export type { DeploymentOptions, ProjectOptions } from "./management.js";
+export { ProjectServerClient } from "./project.js";
 export type {
   Capabilities, InboxOptions, InboxPage, OperationStatus, Principal, RequestResolution, SearchOptions,
-  SearchPage, V1SessionRequestOutcome, SessionRevocation,
+  SearchPage, SessionRequestOutcome, SessionRevocation,
 } from "./project.js";
 export type {
   ActAsCommandOptions, MemberPage, MemberRole, MessageListOptions, MessagePage, ServerConversation,

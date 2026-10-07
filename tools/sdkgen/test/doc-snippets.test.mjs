@@ -78,7 +78,7 @@ test("index.json lists exactly the operation snippets, in IR order", () => {
     assert.deepEqual(Object.keys(index), ["snippetsVersion", "irVersion", "source", "operations"]);
     assert.equal(index.snippetsVersion, SNIPPETS_VERSION);
     assert.equal(index.irVersion, ir.irVersion);
-    assert.equal(index.source, "schema/v1-ir.json");
+    assert.equal(index.source, "schema/ir.json");
     assert.deepEqual(index.operations.map(entry => entry.id), ir.operations.map(operation => operation.id));
     const listed = index.operations.map(entry => `${DEFAULT_DIRECTORY}/${entry.path}`).sort(codeUnitCompare);
     const operationFiles = files.map(file => file.path).filter(path => !/\/(README\.md|index\.json)$/.test(path)).sort(codeUnitCompare);

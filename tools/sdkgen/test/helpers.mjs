@@ -14,10 +14,10 @@ export const FIXTURE_ROOT = fileURLToPath(new URL("./fixtures/edge/", import.met
 export const GOLDEN_ROOT = fileURLToPath(new URL("./golden/", import.meta.url));
 export const UPDATE_GOLDEN = process.env.UPDATE_GOLDEN === "1";
 
-const SCHEMA_FILES = ["v1-annotations.schema.json", "v1-ir.schema.json"];
+const SCHEMA_FILES = ["annotations.schema.json", "ir.schema.json"];
 const REPO_SCHEMAS = {
-  annotationsSchema: join(REPO_ROOT, "schema/v1-annotations.schema.json"),
-  irSchema: join(REPO_ROOT, "schema/v1-ir.schema.json"),
+  annotationsSchema: join(REPO_ROOT, "schema/annotations.schema.json"),
+  irSchema: join(REPO_ROOT, "schema/ir.schema.json"),
 };
 
 export function repoSources() {
@@ -41,7 +41,7 @@ export function fixtureSources({ annotations, planes = {}, extraPlanes = {} } = 
   };
   sources.planes = sources.planes.map(plane => (planes[plane.name] ? reparse(plane, planes[plane.name](plane.text)) : plane));
   for (const [name, text] of Object.entries(extraPlanes)) {
-    const file = `${name}-v1.graphql`;
+    const file = `${name}.graphql`;
     sources.planes.push(reparse({ name, file, path: `schema/${file}` }, text));
   }
   return sources;

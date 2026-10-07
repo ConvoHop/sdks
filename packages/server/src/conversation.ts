@@ -1,9 +1,9 @@
 import {
-  v1Counter, v1Cursor, v1Id, v1String, type CommandOptions, type OperationPayload, type PageOptions, type V1Conversation,
-  type V1Graphql, type V1Membership, type V1Message, type V1Record, type V1SendReceipt,
+  parseCounter, parseCursor, parseId, parseString, type CommandOptions, type OperationPayload, type PageOptions, type Conversation,
+  type GraphqlTypes, type Membership, type ConversationMessage, type ProtocolObject, type SendReceipt,
 } from "@convohop/core";
 import type { LiveSession, LiveSessionPage } from "./live.js";
-import type { V1ProjectServerClient } from "./project.js";
+import type { ProjectServerClient } from "./project.js";
 import { actAsInput, mismatch, pageInput, pageLimit, required, type ActAsOptions } from "./result.js";
 
 export type MemberRole = "member" | "moderator";
@@ -24,33 +24,33 @@ function memberRole(role: string): MemberRole {
 export class ServerConversation {
   readonly messages: {
     list(options?: MessageListOptions): Promise<MessagePage>;
-    get(messageId: string, options?: ActAsOptions): Promise<V1Message>;
-    send(message: { text: string; props?: V1Record }, options?: ActAsCommandOptions): Promise<V1SendReceipt>;
-    edit(input: Omit<V1Graphql.EditMessageRequestInput, "conversationId">, options?: CommandOptions): Promise<V1Message>;
-    delete(input: Omit<V1Graphql.DeleteMessageRequestInput, "conversationId">, options?: CommandOptions): Promise<V1Message>;
+    get(messageId: string, options?: ActAsOptions): Promise<ConversationMessage>;
+    send(message: { text: string; props?: ProtocolObject }, options?: ActAsCommandOptions): Promise<SendReceipt>;
+    edit(input: Omit<GraphqlTypes.EditMessageRequestInput, "conversationId">, options?: CommandOptions): Promise<ConversationMessage>;
+    delete(input: Omit<GraphqlTypes.DeleteMessageRequestInput, "conversationId">, options?: CommandOptions): Promise<ConversationMessage>;
   };
   readonly members: {
     list(options?: PageOptions): Promise<MemberPage>;
-    add(input: { principalId: string; role: MemberRole; expectedRevision: string }, options?: CommandOptions): Promise<V1Membership>;
-    addBatch(members: V1Graphql.MemberBatchEntryInput[], options?: CommandOptions): Promise<V1Membership[]>;
-    remove(input: { principalId: string; expectedRevision: string }, options?: CommandOptions): Promise<V1Membership>;
-    grantHistory(input: Omit<V1Graphql.HistoryGrantRequestInput, "conversationId">, options?: CommandOptions): Promise<V1Membership>;
-    setBroadcastPermission(input: Omit<V1Graphql.SetBroadcastPermissionInput, "conversationId">,
+    add(input: { principalId: string; role: MemberRole; expectedRevision: string }, options?: CommandOptions): Promise<Membership>;
+    addBatch(members: GraphqlTypes.MemberBatchEntryInput[], options?: CommandOptions): Promise<Membership[]>;
+    remove(input: { principalId: string; expectedRevision: string }, options?: CommandOptions): Promise<Membership>;
+    grantHistory(input: Omit<GraphqlTypes.HistoryGrantRequestInput, "conversationId">, options?: CommandOptions): Promise<Membership>;
+    setBroadcastPermission(input: Omit<GraphqlTypes.SetBroadcastPermissionInput, "conversationId">,
       options?: CommandOptions): Promise<OperationPayload<"communication.setBroadcastPermission">>;
   };
   readonly live: {
     current(): Promise<LiveSession | null>;
     history(options?: PageOptions): Promise<LiveSessionPage>;
   };
-  constructor(readonly client: V1ProjectServerClient, readonly conversationId: string) {
-    v1Id(conversationId);
+  constructor(readonly client: ProjectServerClient, readonly conversationId: string) {
+    parseId(conversationId);
     const execute = client.http.execute.bind(client.http), projectId = client.projectId;
-    const message = (value: V1Message | null, messageId: string): V1Message => {
+    const message = (value: ConversationMessage | null, messageId: string): ConversationMessage => {
       const current = required(value);
       if (current.messageId !== messageId || current.conversationId !== conversationId) throw mismatch("Message");
       return current;
     };
-    const member = (value: V1Membership | null, principalId: string): V1Membership => {
+    const member = (value: Membership | null, principalId: string): Membership => {
       const current = required(value);
       if (current.principalId !== principalId || current.conversationId !== conversationId) throw mismatch("Member");
       return current;
@@ -59,51 +59,51 @@ export class ServerConversation {
       list: async (options = {}) => {
         const page = required((await execute("communication.messages", projectId, { conversationId,
           limit: pageLimit(options.limit), ...actAsInput(options),
-          ...(options.beforeSequence === undefined ? {} : { beforeSequence: v1Counter(options.beforeSequence) }) })).result);
+          ...(options.beforeSequence === undefined ? {} : { beforeSequence: parseCounter(options.beforeSequence) }) })).result);
         if (page.items.some(item => item.conversationId !== conversationId)) throw mismatch("Message page");
         return page;
       },
       get: async (messageId, options = {}) => message((await execute("communication.getMessage", projectId,
-        { conversationId, messageId: v1Id(messageId), ...actAsInput(options) })).result, messageId),
+        { conversationId, messageId: parseId(messageId), ...actAsInput(options) })).result, messageId),
       send: async (input, options = {}) => {
         const receipt = required((await execute("communication.sendMessage", projectId,
-          { conversationId, text: v1String(input.text), props: input.props ?? {}, ...actAsInput(options) },
+          { conversationId, text: parseString(input.text), props: input.props ?? {}, ...actAsInput(options) },
           options.requestId)).result);
-        const cursor = v1Cursor(receipt.cursor);
+        const cursor = parseCursor(receipt.cursor);
         if (receipt.status !== "sent" || receipt.conversationId !== conversationId || cursor.conversationId !== conversationId ||
             cursor.sequence !== receipt.sequence || cursor.incarnation !== client.http.incarnation)
           throw new TypeError("Invalid send receipt scope");
         return { ...receipt, cursor };
       },
       edit: async (input, options = {}) => message((await execute("communication.editMessage", projectId,
-        { ...input, conversationId, messageId: v1Id(input.messageId), expectedRevision: v1Counter(input.expectedRevision) },
+        { ...input, conversationId, messageId: parseId(input.messageId), expectedRevision: parseCounter(input.expectedRevision) },
         options.requestId)).result, input.messageId),
       delete: async (input, options = {}) => message((await execute("communication.deleteMessage", projectId,
-        { ...input, conversationId, messageId: v1Id(input.messageId), expectedRevision: v1Counter(input.expectedRevision) },
+        { ...input, conversationId, messageId: parseId(input.messageId), expectedRevision: parseCounter(input.expectedRevision) },
         options.requestId)).result, input.messageId),
     };
     this.members = {
       list: async (options = {}) => {
         const page = required((await execute("communication.members", projectId, { conversationId,
-          limit: pageLimit(options.limit), ...(options.cursor === undefined ? {} : { cursor: v1String(options.cursor) }) })).result);
+          limit: pageLimit(options.limit), ...(options.cursor === undefined ? {} : { cursor: parseString(options.cursor) }) })).result);
         if (page.items.some(item => item.conversationId !== conversationId)) throw mismatch("Member page");
         return page;
       },
       add: async (input, options = {}) => member((await execute("communication.addMember", projectId,
-        { conversationId, principalId: v1Id(input.principalId), role: memberRole(input.role),
-          expectedRevision: v1Counter(input.expectedRevision) }, options.requestId)).result, input.principalId),
+        { conversationId, principalId: parseId(input.principalId), role: memberRole(input.role),
+          expectedRevision: parseCounter(input.expectedRevision) }, options.requestId)).result, input.principalId),
       addBatch: (members, options = {}) => client.addMembers(conversationId, members, options.requestId),
       remove: async (input, options = {}) => member((await execute("communication.removeMember", projectId,
-        { conversationId, principalId: v1Id(input.principalId), expectedRevision: v1Counter(input.expectedRevision) },
+        { conversationId, principalId: parseId(input.principalId), expectedRevision: parseCounter(input.expectedRevision) },
         options.requestId)).result, input.principalId),
       grantHistory: async (input, options = {}) => member((await execute("communication.historyGrant", projectId,
-        { ...input, conversationId, principalId: v1Id(input.principalId), expectedRevision: v1Counter(input.expectedRevision),
-          membershipEpoch: v1Counter(input.membershipEpoch), fromSequence: v1Counter(input.fromSequence) },
+        { ...input, conversationId, principalId: parseId(input.principalId), expectedRevision: parseCounter(input.expectedRevision),
+          membershipEpoch: parseCounter(input.membershipEpoch), fromSequence: parseCounter(input.fromSequence) },
         options.requestId)).result, input.principalId),
       setBroadcastPermission: async (input, options = {}) => {
         const payload = await execute("communication.setBroadcastPermission", projectId,
-          { ...input, conversationId, principalId: v1Id(input.principalId),
-            expectedMembershipRevision: v1Counter(input.expectedMembershipRevision) }, options.requestId);
+          { ...input, conversationId, principalId: parseId(input.principalId),
+            expectedMembershipRevision: parseCounter(input.expectedMembershipRevision) }, options.requestId);
         member(payload.result.member, input.principalId);
         return payload;
       },
@@ -121,16 +121,16 @@ export class ServerConversation {
       },
     };
   }
-  async get(): Promise<V1Conversation> {
+  async get(): Promise<Conversation> {
     const conversation = required((await this.client.http.execute("communication.getConversation", this.client.projectId,
       { conversationId: this.conversationId })).result);
     if (conversation.conversationId !== this.conversationId) throw mismatch("Conversation");
     return conversation;
   }
-  async update(input: Omit<V1Graphql.UpdateConversationRequestInput, "conversationId">,
-    options: CommandOptions = {}): Promise<V1Conversation> {
+  async update(input: Omit<GraphqlTypes.UpdateConversationRequestInput, "conversationId">,
+    options: CommandOptions = {}): Promise<Conversation> {
     const conversation = required((await this.client.http.execute("communication.updateConversation", this.client.projectId,
-      { ...input, conversationId: this.conversationId, expectedRevision: v1Counter(input.expectedRevision) },
+      { ...input, conversationId: this.conversationId, expectedRevision: parseCounter(input.expectedRevision) },
       options.requestId)).result);
     if (conversation.conversationId !== this.conversationId) throw mismatch("Conversation");
     return conversation;

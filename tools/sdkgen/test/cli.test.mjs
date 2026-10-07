@@ -23,7 +23,7 @@ function cli(...argv) {
 const generatedPaths = root => renderEmitters(buildIr(loadSources({ root })), config.emitters, { options: config.options }).map(file => file.path);
 
 function editAnnotations(root, edit) {
-  const path = join(root, "schema/v1-annotations.json");
+  const path = join(root, "schema/annotations.json");
   const annotations = JSON.parse(readFileSync(path, "utf8"));
   edit(annotations);
   writeFileSync(path, formatJson(annotations));
@@ -43,9 +43,9 @@ test("generate writes every generated file once, and --check then passes", t => 
 test("generate --check reports edited, missing and stale files without touching them", t => {
   const root = copyFixture(t);
   assert.equal(cli("generate", "--root", root).status, 0);
-  writeFileSync(join(root, "schema/v1-operations.json"), "{}\n");
-  rmSync(join(root, "docs/snippets/v1/alpha/ping.md"));
-  writeFileSync(join(root, "docs/snippets/v1/alpha/old.md"), "## `old`\n");
+  writeFileSync(join(root, "schema/operations.json"), "{}\n");
+  rmSync(join(root, "docs/snippets/alpha/ping.md"));
+  writeFileSync(join(root, "docs/snippets/alpha/old.md"), "## `old`\n");
   const before = listTree(root);
 
   const check = cli("generate", "--check", "--root", root);
@@ -53,19 +53,19 @@ test("generate --check reports edited, missing and stale files without touching 
     status: 1,
     out: "",
     err: [
-      "Generated GraphQL drift: schema/v1-operations.json",
-      "Generated GraphQL drift: docs/snippets/v1/alpha/ping.md (missing)",
-      "Generated GraphQL drift: docs/snippets/v1/alpha/old.md (stale)",
+      "Generated GraphQL drift: schema/operations.json",
+      "Generated GraphQL drift: docs/snippets/alpha/ping.md (missing)",
+      "Generated GraphQL drift: docs/snippets/alpha/old.md (stale)",
       REGENERATE,
     ].join("\n"),
   });
   assert.deepEqual(listTree(root), before);
-  assert.equal(readFileSync(join(root, "schema/v1-operations.json"), "utf8"), "{}\n");
+  assert.equal(readFileSync(join(root, "schema/operations.json"), "utf8"), "{}\n");
 
   const fix = cli("generate", "--root", root);
   assert.deepEqual(fix, {
     status: 0,
-    out: ["wrote schema/v1-operations.json", "wrote docs/snippets/v1/alpha/ping.md", "removed docs/snippets/v1/alpha/old.md", SUMMARY].join("\n"),
+    out: ["wrote schema/operations.json", "wrote docs/snippets/alpha/ping.md", "removed docs/snippets/alpha/old.md", SUMMARY].join("\n"),
     err: "",
   });
   assert.equal(cli("generate", "--check", "--root", root).status, 0);
@@ -73,15 +73,15 @@ test("generate --check reports edited, missing and stale files without touching 
 
 test("emit runs only the named emitters and checks only their files", t => {
   const root = copyFixture(t);
-  assert.deepEqual(cli("emit", "ir", "--root", root), { status: 0, out: `wrote schema/v1-ir.json\n${SUMMARY}`, err: "" });
+  assert.deepEqual(cli("emit", "ir", "--root", root), { status: 0, out: `wrote schema/ir.json\n${SUMMARY}`, err: "" });
   assert.equal(existsSync(join(root, "packages")), false);
   assert.equal(existsSync(join(root, "docs")), false);
   assert.deepEqual(cli("emit", "ir", "--check", "--root", root), { status: 0, out: `${SUMMARY}\n1 generated files are up to date.`, err: "" });
   const snippets = cli("emit", "typescript", "doc-snippets", "--check", "--root", root);
   assert.equal(snippets.status, 1);
-  assert.match(snippets.err, /^Generated GraphQL drift: packages\/core\/src\/generated\/v1-generated\.ts \(missing\)$/m);
-  assert.match(snippets.err, /^Generated GraphQL drift: docs\/snippets\/v1\/index\.json \(missing\)$/m);
-  assert.doesNotMatch(snippets.err, /v1-ir\.json/);
+  assert.match(snippets.err, /^Generated GraphQL drift: packages\/core\/src\/generated\/graphql-types\.ts \(missing\)$/m);
+  assert.match(snippets.err, /^Generated GraphQL drift: docs\/snippets\/index\.json \(missing\)$/m);
+  assert.doesNotMatch(snippets.err, /ir\.json/);
 });
 
 test("ir prints the IR without writing files", t => {
@@ -123,7 +123,7 @@ test("check-annotations lists missing and unknown operations, and generation ref
   const root = copyFixture(t);
   assert.deepEqual(cli("check-annotations", "--root", root), {
     status: 0,
-    out: "Annotations OK: 14 operations across 2 planes are annotated in schema/v1-annotations.json.",
+    out: "Annotations OK: 14 operations across 2 planes are annotated in schema/annotations.json.",
     err: "",
   });
   editAnnotations(root, annotations => {
@@ -133,28 +133,28 @@ test("check-annotations lists missing and unknown operations, and generation ref
   const check = cli("check-annotations", "--root", root);
   assert.equal(check.status, 1);
   assert.equal(check.out, "");
-  assert.match(check.err, /^Annotation check failed for schema\/v1-annotations\.json: 1 missing, 1 unknown\.$/m);
-  assert.match(check.err, /^ {2}alpha\.ping +mutation +schema\/alpha-v1\.graphql$/m);
-  assert.match(check.err, /^ {2}alpha\.gone +schema\/alpha-v1\.graphql has no root field "gone"$/m);
+  assert.match(check.err, /^Annotation check failed for schema\/annotations\.json: 1 missing, 1 unknown\.$/m);
+  assert.match(check.err, /^ {2}alpha\.ping +mutation +schema\/alpha\.graphql$/m);
+  assert.match(check.err, /^ {2}alpha\.gone +schema\/alpha\.graphql has no root field "gone"$/m);
   assert.match(check.err, /^ {2}"alpha\.ping": \{$/m, "prints a starter entry");
   for (const command of [["generate"], ["generate", "--check"], ["ir"]]) {
     const result = cli(...command, "--root", root);
     assert.equal(result.status, 1, command.join(" "));
     assert.equal(result.err, check.err, command.join(" "));
   }
-  assert.equal(existsSync(join(root, "schema/v1-ir.json")), false);
+  assert.equal(existsSync(join(root, "schema/ir.json")), false);
 });
 
 test("unreadable sources exit 1 with the file name", t => {
   const root = copyFixture(t);
-  writeFileSync(join(root, "schema/v1-annotations.json"), "{\n");
+  writeFileSync(join(root, "schema/annotations.json"), "{\n");
   const invalid = cli("ir", "--root", root);
   assert.equal(invalid.status, 1);
-  assert.match(invalid.err, /^schema\/v1-annotations\.json is not valid JSON: /);
-  rmSync(join(root, "schema/v1-annotations.json"));
+  assert.match(invalid.err, /^schema\/annotations\.json is not valid JSON: /);
+  rmSync(join(root, "schema/annotations.json"));
   const missing = cli("generate", "--root", root);
   assert.equal(missing.status, 1);
-  assert.match(missing.err, /^schema\/v1-annotations\.json cannot be read: ENOENT/);
+  assert.match(missing.err, /^schema\/annotations\.json cannot be read: ENOENT/);
 });
 
 test("the entry point sets the process exit code", t => {

@@ -140,7 +140,7 @@ scenarios on Node.js 24. Neither workflow publishes or deploys anything.
   source for generated operations, input and output types, and runtime
   response validation. After you change them, run `npm run generate:graphql`.
   `npm run check:graphql` detects drift. Don't edit generated files by hand.
-- [`schema/v1-annotations.json`](schema/v1-annotations.json) annotates every
+- [`schema/annotations.json`](schema/annotations.json) annotates every
   operation with its SDK layer, authorization, idempotency, pagination,
   realtime behavior and error codes. The schemas and annotations compile into
   a language-neutral IR that every SDK generator reads. See

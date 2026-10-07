@@ -1,6 +1,6 @@
 // Generated from the current unversioned GraphQL schemas. Run npm run generate:graphql.
-import type * as Generated from "./v1-generated.js";
-export interface V1OperationTypes {
+import type * as Generated from "./graphql-types.js";
+export interface OperationTypes {
   "communication.capabilities": { variables: Generated.CommunicationCapabilitiesQueryVariables; result: Generated.CommunicationCapabilitiesQuery };
   "communication.route": { variables: Generated.CommunicationRouteQueryVariables; result: Generated.CommunicationRouteQuery };
   "communication.currentSession": { variables: Generated.CommunicationCurrentSessionQueryVariables; result: Generated.CommunicationCurrentSessionQuery };
@@ -72,10 +72,10 @@ export interface V1OperationTypes {
   "management.configureWebhook": { variables: Generated.ManagementConfigureWebhookMutationVariables; result: Generated.ManagementConfigureWebhookMutation };
   "management.disableWebhook": { variables: Generated.ManagementDisableWebhookMutationVariables; result: Generated.ManagementDisableWebhookMutation };
 }
-export type V1OperationKey = keyof V1OperationTypes;
-export interface V1Operation { plane: string; kind: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }
-export type V1OutputShape = { kind: "scalar" } | { kind: "enum"; values: readonly string[] } | { kind: "object"; fields: Readonly<Record<string, string>> };
-export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
+export type OperationKey = keyof OperationTypes;
+export interface OperationCatalogEntry { plane: string; kind: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }
+export type OutputShape = { kind: "scalar" } | { kind: "enum"; values: readonly string[] } | { kind: "object"; fields: Readonly<Record<string, string>> };
+export const outputShapes: Readonly<Record<string, OutputShape>> = {
   "AcknowledgeCredentialReply": {
     "kind": "object",
     "fields": {
@@ -1892,7 +1892,7 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
     }
   }
 };
-export const v1Operations: Record<V1OperationKey, V1Operation> = {
+export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.capabilities": {
     "plane": "communication",
     "kind": "query",
