@@ -2,7 +2,9 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const specifierPattern = /\b(?:from|import)\s*\(?\s*["']([^"']+)["']/g;
+// Static import and export statements, side-effect imports and dynamic import() calls. A statement must start a line
+// or follow a semicolon, so string data such as a generated field named "from" or "import" is never a specifier.
+const specifierPattern = /(?:(?:^|;)[ \t]*(?:(?:import|export)\b[^"'`;]*?\bfrom|import)|\bimport\s*\()\s*["']([^"']+)["']/gm;
 
 // Maps each bare specifier imported or re-exported by a package's built JavaScript to the files using it.
 export async function builtImportSpecifiers(distUrl) {

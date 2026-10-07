@@ -2192,6 +2192,89 @@ query ManagementDeploymentUsage($context: RequestContextInput!, $input: Deployme
       observedAt
       complete
       reason
+      from
+      to
+      meters {
+        meter
+        unit
+        quantity
+        emitted
+      }
+      aggregatedThrough
+    }
+  }
+}
+
+query ManagementProjectUsage($context: RequestContextInput!, $input: ProjectUsageRequestInput!) {
+  projectUsage(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      projectId
+      source
+      observedAt
+      complete
+      reason
+      from
+      to
+      meters {
+        meter
+        unit
+        quantity
+        emitted
+      }
+      aggregatedThrough
+    }
+  }
+}
+
+query ManagementOrganizationUsage($context: RequestContextInput!, $input: OrganizationUsageRequestInput!) {
+  organizationUsage(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      source
+      observedAt
+      complete
+      reason
+      from
+      to
+      meters {
+        meter
+        unit
+        quantity
+        emitted
+      }
+      aggregatedThrough
     }
   }
 }

@@ -266,6 +266,10 @@ type DeploymentUsage {
 	observedAt: String!
 	complete: Boolean!
 	reason: String!
+	from: String!
+	to: String!
+	meters: [UsageMeter!]!
+	aggregatedThrough: String
 }
 
 type DisablePrincipalReply {
@@ -1088,6 +1092,18 @@ type OrganizationPage {
 	nextCursor: String
 }
 
+type OrganizationUsage {
+	orgId: UUID!
+	source: String!
+	observedAt: String!
+	complete: Boolean!
+	reason: String!
+	from: String!
+	to: String!
+	meters: [UsageMeter!]!
+	aggregatedThrough: String
+}
+
 scalar PageSize
 
 """
@@ -1136,6 +1152,18 @@ type Project {
 	status: String!
 	revision: Decimal!
 	policyRevision: Decimal!
+}
+
+type ProjectUsage {
+	projectId: UUID!
+	source: String!
+	observedAt: String!
+	complete: Boolean!
+	reason: String!
+	from: String!
+	to: String!
+	meters: [UsageMeter!]!
+	aggregatedThrough: String
 }
 
 scalar Properties
@@ -1612,6 +1640,13 @@ input UpdateConversationRequestInput {
 	expectedRevision: Decimal!
 	title: String
 	props: Properties
+}
+
+type UsageMeter {
+	meter: String!
+	unit: String!
+	quantity: Decimal!
+	emitted: Boolean!
 }
 
 type WebhookDelivery {
