@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/v17.6.0/schemas/config.json",
+  "bootstrap-sha": "5c6124a18f32bdb540d92537e438fe02eb094a4d",
+  "initial-version": "0.1.0",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": false,
+  "include-component-in-tag": true,
+  "include-v-in-tag": true,
+  "tag-separator": "-",
+  "draft": true,
+  "force-tag-creation": true,
+  "separate-pull-requests": false,
+  "pull-request-header": ":robot: release-please maintains this pull request. Its checks don't start by themselves: after each update, select Approve workflows to run in the merge box, or close and reopen it. Merge it only after the release is approved. See RELEASING.md.",
+  "changelog-sections": [
+    { "type": "feat", "section": "Features" },
+    { "type": "fix", "section": "Bug Fixes" },
+    { "type": "perf", "section": "Performance Improvements" },
+    { "type": "revert", "section": "Reverts" },
+    { "type": "chore", "section": "Miscellaneous Chores", "hidden": true },
+    { "type": "docs", "section": "Documentation", "hidden": true },
+    { "type": "style", "section": "Styles", "hidden": true },
+    { "type": "refactor", "section": "Code Refactoring", "hidden": true },
+    { "type": "test", "section": "Tests", "hidden": true },
+    { "type": "build", "section": "Build System", "hidden": true },
+    { "type": "ci", "section": "Continuous Integration", "hidden": true }
+  ],
+  "plugins": [{ "type": "node-workspace" }],
+  "packages": {
+    "packages/core": { "release-type": "node", "component": "core" },
+    "packages/client": { "release-type": "node", "component": "client" },
+    "packages/server": { "release-type": "node", "component": "server" }
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "@convohop/server",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "ConvoHop server SDK for trusted Node.js runtimes. Uses secret backend keys for management and data-plane access.",
   "license": "Apache-2.0",
   "repository": {
@@ -24,8 +24,14 @@
   },
   "files": [
     "dist",
-    "!dist/.tsbuildinfo"
+    "!dist/.tsbuildinfo",
+    "CHANGELOG.md",
+    "NOTICE"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsc --build",
     "test": "npm run build && node --test test/*.test.mjs",
@@ -35,7 +41,6 @@
     "@convohop/core": "0.1.0"
   },
   "devDependencies": {
-    "@convohop/client": "0.1.0",
     "@types/node": "^22.0.0",
     "typescript": "^7.0.2"
   }

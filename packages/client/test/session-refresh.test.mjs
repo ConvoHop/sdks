@@ -552,6 +552,40 @@ test("refresh preserves successfully applied frontier, drops old queued pages an
   assert.deepEqual(errors, []);
 });
 
+test("a replay round page applied while refresh suspends keeps its frontier and the resumed round continues after it", { timeout: 5000 }, async t => {
+  const ws = sockets(t), setup = fixture(), conversationId = id(), entered = deferred(), gate = deferred(), applied = [], errors = [];
+  await setup.client.initialize();
+  const replay = await setup.client.watch(conversationId, async events => {
+    if (events[0]?.sequence === "1" && !applied.length) { entered.resolve(); await gate.promise; }
+    applied.push(...events.map(value => value.sequence));
+  }, error => errors.push(error));
+  t.after(() => replay.close());
+  ws[0].subscribe();
+  setup.handle = ({ operation, request }) => {
+    if (operation !== "communication.events") return undefined;
+    const after = request.variables.input.after;
+    return reply(request, { result: after.sequence === "0" ? {
+      items: [event(conversationId, "1")], nextCursor: { ...after, sequence: "1" }, complete: true, refreshRequired: false,
+    } : { items: [], nextCursor: after, complete: true, refreshRequired: false } });
+  };
+  const reconciled = replay.reconcile();
+  await entered.promise;
+  const refresh = setup.client.refreshSession();
+  await turn();
+  assert.equal(setup.hookCalls.length, 0);
+  gate.resolve();
+  await reconciled;
+  await refresh;
+  const resumed = setup.requests.filter(call => call.operation === "communication.events").at(-1);
+  assert.equal(resumed.credential, setup.lastRenewal.sessionToken);
+  assert.equal(resumed.request.variables.input.after.sequence, "1");
+  assert.deepEqual(applied, ["1"]);
+  assert.equal(replay.cursor.sequence, "1");
+  assert.equal(ws.length, 2);
+  assert.equal(ws[1].subscribe().payload.variables.input.after.sequence, "1");
+  assert.deepEqual(errors, []);
+});
+
 test("an in-flight old reconnect cannot invalidate a retiring application's successful frontier", { timeout: 5000 }, async t => {
   const ws = sockets(t), setup = fixture(), conversationId = id(), entered = deferred(), applyGate = deferred();
   const routeEntered = deferred(), routeGate = deferred(), applied = [], errors = [];
