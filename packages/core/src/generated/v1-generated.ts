@@ -90,6 +90,8 @@ export type DeploymentHealthRequestInput = {
 
 export type DeploymentUsageRequestInput = {
   deploymentId: string;
+  from?: string | null | undefined;
+  to?: string | null | undefined;
 };
 
 export type DisablePrincipalRequestInput = {
@@ -315,6 +317,12 @@ export type MessagesRequestInput = {
   limit: number;
 };
 
+export type OrganizationUsageRequestInput = {
+  from?: string | null | undefined;
+  orgId: string;
+  to?: string | null | undefined;
+};
+
 export type PauseOperationRequestInput = {
   expectedRevision: string;
   operationId: string;
@@ -330,6 +338,12 @@ export type ProjectPolicyRequestInput = {
   change: PolicyChangeInput;
   expectedRevision: string;
   projectId: string;
+};
+
+export type ProjectUsageRequestInput = {
+  from?: string | null | undefined;
+  projectId: string;
+  to?: string | null | undefined;
 };
 
 export type ReceiptsRequestInput = {
@@ -869,7 +883,23 @@ export type ManagementDeploymentUsageQueryVariables = Exact<{
 }>;
 
 
-export type ManagementDeploymentUsageQuery = { deploymentUsage: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { deploymentId: string, source: string, observedAt: string, complete: boolean, reason: string } | null } };
+export type ManagementDeploymentUsageQuery = { deploymentUsage: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { deploymentId: string, source: string, observedAt: string, complete: boolean, reason: string, from: string, to: string, aggregatedThrough: string | null, meters: Array<{ meter: string, unit: string, quantity: string, emitted: boolean }> } | null } };
+
+export type ManagementProjectUsageQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: ProjectUsageRequestInput;
+}>;
+
+
+export type ManagementProjectUsageQuery = { projectUsage: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string, source: string, observedAt: string, complete: boolean, reason: string, from: string, to: string, aggregatedThrough: string | null, meters: Array<{ meter: string, unit: string, quantity: string, emitted: boolean }> } | null } };
+
+export type ManagementOrganizationUsageQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: OrganizationUsageRequestInput;
+}>;
+
+
+export type ManagementOrganizationUsageQuery = { organizationUsage: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { orgId: string, source: string, observedAt: string, complete: boolean, reason: string, from: string, to: string, aggregatedThrough: string | null, meters: Array<{ meter: string, unit: string, quantity: string, emitted: boolean }> } | null } };
 
 export type ManagementWebhookDeliveriesQueryVariables = Exact<{
   context: RequestContextInput;

@@ -242,6 +242,10 @@ type DeploymentUsage {
 	observedAt: String!
 	complete: Boolean!
 	reason: String!
+	from: String!
+	to: String!
+	meters: [UsageMeter!]!
+	aggregatedThrough: String
 }
 
 type DeploymentUsageReply {
@@ -258,6 +262,8 @@ type DeploymentUsageReply {
 
 input DeploymentUsageRequestInput {
 	deploymentId: UUID!
+	from: String
+	to: String
 }
 
 type DisableWebhookReply {
@@ -831,6 +837,36 @@ type OrganizationPage {
 	nextCursor: String
 }
 
+type OrganizationUsage {
+	orgId: UUID!
+	source: String!
+	observedAt: String!
+	complete: Boolean!
+	reason: String!
+	from: String!
+	to: String!
+	meters: [UsageMeter!]!
+	aggregatedThrough: String
+}
+
+type OrganizationUsageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OrganizationUsage
+}
+
+input OrganizationUsageRequestInput {
+	orgId: UUID!
+	from: String
+	to: String
+}
+
 type OrganizationsReply {
 	status: String!
 	requestId: UUID!
@@ -906,6 +942,36 @@ input ProjectPolicyRequestInput {
 	change: PolicyChangeInput!
 }
 
+type ProjectUsage {
+	projectId: UUID!
+	source: String!
+	observedAt: String!
+	complete: Boolean!
+	reason: String!
+	from: String!
+	to: String!
+	meters: [UsageMeter!]!
+	aggregatedThrough: String
+}
+
+type ProjectUsageReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: ProjectUsage
+}
+
+input ProjectUsageRequestInput {
+	projectId: UUID!
+	from: String
+	to: String
+}
+
 scalar Properties
 
 type Query {
@@ -916,6 +982,8 @@ type Query {
 	getProject(context: RequestContextInput!, input: GetProjectRequestInput!): GetProjectReply!
 	deploymentHealth(context: RequestContextInput!, input: DeploymentHealthRequestInput!): DeploymentHealthReply!
 	deploymentUsage(context: RequestContextInput!, input: DeploymentUsageRequestInput!): DeploymentUsageReply!
+	projectUsage(context: RequestContextInput!, input: ProjectUsageRequestInput!): ProjectUsageReply!
+	organizationUsage(context: RequestContextInput!, input: OrganizationUsageRequestInput!): OrganizationUsageReply!
 	webhookDeliveries(context: RequestContextInput!, input: WebhookDeliveriesRequestInput!): WebhookDeliveriesReply!
 	resolveRequest(context: RequestContextInput!, input: ResolveRequestRequestInput!): ResolveRequestReply!
 	getOperation(context: RequestContextInput!, input: GetOperationRequestInput!): GetOperationReply!
@@ -1103,6 +1171,13 @@ type TypingStatus {
 }
 
 scalar UUID
+
+type UsageMeter {
+	meter: String!
+	unit: String!
+	quantity: Decimal!
+	emitted: Boolean!
+}
 
 type WebhookDeliveriesReply {
 	status: String!
