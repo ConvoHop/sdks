@@ -4,7 +4,6 @@
 // answers webhooks.verify with the reference verifier so it can stand in for a conforming SDK.
 //
 // Options:
-//   --protocol-version <n>   protocol version to select in hello (default 1)
 //   --roles <a,b>            roles to declare, each with no operations (default user)
 //   --features <a,b>         features to declare
 //   --stderr <text>          line to write to stderr at startup
@@ -19,7 +18,6 @@ import { parseArgs } from "node:util";
 import { verify } from "../../lib/webhooks.mjs";
 
 const { values } = parseArgs({ options: {
-  "protocol-version": { type: "string", default: "1" },
   roles: { type: "string", default: "user" },
   features: { type: "string", default: "" },
   stderr: { type: "string" },
@@ -46,7 +44,6 @@ const behaviors = new Map(values.on.map(entry => {
 }));
 
 const hello = () => ({
-  protocolVersion: Number(values["protocol-version"]),
   driver: { name: "fake-driver", version: "0.0.0", language: "javascript" },
   roles: Object.fromEntries(list(values.roles).map(role => [role, { operations: [] }])),
   features,

@@ -166,8 +166,8 @@ describe("setup errors exit 2 before any scenario runs", () => {
   });
 
   test("a fixture driver that fails its handshake", async () => {
-    assertSetupError(await cli(["--driver", fake("--roles", "user"), "--fixture-driver", fake("--protocol-version", "2"), "--filter", "crud"]),
-      /^conformance: driver handshake failed: driver selected protocol version 2, which was not offered\n$/);
+    assertSetupError(await cli(["--driver", fake("--roles", "user"), "--fixture-driver", fake("--on", "hello=protocol-error"), "--filter", "crud"]),
+      /^conformance: driver handshake failed: hello returned protocol error UNSUPPORTED: fake driver refuses hello\n$/);
   });
 });
 

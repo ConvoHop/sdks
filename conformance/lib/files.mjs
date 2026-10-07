@@ -9,7 +9,6 @@ export const SCENARIO_DIR = fileURLToPath(new URL("../../spec/conformance/scenar
 export const REPORT_DIR = fileURLToPath(new URL("../reports/", import.meta.url));
 export const REFERENCE_DRIVER = fileURLToPath(new URL("../drivers/ts/dist/driver.mjs", import.meta.url));
 export const RUNNER = Object.freeze({ name: "convohop-conformance-runner", version: "0.1.0" });
-export const PROTOCOL_VERSION = 1;
 
 export async function readJson(path) {
   const text = await readFile(path, "utf8");
