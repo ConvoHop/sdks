@@ -281,7 +281,8 @@ export class V1Client {
   }
 }
 export class V1Realtime {
-  #socket: WebSocket | undefined; #closed = false; #working: Promise<void> | undefined;
+  #socket: WebSocket | undefined; #closed = false; #working: Promise<unknown> | undefined;
+  #round: { generation: number; result: Promise<boolean> } | undefined;
   #applying: Promise<boolean> | undefined;
   #paused = false;
   #started = false;
@@ -324,10 +325,8 @@ export class V1Realtime {
   async #resumeSessionRefresh(route: V1Route, token: string): Promise<void> {
     if (this.#closed) return;
     this.#currentRoute = route; this.#token = token; this.#paused = false;
-    try {
-      await this.reconcile();
-      if (!this.#closed) this.#connect();
-    } catch (error) { this.#fail(error); throw error; }
+    try { this.#proceed(await this.#reconcileRound()); }
+    catch (error) { this.#fail(error); throw error; }
   }
   async #apply(events: V1Record[]): Promise<boolean> {
     const applying = Promise.resolve().then(async () => {
@@ -356,10 +355,10 @@ export class V1Realtime {
     await this.client.recoverPending(this.onError);
     if (this.#paused) throw new V1Problem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
       "Replay startup was paused by session refresh; open it after verified refresh");
-    await this.reconcile();
+    const more = await this.#reconcileRound();
     if (this.#paused) throw new V1Problem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
       "Replay startup was paused by session refresh; open it after verified refresh");
-    if (!this.#closed && !this.#paused) this.#connect();
+    this.#proceed(more);
   }
   #connect(): void {
     if (this.#closed || this.#paused || this.#socket) return;
@@ -444,10 +443,24 @@ export class V1Realtime {
         if (!current()) return;
         this.#currentRoute = route;
         return this.client.recoverPending(this.onError);
-      }).then(() => { if (current()) return this.reconcile(); })
-        .then(() => { if (current()) this.#connect(); })
+      }).then(() => current() ? this.#reconcileRound() : false)
+        .then(more => { if (current()) this.#proceed(more); })
         .catch(error => { if (current()) this.#fail(error); });
     }, delay);
+  }
+  // Managed catch-up keeps each round bounded and paces the next one instead of failing at the work limit.
+  #proceed(more: boolean): void {
+    if (this.#closed || this.#paused) return;
+    if (!more) { this.#connect(); return; }
+    if (this.#timer) return;
+    this.#timer = setTimeout(() => {
+      this.#timer = undefined;
+      if (this.#closed || this.#paused) return;
+      const generation = this.#queueGeneration;
+      const current = () => !this.#closed && !this.#paused && generation === this.#queueGeneration;
+      this.#reconcileRound().then(next => { if (current()) this.#proceed(next); })
+        .catch(error => { if (current()) this.#fail(error); });
+    }, 250 + Math.floor(Math.random() * 250));
   }
   #fail(error: unknown): void {
     if (this.#closed) return;
@@ -464,28 +477,44 @@ export class V1Realtime {
     this.close();
     this.onError(error instanceof Error ? error : new Error("Realtime reconciliation failed"));
   }
-  async reconcile(): Promise<void> {
-    if (this.#closed) return;
-    if (this.#paused) throw new V1Problem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
-      "Realtime application work is paused until session authority is verified");
-    if (this.#working) return this.#working;
+  // One bounded round of at most ten pages; resolves true only when the current replay has more work.
+  #reconcileRound(): Promise<boolean> {
+    if (this.#closed) return Promise.resolve(false);
+    if (this.#paused) return Promise.reject(new V1Problem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+      "Realtime application work is paused until session authority is verified"));
     const generation = this.#queueGeneration;
-    const work = async () => {
-      for (let page = 0; page < 10 && !this.#closed && !this.#paused; page++) {
-        const result = await this.client.events(this.conversationId, this.#cursor);
-        if (this.#closed || this.#paused || generation !== this.#queueGeneration) return;
+    // Rounds coalesce only within one stream generation; earlier queued or superseded work settles first.
+    if (this.#round?.generation === generation) return this.#round.result;
+    const superseded = () => this.#closed || generation !== this.#queueGeneration;
+    const stale = () => superseded() || this.#paused;
+    const pending = (this.#working ?? Promise.resolve()).catch(() => undefined).then(async () => {
+      for (let page = 0; page < 10; page++) {
+        if (stale()) return false;
+        const previous = this.#cursor;
+        const result = await this.client.events(this.conversationId, previous);
+        if (stale()) return false;
         if (result.refreshRequired) throw new Error("Explicit authorized history resynchronization required");
+        if (!result.complete && previous && BigInt(result.nextCursor.sequence) <= BigInt(previous.sequence))
+          throw new TypeError("Incomplete replay page did not advance the authoritative frontier");
         const applied = await this.#apply(result.items);
-        if (!applied || this.#closed || generation !== this.#queueGeneration) return;
+        if (!applied || superseded()) return false;
         this.#cursor = result.nextCursor;
         this.client.storage?.setItem(this.#storageKey, JSON.stringify(this.#cursor));
-        if (result.complete) return;
+        if (result.complete) return false;
       }
-      if (this.#closed || this.#paused || generation !== this.#queueGeneration) return;
-      throw new Error("Replay work limit reached; explicitly reconcile again");
+      return !stale();
+    });
+    const round = { generation, result: pending };
+    this.#round = round; this.#working = pending;
+    const settle = () => {
+      if (this.#round === round) this.#round = undefined;
+      if (this.#working === pending) this.#working = undefined;
     };
-    const pending = work(); this.#working = pending;
-    try { await pending; } finally { if (this.#working === pending) this.#working = undefined; }
+    pending.then(settle, settle);
+    return pending;
+  }
+  async reconcile(): Promise<void> {
+    if (await this.#reconcileRound()) throw new Error("Replay work limit reached; explicitly reconcile again");
   }
   close(): void {
     if (this.#closed) return;
