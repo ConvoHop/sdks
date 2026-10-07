@@ -670,7 +670,8 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
       "transportExpiresAt": "String!",
       "admissionExpiresAt": "String!",
       "leaseExpiresAt": "String!",
-      "leasePolicyId": "String!"
+      "leasePolicyId": "String!",
+      "connectToken": "String!"
     }
   },
   "LiveConnectionMode": {
@@ -2359,7 +2360,7 @@ export const v1Operations: Record<V1OperationKey, V1Operation> = {
     "kind": "mutation",
     "field": "liveSessionCredentials",
     "operationName": "CommunicationLiveSessionCredentials",
-    "query": "mutation CommunicationLiveSessionCredentials($context: RequestContextInput!, $input: LiveSessionCredentialsInput!) {\n  liveSessionCredentials(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    result {\n      liveSessionId\n      participationId\n      generation\n      roomName\n      participantIdentity\n      livekitUrl\n      transportToken\n      admissionTicket\n      forwardingLease\n      transportExpiresAt\n      admissionExpiresAt\n      leaseExpiresAt\n      leasePolicyId\n    }\n  }\n}",
+    "query": "mutation CommunicationLiveSessionCredentials($context: RequestContextInput!, $input: LiveSessionCredentialsInput!) {\n  liveSessionCredentials(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    result {\n      liveSessionId\n      participationId\n      generation\n      roomName\n      participantIdentity\n      livekitUrl\n      transportToken\n      admissionTicket\n      forwardingLease\n      transportExpiresAt\n      admissionExpiresAt\n      leaseExpiresAt\n      leasePolicyId\n      connectToken\n    }\n  }\n}",
     "resultType": "LiveSessionCredentialsPayload!",
     "inputFields": [
       "liveSessionId",

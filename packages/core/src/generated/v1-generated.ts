@@ -791,7 +791,7 @@ export type CommunicationLiveSessionCredentialsMutationVariables = Exact<{
 }>;
 
 
-export type CommunicationLiveSessionCredentialsMutation = { liveSessionCredentials: { status: string, requestId: string, receiptId: string, committedAt: string, replayed: boolean, result: { liveSessionId: string, participationId: string, generation: string, roomName: string, participantIdentity: string, livekitUrl: string, transportToken: string, admissionTicket: Record<string, unknown>, forwardingLease: Record<string, unknown>, transportExpiresAt: string, admissionExpiresAt: string, leaseExpiresAt: string, leasePolicyId: string } } };
+export type CommunicationLiveSessionCredentialsMutation = { liveSessionCredentials: { status: string, requestId: string, receiptId: string, committedAt: string, replayed: boolean, result: { liveSessionId: string, participationId: string, generation: string, roomName: string, participantIdentity: string, livekitUrl: string, transportToken: string, admissionTicket: Record<string, unknown>, forwardingLease: Record<string, unknown>, transportExpiresAt: string, admissionExpiresAt: string, leaseExpiresAt: string, leasePolicyId: string, connectToken: string } } };
 
 export type CommunicationRedeemCredentialMutationVariables = Exact<{
   context: RequestContextInput;

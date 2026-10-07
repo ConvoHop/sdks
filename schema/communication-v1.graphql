@@ -613,6 +613,7 @@ type LiveConnectionGrant {
 	admissionExpiresAt: String!
 	leaseExpiresAt: String!
 	leasePolicyId: String!
+	connectToken: String!
 }
 
 enum LiveConnectionMode {

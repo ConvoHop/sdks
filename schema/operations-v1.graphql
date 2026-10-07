@@ -1844,6 +1844,7 @@ mutation CommunicationLiveSessionCredentials($context: RequestContextInput!, $in
       admissionExpiresAt
       leaseExpiresAt
       leasePolicyId
+      connectToken
     }
   }
 }

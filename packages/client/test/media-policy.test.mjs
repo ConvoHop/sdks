@@ -27,7 +27,8 @@ for (const fail of [false, true]) {
       livekitUrl: "ws://localhost:17880", transportToken: "fixture-private-grant",
       admissionTicket: { participationId, signature: "fixture-private-ticket" },
       forwardingLease: { participationId, leaseVersion: "2", signature: "fixture-private-proof" },
-      transportExpiresAt: expires, admissionExpiresAt: expires, leaseExpiresAt: expires, leasePolicyId: "fixture" };
+      transportExpiresAt: expires, admissionExpiresAt: expires, leaseExpiresAt: expires, leasePolicyId: "fixture",
+      connectToken: "fixture-private-connect-token" };
     const transportOptions = { baseUrl: "http://localhost:18080", namespace: "native-async", incarnation, asyncRecoveryStorage: saved };
     const transport = new V1Transport({ ...transportOptions, fetch: async (_url, init) =>
       reply(JSON.parse(init.body), { result: grant }) });
@@ -44,8 +45,10 @@ for (const fail of [false, true]) {
       connectionAttempted: () => transport.markMediaAdmissionAttempted(requestId) };
     const work = V1MediaConnection.connectParticipation(participation, {});
     assert.ok(room);
-    t.mock.method(room, "connect", async () => {
+    let opened;
+    t.mock.method(room, "connect", async (url, token) => {
       nativeOpens++;
+      opened = [url, token];
       assert.equal(JSON.parse([...saved.values.values()][0])[0].mediaAdmissionAttempted, true);
       throw new Error("synthetic native failure");
     });
@@ -58,6 +61,8 @@ for (const fail of [false, true]) {
     if (fail) gate.reject(new Error("durable commit unavailable")); else gate.resolve();
     await rejected;
     assert.equal(nativeOpens, fail ? 0 : 1);
+    // The Web SDK keeps first-frame admission; connectToken is for stock LiveKit SDKs.
+    if (!fail) assert.deepEqual(opened, [grant.livekitUrl, grant.transportToken]);
     assert.ok(saved.writes.every(({ value }) => !value.includes("fixture-private")));
     if (!fail) {
       const restarted = new V1Transport({ ...transportOptions, fetch: async (_url, init) => {
