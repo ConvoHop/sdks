@@ -1,10 +1,12 @@
 ## `sendMessage`
 
-Send a message.
+Send a message. A backend key sends as its service principal, or as the member named by actAsPrincipalId.
 
 - **Operation:** `communication.sendMessage`, a mutation sent as `CommunicationSendMessage`.
-- **Layer:** client (client SDKs).
-- **Authorization:** `userSession`, when `member`: The caller is an active member of the conversation.
+- **Layer:** both (client and server SDKs).
+- **Authorization** (any one of):
+  - `userSession`, when `member`: The caller is an active member of the conversation.
+  - `backendKey` with scope `messageWrite`.
 - **Idempotency:** `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 - **Emits:**
   - `message.created`: A message was sent.
@@ -26,6 +28,7 @@ Send a message.
 | `conversationId` | `UUID!` |
 | `text` | `String!` |
 | `props` | `Properties!` |
+| `actAsPrincipalId` | `UUID` |
 
 **Result** (`SendMessageReply!`)
 
@@ -43,7 +46,7 @@ Send a message.
 
 **Errors**
 
-- Returned by the authority: `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `REQUEST_EXPIRED`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `WRONG_REGION`.
+- Returned by the authority: `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `REQUEST_EXPIRED`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `SCOPE_REQUIRED`, `WRONG_REGION`.
 - Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `IDEMPOTENCY_CONFLICT`, `INCARNATION_MISMATCH`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
 - Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RECOVERY_STORAGE_FAILURE`, `RESOLUTION_REQUIRED`, `TRANSPORT_UNKNOWN`.
 - Transient, so a retry with the same `requestId` and input may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `OUTCOME_UNKNOWN`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.
