@@ -212,6 +212,9 @@ test('release.yml publishes from the npm environment at the release commit', () 
 test('the release build runs every npm check that CI runs', () => {
   const ci = workflows.find(({ name }) => name.endsWith('/sdk-ci.yml'));
   assert.ok(ci, 'sdk-ci.yml is missing');
+  // Only the mock job: the dev-stack job needs a running dev stack.
+  const conformance = workflows.find(({ name }) => name.endsWith('/conformance.yml'));
+  assert.ok(conformance, 'conformance.yml is missing');
   const npmChecks = (workflow, job) => {
     const jobLines = sections(workflow.lines).jobs.get(job);
     assert.ok(jobLines, `${workflow.name}: job ${job} is missing`);
@@ -221,8 +224,10 @@ test('the release build runs every npm check that CI runs', () => {
   };
   const ciChecks = npmChecks(ci, 'node');
   assert.ok(ciChecks.length >= 4, `expected the CI checks, found: ${ciChecks.join(', ')}`);
+  const conformanceChecks = npmChecks(conformance, 'mock');
+  assert.ok(conformanceChecks.length >= 1, 'expected the conformance check in conformance.yml');
   const releaseChecks = new Set(npmChecks(release, 'build'));
-  for (const check of ciChecks) {
+  for (const check of [...ciChecks, ...conformanceChecks]) {
     assert.ok(releaseChecks.has(check), `release.yml build must also run \`${check}\` before attesting`);
   }
 });

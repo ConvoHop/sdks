@@ -1,0 +1,151 @@
+{
+  "$schema": "./operations.schema.json",
+  "description": "Language-neutral operations invoked through the driver protocol. Arguments and values are JSON; counters are canonical decimal strings, never numbers. Value shapes are the JSON projection of the named schema/ GraphQL types with every selected field present (null when absent).",
+  "realtime": { "irChannel": "conversationEvents" },
+  "operations": {
+    "route.initialize": {
+      "roles": ["user", "backend"],
+      "irOperation": "communication.route",
+      "description": "Fetch and verify the project's signed route. Backend clients only verify it.",
+      "required": [],
+      "optional": [],
+      "returns": "user: the verified route proof (SignedProof scalar: projectId, incarnation, servingEpoch, communicationBase, wssUrl, expiresAt, signature); backend: null"
+    },
+    "principals.create": {
+      "roles": ["backend"],
+      "irOperation": "communication.createPrincipal",
+      "description": "Create a principal for an external user identity.",
+      "required": ["externalUserId"],
+      "optional": [],
+      "arguments": { "externalUserId": "Customer-owned identifier; scenarios use synthetic values." },
+      "returns": "{ principalId }"
+    },
+    "sessions.issue": {
+      "roles": ["backend"],
+      "irOperation": "communication.issueSession",
+      "description": "Issue a short-lived user session token for a principal and device.",
+      "required": ["principalId", "deviceId"],
+      "optional": ["requestedTtlMs"],
+      "arguments": {
+        "principalId": "Principal UUID.",
+        "deviceId": "Device UUID.",
+        "requestedTtlMs": "Requested lifetime as a canonical decimal string (1000..86400000)."
+      },
+      "returns": "SessionBootstrap { session: Session, tokenExpiresAt, sessionToken }"
+    },
+    "conversations.create": {
+      "roles": ["backend"],
+      "irOperation": "communication.createConversation",
+      "description": "Create a conversation with an initial member list.",
+      "required": ["input"],
+      "optional": ["requestId"],
+      "arguments": {
+        "input": "{ title, props: object, members: [{ principalId, role }] }",
+        "requestId": "Idempotency key (UUID). Omitted means the SDK generates one."
+      },
+      "returns": "Conversation"
+    },
+    "conversations.get": {
+      "roles": ["user", "backend"],
+      "irOperation": "communication.getConversation",
+      "description": "Read a conversation. User clients also receive their own membership.",
+      "required": ["conversationId"],
+      "optional": [],
+      "returns": "Conversation (membership is null for backend clients)"
+    },
+    "members.list": {
+      "roles": ["backend"],
+      "irOperation": "communication.members",
+      "description": "Read one page of conversation members ordered by principalId.",
+      "required": ["conversationId"],
+      "optional": ["limit", "cursor"],
+      "arguments": {
+        "limit": "Integer page size (1..1000). Targets may cap it lower.",
+        "cursor": "nextCursor from the previous page."
+      },
+      "returns": "MemberPage { items: [Member], complete, refreshRequired, nextCursor }"
+    },
+    "members.add": {
+      "roles": ["backend"],
+      "irOperation": "communication.addMembers",
+      "description": "Add or update members with optimistic revisions.",
+      "required": ["conversationId", "members"],
+      "optional": ["requestId"],
+      "arguments": {
+        "members": "[{ principalId, role, expectedRevision }] where expectedRevision is a counter string (\"0\" for a new member).",
+        "requestId": "Idempotency key (UUID)."
+      },
+      "returns": "[Member] in request order"
+    },
+    "messages.send": {
+      "roles": ["user"],
+      "irOperation": "communication.sendMessage",
+      "description": "Send a text message as the client's principal.",
+      "required": ["conversationId", "text"],
+      "optional": ["requestId"],
+      "arguments": { "requestId": "Idempotency key (UUID). Omitted means the SDK generates one." },
+      "returns": "MessageAck { messageId, conversationId, sequence, revision, status, cursor: Cursor }"
+    },
+    "messages.list": {
+      "roles": ["user"],
+      "irOperation": "communication.messages",
+      "description": "Read one page of messages, newest first.",
+      "required": ["conversationId"],
+      "optional": ["beforeSequence"],
+      "arguments": { "beforeSequence": "Exclusive upper bound; pass the previous page's nextCursor." },
+      "returns": "MessagePage { items: [Message], complete, refreshRequired, nextCursor }"
+    },
+    "messages.edit": {
+      "roles": ["user"],
+      "irOperation": "communication.editMessage",
+      "description": "Replace a message's text, conditional on the message revision passed in.",
+      "required": ["message", "text"],
+      "optional": ["requestId"],
+      "arguments": { "message": "A Message value previously returned by messages.list or messages.edit." },
+      "returns": "Message"
+    },
+    "messages.delete": {
+      "roles": ["user"],
+      "irOperation": "communication.deleteMessage",
+      "description": "Delete a message, conditional on the message revision passed in.",
+      "required": ["message"],
+      "optional": ["requestId"],
+      "arguments": { "message": "A Message value previously returned by messages.list or messages.edit." },
+      "returns": "Message (deleted: true, text: \"\")"
+    },
+    "events.list": {
+      "roles": ["user"],
+      "irOperation": "communication.events",
+      "description": "Read one page of conversation events in ascending sequence order.",
+      "required": ["conversationId"],
+      "optional": ["after"],
+      "arguments": { "after": "Exclusive Cursor { incarnation, conversationId, sequence }; pass the previous page's nextCursor." },
+      "returns": "EventPage { items: [Event], complete, refreshRequired, nextCursor: Cursor }"
+    },
+    "requests.resolve": {
+      "roles": ["user"],
+      "irOperation": "communication.resolveRequest",
+      "description": "Ask the authority what happened to a mutation request id.",
+      "required": ["requestId"],
+      "optional": [],
+      "returns": "RequestResolution { state: notObservedYet | committed | accepted, requestId, checkedAt, resultWithheld, receipt }"
+    },
+    "requests.retry": {
+      "roles": ["user"],
+      "irOperation": "communication.resolveRequest",
+      "description": "Resolve a request id and, only when it was not observed, resend the original payload under the same id.",
+      "required": ["requestId"],
+      "optional": [],
+      "returns": "RequestResolution after the retry"
+    },
+    "backendKeys.issue": {
+      "roles": ["management"],
+      "irOperation": "management.issueBackendKey",
+      "description": "Request a scoped backend key for a project. The secret is delivered out of band.",
+      "required": ["projectId", "name", "scopes", "expiresAt"],
+      "optional": [],
+      "arguments": { "scopes": "Array of scope names.", "expiresAt": "RFC 3339 timestamp." },
+      "returns": "IssueBackendKeyReply receipt envelope { status: accepted, requestId, operation, resourceRef, ... }"
+    }
+  }
+}

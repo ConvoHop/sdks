@@ -170,7 +170,9 @@ Today the annotations, the IR and its TypeScript and reference-snippet
 generators exist. `npm run generate:graphql` generates the operations and
 types in `@convohop/core` and one reference snippet per operation from
 [`schema/`](../schema). See [SDK generation](sdk-generation.md). The
-generators for other languages and the conformance suite are in development.
+[conformance suite](../spec/conformance/README.md) runs its scenarios through
+a TypeScript reference driver against a deterministic mock, and can target a
+real deployment. The generators for other languages are in development.
 Later, the same IR could also generate a command-line tool and tools for AI
 agents.
 

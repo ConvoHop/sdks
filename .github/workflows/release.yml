@@ -104,6 +104,8 @@ jobs:
         run: npm run check:packages
       - name: Test the release scripts and configuration
         run: npm run check:release
+      - name: Run the conformance scenarios against the mock target
+        run: npm run conformance
       - id: assets
         name: Pack the released packages with SBOMs and SHA256SUMS
         env:

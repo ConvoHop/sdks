@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "rootDir": ".",
+    "outDir": "dist"
+  },
+  "include": ["*.mts"],
+  "references": [{ "path": "../../../packages/client" }, { "path": "../../../packages/server" }]
+}

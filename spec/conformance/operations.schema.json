@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:convohop:conformance:operations",
+  "title": "ConvoHop conformance operation catalog",
+  "description": "Language-neutral operations that scenarios invoke through a driver. See spec/conformance/README.md#operations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["realtime", "operations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "description": { "type": "string" },
+    "realtime": {
+      "description": "What realtime.subscribe steps exercise.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["irChannel"],
+      "properties": {
+        "irChannel": {
+          "description": "The realtime channel in schema/v1-ir.json that SDK subscriptions use: its subscription, gap-filled with its replay query.",
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$",
+          "maxLength": 64
+        }
+      }
+    },
+    "operations": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/operationName" },
+      "additionalProperties": { "$ref": "#/$defs/operation" }
+    }
+  },
+  "$defs": {
+    "operationName": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)+$", "maxLength": 64 },
+    "argumentName": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$", "maxLength": 64 },
+    "arguments": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/argumentName" } },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roles", "irOperation", "description", "required", "optional", "returns"],
+      "properties": {
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["user", "backend", "management"] }
+        },
+        "irOperation": {
+          "description": "The id of the schema/v1-ir.json operation that the SDK call invokes, for every role.",
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*\\.[a-z][A-Za-z0-9]*$",
+          "maxLength": 128
+        },
+        "description": { "type": "string", "minLength": 1 },
+        "required": { "$ref": "#/$defs/arguments" },
+        "optional": { "$ref": "#/$defs/arguments" },
+        "arguments": {
+          "description": "Meaning of each argument.",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/argumentName" },
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        },
+        "returns": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

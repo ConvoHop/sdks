@@ -1,0 +1,132 @@
+{
+  "$schema": "../scenario.schema.json",
+  "suite": "recovery",
+  "title": "Unknown outcomes and recovery",
+  "description": "When the transport fails after submission the outcome is unknown, not rejected. Callers resolve the original request id read-only and retry only what the service never observed.",
+  "scenarios": [
+    {
+      "id": "recovery.resolve.never-observed",
+      "title": "Resolving a request id the service never saw reports notObservedYet",
+      "covers": ["recovery"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "requests.resolve", "args": { "requestId": "${uuid.neverSent}" },
+          "expect": { "value": { "state": "notObservedYet", "requestId": "${uuid.neverSent}", "receipt": null } } }
+      ]
+    },
+    {
+      "id": "recovery.drop-after-commit.resolve",
+      "title": "A response lost after commit is an unknown outcome that resolves to the committed message",
+      "covers": ["recovery", "errors"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Lost replies ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "control.fault", "field": "sendMessage", "action": "dropAfterCommit" },
+        { "do": "invoke", "client": "alice", "operation": "messages.send",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "text": "did it land?", "requestId": "${uuid.send}" },
+          "note": "Transport uncertainty is neither a rejection nor a commit, and there is no HTTP status.",
+          "expect": { "error": { "code": "TRANSPORT_UNKNOWN", "status": null, "outcome": "unknown", "requestId": "${uuid.send}" } } },
+        { "do": "invoke", "client": "alice", "operation": "requests.resolve", "args": { "requestId": "${uuid.send}" },
+          "expect": { "value": { "state": "committed", "requestId": "${uuid.send}",
+            "receipt": { "status": "committed", "requestId": "${uuid.send}",
+              "result": { "messageAck": { "messageId": { "$type": "uuid" }, "conversationId": "${saved.conversation.conversationId}", "sequence": { "$type": "counter" } } } } } },
+          "save": "resolution" },
+        { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "items": [{ "messageId": "${saved.resolution.receipt.result.messageAck.messageId}", "text": "did it land?" }] } } }
+      ]
+    },
+    {
+      "id": "recovery.drop-before-commit.retry",
+      "title": "A request the service never observed is retried with its original id and payload",
+      "covers": ["recovery", "idempotency"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Lost requests ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "control.fault", "field": "sendMessage", "action": "dropBeforeCommit" },
+        { "do": "invoke", "client": "alice", "operation": "messages.send",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "text": "second time lucky", "requestId": "${uuid.send}" },
+          "expect": { "error": { "code": "TRANSPORT_UNKNOWN", "status": null, "outcome": "unknown", "requestId": "${uuid.send}" } } },
+        { "do": "invoke", "client": "alice", "operation": "requests.resolve", "args": { "requestId": "${uuid.send}" },
+          "expect": { "value": { "state": "notObservedYet", "receipt": null } } },
+        { "do": "invoke", "client": "alice", "operation": "requests.retry", "args": { "requestId": "${uuid.send}" },
+          "expect": { "value": { "state": "committed", "requestId": "${uuid.send}",
+            "receipt": { "status": "committed", "result": { "messageAck": { "messageId": { "$type": "uuid" } } } } } },
+          "save": "retried" },
+        { "do": "control.waitLog", "kind": "request", "match": { "field": "sendMessage", "requestId": "${uuid.send}" }, "count": 2,
+          "note": "The retry resends the original request id: one dropped attempt, then one that committed.",
+          "expect": [{ "dropped": true }, { "dropped": false, "status": 200 }] },
+        { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "items": [{ "messageId": "${saved.retried.receipt.result.messageAck.messageId}", "text": "second time lucky" }] } } }
+      ]
+    },
+    {
+      "id": "recovery.retry-after-commit",
+      "title": "Retrying a request that already committed returns the commit without a duplicate",
+      "covers": ["recovery", "idempotency"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Committed ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "control.fault", "field": "sendMessage", "action": "dropAfterCommit" },
+        { "do": "invoke", "client": "alice", "operation": "messages.send",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "text": "only once", "requestId": "${uuid.send}" },
+          "expect": { "error": { "code": "TRANSPORT_UNKNOWN", "outcome": "unknown" } } },
+        { "do": "invoke", "client": "alice", "operation": "requests.retry", "args": { "requestId": "${uuid.send}" },
+          "note": "Whether the SDK resends or answers from the resolution, the service must not commit twice.",
+          "expect": { "value": { "state": "committed", "receipt": { "result": { "messageAck": { "messageId": { "$type": "uuid" } } } } } },
+          "save": "retried" },
+        { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "items": [{ "messageId": "${saved.retried.receipt.result.messageAck.messageId}", "text": "only once" }] } } }
+      ]
+    },
+    {
+      "id": "recovery.storage.restart",
+      "title": "A restarted client retries an unknown request from caller-approved recovery storage",
+      "description": "The storage holds request identity and payload only, never credentials; the new client is given the session token again.",
+      "covers": ["recovery", "idempotency"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Restarts ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "client.create", "client": "alice1", "role": "user", "credential": "${saved.aliceSession.sessionToken}",
+          "principalId": "${saved.alice.principalId}", "storage": "aliceDevice" },
+        { "do": "control.fault", "field": "sendMessage", "action": "dropBeforeCommit" },
+        { "do": "invoke", "client": "alice1", "operation": "messages.send",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "text": "sent before the crash", "requestId": "${uuid.send}" },
+          "expect": { "error": { "code": "TRANSPORT_UNKNOWN", "outcome": "unknown", "requestId": "${uuid.send}" } } },
+        { "do": "client.close", "client": "alice1" },
+        { "do": "client.create", "client": "alice2", "role": "user", "credential": "${saved.aliceSession.sessionToken}",
+          "principalId": "${saved.alice.principalId}", "storage": "aliceDevice" },
+        { "do": "invoke", "client": "alice2", "operation": "requests.retry", "args": { "requestId": "${uuid.send}" },
+          "expect": { "value": { "state": "committed", "requestId": "${uuid.send}" } } },
+        { "do": "invoke", "client": "alice2", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "items": [{ "text": "sent before the crash" }] } } }
+      ]
+    }
+  ]
+}

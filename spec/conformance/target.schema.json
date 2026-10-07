@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:convohop:conformance:target",
+  "title": "ConvoHop conformance target descriptor",
+  "description": "Where and how the runner reaches a ConvoHop authority. String values may use ${env:NAME}; see spec/conformance/targets.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "communicationUrl", "projectId", "incarnation"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "description": { "type": "string" },
+    "name": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$" },
+    "communicationUrl": { "$ref": "#/$defs/url", "description": "Communication plane base URL; SDKs append /graphql." },
+    "managementUrl": { "$ref": "#/$defs/url", "description": "Management plane base URL. Required by management scenarios." },
+    "projectId": { "$ref": "#/$defs/uuid" },
+    "incarnation": { "$ref": "#/$defs/uuid" },
+    "managementActorId": { "$ref": "#/$defs/uuid", "description": "Actor id for the management credential." },
+    "credentials": {
+      "description": "Named credentials scenarios reference as ${target.credentials.<name>}; see targets.md#credentials.",
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z][A-Za-z0-9]{0,63}$" },
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "control": { "$ref": "#/$defs/url", "description": "Control API base URL. Required when any control.* capability is declared." },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "auth.shortSessionTtl", "control.fault", "control.realtimeDrop", "control.reset", "control.waitLog",
+          "pagination.serverCappedPages"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "url": { "type": "string", "pattern": "^https?://[^\\s/?#]+(/[^\\s?#]*)?$" },
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" }
+  }
+}

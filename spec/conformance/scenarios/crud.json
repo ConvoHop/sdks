@@ -1,0 +1,113 @@
+{
+  "$schema": "../scenario.schema.json",
+  "suite": "crud",
+  "title": "Create, read, update and delete",
+  "description": "Conversations, memberships and the message lifecycle through the public operations, read back from more than one principal.",
+  "scenarios": [
+    {
+      "id": "crud.conversations.create-and-get",
+      "title": "A backend creates a conversation that the backend and its members read back unchanged",
+      "covers": ["crud", "auth.backendKey", "auth.userToken"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Planning ${nonce}", "props": { "topic": "launch", "priority": 2, "tags": ["a", "b"] },
+            "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }, { "principalId": "${saved.bob.principalId}", "role": "moderator" }] } },
+          "expect": { "value": { "conversationId": { "$type": "uuid" }, "revision": "1", "title": "Planning ${nonce}",
+            "props": { "$eq": { "topic": "launch", "priority": 2, "tags": ["a", "b"] } }, "latestSequence": { "$type": "counter" } } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.get", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "conversationId": "${saved.conversation.conversationId}", "revision": "1", "title": "Planning ${nonce}",
+            "props": { "$eq": { "topic": "launch", "priority": 2, "tags": ["a", "b"] } }, "latestSequence": { "$type": "counter" } } } },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.bob.principalId}", "deviceId": "${uuid.bobDevice}" }, "save": "bobSession" },
+        { "do": "client.create", "client": "bob", "role": "user", "credential": "${saved.bobSession.sessionToken}", "principalId": "${saved.bob.principalId}" },
+        { "do": "invoke", "client": "bob", "operation": "conversations.get", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "conversationId": "${saved.conversation.conversationId}", "revision": "1", "title": "Planning ${nonce}",
+            "props": { "$eq": { "topic": "launch", "priority": 2, "tags": ["a", "b"] } },
+            "membership": { "conversationId": "${saved.conversation.conversationId}", "principalId": "${saved.bob.principalId}",
+              "role": "moderator", "status": "active", "revision": { "$type": "counter" }, "visibleFromSequence": { "$type": "counter" } } } } }
+      ]
+    },
+    {
+      "id": "crud.members.add-change-and-list",
+      "title": "A backend adds members, changes a role with the current revision and lists the result",
+      "covers": ["crud", "auth.backendKey"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "carol-${nonce}" }, "save": "carol" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Members ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "members.add",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "members": [
+            { "principalId": "${saved.bob.principalId}", "role": "member", "expectedRevision": "0" },
+            { "principalId": "${saved.carol.principalId}", "role": "moderator", "expectedRevision": "0" }] },
+          "note": "expectedRevision 0 means the principal must not already be a member. Results come back in request order.",
+          "expect": { "value": [
+            { "conversationId": "${saved.conversation.conversationId}", "principalId": "${saved.bob.principalId}", "role": "member", "status": "active", "revision": "1" },
+            { "conversationId": "${saved.conversation.conversationId}", "principalId": "${saved.carol.principalId}", "role": "moderator", "status": "active", "revision": "1" }] } },
+        { "do": "invoke", "client": "backend", "operation": "members.add",
+          "args": { "conversationId": "${saved.conversation.conversationId}",
+            "members": [{ "principalId": "${saved.bob.principalId}", "role": "moderator", "expectedRevision": "1" }] },
+          "expect": { "value": [{ "principalId": "${saved.bob.principalId}", "role": "moderator", "status": "active", "revision": "2" }] } },
+        { "do": "invoke", "client": "backend", "operation": "members.list", "args": { "conversationId": "${saved.conversation.conversationId}", "limit": 10 },
+          "expect": { "value": { "complete": true, "nextCursor": null, "items": { "$length": 3,
+            "$each": { "conversationId": "${saved.conversation.conversationId}", "status": "active" },
+            "$contains": { "principalId": "${saved.bob.principalId}", "role": "moderator", "revision": "2" } } } } },
+        { "do": "invoke", "client": "backend", "operation": "members.list", "args": { "conversationId": "${saved.conversation.conversationId}", "limit": 10 },
+          "expect": { "value": { "items": {
+            "$contains": { "principalId": "${saved.carol.principalId}", "role": "moderator", "revision": "1" } } } } },
+        { "do": "invoke", "client": "backend", "operation": "members.list", "args": { "conversationId": "${saved.conversation.conversationId}", "limit": 10 },
+          "expect": { "value": { "items": {
+            "$contains": { "principalId": "${saved.alice.principalId}", "role": "member", "revision": "1" } } } } }
+      ]
+    },
+    {
+      "id": "crud.messages.lifecycle",
+      "title": "A user sends, edits and deletes a message and another member sees each state",
+      "covers": ["crud", "auth.userToken"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Lifecycle ${nonce}", "props": {},
+            "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }, { "principalId": "${saved.bob.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.bob.principalId}", "deviceId": "${uuid.bobDevice}" }, "save": "bobSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "client.create", "client": "bob", "role": "user", "credential": "${saved.bobSession.sessionToken}", "principalId": "${saved.bob.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "messages.send",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "text": "Hello ${nonce}" },
+          "expect": { "value": { "messageId": { "$type": "uuid" }, "conversationId": "${saved.conversation.conversationId}", "sequence": { "$type": "counter" },
+            "revision": "1", "status": "sent",
+            "cursor": { "incarnation": "${target.incarnation}", "conversationId": "${saved.conversation.conversationId}", "sequence": { "$type": "counter" } } } },
+          "save": "m1" },
+        { "do": "invoke", "client": "bob", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "complete": true, "nextCursor": null, "items": [{
+            "messageId": "${saved.m1.messageId}", "conversationId": "${saved.conversation.conversationId}", "authorId": "${saved.alice.principalId}",
+            "sequence": "${saved.m1.sequence}", "revision": "1", "createdAt": { "$type": "timestamp" }, "deleted": false, "text": "Hello ${nonce}" }] } } },
+        { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" }, "save": "page" },
+        { "do": "invoke", "client": "alice", "operation": "messages.edit", "args": { "message": "${saved.page.items.0}", "text": "Hello again ${nonce}" },
+          "expect": { "value": { "messageId": "${saved.m1.messageId}", "sequence": "${saved.m1.sequence}", "revision": "2", "deleted": false,
+            "text": "Hello again ${nonce}", "revisionSequence": { "$gte": "${saved.m1.sequence}", "$ne": "${saved.m1.sequence}" }, "editedAt": { "$type": "timestamp" } } },
+          "save": "edited" },
+        { "do": "invoke", "client": "bob", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "items": [{ "messageId": "${saved.m1.messageId}", "revision": "2", "deleted": false, "text": "Hello again ${nonce}" }] } } },
+        { "do": "invoke", "client": "alice", "operation": "messages.delete", "args": { "message": "${saved.edited}" },
+          "expect": { "value": { "messageId": "${saved.m1.messageId}", "revision": "3", "deleted": true, "text": "" } } },
+        { "do": "invoke", "client": "bob", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "note": "A deleted message stays in history as a tombstone without content.",
+          "expect": { "value": { "items": [{ "messageId": "${saved.m1.messageId}", "sequence": "${saved.m1.sequence}", "revision": "3", "deleted": true, "text": "" }] } } }
+      ]
+    }
+  ]
+}
