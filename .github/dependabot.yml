@@ -10,6 +10,10 @@ updates:
     # Libraries keep their declared ranges; only the lockfile moves unless a
     # new version falls outside the range.
     versioning-strategy: increase-if-necessary
+    # @types/node follows the engines.node floor (22.x); bump it with the floor.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     cooldown:
       default-days: 7
     commit-message:

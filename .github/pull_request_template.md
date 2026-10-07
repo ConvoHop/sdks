@@ -29,10 +29,11 @@ database or hosted-service behavior.
 - [ ] `npm run build`
 - [ ] `npm test`
 - [ ] `npm run check:packages`
+- [ ] `npm run check:release`
 
 ## Checklist
 
-- [ ] The title follows Conventional Commits, with `!` or a `BREAKING CHANGE:` footer for breaking changes.
+- [ ] The title follows Conventional Commits. A breaking change has `!` before the colon, and its migration note is in a `BREAKING CHANGE:` footer in a commit override in the description (see RELEASING.md).
 - [ ] Tests are added or updated in the existing package suites.
 - [ ] Docs, examples and generated files are updated with any public API change. Generated files are regenerated, not edited by hand.
 - [ ] No credentials, tokens or personal data appear in code, tests, logs or examples.

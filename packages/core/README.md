@@ -1,9 +1,10 @@
 # ConvoHop SDK core
 
 `@convohop/core` holds the protocol types, generated GraphQL operations and
-HTTP transport that the ConvoHop client and server SDKs share. It's
-unpublished TypeScript/ESM source. Source license:
-[Apache-2.0](../../LICENSE).
+HTTP transport that the ConvoHop client and server SDKs share. It's an ESM
+package with TypeScript declarations. It isn't on a package registry yet:
+[install it from a GitHub Release](https://github.com/ConvoHop/sdks#install-a-release)
+together with the client or server SDK. License: [Apache-2.0](LICENSE).
 
 **Don't import `@convohop/core` directly.** It's installed as a dependency of
 [`@convohop/client`](../client/README.md) and

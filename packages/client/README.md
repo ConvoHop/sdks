@@ -1,10 +1,12 @@
 # ConvoHop client SDK
 
-`@convohop/client` is unpublished TypeScript/ESM source for the current
-Conversation, LiveSession and Participation API. It runs on end-user devices
-with a short-lived session for one signed-in user, which your backend issues.
-It never holds a backend key. No hosted service is included. Source license:
-[Apache-2.0](../../LICENSE).
+`@convohop/client` is the TypeScript/ESM SDK for the current Conversation,
+LiveSession and Participation API. It runs on end-user devices with a
+short-lived session for one signed-in user, which your backend issues. It
+never holds a backend key. No hosted service is included. It isn't on a
+package registry yet:
+[install it from a GitHub Release](https://github.com/ConvoHop/sdks#install-a-release).
+License: [Apache-2.0](LICENSE).
 
 Build and test from the repository's root npm workspace with Node.js 22+:
 
@@ -72,8 +74,15 @@ epochs and records device coverage, not human-read attestation.
 
 `watch` catches up with an authority-issued cursor, applies ordered event
 pages and persists the frontier only after the application callback succeeds.
-It does not silently reset invalid/ahead/expired cursors. At most four pushed
-pages may await application work; reconnect resumes at the applied frontier.
+It does not silently reset invalid/ahead/expired cursors. Catch-up runs in
+bounded rounds of at most ten pages: `watch` resolves after the first round,
+then the stream paces further rounds until the authority reports the replay
+complete and only then subscribes at the applied frontier. Later round
+failures reach `onError`; an incomplete page that does not advance the
+frontier closes the stream. An explicit `stream.reconcile()` runs one bounded
+round and rejects with a work-limit error while more history remains; call it
+again to continue. At most four pushed pages may await application work;
+overflow and reconnect resume at the applied frontier.
 Close the stream on view teardown. Expiry/revocation closes the stream;
 session renewal belongs to your authenticated backend.
 
