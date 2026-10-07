@@ -8,8 +8,10 @@ permissions, so you don't have to stitch separate services together.
 
 > [!IMPORTANT]
 > The SDKs are pre-release. No package has been published to a package
-> registry yet, and APIs can change in any 0.x release. This repository
-> contains SDK source code only, not the ConvoHop service.
+> registry yet, and APIs can change in any 0.x release. Until registry
+> publishing starts, releases are attached to GitHub Releases in this
+> repository. This repository contains SDK source code only, not the
+> ConvoHop service.
 
 ## Two kinds of SDK
 
@@ -45,9 +47,10 @@ re-exported by `@convohop/client` and `@convohop/server`.
 The packages are ESM-only, with TypeScript declarations included. CommonJS
 code on Node.js 22.12 or later can load them with `require()`.
 
-These names match the planned published names under
-[package names](docs/sdk-strategy.md#package-names), but nothing is published
-yet.
+These names match the planned registry names under
+[package names](docs/sdk-strategy.md#package-names), but nothing is on a
+package registry yet. [Install a release](#install-a-release) or
+[build from source](#build-from-source).
 
 ### Planned
 
@@ -72,6 +75,33 @@ development. See
 [push notifications](docs/sdk-strategy.md#push-notifications-bring-your-own).
 The package READMEs have code samples.
 
+## Install a release
+
+Until the packages are on a registry, each release is attached to a
+[GitHub Release](https://github.com/ConvoHop/sdks/releases) in this
+repository, with checksums, an SBOM and signed build provenance. For
+example, to install client 0.1.0 with the core version that it needs:
+
+```sh
+gh release download core-v0.1.0 --repo ConvoHop/sdks --dir convohop/core
+gh release download client-v0.1.0 --repo ConvoHop/sdks --dir convohop/client
+
+# Check the downloads. On macOS, use `shasum -a 256 -c SHA256SUMS`.
+(cd convohop/core && sha256sum -c SHA256SUMS)
+(cd convohop/client && sha256sum -c SHA256SUMS)
+
+npm install ./convohop/core/convohop-core-0.1.0.tgz ./convohop/client/convohop-client-0.1.0.tgz
+```
+
+- Always install the `@convohop/core` tarball in the same command.
+  Otherwise npm looks for `@convohop/core` on the registry, where it isn't
+  published yet. To see the core version that a package needs, run
+  `tar -xzOf convohop/client/convohop-client-0.1.0.tgz package/package.json`.
+- npm saves the tarball paths in your `package.json`, so keep the tarballs
+  with your project.
+- To check that this repository's release workflow built a tarball, see
+  [Installing and verifying a release](RELEASING.md#installing-and-verifying-a-release).
+
 ## Build from source
 
 You need Node.js 22 or later.
@@ -83,6 +113,7 @@ npm run check:graphql
 npm run build
 npm test                 # package, generator and conformance harness tests
 npm run check:packages   # publint and Are the Types Wrong? package checks
+npm run check:release    # release scripts, release configuration and workflow rules
 npm run conformance      # shared conformance scenarios against a local mock
 ```
 
@@ -94,9 +125,10 @@ run them against a real deployment.
 The unit tests and the mock don't need service credentials. They don't prove
 real WebRTC media, database persistence or the behavior of a hosted service.
 [CI](.github/workflows/sdk-ci.yml) runs the other checks on Node.js 22 and 24
-for every pull request, and the
-[Conformance workflow](.github/workflows/conformance.yml) runs the scenarios
-on Node.js 24. Neither workflow publishes packages or deploys anything.
+for every pull request. On Node.js 24, it also packs `@convohop/core`,
+`@convohop/client` and `@convohop/server` and runs `npm publish --dry-run`.
+The [Conformance workflow](.github/workflows/conformance.yml) runs the
+scenarios on Node.js 24. Neither workflow publishes or deploys anything.
 
 ## API contract
 
@@ -164,6 +196,8 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - [Client SDK](packages/client/README.md)
 - [Node.js server SDK](packages/server/README.md)
 - [Shared core package](packages/core/README.md)
+- [Releasing](RELEASING.md): how releases happen, and how to install and
+  verify them
 - [Conformance suite](spec/conformance/README.md): scenarios, the driver
   protocol, targets and webhook signature vectors
 - [Contributing](CONTRIBUTING.md)

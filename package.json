@@ -17,7 +17,8 @@
     "generate:graphql": "node tools/sdkgen/cli.mjs generate",
     "check:graphql": "node tools/sdkgen/cli.mjs generate --check",
     "check:annotations": "node tools/sdkgen/cli.mjs check-annotations",
-    "test:sdkgen": "node --test \"tools/sdkgen/test/*.test.mjs\""
+    "test:sdkgen": "node --test \"tools/sdkgen/test/*.test.mjs\"",
+    "check:release": "npm run build && node --test test/release/*.test.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",

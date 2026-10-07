@@ -1,7 +1,7 @@
 {
   "name": "@convohop/core",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "Shared ConvoHop protocol types, generated GraphQL operations and isomorphic transport. Installed as a dependency of @convohop/client and @convohop/server; not a supported entry point.",
   "license": "Apache-2.0",
   "repository": {
@@ -32,8 +32,14 @@
   },
   "files": [
     "dist",
-    "!dist/.tsbuildinfo"
+    "!dist/.tsbuildinfo",
+    "CHANGELOG.md",
+    "NOTICE"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsc --build",
     "test": "npm run build && node --test test/*.test.mjs",

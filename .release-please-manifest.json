@@ -1,0 +1,5 @@
+{
+  "packages/core": "0.0.0",
+  "packages/client": "0.0.0",
+  "packages/server": "0.0.0"
+}

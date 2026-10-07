@@ -6,8 +6,10 @@ work, what the packages are called, and how they're versioned and supported.
 
 > [!IMPORTANT]
 > The SDKs are pre-release. No package has been published to a package
-> registry yet, and every package is at version 0.x. This document is the plan
-> of record. It changes only through reviewed pull requests to this repository.
+> registry yet, and every package is at version 0.x. Until registry
+> publishing starts, releases of the TypeScript packages are attached to
+> GitHub Releases in this repository. This document is the plan of record.
+> It changes only through reviewed pull requests to this repository.
 
 ## At a glance
 
@@ -253,13 +255,17 @@ The SDK helpers are all optional:
 
 ## Package names
 
-These are the planned names. None of them has been published yet.
+These are the planned registry names. None of them has been published to a
+registry yet.
 
 > [!WARNING]
 > Until a package is published from this repository, treat any registry
 > package with one of these names, or a similar name, as untrusted. Release
 > notes in this repository will list each official package when it's
-> published.
+> published. Until then, install the TypeScript packages from this
+> repository's GitHub Releases, together with the `@convohop/core` release
+> that they need, as described in
+> [Installing and verifying a release](../RELEASING.md#installing-and-verifying-a-release).
 
 | Ecosystem | Server SDK | Client SDKs |
 | --- | --- | --- |
@@ -276,8 +282,9 @@ Notes:
 - **npm.** `@convohop/core` holds the shared TypeScript protocol and runtime.
   It's installed as a dependency of the other packages, but it isn't a
   supported entry point, so don't import it directly. `@convohop/core`,
-  `@convohop/client` and `@convohop/server` are available as source in this
-  repository. The earlier transitional workspace names,
+  `@convohop/client` and `@convohop/server` are developed in this
+  repository, and their releases are attached to its GitHub Releases. The
+  earlier transitional workspace names,
   `@convohop/browser-sdk` and `@convohop/server-sdk`, were removed before any
   release and were never published.
 - **PyPI.** A single distribution, `convohop`, with the import package
@@ -301,13 +308,22 @@ Notes:
 ## Versioning
 
 - Every package follows [Semantic Versioning 2.0.0](https://semver.org/).
-- Each package is versioned and released on its own, with its own changelog.
-  A Python release doesn't force a Go release.
+- Each package is versioned and released on its own, with its own changelog
+  and its own Git tags, such as `client-v0.2.0`. A Python release doesn't
+  force a Go release.
 - Release automation chooses versions from
   [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/):
-  `fix` makes a patch release and `feat` makes a minor release. A breaking
-  change makes a major release, or a minor release while the package is at
-  0.x.
+  - `fix`, `perf` and `revert` make a patch release.
+  - `feat` makes a minor release, also while the package is at 0.x.
+  - A breaking change makes a major release, or a minor release while the
+    package is at 0.x.
+- When a package is released, the packages in this repository that depend
+  on it are released too, with at least a patch release. For example, a
+  `@convohop/core` release also releases `@convohop/client` and
+  `@convohop/server`.
+- Prereleases, such as `0.3.0-rc.1`, are marked as prereleases on GitHub
+  and use the `next` tag on npm.
+- [RELEASING.md](../RELEASING.md) describes the release process.
 
 ### 0.x until general availability
 
@@ -316,7 +332,8 @@ Until a package reaches 1.0.0:
 - A minor release (for example 0.3.0 to 0.4.0) can include breaking changes.
   The changelog lists them, with migration notes.
 - A patch release (for example 0.3.1 to 0.3.2) contains only
-  backward-compatible fixes.
+  backward-compatible fixes and performance improvements. New features come
+  in minor releases.
 - To avoid surprises, pin to a single 0.x minor version. npm's default caret
   range, `^0.3.1`, already does this.
 
@@ -371,16 +388,24 @@ other row becomes a CI requirement when that SDK lands.
 
 ## Releases and distribution
 
-- Release automation opens a release pull request for each package, with the
-  version bump and the changelog. Merging it tags the release.
-- Packages are built in GitHub Actions. Publishing uses short-lived OpenID
-  Connect (OIDC) credentials (trusted publishing) on registries that support
-  it, such as npm, PyPI, NuGet and pub.dev, with build provenance where the
-  registry offers it. No long-lived registry tokens are stored. Maven Central
-  releases are signed. Go modules and Swift packages are released with Git
-  tags.
-- Registry publishing hasn't started. Until it does, build from source.
-  Pre-release builds might be attached to GitHub releases in this repository.
+- Release automation keeps one release pull request open for every package
+  with releasable changes. It bumps the versions and writes the changelogs.
+  Merging it tags each release and creates its GitHub Release.
+- Each release is built, tested and packed in GitHub Actions from the
+  tagged commit. Its GitHub Release has the package, checksums and an SBOM
+  (software bill of materials), with signed build provenance that you can
+  check with `gh attestation verify`.
+- Publishing uses short-lived OpenID Connect (OIDC) credentials (trusted
+  publishing) on registries that support it, such as npm, PyPI, NuGet and
+  pub.dev, with build provenance where the registry offers it. No long-lived
+  registry tokens are stored. Maven Central releases are signed. Go modules
+  are released with `go/vX.Y.Z` tags in this repository, and the Swift
+  package with tags in its own repository.
+- Registry publishing hasn't started, and the npm publish step is a dry run
+  until it does. Until then, install a release from this repository's
+  GitHub Releases, as described in
+  [RELEASING.md](../RELEASING.md#installing-and-verifying-a-release), or
+  build from source.
 
 ## Security model
 

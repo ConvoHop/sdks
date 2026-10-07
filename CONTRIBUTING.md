@@ -29,6 +29,7 @@ npm run check:graphql      # generated code matches the schemas
 npm run build              # strict TypeScript builds
 npm test                   # builds, then runs the package, generator and conformance harness tests
 npm run check:packages     # publint and Are the Types Wrong? on every package
+npm run check:release      # release scripts, release configuration and workflow rules
 npm run conformance        # conformance scenarios, reference driver against the mock
 ```
 
@@ -43,15 +44,23 @@ None of these commands need service credentials.
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
 | `tools/sdkgen/` | The SDK generator: annotation check, IR builder, emitters and their tests. See [SDK generation](docs/sdk-generation.md) |
+| `scripts/release/`, `test/release/` | Release scripts and their tests |
 | `spec/conformance/` | Language-neutral conformance scenarios, the driver protocol, target descriptors and webhook vectors, with their JSON Schemas |
 | `conformance/` | The conformance runner, the TypeScript reference driver, the mock target and the harness's tests. A private npm workspace that is never published |
 | `test/` | Fixtures shared by the package and conformance test suites |
+| `release-please-config.json`, `.release-please-manifest.json` | The released packages and their current versions. See [RELEASING.md](RELEASING.md). |
+| `.github/workflows/` | CI, conformance, release and pull request title workflows |
 | `docs/` | Public design and policy documents, and generated operation snippets |
 
 Each package has its own tests in `packages/<name>/test/`.
 
-- `@convohop/client` and `@convohop/server` depend on `@convohop/core`. They
-  never depend on each other at runtime.
+- `@convohop/client` and `@convohop/server` depend on `@convohop/core` with
+  an exact version in `dependencies`. They never depend on each other, not
+  even as a development dependency.
+- A workspace or tool that isn't released, such as a test harness or a tool
+  under `tools/`, stays `"private": true` and out of
+  `release-please-config.json`. Such a workspace depends on the packages
+  with `"*"`. `npm run check:release` enforces these rules.
 - Code that runs on end-user devices belongs in `client`. Code that needs a
   backend key or a management credential belongs in `server`. Code that both
   need, and that runs in browsers, React Native and Node.js alike, belongs in
@@ -204,23 +213,57 @@ Open a feature request to discuss the design before you start.
 
 ## Commits and pull requests
 
-- Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
-  for commit messages and pull request titles, for example
-  `fix(client): keep the request ID on retry`. Release automation uses
-  them to choose version numbers and write changelogs.
-  - `feat`: a new capability that users can see.
-  - `fix`: a bug fix.
-  - `perf`: a performance improvement.
-  - `docs`, `test`, `refactor`, `build`, `ci` and `chore`: don't trigger a
-    release on their own.
-  - For a breaking change, add `!` after the type (`feat!:`) or a
-    `BREAKING CHANGE:` footer.
+Pull requests are squash-merged, so the pull request title becomes the commit
+message on `main`. Release automation reads it to choose version numbers and
+write changelogs, as described in [RELEASING.md](RELEASING.md).
+
+- Write the title as a
+  [Conventional Commit](https://www.conventionalcommits.org/en/v1.0.0/):
+  `type(scope): summary`, for example
+  `fix(client): keep the request ID on retry`. The "Conventional Commit
+  title" check fails otherwise. If the pull request has a single commit, its
+  message must match the title.
+
+  | Type | Use it for | Release |
+  | --- | --- | --- |
+  | `feat` | A new capability that users can see | Minor |
+  | `fix` | A bug fix | Patch |
+  | `perf` | A performance improvement | Patch |
+  | `revert` | Undoing an earlier change | Patch |
+  | `docs`, `test`, `refactor`, `build`, `ci`, `chore`, `style` | Anything else | None |
+
+- For a breaking change, add `!` before the colon, for example
+  `feat(client)!: rename connect to connectMedia`. A breaking change makes a
+  minor release while a package is at 0.x, and a major release from 1.0.0.
+  Explain how to migrate in a `BREAKING CHANGE:` footer in a
+  [commit override](RELEASING.md#commit-overrides) in the pull request
+  description.
+- The scope is only for readers. A change is released in the packages whose
+  files it changes. When `@convohop/core` is released, `@convohop/client`
+  and `@convohop/server` get at least a patch release. If a core change adds
+  to or breaks the API that client or server re-exports, change those
+  packages in the same pull request too, for example their README or tests.
+- Don't edit `CHANGELOG.md` files, package versions or
+  `.release-please-manifest.json`. Release automation updates them.
 - Keep each pull request focused on one change.
 - Update documentation, examples and generated files in the same pull request
   as the API change that affects them.
 - Fill in the pull request template, including exactly what you verified.
 - All CI checks must pass, and a maintainer listed in
   [CODEOWNERS](.github/CODEOWNERS) must approve.
+
+### Workflows
+
+`npm run check:release` and [zizmor](https://docs.zizmor.sh/) check the
+workflow files on every pull request. Follow these rules:
+
+- Pin every action to a full commit SHA, with its version in a comment, for
+  example `actions/checkout@<40-character SHA> # v7.0.1`. Dependabot keeps
+  the pins up to date.
+- Declare `permissions` for each workflow or each job, and grant only what
+  it needs. Grant `id-token: write` only to jobs that sign or publish.
+- Pass `${{ }}` expressions to `run:` scripts through `env:`, never inline.
+- Don't use the `pull_request_target` or `workflow_run` triggers.
 
 ## License
 
