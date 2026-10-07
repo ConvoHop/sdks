@@ -542,6 +542,169 @@ test("a failed pushed page invalidates queued successors and resumes from the la
   assert.equal(JSON.parse([...saved.values.values()][0]).sequence, "2");
 });
 
+const drain = () => new Promise(resolve => setImmediate(resolve));
+const sequences = (from, to) => Array.from({ length: to - from + 1 }, (_, index) => String(from + index));
+function backlog(conversationId, incarnation, total) {
+  const server = { total, stalled: false, requested: [], events: async (_conversation, after) => {
+    server.requested.push(after?.sequence);
+    if (server.stalled) return { items: [], nextCursor: after, complete: false, refreshRequired: false };
+    const start = Number(after?.sequence ?? "0"), end = Math.min(start + 100, server.total);
+    return { items: sequences(start + 1, end).map(sequence => event(conversationId, sequence)),
+      nextCursor: { incarnation, conversationId, sequence: String(end) }, complete: end === server.total, refreshRequired: false };
+  } };
+  return server;
+}
+function replayFixture(t, total) {
+  const original = globalThis.WebSocket, sockets = [];
+  class Socket {
+    sent = [];
+    constructor(url, protocol) { this.url = url; this.protocol = protocol; sockets.push(this); }
+    send(value) { this.sent.push(JSON.parse(value)); }
+    close(code) { this.closedWith = code; this.onclose?.({ code }); }
+    subscribe() {
+      this.onopen();
+      this.onmessage({ data: JSON.stringify({ type: "connection_ack" }) });
+      return this.sent.find(frame => frame.type === "subscribe");
+    }
+  }
+  globalThis.WebSocket = Socket;
+  t.after(() => { globalThis.WebSocket = original; });
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  t.mock.method(Math, "random", () => 0);
+  const saved = storage(), projectId = id(), principalId = id(), conversationId = id(), incarnation = id();
+  const route = { incarnation, projectId, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" };
+  const server = backlog(conversationId, incarnation, total);
+  const client = { projectId, principalId, storage: saved, recoverPending: async () => {}, initialize: async () => route,
+    events: (conversation, after) => server.events(conversation, after) };
+  const setup = { sockets, saved, server, conversationId, incarnation, applied: [], errors: [], gate: undefined, overlapped: false };
+  let active = 0;
+  setup.replay = new V1Realtime(client, conversationId, route, "session-fixture", async events => {
+    if (active++) setup.overlapped = true;
+    try {
+      await setup.gate?.(events);
+      setup.applied.push(...events.map(value => value.sequence));
+    } finally { active--; }
+  }, error => setup.errors.push(error));
+  setup.savedSequence = () => JSON.parse([...saved.values.values()][0]).sequence;
+  t.after(() => setup.replay.close());
+  return setup;
+}
+
+test("managed replay continues beyond one bounded round in paced rounds and subscribes at the caught-up frontier", async t => {
+  const { replay, server, sockets, applied, errors, savedSequence } = replayFixture(t, 2500);
+  await replay.start();
+  assert.deepEqual(applied, sequences(1, 1000));
+  assert.equal(replay.cursor.sequence, "1000");
+  assert.equal(savedSequence(), "1000");
+  assert.equal(sockets.length, 0);
+  t.mock.timers.tick(249); await drain();
+  assert.equal(server.requested.length, 10);
+  t.mock.timers.tick(1); await drain();
+  assert.deepEqual(applied, sequences(1, 2000));
+  assert.equal(savedSequence(), "2000");
+  assert.equal(sockets.length, 0);
+  t.mock.timers.tick(250); await drain();
+  assert.deepEqual(applied, sequences(1, 2500));
+  assert.deepEqual(server.requested, [undefined, ...sequences(1, 24).map(page => String(page * 100))]);
+  assert.equal(sockets.length, 1);
+  assert.equal(sockets[0].subscribe().payload.variables.input.after.sequence, "2500");
+  assert.equal(savedSequence(), "2500");
+  assert.deepEqual(errors, []);
+  assert.equal(replay.closed, false);
+});
+
+test("an admission-limit overflow waits for superseded application work, then catches up a large backlog before resubscribing", async t => {
+  const setup = replayFixture(t, 0), { replay, server, sockets, applied, errors, conversationId, incarnation } = setup;
+  let release;
+  const blocked = new Promise(resolve => { release = resolve; });
+  setup.gate = events => events[0]?.sequence === "1" && !applied.length ? blocked : undefined;
+  await replay.start();
+  const first = sockets[0], subscription = first.subscribe();
+  assert.equal(subscription.payload.variables.input.after.sequence, "0");
+  server.total = 2500;
+  const push = page => first.onmessage({ data: JSON.stringify({ type: "next", id: subscription.id, payload: { data: {
+    conversationEvents: { items: sequences(page * 50 + 1, page * 50 + 50).map(sequence => event(conversationId, sequence)),
+      nextCursor: { incarnation, conversationId, sequence: String(page * 50 + 50) }, complete: true, refreshRequired: false },
+  } } }) });
+  push(0); await drain();
+  for (let page = 1; page < 5; page++) push(page);
+  assert.deepEqual(errors.map(error => error.code), ["ADMISSION_LIMIT"]);
+  assert.equal(first.closedWith, 4000);
+  const requested = server.requested.length;
+  t.mock.timers.tick(1000); await drain();
+  assert.equal(server.requested.length, requested);
+  assert.equal(sockets.length, 1);
+  release(); await drain();
+  assert.deepEqual(applied, [...sequences(1, 50), ...sequences(1, 1000)]);
+  assert.equal(replay.cursor.sequence, "1000");
+  assert.equal(sockets.length, 1);
+  t.mock.timers.tick(250); await drain();
+  t.mock.timers.tick(250); await drain();
+  assert.deepEqual(applied.slice(50), sequences(1, 2500));
+  assert.equal(sockets.length, 2);
+  assert.equal(sockets[1].subscribe().payload.variables.input.after.sequence, "2500");
+  assert.equal(errors.length, 1);
+  assert.equal(setup.overlapped, false);
+  assert.equal(replay.closed, false);
+});
+
+test("a reconnect retry with more than one round of missed history continues instead of closing", async t => {
+  const { replay, server, sockets, applied, errors } = replayFixture(t, 10);
+  await replay.start();
+  sockets[0].subscribe();
+  server.total = 1510;
+  sockets[0].close(1006);
+  t.mock.timers.tick(1000); await drain();
+  assert.deepEqual(applied, sequences(1, 1010));
+  assert.equal(sockets.length, 1);
+  t.mock.timers.tick(250); await drain();
+  assert.deepEqual(applied, sequences(1, 1510));
+  assert.equal(sockets.length, 2);
+  assert.equal(sockets[1].subscribe().payload.variables.input.after.sequence, "1510");
+  assert.deepEqual(errors, []);
+  assert.equal(replay.closed, false);
+});
+
+test("explicit reconcile reports each incomplete bounded round and rejects a frontier that does not advance", async () => {
+  const saved = storage(), projectId = id(), principalId = id(), conversationId = id(), incarnation = id();
+  const server = backlog(conversationId, incarnation, 1500), applied = [];
+  const replay = new V1Realtime({ projectId, principalId, storage: saved, events: server.events }, conversationId, {}, "private",
+    async events => { applied.push(...events.map(value => value.sequence)); }, () => {});
+  await assert.rejects(replay.reconcile(), /Replay work limit reached/);
+  assert.equal(replay.cursor.sequence, "1000");
+  await replay.reconcile();
+  assert.deepEqual(applied, sequences(1, 1500));
+  server.stalled = true;
+  await assert.rejects(replay.reconcile(), { name: "TypeError", message: /did not advance/ });
+  assert.equal(replay.cursor.sequence, "1500");
+  assert.equal(JSON.parse([...saved.values.values()][0]).sequence, "1500");
+  replay.close();
+});
+
+test("close cancels a paced replay continuation", async t => {
+  const { replay, server, sockets, errors } = replayFixture(t, 2500);
+  await replay.start();
+  replay.close();
+  t.mock.timers.tick(500); await drain();
+  assert.equal(server.requested.length, 10);
+  assert.equal(sockets.length, 0);
+  assert.deepEqual(errors, []);
+});
+
+test("a managed replay whose incomplete page stops advancing fails closed instead of pacing forever", async t => {
+  const { replay, server, sockets, errors } = replayFixture(t, 2500);
+  await replay.start();
+  server.stalled = true;
+  t.mock.timers.tick(250); await drain();
+  assert.equal(replay.closed, true);
+  assert.equal(errors.length, 1);
+  assert.match(errors[0].message, /did not advance/);
+  assert.equal(replay.cursor.sequence, "1000");
+  t.mock.timers.tick(10000); await drain();
+  assert.equal(server.requested.length, 11);
+  assert.equal(sockets.length, 0);
+});
+
 test("read-only resolution and explicit retry preserve typed committed evidence without another mutation", async () => {
   const projectId = id(), incarnation = id(), conversationId = id(), requestId = id();
   const ack = messageAck(conversationId, incarnation), requests = [];
