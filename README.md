@@ -34,11 +34,28 @@ planned languages, push notifications, package names, versioning and support.
 
 | SDK | Package | Runtime | Covers |
 | --- | --- | --- | --- |
-| [Web client](packages/browser-sdk/README.md) | `@convohop/browser-sdk` | Current browsers | Chat, history and search, realtime updates with replay, and calls with explicit connect and capture |
-| [Node.js server](packages/server-sdk/README.md) | `@convohop/server-sdk` | Node.js 24 or later | Organization and project management, user identities and sessions, conversations and membership |
+| [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, and calls with explicit connect and capture |
+| [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership |
 
-These package names are transitional. The planned published names are listed
-under [package names](docs/sdk-strategy.md#package-names).
+Both packages depend on [`@convohop/core`](packages/core/README.md), which
+holds the generated GraphQL types and operations and the shared transport.
+Don't import `@convohop/core` directly: everything you need from it is
+re-exported by `@convohop/client` and `@convohop/server`.
+
+The packages are ESM-only, with TypeScript declarations included. CommonJS
+code on Node.js 22.12 or later can load them with `require()`.
+
+These names match the planned published names under
+[package names](docs/sdk-strategy.md#package-names), but nothing is published
+yet.
+
+> [!NOTE]
+> `@convohop/browser-sdk` and `@convohop/server-sdk` are deprecated. They're
+> frozen shims that re-export `@convohop/client` and `@convohop/server` for
+> existing source consumers, and they'll be removed. To migrate, change the
+> import specifier. See the [client](packages/client/README.md#migrating-from-convohopbrowser-sdk)
+> and [server](packages/server/README.md#migrating-from-convohopserver-sdk)
+> migration notes.
 
 ### Planned
 
@@ -65,19 +82,20 @@ The package READMEs have code samples.
 
 ## Build from source
 
-You need Node.js 24 or later.
+You need Node.js 22 or later.
 
 ```sh
 npm ci
 npm run check:graphql
 npm run build
 npm test
+npm run check:packages   # publint and Are the Types Wrong? package checks
 ```
 
 The unit tests don't need service credentials. They don't prove real WebRTC
 media, database persistence or the behavior of a hosted service.
-[CI](.github/workflows/sdk-ci.yml) runs the same checks on every pull request.
-It doesn't publish packages or deploy anything.
+[CI](.github/workflows/sdk-ci.yml) runs the same checks on Node.js 22 and 24 for
+every pull request. It doesn't publish packages or deploy anything.
 
 ## API contract
 
@@ -118,14 +136,14 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
   known to be accepted, or a media admission has been attempted, the SDK
   won't resend it.
 - Backends can keep recovery state in their own database with
-  [`asyncRecoveryStorage`](packages/server-sdk/README.md#asynchronous-database-recovery-storage).
+  [`asyncRecoveryStorage`](packages/server/README.md#asynchronous-database-recovery-storage).
   Your application must coordinate writers across processes and overlapping
   deployments. Backends can also read
-  [credential-free session request outcomes](packages/server-sdk/README.md#read-only-session-request-outcomes).
+  [credential-free session request outcomes](packages/server/README.md#read-only-session-request-outcomes).
   These reads never return a token, and a missing observation isn't proof
   that a request didn't commit.
 - Browser apps can opt in to
-  [session refresh](packages/browser-sdk/README.md#session-credential-lifetime).
+  [session refresh](packages/client/README.md#session-credential-lifetime).
 - Starting or joining a call, connecting media, and turning on the microphone
   or camera are separate, explicit steps. A reconnect starts with capture
   off. Media admission needs the matching ConvoHop media server (SFU) and
@@ -137,8 +155,9 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 - [SDK strategy](docs/sdk-strategy.md): layers, languages, push
   notifications, package names, versioning and support
-- [Web client SDK](packages/browser-sdk/README.md)
-- [Node.js server SDK](packages/server-sdk/README.md)
+- [Client SDK](packages/client/README.md)
+- [Node.js server SDK](packages/server/README.md)
+- [Shared core package](packages/core/README.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)

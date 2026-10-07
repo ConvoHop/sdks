@@ -1,5 +1,5 @@
 <!--
-Title: use Conventional Commits, for example `fix(browser-sdk): keep the request ID on retry`.
+Title: use Conventional Commits, for example `fix(client): keep the request ID on retry`.
 Don't include credentials, tokens or personal data anywhere in this pull request.
 Report security vulnerabilities privately instead. See SECURITY.md.
 -->
@@ -27,6 +27,7 @@ database or hosted-service behavior.
 - [ ] `npm run check:graphql`
 - [ ] `npm run build`
 - [ ] `npm test`
+- [ ] `npm run check:packages`
 
 ## Checklist
 

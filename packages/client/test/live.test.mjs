@@ -1,8 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { V1Client, V1MediaConnection, LiveSessionHandle, LiveParticipationHandle } from "../dist/index.js";
-import { v1Operations } from "../dist/v1-operations.js";
-import { operationPayload } from "../dist/v1-graphql.js";
+import { V1Client, V1MediaConnection, LiveSessionHandle, LiveParticipationHandle, v1Operations } from "@convohop/client";
+import { operationPayload } from "@convohop/core/internal";
 import { full, reply } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID(), time = () => new Date().toISOString();

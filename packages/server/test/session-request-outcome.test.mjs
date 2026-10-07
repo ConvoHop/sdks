@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { V1ProjectServerClient } from "../dist/index.js";
-import { V1Client, v1Operations } from "@convohop/browser-sdk";
+import { V1ProjectServerClient } from "@convohop/server";
+import { V1Client, v1Operations } from "@convohop/client";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 

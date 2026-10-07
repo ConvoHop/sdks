@@ -19,14 +19,15 @@ Report security vulnerabilities privately as described in
 
 ## Development setup
 
-You need Node.js 24 or later and the npm version that comes with it. CI runs
-on Ubuntu with Node.js 24.
+You need Node.js 22 or later and the npm version that comes with it. CI runs
+on Ubuntu with Node.js 22 and 24.
 
 ```sh
 npm ci                  # install from the root package-lock.json
 npm run check:graphql   # generated code matches the schemas
 npm run build           # strict TypeScript builds
 npm test                # builds, then runs the package test suites
+npm run check:packages  # publint and Are the Types Wrong? on every package
 ```
 
 None of these commands need service credentials.
@@ -35,15 +36,29 @@ None of these commands need service credentials.
 
 | Path | Contents |
 | --- | --- |
-| `packages/browser-sdk` | Web client SDK (`@convohop/browser-sdk`) and its tests |
-| `packages/server-sdk` | Node.js server SDK (`@convohop/server-sdk`) and its tests |
+| `packages/core` | Shared core (`@convohop/core`): generated GraphQL types and operations, protocol validation and the isomorphic transport |
+| `packages/client` | Client SDK (`@convohop/client`) for browsers and React Native, with realtime and media |
+| `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
+| `packages/browser-sdk` | Deprecated, frozen re-export of `@convohop/client` under the old name |
+| `packages/server-sdk` | Deprecated, frozen re-export of `@convohop/server` under the old name |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, plus generated operation documents |
 | `scripts/`, `codegen.mjs` | Code generation |
 | `test/` | Fixtures shared by the package test suites |
 | `docs/` | Public design and policy documents |
 
-The package names above are transitional. See
-[package names](docs/sdk-strategy.md#package-names) for the planned names.
+Each package has its own tests in `packages/<name>/test/`.
+
+- `@convohop/client` and `@convohop/server` depend on `@convohop/core`. They
+  never depend on each other at runtime.
+- Code that runs on end-user devices belongs in `client`. Code that needs a
+  backend key or a management credential belongs in `server`. Code that both
+  need, and that runs in browsers, React Native and Node.js alike, belongs in
+  `core`.
+- `@convohop/core` isn't a supported entry point. Re-export its public API
+  from `client` and `server` instead of asking users to import it.
+- Don't add features to `browser-sdk` or `server-sdk`. They keep the old
+  names and module layout working for existing consumers until those
+  consumers move, and then they'll be removed.
 
 ## Generated code
 
@@ -53,8 +68,8 @@ generated from them:
 
 - `schema/operations-v1.graphql`
 - `schema/v1-operations.json`
-- `packages/browser-sdk/src/v1-operations.ts`
-- `packages/browser-sdk/src/v1-generated.ts`
+- `packages/core/src/generated/v1-operations.ts`
+- `packages/core/src/generated/v1-generated.ts`
 
 ```sh
 npm run generate:graphql   # regenerate after a schema change
@@ -119,7 +134,7 @@ request to discuss the design before you start.
 
 - Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
   for commit messages and pull request titles, for example
-  `fix(browser-sdk): keep the request ID on retry`. Release automation uses
+  `fix(client): keep the request ID on retry`. Release automation uses
   them to choose version numbers and write changelogs.
   - `feat`: a new capability that users can see.
   - `fix`: a bug fix.

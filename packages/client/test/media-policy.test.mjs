@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { Room } from "livekit-client";
-import { V1MediaConnection, V1Transport } from "../dist/index.js";
+import { V1MediaConnection, V1Transport } from "@convohop/client";
 import { reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 

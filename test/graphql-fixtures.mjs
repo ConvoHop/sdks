@@ -1,4 +1,4 @@
-import { v1Operations, v1OutputShapes } from "../packages/browser-sdk/dist/v1-operations.js";
+import { v1Operations, v1OutputShapes } from "../packages/core/dist/generated/v1-operations.js";
 
 export function full(type, fields) {
   const shape = v1OutputShapes[type];

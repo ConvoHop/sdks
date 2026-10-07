@@ -57,7 +57,7 @@ for (const plane of ["communication", "management"]) {
 const notice = "// Generated from the current unversioned GraphQL schemas. Run npm run generate:graphql.\n";
 output("schema/operations-v1.graphql", documents.join("\n\n") + "\n");
 output("schema/v1-operations.json", JSON.stringify({ operations }, null, 2) + "\n");
-output("packages/browser-sdk/src/v1-operations.ts", notice +
+output("packages/core/src/generated/v1-operations.ts", notice +
   'import type * as Generated from "./v1-generated.js";\n' +
   `export interface V1OperationTypes {\n${types.join("\n")}\n}\n` +
   "export type V1OperationKey = keyof V1OperationTypes;\n" +

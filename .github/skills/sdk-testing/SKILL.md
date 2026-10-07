@@ -7,8 +7,13 @@ description: Build maintainable current ConvoHop Browser/Node regression tests w
 
 Use the existing package test suites:
 
-- Browser/Node: root `npm test` builds packages and runs `node:test`.
+- TypeScript packages (`core`, `client`, `server` and the deprecated
+  `browser-sdk`/`server-sdk` shims): root `npm test` builds packages and runs
+  `node:test` from `packages/<name>/test/`.
 - Generated contract: root `npm run check:graphql`.
+- Package metadata and export maps: root `npm run check:packages` (publint
+  and attw). Each package's `surface.test.mjs` pins its runtime exports and
+  allowed imports; the shims also pin their frozen legacy type surface.
 
 Prototype clients and the earlier Python/Go implementations were deliberately
 removed. New language SDKs follow `docs/sdk-strategy.md`. Test the current
@@ -31,5 +36,5 @@ consumer's maintained Playwright suite against a real service/SFU; synthetic
 camera/microphone sources are acceptable, fabricated RTP counters are not.
 
 Use isolated artifacts and no real credentials. Run focused cases while
-iterating, then the complete affected package suites and Node 24 CI.
+iterating, then the complete affected package suites and Node 22 and 24 CI.
 Record skipped or unavailable integration explicitly.

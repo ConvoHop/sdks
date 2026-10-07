@@ -1,0 +1,42 @@
+{
+  "name": "@convohop/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ConvoHop server SDK for trusted Node.js runtimes. Uses secret backend keys for management and data-plane access.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ConvoHop/sdks.git",
+    "directory": "packages/server"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "check:package": "publint --strict && attw --pack . --profile esm-only"
+  },
+  "dependencies": {
+    "@convohop/core": "0.1.0"
+  },
+  "devDependencies": {
+    "@convohop/client": "0.1.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^7.0.2"
+  }
+}

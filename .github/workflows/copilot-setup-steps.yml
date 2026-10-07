@@ -23,5 +23,5 @@ jobs:
           cache: npm
       - name: Install locked JavaScript dependencies
         run: npm ci --no-audit --no-fund
-      - name: Build browser and server SDKs
+      - name: Build TypeScript packages
         run: npm run build
