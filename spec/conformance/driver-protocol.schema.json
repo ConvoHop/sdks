@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:convohop:conformance:driver-protocol",
+  "title": "ConvoHop conformance driver protocol v1",
+  "description": "Message shapes for the JSON-over-stdio driver protocol. spec/conformance/driver-protocol.md is normative; the runner validates every response against these definitions.",
+  "$defs": {
+    "requestId": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "handle": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,64}$" },
+    "operation": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)+$", "maxLength": 64 },
+    "feature": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)*$", "maxLength": 64 },
+    "request": {
+      "description": "One line written by the runner to the driver's stdin.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "method", "params"],
+      "properties": {
+        "id": { "$ref": "#/$defs/requestId" },
+        "method": {
+          "enum": [
+            "hello", "client.create", "client.close", "invoke", "realtime.subscribe", "realtime.collect",
+            "realtime.close", "webhooks.verify", "reset", "shutdown"
+          ]
+        },
+        "params": { "type": "object" }
+      }
+    },
+    "response": {
+      "description": "One line written by the driver to stdout. id is null only when the request line could not be parsed.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": ["integer", "null"], "minimum": 1, "maximum": 9007199254740991 },
+        "result": {},
+        "error": { "$ref": "#/$defs/protocolError" }
+      },
+      "oneOf": [{ "required": ["result"] }, { "required": ["error"] }]
+    },
+    "protocolError": {
+      "description": "The request itself failed. SDK failures are results ({ok:false}), never protocol errors.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "enum": [
+            "INVALID_REQUEST", "PROTOCOL_VERSION_UNSUPPORTED", "UNKNOWN_METHOD", "INVALID_PARAMS", "UNKNOWN_HANDLE",
+            "UNSUPPORTED", "DRIVER_FAILURE"
+          ]
+        },
+        "message": { "type": "string" }
+      }
+    },
+    "sdkError": {
+      "description": "Language-neutral projection of an SDK failure.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "status", "outcome", "requestId", "retryAfterMs", "message"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "maxLength": 64 },
+        "status": { "type": ["integer", "null"], "minimum": 100, "maximum": 599 },
+        "outcome": { "type": ["string", "null"], "pattern": "^[a-z][A-Za-z]*$", "maxLength": 64 },
+        "requestId": { "type": ["string", "null"], "minLength": 1 },
+        "retryAfterMs": { "type": ["integer", "null"], "minimum": 0 },
+        "message": { "type": "string" }
+      }
+    },
+    "helloParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocolVersions", "runner"],
+      "properties": {
+        "protocolVersions": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "integer", "minimum": 1 } },
+        "runner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version"],
+          "properties": { "name": { "type": "string" }, "version": { "type": "string" } }
+        }
+      }
+    },
+    "helloResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocolVersion", "driver", "roles", "features"],
+      "properties": {
+        "protocolVersion": { "type": "integer", "minimum": 1 },
+        "driver": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version", "language"],
+          "properties": {
+            "name": { "type": "string", "pattern": "^[A-Za-z0-9._@/-]{1,100}$" },
+            "version": { "type": "string", "minLength": 1, "maxLength": 64 },
+            "language": { "type": "string", "pattern": "^[a-z][a-z0-9+#-]{0,31}$" },
+            "packages": {
+              "description": "SDK packages under test and their versions.",
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            }
+          }
+        },
+        "roles": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "user": { "$ref": "#/$defs/roleDeclaration" },
+            "backend": { "$ref": "#/$defs/roleDeclaration" },
+            "management": { "$ref": "#/$defs/roleDeclaration" }
+          }
+        },
+        "features": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/feature" } }
+      }
+    },
+    "roleDeclaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operations"],
+      "properties": { "operations": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/operation" } } }
+    },
+    "emptyResult": { "type": "object", "additionalProperties": false },
+    "clientCreateParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["client", "role", "baseUrl", "credential"],
+      "properties": {
+        "client": { "$ref": "#/$defs/handle" },
+        "role": { "enum": ["user", "backend", "management"] },
+        "baseUrl": { "type": "string" },
+        "credential": { "type": "string" },
+        "projectId": { "type": "string" },
+        "incarnation": { "type": "string" },
+        "principalId": { "type": "string" },
+        "actorId": { "type": "string" },
+        "storage": { "$ref": "#/$defs/handle" }
+      }
+    },
+    "clientCloseParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["client"],
+      "properties": { "client": { "$ref": "#/$defs/handle" } }
+    },
+    "invokeParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["client", "operation"],
+      "properties": {
+        "client": { "$ref": "#/$defs/handle" },
+        "operation": { "$ref": "#/$defs/operation" },
+        "args": { "type": "object" }
+      }
+    },
+    "invokeResult": {
+      "type": "object",
+      "required": ["ok"],
+      "properties": { "ok": { "type": "boolean" } },
+      "if": { "required": ["ok"], "properties": { "ok": { "const": true } } },
+      "then": { "additionalProperties": false, "required": ["value"], "properties": { "ok": true, "value": {} } },
+      "else": {
+        "additionalProperties": false,
+        "required": ["error"],
+        "properties": { "ok": true, "error": { "$ref": "#/$defs/sdkError" } }
+      }
+    },
+    "subscribeParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["client", "subscription", "conversationId"],
+      "properties": {
+        "client": { "$ref": "#/$defs/handle" },
+        "subscription": { "$ref": "#/$defs/handle" },
+        "conversationId": { "type": "string" }
+      }
+    },
+    "subscribeResult": {
+      "type": "object",
+      "required": ["ok"],
+      "properties": { "ok": { "type": "boolean" } },
+      "if": { "required": ["ok"], "properties": { "ok": { "const": true } } },
+      "then": { "additionalProperties": false, "properties": { "ok": true } },
+      "else": {
+        "additionalProperties": false,
+        "required": ["error"],
+        "properties": { "ok": true, "error": { "$ref": "#/$defs/sdkError" } }
+      }
+    },
+    "collectParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subscription", "timeoutMs"],
+      "properties": {
+        "subscription": { "$ref": "#/$defs/handle" },
+        "until": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "count": { "type": "integer", "minimum": 0, "maximum": 100000 },
+            "sequence": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+            "closed": { "const": true }
+          }
+        },
+        "timeoutMs": { "type": "integer", "minimum": 0, "maximum": 60000 },
+        "settleMs": { "type": "integer", "minimum": 0, "maximum": 10000 }
+      }
+    },
+    "collectResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["events", "errors", "closed", "timedOut"],
+      "properties": {
+        "events": { "type": "array", "items": { "type": "object" } },
+        "errors": { "type": "array", "items": { "$ref": "#/$defs/sdkError" } },
+        "closed": { "type": "boolean" },
+        "timedOut": { "type": "boolean" }
+      }
+    },
+    "realtimeCloseParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subscription"],
+      "properties": { "subscription": { "$ref": "#/$defs/handle" } }
+    },
+    "verifyParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload", "headers", "secrets", "nowSeconds", "toleranceSeconds"],
+      "properties": {
+        "payload": { "type": "string" },
+        "headers": { "type": "object", "additionalProperties": { "type": "string" } },
+        "secrets": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "nowSeconds": { "type": "integer", "minimum": 0 },
+        "toleranceSeconds": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "verifyResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["valid", "code"],
+      "properties": { "valid": { "type": "boolean" }, "code": { "$ref": "#/$defs/webhookCode" } },
+      "if": { "required": ["valid"], "properties": { "valid": { "const": true } } },
+      "then": { "properties": { "code": { "type": "null" } } },
+      "else": { "properties": { "code": { "type": "string" } } }
+    },
+    "webhookCode": {
+      "enum": [
+        null, "WEBHOOK_HEADERS_MISSING", "WEBHOOK_TIMESTAMP_INVALID", "WEBHOOK_TIMESTAMP_EXPIRED",
+        "WEBHOOK_TIMESTAMP_FUTURE", "WEBHOOK_SIGNATURE_INVALID"
+      ]
+    }
+  }
+}

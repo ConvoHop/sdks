@@ -79,8 +79,9 @@ the bundle files.
    1. **Plan** checks that every new tag points to the commit that started
       the run.
    2. **Build, check and pack** checks out that commit, installs the locked
-      dependencies without lifecycle scripts, runs every check and test, and
-      packs each released package with its SBOM and `SHA256SUMS`.
+      dependencies without lifecycle scripts, runs every check and test,
+      including the conformance scenarios against the mock, and packs each
+      released package with its SBOM and `SHA256SUMS`.
    3. **Attest** signs build provenance and an SBOM attestation for each
       package, then verifies them as a user would.
    4. **Attach the assets to the draft releases** checks the complete asset
@@ -218,11 +219,13 @@ END_COMMIT_OVERRIDE
   END_COMMIT_OVERRIDE
   ```
 
-  Without it, `@convohop/server` would start at 0.1.1. It has no releasable
-  changes of its own, so it would be released only because
-  `@convohop/core` is, with a patch bump from the 0.1.0 in its
-  `package.json`. Each package's first changelog lists the override as
-  "release 0.1.0" under Miscellaneous Chores.
+  Without it, a package with no releasable changes of its own would be
+  released only because `@convohop/core` is, with a patch bump from the
+  0.1.0 in its `package.json` to 0.1.1. That was true of
+  `@convohop/server` when the pipeline was added. Every package has had
+  releasable changes since then and would start at 0.1.0 anyway, so the
+  override is now a safeguard. Each package's first changelog lists the
+  override as "release 0.1.0" under Miscellaneous Chores.
 
 ## Recovering a release
 

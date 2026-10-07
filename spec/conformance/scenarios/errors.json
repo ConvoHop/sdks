@@ -1,0 +1,208 @@
+{
+  "$schema": "../scenario.schema.json",
+  "suite": "errors",
+  "title": "Errors",
+  "description": "Normalized error codes, HTTP status and outcome for validation, authorization, conflicts and rate limits.",
+  "scenarios": [
+    {
+      "id": "errors.messages.revision-conflict",
+      "title": "Editing from a stale message revision is a definitive revision conflict",
+      "covers": ["errors"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Conflicts ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "first draft" } },
+        { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" }, "save": "page" },
+        { "do": "invoke", "client": "alice", "operation": "messages.edit", "args": { "message": "${saved.page.items.0}", "text": "second draft" },
+          "expect": { "value": { "revision": "2", "text": "second draft" } } },
+        { "do": "invoke", "client": "alice", "operation": "messages.edit", "args": { "message": "${saved.page.items.0}", "text": "stale draft" },
+          "note": "The message object still carries revision 1.",
+          "expect": { "error": { "code": "REVISION_CONFLICT", "status": 409, "outcome": "rejected", "requestId": { "$type": "uuid" } } } },
+        { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "items": [{ "revision": "2", "text": "second draft" }] } } }
+      ]
+    },
+    {
+      "id": "errors.messages.edit-deleted",
+      "title": "A deleted message cannot be edited, even from its current revision",
+      "covers": ["errors"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Tombstones ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "short-lived" } },
+        { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" }, "save": "page" },
+        { "do": "invoke", "client": "alice", "operation": "messages.delete", "args": { "message": "${saved.page.items.0}" },
+          "expect": { "value": { "deleted": true } }, "save": "tombstone" },
+        { "do": "invoke", "client": "alice", "operation": "messages.edit", "args": { "message": "${saved.tombstone}", "text": "revived" },
+          "expect": { "error": { "code": "MESSAGE_DELETED", "status": 409, "outcome": "rejected" } } }
+      ]
+    },
+    {
+      "id": "errors.messages.non-author-edit",
+      "title": "Only the author or a moderator can edit a message",
+      "description": "Editing carries the IR's authorOrModerator condition: the caller wrote the message or moderates the conversation.",
+      "covers": ["errors", "auth.userToken"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "carol-${nonce}" }, "save": "carol" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Authors ${nonce}", "props": {}, "members": [
+            { "principalId": "${saved.alice.principalId}", "role": "member" }, { "principalId": "${saved.bob.principalId}", "role": "member" },
+            { "principalId": "${saved.carol.principalId}", "role": "moderator" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.bob.principalId}", "deviceId": "${uuid.bobDevice}" }, "save": "bobSession" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.carol.principalId}", "deviceId": "${uuid.carolDevice}" }, "save": "carolSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "client.create", "client": "bob", "role": "user", "credential": "${saved.bobSession.sessionToken}", "principalId": "${saved.bob.principalId}" },
+        { "do": "client.create", "client": "carol", "role": "user", "credential": "${saved.carolSession.sessionToken}", "principalId": "${saved.carol.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "mine" } },
+        { "do": "invoke", "client": "bob", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" }, "save": "page" },
+        { "do": "invoke", "client": "bob", "operation": "messages.edit", "args": { "message": "${saved.page.items.0}", "text": "not yours" },
+          "note": "A member who neither wrote the message nor moderates the conversation cannot change it.",
+          "expect": { "error": { "code": "FORBIDDEN", "status": 403, "outcome": "rejected" } } },
+        { "do": "invoke", "client": "carol", "operation": "messages.edit", "args": { "message": "${saved.page.items.0}", "text": "moderated" },
+          "note": "The rejected edit left revision 1 in place, so the moderator's edit applies.",
+          "expect": { "value": { "revision": "2", "text": "moderated" } } },
+        { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "items": [{ "revision": "2", "text": "moderated" }] } } }
+      ]
+    },
+    {
+      "id": "errors.members.revision-conflict",
+      "title": "Adding an existing member with expectedRevision 0 is a revision conflict",
+      "covers": ["errors"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Members ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "members.add",
+          "args": { "conversationId": "${saved.conversation.conversationId}",
+            "members": [{ "principalId": "${saved.bob.principalId}", "role": "member", "expectedRevision": "0" }] },
+          "expect": { "value": [{ "principalId": "${saved.bob.principalId}", "revision": "1" }] } },
+        { "do": "invoke", "client": "backend", "operation": "members.add",
+          "args": { "conversationId": "${saved.conversation.conversationId}",
+            "members": [{ "principalId": "${saved.bob.principalId}", "role": "moderator", "expectedRevision": "0" }] },
+          "expect": { "error": { "code": "REVISION_CONFLICT", "status": 409, "outcome": "rejected" } } },
+        { "do": "invoke", "client": "backend", "operation": "members.list", "args": { "conversationId": "${saved.conversation.conversationId}", "limit": 10 },
+          "expect": { "value": { "items": { "$contains": { "principalId": "${saved.bob.principalId}", "role": "member", "revision": "1" } } } } }
+      ]
+    },
+    {
+      "id": "errors.not-found",
+      "title": "Unknown conversations are not found for backend and user callers alike",
+      "covers": ["errors"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.get", "args": { "conversationId": "${uuid.missing}" },
+          "expect": { "error": { "code": "NOT_FOUND", "status": 404, "outcome": "rejected" } } },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "conversations.get", "args": { "conversationId": "${uuid.missing}" },
+          "expect": { "error": { "code": "NOT_FOUND", "status": 404, "outcome": "rejected" } } },
+        { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${uuid.missing}", "text": "hello?" },
+          "expect": { "error": { "code": "NOT_FOUND", "status": 404, "outcome": "rejected" } } }
+      ]
+    },
+    {
+      "id": "errors.invalid-request",
+      "title": "Out-of-range input is rejected as an invalid request",
+      "description": "SDKs may reject input locally or let the service do it; either way the error is INVALID_REQUEST and definitive, so status is not pinned.",
+      "covers": ["errors"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "expect": { "error": { "code": "INVALID_REQUEST", "outcome": "rejected" } } },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}", "requestedTtlMs": "999" },
+          "note": "Session lifetimes must be at least one second.",
+          "expect": { "error": { "code": "INVALID_REQUEST", "outcome": "rejected" } } },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Valid ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "" },
+          "expect": { "error": { "code": "INVALID_REQUEST", "outcome": "rejected" } } },
+        { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "items": [] } } }
+      ]
+    },
+    {
+      "id": "errors.rate-limited.user",
+      "title": "A rate-limited send is a definitive rejection that can be resubmitted with the same request id",
+      "description": "RATE_LIMITED is the normalized form of the service's rateLimited error.",
+      "covers": ["errors", "errors.rateLimited", "idempotency"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
+        { "do": "invoke", "client": "backend", "operation": "conversations.create",
+          "args": { "input": { "title": "Limits ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
+          "save": "conversation" },
+        { "do": "invoke", "client": "backend", "operation": "sessions.issue",
+          "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
+        { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "control.fault", "field": "sendMessage", "action": "rateLimit", "retryAfterSeconds": 1 },
+        { "do": "invoke", "client": "alice", "operation": "messages.send",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "text": "throttled", "requestId": "${uuid.limited}" },
+          "expect": { "error": { "code": "RATE_LIMITED", "status": 429, "outcome": "rejected", "requestId": "${uuid.limited}" } } },
+        { "do": "sleep", "ms": 1000, "note": "Honour the one-second retry-after before resubmitting." },
+        { "do": "invoke", "client": "alice", "operation": "messages.send",
+          "args": { "conversationId": "${saved.conversation.conversationId}", "text": "throttled", "requestId": "${uuid.limited}" },
+          "expect": { "value": { "status": "sent", "messageId": { "$type": "uuid" } } }, "save": "sent" },
+        { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
+          "expect": { "value": { "items": [{ "messageId": "${saved.sent.messageId}", "text": "throttled" }] } } }
+      ]
+    },
+    {
+      "id": "errors.rate-limited.retry-after",
+      "title": "A rate-limited error exposes the retry-after delay in milliseconds",
+      "covers": ["errors.rateLimited"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "control.fault", "field": "createPrincipal", "action": "rateLimit", "retryAfterSeconds": 2 },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "requires": ["retryAfter"],
+          "expect": { "error": { "code": "RATE_LIMITED", "status": 429, "outcome": "rejected", "retryAfterMs": 2000 } } }
+      ]
+    },
+    {
+      "id": "errors.rate-limited.backend",
+      "title": "Backend calls surface rate limits with the same normalized error",
+      "covers": ["errors", "errors.rateLimited", "auth.backendKey"],
+      "steps": [
+        { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "control.fault", "field": "createPrincipal", "action": "rateLimit", "retryAfterSeconds": 1 },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" },
+          "expect": { "error": { "code": "RATE_LIMITED", "status": 429, "outcome": "rejected", "requestId": { "$type": "uuid" } } } },
+        { "do": "sleep", "ms": 1000 },
+        { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" },
+          "expect": { "value": { "principalId": { "$type": "uuid" } } } }
+      ]
+    }
+  ]
+}
