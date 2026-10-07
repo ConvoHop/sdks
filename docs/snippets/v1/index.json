@@ -539,9 +539,29 @@
       "kind": "query",
       "field": "deploymentUsage",
       "operationName": "ManagementDeploymentUsage",
-      "summary": "Read the usage of a deployment.",
+      "summary": "Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
       "layer": "server",
       "path": "management/deploymentUsage.md"
+    },
+    {
+      "id": "management.projectUsage",
+      "plane": "management",
+      "kind": "query",
+      "field": "projectUsage",
+      "operationName": "ManagementProjectUsage",
+      "summary": "Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "layer": "server",
+      "path": "management/projectUsage.md"
+    },
+    {
+      "id": "management.organizationUsage",
+      "plane": "management",
+      "kind": "query",
+      "field": "organizationUsage",
+      "operationName": "ManagementOrganizationUsage",
+      "summary": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "layer": "server",
+      "path": "management/organizationUsage.md"
     },
     {
       "id": "management.webhookEndpoints",

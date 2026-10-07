@@ -4908,7 +4908,7 @@
       "kind": "query",
       "field": "deploymentUsage",
       "operationName": "ManagementDeploymentUsage",
-      "summary": "Read the usage of a deployment.",
+      "summary": "Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
       "layer": "server",
       "auth": [{"credential": "portalCredential", "condition": "owner"}],
       "arguments": [
@@ -4937,10 +4937,142 @@
       "input": {"argument": "input", "type": "DeploymentUsageRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "DeploymentUsageReply", "nullable": false}},
       "document": {
-        "text": "query ManagementDeploymentUsage($context: RequestContextInput!, $input: DeploymentUsageRequestInput!) {\n  deploymentUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      deploymentId\n      source\n      observedAt\n      complete\n      reason\n    }\n  }\n}",
-        "bytes": 461,
-        "selectedFields": 21,
-        "depth": 2
+        "text": "query ManagementDeploymentUsage($context: RequestContextInput!, $input: DeploymentUsageRequestInput!) {\n  deploymentUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      deploymentId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
+        "bytes": 588,
+        "selectedFields": 29,
+        "depth": 3
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "REQUEST_TOO_LARGE",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.projectUsage",
+      "plane": "management",
+      "kind": "query",
+      "field": "projectUsage",
+      "operationName": "ManagementProjectUsage",
+      "summary": "Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "ProjectUsageRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "ProjectUsageRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "ProjectUsageReply", "nullable": false}},
+      "document": {
+        "text": "query ManagementProjectUsage($context: RequestContextInput!, $input: ProjectUsageRequestInput!) {\n  projectUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
+        "bytes": 576,
+        "selectedFields": 29,
+        "depth": 3
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "REQUEST_TOO_LARGE",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.organizationUsage",
+      "plane": "management",
+      "kind": "query",
+      "field": "organizationUsage",
+      "operationName": "ManagementOrganizationUsage",
+      "summary": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "OrganizationUsageRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "OrganizationUsageRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "OrganizationUsageReply", "nullable": false}},
+      "document": {
+        "text": "query ManagementOrganizationUsage($context: RequestContextInput!, $input: OrganizationUsageRequestInput!) {\n  organizationUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
+        "bytes": 587,
+        "selectedFields": 29,
+        "depth": 3
       },
       "idempotency": "safe",
       "pagination": {"style": "none"},
@@ -6794,7 +6926,21 @@
         {"name": "source", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "observedAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "complete", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
-        {"name": "reason", "type": {"kind": "scalar", "name": "String", "nullable": false}}
+        {"name": "reason", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "from", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "to", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "meters",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "UsageMeter", "nullable": false}
+          }
+        },
+        {
+          "name": "aggregatedThrough",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        }
       ]
     },
     {
@@ -8209,6 +8355,32 @@
       ]
     },
     {
+      "name": "OrganizationUsage",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "source", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "observedAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "complete", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {"name": "reason", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "from", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "to", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "meters",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "UsageMeter", "nullable": false}
+          }
+        },
+        {
+          "name": "aggregatedThrough",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        }
+      ]
+    },
+    {
       "name": "PageSize",
       "kind": "scalar",
       "planes": ["communication", "management"],
@@ -8253,6 +8425,32 @@
         {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "revision", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}},
         {"name": "policyRevision", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}}
+      ]
+    },
+    {
+      "name": "ProjectUsage",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "projectId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "source", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "observedAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "complete", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {"name": "reason", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "from", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "to", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "meters",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "UsageMeter", "nullable": false}
+          }
+        },
+        {
+          "name": "aggregatedThrough",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        }
       ]
     },
     {
@@ -8999,6 +9197,17 @@
       ]
     },
     {
+      "name": "UsageMeter",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "meter", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "unit", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "quantity", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}},
+        {"name": "emitted", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}}
+      ]
+    },
+    {
       "name": "WebhookDelivery",
       "kind": "object",
       "planes": ["communication", "management"],
@@ -9297,7 +9506,9 @@
       "kind": "input",
       "planes": ["management"],
       "fields": [
-        {"name": "deploymentId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}}
+        {"name": "deploymentId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "from", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "to", "type": {"kind": "scalar", "name": "String", "nullable": true}}
       ]
     },
     {
@@ -9434,6 +9645,35 @@
       ]
     },
     {
+      "name": "OrganizationUsageReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "OrganizationUsage", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "OrganizationUsageRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "from", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "to", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
       "name": "OrganizationsReply",
       "kind": "object",
       "planes": ["management"],
@@ -9507,6 +9747,32 @@
           "name": "change",
           "type": {"kind": "input", "name": "PolicyChangeInput", "nullable": false}
         }
+      ]
+    },
+    {
+      "name": "ProjectUsageReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {"name": "result", "type": {"kind": "object", "name": "ProjectUsage", "nullable": true}}
+      ]
+    },
+    {
+      "name": "ProjectUsageRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "projectId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "from", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "to", "type": {"kind": "scalar", "name": "String", "nullable": true}}
       ]
     },
     {

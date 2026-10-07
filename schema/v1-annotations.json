@@ -1601,7 +1601,25 @@
       "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
     },
     "management.deploymentUsage": {
-      "summary": "Read the usage of a deployment.",
+      "summary": "Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "management.projectUsage": {
+      "summary": "Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "management.organizationUsage": {
+      "summary": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
       "layer": "server",
       "auth": [{"credential": "portalCredential", "condition": "owner"}],
       "idempotency": "safe",

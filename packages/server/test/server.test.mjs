@@ -161,6 +161,46 @@ test("management key issuance and permits retain generated inputs, not result se
   assert.ok(client.http.recoveryStates.every(state => !JSON.stringify(state).includes("fixture-secret-permit")));
 });
 
+test("usage queries use generated management operations and keep meter quantities as decimal strings", async () => {
+  const deploymentId = crypto.randomUUID(), projectId = crypto.randomUUID(), orgId = crypto.randomUUID(), requests = [];
+  const from = "2026-10-01T00:00:00.000Z", to = "2026-10-01T05:00:00.000Z", reason = "Usage aggregation has not reported yet";
+  const scopes = { ManagementDeploymentUsage: ["DeploymentUsage", { deploymentId }],
+    ManagementProjectUsage: ["ProjectUsage", { projectId }], ManagementOrganizationUsage: ["OrganizationUsage", { orgId }] };
+  let quantity = "9223372036854775807";
+  const client = new V1ManagementClient({ baseUrl: "http://localhost:18081", actorId: crypto.randomUUID(),
+    accessToken: "fixture-operator", fetch: async (_url, options) => {
+      const request = JSON.parse(options.body); requests.push(request);
+      if (!Object.hasOwn(scopes, request.operationName)) throw new Error("Unexpected operation");
+      const [type, scope] = scopes[request.operationName];
+      return reply(request, { result: full(type, { ...scope, source: "usage-rollup", observedAt: to, complete: false,
+        reason, from, to, meters: [
+          full("UsageMeter", { meter: "api_calls", unit: "call", quantity, emitted: true }),
+          full("UsageMeter", { meter: "egress_gb", unit: "byte", quantity: "0", emitted: false }),
+        ] }) });
+    } });
+  const payloads = [
+    await client.http.execute("management.deploymentUsage", undefined, { deploymentId, from, to }),
+    await client.http.execute("management.projectUsage", undefined, { projectId }),
+    await client.http.execute("management.organizationUsage", undefined, { orgId, to }),
+  ];
+  assert.deepEqual(requests.map(request => request.operationName),
+    ["ManagementDeploymentUsage", "ManagementProjectUsage", "ManagementOrganizationUsage"]);
+  assert.deepEqual(requests.map(request => request.variables.input), [{ deploymentId, from, to }, { projectId }, { orgId, to }]);
+  assert.ok(requests.every(request => request.variables.context.projectId === undefined));
+  for (const [index, scope] of [{ deploymentId }, { projectId }, { orgId }].entries())
+    assert.deepEqual(payloads[index].result, { ...scope, source: "usage-rollup", observedAt: to, complete: false, reason,
+      from, to, aggregatedThrough: null, meters: [
+        { meter: "api_calls", unit: "call", quantity: "9223372036854775807", emitted: true },
+        { meter: "egress_gb", unit: "byte", quantity: "0", emitted: false },
+      ] });
+  for (const malformed of [5, "-1", "1.5", "01", "9223372036854775808"]) {
+    quantity = malformed;
+    await assert.rejects(client.http.execute("management.projectUsage", undefined, { projectId }),
+      { name: "V1Problem", code: "INVALID_RESPONSE" }, String(malformed));
+  }
+  assert.equal(requests.length, 8);
+});
+
 test("membership batches use generated GraphQL and preserve original identity and decimal revisions", async () => {
   const projectId = crypto.randomUUID(), incarnation = crypto.randomUUID(), conversationId = crypto.randomUUID();
   const requestId = crypto.randomUUID(), principalId = crypto.randomUUID(), requests = [];

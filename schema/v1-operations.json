@@ -655,10 +655,38 @@
       "kind": "query",
       "field": "deploymentUsage",
       "operationName": "ManagementDeploymentUsage",
-      "query": "query ManagementDeploymentUsage($context: RequestContextInput!, $input: DeploymentUsageRequestInput!) {\n  deploymentUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      deploymentId\n      source\n      observedAt\n      complete\n      reason\n    }\n  }\n}",
+      "query": "query ManagementDeploymentUsage($context: RequestContextInput!, $input: DeploymentUsageRequestInput!) {\n  deploymentUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      deploymentId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
       "resultType": "DeploymentUsageReply!",
       "inputFields": [
-        "deploymentId"
+        "deploymentId",
+        "from",
+        "to"
+      ]
+    },
+    "management.projectUsage": {
+      "plane": "management",
+      "kind": "query",
+      "field": "projectUsage",
+      "operationName": "ManagementProjectUsage",
+      "query": "query ManagementProjectUsage($context: RequestContextInput!, $input: ProjectUsageRequestInput!) {\n  projectUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
+      "resultType": "ProjectUsageReply!",
+      "inputFields": [
+        "projectId",
+        "from",
+        "to"
+      ]
+    },
+    "management.organizationUsage": {
+      "plane": "management",
+      "kind": "query",
+      "field": "organizationUsage",
+      "operationName": "ManagementOrganizationUsage",
+      "query": "query ManagementOrganizationUsage($context: RequestContextInput!, $input: OrganizationUsageRequestInput!) {\n  organizationUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
+      "resultType": "OrganizationUsageReply!",
+      "inputFields": [
+        "orgId",
+        "from",
+        "to"
       ]
     },
     "management.webhookEndpoints": {

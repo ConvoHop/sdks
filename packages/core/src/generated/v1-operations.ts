@@ -55,6 +55,8 @@ export interface V1OperationTypes {
   "management.getProject": { variables: Generated.ManagementGetProjectQueryVariables; result: Generated.ManagementGetProjectQuery };
   "management.deploymentHealth": { variables: Generated.ManagementDeploymentHealthQueryVariables; result: Generated.ManagementDeploymentHealthQuery };
   "management.deploymentUsage": { variables: Generated.ManagementDeploymentUsageQueryVariables; result: Generated.ManagementDeploymentUsageQuery };
+  "management.projectUsage": { variables: Generated.ManagementProjectUsageQueryVariables; result: Generated.ManagementProjectUsageQuery };
+  "management.organizationUsage": { variables: Generated.ManagementOrganizationUsageQueryVariables; result: Generated.ManagementOrganizationUsageQuery };
   "management.webhookEndpoints": { variables: Generated.ManagementWebhookEndpointsQueryVariables; result: Generated.ManagementWebhookEndpointsQuery };
   "management.webhookDeliveries": { variables: Generated.ManagementWebhookDeliveriesQueryVariables; result: Generated.ManagementWebhookDeliveriesQuery };
   "management.resolveRequest": { variables: Generated.ManagementResolveRequestQueryVariables; result: Generated.ManagementResolveRequestQuery };
@@ -352,7 +354,11 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
       "source": "String!",
       "observedAt": "String!",
       "complete": "Boolean!",
-      "reason": "String!"
+      "reason": "String!",
+      "from": "String!",
+      "to": "String!",
+      "meters": "[UsageMeter!]!",
+      "aggregatedThrough": "String"
     }
   },
   "DisablePrincipalReply": {
@@ -1167,6 +1173,20 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
       "nextCursor": "String"
     }
   },
+  "OrganizationUsage": {
+    "kind": "object",
+    "fields": {
+      "orgId": "UUID!",
+      "source": "String!",
+      "observedAt": "String!",
+      "complete": "Boolean!",
+      "reason": "String!",
+      "from": "String!",
+      "to": "String!",
+      "meters": "[UsageMeter!]!",
+      "aggregatedThrough": "String"
+    }
+  },
   "PageSize": {
     "kind": "scalar"
   },
@@ -1192,6 +1212,20 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
       "status": "String!",
       "revision": "Decimal!",
       "policyRevision": "Decimal!"
+    }
+  },
+  "ProjectUsage": {
+    "kind": "object",
+    "fields": {
+      "projectId": "UUID!",
+      "source": "String!",
+      "observedAt": "String!",
+      "complete": "Boolean!",
+      "reason": "String!",
+      "from": "String!",
+      "to": "String!",
+      "meters": "[UsageMeter!]!",
+      "aggregatedThrough": "String"
     }
   },
   "Properties": {
@@ -1557,6 +1591,15 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
       "result": "Conversation"
     }
   },
+  "UsageMeter": {
+    "kind": "object",
+    "fields": {
+      "meter": "String!",
+      "unit": "String!",
+      "quantity": "Decimal!",
+      "emitted": "Boolean!"
+    }
+  },
   "WebhookDelivery": {
     "kind": "object",
     "fields": {
@@ -1785,6 +1828,20 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
       "result": "OperationResult"
     }
   },
+  "OrganizationUsageReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "OrganizationUsage"
+    }
+  },
   "OrganizationsReply": {
     "kind": "object",
     "fields": {
@@ -1825,6 +1882,20 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
       "operation": "OperationRef",
       "resourceRef": "ResourceRef",
       "result": "OperationResult"
+    }
+  },
+  "ProjectUsageReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "ProjectUsage"
     }
   },
   "ReplayWebhookDeliveriesReply": {
@@ -2582,10 +2653,38 @@ export const v1Operations: Record<V1OperationKey, V1Operation> = {
     "kind": "query",
     "field": "deploymentUsage",
     "operationName": "ManagementDeploymentUsage",
-    "query": "query ManagementDeploymentUsage($context: RequestContextInput!, $input: DeploymentUsageRequestInput!) {\n  deploymentUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      deploymentId\n      source\n      observedAt\n      complete\n      reason\n    }\n  }\n}",
+    "query": "query ManagementDeploymentUsage($context: RequestContextInput!, $input: DeploymentUsageRequestInput!) {\n  deploymentUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      deploymentId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
     "resultType": "DeploymentUsageReply!",
     "inputFields": [
-      "deploymentId"
+      "deploymentId",
+      "from",
+      "to"
+    ]
+  },
+  "management.projectUsage": {
+    "plane": "management",
+    "kind": "query",
+    "field": "projectUsage",
+    "operationName": "ManagementProjectUsage",
+    "query": "query ManagementProjectUsage($context: RequestContextInput!, $input: ProjectUsageRequestInput!) {\n  projectUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
+    "resultType": "ProjectUsageReply!",
+    "inputFields": [
+      "projectId",
+      "from",
+      "to"
+    ]
+  },
+  "management.organizationUsage": {
+    "plane": "management",
+    "kind": "query",
+    "field": "organizationUsage",
+    "operationName": "ManagementOrganizationUsage",
+    "query": "query ManagementOrganizationUsage($context: RequestContextInput!, $input: OrganizationUsageRequestInput!) {\n  organizationUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
+    "resultType": "OrganizationUsageReply!",
+    "inputFields": [
+      "orgId",
+      "from",
+      "to"
     ]
   },
   "management.webhookEndpoints": {
