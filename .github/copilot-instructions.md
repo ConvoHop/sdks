@@ -16,6 +16,15 @@ Package tests use Node's test runner and strict TypeScript builds.
 generated operations/types in `packages/core/src/generated/`.
 `npm run check:packages` runs publint and attw on every package.
 
+`tools/sdkgen` generates from the schemas plus `schema/v1-annotations.json`
+through a versioned language-neutral IR (`schema/v1-ir.json`); see
+`docs/sdk-generation.md`. Every schema operation needs an annotation entry
+(`npm run check:annotations`; see CONTRIBUTING "Annotating operations").
+Annotate real behavior: layer must match the accepted credentials, and
+mutations need an accurate idempotency class. Regenerate with
+`npm run generate:graphql`; never hand-edit or hand-merge generated files.
+Generator changes update goldens with `UPDATE_GOLDEN=1 npm run test:sdkgen`.
+
 Only the current Conversation/LiveSession/Participation model is supported.
 The zero-customer consolidation deliberately removed prototype clients and
 the earlier Python/Go SDKs; do not restore them. Add new language SDKs only

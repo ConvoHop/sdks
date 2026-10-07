@@ -1,0 +1,214 @@
+"""
+Edge-case fixture for the sdkgen tests. It is not a ConvoHop API.
+"""
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+"""
+Non-negative counter as a decimal string.
+Descriptions keep their line breaks, and a closing comment marker */ stays escaped.
+"""
+scalar Counter
+
+"Server-signed JSON object."
+scalar Blob
+
+"Requested page size."
+scalar PageSize
+
+"Request metadata that every root field takes."
+input ContextInput {
+  "Tenant that owns the request."
+  tenant: String
+  requestId: ID!
+  attempt: Int = 1
+  "Single-use permit. Only alpha.redeem accepts it."
+  permit: String
+  tags: [String!] = ["a", "b|c"]
+}
+
+type Capabilities {
+  version: String!
+  wssUrl: String
+  features: [String!]!
+}
+
+input ResolveInput {
+  requestId: ID!
+}
+
+type Receipt {
+  requestId: ID!
+  committed: Boolean!
+  sequence: Counter
+}
+
+"""
+Kinds of fruit.
+The values are deliberately unsorted.
+"""
+enum Fruit {
+  "Curved and yellow."
+  BANANA
+  APPLE
+  cherry
+  apple10
+  apple9
+  DATE @deprecated
+  "Elderberries."
+  ELDER @deprecated(reason: "Use APPLE.")
+}
+
+enum HTTPMethod {
+  POST
+  GET
+}
+
+type Item {
+  id: ID!
+  name: String!
+  fruit: Fruit
+  weight: Float
+  ripe: Boolean!
+  oldName: String @deprecated
+  "Legacy numeric code."
+  legacyCode: Int @deprecated(reason: "Use id.")
+  "Nested and nullable lists."
+  grid: [[Int!]]!
+  aliases: [String]
+  history: [[Fruit]!]
+}
+
+"""
+Filters for alpha.items.
+A closing comment marker */ must not end a generated comment.
+"""
+input ItemsInput {
+  """
+  Page size.
+  Defaults to 20.
+  """
+  limit: Int = 20
+  cursor: String
+  fruits: [Fruit!]
+  minWeight: Float
+  includeDeprecated: Boolean = false
+  method: HTTPMethod = GET
+  box: Box_3dInput
+  legacyFilter: String @deprecated(reason: "Use fruits.")
+  item2: Int
+  item10: Int
+}
+
+input Box_3dInput {
+  width: Float!
+  height: Float!
+  depth: Float!
+}
+
+type ItemPage {
+  items: [Item!]!
+  complete: Boolean!
+  refreshRequired: Boolean!
+  nextCursor: String
+}
+
+type SubjectRef {
+  kind: String!
+  id: ID!
+}
+
+type EventPayload {
+  itemId: ID
+  jobId: ID
+  revision: Counter
+  note: String
+}
+
+type Event {
+  sequence: Counter!
+  type: String!
+  subjectRef: SubjectRef!
+  payload: EventPayload!
+}
+
+type EventPage {
+  items: [Event!]!
+  complete: Boolean!
+  refreshRequired: Boolean!
+  nextCursor: String
+}
+
+input EventsInput {
+  after: String
+  limit: PageSize!
+}
+
+type JobRef {
+  operationId: ID!
+  state: String!
+}
+
+type StartJobPayload {
+  requestId: ID!
+  receipt: Receipt!
+  job: JobRef
+}
+
+input StartJobInput {
+  itemId: ID!
+  "How many times to run."
+  repeat: Int = 1
+  props: Blob
+}
+
+input JobInput {
+  operationId: ID!
+}
+
+type Job {
+  operationId: ID!
+  state: String!
+  progress: Float
+  output: Blob
+}
+
+input PingInput {
+  note: String
+}
+
+input FetchInput {
+  method: HTTPMethod = GET
+}
+
+input RedeemInput {
+  deliveryId: ID!
+}
+
+type Query {
+  "Server capabilities."
+  capabilities(context: ContextInput!): Capabilities!
+  resolveRequest(context: ContextInput!, input: ResolveInput!): Receipt!
+  """
+  List items.
+
+  Pages follow the cursor style.
+  """
+  items(context: ContextInput!, input: ItemsInput!): ItemPage!
+  events(context: ContextInput!, input: EventsInput!): EventPage!
+  job(context: ContextInput!, input: JobInput!): Job
+  fetchHTTPStatus(context: ContextInput!, input: FetchInput): Int @deprecated(reason: "Use capabilities.")
+}
+
+type Mutation {
+  startJob(context: ContextInput!, input: StartJobInput!): StartJobPayload!
+  ping(context: ContextInput!, input: PingInput): Boolean!
+  redeem(context: ContextInput!, input: RedeemInput!): Receipt!
+}
+
+type Subscription {
+  eventStream(context: ContextInput!, input: EventsInput!): EventPage!
+}

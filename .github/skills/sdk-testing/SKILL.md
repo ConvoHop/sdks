@@ -10,6 +10,13 @@ Use the existing package test suites:
 - TypeScript packages (`core`, `client` and `server`): root `npm test` builds
   packages and runs `node:test` from `packages/<name>/test/`.
 - Generated contract: root `npm run check:graphql`.
+- Operation annotations: root `npm run check:annotations`.
+- SDK generator (`tools/sdkgen`): root `npm run test:sdkgen` (also part of
+  `npm test`). Emitters are tested against the edge-case fixture in
+  `tools/sdkgen/test/fixtures/` and golden files; refresh goldens only for
+  intended output changes with `UPDATE_GOLDEN=1 npm run test:sdkgen` and
+  review the diff. Add new GraphQL shapes to the fixture rather than relying
+  on the production schema.
 - Package metadata and export maps: root `npm run check:packages` (publint
   and attw). Each package's `surface.test.mjs` pins its runtime exports and
   allowed imports.

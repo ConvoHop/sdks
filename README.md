@@ -78,6 +78,7 @@ You need Node.js 22 or later.
 
 ```sh
 npm ci
+npm run check:annotations
 npm run check:graphql
 npm run build
 npm test
@@ -98,6 +99,11 @@ every pull request. It doesn't publish packages or deploy anything.
   source for generated operations, input and output types, and runtime
   response validation. After you change them, run `npm run generate:graphql`.
   `npm run check:graphql` detects drift. Don't edit generated files by hand.
+- [`schema/v1-annotations.json`](schema/v1-annotations.json) annotates every
+  operation with its SDK layer, authorization, idempotency, pagination,
+  realtime behavior and error codes. The schemas and annotations compile into
+  a language-neutral IR that every SDK generator reads. See
+  [SDK generation](docs/sdk-generation.md).
 - `V1` in type names identifies the current domain model. It isn't an API
   version that you select.
 - Every generated operation is available through the low-level transport:

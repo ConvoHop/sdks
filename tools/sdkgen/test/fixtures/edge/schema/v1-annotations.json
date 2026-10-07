@@ -1,0 +1,322 @@
+{
+  "$schema": "./v1-annotations.schema.json",
+  "annotationsVersion": 1,
+  "api": {
+    "name": "edge",
+    "model": "v1",
+    "summary": "Edge-case fixture for the sdkgen tests. It is not a ConvoHop API."
+  },
+  "transport": {
+    "path": "/graphql",
+    "http": {
+      "method": "POST",
+      "contentType": "application/json",
+      "accept": "application/json",
+      "body": ["query", "operationName", "variables"],
+      "maxDocumentBytes": 4096
+    },
+    "websocket": {"subprotocol": "graphql-transport-ws"},
+    "errors": {
+      "summary": "GraphQL errors carry these extensions.",
+      "extensions": {
+        "code": {"type": "string", "summary": "Stable machine-readable error code."},
+        "outcome": {"type": "string", "summary": "Whether the request committed.", "values": ["rejected", "unknown"]}
+      }
+    }
+  },
+  "planes": {
+    "alpha": {
+      "schema": "alpha-v1.graphql",
+      "summary": "Items, jobs and realtime events.",
+      "context": {
+        "argument": "context",
+        "input": "ContextInput",
+        "rules": [
+          {
+            "fields": ["tenant"],
+            "use": "required",
+            "except": ["alpha.capabilities"],
+            "summary": "Name the tenant explicitly."
+          },
+          {
+            "fields": ["permit"],
+            "use": "forbidden",
+            "except": ["alpha.redeem"],
+            "summary": "Permits authorize only alpha.redeem."
+          }
+        ]
+      },
+      "resolveOperation": "alpha.resolveRequest"
+    },
+    "beta": {
+      "schema": "beta-v1.graphql",
+      "summary": "Widgets.",
+      "context": {
+        "argument": "context",
+        "input": "ContextInput",
+        "rules": [
+          {"fields": ["permit"], "use": "forbidden", "summary": "Permits never authorize beta operations."}
+        ]
+      },
+      "resolveOperation": "beta.resolveRequest"
+    }
+  },
+  "scalars": {
+    "Blob": {
+      "representation": "object",
+      "summary": "Server-signed JSON object. Pass it back unchanged.",
+      "maxCanonicalJsonBytes": 1024,
+      "requiredStringProperties": ["signature"]
+    },
+    "Counter": {
+      "representation": "string",
+      "summary": "Non-negative counter as a canonical decimal string.",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "maximumDecimal": "9223372036854775807"
+    },
+    "PageSize": {"representation": "integer", "summary": "Requested page size.", "minimum": 1, "maximum": 50},
+    "Ratio": {"representation": "number", "summary": "Fraction between 0 and 1.", "minimum": 0, "maximum": 1}
+  },
+  "credentials": {
+    "permit": {
+      "summary": "Single-use permit sent in the request context.",
+      "runtime": "server",
+      "carrier": "context",
+      "contextField": "permit",
+      "scoped": false
+    },
+    "serverKey": {"summary": "Scoped key for server runtimes.", "runtime": "server", "carrier": "bearer", "scoped": true},
+    "userToken": {"summary": "Short-lived token for client runtimes.", "runtime": "client", "carrier": "bearer", "scoped": false}
+  },
+  "scopes": {
+    "itemRead": {"summary": "Read items and jobs."},
+    "widgetWrite": {"summary": "Create widgets and start jobs."}
+  },
+  "conditions": {
+    "owner": {"summary": "The caller made the original request."}
+  },
+  "idempotency": {
+    "safe": {"summary": "Read-only. Repeat freely.", "retry": "repeat", "resolvable": false},
+    "idempotent": {
+      "summary": "Retry with the same requestId and input; resolve an unknown outcome with resolveRequest.",
+      "retry": "sameRequest",
+      "resolvable": true,
+      "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
+    },
+    "singleUse": {
+      "summary": "Like idempotent, but the result is good for one use.",
+      "retry": "sameRequest",
+      "resolvable": true,
+      "retryBudget": {"maxAttempts": 2, "windowMs": 1000}
+    },
+    "permitBound": {
+      "summary": "Authorized by a single-use permit. Retry with the same requestId and permit.",
+      "retry": "sameRequest",
+      "resolvable": false,
+      "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
+    },
+    "ephemeral": {"summary": "Transient signal. Never retried.", "retry": "none", "resolvable": false}
+  },
+  "pagination": {
+    "none": {"summary": "Not paged.", "order": "none", "cursorInput": false, "pageFields": []},
+    "cursor": {
+      "summary": "Server-ordered pages.",
+      "order": "server",
+      "cursorInput": true,
+      "pageFields": ["items", "complete", "refreshRequired", "nextCursor"]
+    },
+    "sequence": {
+      "summary": "Newest first.",
+      "order": "descending",
+      "cursorInput": true,
+      "pageFields": ["items", "complete", "refreshRequired", "nextCursor"]
+    },
+    "replay": {
+      "summary": "Events in ascending sequence after a cursor.",
+      "order": "ascending",
+      "cursorInput": true,
+      "pageFields": ["items", "complete", "refreshRequired", "nextCursor"]
+    },
+    "bounded": {
+      "summary": "One bounded page.",
+      "order": "server",
+      "cursorInput": false,
+      "pageFields": ["items", "complete", "refreshRequired"]
+    }
+  },
+  "errorCodes": {
+    "CURSOR_EXPIRED": {"summary": "The cursor is too old.", "origin": "server", "status": 410, "retryable": false},
+    "INVALID_REQUEST": {"summary": "The request is malformed.", "origin": "both", "status": 400, "retryable": false},
+    "NOT_FOUND": {"summary": "The resource does not exist.", "origin": "server", "status": 404, "retryable": false},
+    "TRANSPORT_UNKNOWN": {"summary": "The transport failed after sending.", "origin": "sdk", "retryable": true},
+    "UNAVAILABLE": {"summary": "Temporarily unavailable.", "origin": "server", "status": 503, "retryable": true}
+  },
+  "errorSets": {
+    "http": {"summary": "HTTP transport failures.", "codes": ["TRANSPORT_UNKNOWN"]},
+    "request": {"summary": "Every operation.", "codes": ["INVALID_REQUEST", "UNAVAILABLE"]}
+  },
+  "realtime": {
+    "envelope": {
+      "plane": "alpha",
+      "type": "Event",
+      "discriminator": "type",
+      "payload": "payload",
+      "subject": "subjectRef",
+      "unknownTypes": "deliverAsUnknown"
+    },
+    "channels": {
+      "eventStream": {
+        "summary": "Ordered alpha events, gap-filled with alpha.events.",
+        "subscription": "alpha.eventStream",
+        "replay": "alpha.events",
+        "endpoint": {"operation": "alpha.capabilities", "resultField": "wssUrl"},
+        "connectionInit": ["tenant", "token"],
+        "ordering": "Events arrive in ascending sequence. Persist the last applied cursor.",
+        "limits": {"maxFrameBytes": 4096, "maxPendingPages": 2, "subscribeLimit": 10, "replayLimit": 20},
+        "reconnect": {"baseDelayMs": 100, "maxDelayMs": 1000, "jitterMs": 0, "terminalCloseCodes": [4401, 4403]}
+      }
+    },
+    "events": {
+      "item.changed": {
+        "summary": "An item changed.",
+        "subject": "item",
+        "payload": {"required": ["itemId"], "optional": ["note"]}
+      },
+      "job.finished": {
+        "summary": "A job finished.",
+        "subject": "job",
+        "payload": {"required": ["jobId", "revision"], "optional": []}
+      },
+      "job.started": {"summary": "A job started.", "subject": "job", "payload": {"required": ["jobId"], "optional": []}}
+    }
+  },
+  "operations": {
+    "alpha.capabilities": {
+      "summary": "Read the server capabilities.",
+      "layer": "both",
+      "auth": [{"credential": "userToken"}, {"credential": "serverKey"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": []}
+    },
+    "alpha.resolveRequest": {
+      "summary": "Look up the outcome of an earlier alpha mutation by requestId.",
+      "layer": "both",
+      "auth": [{"credential": "userToken", "condition": "owner"}, {"credential": "serverKey", "scopes": ["itemRead"]}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "alpha.items": {
+      "summary": "List items in server order.",
+      "layer": "client",
+      "auth": [{"credential": "userToken"}],
+      "idempotency": "safe",
+      "pagination": {"style": "cursor", "limitField": "limit", "cursorField": "cursor", "pagePath": []},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["CURSOR_EXPIRED"]}
+    },
+    "alpha.events": {
+      "summary": "Replay alpha events after a cursor.",
+      "layer": "client",
+      "auth": [{"credential": "userToken"}],
+      "idempotency": "safe",
+      "pagination": {"style": "replay", "limitField": "limit", "cursorField": "after", "pagePath": []},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["CURSOR_EXPIRED"]}
+    },
+    "alpha.job": {
+      "summary": "Poll a job that alpha.startJob started.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey", "scopes": ["itemRead"]}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "alpha.fetchHTTPStatus": {
+      "summary": "Fetch a <status> for `GET` | *POST* calls, with #tags, {braces}, [links], ~tildes~, & a back\\slash for _escaping_ in snake_case.",
+      "layer": "both",
+      "auth": [{"credential": "userToken"}, {"credential": "serverKey", "scopes": ["itemRead", "widgetWrite"]}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": [], "codes": ["UNAVAILABLE"]}
+    },
+    "alpha.startJob": {
+      "summary": "Start a job. It finishes asynchronously.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey", "scopes": ["widgetWrite"]}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["job.started", "job.finished"]},
+      "longRunning": {"poll": "alpha.job", "refField": "job"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "alpha.ping": {
+      "summary": "1. Send an ephemeral ping.",
+      "layer": "client",
+      "auth": [{"credential": "userToken"}],
+      "idempotency": "ephemeral",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none", "emits": ["item.changed"]},
+      "errors": {"sets": ["request"], "codes": []}
+    },
+    "alpha.redeem": {
+      "summary": "Redeem a delivery with its permit.",
+      "layer": "server",
+      "auth": [{"credential": "permit"}],
+      "idempotency": "permitBound",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "alpha.eventStream": {
+      "summary": "Subscribe to alpha events after a cursor.",
+      "layer": "client",
+      "auth": [{"credential": "userToken"}],
+      "idempotency": "safe",
+      "pagination": {"style": "replay", "limitField": "limit", "cursorField": "after", "pagePath": []},
+      "realtime": {"mode": "subscription", "channel": "eventStream"},
+      "errors": {"sets": ["request"], "codes": ["CURSOR_EXPIRED"]}
+    },
+    "beta.capabilities": {
+      "summary": "Read the server capabilities.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request"], "codes": []}
+    },
+    "beta.resolveRequest": {
+      "summary": "Look up the outcome of an earlier beta mutation by requestId.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey", "scopes": ["widgetWrite"]}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request"], "codes": ["NOT_FOUND"]}
+    },
+    "beta.widgets": {
+      "summary": "List widgets in one bounded page.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey", "scopes": ["itemRead"]}],
+      "idempotency": "safe",
+      "pagination": {"style": "bounded", "pagePath": ["result"]},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": []}
+    },
+    "beta.createWidget": {
+      "summary": "Create a widget.",
+      "layer": "server",
+      "auth": [{"credential": "serverKey", "scopes": ["widgetWrite"]}],
+      "idempotency": "singleUse",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": []}
+    }
+  }
+}
