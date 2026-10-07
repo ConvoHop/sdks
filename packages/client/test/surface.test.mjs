@@ -8,9 +8,9 @@ import { builtImportSpecifiers, sortedKeys } from "../../../test/package-fixture
 test("client runtime exports are pinned", () => {
   assert.deepEqual(sortedKeys(client), [
     "ConversationHandle", "ConversationLive", "LiveEndOperation", "LiveParticipationHandle", "LiveSessionHandle",
-    "LiveStartOperation", "V1Client", "V1MediaConnection", "V1Problem", "V1Realtime", "V1Transport", "v1Conversation",
-    "v1Counter", "v1Cursor", "v1Id", "v1Membership", "v1Message", "v1Operations", "v1Page", "v1Record", "v1SearchHit",
-    "v1String",
+    "LiveStartOperation", "ScopeRequiredProblem", "V1Client", "V1MediaConnection", "V1Problem", "V1Realtime",
+    "V1Transport", "v1Conversation", "v1Counter", "v1Cursor", "v1Id", "v1Membership", "v1Message", "v1Operations",
+    "v1Page", "v1Record", "v1SearchHit", "v1String",
   ]);
 });
 

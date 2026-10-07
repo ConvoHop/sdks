@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { V1Client, V1MediaConnection, LiveSessionHandle, LiveParticipationHandle, v1Operations } from "@convohop/client";
-import { operationPayload } from "@convohop/core/internal";
+import { validateOutput } from "@convohop/core/internal";
 import { full, reply } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID(), time = () => new Date().toISOString();
@@ -114,9 +114,9 @@ test("invalid generated response cannot turn an unknown mutation into committed 
   const requestId = id();
   await assert.rejects(setup.client.conversation(id()).live.startVoice({ requestId }), { code: "INVALID_RESPONSE" });
   assert.equal(setup.client.http.recoveryStates[0].resolutionState, "unknown");
-  assert.throws(() => operationPayload("communication.liveSession", {
+  assert.throws(() => validateOutput({
     status: "ok", requestId: id(), serverTime: time(), result: live({ state: "UNKNOWN_FUTURE_STATE" }),
-  }), /Unknown LiveSessionState/);
+  }, v1Operations["communication.liveSession"].resultType), /Unknown LiveSessionState/);
 });
 
 test("viewer and audio-only capture controls fail before local device access", async () => {

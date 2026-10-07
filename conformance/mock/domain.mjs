@@ -51,6 +51,9 @@ export class Domain {
     this.projectId = uuidFrom(`${seed}:project`);
     this.incarnation = uuidFrom(`${seed}:incarnation`);
     this.managementActorId = uuidFrom(`${seed}:management-actor`);
+    // The mock's backend keys share one service principal, as keys that keep their backend principal across
+    // rotation do. Backend messages sent without actAs are authored by it.
+    this.backendPrincipalId = uuidFrom(`${seed}:backend-principal`);
     this.servingEpoch = "1";
     this.credentials = Object.freeze({ backend: "mock-backend-key-full", backendLimited: "mock-backend-key-limited",
       backendExpired: "mock-backend-key-expired", management: "mock-management-token" });
@@ -84,7 +87,7 @@ export class Domain {
     const key = this.backendKeys.get(token);
     if (key) {
       if (Date.now() >= key.expiresAt) throw rejected;
-      return { kind: "backend", scopes: key.scopes, scope: `backend:${this.projectId}` };
+      return { kind: "backend", scopes: key.scopes, principalId: this.backendPrincipalId, scope: `backend:${this.projectId}` };
     }
     const session = this.sessions.get(token);
     if (session && Date.now() < Date.parse(session.expiresAt))
@@ -100,18 +103,21 @@ export class Domain {
       throw new Problem("INCARNATION_MISMATCH", 409, "Project incarnation changed; explicit recovery required");
   }
 
-  // A missing scope is SCOPE_REQUIRED; FORBIDDEN is for every other authorization failure.
+  // A missing scope is SCOPE_REQUIRED, with the authority's message naming the scope; FORBIDDEN is for every
+  // other authorization failure.
   requireBackend(actor, scope) {
     if (actor.kind !== "backend") throw new Problem("FORBIDDEN", 403, "A backend key is required");
-    if (!actor.scopes.has(scope)) throw new Problem("SCOPE_REQUIRED", 403, `The backend key requires the ${scope} scope`);
+    if (!actor.scopes.has(scope)) throw new Problem("SCOPE_REQUIRED", 403, `The backend key requires the current ${scope} scope`);
   }
 
-  // Backend keys may also send, edit and delete messages with the operation's scope. The mock leaves that
-  // backend data plane out, so after the scope check it answers as a deployment without the feature.
-  requireUser(actor, scope) {
-    if (actor.kind === "user") return;
+  // A backend acting as a principal is held to that principal's active membership; absence is NOT_FOUND.
+  // User sessions cannot act as anyone else.
+  #actingAs(actor, conversationId, principalId, scope) {
     this.requireBackend(actor, scope);
-    throw new Problem("FEATURE_UNSUPPORTED", 422, "This target does not offer backend data-plane messaging");
+    const conversation = this.#conversation(conversationId);
+    const member = conversation.members.get(principalId);
+    if (member?.status !== "active" || this.principals.get(principalId)?.status !== "active") throw notFound("Member");
+    return { conversation, member };
   }
 
   route(actor) {
@@ -280,22 +286,25 @@ export class Domain {
     return { items, complete, refreshRequired: false, nextCursor: complete ? null : items.at(-1).principalId };
   }
 
-  // The IR's authorOrModerator condition.
+  // The IR's authorOrModerator condition for user sessions; backend keys moderate with the moderation scope.
   #message(conversation, messageId, actor, member) {
     const message = conversation.messages.get(messageId);
     if (!message) throw notFound("Message");
-    if (message.authorId !== actor.principalId && member.role !== "moderator")
+    if (member && message.authorId !== actor.principalId && member.role !== "moderator")
       throw new Problem("FORBIDDEN", 403, "Only the author or a moderator can change this message");
     return message;
   }
 
-  sendMessage(actor, { conversationId, text, props }) {
-    this.requireUser(actor, "messageWrite");
-    const { conversation } = this.#visible(actor, conversationId);
+  // User sessions send as themselves; backend keys as actAs, or without it as their service principal.
+  sendMessage(actor, { conversationId, text, props, actAsPrincipalId }) {
+    const { conversation, member } = actAsPrincipalId == null
+      ? this.#visible(actor, conversationId, "messageWrite")
+      : this.#actingAs(actor, conversationId, actAsPrincipalId, "messageWrite");
     if (!text || text.length > 4000) throw invalid("text must contain 1..4000 characters");
     const sequence = String(conversation.sequence + 1n);
-    const message = { messageId: this.nextId(), conversationId, authorId: actor.principalId, sequence, revision: "1",
-      revisionSequence: sequence, createdAt: iso(), deleted: false, text, props: structuredClone(props), editedAt: null };
+    const message = { messageId: this.nextId(), conversationId, authorId: member?.principalId ?? actor.principalId, sequence,
+      revision: "1", revisionSequence: sequence, createdAt: iso(), deleted: false, text, props: structuredClone(props),
+      editedAt: null };
     conversation.messages.set(message.messageId, message);
     this.#append(conversation, "message.created", { kind: "message", id: message.messageId },
       { messageId: message.messageId, revision: "1", revisionSequence: sequence });
@@ -304,8 +313,7 @@ export class Domain {
   }
 
   #revise(actor, { conversationId, messageId, expectedRevision }, type, change) {
-    this.requireUser(actor, "moderation");
-    const { conversation, member } = this.#visible(actor, conversationId);
+    const { conversation, member } = this.#visible(actor, conversationId, "moderation");
     const message = this.#message(conversation, messageId, actor, member);
     if (message.deleted) throw new Problem("MESSAGE_DELETED", 409, "Message was deleted");
     if (message.revision !== expectedRevision) throw new Problem("REVISION_CONFLICT", 409, "Message revision changed");
@@ -333,8 +341,12 @@ export class Domain {
     });
   }
 
-  messages(actor, { conversationId, limit, beforeSequence }) {
-    const { conversation, member } = this.#visible(actor, conversationId, "messageRead");
+  // User sessions, and backend keys acting as a member, read from that member's visibility floor; backend keys
+  // without actAs read the whole history.
+  messages(actor, { conversationId, limit, beforeSequence, actAsPrincipalId }) {
+    const { conversation, member } = actAsPrincipalId == null
+      ? this.#visible(actor, conversationId, "messageRead")
+      : this.#actingAs(actor, conversationId, actAsPrincipalId, "messageRead");
     const floor = BigInt(member?.visibleFromSequence ?? "1");
     const before = beforeSequence == null ? undefined : BigInt(beforeSequence);
     const ordered = [...conversation.messages.values()]
