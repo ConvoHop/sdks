@@ -41,7 +41,6 @@ as planned in `docs/sdk-strategy.md`, generated from the shared schema and
 passing the shared conformance tests. Do not restore compatibility adapters
 or REST-shaped logical routes: HTTP and graphql-transport-ws use unversioned
 `/graphql`.
-`V1*` is a current SDK/domain name, not a selectable API version.
 Do not advertise registry publication without release evidence.
 
 Keep browser credentials short-lived and scoped. Trusted backend/operator
@@ -71,3 +70,25 @@ in maintained framework tests, not one-off scripts. Update public examples
 and generated declarations with API changes, never with real credentials.
 Report exactly which language/client paths and integration environments
 were verified; a green unit suite is not production certification.
+
+## Versioning
+
+Before adding a version marker, ask whether it makes sense. Version only when
+two versions must coexist and you can name the concrete consumer that has to
+tell them apart, or when an external specification mandates it. Otherwise add
+a marker at the first real breaking change and treat its absence as the
+original. GraphQL evolves in place: additive change, then `@deprecated`, then
+removal once usage is zero.
+
+Do not put version markers in file or directory names, type or export names,
+routes, config keys, format or mode tags, schema-version payload fields, PR
+titles or doc headings. Existing `v1`/`V1` names predate this rule and are
+being removed; do not add new ones. These versions are legitimate and stay:
+
+- the Standard Webhooks `v1,` signature prefix and LiveKit `/rtc/v1` paths;
+- npm semver, release tags and `*-v*` tag rules, Go module majors, GitHub
+  Actions `@vN` and dependency majors;
+- versions owned by external specifications or vendors, such as SLSA and
+  in-toto type URIs and pinned third-party API versions;
+- signing-key rotation versions, database row versions and sequence numbers;
+- negative tests that assert retired `/v1` paths fail.
