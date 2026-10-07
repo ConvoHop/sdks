@@ -1,0 +1,43 @@
+# Squash merges use the PR title as the commit message, and release-please
+# reads that message to choose versions and write changelogs. See
+# CONTRIBUTING.md for the Conventional Commits rules.
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  conventional-commit:
+    name: Conventional Commit title
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read # read the PR's commits
+    steps:
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          types: |
+            feat
+            fix
+            perf
+            revert
+            docs
+            test
+            refactor
+            build
+            ci
+            chore
+            style
+          # GitHub uses the commit message instead of the PR title when it
+          # squashes a single-commit PR, so that message must match.
+          validateSingleCommit: true
+          validateSingleCommitMatchesPrTitle: true

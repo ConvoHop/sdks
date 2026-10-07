@@ -1,10 +1,12 @@
 # ConvoHop server SDK
 
-`@convohop/server` is unpublished TypeScript/ESM source for the current
-Management and Conversation APIs. It runs only in trusted Node.js 22+
-runtimes, because it holds secret backend keys and operator credentials.
-Source license: [Apache-2.0](../../LICENSE). No hosted service, cloud
-provisioner or privileged browser client is included.
+`@convohop/server` is the TypeScript/ESM SDK for the current Management and
+Conversation APIs. It runs only in trusted Node.js 22+ runtimes, because it
+holds secret backend keys and operator credentials. No hosted service, cloud
+provisioner or privileged browser client is included. It isn't on a package
+registry yet:
+[install it from a GitHub Release](https://github.com/ConvoHop/sdks#install-a-release).
+License: [Apache-2.0](LICENSE).
 
 ## Runtime and entry point
 

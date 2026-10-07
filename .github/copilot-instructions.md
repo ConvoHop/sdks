@@ -15,6 +15,12 @@ Package tests use Node's test runner and strict TypeScript builds.
 `npm run check:graphql` checks actual authority-exported schemas and
 generated operations/types in `packages/core/src/generated/`.
 `npm run check:packages` runs publint and attw on every package.
+`npm run check:release` tests the release scripts, release-please config
+and workflow policy. Releases follow `RELEASING.md`: never hand-edit package
+versions, `CHANGELOG.md` files or `.release-please-manifest.json`; keep
+unreleased workspaces `private`; pin every action to a full commit SHA and
+grant each job least-privilege `permissions`. npm publishing stays a dry run
+until registry publishing (REL-PUB) is approved.
 
 `tools/sdkgen` generates from the schemas plus `schema/v1-annotations.json`
 through a versioned language-neutral IR (`schema/v1-ir.json`); see
