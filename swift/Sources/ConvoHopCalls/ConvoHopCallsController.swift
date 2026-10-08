@@ -222,6 +222,17 @@ public final class ConvoHopCalls: NSObject {
         notify()
     }
 
+    /// Asks CallKit to answer a ringing call, for example from an in-app Answer button.
+    /// ``ConvoHopCallsDelegate/convoHopCalls(_:didAnswer:)`` follows, as when the user answers in the system UI.
+    ///
+    /// - Throws: `CXErrorCodeRequestTransactionError.unknownCallUUID` for a call ConvoHop didn't report, or
+    ///   `.invalidAction` for a call that isn't ringing, before asking CallKit.
+    public func answer(_ uuid: UUID) async throws {
+        guard let call = book[uuid] else { throw CXErrorCodeRequestTransactionError(.unknownCallUUID) }
+        guard call.state == .ringing else { throw CXErrorCodeRequestTransactionError(.invalidAction) }
+        try await callController.request(CXTransaction(action: CXAnswerCallAction(call: uuid)))
+    }
+
     /// Asks CallKit to mute or unmute. ``ConvoHopCallsDelegate/convoHopCalls(_:didSetMuted:for:)`` applies it.
     public func setMuted(_ muted: Bool, for uuid: UUID) async throws {
         try await callController.request(CXTransaction(action: CXSetMutedCallAction(call: uuid, muted: muted)))
