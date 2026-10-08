@@ -84,7 +84,13 @@ public final class FakeAuthority implements AutoCloseable {
       for (Map.Entry<String, String> header : response.headers.entrySet()) {
         http.getResponseHeaders().add(header.getKey(), header.getValue());
       }
-      http.sendResponseHeaders(response.status, bytes.length == 0 ? -1 : bytes.length);
+      if (bytes.length == 0) {
+        // sendResponseHeaders(-1) finishes the exchange. On Java 11, closing the response body too
+        // finishes it twice, which can break the next request on the kept-alive connection.
+        http.sendResponseHeaders(response.status, -1);
+        return;
+      }
+      http.sendResponseHeaders(response.status, bytes.length);
       try (OutputStream output = http.getResponseBody()) {
         output.write(bytes);
       }
