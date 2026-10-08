@@ -125,6 +125,47 @@ test("parsePage enforces the MDX-safe subset", () => {
   for (const [markdown, errors] of cases) assert.deepEqual(errorsOf(markdown), errors, JSON.stringify(markdown));
 });
 
+test("parsePage rejects indented code, which MDX doesn't support, and fences CommonMark doesn't read as fences", () => {
+  const code = line => ({ line, message: "indented code blocks aren't supported; use a fenced code block with a language" });
+  const fence = line => ({ line, message: "indent code fences at most 3 spaces past their container (the page or a list item)" });
+  const inItem = line => ({ line, message: "indent fenced code in a list item at least as far as the item's text" });
+  const inQuote = line => ({ line, message: "block quotes can't contain code fences" });
+  const afterMarker = line => ({ line, message: "start code fences on their own line, not after a list marker" });
+  const body = (...lines) => page("# Title", "", "Text.", "", ...lines);
+  const cases = [
+    [body("    const a = 1;", "", "    const b = 2;", "Text."), [code(5)]],
+    [body("\tconst a = 1;"), [code(5)]],
+    [body("```ts", "x", "```", "    const a = 1;"), [code(8)]],
+    [body("- Item:", "", "      const a = 1;"), [code(7)]],
+    [body("-     const a = 1;"), [code(5)]],
+    [body("-", "      const a = 1;"), [code(6)]],
+    [body("- Item", "", "  - Nested", "", "        const a = 1;"), [code(9)]],
+    [body("> Quote:", ">", ">     const a = 1;"), [code(7)]],
+    [body("- Item", "", "Text.", "", "      const a = 1;"), [code(9)]],
+    [body("* * *", "", "    const a = 1;"), [code(7)]],
+    [body("Text", "2. doesn't start a list here", "", "      const a = 1;"), [code(8)]],
+    [body("    ```ts", "    x", "    ```"), [fence(5)]],
+    [body("Text", "    ```ts", "    x", "    ```"), [fence(6)]],
+    [body("1. Step:", "", "       ```ts", "       x", "       ```"), [fence(7)]],
+    [body("```sh", "echo hi", "    ```"), [fence(7)]],
+    [body("> Quote", "    ```ts", "    x", "    ```"), [fence(6)]],
+    [body("1. Step:", "", "   ```sh", "echo hi", "   ```"), [inItem(8)]],
+    [body("1. Step:", "", "   ```sh", "   echo hi", "```"), [inItem(9)]],
+    [body("> ```ts", "> const a = 1;", "> ```"), [inQuote(5), inQuote(7)]],
+    [body("- ```ts", "  const a = 1;", "- ```"), [afterMarker(5), afterMarker(7)]],
+    [body("Text that wraps", "    onto an indented line."), []],
+    [body("- Item that wraps", "      onto an indented line."), []],
+    [body("- Item", "", "  - Nested", "", "      More text in the nested item."), []],
+    [body("10.  Ten", "", "     Still ten.", "", "     ```ts", "     x", "     ```"), []],
+    [body("1. Step:", "", "   ```ts", "   x", "   ```", "", "2. Next."), []],
+    [body("1. Step:", "", "   ```sh", "   echo a", "", "   echo b", "   ```"), []],
+    [body("- Item", "```sh", "echo hi", "```"), []],
+    [body("> Quote", "    continued lazily."), []],
+    [body("| Name | Use |", "| - | - |", "| a | b |", "    | c | d |"), []],
+  ];
+  for (const [markdown, errors] of cases) assert.deepEqual(errorsOf(markdown), errors, JSON.stringify(markdown));
+});
+
 test("parsePage ignores Markdown syntax inside code", () => {
   const markdown = page("# Title", "", "Use `<T>`, `{ a }`, `![x](y)` and ``a ` b``.", "", "~~~sh", "import x", "<div>", "~~~");
   assert.deepEqual(errorsOf(markdown), []);

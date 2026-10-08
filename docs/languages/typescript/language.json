@@ -6,7 +6,7 @@
   "status": "preview",
   "codeFence": "ts",
   "regionComment": "//",
-  "testedFences": ["ts", "typescript", "tsx", "mts", "js", "javascript", "jsx", "mjs"],
+  "testedFences": ["ts", "typescript", "tsx", "mts", "cts", "js", "javascript", "jsx", "mjs", "cjs"],
   "snippetRoots": ["examples/src"],
   "packages": [
     {

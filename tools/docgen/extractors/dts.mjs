@@ -479,7 +479,8 @@ class Parser {
 
   variable(start, keywordIndex) {
     const name = this.word(keywordIndex + 1) ?? this.fail("expected variable name", keywordIndex + 1);
-    const end = this.findAtDepth(keywordIndex + 2, [";"]);
+    const end = this.findAtDepth(keywordIndex + 2, [",", ";"]);
+    if (this.is(end, ",")) this.fail("declare one variable per statement", end);
     const object = this.is(keywordIndex + 2, ":") && end > keywordIndex + 3 ? this.objectMembers(keywordIndex + 3, end - 1, "constant") : undefined;
     const { signature } = this.untilSemicolon(start, keywordIndex);
     if (!object) return { name, kind: "constant", signature };

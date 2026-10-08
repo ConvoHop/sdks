@@ -7,7 +7,9 @@
  *   and code spans: no emphasis, strikethrough or character references, so every CommonMark parser
  *   reads the same text. Heading IDs are github-slugger slugs of that text, as rehype-slug makes
  *   them, and must be unique within a page.
- * - Fenced code blocks only, each with a language. Code spans stay on one line.
+ * - Fenced code blocks only (no indented code), each with a language, on its own line, indented at
+ *   most 3 spaces past its container (the page or a list item) and not in a block quote. Code in a
+ *   list item's fence is indented at least as far as the item's text. Code spans stay on one line.
  * - Outside code, `<`, `{` and `}` are backslash-escaped. No HTML, comments, front matter,
  *   autolinks, images, reference-style links or lines starting with `import`/`export`.
  * - Links are https:, mailto: or relative paths to generated files, with optional anchors.
@@ -43,8 +45,8 @@ export function scanLines(markdown) {
       }
       return;
     }
-    const match = FENCE.exec(text);
-    if (match && !(match[2][0] === "`" && match[3].includes("`"))) {
+    const match = fenceOpening(text);
+    if (match) {
       const info = match[3].trim();
       const fence = { info, language: info.split(/\s+/)[0] ?? "", line: number };
       open = { marker: match[2], fence };
@@ -55,6 +57,148 @@ export function scanLines(markdown) {
   });
   if (open) errors.push({ line: open.fence.line, message: "code fence isn't closed" });
   return { lines, errors };
+}
+
+/** The FENCE match for a line that opens a code fence; a backtick fence's info can't contain backticks. */
+function fenceOpening(text) {
+  const match = FENCE.exec(text);
+  return match && !(match[2][0] === "`" && match[3].includes("`")) ? match : null;
+}
+
+const QUOTE_MARKER = /^ {0,3}> ?/;
+const LIST_MARKER = /^ {0,3}(?:[-+*]|(\d{1,9})[.)])(?= |$)/;
+const THEMATIC_BREAK = /^ {0,3}([-*_])(?: *\1){2,} *$/;
+const ATX_HEADING = /^ {0,3}#{1,6}(?: |$)/;
+const INDENTED_CODE = "indented code blocks aren't supported; use a fenced code block with a language";
+const FENCE_INDENT = "indent code fences at most 3 spaces past their container (the page or a list item)";
+const FENCE_IN_ITEM = "indent fenced code in a list item at least as far as the item's text";
+const FENCE_IN_QUOTE = "block quotes can't contain code fences";
+const FENCE_AFTER_MARKER = "start code fences on their own line, not after a list marker";
+
+/** Expands tabs to the next multiple of 4 columns, as CommonMark does when it measures indentation. */
+function detab(text) {
+  if (!text.includes("\t")) return text;
+  let out = "";
+  for (const char of text) out += char === "\t" ? " ".repeat(4 - (out.length % 4)) : char;
+  return out;
+}
+
+const indentOf = text => /^ */.exec(text)[0].length;
+const isBlank = text => /^ *$/.test(text);
+
+/**
+ * Follows CommonMark's block quotes and list items far enough to find the
+ * code that scanLines can't see alone: indented code blocks, which MDX
+ * doesn't support; fences CommonMark doesn't read as fences, because they're
+ * indented 4+ columns past their container, follow a `>` or list marker or
+ * close indented 4+ columns; and fenced code that ends its list item, and so
+ * its fence, early. Returns a function to call with each scanned line in
+ * order, which returns true for a fence that scanLines took for text.
+ */
+function blockChecker(error) {
+  /** Open containers, outermost first: `{ quote: true }` or a list item's `{ indent }`, its text's column past its parent's. */
+  const containers = [];
+  /** The innermost open block: blank (none yet), paragraph, code (indented) or other. */
+  let state = "blank";
+  /** `{ reported }` while a fence that scanLines found is open. */
+  let fence = null;
+
+  /** How far `text` continues the open containers: `{ position, matched }`. */
+  const continuation = text => {
+    let position = 0;
+    let matched = 0;
+    for (const container of containers) {
+      const rest = text.slice(position);
+      if (container.quote) {
+        const marker = QUOTE_MARKER.exec(rest);
+        if (!marker) break;
+        position += marker[0].length;
+      } else if (!isBlank(rest)) {
+        if (indentOf(rest) < container.indent) break;
+        position += container.indent;
+      }
+      matched++;
+    }
+    return { position, matched };
+  };
+
+  /** Whether `rest` starts a block, which ends a paragraph instead of continuing it lazily. */
+  const startsBlock = rest =>
+    indentOf(rest) < 4 &&
+    (QUOTE_MARKER.test(rest) || THEMATIC_BREAK.test(rest) || ATX_HEADING.test(rest) || fenceOpening(rest) !== null || LIST_MARKER.test(rest));
+
+  return line => {
+    const text = detab(line.text);
+    if (line.kind === "code" || line.kind === "close") {
+      if (!fence.reported) {
+        const { position, matched } = continuation(text);
+        if (matched < containers.length) {
+          error(line.number, FENCE_IN_ITEM);
+          fence.reported = true;
+        } else if (line.kind === "close" && indentOf(text.slice(position)) >= 4) {
+          error(line.number, FENCE_INDENT);
+        }
+      }
+      if (line.kind === "close") {
+        fence = null;
+        state = "other";
+      }
+      return;
+    }
+    let { position, matched } = continuation(text);
+    let rest = text.slice(position);
+    if (matched < containers.length) {
+      if (!isBlank(rest) && state === "paragraph" && !startsBlock(rest)) {
+        if (line.kind === "open") {
+          error(line.number, FENCE_INDENT);
+          fence = { reported: true };
+        }
+        return;
+      }
+      containers.length = matched;
+      state = isBlank(rest) ? "blank" : "other";
+    }
+    let opened = false;
+    while (indentOf(rest) < 4) {
+      const quote = QUOTE_MARKER.exec(rest);
+      if (quote) {
+        containers.push({ quote: true });
+        position += quote[0].length;
+      } else {
+        const item = THEMATIC_BREAK.test(rest) ? null : LIST_MARKER.exec(rest);
+        if (!item) break;
+        const after = rest.slice(item[0].length);
+        const empty = isBlank(after);
+        const interrupts = state === "paragraph" && !opened;
+        if (interrupts && (empty || (item[1] !== undefined && Number(item[1]) !== 1))) break;
+        const spaces = indentOf(after);
+        const indent = item[0].length + (empty || spaces >= 5 ? 1 : spaces);
+        containers.push({ indent });
+        position += empty ? rest.length : indent;
+      }
+      opened = true;
+      state = "blank";
+      rest = text.slice(position);
+    }
+    const indent = indentOf(rest);
+    if (line.kind === "open") {
+      if (indent >= 4) error(line.number, FENCE_INDENT);
+      fence = { reported: indent >= 4 };
+      state = "other";
+    } else if (isBlank(rest)) {
+      if (state !== "code") state = "blank";
+    } else if (indent >= 4) {
+      if (state === "paragraph") return;
+      if (state !== "code") error(line.number, INDENTED_CODE);
+      state = "code";
+    } else if (fenceOpening(rest)) {
+      error(line.number, containers.some(container => container.quote) ? FENCE_IN_QUOTE : FENCE_AFTER_MARKER);
+      state = "other";
+      return true;
+    } else {
+      state = ATX_HEADING.test(rest) || THEMATIC_BREAK.test(rest) ? "other" : "paragraph";
+    }
+  };
 }
 
 /**
@@ -244,10 +388,12 @@ export function parsePage(markdown) {
   if (!markdown.endsWith("\n") || markdown.endsWith("\n\n")) error(lines.length, "pages end with exactly one newline");
   if (!/^# \S/.test(lines[0]?.text ?? "")) error(1, "pages start with an H1 (`# Title`)");
   let previous = "";
+  const checkBlock = blockChecker(error);
   for (const line of lines) {
     if (line.kind === "open" && !line.fence.language) error(line.number, "code fences need a language");
-    if (line.kind !== "text") {
-      previous = line.kind === "close" ? "" : previous;
+    const hiddenFence = checkBlock(line);
+    if (line.kind !== "text" || hiddenFence) {
+      previous = line.kind === "close" || hiddenFence ? "" : previous;
       continue;
     }
     const { text, number } = line;

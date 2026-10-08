@@ -234,17 +234,44 @@ function memberKey(member) {
   return `${member.static ? "static " : ""}${member.name}`;
 }
 
+/**
+ * Resolves a base named in an extends list: `{ kind, file, name }`, or null
+ * for a global or a type from another package, which aren't documented here.
+ * Follows namespace imports, as in `core.BaseClient`. `where` starts errors.
+ */
+function resolveBase(program, file, base, where) {
+  if (!base.name || !/^(?:<.*>)?$/s.test(base.text.slice(base.name.length).trim())) {
+    throw new ExtractError(`${where} ${base.text}, which the extractor can't follow; extend a class or interface by name`);
+  }
+  const [first, ...rest] = base.name.split(".");
+  let target = program.binding(file, first);
+  let prefix = first;
+  for (const part of rest) {
+    if (!target) return null;
+    if (target.kind !== "namespace") throw new ExtractError(`${where} ${base.name}, but ${prefix} isn't a namespace import`);
+    target = program.exports(target.file).get(part);
+    if (!target) throw new ExtractError(`${where} ${base.name}, but ${prefix} doesn't export ${part}`);
+    prefix = `${prefix}.${part}`;
+  }
+  return target;
+}
+
 /** Own members followed by members inherited through `extends`, nearest base first. */
 function membersOf(program, declaration, file, seen = new Set()) {
   const own = (declaration.members ?? []).map(member => ({ ...member }));
   const names = new Set(own.map(memberKey));
+  const where = `${relative(program.root, file)}: ${declaration.name} extends`;
   for (const base of declaration.heritage?.extends ?? []) {
-    if (!base.name || base.name.includes(".")) continue;
-    const target = program.binding(file, base.name);
-    if (!target || target.kind !== "declaration" || isGenerated(program, target.file)) continue;
+    const target = resolveBase(program, file, base, where);
+    if (!target || isGenerated(program, target.file)) continue;
+    const declarations = target.kind === "declaration" ? program.declarations(target) : [];
+    if (!declarations.some(baseDeclaration => baseDeclaration.members)) {
+      const kind = target.kind === "declaration" ? (declarations[0]?.kind ?? "declaration") : target.kind;
+      throw new ExtractError(`${where} ${base.name}, a ${kind} whose members the extractor can't read`);
+    }
     const key = `${target.file}#${target.name}`;
     if (seen.has(key)) continue;
-    for (const baseDeclaration of program.declarations(target)) {
+    for (const baseDeclaration of declarations) {
       if (!baseDeclaration.members) continue;
       for (const member of membersOf(program, baseDeclaration, target.file, new Set([...seen, key]))) {
         if (member.kind === "constructor" || names.has(memberKey(member))) continue;

@@ -174,6 +174,7 @@ test("parseDeclarations rejects constructs it doesn't understand, with the file 
     ["export default class Client {}\n", 'fixture.d.ts:1: unsupported export form "export default"'],
     ["export = Client;\n", 'fixture.d.ts:1: unsupported export form "export ="'],
     ["\ndeclare namespace Client {}\n", 'fixture.d.ts:2: unsupported statement starting with "namespace"'],
+    ["export declare const a = 1,\n    b = 2;\n", "fixture.d.ts:1: declare one variable per statement"],
     ["/**\n * Sends.\n * @example send()\n */\nexport declare function send(): void;\n", /^fixture\.d\.ts:1: unsupported JSDoc tag @example;/],
   ]) {
     assert.throws(() => parseDeclarations(source, "fixture.d.ts"), error => {
@@ -377,6 +378,49 @@ test("extractTypeScript names the package or file it can't document", t => {
   fails(["@fx/sdk"], "packages/sdk/dist/missing.d.ts is missing; run npm run build first");
   write(root, "packages/sdk/package.json", { name: "@fx/sdk", exports: { ".": "./dist/index.js" } });
   fails(["@fx/sdk"], '@fx/sdk: package.json exports["."] has no "types" condition');
+});
+
+test("extractTypeScript follows bases through namespace imports and rejects workspace bases it can't read", t => {
+  const root = writeWorkspace(t);
+  const client = (...body) => write(root, "packages/sdk/dist/client.d.ts", lines(...body));
+  const userClient = () => extractTypeScript({ root, language: "fixture", packages: ["@fx/sdk"] }).packages[0].symbols.find(symbol => symbol.name === "UserClient");
+  const fails = message =>
+    assert.throws(() => extractTypeScript({ root, packages: ["@fx/sdk"] }), error => {
+      assert.ok(error instanceof ExtractError, error.stack);
+      assert.equal(error.message, message);
+      return true;
+    });
+
+  client('import * as core from "@fx/core";', "export declare class UserClient extends core.BaseClient<string> {", "    constructor(token: string);", "}");
+  assert.deepEqual(
+    userClient().members.map(member => [member.name, member.inherited]),
+    [["constructor", undefined], ["ping", "BaseClient"], ["close", "BaseClient"]],
+  );
+  client('import * as tp from "thirdparty";', "export declare class UserClient extends tp.Thing {", "}", "export declare class Failure extends Error {", "}");
+  assert.deepEqual(userClient().members ?? [], [], "third-party and global bases aren't listed");
+
+  const where = "packages/sdk/dist/client.d.ts: UserClient extends";
+  client('import * as core from "@fx/core";', "export declare class UserClient extends core.Missing {", "}");
+  fails(`${where} core.Missing, but core doesn't export Missing`);
+  client('import { BaseClient } from "@fx/core";', "export declare class UserClient extends BaseClient.Inner {", "}");
+  fails(`${where} BaseClient.Inner, but BaseClient isn't a namespace import`);
+  client('import { BaseClient } from "@fx/core";', "export declare class UserClient extends (BaseClient) {", "}");
+  fails(`${where} (BaseClient), which the extractor can't follow; extend a class or interface by name`);
+  client('import { BaseClient } from "@fx/core";', "export declare class UserClient extends Mixin(BaseClient) {", "}");
+  fails(`${where} Mixin(BaseClient), which the extractor can't follow; extend a class or interface by name`);
+  client(
+    'import { BaseClient } from "@fx/core";',
+    "declare const UserClient_base: {",
+    "    new (...args: any[]): {",
+    "        retry(): void;",
+    "    };",
+    "} & typeof BaseClient;",
+    "export declare class UserClient extends UserClient_base {",
+    "}",
+  );
+  fails(`${where} UserClient_base, a constant whose members the extractor can't read`);
+  client('import type { Options } from "@fx/core";', "type Both = Options & { token: string };", "export interface UserClient extends Both {", "}");
+  fails(`${where} Both, a type whose members the extractor can't read`);
 });
 
 test("the extractor command takes one language file", () => {

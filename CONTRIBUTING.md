@@ -120,8 +120,8 @@ npm run generate:docs                     # regenerate docs/site
 npm run test:docs -- --install typescript # compile and run the language's example code
 ```
 
-The Docs workflow fails if `surface.json` or `docs/site` is stale. Resolve
-conflicts in them the same way: regenerate, don't merge by hand.
+CI fails if `surface.json` or `docs/site` is stale. Resolve conflicts in
+them the same way: regenerate, don't merge by hand.
 
 ## Annotating operations
 

@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { symlinkSync } from "node:fs";
+import { join } from "node:path";
 import { expandIncludes, extractRegion, parseRegions } from "../lib/snippets.mjs";
 import { tempRoot, write } from "./helpers.mjs";
 
@@ -72,14 +74,17 @@ const PAGE = `${DIRECTORY}/quickstarts/server.md`;
 const LANGUAGE = { testedFences: ["ts", "tsx"], snippetRoots: ["examples/src", "examples/web"], regionComment: "//" };
 const FILES = {
   "examples/src/server.ts": source('import { x } from "x";', "// #region create", "const a = x(`", "```", "`);", "// #endregion create"),
+  "examples/src/steps.ts": source("const a = 1;", "", "const b = a;"),
   "examples/src/bad.ts": source("x", "// #region open", "y"),
   "examples/src/lib/util.ts": source("export const util = 1;"),
   "examples/web/app.tsx": source("export const App = () => <div />;"),
 };
 
-function expand(t, markdown) {
+/** Expands `markdown` in a new language directory holding FILES; `prepare(root)` can change it first. */
+function expand(t, markdown, prepare = () => {}) {
   const root = tempRoot(t);
   for (const [path, contents] of Object.entries(FILES)) write(root, `${DIRECTORY}/${path}`, contents);
+  prepare(root);
   return expandIncludes(markdown, { root, language: LANGUAGE, directory: DIRECTORY, file: PAGE });
 }
 
@@ -129,6 +134,8 @@ test("expandIncludes reports code that isn't a tested snippet and bad includes",
   const outside = "include paths are relative to the language directory, without . or .. segments:";
   const cases = [
     [source("```ts", "const x = 1;", "```"), [at(1, "ts code must come from a tested snippet: ```ts include=<file>#<region>")]],
+    [source("```TS", "const x = 1;", "```"), [at(1, "TS code must come from a tested snippet: ```TS include=<file>#<region>")]],
+    [source("```Tsx title=app", "<App />", "```"), [at(1, "Tsx code must come from a tested snippet: ```Tsx include=<file>#<region>")]],
     [source("```ts include=examples/src/server.ts#create", "const x = 1;", "```"), [at(1, "include fences are empty; the code comes from the included file")]],
     [source("```ts include=examples/src/server.ts#create title=x", "```"), [at(1, "include fences take only a language and include=<file>#<region>")]],
     [source("```ts include=../secret.ts", "```"), [at(1, `${outside} ../secret.ts`)]],
@@ -150,4 +157,68 @@ test("expandIncludes reports code that isn't a tested snippet and bad includes",
   ];
   for (const [markdown, problems] of cases) assert.deepEqual(expand(t, markdown).problems, problems, markdown);
   assert.equal(expand(t, source("```ts", "x", "```")).markdown, source("```ts", "x", "```"), "rejected code is kept as written");
+});
+
+test("expandIncludes indents included code like its fence, so the code stays in its list item", t => {
+  const markdown = source(
+    "1. Create a conversation:",
+    "",
+    "   ```ts include=examples/src/server.ts#create",
+    "   ```",
+    "",
+    "2. Then:",
+    "",
+    "   ```TS include=examples/src/steps.ts",
+    "   ```",
+  );
+  assert.deepEqual(expand(t, markdown), {
+    markdown: source(
+      "1. Create a conversation:",
+      "",
+      "   ````ts snippet=docs/languages/ts/examples/src/server.ts#create",
+      "   const a = x(`",
+      "   ```",
+      "   `);",
+      "   ````",
+      "",
+      "2. Then:",
+      "",
+      "   ```TS snippet=docs/languages/ts/examples/src/steps.ts",
+      "   const a = 1;",
+      "",
+      "   const b = a;",
+      "   ```",
+    ),
+    includes: [`${DIRECTORY}/examples/src/server.ts#create`, `${DIRECTORY}/examples/src/steps.ts`],
+    problems: [],
+  });
+});
+
+test("expandIncludes rejects included files that resolve outside their snippet root", t => {
+  const outside = (root, target, link) => {
+    write(root, target, "export const secret = 1;\n");
+    symlinkSync(join(root, target), join(root, DIRECTORY, link));
+  };
+  const cases = [
+    ["examples/src/secret.ts", root => outside(root, "secret.ts", "examples/src/secret.ts")],
+    [
+      "examples/src/linked/secret.ts",
+      root => {
+        write(root, "elsewhere/secret.ts", "export const secret = 1;\n");
+        symlinkSync(join(root, "elsewhere"), join(root, DIRECTORY, "examples/src/linked"), "dir");
+      },
+    ],
+    ["examples/src/app.tsx", root => symlinkSync(join(root, DIRECTORY, "examples/web/app.tsx"), join(root, DIRECTORY, "examples/src/app.tsx"))],
+  ];
+  for (const [path, prepare] of cases) {
+    assert.deepEqual(
+      expand(t, source(`\`\`\`ts include=${path}`, "```"), prepare).problems,
+      [`${PAGE}:1: included file ${DIRECTORY}/${path} resolves outside its snippet root`],
+      path,
+    );
+  }
+  const inside = expand(t, source("```ts include=examples/src/util.ts", "```"), root => {
+    symlinkSync(join(root, DIRECTORY, "examples/src/lib/util.ts"), join(root, DIRECTORY, "examples/src/util.ts"));
+  });
+  assert.deepEqual(inside.problems, [], "links within the snippet root are fine");
 });

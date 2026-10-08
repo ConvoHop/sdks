@@ -151,7 +151,13 @@ hand-written:
   slug, as GitHub and [rehype-slug](https://github.com/rehypejs/rehype-slug)
   make it, and is unique within its page. Anchors in links use these IDs.
 - Code is in fenced code blocks, each with a language. Code spans stay on
-  one line.
+  one line. MDX doesn't support indented code blocks, so a line indented
+  4 or more spaces past its container (the page or a list item) must
+  continue a paragraph.
+- A fence starts on its own line, after no list marker, indented at most
+  3 spaces past its container, and isn't in a block quote. In a list item,
+  the fence, its code and its closing fence are indented at least as far
+  as the item's text, so CommonMark keeps them in the item.
 - Outside code, `<`, `{` and `}` are escaped with a backslash. Pages contain
   no HTML, comments, autolinks, images or reference-style links, and no line
   starts with `import` or `export`.
@@ -209,6 +215,13 @@ The info string's first word is the language. remark and MDX keep the rest
 as the code node's `meta`, so a renderer can label the block as tested and
 link to its source in this repository. Code in other fences, such as `sh`,
 `json` and `text`, isn't tested.
+
+Tested fences match without regard to case, so a fence whose language is
+`TS` is tested too. An include fence can be indented in a list item; the included
+code keeps its indentation, so it stays in the item. An included file must
+resolve inside its snippet root once symbolic links are followed, and
+docgen reads a language's pages, snippet roots, operation map and
+`surface.json` only from inside its directory.
 
 ### JSON data
 
@@ -274,7 +287,9 @@ matching website change.
 
 A language plugs in with a directory under `docs/languages` and an
 extractor. docgen itself doesn't change. Use
-[TypeScript's directory](languages/typescript) as the model.
+[TypeScript's directory](languages/typescript) as the model. The language
+directory is a real directory, not a symbolic link, and the files docgen
+reads from it resolve inside it.
 
 1. **Describe the language** in `docs/languages/<id>/language.json`
    ([`language.schema.json`](../spec/docs/language.schema.json)). Paths are
@@ -289,7 +304,7 @@ extractor. docgen itself doesn't change. Use
    | `name`, `order` | The display name, and its position in navigation. TypeScript's `order` is 10. |
    | `status` | `preview` until the SDK is released and supported, then `stable` |
    | `codeFence` | The info string of rendered code blocks, such as `ts` |
-   | `testedFences` | Every info string that pages may use only through include fences, including `codeFence` |
+   | `testedFences` | Every info string that pages may use only through include fences, including `codeFence`. Matching ignores case. |
    | `regionComment` | The line comment before region markers, such as `//` or `#`. Leave it empty where `#region` is itself a directive, as in C#. |
    | `snippetRoots` | The directories whose files pages may include. The test command must compile or run every file in them. |
    | `packages` | The documented packages in display order, each with its name, slug, layer (`server` or `client`), summary, runtime and source directory |
@@ -322,7 +337,12 @@ extractor. docgen itself doesn't change. Use
 
    TypeScript's extractor,
    [`tools/docgen/extractors/typescript.mjs`](../tools/docgen/extractors/typescript.mjs),
-   reads the `.d.ts` files of the built packages.
+   reads the `.d.ts` files of the built packages. It follows bases by name,
+   including through namespace imports such as `core.BaseClient`. It doesn't
+   list members inherited from globals or third-party packages, and fails
+   for a workspace base whose members it can't read, such as a mixin
+   constant or an intersection type. Declarations take one variable per
+   statement.
 
 3. **Map the operations** in `operations.json`. For each operation ID in
    `schema/ir.json`, list the references of the public members that send it.

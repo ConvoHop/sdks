@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { cpSync, mkdirSync, rmSync } from "node:fs";
-import { join } from "node:path";
+import { cpSync, mkdirSync, renameSync, rmSync, symlinkSync } from "node:fs";
+import { basename, join } from "node:path";
 import { test } from "node:test";
 import { buildSite } from "../lib/generate.mjs";
 import { formatReference, parseReference, resolveReference, validate } from "../lib/languages.mjs";
@@ -14,6 +14,7 @@ import {
   SURFACE_FILE,
   editJson,
   editText,
+  tempRoot,
   write,
   writeFixture,
 } from "./helpers.mjs";
@@ -704,6 +705,32 @@ test("each language needs its overview, quickstarts, snippet roots and operation
       "operation map operations.json doesn't exist",
     ].map(problem => `${LANGUAGE_DIRECTORY}: ${problem}`),
   );
+});
+
+test("languages are directories, and the files generation reads can't resolve outside them", t => {
+  const elsewhere = tempRoot(t);
+  /** Moves a fixture path out of the repository and links it back. */
+  const moveOut = (root, path) => {
+    const outside = join(elsewhere, `${basename(root)}-${path.replaceAll("/", "-")}`);
+    renameSync(join(root, path), outside);
+    symlinkSync(outside, join(root, path));
+  };
+  const read = ["examples/src", "overview.md", "quickstarts/server.md", "operations.json", "surface.json"];
+  const root = writeFixture(t);
+  for (const path of read) moveOut(root, `${LANGUAGE_DIRECTORY}/${path}`);
+  assert.deepEqual(inputProblems(root), read.map(path => `${LANGUAGE_DIRECTORY}: ${path} resolves outside the language directory`));
+
+  const linked = writeFixture(t);
+  moveOut(linked, LANGUAGE_FILE);
+  symlinkSync(join(linked, LANGUAGE_DIRECTORY), join(linked, "docs/languages/linked"));
+  assert.deepEqual(inputProblems(linked), [
+    "docs/languages/linked is a symbolic link; make each language a directory",
+    `${LANGUAGE_DIRECTORY}: language.json resolves outside the language directory`,
+  ]);
+
+  const moved = writeFixture(t);
+  moveOut(moved, "docs/languages");
+  assert.deepEqual(inputProblems(moved), ["docs/languages resolves outside the repository"]);
 });
 
 test("the extracted surface must exist and match language.json, with unique names", t => {

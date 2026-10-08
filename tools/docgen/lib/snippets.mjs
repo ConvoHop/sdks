@@ -20,10 +20,14 @@
  *
  *   ```ts snippet=docs/languages/typescript/examples/src/server.ts#create-conversation
  *
- * Code in other fences (sh, json, text) is copied as written.
+ * The generated block keeps the include fence's indentation, so included
+ * code stays in its list item. Tested fences match case-insensitively, and an
+ * included file must resolve inside its snippet root once symbolic links are
+ * followed. Code in other fences (sh, json, text) is copied as written.
  */
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join, posix } from "node:path";
+import { resolvesInside } from "./languages.mjs";
 import { codeBlock, scanLines } from "./markdown.mjs";
 
 const INCLUDE = /^include=(\S+)$/;
@@ -102,7 +106,7 @@ export function expandIncludes(markdown, { root, language, directory, file }) {
   const includes = [];
   const { lines, errors } = scanLines(markdown);
   for (const error of errors) problems.push(`${file}:${error.line}: ${error.message}`);
-  const tested = new Set(language.testedFences);
+  const tested = new Set(language.testedFences.map(fence => fence.toLowerCase()));
   const out = [];
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -113,7 +117,7 @@ export function expandIncludes(markdown, { root, language, directory, file }) {
     const [fenceLanguage, ...attributes] = line.fence.info.split(/\s+/).filter(Boolean);
     const include = attributes.map(attribute => INCLUDE.exec(attribute)).find(Boolean);
     if (!include) {
-      if (tested.has(fenceLanguage)) {
+      if (tested.has(fenceLanguage?.toLowerCase())) {
         problems.push(
           `${file}:${line.number}: ${fenceLanguage} code must come from a tested snippet: \`\`\`${fenceLanguage} include=<file>#<region>`,
         );
@@ -139,6 +143,10 @@ export function expandIncludes(markdown, { root, language, directory, file }) {
       problems.push(`${file}:${line.number}: included file doesn't exist: ${resolved.path}`);
       continue;
     }
+    if (!resolvesInside(join(root, directory, resolved.snippetRoot), absolute)) {
+      problems.push(`${file}:${line.number}: included file ${resolved.path} resolves outside its snippet root`);
+      continue;
+    }
     const extracted = extractRegion(readFileSync(absolute, "utf8"), language.regionComment, region);
     if (extracted.errors.length) {
       for (const error of extracted.errors) problems.push(`${resolved.path}:${error.line}: ${error.message} (included by ${file}:${line.number})`);
@@ -146,18 +154,24 @@ export function expandIncludes(markdown, { root, language, directory, file }) {
     }
     const source = region === undefined ? resolved.path : `${resolved.path}#${region}`;
     includes.push(source);
-    out.push(codeBlock(extracted.code, `${fenceLanguage} snippet=${source}`));
+    const indent = /^[ \t]*/.exec(line.text)[0];
+    const block = codeBlock(extracted.code, `${fenceLanguage} snippet=${source}`);
+    out.push(block.split("\n").map(text => (text ? indent + text : text)).join("\n"));
   }
   return { markdown: out.join("\n"), includes, problems };
 }
 
-/** Resolves an include path relative to the language directory and checks it's under a snippet root. */
+/**
+ * Resolves an include path relative to the language directory and checks
+ * it's under a snippet root. Returns `{ path, snippetRoot }` or `{ error }`.
+ */
 function includePath(path, language, directory) {
   if (!path || path.startsWith("/") || path.includes("\\") || path.split("/").some(segment => segment === ".." || segment === "." || segment === "")) {
     return { error: `include paths are relative to the language directory, without . or .. segments: ${path}` };
   }
-  if (!language.snippetRoots.some(snippetRoot => path.startsWith(`${snippetRoot}/`))) {
+  const snippetRoot = language.snippetRoots.find(snippetRoot => path.startsWith(`${snippetRoot}/`));
+  if (!snippetRoot) {
     return { error: `included files must be under a snippet root (${language.snippetRoots.join(", ")}): ${path}` };
   }
-  return { path: posix.join(directory, path) };
+  return { path: posix.join(directory, path), snippetRoot };
 }

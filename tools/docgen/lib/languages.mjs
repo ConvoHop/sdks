@@ -4,8 +4,8 @@
  * appends human-readable problems instead of throwing, so one run reports
  * every problem. See docs/docs-pipeline.md.
  */
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join, posix } from "node:path";
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
+import { isAbsolute, join, posix, relative, sep } from "node:path";
 import { createValidator, formatValidationErrors } from "../../sdkgen/lib/json-schema.mjs";
 import { codeUnitCompare } from "../../sdkgen/lib/naming.mjs";
 
@@ -57,6 +57,17 @@ function isDirectory(path) {
   return existsSync(path) && statSync(path).isDirectory();
 }
 
+/** Whether `child` is inside `parent`; both are absolute paths. */
+export function isInside(parent, child) {
+  const path = relative(parent, child);
+  return path !== "" && path !== ".." && !path.startsWith(`..${sep}`) && !isAbsolute(path);
+}
+
+/** Whether `path`, which exists, is inside `directory` once symbolic links are resolved. */
+export function resolvesInside(directory, path) {
+  return isInside(realpathSync(directory), realpathSync(path));
+}
+
 /** Validates docgen.config.mjs. */
 export function checkConfig(config, problems) {
   const ids = new Set();
@@ -78,15 +89,26 @@ export function discoverLanguages(root, config, problems) {
     problems.push(`${config.languagesDirectory} doesn't exist`);
     return [];
   }
+  if (!resolvesInside(root, base)) {
+    problems.push(`${config.languagesDirectory} resolves outside the repository`);
+    return [];
+  }
   const topics = new Set(config.topics.map(topic => topic.id));
   const languages = [];
-  const ids = readdirSync(base, { withFileTypes: true })
-    .filter(entry => entry.isDirectory())
-    .map(entry => entry.name)
-    .sort(codeUnitCompare);
-  for (const id of ids) {
+  const entries = readdirSync(base, { withFileTypes: true }).sort((a, b) => codeUnitCompare(a.name, b.name));
+  for (const entry of entries) {
+    const id = entry.name;
     const directory = `${config.languagesDirectory}/${id}`;
+    if (entry.isSymbolicLink()) {
+      if (isDirectory(join(base, id))) problems.push(`${directory} is a symbolic link; make each language a directory`);
+      continue;
+    }
+    if (!entry.isDirectory()) continue;
     const path = `${directory}/language.json`;
+    if (existsSync(join(root, path)) && !resolvesInside(join(root, directory), join(root, path))) {
+      problems.push(`${directory}: language.json resolves outside the language directory`);
+      continue;
+    }
     const language = readJson(root, path, problems);
     if (language === undefined || !validate(root, "language", language, path, problems)) continue;
     const before = problems.length;
@@ -130,6 +152,16 @@ export function checkLanguageFiles(root, language, problems) {
   }
   if (!existsSync(join(base, "overview.md"))) problem("needs an overview.md");
   if (!existsSync(join(base, language.config.operations))) problem(`operation map ${language.config.operations} doesn't exist`);
+  const read = [
+    ...language.config.snippetRoots,
+    "overview.md",
+    ...language.config.quickstarts.map(topic => `quickstarts/${topic}.md`),
+    language.config.operations,
+    "surface.json",
+  ];
+  for (const path of read) {
+    if (existsSync(join(base, path)) && !resolvesInside(base, join(base, path))) problem(`${path} resolves outside the language directory`);
+  }
   return problems.length === before;
 }
 
