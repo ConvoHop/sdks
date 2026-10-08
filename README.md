@@ -37,7 +37,7 @@ planned languages, push notifications, package names, versioning and support.
 | SDK | Package | Runtime | Covers |
 | --- | --- | --- | --- |
 | [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, and calls with explicit connect and capture |
-| [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and provisional push payload builders |
+| [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and push payload builders |
 
 Both packages depend on [`@convohop/core`](packages/core/README.md), which
 holds the generated GraphQL types and operations and the shared transport.
@@ -70,9 +70,8 @@ package registry yet. [Install a release](#install-a-release) or
    server SDK and can, for example, send push notifications with your own
    APNs, FCM or Web Push credentials.
 
-`@convohop/server` verifies webhook signatures today, and its typed events
-are provisional. Webhook delivery and notification events for step 4 are in
-development. See
+`@convohop/server` verifies these webhooks and returns typed events,
+including the per-recipient notification events for push notifications. See
 [push notifications](docs/sdk-strategy.md#push-notifications-bring-your-own).
 The package READMEs have code samples.
 
@@ -199,7 +198,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
   verify them
 - [Conformance suite](spec/conformance/README.md): scenarios, the driver
   protocol, targets and webhook signature vectors
-- [Push payload contract](spec/push-payload/README.md): provisional
+- [Push payload contract](spec/push-payload/README.md): per-recipient
   notification events, the push requests built from them and shared vectors
 - [Contributing](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)

@@ -123,6 +123,7 @@ mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: Issue
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }

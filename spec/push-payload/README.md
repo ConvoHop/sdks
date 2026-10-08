@@ -1,10 +1,5 @@
 # Push payload contract
 
-> [!IMPORTANT]
-> Provisional. ConvoHop doesn't send notification events yet. The producer
-> will conform to this contract when it ships, and event fields, lifetimes
-> and payload layouts can change until then.
-
 ConvoHop doesn't send push notifications for you
 ([bring your own](../../docs/sdk-strategy.md#push-notifications-bring-your-own)).
 It sends your backend a signed webhook with a per-recipient notification
@@ -88,6 +83,33 @@ fits the 4096-byte webhook body limit: a 512-code-point preview takes at most
 `eventVersion`, or one that breaks these rules, isn't a notification event:
 webhook verifiers return it like an event type they don't know, and builders
 reject it.
+
+### Recipients and delivery
+
+ConvoHop produces notification events only while the project has an active
+webhook endpoint subscribed to their type, and delivers them like its other
+webhook events:
+
+- **Recipients.** A message notifies each active member who can see it,
+  except its sender. A call notifies each principal it rings. A
+  cancellation goes to exactly the recipients that got the ring's
+  `notification.call`.
+- **Mute.** A member can mute a conversation, optionally until a time. A
+  muted member gets no `notification.message` for it. Calls still ring a
+  muted member, because they are time-critical. Leaving the conversation
+  ends the mute.
+- **Previews** are off by default. A project owner turns them on with the
+  `management.projectPolicy` change `enableMessagePreview` and off with
+  `disableMessagePreview`, and `getProject` reports the setting as
+  `messagePreview`. Events produced after the operation completes follow
+  the new setting. An event that was already produced keeps its body,
+  including on retries and replays.
+- **Delivery** is at least once, and events aren't ordered: a cancellation
+  can arrive before its call. Deduplicate on `eventId`, and treat a
+  `notification.call` as stopped once you have seen a cancellation with its
+  `alertId` or its `expiresAt` has passed.
+- **`connected`** comes from a realtime connection lease of about ten
+  seconds, so it can stay `true` for that long after the connection drops.
 
 ## Builders
 

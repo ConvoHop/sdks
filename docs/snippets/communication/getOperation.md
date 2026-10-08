@@ -136,6 +136,7 @@ query CommunicationGetOperation($context: RequestContextInput!, $input: GetOpera
         }
         replayedDeliveries
         skippedDeliveries
+        messagePreview
       }
       blockedReason
     }

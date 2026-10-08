@@ -120,6 +120,25 @@ type ConversationMemberBatch {
 	items: [Member!]!
 }
 
+type ConversationMute {
+	conversationId: UUID!
+	principalId: UUID!
+	muted: Boolean!
+	until: String
+}
+
+input ConversationMuteInput {
+	conversationId: UUID!
+	actAsPrincipalId: UUID
+}
+
+type ConversationMuteReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String!
+	result: ConversationMute!
+}
+
 type CreateConversationReply {
 	status: String!
 	requestId: UUID!
@@ -1026,6 +1045,7 @@ type Mutation {
 	reportReceipt(context: RequestContextInput!, input: ReportReceiptRequestInput!): ReportReceiptReply!
 	typing(context: RequestContextInput!, input: TypingRequestInput!): TypingReply!
 	setBroadcastPermission(context: RequestContextInput!, input: SetBroadcastPermissionInput!): SetBroadcastPermissionPayload!
+	setConversationMute(context: RequestContextInput!, input: SetConversationMuteInput!): SetConversationMutePayload!
 	startLiveSession(context: RequestContextInput!, input: StartLiveSessionInput!): StartLiveSessionPayload!
 	joinLiveSession(context: RequestContextInput!, input: JoinLiveSessionInput!): JoinLiveSessionPayload!
 	alertLiveSession(context: RequestContextInput!, input: AlertLiveSessionInput!): AlertLiveSessionPayload!
@@ -1073,6 +1093,7 @@ type OperationResult {
 	liveSessionCompletion: LiveSessionOperationCompletion
 	replayedDeliveries: Int
 	skippedDeliveries: Int
+	messagePreview: Boolean
 }
 
 type OperationStep {
@@ -1154,6 +1175,7 @@ type Project {
 	status: String!
 	revision: Decimal!
 	policyRevision: Decimal!
+	messagePreview: Boolean!
 }
 
 type ProjectUsage {
@@ -1185,6 +1207,7 @@ type Query {
 	search(context: RequestContextInput!, input: SearchRequestInput!): SearchReply!
 	resolveRequest(context: RequestContextInput!, input: ResolveRequestRequestInput!): ResolveRequestReply!
 	getOperation(context: RequestContextInput!, input: GetOperationRequestInput!): GetOperationReply!
+	conversationMute(context: RequestContextInput!, input: ConversationMuteInput!): ConversationMuteReply!
 	currentLiveSession(context: RequestContextInput!, input: ConversationLiveInput!): CurrentLiveSessionReply!
 	liveSession(context: RequestContextInput!, input: LiveSessionInput!): LiveSessionReply!
 	liveSessions(context: RequestContextInput!, input: LiveSessionsInput!): LiveSessionPageReply!
@@ -1406,6 +1429,7 @@ type RetainedResult {
 	broadcastPermissionChanged: BroadcastPermissionChanged
 	conversation: Conversation
 	conversationMemberBatch: ConversationMemberBatch
+	conversationMute: ConversationMute
 	credentialDeliveryReceipt: CredentialDeliveryReceipt
 	deliveryAck: DeliveryAck
 	liveAlertBatch: LiveAlertBatch
@@ -1578,6 +1602,22 @@ type SetBroadcastPermissionPayload {
 	committedAt: String!
 	replayed: Boolean!
 	result: BroadcastPermissionChanged!
+}
+
+input SetConversationMuteInput {
+	conversationId: UUID!
+	muted: Boolean!
+	until: String
+	actAsPrincipalId: UUID
+}
+
+type SetConversationMutePayload {
+	status: String!
+	requestId: UUID!
+	receiptId: UUID!
+	committedAt: String!
+	replayed: Boolean!
+	result: ConversationMute!
 }
 
 scalar SignedProof

@@ -142,6 +142,16 @@
       "path": "communication/getOperation.md"
     },
     {
+      "id": "communication.conversationMute",
+      "plane": "communication",
+      "kind": "query",
+      "field": "conversationMute",
+      "operationName": "CommunicationConversationMute",
+      "summary": "Read whether a member has muted message push notifications for a conversation. A backend key must name the member with actAsPrincipalId.",
+      "layer": "both",
+      "path": "communication/conversationMute.md"
+    },
+    {
       "id": "communication.currentLiveSession",
       "plane": "communication",
       "kind": "query",
@@ -380,6 +390,16 @@
       "summary": "Allow or deny a member to publish media in live sessions.",
       "layer": "server",
       "path": "communication/setBroadcastPermission.md"
+    },
+    {
+      "id": "communication.setConversationMute",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "setConversationMute",
+      "operationName": "CommunicationSetConversationMute",
+      "summary": "Mute or unmute message push notifications for a member of a conversation, optionally until a time. Calls still ring. A backend key must name the member with actAsPrincipalId.",
+      "layer": "both",
+      "path": "communication/setConversationMute.md"
     },
     {
       "id": "communication.startLiveSession",

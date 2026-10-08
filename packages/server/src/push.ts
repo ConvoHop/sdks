@@ -1,4 +1,4 @@
-// Push payload builders for the provisional contract in spec/push-payload/. They are pure functions: they send nothing
+// Push payload builders for the contract in spec/push-payload/. They are pure functions: they send nothing
 // and hold no credentials. Your push library sends the requests and owns APNs/FCM auth and Web Push encryption.
 import { epochSeconds, notificationEvent } from "./webhooks.js";
 import type {
@@ -221,8 +221,7 @@ function apnsHeaders(type: "alert" | "voip", topic: string, expiration: number, 
  * `notification.callCancelled`), as `webhooks.verify()` returns them. Each builder validates its options and then the
  * event, throwing `PushPayloadError`, and returns `null` when the event doesn't apply to the platform or is stale.
  * Payloads are metadata-only unless you pass `title` or `body`, or the event carries an opted-in message preview.
- *
- * @experimental Provisional: the contract is `spec/push-payload/`, and the authority doesn't send these events yet.
+ * The contract is `spec/push-payload/`.
  */
 export const push = Object.freeze({
   /**

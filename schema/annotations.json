@@ -149,7 +149,7 @@
     "conversationManage": {"summary": "Create, read and update any conversation in the project."},
     "historyManage": {"summary": "Expand the history visible to members."},
     "membershipManage": {
-      "summary": "Read and change conversation membership and broadcast permissions."
+      "summary": "Read and change conversation membership and broadcast permissions, and read or set the push mute of the member named by actAsPrincipalId. Requests that use actAsPrincipalId are audited."
     },
     "messageRead": {
       "summary": "Read history, get messages and search in any conversation of the project, or read as the member named by actAsPrincipalId. The inbox requires actAsPrincipalId. Requests that use actAsPrincipalId are audited."
@@ -1069,6 +1069,21 @@
         "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
+    "communication.conversationMute": {
+      "summary": "Read whether a member has muted message push notifications for a conversation. A backend key must name the member with actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["membershipManage"]}
+      ],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication", "rateLimited"],
+        "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
+      }
+    },
     "communication.currentLiveSession": {
       "summary": "Return the active live session of a conversation, if any.",
       "layer": "both",
@@ -1535,6 +1550,28 @@
           "rateLimited"
         ],
         "codes": ["NOT_FOUND", "REVISION_CONFLICT", "SCOPE_REQUIRED"]
+      }
+    },
+    "communication.setConversationMute": {
+      "summary": "Mute or unmute message push notifications for a member of a conversation, optionally until a time. Calls still ring. A backend key must name the member with actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["membershipManage"]}
+      ],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
+        "codes": ["NOT_FOUND", "SCOPE_REQUIRED"]
       }
     },
     "communication.startLiveSession": {

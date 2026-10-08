@@ -133,7 +133,7 @@
     {"name": "historyManage", "summary": "Expand the history visible to members."},
     {
       "name": "membershipManage",
-      "summary": "Read and change conversation membership and broadcast permissions."
+      "summary": "Read and change conversation membership and broadcast permissions, and read or set the push mute of the member named by actAsPrincipalId. Requests that use actAsPrincipalId are audited."
     },
     {
       "name": "messageRead",
@@ -1902,9 +1902,9 @@
       "input": {"argument": "input", "type": "ResolveRequestRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ResolveRequestReply", "nullable": false}},
       "document": {
-        "text": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
-        "bytes": 6156,
-        "selectedFields": 230,
+        "text": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+        "bytes": 6284,
+        "selectedFields": 235,
         "depth": 8
       },
       "idempotency": "safe",
@@ -1975,10 +1975,83 @@
       "input": {"argument": "input", "type": "GetOperationRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "GetOperationReply", "nullable": false}},
       "document": {
-        "text": "query CommunicationGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {\n  getOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n      }\n      blockedReason\n    }\n  }\n}",
-        "bytes": 1625,
-        "selectedFields": 75,
+        "text": "query CommunicationGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {\n  getOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n        messagePreview\n      }\n      blockedReason\n    }\n  }\n}",
+        "bytes": 1648,
+        "selectedFields": 76,
         "depth": 6
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "communication", "rateLimited"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "INCARNATION_MISMATCH",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "RATE_LIMITED",
+          "REQUEST_TOO_LARGE",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED",
+          "WRONG_REGION"
+        ]
+      }
+    },
+    {
+      "id": "communication.conversationMute",
+      "plane": "communication",
+      "kind": "query",
+      "field": "conversationMute",
+      "operationName": "CommunicationConversationMute",
+      "summary": "Read whether a member has muted message push notifications for a conversation. A backend key must name the member with actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["membershipManage"]}
+      ],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "ConversationMuteInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "required"},
+          {"name": "incarnation", "use": "required"},
+          {"name": "observedServingEpoch", "use": "required"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "ConversationMuteInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "ConversationMuteReply", "nullable": false}},
+      "document": {
+        "text": "query CommunicationConversationMute($context: RequestContextInput!, $input: ConversationMuteInput!) {\n  conversationMute(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      conversationId\n      principalId\n      muted\n      until\n    }\n  }\n}",
+        "bytes": 284,
+        "selectedFields": 9,
+        "depth": 2
       },
       "idempotency": "safe",
       "pagination": {"style": "none"},
@@ -3970,6 +4043,93 @@
       }
     },
     {
+      "id": "communication.setConversationMute",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "setConversationMute",
+      "operationName": "CommunicationSetConversationMute",
+      "summary": "Mute or unmute message push notifications for a member of a conversation, optionally until a time. Calls still ring. A backend key must name the member with actAsPrincipalId.",
+      "layer": "both",
+      "auth": [
+        {"credential": "userSession", "condition": "member"},
+        {"credential": "backendKey", "scopes": ["membershipManage"]}
+      ],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "SetConversationMuteInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "required"},
+          {"name": "incarnation", "use": "required"},
+          {"name": "observedServingEpoch", "use": "required"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "SetConversationMuteInput", "required": true},
+      "result": {
+        "type": {"kind": "object", "name": "SetConversationMutePayload", "nullable": false}
+      },
+      "document": {
+        "text": "mutation CommunicationSetConversationMute($context: RequestContextInput!, $input: SetConversationMuteInput!) {\n  setConversationMute(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    result {\n      conversationId\n      principalId\n      muted\n      until\n    }\n  }\n}",
+        "bytes": 324,
+        "selectedFields": 11,
+        "depth": 2
+      },
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INCARNATION_MISMATCH",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_EXPIRED",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "SCOPE_REQUIRED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED",
+          "WRONG_REGION"
+        ]
+      }
+    },
+    {
       "id": "communication.startLiveSession",
       "plane": "communication",
       "kind": "mutation",
@@ -5045,9 +5205,9 @@
       "input": {"argument": "input", "type": "GetProjectRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "GetProjectReply", "nullable": false}},
       "document": {
-        "text": "query ManagementGetProject($context: RequestContextInput!, $input: GetProjectRequestInput!) {\n  getProject(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      deploymentId\n      name\n      environment\n      incarnation\n      servingRegion\n      servingEpoch\n      status\n      revision\n      policyRevision\n    }\n  }\n}",
-        "bytes": 539,
-        "selectedFields": 26,
+        "text": "query ManagementGetProject($context: RequestContextInput!, $input: GetProjectRequestInput!) {\n  getProject(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      deploymentId\n      name\n      environment\n      incarnation\n      servingRegion\n      servingEpoch\n      status\n      revision\n      policyRevision\n      messagePreview\n    }\n  }\n}",
+        "bytes": 560,
+        "selectedFields": 27,
         "depth": 2
       },
       "idempotency": "safe",
@@ -5517,9 +5677,9 @@
       "input": {"argument": "input", "type": "ResolveRequestRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ResolveRequestReply", "nullable": false}},
       "document": {
-        "text": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
-        "bytes": 6153,
-        "selectedFields": 230,
+        "text": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+        "bytes": 6281,
+        "selectedFields": 235,
         "depth": 8
       },
       "idempotency": "safe",
@@ -5584,9 +5744,9 @@
       "input": {"argument": "input", "type": "GetOperationRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "GetOperationReply", "nullable": false}},
       "document": {
-        "text": "query ManagementGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {\n  getOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n      }\n      blockedReason\n    }\n  }\n}",
-        "bytes": 1622,
-        "selectedFields": 75,
+        "text": "query ManagementGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {\n  getOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n        messagePreview\n      }\n      blockedReason\n    }\n  }\n}",
+        "bytes": 1645,
+        "selectedFields": 76,
         "depth": 6
       },
       "idempotency": "safe",
@@ -5721,9 +5881,9 @@
       "input": {"argument": "input", "type": "CreateDeploymentRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "CreateDeploymentReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementCreateDeployment($context: RequestContextInput!, $input: CreateDeploymentRequestInput!) {\n  createDeployment(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
-        "bytes": 1299,
-        "selectedFields": 61,
+        "text": "mutation ManagementCreateDeployment($context: RequestContextInput!, $input: CreateDeploymentRequestInput!) {\n  createDeployment(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
+        "bytes": 1320,
+        "selectedFields": 62,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -5793,9 +5953,9 @@
       "input": {"argument": "input", "type": "CreateProjectRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "CreateProjectReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateProjectRequestInput!) {\n  createProject(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
-        "bytes": 1290,
-        "selectedFields": 61,
+        "text": "mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateProjectRequestInput!) {\n  createProject(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
+        "bytes": 1311,
+        "selectedFields": 62,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -5867,9 +6027,9 @@
       "input": {"argument": "input", "type": "IssueBackendKeyRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "IssueBackendKeyReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: IssueBackendKeyRequestInput!) {\n  issueBackendKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
-        "bytes": 1296,
-        "selectedFields": 61,
+        "text": "mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: IssueBackendKeyRequestInput!) {\n  issueBackendKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
+        "bytes": 1317,
+        "selectedFields": 62,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -5938,9 +6098,9 @@
       "input": {"argument": "input", "type": "RevokeBackendKeyRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "RevokeBackendKeyReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: RevokeBackendKeyRequestInput!) {\n  revokeBackendKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
-        "bytes": 1299,
-        "selectedFields": 61,
+        "text": "mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: RevokeBackendKeyRequestInput!) {\n  revokeBackendKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
+        "bytes": 1320,
+        "selectedFields": 62,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -6010,9 +6170,9 @@
       "input": {"argument": "input", "type": "ProjectPolicyRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ProjectPolicyReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementProjectPolicy($context: RequestContextInput!, $input: ProjectPolicyRequestInput!) {\n  projectPolicy(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
-        "bytes": 1290,
-        "selectedFields": 61,
+        "text": "mutation ManagementProjectPolicy($context: RequestContextInput!, $input: ProjectPolicyRequestInput!) {\n  projectPolicy(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
+        "bytes": 1311,
+        "selectedFields": 62,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -6154,9 +6314,9 @@
       "input": {"argument": "input", "type": "PauseOperationRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "PauseOperationReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseOperationRequestInput!) {\n  pauseOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n      }\n      blockedReason\n    }\n  }\n}",
-        "bytes": 1631,
-        "selectedFields": 75,
+        "text": "mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseOperationRequestInput!) {\n  pauseOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n        messagePreview\n      }\n      blockedReason\n    }\n  }\n}",
+        "bytes": 1654,
+        "selectedFields": 76,
         "depth": 6
       },
       "idempotency": "idempotent",
@@ -6225,9 +6385,9 @@
       "input": {"argument": "input", "type": "ResumeOperationRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ResumeOperationReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementResumeOperation($context: RequestContextInput!, $input: ResumeOperationRequestInput!) {\n  resumeOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n      }\n      blockedReason\n    }\n  }\n}",
-        "bytes": 1634,
-        "selectedFields": 75,
+        "text": "mutation ManagementResumeOperation($context: RequestContextInput!, $input: ResumeOperationRequestInput!) {\n  resumeOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n        messagePreview\n      }\n      blockedReason\n    }\n  }\n}",
+        "bytes": 1657,
+        "selectedFields": 76,
         "depth": 6
       },
       "idempotency": "idempotent",
@@ -6296,9 +6456,9 @@
       "input": {"argument": "input", "type": "ConfigureWebhookRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ConfigureWebhookReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: ConfigureWebhookRequestInput!) {\n  configureWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
-        "bytes": 1299,
-        "selectedFields": 61,
+        "text": "mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: ConfigureWebhookRequestInput!) {\n  configureWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
+        "bytes": 1320,
+        "selectedFields": 62,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -6369,9 +6529,9 @@
       "input": {"argument": "input", "type": "UpdateWebhookRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "UpdateWebhookReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementUpdateWebhook($context: RequestContextInput!, $input: UpdateWebhookRequestInput!) {\n  updateWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
-        "bytes": 1290,
-        "selectedFields": 61,
+        "text": "mutation ManagementUpdateWebhook($context: RequestContextInput!, $input: UpdateWebhookRequestInput!) {\n  updateWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
+        "bytes": 1311,
+        "selectedFields": 62,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -6443,9 +6603,9 @@
       "input": {"argument": "input", "type": "RotateWebhookSecretRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "RotateWebhookSecretReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementRotateWebhookSecret($context: RequestContextInput!, $input: RotateWebhookSecretRequestInput!) {\n  rotateWebhookSecret(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
-        "bytes": 1308,
-        "selectedFields": 61,
+        "text": "mutation ManagementRotateWebhookSecret($context: RequestContextInput!, $input: RotateWebhookSecretRequestInput!) {\n  rotateWebhookSecret(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
+        "bytes": 1329,
+        "selectedFields": 62,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -6517,9 +6677,9 @@
       "input": {"argument": "input", "type": "DisableWebhookRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "DisableWebhookReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementDisableWebhook($context: RequestContextInput!, $input: DisableWebhookRequestInput!) {\n  disableWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
-        "bytes": 1293,
-        "selectedFields": 61,
+        "text": "mutation ManagementDisableWebhook($context: RequestContextInput!, $input: DisableWebhookRequestInput!) {\n  disableWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
+        "bytes": 1314,
+        "selectedFields": 62,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -6599,9 +6759,9 @@
         "type": {"kind": "object", "name": "ReplayWebhookDeliveriesReply", "nullable": false}
       },
       "document": {
-        "text": "mutation ManagementReplayWebhookDeliveries($context: RequestContextInput!, $input: ReplayWebhookDeliveriesRequestInput!) {\n  replayWebhookDeliveries(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
-        "bytes": 1320,
-        "selectedFields": 61,
+        "text": "mutation ManagementReplayWebhookDeliveries($context: RequestContextInput!, $input: ReplayWebhookDeliveriesRequestInput!) {\n  replayWebhookDeliveries(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
+        "bytes": 1341,
+        "selectedFields": 62,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -6911,6 +7071,40 @@
             "nullable": false,
             "ofType": {"kind": "object", "name": "Member", "nullable": false}
           }
+        }
+      ]
+    },
+    {
+      "name": "ConversationMute",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "conversationId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "principalId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "muted", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {"name": "until", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "ConversationMuteInput",
+      "kind": "input",
+      "planes": ["communication"],
+      "fields": [
+        {"name": "conversationId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "actAsPrincipalId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}}
+      ]
+    },
+    {
+      "name": "ConversationMuteReply",
+      "kind": "object",
+      "planes": ["communication"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "ConversationMute", "nullable": false}
         }
       ]
     },
@@ -8545,7 +8739,8 @@
           "type": {"kind": "object", "name": "LiveSessionOperationCompletion", "nullable": true}
         },
         {"name": "replayedDeliveries", "type": {"kind": "scalar", "name": "Int", "nullable": true}},
-        {"name": "skippedDeliveries", "type": {"kind": "scalar", "name": "Int", "nullable": true}}
+        {"name": "skippedDeliveries", "type": {"kind": "scalar", "name": "Int", "nullable": true}},
+        {"name": "messagePreview", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}}
       ]
     },
     {
@@ -8693,7 +8888,8 @@
         {"name": "servingEpoch", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}},
         {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "revision", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}},
-        {"name": "policyRevision", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}}
+        {"name": "policyRevision", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}},
+        {"name": "messagePreview", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}}
       ]
     },
     {
@@ -9087,6 +9283,10 @@
           "type": {"kind": "object", "name": "ConversationMemberBatch", "nullable": true}
         },
         {
+          "name": "conversationMute",
+          "type": {"kind": "object", "name": "ConversationMute", "nullable": true}
+        },
+        {
           "name": "credentialDeliveryReceipt",
           "type": {"kind": "object", "name": "CredentialDeliveryReceipt", "nullable": true}
         },
@@ -9402,6 +9602,33 @@
         {
           "name": "result",
           "type": {"kind": "object", "name": "BroadcastPermissionChanged", "nullable": false}
+        }
+      ]
+    },
+    {
+      "name": "SetConversationMuteInput",
+      "kind": "input",
+      "planes": ["communication"],
+      "fields": [
+        {"name": "conversationId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "muted", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {"name": "until", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "actAsPrincipalId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}}
+      ]
+    },
+    {
+      "name": "SetConversationMutePayload",
+      "kind": "object",
+      "planes": ["communication"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "ConversationMute", "nullable": false}
         }
       ]
     },

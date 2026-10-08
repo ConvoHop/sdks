@@ -124,6 +124,7 @@ mutation ManagementReplayWebhookDeliveries($context: RequestContextInput!, $inpu
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }

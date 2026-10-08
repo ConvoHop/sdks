@@ -1,6 +1,6 @@
 import {
   parseCounter, parseCursor, parseId, parseString, type CommandOptions, type OperationPayload, type PageOptions, type Conversation,
-  type GraphqlTypes, type Membership, type ConversationMessage, type ProtocolObject, type SendReceipt,
+  type ConversationMute, type GraphqlTypes, type Membership, type ConversationMessage, type ProtocolObject, type SendReceipt,
 } from "@convohop/core";
 import type { LiveSession, LiveSessionPage } from "./live.js";
 import type { ProjectServerClient } from "./project.js";
@@ -11,6 +11,8 @@ export type MessagePage = NonNullable<OperationPayload<"communication.messages">
 export type MemberPage = NonNullable<OperationPayload<"communication.members">["result"]>;
 export interface MessageListOptions extends ActAsOptions { beforeSequence?: string; limit?: number }
 export interface ActAsCommandOptions extends ActAsOptions, CommandOptions {}
+/** Mutes or unmutes a member's message push notifications. `until` (RFC 3339, in the future) applies only to a mute. */
+export interface SetMemberMuteInput { principalId: string; muted: boolean; until?: string }
 
 function memberRole(role: string): MemberRole {
   if (role !== "member" && role !== "moderator") throw new TypeError("Invalid membership role");
@@ -37,6 +39,10 @@ export class ServerConversation {
     grantHistory(input: Omit<GraphqlTypes.HistoryGrantRequestInput, "conversationId">, options?: CommandOptions): Promise<Membership>;
     setBroadcastPermission(input: Omit<GraphqlTypes.SetBroadcastPermissionInput, "conversationId">,
       options?: CommandOptions): Promise<OperationPayload<"communication.setBroadcastPermission">>;
+    /** Reads a member's mute, acting as that member; audited. */
+    getMute(principalId: string): Promise<ConversationMute>;
+    /** Sets a member's mute, acting as that member; audited. Calls still ring a muted member. */
+    setMute(input: SetMemberMuteInput, options?: CommandOptions): Promise<ConversationMute>;
   };
   readonly live: {
     current(): Promise<LiveSession | null>;
@@ -53,6 +59,11 @@ export class ServerConversation {
     const member = (value: Membership | null, principalId: string): Membership => {
       const current = required(value);
       if (current.principalId !== principalId || current.conversationId !== conversationId) throw mismatch("Member");
+      return current;
+    };
+    const mute = (value: ConversationMute | null | undefined, principalId: string): ConversationMute => {
+      const current = required(value);
+      if (current.principalId !== principalId || current.conversationId !== conversationId) throw mismatch("Mute");
       return current;
     };
     this.messages = {
@@ -106,6 +117,14 @@ export class ServerConversation {
             expectedMembershipRevision: parseCounter(input.expectedMembershipRevision) }, options.requestId);
         member(payload.result.member, input.principalId);
         return payload;
+      },
+      getMute: async principalId => mute((await execute("communication.conversationMute", projectId,
+        { conversationId, actAsPrincipalId: parseId(principalId) })).result, principalId),
+      setMute: async (input, options = {}) => {
+        if (typeof input.muted !== "boolean") throw new TypeError("muted must be a boolean");
+        return mute((await execute("communication.setConversationMute", projectId,
+          { conversationId, muted: input.muted, ...(input.until === undefined ? {} : { until: parseString(input.until) }),
+            actAsPrincipalId: parseId(input.principalId) }, options.requestId)).result, input.principalId);
       },
     };
     this.live = {
