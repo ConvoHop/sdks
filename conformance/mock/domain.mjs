@@ -1,5 +1,5 @@
 // Deterministic in-memory authority used by the conformance mock target.
-// It models only the public behaviour exercised by spec/conformance scenarios;
+// It models only the public behaviour exercised by spec/conformance scenarios and the SDK wire tests;
 // it is not a backend implementation and must not grow private service logic.
 import { createHash } from "node:crypto";
 import { EventEmitter } from "node:events";
@@ -380,6 +380,60 @@ export class Domain {
   events(actor, { conversationId, limit, after }) {
     const { conversation, start } = this.replayStart(actor, conversationId, after);
     return this.eventPage(conversation, start, Math.min(limit, PAGE_CAPS.events));
+  }
+
+  // Reads one message from the same visibility floor as messages; a message below it is NOT_FOUND.
+  getMessage(actor, { conversationId, messageId, actAsPrincipalId }) {
+    const { conversation, member } = actAsPrincipalId == null
+      ? this.#visible(actor, conversationId, "messageRead")
+      : this.#actingAs(actor, conversationId, actAsPrincipalId, "messageRead");
+    const message = conversation.messages.get(messageId);
+    if (!message || BigInt(message.sequence) < BigInt(member?.visibleFromSequence ?? "1")) throw notFound("Message");
+    return structuredClone(message);
+  }
+
+  // Receipt progress is kept beside the membership, so member reads keep their shape.
+  #receipt(conversation, member) {
+    const progress = conversation.receiptProgress?.get(member.principalId);
+    return { principalId: member.principalId, membershipEpoch: member.membershipEpoch, visibilityEpoch: member.visibilityEpoch,
+      deliveredThroughSequence: progress?.delivered ?? null, readThroughSequence: progress?.read ?? null,
+      updatedAt: progress?.updatedAt ?? null };
+  }
+
+  // Receipts are user-session reads, one per active member in principal order. (this.receipts holds request receipts.)
+  readReceipts(actor, { conversationId, limit, cursor }) {
+    const { conversation } = this.#visible(actor, conversationId);
+    if (cursor != null && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(cursor))
+      throw invalid("Unknown receipt cursor");
+    const ordered = [...conversation.members.values()].filter(member => member.status === "active")
+      .sort((a, b) => a.principalId < b.principalId ? -1 : 1)
+      .filter(member => cursor == null || member.principalId > cursor);
+    const items = ordered.slice(0, limit).map(member => this.#receipt(conversation, member));
+    const complete = ordered.length <= items.length;
+    return { items, complete, refreshRequired: false, nextCursor: complete ? null : items.at(-1).principalId };
+  }
+
+  // Progress names a visible, non-deleted message at the caller's current epochs and only moves forward. A read
+  // also counts as delivered, and each advance appends a receipt.reported event.
+  reportReceipt(actor, { conversationId, kind, membershipEpoch, visibilityEpoch, throughSequence }) {
+    const { conversation, member } = this.#visible(actor, conversationId);
+    if (member.membershipEpoch !== membershipEpoch || member.visibilityEpoch !== visibilityEpoch)
+      throw new Problem("REVISION_CONFLICT", 409, "Membership epochs changed; read the conversation and retry");
+    if (kind !== "delivered" && kind !== "read") throw invalid("Receipt kind must be delivered or read");
+    const through = BigInt(throughSequence);
+    if (through < BigInt(member.visibleFromSequence) ||
+        ![...conversation.messages.values()].some(message => message.sequence === throughSequence && !message.deleted))
+      throw invalid("Receipts require a currently visible, non-deleted message");
+    conversation.receiptProgress ??= new Map();
+    const current = conversation.receiptProgress.get(member.principalId) ?? { delivered: null, read: null };
+    if (through > BigInt(current[kind] ?? "0")) {
+      const advance = value => value != null && BigInt(value) >= through ? value : throughSequence;
+      conversation.receiptProgress.set(member.principalId, { delivered: advance(current.delivered),
+        read: kind === "read" ? advance(current.read) : current.read, updatedAt: iso() });
+      this.#append(conversation, "receipt.reported", { kind: "member", id: member.principalId },
+        { principalId: member.principalId, membershipEpoch, visibilityEpoch, kind, throughSequence });
+    }
+    return { result: this.#receipt(conversation, member), retainedKey: "readReceipt" };
   }
 
   issueBackendKey(actor, { projectId, name, scopes, expiresAt }) {

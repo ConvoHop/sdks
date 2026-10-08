@@ -283,7 +283,7 @@ export class ConversationStore {
         conversationChanged = true;
       } else if (type.startsWith("member.")) {
         membersChanged = true;
-        if (parseId(payload.principalId) === self) {
+        if (payload.principalId === self) {
           conversationChanged = true;
           if (type === "member.historyExpanded") expanded = true;
         }
@@ -294,7 +294,7 @@ export class ConversationStore {
       let newest = 0n;
       for (const sequence of created.values()) if (sequence > newest) newest = sequence;
       // Created messages take their event's sequence, so the page below the newest one holds them all unless it's cut short.
-      const page = await this.client.messages(this.conversationId, (newest + 1n).toString(), created.size);
+      const page = await this.client.messages(this.conversationId, (newest + 1n).toString(), Math.min(created.size, 100));
       for (const message of page.items) if (created.has(message.messageId)) fetched.set(message.messageId, message);
     }
     const singles = [...created.keys()].filter(id => !fetched.has(id));

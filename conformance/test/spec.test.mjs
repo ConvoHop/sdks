@@ -281,6 +281,12 @@ describe("the operation catalog and scenarios agree with schema/ir.json", () => 
       "communication.deleteMessage": ({ domain, conversationId, messageId }, actor) =>
         domain.deleteMessage(actor, { conversationId, messageId, expectedRevision: "1" }),
       "communication.events": ({ domain, conversationId }, actor) => domain.events(actor, { conversationId, limit: 10 }),
+      "communication.getMessage": ({ domain, conversationId, messageId }, actor) =>
+        domain.getMessage(actor, { conversationId, messageId }),
+      "communication.receipts": ({ domain, conversationId }, actor) => domain.readReceipts(actor, { conversationId, limit: 10 }),
+      "communication.reportReceipt": ({ domain, conversationId, messageId }, actor) =>
+        domain.reportReceipt(actor, { conversationId, kind: "read", membershipEpoch: "1", visibilityEpoch: "1",
+          throughSequence: domain.conversations.get(conversationId).messages.get(messageId).sequence }),
       [channel.subscription]: ({ domain, conversationId }, actor) => domain.replayStart(actor, conversationId),
       [RESOLVE_REQUEST]: ({ domain }, actor) => domain.resolve(actor, domain.nextId()),
     };
