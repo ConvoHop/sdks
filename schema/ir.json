@@ -6541,6 +6541,7 @@
         "depth": 5
       },
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "longRunning": {"poll": "management.getOperation", "refField": "operation"},

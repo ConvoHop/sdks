@@ -116,7 +116,7 @@ test("call --list lists every operation call can run, with its plane, kind and w
   assert.deepEqual(operations.filter(op => op.destructive).map(op => op.id).sort(), [
     "communication.deleteMessage", "communication.disablePrincipal", "communication.endLiveSession",
     "communication.removeMember", "communication.revokeSession", "management.disableWebhook",
-    "management.revokeBackendKey", "management.rotateWebhookSecret",
+    "management.revokeBackendKey", "management.rotateWebhookSecret", "management.updateWebhook",
   ]);
   for (const id of Object.keys(withheldOperations)) assert.ok(!operations.some(op => op.id === id), id);
   assertUsage(await cli(["call", "management.getProject", "--list"]), "--list takes no operation", "call");

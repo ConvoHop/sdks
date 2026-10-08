@@ -1241,7 +1241,7 @@ export const cliOperations: Readonly<Record<string, CliOperation>> = {
     "idempotency": "idempotent",
     "retry": "sameRequest",
     "resolvable": true,
-    "destructive": false,
+    "destructive": true,
     "longRunning": {"poll": "management.getOperation", "refField": "operation"},
     "input": "UpdateWebhookRequestInput"
   },

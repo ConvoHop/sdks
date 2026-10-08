@@ -2400,7 +2400,7 @@ export const mcpTools: readonly McpToolDefinition[] = [
   {
     "name": "management_update_webhook",
     "title": "Management: update webhook",
-    "description": "Change the event types of a webhook endpoint, or enable or disable it.\n\nOperation management.updateWebhook (mutation).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nEach call is a new request. Results and errors carry its requestId. When the outcome is unknown, call retry_request with that requestId instead of calling this tool again.\nLong-running: the result's operation identifies work that finishes later. Poll it with management_get_operation.",
+    "description": "Change the event types of a webhook endpoint, or enable or disable it.\n\nOperation management.updateWebhook (mutation).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nEach call is a new request. Results and errors carry its requestId. When the outcome is unknown, call retry_request with that requestId instead of calling this tool again.\nDestructive: it deletes, revokes, removes, disables or ends something. Confirm with the user before calling it.\nLong-running: the result's operation identifies work that finishes later. Poll it with management_get_operation.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2429,7 +2429,7 @@ export const mcpTools: readonly McpToolDefinition[] = [
     },
     "annotations": {
       "readOnlyHint": false,
-      "destructiveHint": false,
+      "destructiveHint": true,
       "idempotentHint": false,
       "openWorldHint": false
     },
@@ -2440,7 +2440,7 @@ export const mcpTools: readonly McpToolDefinition[] = [
       "credential": "portalCredential",
       "auth": [{"credential": "portalCredential", "condition": "owner"}],
       "idempotency": "idempotent",
-      "destructive": false,
+      "destructive": true,
       "pagination": {"style": "none"},
       "longRunning": {
         "poll": "management.getOperation",

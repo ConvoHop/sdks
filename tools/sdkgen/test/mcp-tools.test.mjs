@@ -153,6 +153,7 @@ test("the repository catalog withholds credential-returning operations and marks
   assert.deepEqual(tools.filter(tool => tool.annotations.destructiveHint).map(tool => tool.operation.id).sort(), [
     "communication.deleteMessage", "communication.disablePrincipal", "communication.endLiveSession", "communication.removeMember",
     "communication.revokeSession", "management.disableWebhook", "management.revokeBackendKey", "management.rotateWebhookSecret",
+    "management.updateWebhook",
   ]);
   const revoke = byName(tools).management_revoke_backend_key;
   assert.match(revoke.description, /^Requires portalCredential \(condition owner: The caller owns the organization, deployment or project\)\.$/m);

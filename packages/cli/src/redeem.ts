@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { open, rm, type FileHandle } from "node:fs/promises";
 import { resolve } from "node:path";
 import { ConvoHopProblem, ConvoHopTransport, parseObject, type ProtocolObject } from "@convohop/server";
-import { maxWait, query, read } from "./call.js";
+import { finalCodes, maxWait, query, resend } from "./call.js";
 import { CliError, UsageError, problemDetails, type ErrorDetails } from "./output.js";
 import type { Context, Plane } from "./session.js";
 
@@ -32,13 +32,14 @@ export interface Redemption {
 
 const reissue = "If no one has the credential, revoke the key or rotate the webhook secret, then issue a new one.";
 const consumed = new Set(["DELIVERY_CONSUMED", "CREDENTIAL_DELIVERY_EXPIRED"]);
-/** Unknown outcomes that waiting doesn't change. */
-const final = new Set(["RESOLUTION_REQUIRED", "INCARNATION_MISMATCH", "IDEMPOTENCY_CONFLICT", "REQUEST_EXPIRED",
-  "RECOVERY_STORAGE_FAILURE"]);
+
+function redeemCommand(delivery: DeliveryRef): string {
+  return `convohop redeem --delivery ${delivery.deliveryId} --project ${delivery.projectId} --out FILE`;
+}
 
 function redeemAgain(delivery: DeliveryRef): string {
-  return "The credential may be redeemed but not received. Run convohop redeem --delivery " +
-    `${delivery.deliveryId} --project ${delivery.projectId} --out FILE; if it reports DELIVERY_CONSUMED: ${reissue}`;
+  return `The credential may be redeemed but not received. Run ${redeemCommand(delivery)}; if it reports ` +
+    `DELIVERY_CONSUMED: ${reissue}`;
 }
 
 /** A new file, readable only by the current user, that receives one credential. */
@@ -116,16 +117,32 @@ async function projectRoute(context: Context, management: Plane,
   return { incarnation: project.incarnation, servingEpoch: project.servingEpoch };
 }
 
-/** A permit that authorizes one redemption, identified by redemptionRequestId, and its acknowledgement. */
+/**
+ * Requests a new permit that authorizes one redemption, identified by redemptionRequestId, and its acknowledgement. When
+ * the outcome is unknown, sends the same permit request again, with its request ID.
+ */
 async function requestPermit(context: Context, management: Plane, delivery: DeliveryRef,
   redemptionRequestId: string): Promise<ProtocolObject> {
-  const { result } = await read(context, () => management.transport.execute("management.credentialPermit", undefined,
-    { projectId: delivery.projectId, deliveryId: delivery.deliveryId, redemptionRequestId }));
+  const requestId = randomUUID();
+  const { result } = await resend(context, management, "management.credentialPermit",
+    { projectId: delivery.projectId, deliveryId: delivery.deliveryId, redemptionRequestId }, requestId);
   try {
     return parseObject(result);
   } catch {
-    throw new CliError("The management authority returned no delivery permit");
+    throw new CliError("The management authority returned no delivery permit", 1, { requestId });
   }
+}
+
+/** No redemption is sent before the first permit, so a new run, with a new permit, can redeem the credential. */
+function firstPermitFailure(context: Context, error: unknown, delivery: DeliveryRef): unknown {
+  if (context.signal.aborted) return error;
+  const next = `No redemption was sent. Redeem the credential with ${redeemCommand(delivery)}, which requests a new permit`;
+  if (error instanceof CliError) return error.details.next === undefined
+    ? new CliError(error.message, error.exitCode, { ...error.details, next }) : error;
+  if (!(error instanceof ConvoHopProblem)) return error;
+  if (consumed.has(error.code)) return new CliError(error.message, 1, problemDetails(error, reissue));
+  return error.outcome === "unknown"
+    ? new CliError("The delivery permit request's outcome is unknown", 1, problemDetails(error, next)) : error;
 }
 
 type Sent<T> =
@@ -177,7 +194,7 @@ class DeliveryRoute {
         else if (problem.code === "PERMIT_EXPIRED") await this.#renew();
         else {
           const wait = problem.retryAfter ??
-            (problem.outcome === "unknown" && !final.has(problem.code) ? attempt : undefined);
+            (problem.outcome === "unknown" && !finalCodes.has(problem.code) ? attempt : undefined);
           if (wait === undefined || wait > maxWait) return { ok: false, error: problem, uncertain };
           await this.context.sleep(wait * 1000);
           if (problem.outcome === "unknown") await this.#renew();
@@ -213,8 +230,10 @@ export async function redeem(context: Context, management: Plane, baseUrl: strin
     fetch: context.fetch });
   transport.servingEpoch = route.servingEpoch;
   const redemptionRequestId = randomUUID();
-  const channel = new DeliveryRoute(context, management, transport, delivery, redemptionRequestId,
-    await requestPermit(context, management, delivery, redemptionRequestId));
+  const permit = await requestPermit(context, management, delivery, redemptionRequestId).catch((error: unknown) => {
+    throw firstPermitFailure(context, error, delivery);
+  });
+  const channel = new DeliveryRoute(context, management, transport, delivery, redemptionRequestId, permit);
 
   const { deliveryId, projectId } = delivery, redeemRequestId = randomUUID(), acknowledgeRequestId = randomUUID();
   const redeemed = await channel.send((sender, permit) =>

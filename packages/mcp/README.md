@@ -90,10 +90,11 @@ Each tool carries the operation's annotations:
 - `destructiveHint` is true for the operations that the schema annotates
   `destructive`: `management_revoke_backend_key`,
   `management_rotate_webhook_secret`, `management_disable_webhook`,
-  `communication_disable_principal`, `communication_revoke_session`,
-  `communication_remove_member`, `communication_delete_message` and
-  `communication_end_live_session`. Confirm with the user before calling
-  them.
+  `management_update_webhook`, `communication_disable_principal`,
+  `communication_revoke_session`, `communication_remove_member`,
+  `communication_delete_message` and `communication_end_live_session`;
+  `management_update_webhook` can disable an endpoint. Confirm with the user
+  before calling them.
 - `openWorldHint` is false: the tools act only on ConvoHop.
 - `_meta["com.convohop/operation"]` carries the operation ID, plane, kind, the
   credential the server uses, the accepted credentials with their scopes and
@@ -125,7 +126,10 @@ keeps their recovery records in memory, never on disk. After a restart, the
 read-only `management_resolve_request` and `communication_resolve_request`
 tools still look a request up by its ID. Each plane keeps up to 128 records of
 mutations that it hasn't seen committed or accepted, including rejected ones.
-At that limit, mutations fail without being sent until you restart the server.
+At that limit, mutations fail without being sent, with "Resolve outstanding
+mutations before creating more". `retry_request` and the `*_resolve_request`
+tools free a record when they report its request committed or accepted;
+rejected records stay until you restart the server.
 
 ## Secrets
 

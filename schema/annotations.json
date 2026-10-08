@@ -2046,6 +2046,7 @@
       "layer": "server",
       "auth": [{"credential": "portalCredential", "condition": "owner"}],
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "longRunning": {"poll": "management.getOperation", "refField": "operation"},

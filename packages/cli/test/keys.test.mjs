@@ -257,7 +257,7 @@ test("redeem refuses a delivery without exactly one credential, and leaves no fi
   }
 });
 
-test("a delivery that was already redeemed is reported with what to do next", async t => {
+test("a delivery that was already redeemed or has expired is reported with what to do next", async t => {
   const { cli, directory } = await sandbox(t);
   const authority = keyAuthority(() => ({
     CommunicationRedeemCredential: request => problem(request, "DELIVERY_CONSUMED", 409, "The delivery was redeemed"),
@@ -270,6 +270,19 @@ test("a delivery that was already redeemed is reported with what to do next", as
   assert.equal(result.stderr, "convohop: DELIVERY_CONSUMED: The delivery was redeemed\n  outcome: rejected\n" +
     `  requestId: ${redemption.variables.context.requestId}\n  next: ${reissue}\n`);
   assert.deepEqual(result.waits, []);
+  await missing(out);
+
+  const expired = keyAuthority(() => ({
+    ManagementCredentialPermit: request => problem(request, "CREDENTIAL_DELIVERY_EXPIRED", 409, "The delivery expired"),
+  }));
+  const late = await run(cli, redeemArgs(expired, out), expired);
+  assert.equal(late.code, 1);
+  assert.equal(late.stdout, "");
+  const [permit] = sent(expired, "ManagementCredentialPermit");
+  assert.equal(late.stderr, "convohop: CREDENTIAL_DELIVERY_EXPIRED: The delivery expired\n  outcome: rejected\n" +
+    `  requestId: ${permit.variables.context.requestId}\n  next: ${reissue}\n`);
+  assert.deepEqual(late.waits, []);
+  assert.ok(!expired.names().includes("CommunicationRedeemCredential"));
   await missing(out);
 });
 
@@ -296,6 +309,88 @@ test("a redemption whose outcome stays unknown is resent with its request ID and
     `  requestId: ${requestId}\n  next: The credential may be redeemed but not received. Run convohop redeem --delivery ` +
     `${deliveryId} --project ${projectId} --out FILE; if it reports DELIVERY_CONSUMED: ${reissue}\n`);
   await missing(out);
+});
+
+/** A permit answer that fails at the transport on the given calls, counted from 1, and otherwise grants a permit. */
+const permitFailingOn = (...calls) => {
+  let count = 0;
+  return request => {
+    if (calls.includes(++count)) throw new Error("connection reset");
+    return reply(request, { result: permitOf(request) });
+  };
+};
+
+test("a permit request whose outcome is unknown is sent again with its request ID, also when renewing a permit", async t => {
+  const { cli, directory } = await sandbox(t);
+  const first = keyAuthority(() => ({ ManagementCredentialPermit: permitFailingOn(1) }));
+  const out = join(directory, "first");
+  const result = await run(cli, redeemArgs(first, out), first);
+  assert.equal(result.code, 0, result.stderr);
+  assert.deepEqual(result.waits, [1000]);
+  const permits = sent(first, "ManagementCredentialPermit");
+  assert.equal(permits.length, 2);
+  assert.deepEqual(permits[1].variables, permits[0].variables, "the same request ID and input");
+  assert.deepEqual(sent(first, "CommunicationRedeemCredential").map(request => request.variables.context.credentialDeliveryPermit),
+    [permitOf(permits[0])]);
+  assert.equal(await readFile(out, "utf8"), `${KEY}\n`);
+
+  let redemptions = 0;
+  const renewed = keyAuthority(() => ({
+    ManagementCredentialPermit: permitFailingOn(2),
+    CommunicationRedeemCredential: request => ++redemptions === 1
+      ? problem(request, "PERMIT_EXPIRED", 401, "The permit expired") : reply(request, { result: capsule() }),
+  }));
+  const second = await run(cli, redeemArgs(renewed, join(directory, "renewed")), renewed);
+  assert.equal(second.code, 0, second.stderr);
+  assert.deepEqual(second.waits, [1000]);
+  const [initial, renewal, resent, ...more] = sent(renewed, "ManagementCredentialPermit");
+  assert.deepEqual(more, []);
+  assert.notEqual(renewal.variables.context.requestId, initial.variables.context.requestId, "a renewal is a new permit");
+  assert.equal(renewal.variables.input.redemptionRequestId, initial.variables.input.redemptionRequestId);
+  assert.deepEqual(resent.variables, renewal.variables, "the renewal is sent again with its own request ID");
+  const delivered = [...sent(renewed, "CommunicationRedeemCredential"), ...sent(renewed, "CommunicationAcknowledgeCredential")];
+  assert.deepEqual(delivered.map(request => request.variables.context.credentialDeliveryPermit),
+    [permitOf(initial), permitOf(renewal), permitOf(renewal)]);
+});
+
+test("without a first permit nothing is redeemed, and the error says how to redeem the credential", async t => {
+  const { cli, directory } = await sandbox(t);
+  const again = authority => "No redemption was sent. Redeem the credential with convohop redeem --delivery " +
+    `${authority.deliveryId} --project ${authority.projectId} --out FILE, which requests a new permit`;
+  const unknown = keyAuthority(() => ({ ManagementCredentialPermit: permitFailingOn(1, 2, 3) }));
+  const out = join(directory, "unknown");
+  const result = await run(cli, redeemArgs(unknown, out), unknown);
+  assert.equal(result.code, 1);
+  assert.equal(result.stdout, "");
+  assert.deepEqual(result.waits, [1000, 2000]);
+  const permits = sent(unknown, "ManagementCredentialPermit");
+  assert.equal(permits.length, 3);
+  for (const request of permits) assert.deepEqual(request.variables, permits[0].variables);
+  assert.ok(!unknown.names().includes("CommunicationRedeemCredential"));
+  assert.equal(result.stderr, "convohop: TRANSPORT_UNKNOWN: The delivery permit request's outcome is unknown\n" +
+    `  outcome: unknown\n  requestId: ${permits[0].variables.context.requestId}\n  next: ${again(unknown)}\n`);
+  await missing(out);
+
+  const issued = keyAuthority(() => ({ ManagementCredentialPermit: permitFailingOn(1, 2, 3) }));
+  const key = join(directory, "issued");
+  const issue = await run(cli, ["keys", "issue", "--project", issued.projectId, "--name", "ci", "--scope", "messageRead",
+    "--expires-in", "1d", "--out", key], issued);
+  assert.equal(issue.code, 1);
+  assert.equal(issue.stdout, "");
+  assert.match(issue.stderr, new RegExp(`^The key is issued \\(operation ${issued.operationId}\\)\\.\\n` +
+    "convohop: TRANSPORT_UNKNOWN: The delivery permit request's outcome is unknown\\n"));
+  assert.ok(issue.stderr.endsWith(`  next: ${again(issued)}\n`));
+  assert.ok(!issued.names().includes("CommunicationRedeemCredential"));
+  await missing(key);
+
+  const empty = keyAuthority(() => ({ ManagementCredentialPermit: request => reply(request, { result: null }) }));
+  const none = await run(cli, redeemArgs(empty, join(directory, "empty")), empty);
+  assert.equal(none.code, 1);
+  const [permit] = sent(empty, "ManagementCredentialPermit");
+  assert.equal(none.stderr, "convohop: The management authority returned no delivery permit\n" +
+    `  requestId: ${permit.variables.context.requestId}\n  next: ${again(empty)}\n`);
+  assert.ok(!empty.names().includes("CommunicationRedeemCredential"));
+  await missing(join(directory, "empty"));
 });
 
 test("redeem renews an expired permit and follows a moved project, but not a new incarnation", async t => {

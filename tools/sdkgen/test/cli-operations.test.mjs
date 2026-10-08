@@ -103,6 +103,7 @@ test("the repository catalog withholds credential-returning operations and marks
   assert.deepEqual(entries.filter(entry => entry.destructive).map(entry => entry.id).sort(), [
     "communication.deleteMessage", "communication.disablePrincipal", "communication.endLiveSession", "communication.removeMember",
     "communication.revokeSession", "management.disableWebhook", "management.revokeBackendKey", "management.rotateWebhookSecret",
+    "management.updateWebhook",
   ]);
   const revoke = entries.find(entry => entry.id === "management.revokeBackendKey");
   assert.equal(revoke.requires, "portalCredential (condition owner: The caller owns the organization, deployment or project)");

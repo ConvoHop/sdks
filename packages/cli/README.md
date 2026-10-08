@@ -161,6 +161,12 @@ the request ID. Don't run the command again, which sends a new request: run
 `convohop resolve --request ID` instead. convohop keeps no requests after it
 exits, so `resolve` looks a request up but can't resend it.
 
+Credential delivery permits are the exception. A permit authorizes one
+redemption, and looking its request up can't return it, so convohop sends the
+permit request again with the same request ID, which the authority
+deduplicates. If the permit's outcome stays unknown, nothing was redeemed:
+convohop exits with code 1, and running `redeem` again requests a new permit.
+
 ## Secrets
 
 convohop never prints a portal token, backend key, webhook secret or redeemed

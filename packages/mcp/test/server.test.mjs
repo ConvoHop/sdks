@@ -16,7 +16,7 @@ const BACKEND_KEY = "fixture-backend-key-never-in-output", PORTAL_TOKEN = "fixtu
 const DESTRUCTIVE = [
   "communication_delete_message", "communication_disable_principal", "communication_end_live_session",
   "communication_remove_member", "communication_revoke_session", "management_disable_webhook",
-  "management_revoke_backend_key", "management_rotate_webhook_secret",
+  "management_revoke_backend_key", "management_rotate_webhook_secret", "management_update_webhook",
 ];
 
 /** Connects a raw JSON-RPC client to a new server. `received` keeps every message the client receives. */
