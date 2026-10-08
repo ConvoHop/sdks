@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { Room } from "livekit-client";
-import { V1MediaConnection, V1Transport } from "@convohop/client";
+import { MediaConnection, ConvoHopTransport } from "@convohop/client";
 import { reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -9,7 +9,7 @@ test("native ICE policy rejects invalid values before credentials or network wor
   let requested = 0;
   const participation = { connectionGrant: async () => { requested++; throw new Error("must not be called"); } };
   for (const iceTransportPolicy of ["tcp", "Relay", "", null, false, {}, 1]) {
-    await assert.rejects(V1MediaConnection.connectParticipation(participation, { iceTransportPolicy }),
+    await assert.rejects(MediaConnection.connectParticipation(participation, { iceTransportPolicy }),
       { name: "TypeError", message: "ICE policy must be all or relay" });
   }
   assert.equal(requested, 0);
@@ -30,7 +30,7 @@ for (const fail of [false, true]) {
       transportExpiresAt: expires, admissionExpiresAt: expires, leaseExpiresAt: expires, leasePolicyId: "fixture",
       connectToken: "fixture-private-connect-token" };
     const transportOptions = { baseUrl: "http://localhost:18080", namespace: "native-async", incarnation, asyncRecoveryStorage: saved };
-    const transport = new V1Transport({ ...transportOptions, fetch: async (_url, init) =>
+    const transport = new ConvoHopTransport({ ...transportOptions, fetch: async (_url, init) =>
       reply(JSON.parse(init.body), { result: grant }) });
     await transport.execute("communication.liveSessionCredentials", projectId,
       { liveSessionId, participationId, expectedGeneration: "1", mode: "INITIAL" }, requestId);
@@ -43,7 +43,7 @@ for (const fail of [false, true]) {
     const participation = { participationId, snapshot: { permissions: { microphone: false, camera: false, subscribe: true } },
       connectionGrant: async () => ({ requestId, grant }),
       connectionAttempted: () => transport.markMediaAdmissionAttempted(requestId) };
-    const work = V1MediaConnection.connectParticipation(participation, {});
+    const work = MediaConnection.connectParticipation(participation, {});
     assert.ok(room);
     let opened;
     t.mock.method(room, "connect", async (url, token) => {
@@ -65,7 +65,7 @@ for (const fail of [false, true]) {
     if (!fail) assert.deepEqual(opened, [grant.livekitUrl, grant.transportToken]);
     assert.ok(saved.writes.every(({ value }) => !value.includes("fixture-private")));
     if (!fail) {
-      const restarted = new V1Transport({ ...transportOptions, fetch: async (_url, init) => {
+      const restarted = new ConvoHopTransport({ ...transportOptions, fetch: async (_url, init) => {
         const request = JSON.parse(init.body);
         assert.equal(request.operationName, "CommunicationResolveRequest");
         return reply(request, { result: resolution(requestId, "notObservedYet") });

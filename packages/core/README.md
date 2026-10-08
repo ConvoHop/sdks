@@ -14,9 +14,9 @@ together with the client or server SDK. License: [Apache-2.0](LICENSE).
 
 | Subpath | Contents | Stability |
 | --- | --- | --- |
-| `.` | `V1Problem`, `V1Transport`, protocol validators and types, `v1Operations` and the generated `V1Graphql` types. | Public only through `@convohop/client` and `@convohop/server`. |
+| `.` | `ConvoHopProblem`, `ConvoHopTransport`, protocol validators and types, `operationCatalog` and the generated `GraphqlTypes` types. | Public only through `@convohop/client` and `@convohop/server`. |
 | `./internal` | Helpers shared by the client and server packages. | Internal. Can change in any release. |
-| `./internal/generated` | Generated operation types, without the `V1Graphql` namespace. | Internal. Can change in any release. |
+| `./internal/generated` | Generated operation types, without the `GraphqlTypes` namespace. | Internal. Can change in any release. |
 
 ## Runtimes
 

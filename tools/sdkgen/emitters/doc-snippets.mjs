@@ -9,8 +9,7 @@ import { formatJson } from "../lib/json.mjs";
  * or front matter, and every MDX-significant character in prose is escaped, so
  * the same files render as Markdown and as MDX. index.json lists them.
  */
-export const DEFAULT_DIRECTORY = "docs/snippets/v1";
-export const SNIPPETS_VERSION = 1;
+export const DEFAULT_DIRECTORY = "docs/snippets";
 
 const LAYERS = { client: "client SDKs", server: "server SDKs", both: "client and server SDKs" };
 const ERROR_ORIGINS = [["server", "Returned by the authority"], ["both", "Returned by the authority or raised by SDKs"], ["sdk", "Raised by SDKs"]];
@@ -183,7 +182,7 @@ function createRenderer(ir) {
 
 const README = `# Operation reference snippets
 
-Generated from ${code("schema/v1-ir.json")} by the ${code("doc-snippets")} emitter in ${code("tools/sdkgen")}. Do not edit these files. Change the GraphQL schema or ${code("schema/v1-annotations.json")}, then run ${code("npm run generate:graphql")}.
+Generated from ${code("schema/ir.json")} by the ${code("doc-snippets")} emitter in ${code("tools/sdkgen")}. Do not edit these files. Change the GraphQL schema or ${code("schema/annotations.json")}, then run ${code("npm run generate:graphql")}.
 
 - ${code("index.json")} lists every operation with the path of its snippet, relative to this directory.
 - ${code("<plane>/<field>.md")} documents one operation: summary, layer, authorization, idempotency, pagination, realtime behavior, context, input, result, errors and the GraphQL document.
@@ -208,7 +207,7 @@ export default defineEmitter({
       ...(operation.deprecated ? { deprecated: true } : {}),
       path: `${operation.plane}/${operation.field}.md`,
     }));
-    const index = { snippetsVersion: SNIPPETS_VERSION, irVersion: ir.irVersion, source: "schema/v1-ir.json", operations: entries };
+    const index = { source: "schema/ir.json", operations: entries };
     return [
       { path: `${DEFAULT_DIRECTORY}/README.md`, contents: README },
       { path: `${DEFAULT_DIRECTORY}/index.json`, contents: formatJson(index) },

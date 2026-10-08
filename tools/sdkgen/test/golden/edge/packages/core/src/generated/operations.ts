@@ -1,6 +1,6 @@
 // Generated from the current unversioned GraphQL schemas. Run npm run generate:graphql.
-import type * as Generated from "./v1-generated.js";
-export interface V1OperationTypes {
+import type * as Generated from "./graphql-types.js";
+export interface OperationTypes {
   "alpha.capabilities": { variables: Generated.AlphaCapabilitiesQueryVariables; result: Generated.AlphaCapabilitiesQuery };
   "alpha.resolveRequest": { variables: Generated.AlphaResolveRequestQueryVariables; result: Generated.AlphaResolveRequestQuery };
   "alpha.items": { variables: Generated.AlphaItemsQueryVariables; result: Generated.AlphaItemsQuery };
@@ -16,10 +16,10 @@ export interface V1OperationTypes {
   "beta.widgets": { variables: Generated.BetaWidgetsQueryVariables; result: Generated.BetaWidgetsQuery };
   "beta.createWidget": { variables: Generated.BetaCreateWidgetMutationVariables; result: Generated.BetaCreateWidgetMutation };
 }
-export type V1OperationKey = keyof V1OperationTypes;
-export interface V1Operation { plane: string; kind: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }
-export type V1OutputShape = { kind: "scalar" } | { kind: "enum"; values: readonly string[] } | { kind: "object"; fields: Readonly<Record<string, string>> };
-export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
+export type OperationKey = keyof OperationTypes;
+export interface OperationCatalogEntry { plane: string; kind: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }
+export type OutputShape = { kind: "scalar" } | { kind: "enum"; values: readonly string[] } | { kind: "object"; fields: Readonly<Record<string, string>> };
+export const outputShapes: Readonly<Record<string, OutputShape>> = {
   "Counter": {
     "kind": "scalar"
   },
@@ -196,7 +196,7 @@ export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = {
     }
   }
 };
-export const v1Operations: Record<V1OperationKey, V1Operation> = {
+export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.capabilities": {
     "plane": "alpha",
     "kind": "query",

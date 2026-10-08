@@ -8,9 +8,9 @@ and has no dependencies other than `graphql`.
 
 ```mermaid
 flowchart LR
-  S["schema/*-v1.graphql"] --> C{"Annotation check"}
-  A["schema/v1-annotations.json"] --> C
-  C --> I["IR: schema/v1-ir.json"]
+  S["schema/*.graphql"] --> C{"Annotation check"}
+  A["schema/annotations.json"] --> C
+  C --> I["IR: schema/ir.json"]
   I --> E1["ir"]
   I --> E2["graphql-operations"]
   I --> E3["typescript"]
@@ -39,14 +39,14 @@ byte-identical files.
 
 ## Inputs
 
-- **`schema/<plane>-v1.graphql`**: one GraphQL schema per plane, exported by
+- **`schema/<plane>.graphql`**: one GraphQL schema per plane, exported by
   the ConvoHop API. Today the planes are `communication` and `management`.
   Each root field of a plane is an operation with the ID `<plane>.<field>`,
   for example `communication.sendMessage`.
-- **`schema/v1-annotations.json`**: facts that GraphQL can't express, such as
+- **`schema/annotations.json`**: facts that GraphQL can't express, such as
   which SDK layer exposes an operation, the credentials and scopes it needs,
   and how it retries, paginates and streams. It's validated by
-  [`schema/v1-annotations.schema.json`](../schema/v1-annotations.schema.json)
+  [`schema/annotations.schema.json`](../schema/annotations.schema.json)
   and by cross-checks against the schemas. See
   [Annotating operations](../CONTRIBUTING.md#annotating-operations).
 
@@ -57,22 +57,21 @@ Don't edit generated files by hand. Change the inputs and run
 
 | Emitter | Files | Contents |
 | --- | --- | --- |
-| `ir` | `schema/v1-ir.json` | The IR that every emitter reads |
-| `graphql-operations` | `schema/operations-v1.graphql`, `schema/v1-operations.json` | One GraphQL document per operation, and a JSON catalog of them |
-| `typescript` | `packages/core/src/generated/v1-generated.ts`, `packages/core/src/generated/v1-operations.ts` | Operation types and the operation catalog of `@convohop/core` |
-| `doc-snippets` | `docs/snippets/v1/` | One reference snippet per operation, for the documentation site |
+| `ir` | `schema/ir.json` | The IR that every emitter reads |
+| `graphql-operations` | `schema/operations.graphql`, `schema/operations.json` | One GraphQL document per operation, and a JSON catalog of them |
+| `typescript` | `packages/core/src/generated/graphql-types.ts`, `packages/core/src/generated/operations.ts` | Operation types and the operation catalog of `@convohop/core` |
+| `doc-snippets` | `docs/snippets/` | One reference snippet per operation, for the documentation site |
 
 ## The IR
 
-[`schema/v1-ir.json`](../schema/v1-ir.json) is plain JSON, validated against
-[`schema/v1-ir.schema.json`](../schema/v1-ir.schema.json) every time it's
+[`schema/ir.json`](../schema/ir.json) is plain JSON, validated against
+[`schema/ir.schema.json`](../schema/ir.schema.json) every time it's
 built. Emitters read only the IR. They never parse GraphQL or the annotations
 themselves, so every language sees the same facts.
 
 | Key | Contents |
 | --- | --- |
-| `irVersion` | Semantic version of the IR format |
-| `api`, `sources` | API name and model, and the input files the IR was built from |
+| `api`, `sources` | API name and summary, and the input files the IR was built from |
 | `transport` | HTTP and WebSocket transport, the GraphQL error extensions and the document size limit |
 | `planes` | Each plane's schema file, summary, request-context argument and context rules, and the operation that resolves an unknown outcome |
 | `credentials`, `scopes`, `conditions` | The authorization catalog |
@@ -88,16 +87,14 @@ Each custom scalar has a `representation` (`string`, `integer`, `number`,
 `boolean` or `object`) and optional constraints, such as a pattern or a
 maximum, so that emitters can map it to a native type without knowing GraphQL.
 
-### Versioning
+### Changing the IR
 
-`irVersion` follows [semantic versioning](https://semver.org/):
-
-- Additive changes, such as a new optional key, bump the minor version.
-- Changes that can break an emitter, such as removing or renaming a key or
-  changing its meaning, bump the major version.
-
-Each emitter declares the IR major version it understands. The runner refuses
-to run an emitter against another major version.
+The IR carries no format version. Every emitter lives in this repository, so
+the IR, its schema and the emitters change together in one commit, and the
+golden tests and `npm run check:graphql` fail when they disagree. Add a format
+marker only when two IR formats must coexist for a named consumer, such as an
+emitter maintained outside this repository. Treat an IR without the marker as
+the original format.
 
 ## Emitter plugin API
 
@@ -109,7 +106,6 @@ import { defineEmitter } from "../lib/emitter.mjs";
 export default defineEmitter({
   name: "python-models",                 // kebab-case, unique
   description: "Python models and operations",
-  irMajor: 1,                            // the IR major version this emitter understands
   owns: ["packages/python/src/convohop/_generated"], // optional
   emit(ir, options) {
     return [{ path: "packages/python/src/convohop/_generated/models.py", contents: "...\n" }];
@@ -225,7 +221,7 @@ target language, or the authority doesn't accept them:
 
 ## JSON Schema validation
 
-`schema/v1-annotations.schema.json` and `schema/v1-ir.schema.json` use a
+`schema/annotations.schema.json` and `schema/ir.schema.json` use a
 subset of JSON Schema draft 2020-12. A small built-in validator
 ([`tools/sdkgen/lib/json-schema.mjs`](../tools/sdkgen/lib/json-schema.mjs))
 checks them, so the generator needs no extra dependencies. It supports:
@@ -246,11 +242,11 @@ can also read both files.
 ## Documentation snippets
 
 The `doc-snippets` emitter writes one Markdown snippet per operation to
-[`docs/snippets/v1`](snippets/v1), for the documentation site. Each snippet
+[`docs/snippets`](snippets), for the documentation site. Each snippet
 describes the operation's layer, authorization, idempotency, pagination,
 realtime behavior, context, input, result, errors and GraphQL document.
-`index.json` lists every operation with its snippet path, and includes
-`snippetsVersion` and `irVersion`.
+`index.json` names the IR it was built from and lists every operation with
+its snippet path.
 
 Snippets are language-neutral. Language-specific examples are expected to be
 added by the documentation pipeline. Snippets use only CommonMark and GFM

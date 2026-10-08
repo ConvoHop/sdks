@@ -347,7 +347,7 @@ describe("redaction", () => {
 describe("reports", () => {
   const longLine = `${"x".repeat(600)}`;
   const summary = {
-    runner: { name: "runner", version: "0" }, protocolVersion: 1,
+    runner: { name: "runner", version: "0" },
     driver: { name: "probe", version: "1.0.0", language: "javascript", roles: ["user"], features: ["realtime"] },
     fixtureDriver: null, target: { kind: "mock", name: "mock", capabilities: ["control.reset"] },
     startedAt: "2026-01-01T00:00:00.000Z", durationMs: 1234,

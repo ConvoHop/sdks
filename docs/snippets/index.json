@@ -1,7 +1,5 @@
 {
-  "snippetsVersion": 1,
-  "irVersion": "1.0.0",
-  "source": "schema/v1-ir.json",
+  "source": "schema/ir.json",
   "operations": [
     {
       "id": "communication.capabilities",

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { V1ProjectServerClient } from "@convohop/server";
-import { V1Client, v1Operations } from "@convohop/client";
+import { ProjectServerClient } from "@convohop/server";
+import { ConvoHopClient, operationCatalog } from "@convohop/client";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -34,7 +34,7 @@ function fixture({ operation, currentState, asyncRecoveryStorage } = {}) {
   const projectId = id(), incarnation = id(), requestId = id(), requests = [];
   const setup = { projectId, incarnation, requestId, requests,
     result: outcome(requestId, incarnation, operation, currentState), envelope: {} };
-  setup.client = new V1ProjectServerClient({
+  setup.client = new ProjectServerClient({
     baseUrl: "http://localhost:18080", projectId, incarnation, backendKey: secret,
     ...(asyncRecoveryStorage ? { asyncRecoveryStorage } : {}),
     fetch: async (url, init) => {
@@ -218,7 +218,7 @@ for (const [name, fields] of [
 
 test("invalid original IDs fail before authority calls or recovery initialization", async () => {
   const saved = asyncStorage(), requests = [];
-  const client = new V1ProjectServerClient({ baseUrl: "http://localhost:18080",
+  const client = new ProjectServerClient({ baseUrl: "http://localhost:18080",
     projectId: id(), incarnation: id(), backendKey: secret, asyncRecoveryStorage: saved,
     fetch: async request => { requests.push(request); throw new Error("Unexpected effect"); } });
   for (const invalid of ["", "not-an-id", "00000000-0000-0000-0000-000000000000", "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", 1])
@@ -311,7 +311,7 @@ test("original/current metadata cannot settle, evict or reset unknown session re
   const input = { sessionId: originalSession.sessionId, principalId: originalSession.principalId,
     deviceId: originalSession.deviceId, expectedRevision: "9007199254740992", requestedTtlMs: "60000" };
   const common = { baseUrl: "http://localhost:18080", projectId, incarnation, asyncRecoveryStorage: saved };
-  const first = new V1ProjectServerClient({ ...common, backendKey: "fixture-original-key",
+  const first = new ProjectServerClient({ ...common, backendKey: "fixture-original-key",
     fetch: async () => { throw new Error("Response unavailable"); } });
   await assert.rejects(first.http.execute("communication.renewSession", projectId, input, requestId),
     { code: "TRANSPORT_UNKNOWN" });
@@ -319,7 +319,7 @@ test("original/current metadata cannot settle, evict or reset unknown session re
   const result = outcome(requestId, incarnation);
   result.originalSession = originalSession;
   result.currentSession = { ...originalSession, sessionRevision: "9007199254740994", expiresAt: activeExpiry };
-  const rotated = new V1ProjectServerClient({ ...common, backendKey: "fixture-rotated-key",
+  const rotated = new ProjectServerClient({ ...common, backendKey: "fixture-rotated-key",
     fetch: async (_url, init) => {
       assert.equal(init.headers.authorization, "Bearer fixture-rotated-key");
       const request = JSON.parse(init.body); requests.push(request);
@@ -348,7 +348,7 @@ test("original/current metadata cannot settle, evict or reset unknown session re
 test("authority rejection and network uncertainty remain read failures without automatic retries", async () => {
   const projectId = id(), incarnation = id(), requestId = id(), requests = [];
   let unavailable = false;
-  const client = new V1ProjectServerClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
+  const client = new ProjectServerClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
     backendKey: secret, fetch: async (_url, init) => {
       requests.push(JSON.parse(init.body));
       if (unavailable) throw new Error(secret);
@@ -379,11 +379,11 @@ test("legacy Browser and Server initialization and withheld ResolveRequest seman
     assert.equal(request.operationName, "CommunicationResolveRequest");
     return reply(request, { result: { ...resolution(originalId, "committed"), resultWithheld: true } });
   };
-  const server = new V1ProjectServerClient({ baseUrl: "http://localhost:18080", projectId, incarnation, backendKey: secret, fetch });
+  const server = new ProjectServerClient({ baseUrl: "http://localhost:18080", projectId, incarnation, backendKey: secret, fetch });
   const values = new Map(), recoveryStorage = {
     getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key),
   };
-  const browser = new V1Client({ baseUrl: "http://localhost:18080", projectId, incarnation,
+  const browser = new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
     principalId: id(), sessionToken: "fixture-browser", recoveryStorage, fetch });
   await server.initialize();
   await browser.initialize();
@@ -394,9 +394,9 @@ test("legacy Browser and Server initialization and withheld ResolveRequest seman
   assert.deepEqual(requests.map(request => request.operationName),
     ["CommunicationRoute", "CommunicationRoute", "CommunicationResolveRequest"]);
   assert.equal(values.size, 0);
-  assert.equal(v1Operations["communication.sessionRequestOutcome"].kind, "query");
-  assert.deepEqual(v1Operations["communication.sessionRequestOutcome"].inputFields, ["requestId"]);
-  assert.ok(!v1Operations["communication.sessionRequestOutcome"].query.includes("sessionToken"));
-  assert.ok(!v1Operations["communication.currentSession"].query.includes("sessionRequestOutcome"));
-  assert.ok(!v1Operations["communication.resolveRequest"].query.includes("sessionRequestOutcome"));
+  assert.equal(operationCatalog["communication.sessionRequestOutcome"].kind, "query");
+  assert.deepEqual(operationCatalog["communication.sessionRequestOutcome"].inputFields, ["requestId"]);
+  assert.ok(!operationCatalog["communication.sessionRequestOutcome"].query.includes("sessionToken"));
+  assert.ok(!operationCatalog["communication.currentSession"].query.includes("sessionRequestOutcome"));
+  assert.ok(!operationCatalog["communication.resolveRequest"].query.includes("sessionRequestOutcome"));
 });

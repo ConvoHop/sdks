@@ -4,7 +4,7 @@
 import { createHash } from "node:crypto";
 import { EventEmitter } from "node:events";
 
-// The backend-key scopes of schema/v1-ir.json; conformance/test/spec.test.mjs keeps them, and the scope each
+// The backend-key scopes of schema/ir.json; conformance/test/spec.test.mjs keeps them, and the scope each
 // operation below requires, equal to the IR.
 export const SCOPES = Object.freeze(["callManage", "callRead", "conversationManage", "historyManage", "membershipManage",
   "messageRead", "messageWrite", "moderation", "principalManage", "sessionIssue", "sessionManage"]);

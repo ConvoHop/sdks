@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { V1Client, V1MediaConnection, LiveSessionHandle, LiveParticipationHandle, v1Operations } from "@convohop/client";
+import { ConvoHopClient, MediaConnection, LiveSessionHandle, LiveParticipationHandle, operationCatalog } from "@convohop/client";
 import { validateOutput } from "@convohop/core/internal";
 import { full, reply } from "../../../test/graphql-fixtures.mjs";
 
@@ -9,14 +9,14 @@ function fixture(handle) {
   const requests = [], values = new Map(), context = { projectId: id(), incarnation: id(), principalId: id() };
   const recoveryStorage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) };
   const fetch = async (_url, options) => {
-    const request = JSON.parse(options.body), key = Object.keys(v1Operations)
-      .find(key => v1Operations[key].operationName === request.operationName);
+    const request = JSON.parse(options.body), key = Object.keys(operationCatalog)
+      .find(key => operationCatalog[key].operationName === request.operationName);
     requests.push(request);
     const output = await handle(key, request);
     return reply(request, output);
   };
   const options = { baseUrl: "http://localhost:18080", ...context, sessionToken: "private", recoveryStorage, fetch };
-  return { client: new V1Client(options), options, requests, values };
+  return { client: new ConvoHopClient(options), options, requests, values };
 }
 function live(fields = {}) {
   return { liveSessionId: id(), conversationId: id(), creatorId: id(), kind: "INTERACTIVE", mediaProfile: "AUDIO_VIDEO",
@@ -81,7 +81,7 @@ test("unknown start preserves discriminator, exact payload and finite deadline a
   await assert.rejects(setup.client.conversation(conversationId).live.startVoice({ requestId }), { code: "TRANSPORT_UNKNOWN" });
   const original = setup.client.http.recoveryStates[0];
   lost = false;
-  const restarted = new V1Client(setup.options);
+  const restarted = new ConvoHopClient(setup.options);
   await assert.rejects(restarted.conversation(conversationId).live.startVoice({ requestId }), { code: "TRANSPORT_UNKNOWN" });
   assert.deepEqual(setup.requests[0], setup.requests[1]);
   assert.equal(restarted.http.recoveryStates[0].retryDeadline, original.retryDeadline);
@@ -100,7 +100,7 @@ test("same end identity does not refresh its original revision after an ambiguou
   await assert.rejects(handle.end({ requestId }), { code: "TRANSPORT_UNKNOWN" });
   session.revision = "40";
   await assert.rejects(handle.end({ requestId }), { code: "TRANSPORT_UNKNOWN" });
-  const restored = new LiveSessionHandle(new V1Client(setup.options), session);
+  const restored = new LiveSessionHandle(new ConvoHopClient(setup.options), session);
   await assert.rejects(restored.end(), { code: "TRANSPORT_UNKNOWN" });
   const mutations = setup.requests.filter(request => request.operationName === "CommunicationEndLiveSession");
   assert.equal(mutations.length, 3);
@@ -116,7 +116,7 @@ test("invalid generated response cannot turn an unknown mutation into committed 
   assert.equal(setup.client.http.recoveryStates[0].resolutionState, "unknown");
   assert.throws(() => validateOutput({
     status: "ok", requestId: id(), serverTime: time(), result: live({ state: "UNKNOWN_FUTURE_STATE" }),
-  }, v1Operations["communication.liveSession"].resultType), /Unknown LiveSessionState/);
+  }, operationCatalog["communication.liveSession"].resultType), /Unknown LiveSessionState/);
 });
 
 test("viewer and audio-only capture controls fail before local device access", async () => {
@@ -126,7 +126,7 @@ test("viewer and audio-only capture controls fail before local device access", a
   ]) {
     const setup = fixture(() => { throw new Error("no request expected"); });
     const participation = new LiveParticipationHandle(new LiveSessionHandle(setup.client, live()), participant({ permissions }));
-    const connection = new V1MediaConnection(participation, {});
+    const connection = new MediaConnection(participation, {});
     connection.nativeConnectionId = id();
     for (const control of controls) await assert.rejects(connection[control](true), /not authorized/);
     const stats = await connection.stats();
@@ -144,7 +144,7 @@ test("leave failure retains its request identity and forbids a new connection", 
   await assert.rejects(p.connect(), /Leave has been requested/);
   await assert.rejects(p.leave(), { code: "TRANSPORT_UNKNOWN" });
   assert.deepEqual(setup.requests[0], setup.requests[1]);
-  const restored = new LiveParticipationHandle(new LiveSessionHandle(new V1Client(setup.options), p.live.snapshot), p.snapshot);
+  const restored = new LiveParticipationHandle(new LiveSessionHandle(new ConvoHopClient(setup.options), p.live.snapshot), p.snapshot);
   await assert.rejects(restored.connect(), /Leave has been requested/);
   await assert.rejects(restored.leave(), { code: "TRANSPORT_UNKNOWN" });
   assert.deepEqual(setup.requests[0], setup.requests[2]);
@@ -178,7 +178,7 @@ test("credential recovery preserves the original unknown command, and native ret
   });
   const first = new LiveParticipationHandle(new LiveSessionHandle(setup.client, session), p);
   await assert.rejects(first.connectionGrant(), { code: "TRANSPORT_UNKNOWN" });
-  const restoredClient = new V1Client(setup.options);
+  const restoredClient = new ConvoHopClient(setup.options);
   const restored = new LiveParticipationHandle(new LiveSessionHandle(restoredClient, session), p);
   const original = await restored.connectionGrant();
   assert.equal(original.requestId, priorRequest.variables.context.requestId);
@@ -187,7 +187,7 @@ test("credential recovery preserves the original unknown command, and native ret
   assert.ok([...setup.values.values()].every(value => !value.includes("never-persist")));
   await assert.rejects(restored.connectionGrant(), { code: "RESOLUTION_REQUIRED", requestId: original.requestId });
   assert.equal(setup.requests.at(-1).operationName, "CommunicationResolveRequest");
-  const latestClient = new V1Client(setup.options);
+  const latestClient = new ConvoHopClient(setup.options);
   const latest = new LiveParticipationHandle(new LiveSessionHandle(latestClient, session), p);
   await assert.rejects(latest.connectionGrant(), { code: "RESOLUTION_REQUIRED", requestId: original.requestId });
   assert.equal(latestClient.http.recoveryStates[0].mediaAdmissionAttempted, true);
@@ -204,9 +204,9 @@ test("receive-only reconnect never carries the old explicit credential request I
   const setup = fixture(() => { throw new Error("no network request expected"); });
   const p = new LiveParticipationHandle(new LiveSessionHandle(setup.client, live()), participant());
   let received;
-  const next = new V1MediaConnection(p, {});
+  const next = new MediaConnection(p, {});
   p.connect = async options => { received = options; return next; };
-  const connection = new V1MediaConnection(p, { requestId: id(), iceTransportPolicy: "relay" });
+  const connection = new MediaConnection(p, { requestId: id(), iceTransportPolicy: "relay" });
   assert.equal(await connection.reconnect(), next);
   assert.deepEqual(received, { iceTransportPolicy: "relay" });
   const stats = await next.stats();

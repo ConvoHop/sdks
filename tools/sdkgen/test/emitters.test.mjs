@@ -15,7 +15,7 @@ import { REPO_ROOT, assertGoldenTree, fixtureSources, repoSources } from "./help
 const render = sources => renderEmitters(buildIr(sources), config.emitters, { options: config.options });
 
 test("the edge fixture renders to the golden files", () => {
-  // golden/edge/packages/core/src/generated/v1-generated.ts was verified byte-identical to
+  // golden/edge/packages/core/src/generated/graphql-types.ts was verified byte-identical to
   // @graphql-codegen/cli 7.4.3 with typescript-operations 6.1.7 before those packages were removed.
   assertGoldenTree("edge", render(fixtureSources()));
 });
@@ -35,9 +35,9 @@ test("the committed generated files match a fresh render of the repository schem
 test("the ir and graphql-operations emitters publish the IR, the documents and the runtime catalog", () => {
   const ir = buildIr(fixtureSources());
   const files = Object.fromEntries(render(fixtureSources()).map(file => [file.path, file.contents]));
-  assert.equal(files["schema/v1-ir.json"], formatJson(ir));
-  assert.equal(files["schema/operations-v1.graphql"], `${ir.operations.map(operation => operation.document.text).join("\n\n")}\n`);
-  const catalog = JSON.parse(files["schema/v1-operations.json"]).operations;
+  assert.equal(files["schema/ir.json"], formatJson(ir));
+  assert.equal(files["schema/operations.graphql"], `${ir.operations.map(operation => operation.document.text).join("\n\n")}\n`);
+  const catalog = JSON.parse(files["schema/operations.json"]).operations;
   assert.deepEqual(Object.keys(catalog), ir.operations.map(operation => operation.id));
   assert.deepEqual(catalog["alpha.fetchHTTPStatus"], {
     plane: "alpha", kind: "query", field: "fetchHTTPStatus", operationName: "AlphaFetchHTTPStatus",
@@ -61,11 +61,11 @@ test("TypeScript names and scalar types follow the graphql-codegen conventions t
   assert.throws(() => scalarTsType(scalar("Big", "bigint"), "output"), new EmitterError('typescript: scalar Big has unsupported representation "bigint"'));
 });
 
-const USAGE = `import type * as Generated from "./v1-generated.js";
-import { v1Operations, v1OutputShapes, type V1OperationTypes } from "./v1-operations.js";
+const USAGE = `import type * as Generated from "./graphql-types.js";
+import { operationCatalog, outputShapes, type OperationTypes } from "./operations.js";
 
-type Variables<K extends keyof V1OperationTypes> = V1OperationTypes[K]["variables"];
-type Result<K extends keyof V1OperationTypes> = V1OperationTypes[K]["result"];
+type Variables<K extends keyof OperationTypes> = OperationTypes[K]["variables"];
+type Result<K extends keyof OperationTypes> = OperationTypes[K]["result"];
 
 export const ping: Variables<"alpha.ping"> = { context: { requestId: "r1" } };
 export const items: Variables<"alpha.items"> = { context: { requestId: 7, tags: null }, input: { fruits: ["APPLE", "apple10"], limit: null } };
@@ -88,11 +88,11 @@ export const sequence: string = events.events.items[0]?.sequence ?? "0";
 // @ts-expect-error counters are canonical decimal strings, never numbers
 export const numeric: number = events.events.items[0]!.sequence;
 
-export const query: string = v1Operations["alpha.items"].query;
-export const inputFields: readonly string[] = v1Operations["beta.widgets"].inputFields;
-export const shape = v1OutputShapes["Fruit"]?.kind;
+export const query: string = operationCatalog["alpha.items"].query;
+export const inputFields: readonly string[] = operationCatalog["beta.widgets"].inputFields;
+export const shape = outputShapes["Fruit"]?.kind;
 // @ts-expect-error unknown operation keys are rejected
-export const unknownOperation = v1Operations["alpha.missing"];
+export const unknownOperation = operationCatalog["alpha.missing"];
 `;
 
 test("the generated TypeScript type-checks under strict compiler settings", t => {

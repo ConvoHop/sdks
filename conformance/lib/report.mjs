@@ -23,7 +23,7 @@ export function junit(summary) {
   const all = summary.suites.flatMap(suite => suite.scenarios), sum = totals(all);
   const properties = [["driver", `${summary.driver.name} ${summary.driver.version}`], ["driver.language", summary.driver.language],
     ["driver.features", summary.driver.features.join(",")], ["target", `${summary.target.kind}:${summary.target.name}`],
-    ["target.capabilities", summary.target.capabilities.join(",")], ["protocolVersion", String(summary.protocolVersion)]];
+    ["target.capabilities", summary.target.capabilities.join(",")]];
   const lines = ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
     `<testsuites name="ConvoHop conformance" tests="${sum.scenarios}" failures="${sum.failed}" errors="0" skipped="${sum.skipped}" time="${seconds(summary.durationMs)}">`];
   for (const suite of summary.suites) {
@@ -57,7 +57,7 @@ export function markdown(summary) {
   const all = summary.suites.flatMap(suite => suite.scenarios), sum = totals(all);
   const lines = ["## ConvoHop conformance", "",
     `Driver **${summary.driver.name} ${summary.driver.version}** (${summary.driver.language}) against target ` +
-    `**${summary.target.kind}:${summary.target.name}**, protocol v${summary.protocolVersion}.`, "",
+    `**${summary.target.kind}:${summary.target.name}**.`, "",
     `**${sum.passed} passed, ${sum.failed} failed, ${sum.skipped} skipped** of ${sum.scenarios} scenarios in ${seconds(summary.durationMs)} s.`, "",
     "| Suite | Passed | Failed | Skipped |", "| --- | ---: | ---: | ---: |"];
   for (const suite of summary.suites) {

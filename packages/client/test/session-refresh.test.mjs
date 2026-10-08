@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { V1Client, LiveSessionHandle, LiveParticipationHandle, v1Operations } from "@convohop/client";
+import { ConvoHopClient, LiveSessionHandle, LiveParticipationHandle, operationCatalog } from "@convohop/client";
 import { event, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID();
@@ -45,7 +45,7 @@ function fixture({ enabled = true, revision = "1" } = {}) {
   setup.refreshHook = async () => setup.renew();
   setup.fetch = async (url, options) => {
     const request = JSON.parse(options.body), credential = options.headers.authorization?.slice(7);
-    const operation = Object.keys(v1Operations).find(key => v1Operations[key].operationName === request.operationName);
+    const operation = Object.keys(operationCatalog).find(key => operationCatalog[key].operationName === request.operationName);
     assert.ok(operation, "Use a generated operation");
     assert.equal(url, "http://localhost:18080/graphql");
     assert.equal(options.redirect, "error");
@@ -80,7 +80,7 @@ function fixture({ enabled = true, revision = "1" } = {}) {
     } });
     throw new Error(`Unexpected fixture operation ${operation}`);
   };
-  setup.client = new V1Client({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
+  setup.client = new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
     sessionToken: originalToken, recoveryStorage: saved, fetch: setup.fetch,
     ...(enabled ? { sessionRefresh: async current => {
       setup.hookCalls.push(current);
@@ -142,7 +142,7 @@ test("enrollment proves the original bearer once and exposes only cloned metadat
   assert.equal(current.credential, setup.originalToken);
   assert.equal(current.request.variables.input, undefined);
   assert.equal(current.request.variables.context.observedServingEpoch, "1");
-  assert.deepEqual(v1Operations["communication.currentSession"].inputFields, []);
+  assert.deepEqual(operationCatalog["communication.currentSession"].inputFields, []);
   assert.doesNotMatch(current.request.query, /sessionToken|tokenExpiresAt|input:/);
   await assert.rejects(setup.client.http.execute("communication.currentSession", setup.projectId,
     { sessionId: id() }), { code: "INVALID_REQUEST" });
@@ -686,7 +686,7 @@ test("installed-candidate replay failure is explicit, keeps new binding, and nev
   await setup.client.initialize();
   const replay = await setup.client.watch(conversationId, async () => {}, error => errors.push(error));
   t.after(() => replay.close());
-  const key = `convohop.v1.cursor:${setup.projectId}:${setup.original.principalId}:${conversationId}`;
+  const key = `convohop.cursor:${setup.projectId}:${setup.original.principalId}:${conversationId}`;
   const before = setup.saved.getItem(key);
   setup.refreshHook = async () => {
     const candidate = setup.renew();

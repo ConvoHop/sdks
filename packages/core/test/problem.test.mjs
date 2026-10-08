@@ -1,13 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ScopeRequiredProblem, V1Problem, V1Transport } from "@convohop/core";
+import { ScopeRequiredProblem, ConvoHopProblem, ConvoHopTransport } from "@convohop/core";
 
 const credential = "fixture-key-never-in-errors", projectId = crypto.randomUUID();
 const scopeMessage = scope => `The backend key requires the current ${scope} scope`;
 
 /** A transport whose authority answers every request with `respond(request)`. */
 function transport(respond) {
-  return new V1Transport({ baseUrl: "http://127.0.0.1:18080", credential, namespace: crypto.randomUUID(),
+  return new ConvoHopTransport({ baseUrl: "http://127.0.0.1:18080", credential, namespace: crypto.randomUUID(),
     incarnation: crypto.randomUUID(), fetch: async (_url, init) => respond(JSON.parse(init.body)) });
 }
 const graphqlError = (extensions, message = "Rate limited", init) => request => Response.json({ errors: [{ message,
@@ -16,7 +16,7 @@ const httpError = (body, headers = {}, status = 429) => () => Response.json(body
 async function problem(respond, key = "communication.capabilities", input = {}) {
   const requestId = crypto.randomUUID();
   return transport(respond).execute(key, projectId, input, requestId).then(() => assert.fail("expected a problem"), error => {
-    assert.ok(error instanceof V1Problem, String(error));
+    assert.ok(error instanceof ConvoHopProblem, String(error));
     assert.equal(error.requestId, requestId);
     for (const view of [String(error), error.message, JSON.stringify(error)]) assert.equal(view.includes(credential), false);
     return error;
@@ -98,10 +98,10 @@ test("a SCOPE_REQUIRED message in another wording keeps the class but not a gues
 
 test("problems constructed directly keep the same shape", () => {
   const requestId = crypto.randomUUID(), cause = new Error("cause");
-  const limited = new V1Problem("RATE_LIMITED", requestId, "rejected", 429, "Rate limited", { cause, retryAfter: 3 });
-  assert.deepEqual([limited.name, limited.retryAfter, limited.cause], ["V1Problem", 3, cause]);
-  assert.equal(Object.hasOwn(new V1Problem("NOT_FOUND", requestId, "rejected", 404, "Not found"), "retryAfter"), false);
+  const limited = new ConvoHopProblem("RATE_LIMITED", requestId, "rejected", 429, "Rate limited", { cause, retryAfter: 3 });
+  assert.deepEqual([limited.name, limited.retryAfter, limited.cause], ["ConvoHopProblem", 3, cause]);
+  assert.equal(Object.hasOwn(new ConvoHopProblem("NOT_FOUND", requestId, "rejected", 404, "Not found"), "retryAfter"), false);
   const scoped = new ScopeRequiredProblem(requestId, "rejected", 403, scopeMessage("callRead"));
-  assert.ok(scoped instanceof V1Problem);
+  assert.ok(scoped instanceof ConvoHopProblem);
   assert.deepEqual([scoped.code, scoped.scope, scoped.requestId], ["SCOPE_REQUIRED", "callRead", requestId]);
 });

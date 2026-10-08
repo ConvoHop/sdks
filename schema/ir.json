@@ -1,14 +1,12 @@
 {
-  "$schema": "./v1-ir.schema.json",
-  "irVersion": "1.0.0",
+  "$schema": "./ir.schema.json",
   "api": {
     "name": "convohop",
-    "model": "v1",
     "summary": "ConvoHop communication plane (conversations, messages, realtime events and live sessions) and management plane (organizations, deployments and projects)."
   },
   "sources": {
-    "graphql": ["schema/communication-v1.graphql", "schema/management-v1.graphql"],
-    "annotations": "schema/v1-annotations.json"
+    "graphql": ["schema/communication.graphql", "schema/management.graphql"],
+    "annotations": "schema/annotations.json"
   },
   "transport": {
     "path": "/graphql",
@@ -41,7 +39,7 @@
   "planes": [
     {
       "name": "communication",
-      "schema": "schema/communication-v1.graphql",
+      "schema": "schema/communication.graphql",
       "summary": "Conversations, members, messages, receipts, realtime events and live sessions inside one project.",
       "context": {
         "argument": "context",
@@ -70,7 +68,7 @@
     },
     {
       "name": "management",
-      "schema": "schema/management-v1.graphql",
+      "schema": "schema/management.graphql",
       "summary": "Organizations, deployments, projects, backend keys and webhooks.",
       "context": {
         "argument": "context",

@@ -359,9 +359,8 @@ Until a package reaches 1.0.0:
 
 SDK versions are independent of the API. The API is served at an unversioned
 `/graphql` endpoint for HTTP, and with the `graphql-transport-ws` protocol for
-realtime. A `V1` prefix in type names identifies the current domain model,
-not an API version that you select. SDKs reject responses and features that
-they don't support instead of guessing.
+realtime. SDKs reject responses and features that they don't support instead
+of guessing.
 
 ## Support policy
 

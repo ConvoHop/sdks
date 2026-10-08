@@ -4,10 +4,10 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, 
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import config from "../sdkgen.config.mjs";
-import { EMITTER_API_VERSION, EmitterError, assertSafePath, defineEmitter, irMajorOf, listEmittableFiles, renderEmitters, runEmitters, syncFiles } from "../lib/emitter.mjs";
+import { EmitterError, assertSafePath, defineEmitter, listEmittableFiles, renderEmitters, runEmitters, syncFiles } from "../lib/emitter.mjs";
 import { listTree } from "./helpers.mjs";
 
-const IR = { irVersion: "1.0.0", operations: [{ id: "alpha.ping", document: { text: "query AlphaPing { ping }" } }] };
+const IR = { operations: [{ id: "alpha.ping", document: { text: "query AlphaPing { ping }" } }] };
 const emitter = (name, emit, extra = {}) => defineEmitter({ name, description: `${name} files`, emit, ...extra });
 const constant = (name, files, extra) => emitter(name, () => files, extra);
 const emitterError = message => error => error instanceof EmitterError && error.message === message;
@@ -24,11 +24,10 @@ function write(root, path, contents) {
 }
 
 test("defineEmitter validates the definition and returns a frozen emitter", () => {
-  assert.equal(EMITTER_API_VERSION, 1);
   const emit = () => [];
   const owns = ["generated/python"];
   const defined = defineEmitter({ name: "python-models", description: "Python models", owns, emit });
-  assert.deepEqual({ ...defined }, { name: "python-models", description: "Python models", irMajor: 1, owns: ["generated/python"], emit });
+  assert.deepEqual({ ...defined }, { name: "python-models", description: "Python models", owns: ["generated/python"], emit });
   assert.ok(Object.isFrozen(defined) && Object.isFrozen(defined.owns));
   owns.push("elsewhere");
   assert.deepEqual(defined.owns, ["generated/python"]);
@@ -41,8 +40,6 @@ test("defineEmitter validates the definition and returns a frozen emitter", () =
     [{ name: "python--models", description: "d", emit }, 'emitter name must be kebab-case, got "python--models"'],
     [{ description: "d", emit }, "emitter name must be kebab-case, got undefined"],
     [{ name: "x", description: " ", emit }, 'emitter "x" needs a description'],
-    [{ name: "x", description: "d", irMajor: 0, emit }, 'emitter "x": irMajor must be a positive integer'],
-    [{ name: "x", description: "d", irMajor: 1.5, emit }, 'emitter "x": irMajor must be a positive integer'],
     [{ name: "x", description: "d", owns: "generated", emit }, 'emitter "x": owns must be an array of directories'],
     [{ name: "x", description: "d", owns: ["../generated"], emit },
       'emitter "x" owns: unsafe path "../generated"; use a relative POSIX path whose segments use only letters, digits and _.@+=,- and do not start with a dot'],
@@ -52,21 +49,13 @@ test("defineEmitter validates the definition and returns a frozen emitter", () =
 });
 
 test("assertSafePath accepts only relative POSIX paths without dot segments", () => {
-  for (const path of ["a", "docs/snippets/v1/alpha/fetchHTTPStatus.md", "packages/@scope/pkg/v1-generated.ts", "a/b_c+d=e,f-g.h", "a/b..c"]) {
+  for (const path of ["a", "docs/snippets/alpha/fetchHTTPStatus.md", "packages/@scope/pkg/graphql-types.ts", "a/b_c+d=e,f-g.h", "a/b..c"]) {
     assert.equal(assertSafePath(path, "test"), path);
   }
   for (const path of ["", "/abs/file", "a//b", "a/", "./a", "a/../b", "..", ".github/workflows/ci.yml", "a\\b", "C:/a", "a b", "naïve.md", "a/.hidden"]) {
     assert.throws(() => assertSafePath(path, "test"), EmitterError, JSON.stringify(path));
   }
   assert.throws(() => assertSafePath(7, "label"), emitterError("label: path must be a non-empty string"));
-});
-
-test("irMajorOf reads the major version of a semantic irVersion", () => {
-  assert.equal(irMajorOf({ irVersion: "1.0.0" }), 1);
-  assert.equal(irMajorOf({ irVersion: "12.3.4" }), 12);
-  for (const [ir, got] of [[{ irVersion: "1.0" }, '"1.0"'], [{ irVersion: "01.0.0" }, '"01.0.0"'], [{ irVersion: 1 }, "1"], [{}, "undefined"], [undefined, "undefined"]]) {
-    assert.throws(() => irMajorOf(ir), emitterError(`IR has no valid irVersion (got ${got})`));
-  }
 });
 
 test("renderEmitters runs emitters in order on a frozen copy of the IR with their own options", () => {
@@ -96,7 +85,6 @@ test("renderEmitters rejects invalid emitters and output with a precise message"
   const cases = [
     [[{ name: "plain", emit: () => [] }], "emitters must be created with defineEmitter (got \"plain\")"],
     [[constant("same", []), constant("same", [])], 'emitter names must be unique; "same" is registered twice'],
-    [[constant("future", [], { irMajor: 2 })], 'emitter "future" supports IR major version 2, but the IR is 1.0.0'],
     [[emitter("bad", () => ({ path: "a", contents: "x\n" }))], 'emitter "bad" must return an array of { path, contents }'],
     [[constant("bad", [{ path: "a", contents: "x\n", mode: 0o644 }])], 'emitter "bad" returned an entry that is not exactly { path, contents }'],
     [[constant("bad", [{ path: "a" }])], 'emitter "bad" returned an entry that is not exactly { path, contents }'],
@@ -113,7 +101,6 @@ test("renderEmitters rejects invalid emitters and output with a precise message"
       'emitter "intruder" emits docs/snippets/extra.md inside docs/snippets, which emitter "snippets" owns'],
   ];
   for (const [emitters, message] of cases) assert.throws(() => renderEmitters(IR, emitters), emitterError(message), message);
-  assert.throws(() => renderEmitters({ irVersion: "1" }, []), emitterError('IR has no valid irVersion (got "1")'));
   assert.doesNotThrow(() => renderEmitters(IR, [constant("snippets", [file("docs/snippets-extra.md")], { owns: ["docs/snippets"] })]));
 });
 
@@ -187,8 +174,8 @@ test("runEmitters renders and syncs with every emitter's owned directories", t =
   assert.equal(existsSync(join(root, "owned/stale.txt")), false);
 });
 
-test("the configured emitters are valid, uniquely named and agree on the IR major version", () => {
+test("the configured emitters are valid and uniquely named", () => {
   assert.deepEqual(config.emitters.map(entry => entry.name), ["ir", "graphql-operations", "typescript", "doc-snippets"]);
-  assert.ok(config.emitters.every(entry => Object.isFrozen(entry) && entry.irMajor === 1));
+  assert.ok(config.emitters.every(entry => Object.isFrozen(entry)));
   assert.deepEqual(Object.keys(config.options).filter(name => !config.emitters.some(entry => entry.name === name)), [], "options for unknown emitters");
 });

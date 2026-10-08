@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { V1Transport, V1Client } from "@convohop/client";
+import { ConvoHopTransport, ConvoHopClient } from "@convohop/client";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -15,12 +15,12 @@ const mutate = (transport, requestId = id()) =>
 test("async recovery inspection fails closed and one restore precedes concurrent queries", async () => {
   const read = Promise.withResolvers(), entered = Promise.withResolvers();
   const saved = asyncStorage({ onRead: async () => { entered.resolve(); await read.promise; } });
-  const original = new V1Transport({ ...options, fetch: async () => { throw new Error("offline"); } });
+  const original = new ConvoHopTransport({ ...options, fetch: async () => { throw new Error("offline"); } });
   const requestId = id();
   await assert.rejects(mutate(original, requestId), { code: "TRANSPORT_UNKNOWN" });
   saved.values.set("convohop.requests:" + options.namespace, JSON.stringify(original.recoveryStates));
   let fetches = 0;
-  const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+  const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
     fetches++;
     return reply(JSON.parse(init.body), { result: resolution(requestId, "notObservedYet") });
   } });
@@ -49,7 +49,7 @@ test("async pending intent, submitted attempt and receipt writes are awaited in 
   } });
   let fetches = 0, finished = false;
   const requestId = id();
-  const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+  const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
     fetches++;
     assert.equal(states(saved)[0].attemptCount, 1);
     assert.equal(states(saved)[0].resolutionState, "unknown");
@@ -82,7 +82,7 @@ test("failed async restore is retained and cannot become empty recovery or permi
   const failure = new Error("storage unavailable");
   const saved = asyncStorage({ onRead: async () => { throw failure; } });
   let fetches = 0;
-  const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async () => { fetches++; } });
+  const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async () => { fetches++; } });
   await assert.rejects(transport.initializeRecovery(), error => error === failure);
   await assert.rejects(mutate(transport), error => error === failure);
   await assert.rejects(transport.retry(id()), error => error === failure);
@@ -96,14 +96,14 @@ test("conflicting synchronous and asynchronous storage is rejected before any ef
   let reads = 0;
   const sync = { getItem: () => { reads++; return null; }, setItem() {}, removeItem() {} };
   const saved = asyncStorage();
-  assert.throws(() => new V1Transport({ ...options, recoveryStorage: sync, asyncRecoveryStorage: saved }), /recoveryStorage.*asyncRecoveryStorage/);
+  assert.throws(() => new ConvoHopTransport({ ...options, recoveryStorage: sync, asyncRecoveryStorage: saved }), /recoveryStorage.*asyncRecoveryStorage/);
   assert.equal(reads, 0);
   assert.equal(saved.reads.length, 0);
   assert.equal(saved.writes.length, 0);
 });
 
 test("malformed async journals fail closed without exposing partial restoration", async () => {
-  const original = new V1Transport({ ...options, fetch: async () => { throw new Error("offline"); } });
+  const original = new ConvoHopTransport({ ...options, fetch: async () => { throw new Error("offline"); } });
   await assert.rejects(mutate(original), { code: "TRANSPORT_UNKNOWN" });
   const state = original.recoveryStates[0];
   for (const text of ["{", "", "null", "{}", "[{}]", JSON.stringify([state, {}]),
@@ -111,7 +111,7 @@ test("malformed async journals fail closed without exposing partial restoration"
     const saved = asyncStorage();
     saved.values.set("convohop.requests:" + options.namespace, text);
     let fetches = 0;
-    const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async () => { fetches++; } });
+    const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async () => { fetches++; } });
     await assert.rejects(mutate(transport), error => error instanceof TypeError || error instanceof SyntaxError);
     assert.throws(() => transport.recoveryStates, /initializeRecovery/);
     assert.equal(saved.reads.length, 1);
@@ -122,12 +122,12 @@ test("malformed async journals fail closed without exposing partial restoration"
 
 test("mutation identity cannot be replaced while an async restore is pending", async () => {
   const read = Promise.withResolvers(), entered = Promise.withResolvers(), requestId = id();
-  const original = new V1Transport({ ...options, fetch: async () => { throw new Error("offline"); } });
+  const original = new ConvoHopTransport({ ...options, fetch: async () => { throw new Error("offline"); } });
   await assert.rejects(mutate(original, requestId), { code: "TRANSPORT_UNKNOWN" });
   const saved = asyncStorage({ onRead: async () => { entered.resolve(); await read.promise; } });
   saved.values.set("convohop.requests:" + options.namespace, JSON.stringify(original.recoveryStates));
   let fetches = 0;
-  const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async () => { fetches++; } });
+  const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async () => { fetches++; } });
   const work = assert.rejects(transport.execute("management.createOrganization", undefined,
     { ...input, name: "replacement" }, requestId), { code: "IDEMPOTENCY_CONFLICT", requestId });
   await entered.promise;
@@ -145,7 +145,7 @@ for (const failingWrite of [1, 2]) {
     const failure = new Error("durable commit unavailable"), requestId = id();
     const saved = asyncStorage({ onWrite: async (_key, _value, count) => { if (count === failingWrite) throw failure; } });
     let fetches = 0;
-    const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+    const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
       fetches++;
       return reply(JSON.parse(init.body), { result: organization() });
     } });
@@ -177,7 +177,7 @@ for (const outcome of ["committed", "accepted"]) {
     const failure = new Error("receipt commit unavailable"), requestId = id();
     const saved = asyncStorage({ onWrite: async (_key, _value, count) => { if (count === 3) throw failure; } });
     let mutations = 0;
-    const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+    const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
       const request = JSON.parse(init.body);
       if (request.operationName === "ManagementResolveRequest")
         return reply(request, { result: resolution(requestId, outcome) });
@@ -205,7 +205,7 @@ for (const outcome of ["committed", "accepted"]) {
   test(`async transport uncertainty after known ${outcome} cannot regress settled custody`, async () => {
     const saved = asyncStorage(), requestId = id();
     let mutations = 0;
-    const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+    const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
       const request = JSON.parse(init.body);
       if (request.operationName === "ManagementResolveRequest")
         return reply(request, { result: resolution(requestId, "notObservedYet") });
@@ -234,7 +234,7 @@ test("failed read-only resolution persistence reports the original mutation iden
     onWrite: async (_key, _value, count) => { if (count === 4) throw new Error("resolution commit unavailable"); },
   });
   let queries = 0, mutations = 0;
-  const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+  const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
     const request = JSON.parse(init.body);
     if (request.operationName === "ManagementResolveRequest")
       return reply(request, { result: resolution(requestId, ++queries === 1 ? "committed" : "notObservedYet") });
@@ -254,14 +254,14 @@ test("failed read-only resolution persistence reports the original mutation iden
 test("failed failure-classification storage retains the submitted unknown identity for restart resolution", async () => {
   const failure = new Error("storage unavailable"), requestId = id();
   const saved = asyncStorage({ onWrite: async (_key, _value, count) => { if (count === 3) throw failure; } });
-  const first = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async () => { throw new Error("response lost"); } });
+  const first = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async () => { throw new Error("response lost"); } });
   await assert.rejects(mutate(first, requestId), { code: "RECOVERY_STORAGE_FAILURE", requestId, outcome: "unknown" });
   const original = first.recoveryStates[0];
   assert.equal(original.lastAttemptClassification, "TRANSPORT_UNKNOWN");
   assert.equal(original.resolutionState, "unknown");
   assert.equal(states(saved)[0].lastAttemptClassification, "submitted");
   let mutations = 0;
-  const restarted = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+  const restarted = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
     const request = JSON.parse(init.body);
     if (request.operationName !== "ManagementResolveRequest") mutations++;
     return reply(request, { result: resolution(requestId, "committed") });
@@ -276,12 +276,12 @@ test("async retry restores the original request, fingerprint and budget without 
   let now = Date.now(), committed = false, mutations = 0;
   t.mock.method(Date, "now", () => now);
   const saved = asyncStorage(), requestId = id();
-  const first = new V1Transport({ ...options, credential: "never-journal-this-key", asyncRecoveryStorage: saved,
+  const first = new ConvoHopTransport({ ...options, credential: "never-journal-this-key", asyncRecoveryStorage: saved,
     fetch: async () => { throw new Error("offline"); } });
   await assert.rejects(mutate(first, requestId), { code: "TRANSPORT_UNKNOWN" });
   const original = first.recoveryStates[0];
   now += 1000;
-  const restarted = new V1Transport({ ...options, credential: "refreshed-never-journal-this-key", asyncRecoveryStorage: saved,
+  const restarted = new ConvoHopTransport({ ...options, credential: "refreshed-never-journal-this-key", asyncRecoveryStorage: saved,
     fetch: async (_url, init) => {
       const request = JSON.parse(init.body);
       if (request.operationName === "ManagementResolveRequest")
@@ -312,7 +312,7 @@ for (const [write, shift] of [[1, 60001], [2, 60001], [2, -1]]) {
     t.mock.method(Date, "now", () => now);
     const saved = asyncStorage({ onWrite: async (_key, _value, count) => { if (count === write) now = start + shift; } });
     const requestId = id();
-    const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+    const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
       const request = JSON.parse(init.body);
       if (request.operationName !== "ManagementResolveRequest") mutations++;
       return reply(request, { result: resolution(requestId, "notObservedYet") });
@@ -338,13 +338,13 @@ test("three-attempt limit is preserved across asynchronous reconstruction", asyn
     throw new Error("response lost");
   };
   for (let attempt = 0; attempt < 3; attempt++) {
-    const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch });
+    const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch });
     await assert.rejects(attempt === 0 ? mutate(transport, requestId) : transport.retry(requestId), { code: "TRANSPORT_UNKNOWN" });
     original ??= transport.recoveryStates[0];
     assert.equal(states(saved)[0].retryDeadline, original.retryDeadline);
     assert.equal(states(saved)[0].attemptCount, attempt + 1);
   }
-  const exhausted = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch });
+  const exhausted = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch });
   await assert.rejects(exhausted.retry(requestId), { code: "RESOLUTION_REQUIRED", requestId });
   assert.equal(mutations, 3);
   assert.equal(states(saved)[0].attemptCount, 3);
@@ -358,7 +358,7 @@ test("overlapping mutations serialize complete snapshots even when authority rep
     writing--;
   } });
   const ids = [id(), id()], entered = ids.map(() => Promise.withResolvers()), replies = ids.map(() => Promise.withResolvers());
-  const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+  const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
     const request = JSON.parse(init.body), index = ids.indexOf(request.variables.context.requestId);
     entered[index].resolve();
     await replies[index].promise;
@@ -384,7 +384,7 @@ test("overlapping same-identity mutations share the pending durable submission",
     if (count === 1) { entered.resolve(); await gate.promise; }
   } });
   let mutations = 0;
-  const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+  const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
     mutations++;
     return reply(JSON.parse(init.body), { result: organization() });
   } });
@@ -402,7 +402,7 @@ test("overlapping same-identity mutations share the pending durable submission",
 });
 
 test("a receipt observed during an awaited retry write prevents a stale absent-evidence resend", async () => {
-  const requestId = id(), original = new V1Transport({ ...options, fetch: async () => { throw new Error("offline"); } });
+  const requestId = id(), original = new ConvoHopTransport({ ...options, fetch: async () => { throw new Error("offline"); } });
   await assert.rejects(mutate(original, requestId), { code: "TRANSPORT_UNKNOWN" });
   const gate = Promise.withResolvers(), entered = Promise.withResolvers();
   const saved = asyncStorage({ onWrite: async (_key, _value, count) => {
@@ -410,7 +410,7 @@ test("a receipt observed during an awaited retry write prevents a stale absent-e
   } });
   saved.values.set("convohop.requests:" + options.namespace, JSON.stringify(original.recoveryStates));
   let queries = 0, mutations = 0;
-  const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+  const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
     const request = JSON.parse(init.body);
     if (request.operationName !== "ManagementResolveRequest") mutations++;
     return reply(request, { result: resolution(requestId, ++queries === 1 ? "notObservedYet" : "committed") });
@@ -435,7 +435,7 @@ test("caller changes during durable writes cannot alter the original nested payl
   const body = { conversationId, text: "original", props: { nested: { value: "original" } } };
   const expected = structuredClone(body);
   let submitted;
-  const transport = new V1Transport({ ...options, incarnation, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+  const transport = new ConvoHopTransport({ ...options, incarnation, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
     submitted = JSON.parse(init.body);
     return reply(submitted, { result: { messageId: id(), conversationId, sequence: "1", revision: "1", status: "sent",
       cursor: { incarnation, conversationId, sequence: "1" } } });
@@ -448,7 +448,7 @@ test("caller changes during durable writes cannot alter the original nested payl
   assert.deepEqual(submitted.variables.input, expected);
   assert.deepEqual(states(saved)[0].input, expected);
   await assert.rejects(transport.execute("communication.sendMessage", projectId, body, requestId), { code: "IDEMPOTENCY_CONFLICT" });
-  const wrongIncarnation = new V1Transport({ ...options, incarnation: id(), asyncRecoveryStorage: saved,
+  const wrongIncarnation = new ConvoHopTransport({ ...options, incarnation: id(), asyncRecoveryStorage: saved,
     fetch: async () => { throw new Error("must not submit"); } });
   await assert.rejects(wrongIncarnation.retry(requestId), { code: "INCARNATION_MISMATCH" });
   await assert.rejects(transport.execute("communication.sendMessage", id(), expected, requestId), { code: "IDEMPOTENCY_CONFLICT" });
@@ -462,7 +462,7 @@ for (const write of [1, 2]) {
     } });
     const projectId = id(), incarnation = id(), conversationId = id(), requestId = id();
     let fetches = 0;
-    const transport = new V1Transport({ ...options, incarnation, asyncRecoveryStorage: saved, fetch: async () => { fetches++; } });
+    const transport = new ConvoHopTransport({ ...options, incarnation, asyncRecoveryStorage: saved, fetch: async () => { fetches++; } });
     const rejected = assert.rejects(transport.execute("communication.sendMessage", projectId,
       { conversationId, text: "original", props: {} }, requestId), { code: "INCARNATION_MISMATCH", requestId });
     await entered.promise;
@@ -479,7 +479,7 @@ for (const write of [1, 2]) {
 test("async retention never drops unresolved records or exceeds its 128-record bound", async () => {
   const saved = asyncStorage(), ids = [];
   let mutations = 0;
-  const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+  const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
     const request = JSON.parse(init.body);
     if (request.operationName === "ManagementResolveRequest")
       return reply(request, { result: resolution(request.variables.input.requestId, "committed") });
@@ -506,7 +506,7 @@ for (const operation of ["communication.redeemCredential", "communication.acknow
   test(`async ${operation} retains no bearer, permit or capsule and requires explicit delivery custody`, async () => {
     const saved = asyncStorage(), requestId = id(), projectId = id(), deliveryId = id();
     let attempts = 0;
-    const transport = new V1Transport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+    const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
       const request = JSON.parse(init.body);
       assert.equal(init.headers.authorization, undefined);
       assert.notEqual(request.operationName, "CommunicationResolveRequest");
@@ -538,9 +538,9 @@ test("browser synchronous storage restores immediately and remains usable withou
     setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) };
   const clientOptions = { baseUrl: options.baseUrl, projectId: id(), principalId: id(), incarnation: id(),
     sessionToken: "private-session", recoveryStorage, fetch: async () => { throw new Error("offline"); } };
-  const first = new V1Client(clientOptions), requestId = id(), conversationId = id();
+  const first = new ConvoHopClient(clientOptions), requestId = id(), conversationId = id();
   await assert.rejects(first.send(conversationId, "original", requestId), { code: "TRANSPORT_UNKNOWN" });
-  const restored = new V1Client(clientOptions);
+  const restored = new ConvoHopClient(clientOptions);
   assert.deepEqual(restored.http.recoveryStates, first.http.recoveryStates);
   assert.equal(restored.storage, recoveryStorage);
   assert.equal(restored.conversation(conversationId).then, undefined);

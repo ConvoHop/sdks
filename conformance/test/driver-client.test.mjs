@@ -22,7 +22,7 @@ const verifyParams = id => {
 describe("a conforming driver", () => {
   test("negotiates the protocol, answers requests and exits on shutdown", async () => {
     const { driver, hello } = await start("--roles", "user,backend", "--features", "realtime,webhooks.verify");
-    assert.deepEqual(hello, { protocolVersion: 1, driver: { name: "fake-driver", version: "0.0.0", language: "javascript" },
+    assert.deepEqual(hello, { driver: { name: "fake-driver", version: "0.0.0", language: "javascript" },
       roles: { user: { operations: [] }, backend: { operations: [] } }, features: ["realtime", "webhooks.verify"] });
     assert.deepEqual(await driver.request("reset"), {});
     for (const id of ["valid-single-secret", "wrong-secret"]) {
@@ -44,8 +44,6 @@ describe("handshake failures", () => {
     [["--on", "hello=bad-result"], /^hello result is invalid: /],
     [["--on", "hello=protocol-error"], "hello returned protocol error UNSUPPORTED: fake driver refuses hello"],
     [["--on", "hello=exit"], "driver exited (code 3, signal none)", "fake driver exits during hello"],
-    [["--protocol-version", "2"], "driver selected protocol version 2, which was not offered"],
-    [["--protocol-version", "0"], /^hello result is invalid: \/protocolVersion /],
   ];
   for (const [args, reason, extraStderr] of cases) {
     test(`${args.join(" ")} fails with the reason and the driver's stderr`, async () => {

@@ -5,22 +5,17 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "$schema", "annotationsVersion", "api", "transport", "planes", "scalars", "credentials", "scopes", "conditions",
+    "$schema", "api", "transport", "planes", "scalars", "credentials", "scopes", "conditions",
     "idempotency", "pagination", "errorCodes", "errorSets", "realtime", "operations"
   ],
   "properties": {
-    "$schema": { "const": "./v1-annotations.schema.json" },
-    "annotationsVersion": { "const": 1 },
+    "$schema": { "const": "./annotations.schema.json" },
     "api": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "model", "summary"],
+      "required": ["name", "summary"],
       "properties": {
         "name": { "$ref": "#/$defs/identifier" },
-        "model": {
-          "description": "Domain-model identifier used in generated names such as V1Operation. It is not a selectable API version: the wire endpoint is unversioned.",
-          "const": "v1"
-        },
         "summary": { "$ref": "#/$defs/summary" }
       }
     },
@@ -75,7 +70,7 @@
       }
     },
     "planes": {
-      "description": "GraphQL planes in generation order. Each key must match schema/<plane>-v1.graphql.",
+      "description": "GraphQL planes in generation order. Each key must match schema/<plane>.graphql.",
       "type": "object",
       "minProperties": 1,
       "propertyNames": { "$ref": "#/$defs/identifier" },
@@ -180,7 +175,7 @@
       "additionalProperties": false,
       "required": ["schema", "summary", "context", "resolveOperation"],
       "properties": {
-        "schema": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*-v1\\.graphql$" },
+        "schema": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*\\.graphql$" },
         "summary": { "$ref": "#/$defs/summary" },
         "context": {
           "type": "object",

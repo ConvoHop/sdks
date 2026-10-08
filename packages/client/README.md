@@ -21,8 +21,8 @@ npm test --workspace @convohop/client
 - `@convohop/client` has one ESM entry point with bundled TypeScript
   declarations. It has no import side effects, so bundlers can tree-shake
   unused exports.
-- It re-exports the public API of `@convohop/core`, such as `V1Problem`,
-  `V1Transport`, `v1Operations` and the generated `V1Graphql` types. Import
+- It re-exports the public API of `@convohop/core`, such as `ConvoHopProblem`,
+  `ConvoHopTransport`, `operationCatalog` and the generated `GraphqlTypes` types. Import
   them from `@convohop/client`, not from `@convohop/core`.
 - **Browsers:** targets the current and previous major versions of Chrome,
   Edge, Firefox and Safari. Calls need WebRTC and use `livekit-client`. CI
@@ -44,12 +44,11 @@ Your authenticated backend returns a scoped user bootstrap, never its backend
 or operator credentials. IDs are canonical nonzero UUIDs; SQL counters are
 decimal strings. Configure an HTTPS origin, or explicit loopback HTTP for
 local development. HTTP and `graphql-transport-ws` use unversioned `/graphql`.
-`V1*` names do not select an API/schema version.
 
 ```ts
-import { V1Client } from "@convohop/client";
+import { ConvoHopClient } from "@convohop/client";
 
-const client = new V1Client({
+const client = new ConvoHopClient({
   baseUrl: bootstrap.baseUrl,
   projectId: bootstrap.projectId,
   incarnation: bootstrap.session.incarnation,
@@ -165,7 +164,7 @@ budget. `recoverPending(showError)` runs that bounded recovery on startup or
 foreground. Never replace an uncertain command with a new UUID. Native-use
 markers survive reconstruction without persisting the grant.
 
-Failures are `V1Problem` errors. `retryAfter` is the number of whole seconds
+Failures are `ConvoHopProblem` errors. `retryAfter` is the number of whole seconds
 the authority asks you to wait before resending, for example with
 `RATE_LIMITED`. It comes from the error's `retryAfter` extension, or else
 from an HTTP `Retry-After` header given in seconds. It is `undefined` when
@@ -173,10 +172,10 @@ the authority gives no delay, and the SDK never waits or resends because of
 it. `ScopeRequiredProblem` is re-exported for completeness, but user
 sessions never get it: only backend keys have scopes.
 
-Browser `V1Client` keeps its existing synchronous `recoveryStorage`
+Browser `ConvoHopClient` keeps its existing synchronous `recoveryStorage`
 (`sessionStorage` or `localStorage`) for request recovery and replay cursors.
-For trusted database-backed use, `V1Transport` separately exports
-`V1AsyncRecoveryStorage` and accepts optional `asyncRecoveryStorage`.
+For trusted database-backed use, `ConvoHopTransport` separately exports
+`AsyncRecoveryStorage` and accepts optional `asyncRecoveryStorage`.
 Do not pass a Promise-returning adapter as synchronous storage. Explicit
 `await transport.initializeRecovery()` loads its journal once; `execute` and
 `retry` also await initialization and durable writes. Until that restore
@@ -190,8 +189,8 @@ It accepts generated operation keys and exact inputs, not REST paths or
 revision aliases. Responses retain declared nullable fields and typed
 `receipt.result`, with no result-shape inference. HTTP 200 GraphQL errors or
 malformed metadata cannot become successful mutation evidence.
-`v1Operations`, `V1OperationTypes`, `OperationInput`, `OperationPayload` and
-the `V1Graphql` namespace are generated/aligned exports. Schema files are
+`operationCatalog`, `OperationTypes`, `OperationInput`, `OperationPayload` and
+the `GraphqlTypes` namespace are generated/aligned exports. Schema files are
 authority exports; `npm run check:graphql` detects document/type drift.
 
 ## Session credential lifetime
@@ -209,25 +208,25 @@ separate backend-only session-outcome read without changing that capability.
 
 ```ts
 import {
-  V1Client, type V1Session, type V1SessionBootstrap,
+  ConvoHopClient, type SessionMetadata, type SessionBootstrap,
 } from "@convohop/client";
 
-const client = new V1Client({
+const client = new ConvoHopClient({
   baseUrl: bootstrap.baseUrl,
   projectId: bootstrap.projectId,
   incarnation: bootstrap.session.incarnation,
   principalId: bootstrap.session.principalId,
   sessionToken: bootstrap.sessionToken,
   recoveryStorage: localStorage,
-  sessionRefresh: (current: Readonly<V1Session>): Promise<V1SessionBootstrap> =>
+  sessionRefresh: (current: Readonly<SessionMetadata>): Promise<SessionBootstrap> =>
     renewThroughAuthenticatedApplicationBackend(current),
 });
 await client.initialize(); // Proves ORIGINAL binding while its bearer is valid.
-const renewed: V1Session = await client.refreshSession();
+const renewed: SessionMetadata = await client.refreshSession();
 ```
 
-`V1Session`, `V1SessionRefresh` and `V1SessionRefreshState` are exported.
-`V1SessionBootstrap` is the same generated bootstrap type also exported by
+`SessionMetadata`, `SessionRefresh` and `SessionRefreshState` are exported.
+`SessionBootstrap` is the same generated bootstrap type also exported by
 the Server SDK. Initialization obtains the original authority binding once
 only when `sessionRefresh` is configured. Without that hook, constructors
 and ordinary initialization keep their existing behavior and never require

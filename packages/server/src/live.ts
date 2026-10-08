@@ -1,5 +1,5 @@
-import { V1Problem, v1Counter, v1Id, type CommandOptions, type OperationPayload, type PageOptions } from "@convohop/core";
-import type { V1ProjectServerClient } from "./project.js";
+import { ConvoHopProblem, parseCounter, parseId, type CommandOptions, type OperationPayload, type PageOptions } from "@convohop/core";
+import type { ProjectServerClient } from "./project.js";
 import { mismatch, pageInput } from "./result.js";
 
 export type LiveSession = OperationPayload<"communication.liveSession">["result"];
@@ -32,7 +32,7 @@ async function pause(signal?: AbortSignal): Promise<void> {
  * `requestId` resends the original payload.
  */
 export class ServerLiveSession {
-  constructor(readonly client: V1ProjectServerClient, readonly liveSessionId: string) { v1Id(liveSessionId); }
+  constructor(readonly client: ProjectServerClient, readonly liveSessionId: string) { parseId(liveSessionId); }
   async get(): Promise<LiveSession> {
     const session = (await this.client.http.execute("communication.liveSession", this.client.projectId,
       { liveSessionId: this.liveSessionId })).result;
@@ -46,8 +46,8 @@ export class ServerLiveSession {
   async alert(input: { expectedGeneration: string; principalIds: readonly string[] },
     options: CommandOptions = {}): Promise<LiveAlertBatch> {
     const batch = (await this.client.http.execute("communication.alertLiveSession", this.client.projectId,
-      { liveSessionId: this.liveSessionId, expectedGeneration: v1Counter(input.expectedGeneration),
-        principalIds: input.principalIds.map(principalId => v1Id(principalId)) }, options.requestId)).result;
+      { liveSessionId: this.liveSessionId, expectedGeneration: parseCounter(input.expectedGeneration),
+        principalIds: input.principalIds.map(principalId => parseId(principalId)) }, options.requestId)).result;
     if (batch.liveSessionId !== this.liveSessionId) throw mismatch("Live alert batch");
     return batch;
   }
@@ -55,8 +55,8 @@ export class ServerLiveSession {
   async end(input: { expectedGeneration: string; expectedRevision: string },
     options: CommandOptions = {}): Promise<ServerLiveOperation> {
     const receipt = await this.client.http.execute("communication.endLiveSession", this.client.projectId,
-      { liveSessionId: this.liveSessionId, expectedGeneration: v1Counter(input.expectedGeneration),
-        expectedRevision: v1Counter(input.expectedRevision) }, options.requestId);
+      { liveSessionId: this.liveSessionId, expectedGeneration: parseCounter(input.expectedGeneration),
+        expectedRevision: parseCounter(input.expectedRevision) }, options.requestId);
     if (receipt.result.liveSessionId !== this.liveSessionId) throw mismatch("Live end receipt");
     return new ServerLiveOperation(this.client, receipt.result.operationId, receipt);
   }
@@ -66,9 +66,9 @@ export class ServerLiveSession {
 export class ServerLiveOperation {
   readonly operationId: string;
   #scope: { liveSessionId: string; kind: LiveOperation["kind"] } | undefined;
-  constructor(readonly client: V1ProjectServerClient, operationId: string, readonly receipt?: LiveEndReceipt) {
-    this.operationId = v1Id(operationId);
-    if (receipt) this.#scope = { liveSessionId: v1Id(receipt.result.liveSessionId), kind: "END" };
+  constructor(readonly client: ProjectServerClient, operationId: string, readonly receipt?: LiveEndReceipt) {
+    this.operationId = parseId(operationId);
+    if (receipt) this.#scope = { liveSessionId: parseId(receipt.result.liveSessionId), kind: "END" };
   }
   async get(): Promise<LiveOperation> {
     const operation = (await this.client.http.execute("communication.liveSessionOperation", this.client.projectId,
@@ -81,7 +81,7 @@ export class ServerLiveOperation {
   }
   /**
    * Polls until the operation completes. An END completion must carry an enforced media cutoff. A failure throws a
-   * `V1Problem` with the live error code; the deadline throws `RESOLUTION_REQUIRED`, which is not a cutoff.
+   * `ConvoHopProblem` with the live error code; the deadline throws `RESOLUTION_REQUIRED`, which is not a cutoff.
    */
   async completed(options: LiveWaitOptions = {}): Promise<LiveOperationCompletion> {
     const { deadline, signal } = waitOptions(options);
@@ -99,10 +99,10 @@ export class ServerLiveOperation {
       }
       if (operation.state === "FAILED") {
         if (!operation.failure) throw new TypeError("Failed live operation is missing its reason");
-        throw new V1Problem(operation.failure.code, requestId, "accepted", 409, operation.failure.message);
+        throw new ConvoHopProblem(operation.failure.code, requestId, "accepted", 409, operation.failure.message);
       }
       if (operation.state !== "RUNNING") throw new TypeError("Unknown live operation state");
-      if (Date.now() >= deadline) throw new V1Problem("RESOLUTION_REQUIRED", requestId, "accepted", 409,
+      if (Date.now() >= deadline) throw new ConvoHopProblem("RESOLUTION_REQUIRED", requestId, "accepted", 409,
         "Action remains unresolved; retain this operation ID and query it again. Elapsed time is not cutoff.");
       await pause(signal);
     }

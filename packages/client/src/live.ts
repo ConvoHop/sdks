@@ -1,17 +1,17 @@
 import {
-  V1Problem, v1Id, type CommandOptions, type OperationPayload, type PageOptions, type V1Graphql, type V1Message, type V1Record,
+  ConvoHopProblem, parseId, type CommandOptions, type OperationPayload, type PageOptions, type GraphqlTypes, type ConversationMessage, type ProtocolObject,
 } from "@convohop/core";
-import type { V1Client } from "./client.js";
-import { V1MediaConnection, type V1MediaOptions } from "./media.js";
+import type { ConvoHopClient } from "./client.js";
+import { MediaConnection, type MediaOptions } from "./media.js";
 
-type LiveMediaProfile = V1Graphql.LiveMediaProfile;
+type LiveMediaProfile = GraphqlTypes.LiveMediaProfile;
 
 export type LiveSession = OperationPayload<"communication.liveSession">["result"];
 export type LiveParticipation = OperationPayload<"communication.joinLiveSession">["result"]["participation"];
 export type LiveConnectionGrant = OperationPayload<"communication.liveSessionCredentials">["result"];
 export type LiveOperation = OperationPayload<"communication.liveSessionOperation">["result"];
 export interface LiveWaitOptions { signal?: AbortSignal; timeoutMs?: number }
-export interface LiveConnectOptions extends V1MediaOptions, CommandOptions {}
+export interface LiveConnectOptions extends MediaOptions, CommandOptions {}
 
 function waitOptions(options: LiveWaitOptions): { deadline: number; signal: AbortSignal | undefined } {
   const timeout = options.timeoutMs ?? 45000;
@@ -30,21 +30,21 @@ async function pause(signal?: AbortSignal): Promise<void> {
 
 export class ConversationHandle {
   readonly live: ConversationLive;
-  constructor(readonly client: V1Client, readonly conversationId: string) {
-    v1Id(conversationId);
+  constructor(readonly client: ConvoHopClient, readonly conversationId: string) {
+    parseId(conversationId);
     this.live = new ConversationLive(this);
   }
   get() { return this.client.getConversation(this.conversationId); }
   readonly messages = {
-    send: async (message: { text: string; props?: V1Record }, options: CommandOptions = {}) =>
+    send: async (message: { text: string; props?: ProtocolObject }, options: CommandOptions = {}) =>
       (await this.client.http.execute("communication.sendMessage", this.client.projectId,
         { conversationId: this.conversationId, text: message.text, props: message.props ?? {} }, options.requestId)).result,
     list: (beforeSequence?: string) => this.client.messages(this.conversationId, beforeSequence),
-    edit: (message: V1Message, text: string, options: CommandOptions = {}) => {
+    edit: (message: ConversationMessage, text: string, options: CommandOptions = {}) => {
       if (message.conversationId !== this.conversationId) throw new TypeError("Message is outside this conversation");
       return this.client.edit(message, text, options.requestId);
     },
-    delete: (message: V1Message, options: CommandOptions = {}) => {
+    delete: (message: ConversationMessage, options: CommandOptions = {}) => {
       if (message.conversationId !== this.conversationId) throw new TypeError("Message is outside this conversation");
       return this.client.delete(message, options.requestId);
     },
@@ -77,9 +77,9 @@ export class ConversationLive {
 }
 
 class LiveAction {
-  constructor(readonly client: V1Client, readonly operationId: string, readonly liveSessionId: string,
+  constructor(readonly client: ConvoHopClient, readonly operationId: string, readonly liveSessionId: string,
     readonly kind: "START" | "END", readonly requestId: string) {
-    v1Id(operationId); v1Id(liveSessionId); v1Id(requestId);
+    parseId(operationId); parseId(liveSessionId); parseId(requestId);
   }
   async get(): Promise<LiveOperation> {
     const result = (await this.client.http.execute("communication.liveSessionOperation",
@@ -100,18 +100,18 @@ class LiveAction {
       }
       if (action.state === "FAILED") {
         if (!action.failure) throw new TypeError("Failed live action is missing its reason");
-        throw new V1Problem(action.failure.code, this.requestId, "accepted", 409, action.failure.message);
+        throw new ConvoHopProblem(action.failure.code, this.requestId, "accepted", 409, action.failure.message);
       }
       if (action.state !== "RUNNING") throw new TypeError("Unknown live action state");
       await pause(signal);
     } while (Date.now() < deadline);
-    throw new V1Problem("RESOLUTION_REQUIRED", this.requestId, "accepted", 409,
+    throw new ConvoHopProblem("RESOLUTION_REQUIRED", this.requestId, "accepted", 409,
       "Action remains unresolved; retain this operation ID and query it again. Elapsed time is not cutoff.");
   }
 }
 
 export class LiveStartOperation extends LiveAction {
-  constructor(client: V1Client, readonly receipt: OperationPayload<"communication.startLiveSession">) {
+  constructor(client: ConvoHopClient, readonly receipt: OperationPayload<"communication.startLiveSession">) {
     super(client, receipt.result.operationId, receipt.result.liveSessionId, "START", receipt.requestId);
   }
   async ready(options: LiveWaitOptions = {}): Promise<LiveSessionHandle> {
@@ -121,7 +121,7 @@ export class LiveStartOperation extends LiveAction {
 }
 
 export class LiveEndOperation extends LiveAction {
-  constructor(client: V1Client, readonly receipt: OperationPayload<"communication.endLiveSession">) {
+  constructor(client: ConvoHopClient, readonly receipt: OperationPayload<"communication.endLiveSession">) {
     super(client, receipt.result.operationId, receipt.result.liveSessionId, "END", receipt.requestId);
   }
 }
@@ -131,14 +131,14 @@ export class LiveSessionHandle {
   readonly generation: string;
   readonly conversationId: string;
   #endRequest: string | undefined;
-  constructor(readonly client: V1Client, readonly snapshot: LiveSession) {
-    this.liveSessionId = v1Id(snapshot.liveSessionId);
+  constructor(readonly client: ConvoHopClient, readonly snapshot: LiveSession) {
+    this.liveSessionId = parseId(snapshot.liveSessionId);
     this.generation = snapshot.generation;
-    this.conversationId = v1Id(snapshot.conversationId);
+    this.conversationId = parseId(snapshot.conversationId);
   }
-  static async get(client: V1Client, liveSessionId: string) {
+  static async get(client: ConvoHopClient, liveSessionId: string) {
     return new LiveSessionHandle(client, (await client.http.execute("communication.liveSession",
-      client.projectId, { liveSessionId: v1Id(liveSessionId) })).result);
+      client.projectId, { liveSessionId: parseId(liveSessionId) })).result);
   }
   async get(): Promise<LiveSession> {
     const current = (await LiveSessionHandle.get(this.client, this.liveSessionId)).snapshot;
@@ -181,25 +181,25 @@ export class LiveSessionHandle {
 export class LiveParticipationHandle {
   readonly participationId: string;
   #attempt: { requestId: string; mode: "INITIAL" | "RECONNECT"; replacementOfConnectionId?: string; used: boolean } | undefined;
-  #connection: V1MediaConnection | undefined;
-  #connecting: Promise<V1MediaConnection> | undefined;
+  #connection: MediaConnection | undefined;
+  #connecting: Promise<MediaConnection> | undefined;
   #leaveRequest: string | undefined;
   constructor(readonly live: LiveSessionHandle, readonly snapshot: LiveParticipation) {
-    this.participationId = v1Id(snapshot.participationId);
+    this.participationId = parseId(snapshot.participationId);
     this.#leaveRequest = [...live.client.http.recoveryStates].reverse().find(state =>
       state.operation === "communication.leaveLiveSession" && state.input.participationId === this.participationId)?.requestId;
   }
   async get(): Promise<LiveParticipation> {
     const current = (await this.live.get()).myParticipation;
     if (!current || current.participationId !== this.participationId)
-      throw new V1Problem("PARTICIPATION_MISMATCH", crypto.randomUUID(), "rejected", 409, "This participation is no longer current");
+      throw new ConvoHopProblem("PARTICIPATION_MISMATCH", crypto.randomUUID(), "rejected", 409, "This participation is no longer current");
     return current;
   }
-  connect(options: LiveConnectOptions = {}): Promise<V1MediaConnection> {
+  connect(options: LiveConnectOptions = {}): Promise<MediaConnection> {
     if (this.#leaveRequest) return Promise.reject(new Error("Leave has been requested; resolve its cutoff before rejoining"));
     if (this.#connecting) return this.#connecting;
     if (this.#connection?.connected) return Promise.resolve(this.#connection);
-    const work = V1MediaConnection.connectParticipation(this, options).then(async connection => {
+    const work = MediaConnection.connectParticipation(this, options).then(async connection => {
       if (this.#leaveRequest) { await connection.disconnect(); throw new Error("Participation was left during connection"); }
       this.#connection = connection; return connection;
     });
@@ -219,7 +219,7 @@ export class LiveParticipationHandle {
         const replacement = previous.input.replacementOfConnectionId;
         this.#attempt = { requestId: previous.requestId, mode,
           used: previous.mediaAdmissionAttempted === true || !!current.nativeConnectionId,
-          ...(replacement === undefined ? {} : { replacementOfConnectionId: v1Id(replacement) }) };
+          ...(replacement === undefined ? {} : { replacementOfConnectionId: parseId(replacement) }) };
       }
     }
     const saved = this.#attempt && client.http.recoveryStates.find(state => state.requestId === this.#attempt?.requestId);
@@ -231,13 +231,13 @@ export class LiveParticipationHandle {
       const resolution = await client.requests.resolve(old.requestId);
       const issuance = resolution?.receipt?.result?.liveCredentialIssuance;
       if (!resolution || !issuance || issuance.participationId !== this.participationId || issuance.liveSessionId !== liveSessionId)
-        throw new V1Problem("RESOLUTION_REQUIRED", old.requestId, "unknown", 409, "Resolve the original credential attempt before obtaining another grant");
+        throw new ConvoHopProblem("RESOLUTION_REQUIRED", old.requestId, "unknown", 409, "Resolve the original credential attempt before obtaining another grant");
       const unobserved = !current.nativeConnectionId ||
         (old.mode === "RECONNECT" && current.nativeConnectionId === old.replacementOfConnectionId);
       if (unobserved && Date.parse(issuance.admissionExpiresAt) > Date.parse(resolution.checkedAt))
-        throw new V1Problem("RESOLUTION_REQUIRED", old.requestId, "committed", 409, "Native admission remains unresolved; keep this reservation and retry or explicitly leave");
+        throw new ConvoHopProblem("RESOLUTION_REQUIRED", old.requestId, "committed", 409, "Native admission remains unresolved; keep this reservation and retry or explicitly leave");
       if (options.requestId === old.requestId)
-        throw new V1Problem("CREDENTIAL_REFRESH_REQUIRED", old.requestId, "committed", 409, "The resolved old credential requires a separately identified fresh attempt");
+        throw new ConvoHopProblem("CREDENTIAL_REFRESH_REQUIRED", old.requestId, "committed", 409, "The resolved old credential requires a separately identified fresh attempt");
       this.#attempt = undefined;
     }
     this.#attempt ??= { requestId: options.requestId ?? crypto.randomUUID(),

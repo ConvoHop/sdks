@@ -1,14 +1,12 @@
 {
-  "$schema": "./v1-ir.schema.json",
-  "irVersion": "1.0.0",
+  "$schema": "./ir.schema.json",
   "api": {
     "name": "edge",
-    "model": "v1",
     "summary": "Edge-case fixture for the sdkgen tests. It is not a ConvoHop API."
   },
   "sources": {
-    "graphql": ["schema/alpha-v1.graphql", "schema/beta-v1.graphql"],
-    "annotations": "schema/v1-annotations.json"
+    "graphql": ["schema/alpha.graphql", "schema/beta.graphql"],
+    "annotations": "schema/annotations.json"
   },
   "transport": {
     "path": "/graphql",
@@ -35,7 +33,7 @@
   "planes": [
     {
       "name": "alpha",
-      "schema": "schema/alpha-v1.graphql",
+      "schema": "schema/alpha.graphql",
       "summary": "Items, jobs and realtime events.",
       "context": {
         "argument": "context",
@@ -59,7 +57,7 @@
     },
     {
       "name": "beta",
-      "schema": "schema/beta-v1.graphql",
+      "schema": "schema/beta.graphql",
       "summary": "Widgets.",
       "context": {
         "argument": "context",

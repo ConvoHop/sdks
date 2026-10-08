@@ -1,13 +1,13 @@
-import { v1Operations, v1OutputShapes } from "../packages/core/dist/generated/v1-operations.js";
+import { operationCatalog, outputShapes } from "../packages/core/dist/generated/operations.js";
 
 export function full(type, fields) {
-  const shape = v1OutputShapes[type];
+  const shape = outputShapes[type];
   if (shape?.kind !== "object") throw new TypeError(`Unknown fixture object ${type}`);
   return Object.fromEntries(Object.keys(shape.fields).map(key => [key, fields[key] ?? null]));
 }
 
 export function reply(request, fields) {
-  const operation = Object.values(v1Operations).find(value => value.operationName === request.operationName);
+  const operation = Object.values(operationCatalog).find(value => value.operationName === request.operationName);
   if (!operation) throw new TypeError("Unknown fixture operation");
   const now = new Date().toISOString();
   return Response.json({ data: { [operation.field]: full(operation.resultType.replace(/!$/, ""), {

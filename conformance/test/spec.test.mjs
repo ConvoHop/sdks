@@ -70,7 +70,7 @@ describe("enumerations agree across the spec, the mock and the reference driver"
   });
 });
 
-// Scenario expectations that schema/v1-ir.json does not define yet.
+// Scenario expectations that schema/ir.json does not define yet.
 const PENDING_ERROR_CODES = new Set();
 // HTTP guards that generated SDK requests never trip, and the mock's own internal failures.
 const MOCK_ONLY_CODES = new Set(["METHOD_NOT_ALLOWED", "UNSUPPORTED_MEDIA_TYPE", "MOCK_FAILURE"]);
@@ -112,16 +112,15 @@ function namedStrings(value, names, found = new Set()) {
 /** Whether a realtime.collect step expects its subscription to have ended, as the runner evaluates it. */
 const expectsEnd = step => step.expect?.closed ?? (step.until?.closed === true);
 
-describe("the operation catalog and scenarios agree with schema/v1-ir.json", () => {
+describe("the operation catalog and scenarios agree with schema/ir.json", () => {
   let ir, irOperations, channel;
   before(async () => {
-    ir = await readJson(join(REPO_ROOT, "schema", "v1-ir.json"));
+    ir = await readJson(join(REPO_ROOT, "schema", "ir.json"));
     irOperations = new Map(ir.operations.map(operation => [operation.id, operation]));
     channel = ir.realtime.channels.find(candidate => candidate.name === files.operations.realtime.irChannel);
   });
 
   test("every operation maps to an IR operation that accepts each of its roles", t => {
-    assert.match(ir.irVersion, /^1\./, "the IR format changed; review these checks");
     for (const [name, entry] of Object.entries(spec.catalog)) {
       const operation = irOperations.get(entry.irOperation);
       assert.ok(operation, `${name}: ${entry.irOperation} is not an IR operation`);

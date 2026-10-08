@@ -1,6 +1,6 @@
 # Operation reference snippets
 
-Generated from `schema/v1-ir.json` by the `doc-snippets` emitter in `tools/sdkgen`. Do not edit these files. Change the GraphQL schema or `schema/v1-annotations.json`, then run `npm run generate:graphql`.
+Generated from `schema/ir.json` by the `doc-snippets` emitter in `tools/sdkgen`. Do not edit these files. Change the GraphQL schema or `schema/annotations.json`, then run `npm run generate:graphql`.
 
 - `index.json` lists every operation with the path of its snippet, relative to this directory.
 - `<plane>/<field>.md` documents one operation: summary, layer, authorization, idempotency, pagination, realtime behavior, context, input, result, errors and the GraphQL document.

@@ -16,7 +16,7 @@
       "required": ["irChannel"],
       "properties": {
         "irChannel": {
-          "description": "The realtime channel in schema/v1-ir.json that SDK subscriptions use: its subscription, gap-filled with its replay query.",
+          "description": "The realtime channel in schema/ir.json that SDK subscriptions use: its subscription, gap-filled with its replay query.",
           "type": "string",
           "pattern": "^[a-z][A-Za-z0-9]*$",
           "maxLength": 64
@@ -46,7 +46,7 @@
           "items": { "enum": ["user", "backend", "management"] }
         },
         "irOperation": {
-          "description": "The id of the schema/v1-ir.json operation that the SDK call invokes, for every role.",
+          "description": "The id of the schema/ir.json operation that the SDK call invokes, for every role.",
           "type": "string",
           "pattern": "^[a-z][A-Za-z0-9]*\\.[a-z][A-Za-z0-9]*$",
           "maxLength": 128

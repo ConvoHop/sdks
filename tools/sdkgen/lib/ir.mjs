@@ -13,12 +13,7 @@ import { canonicalJson } from "./json.mjs";
 import { codeUnitCompare } from "./naming.mjs";
 import { planeOrder, schemaOperations } from "./sources.mjs";
 
-/**
- * Semantic version of the IR format (schema/v1-ir.schema.json). Bump the minor
- * version for additive changes and the major version for breaking changes.
- */
-export const IR_VERSION = "1.0.0";
-export const IR_SCHEMA_REF = "./v1-ir.schema.json";
+export const IR_SCHEMA_REF = "./ir.schema.json";
 export const GENERATION_DOCS = "docs/sdk-generation.md";
 
 const BUILT_IN_REPRESENTATION = Object.freeze({ String: "string", ID: "string", Int: "integer", Float: "number", Boolean: "boolean" });
@@ -28,7 +23,7 @@ export class IrBuildError extends Error {}
 /**
  * Builds the language-neutral IR from the GraphQL planes and the annotations.
  * Fails with the annotation report when annotations are incomplete, and with
- * a schema violation list when the result does not match v1-ir.schema.json.
+ * a schema violation list when the result does not match ir.schema.json.
  * The result is plain JSON: building it, writing it and reading it back gives
  * an identical value.
  */
@@ -44,7 +39,6 @@ export function buildIr(sources) {
   const operationEntries = operations.map(operation => buildOperation(operation, annotations));
   const ir = {
     $schema: IR_SCHEMA_REF,
-    irVersion: IR_VERSION,
     api: annotations.api,
     sources: { graphql: planes.map(plane => plane.path), annotations: sources.annotationsPath },
     transport: annotations.transport,
@@ -60,9 +54,9 @@ export function buildIr(sources) {
     types,
   };
   const plain = JSON.parse(JSON.stringify(ir));
-  const errors = createValidator(sources.irSchema, { label: "v1-ir.schema.json" })(plain);
+  const errors = createValidator(sources.irSchema, { label: "ir.schema.json" })(plain);
   if (errors.length) {
-    throw new IrBuildError(`The generated IR violates schema/v1-ir.schema.json:\n${formatValidationErrors(errors)}`);
+    throw new IrBuildError(`The generated IR violates schema/ir.schema.json:\n${formatValidationErrors(errors)}`);
   }
   return plain;
 }

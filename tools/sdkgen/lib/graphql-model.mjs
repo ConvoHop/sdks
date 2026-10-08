@@ -71,14 +71,14 @@ export function isBuiltInScalar(type) {
   return isScalarType(type) && isSpecifiedScalarType(type);
 }
 
-/** `alpha` + `fetchHTTPStatus` gives `AlphaFetchHTTPStatus`, the name in schema/operations-v1.graphql. */
+/** `alpha` + `fetchHTTPStatus` gives `AlphaFetchHTTPStatus`, the name in schema/operations.graphql. */
 export function graphqlOperationName(plane, fieldName) {
   return capitalize(plane) + capitalize(fieldName);
 }
 
 /**
  * Builds the "select every public field" operation document for a root field
- * (the format of schema/operations-v1.graphql), validates it against the
+ * (the format of schema/operations.graphql), validates it against the
  * schema and enforces the server's field and depth bounds.
  */
 export function buildOperationDocument(schema, plane, kind, field) {

@@ -16,8 +16,8 @@ License: [Apache-2.0](LICENSE).
   CommonJS code on Node.js 22.12 or later can `require()` it.
 - It depends only on `@convohop/core`. It never loads `@convohop/client`
   or `livekit-client`.
-- It re-exports the public API of `@convohop/core`, such as `V1Problem`,
-  `V1Transport`, `v1Operations` and the generated `V1Graphql` types. Import
+- It re-exports the public API of `@convohop/core`, such as `ConvoHopProblem`,
+  `ConvoHopTransport`, `operationCatalog` and the generated `GraphqlTypes` types. Import
   them from `@convohop/server`, not from `@convohop/core`.
 
 ## Application backend
@@ -26,9 +26,9 @@ Authenticate the application user before looking up its project-scoped
 principal. A caller-supplied principal ID is not proof of login.
 
 ```ts
-import { V1ProjectServerClient } from "@convohop/server";
+import { ProjectServerClient } from "@convohop/server";
 
-const server = new V1ProjectServerClient({
+const server = new ProjectServerClient({
   baseUrl: communicationBase,
   projectId,
   incarnation,
@@ -74,14 +74,14 @@ Keep the original backend renewal request and its expected revision through
 unknown outcomes; SDK hook rejection is not proof of rollback. The additive
 `communication.currentSession` query is restricted to the authenticated
 current ClientSession, not backend/portal readers or selected session IDs.
-`V1SessionBootstrap` remains the same exported generated bootstrap type.
+`SessionBootstrap` remains the same exported generated bootstrap type.
 Its `tokenExpiresAt` equals session `expiresAt`, while effective bearer
 expiry is floored to integer seconds and may be up to 999 ms earlier.
 
 ## Data-plane methods
 
-`V1ProjectServerClient` has a typed method for every backend-key operation
-in `schema/v1-annotations.json`. A package test fails if an operation is
+`ProjectServerClient` has a typed method for every backend-key operation
+in `schema/annotations.json`. A package test fails if an operation is
 added without one. The handles that `conversation(id)`, `liveSession(id)`
 and `liveOperation(id)` return send nothing until you call a method. Each
 method needs the backend-key scope listed:
@@ -165,9 +165,9 @@ const inbox = await server.inbox({ actAs: principalId });
 
 ### Errors
 
-Failures are `V1Problem` errors, re-exported from `@convohop/core`.
+Failures are `ConvoHopProblem` errors, re-exported from `@convohop/core`.
 
-- A key without a required scope gets `ScopeRequiredProblem`, a `V1Problem`
+- A key without a required scope gets `ScopeRequiredProblem`, a `ConvoHopProblem`
   with `code: "SCOPE_REQUIRED"`, status 403 and outcome `rejected`. Grant
   the scope instead of retrying. `scope` names the missing scope, parsed from
   the authority's message, and is `undefined` if the wording differs. For
@@ -384,15 +384,15 @@ first, and the message names the field but never contains its value.
 
 ## Management and credential delivery
 
-`V1ManagementClient` uses its separately configured Management origin's
+`ConvoHopManagementClient` uses its separately configured Management origin's
 unversioned `/graphql`, with an authorized portal credential. The project
 client uses Communication `/graphql`. Both reject redirects and unsafe
 origins; only explicit loopback HTTP is permitted without TLS.
 
 ```ts
-import { V1ManagementClient } from "@convohop/server";
+import { ConvoHopManagementClient } from "@convohop/server";
 
-const management = new V1ManagementClient({
+const management = new ConvoHopManagementClient({
   baseUrl: managementBase,
   actorId: operatorId,
   accessToken: operatorToken,
@@ -412,7 +412,7 @@ Deployment/project readiness precedes dependent operations.
 `createProject`, `issueBackendKey` and `deliveryPermit` expose the remaining
 provisioning flow. Accepted management work has a durable operation ID, not
 a completion promise. Backend credentials use one-time delivery, never an
-ordinary retained result. Redeem using a bearer-less `V1Transport`:
+ordinary retained result. Redeem using a bearer-less `ConvoHopTransport`:
 
 ```ts
 const result = await deliveryTransport.execute(
@@ -450,15 +450,15 @@ The optional backend-facing helper reads credential-free evidence for an
 **original** `issueSession` or `renewSession` mutation:
 
 ```ts
-import { type V1SessionRequestOutcome } from "@convohop/server";
+import { type SessionRequestOutcome } from "@convohop/server";
 
 await server.initialize(); // Establish the configured project route/epoch.
-const evidence: V1SessionRequestOutcome =
+const evidence: SessionRequestOutcome =
   await server.sessionRequestOutcome(originalSqlRenewalRequestId);
 ```
 
 Its exact signature is
-`sessionRequestOutcome(requestId: string): Promise<V1SessionRequestOutcome>`.
+`sessionRequestOutcome(requestId: string): Promise<SessionRequestOutcome>`.
 The only query input is the original mutation ID; the SDK generates a
 different `context.requestId` for each read. Communication project,
 incarnation and the initialized serving epoch use the existing transport
@@ -519,12 +519,12 @@ qualification and public deployment remain separate publication gates.
 
 ### Asynchronous database recovery storage
 
-`V1ProjectServerClient`, `V1ManagementClient` and the low-level `V1Transport`
+`ProjectServerClient`, `ConvoHopManagementClient` and the low-level `ConvoHopTransport`
 accept optional `asyncRecoveryStorage`, mutually exclusive with the existing
 synchronous `recoveryStorage`. Both Server SDK storage types are exported:
 
 ```ts
-export interface V1AsyncRecoveryStorage {
+export interface AsyncRecoveryStorage {
   getItem(key: string): Promise<string | null>;
   setItem(key: string, value: string): Promise<void>;
   removeItem(key: string): Promise<void>;
@@ -535,10 +535,10 @@ Implement that interface using your application's database transactions;
 it is not a bundled SQL adapter or migration:
 
 ```ts
-import { V1ProjectServerClient, type V1AsyncRecoveryStorage } from "@convohop/server";
+import { ProjectServerClient, type AsyncRecoveryStorage } from "@convohop/server";
 
-const storage: V1AsyncRecoveryStorage = applicationSqlRecoveryStorage;
-const server = new V1ProjectServerClient({
+const storage: AsyncRecoveryStorage = applicationSqlRecoveryStorage;
+const server = new ProjectServerClient({
   baseUrl: communicationBase, projectId, incarnation, backendKey,
   asyncRecoveryStorage: storage,
 });
@@ -565,7 +565,7 @@ with fire-and-forget writes or success-shaped error handling.
 The SDK awaits pending-intent and submitted-attempt writes before sending a
 mutation, and awaits receipt/resolution writes before returning success.
 Native admission likewise awaits its saved use marker before opening.
-An async write failure raises local `V1Problem` code
+An async write failure raises local `ConvoHopProblem` code
 `RECOVERY_STORAGE_FAILURE` with the original `requestId`, retained
 `outcome` (`unknown`, `committed` or `accepted`) and storage error `cause`.
 No mutation is sent when its pre-submit write fails. An attempted submission
@@ -598,7 +598,7 @@ Locking each `setItem` alone, an unconditional transactional upsert, or a
 last-write-wins store can still lose another client's pending commands.
 One small app-service instance can have overlapping deployments/processes;
 it does not guarantee a single writer. The SDK supplies no distributed lock,
-snapshot merge, SQL schema or migration. Browser `V1Client` recovery/cursor
+snapshot merge, SQL schema or migration. Browser `ConvoHopClient` recovery/cursor
 storage remains synchronous, including existing `sessionStorage` usage.
 
 Build/test from the root npm workspace:
@@ -613,4 +613,3 @@ npm test
 Isolated SDK unit
 tests do not establish CockroachDB/WebRTC or hosted-release qualification;
 that acceptance belongs to the compatible service's maintained suite.
-`V1*` is a current SDK/domain name, not a selectable endpoint version.

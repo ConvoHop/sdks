@@ -6,8 +6,9 @@ import * as generated from "@convohop/core/internal/generated";
 import { builtImportSpecifiers, sortedKeys } from "../../../test/package-fixtures.mjs";
 
 const publicValues = [
-  "ScopeRequiredProblem", "V1Problem", "V1Transport", "v1Conversation", "v1Counter", "v1Cursor", "v1Id", "v1Membership",
-  "v1Message", "v1Operations", "v1Page", "v1Record", "v1SearchHit", "v1String",
+  "ConvoHopProblem", "ConvoHopTransport", "ScopeRequiredProblem", "operationCatalog", "parseConversation",
+  "parseCounter", "parseCursor", "parseId", "parseMembership", "parseMessage", "parseObject", "parsePage",
+  "parseSearchHit", "parseString",
 ];
 const internalValues = [
   "authenticatedTransport", "canonical", "currentSession", "eventPage", "origin", "route", "sameSession",
@@ -25,7 +26,7 @@ test("flat generated types are type-only and kept behind the internal entry poin
 });
 
 test("built modules are reachable only through the exports map", async () => {
-  for (const path of ["dist/index.js", "dist/protocol.js", "dist/generated/v1-operations.js", "src/index.ts"]) {
+  for (const path of ["dist/index.js", "dist/protocol.js", "dist/generated/operations.js", "src/index.ts"]) {
     await assert.rejects(import(`@convohop/core/${path}`), { code: "ERR_PACKAGE_PATH_NOT_EXPORTED" }, path);
   }
 });

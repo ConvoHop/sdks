@@ -1,10 +1,10 @@
-import { v1Operations, v1OutputShapes, type V1Operation, type V1OperationKey, type V1OperationTypes } from "./generated/v1-operations.js";
+import { operationCatalog, outputShapes, type OperationCatalogEntry, type OperationKey, type OperationTypes } from "./generated/operations.js";
 
-export type OperationInput<K extends V1OperationKey> =
-  V1OperationTypes[K]["variables"] extends { input?: infer I } ? NonNullable<I> : Record<string, never>;
+export type OperationInput<K extends OperationKey> =
+  OperationTypes[K]["variables"] extends { input?: infer I } ? NonNullable<I> : Record<string, never>;
 type FieldName<K> = K extends `${"communication" | "management"}.${infer F}` ? F : never;
-export type OperationPayload<K extends V1OperationKey> =
-  V1OperationTypes[K]["result"][FieldName<K> & keyof V1OperationTypes[K]["result"]];
+export type OperationPayload<K extends OperationKey> =
+  OperationTypes[K]["result"][FieldName<K> & keyof OperationTypes[K]["result"]];
 
 export function validateOutput(value: unknown, type: string, depth = 0): void {
   if (depth > 16) throw new TypeError("GraphQL response exceeds its depth bound");
@@ -19,7 +19,7 @@ export function validateOutput(value: unknown, type: string, depth = 0): void {
     for (const item of value) validateOutput(item, type.slice(1, -1), depth + 1);
     return;
   }
-  const shape = v1OutputShapes[type];
+  const shape = outputShapes[type];
   if (!shape) throw new TypeError(`Unknown generated output type: ${type}`);
   if (shape.kind === "object") {
     const record = object(value);
@@ -42,12 +42,12 @@ export function validateOutput(value: unknown, type: string, depth = 0): void {
   }
 }
 
-export function operationPayload<K extends V1OperationKey>(key: K, value: unknown): OperationPayload<K> {
-  validateOutput(value, v1Operations[key].resultType);
+export function operationPayload<K extends OperationKey>(key: K, value: unknown): OperationPayload<K> {
+  validateOutput(value, operationCatalog[key].resultType);
   return value as OperationPayload<K>;
 }
 
-export function validateOperationPayload(operation: V1Operation, value: unknown): void {
+export function validateOperationPayload(operation: OperationCatalogEntry, value: unknown): void {
   validateOutput(value, operation.resultType);
 }
 
@@ -61,16 +61,16 @@ function id(value: string): string {
       value === "00000000-0000-0000-0000-000000000000") throw new TypeError("Expected a canonical UUID");
   return value;
 }
-export function operationKey(key: unknown): V1OperationKey {
-  if (typeof key !== "string" || !Object.hasOwn(v1Operations, key)) throw new TypeError("Unknown generated GraphQL operation");
-  return key as V1OperationKey;
+export function operationKey(key: unknown): OperationKey {
+  if (typeof key !== "string" || !Object.hasOwn(operationCatalog, key)) throw new TypeError("Unknown generated GraphQL operation");
+  return key as OperationKey;
 }
 
-export function v1GraphqlRequest(key: V1OperationKey, input: RecordValue, context: {
+export function buildGraphqlRequest(key: OperationKey, input: RecordValue, context: {
   requestId: string; projectId?: string; incarnation?: string; observedServingEpoch?: string;
   credentialDeliveryPermit?: RecordValue;
-}): { operation: V1Operation; body: RecordValue } {
-  const operation = v1Operations[operationKey(key)];
+}): { operation: OperationCatalogEntry; body: RecordValue } {
+  const operation = operationCatalog[operationKey(key)];
   if (operation.kind === "subscription") throw new TypeError("Use graphql-transport-ws for subscriptions");
   if (operation.plane === "communication") {
     if (!context.projectId) throw new TypeError("Communication operations require an explicit project");

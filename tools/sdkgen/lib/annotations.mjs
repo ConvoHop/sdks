@@ -72,7 +72,7 @@ export function expandedErrorCodes(annotations, operationAnnotation) {
  */
 export function checkAnnotations(sources) {
   const { annotations } = sources;
-  const schemaErrors = createValidator(sources.annotationsSchema, { label: "v1-annotations.schema.json" })(annotations);
+  const schemaErrors = createValidator(sources.annotationsSchema, { label: "annotations.schema.json" })(annotations);
   const operations = schemaOperations(sources.planes, planeOrder(sources.planes, annotations));
   const index = new Map(operations.map(operation => [operation.id, operation]));
   const annotated = isPlainObject(annotations?.operations) ? annotations.operations : {};
@@ -129,7 +129,7 @@ export function formatAnnotationReport(result) {
     }
   }
   if (result.schemaErrors.length) {
-    lines.push("", `INVALID: ${result.schemaErrors.length} violation(s) of schema/v1-annotations.schema.json:`);
+    lines.push("", `INVALID: ${result.schemaErrors.length} violation(s) of schema/annotations.schema.json:`);
     lines.push(formatValidationErrors(result.schemaErrors));
   }
   if (result.problems.length) {
@@ -151,7 +151,7 @@ function describeUnknown(id, planes, missing) {
   const planeName = id.slice(0, dot);
   const fieldName = id.slice(dot + 1);
   const plane = planes.find(item => item.name === planeName);
-  const reason = plane ? `${plane.path} has no root field "${fieldName}"` : `no schema/${planeName}-v1.graphql plane schema exists`;
+  const reason = plane ? `${plane.path} has no root field "${fieldName}"` : `no schema/${planeName}.graphql plane schema exists`;
   const candidates = missing.filter(operation => operation.plane === planeName).map(operation => operation.id);
   return { id, reason, suggestion: closest(id, candidates) };
 }
@@ -240,7 +240,7 @@ function checkSemantics({ annotations, planes, operations, index, report }) {
   for (const [name, plane] of Object.entries(annotations.planes)) {
     const source = planeByName.get(name);
     if (!source) {
-      report(pointer("planes", name), `no schema/${name}-v1.graphql plane schema exists`);
+      report(pointer("planes", name), `no schema/${name}.graphql plane schema exists`);
       continue;
     }
     if (plane.schema !== source.file) report(pointer("planes", name, "schema"), `must be "${source.file}"`);

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { checkAnnotations, formatAnnotationReport } from "../lib/annotations.mjs";
-import { IR_VERSION, IrBuildError, buildIr } from "../lib/ir.mjs";
+import { IrBuildError, buildIr } from "../lib/ir.mjs";
 import { createValidator } from "../lib/json-schema.mjs";
 import { formatJson } from "../lib/json.mjs";
 import { SourceError, loadSources } from "../lib/sources.mjs";
@@ -18,22 +18,19 @@ const find = (list, key, value) => {
 test("the committed repository IR is current, complete and valid", () => {
   const sources = repoSources();
   const ir = buildIr(sources);
-  const committed = JSON.parse(readFileSync(join(REPO_ROOT, "schema/v1-ir.json"), "utf8"));
-  assert.deepEqual(ir, committed, "schema/v1-ir.json is stale. Run npm run generate:graphql.");
+  const committed = JSON.parse(readFileSync(join(REPO_ROOT, "schema/ir.json"), "utf8"));
+  assert.deepEqual(ir, committed, "schema/ir.json is stale. Run npm run generate:graphql.");
   assert.deepEqual(createValidator(sources.irSchema)(committed), []);
-  assert.equal(ir.irVersion, IR_VERSION);
   assert.deepEqual(ir.operations.map(operation => operation.id).sort(), Object.keys(sources.annotations.operations).sort());
   assert.deepEqual(ir.realtime.events.map(event => event.type).sort(), Object.keys(sources.annotations.realtime.events).sort());
   assert.ok(ir.realtime.events.length > 0 && ir.realtime.channels.length > 0);
 });
 
-test("the IR version is semantic and the IR schema accepts only its major version", () => {
-  assert.equal(IR_VERSION, "1.0.0");
+test("the IR schema accepts the built IR and reports each violation by path", () => {
   const sources = fixtureSources();
   const ir = buildIr(sources);
   const validate = createValidator(sources.irSchema);
-  assert.deepEqual(validate({ ...ir, irVersion: "1.7.0" }), []);
-  assert.deepEqual(validate({ ...ir, irVersion: "2.0.0" }).map(error => error.path), ["/irVersion"]);
+  assert.deepEqual(validate(ir), []);
   const broken = structuredClone(ir);
   broken.operations[0].layer = "edge";
   broken.extra = true;
@@ -47,11 +44,11 @@ test("the IR version is semantic and the IR schema accepts only its major versio
 
 test("operations carry the plane, documents, context rules, inputs and annotations", () => {
   const ir = buildIr(fixtureSources());
-  assert.equal(ir.$schema, "./v1-ir.schema.json");
-  assert.deepEqual(ir.sources, { graphql: ["schema/alpha-v1.graphql", "schema/beta-v1.graphql"], annotations: "schema/v1-annotations.json" });
+  assert.equal(ir.$schema, "./ir.schema.json");
+  assert.deepEqual(ir.sources, { graphql: ["schema/alpha.graphql", "schema/beta.graphql"], annotations: "schema/annotations.json" });
   assert.deepEqual(ir.planes.map(plane => [plane.name, plane.schema, plane.context.type, plane.resolveOperation]), [
-    ["alpha", "schema/alpha-v1.graphql", "ContextInput", "alpha.resolveRequest"],
-    ["beta", "schema/beta-v1.graphql", "ContextInput", "beta.resolveRequest"],
+    ["alpha", "schema/alpha.graphql", "ContextInput", "alpha.resolveRequest"],
+    ["beta", "schema/beta.graphql", "ContextInput", "beta.resolveRequest"],
   ]);
   assert.deepEqual(ir.operations.map(operation => operation.id), [
     "alpha.capabilities", "alpha.resolveRequest", "alpha.items", "alpha.events", "alpha.job", "alpha.fetchHTTPStatus",
@@ -177,17 +174,17 @@ const appendTo = (plane, sdl) => ({ planes: { [plane]: text => `${text}\n${sdl}`
 const addJobField = (field, sdl) => ({ planes: { alpha: text => `${replaceOnce(text, "  output: Blob\n", `  output: Blob\n  ${field}\n`)}\n${sdl}` } });
 const UNSUPPORTED = [
   ["union types", appendTo("alpha", "union Result = Item | Job\n"),
-    "schema/alpha-v1.graphql: Result: union types are not supported by the SDK generators; see docs/sdk-generation.md"],
+    "schema/alpha.graphql: Result: union types are not supported by the SDK generators; see docs/sdk-generation.md"],
   ["interface types", appendTo("alpha", "interface Named {\n  name: String!\n}\n"),
-    "schema/alpha-v1.graphql: Named: interface types are not supported by the SDK generators; see docs/sdk-generation.md"],
+    "schema/alpha.graphql: Named: interface types are not supported by the SDK generators; see docs/sdk-generation.md"],
   ["@oneOf inputs", appendTo("alpha", "input Choice @oneOf {\n  a: Int\n  b: String\n}\n"),
-    "schema/alpha-v1.graphql: Choice: @oneOf input types are not supported by the SDK generators; see docs/sdk-generation.md"],
+    "schema/alpha.graphql: Choice: @oneOf input types are not supported by the SDK generators; see docs/sdk-generation.md"],
   ["custom directives", appendTo("beta", "directive @internal on FIELD_DEFINITION\n"),
-    "schema/beta-v1.graphql: custom directive @internal is not supported by the SDK generators; see docs/sdk-generation.md"],
+    "schema/beta.graphql: custom directive @internal is not supported by the SDK generators; see docs/sdk-generation.md"],
   ["arguments on non-root fields", { planes: { alpha: text => replaceOnce(text, "  name: String!\n", "  name(locale: String): String!\n") } },
-    "schema/alpha-v1.graphql: Item.name: only root fields may take arguments"],
+    "schema/alpha.graphql: Item.name: only root fields may take arguments"],
   ["shared type names with different definitions", { planes: { beta: text => replaceOnce(text, "  version: String!\n", "  version: String\n") } },
-    "Capabilities differs between schema/alpha-v1.graphql and schema/beta-v1.graphql; make the definitions identical or rename one"],
+    "Capabilities differs between schema/alpha.graphql and schema/beta.graphql; make the definitions identical or rename one"],
   ["recursive result types", addJobField("parent: Job", ""),
     "alpha.job: result type Job is recursive or nested deeper than 12 levels; see docs/sdk-generation.md"],
   ["result types nested deeper than the server allows", addJobField("nest: N0",
@@ -220,9 +217,9 @@ test("the build stops with the annotation report or the IR schema violations", (
 
   const strict = fixtureSources();
   strict.irSchema = structuredClone(strict.irSchema);
-  strict.irSchema.properties.irVersion.pattern = "^2\\.";
+  strict.irSchema.$defs.transport.properties.path.pattern = "^/rpc$";
   assert.throws(() => buildIr(strict), error => error instanceof IrBuildError
-    && error.message === 'The generated IR violates schema/v1-ir.schema.json:\n  /irVersion: must match pattern ^2\\. (got "1.0.0")');
+    && error.message === 'The generated IR violates schema/ir.schema.json:\n  /transport/path: must match pattern ^/rpc$ (got "/graphql")');
 });
 
 test("input files that cannot be loaded are reported by repository path", t => {
@@ -230,23 +227,23 @@ test("input files that cannot be loaded are reported by repository path", t => {
   const load = (paths = {}) => () => loadSources({ root, paths });
   const sourceError = prefix => error => error instanceof SourceError && error.message.startsWith(prefix);
 
-  writeFileSync(join(root, "schema/operations-v1.graphql"), "query Q {\n  a\n}\n");
-  writeFileSync(join(root, "schema/notes.graphql"), "type Query {\n  a: Int\n}\n");
-  assert.deepEqual(load()().planes.map(plane => plane.path), ["schema/alpha-v1.graphql", "schema/beta-v1.graphql"]);
+  writeFileSync(join(root, "schema/operations.graphql"), "query Q {\n  a\n}\n");
+  writeFileSync(join(root, "schema/notes-draft.graphql"), "type Query {\n  a: Int\n}\n");
+  assert.deepEqual(load()().planes.map(plane => plane.path), ["schema/alpha.graphql", "schema/beta.graphql"]);
 
-  const alpha = join(root, "schema/alpha-v1.graphql");
+  const alpha = join(root, "schema/alpha.graphql");
   const original = readFileSync(alpha, "utf8");
   writeFileSync(alpha, "type Query {");
-  assert.throws(load(), sourceError("schema/alpha-v1.graphql is not valid GraphQL: Syntax Error: "));
+  assert.throws(load(), sourceError("schema/alpha.graphql is not valid GraphQL: Syntax Error: "));
   writeFileSync(alpha, "type Query {\n  a: Missing\n}\n");
-  assert.throws(load(), { message: 'schema/alpha-v1.graphql is not a valid GraphQL schema: Unknown type "Missing".' });
+  assert.throws(load(), { message: 'schema/alpha.graphql is not a valid GraphQL schema: Unknown type "Missing".' });
   writeFileSync(alpha, replaceOnce(original, "  note: String\n}\n\ninput FetchInput", "  note: Item\n}\n\ninput FetchInput"));
-  assert.throws(load(), { message: "schema/alpha-v1.graphql is not a valid GraphQL schema: The type of PingInput.note must be Input Type but got: Item." });
+  assert.throws(load(), { message: "schema/alpha.graphql is not a valid GraphQL schema: The type of PingInput.note must be Input Type but got: Item." });
   writeFileSync(alpha, original);
 
   assert.throws(load({ schemaDir: "graphql" }), sourceError("graphql cannot be read: ENOENT"));
-  writeFileSync(join(root, "schema/v1-annotations.json"), "{");
-  assert.throws(load(), sourceError("schema/v1-annotations.json is not valid JSON: "));
-  rmSync(join(root, "schema/v1-annotations.json"));
-  assert.throws(load(), sourceError("schema/v1-annotations.json cannot be read: ENOENT"));
+  writeFileSync(join(root, "schema/annotations.json"), "{");
+  assert.throws(load(), sourceError("schema/annotations.json is not valid JSON: "));
+  rmSync(join(root, "schema/annotations.json"));
+  assert.throws(load(), sourceError("schema/annotations.json cannot be read: ENOENT"));
 });

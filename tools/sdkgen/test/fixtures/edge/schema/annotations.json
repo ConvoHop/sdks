@@ -1,9 +1,7 @@
 {
-  "$schema": "./v1-annotations.schema.json",
-  "annotationsVersion": 1,
+  "$schema": "./annotations.schema.json",
   "api": {
     "name": "edge",
-    "model": "v1",
     "summary": "Edge-case fixture for the sdkgen tests. It is not a ConvoHop API."
   },
   "transport": {
@@ -26,7 +24,7 @@
   },
   "planes": {
     "alpha": {
-      "schema": "alpha-v1.graphql",
+      "schema": "alpha.graphql",
       "summary": "Items, jobs and realtime events.",
       "context": {
         "argument": "context",
@@ -49,7 +47,7 @@
       "resolveOperation": "alpha.resolveRequest"
     },
     "beta": {
-      "schema": "beta-v1.graphql",
+      "schema": "beta.graphql",
       "summary": "Widgets.",
       "context": {
         "argument": "context",

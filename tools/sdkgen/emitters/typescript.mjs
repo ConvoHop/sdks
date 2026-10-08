@@ -5,12 +5,12 @@ import { codegenTypeName, naturalCompare } from "../lib/naming.mjs";
 /**
  * TypeScript operation types for @convohop/core.
  *
- * v1-generated.ts reproduces, byte for byte, what the typescript-operations
- * plugin of graphql-codegen printed for schema/operations-v1.graphql with
+ * graphql-types.ts reproduces, byte for byte, what the typescript-operations
+ * plugin of graphql-codegen printed for schema/operations.graphql with
  * { useTypeImports, skipTypename, strictScalars }. Parity was verified against
  * @graphql-codegen/cli 7.4.3 and typescript-operations 6.1.7 before those
  * packages were removed; the golden files in tools/sdkgen/test/golden and the
- * strict tsc test now pin the output. v1-operations.ts is the operation catalog
+ * strict tsc test now pin the output. operations.ts is the operation catalog
  * the runtime reads. Both are derived from the IR alone.
  */
 export const DEFAULT_DIRECTORY = "packages/core/src/generated";
@@ -146,7 +146,7 @@ function createRenderer(ir) {
   return { collectInput, collectOutputEnums, schemaTypeDeclaration, operationDeclarations };
 }
 
-/** The contents of v1-generated.ts. */
+/** The contents of graphql-types.ts. */
 export function renderGeneratedTypes(ir) {
   const renderer = createRenderer(ir);
   const used = new Set();
@@ -161,7 +161,7 @@ export function renderGeneratedTypes(ir) {
   return [EXACT, INCREMENTAL, [...schemaTypes, ...operations].join("\n")].join("\n");
 }
 
-/** `v1OutputShapes`: every non-input type, keyed by name, in IR order. */
+/** `outputShapes`: every non-input type, keyed by name, in IR order. */
 export function outputShapes(ir) {
   const shape = type => {
     if (type.kind === "object") return { kind: "object", fields: Object.fromEntries(type.fields.map(field => [field.name, printTypeRef(field.type)])) };
@@ -171,20 +171,20 @@ export function outputShapes(ir) {
   return Object.fromEntries(ir.types.filter(type => type.kind !== "input").map(type => [type.name, shape(type)]));
 }
 
-/** The contents of v1-operations.ts. */
+/** The contents of operations.ts. */
 export function renderOperationCatalog(ir) {
   const types = ir.operations.map(operation => {
     const names = operationTypeNames(operation);
     return `  "${operation.id}": { variables: Generated.${names.variables}; result: Generated.${names.result} };`;
   });
   return NOTICE +
-    'import type * as Generated from "./v1-generated.js";\n' +
-    `export interface V1OperationTypes {\n${types.join("\n")}\n}\n` +
-    "export type V1OperationKey = keyof V1OperationTypes;\n" +
-    "export interface V1Operation { plane: string; kind: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }\n" +
-    'export type V1OutputShape = { kind: "scalar" } | { kind: "enum"; values: readonly string[] } | { kind: "object"; fields: Readonly<Record<string, string>> };\n' +
-    `export const v1OutputShapes: Readonly<Record<string, V1OutputShape>> = ${JSON.stringify(outputShapes(ir), null, 2)};\n` +
-    `export const v1Operations: Record<V1OperationKey, V1Operation> = ${JSON.stringify(operationCatalog(ir), null, 2)};\n`;
+    'import type * as Generated from "./graphql-types.js";\n' +
+    `export interface OperationTypes {\n${types.join("\n")}\n}\n` +
+    "export type OperationKey = keyof OperationTypes;\n" +
+    "export interface OperationCatalogEntry { plane: string; kind: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }\n" +
+    'export type OutputShape = { kind: "scalar" } | { kind: "enum"; values: readonly string[] } | { kind: "object"; fields: Readonly<Record<string, string>> };\n' +
+    `export const outputShapes: Readonly<Record<string, OutputShape>> = ${JSON.stringify(outputShapes(ir), null, 2)};\n` +
+    `export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = ${JSON.stringify(operationCatalog(ir), null, 2)};\n`;
 }
 
 export default defineEmitter({
@@ -192,8 +192,8 @@ export default defineEmitter({
   description: "TypeScript operation types and catalog for @convohop/core",
   emit(ir, { directory = DEFAULT_DIRECTORY } = {}) {
     return [
-      { path: `${directory}/v1-generated.ts`, contents: renderGeneratedTypes(ir) },
-      { path: `${directory}/v1-operations.ts`, contents: renderOperationCatalog(ir) },
+      { path: `${directory}/graphql-types.ts`, contents: renderGeneratedTypes(ir) },
+      { path: `${directory}/operations.ts`, contents: renderOperationCatalog(ir) },
     ];
   },
 });

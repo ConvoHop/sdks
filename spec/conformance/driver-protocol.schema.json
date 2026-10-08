@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:convohop:conformance:driver-protocol",
-  "title": "ConvoHop conformance driver protocol v1",
+  "title": "ConvoHop conformance driver protocol",
   "description": "Message shapes for the JSON-over-stdio driver protocol. spec/conformance/driver-protocol.md is normative; the runner validates every response against these definitions.",
   "$defs": {
     "requestId": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
@@ -44,8 +44,7 @@
       "properties": {
         "code": {
           "enum": [
-            "INVALID_REQUEST", "PROTOCOL_VERSION_UNSUPPORTED", "UNKNOWN_METHOD", "INVALID_PARAMS", "UNKNOWN_HANDLE",
-            "UNSUPPORTED", "DRIVER_FAILURE"
+            "INVALID_REQUEST", "UNKNOWN_METHOD", "INVALID_PARAMS", "UNKNOWN_HANDLE", "UNSUPPORTED", "DRIVER_FAILURE"
           ]
         },
         "message": { "type": "string" }
@@ -68,9 +67,8 @@
     "helloParams": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["protocolVersions", "runner"],
+      "required": ["runner"],
       "properties": {
-        "protocolVersions": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "integer", "minimum": 1 } },
         "runner": {
           "type": "object",
           "additionalProperties": false,
@@ -82,9 +80,8 @@
     "helloResult": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["protocolVersion", "driver", "roles", "features"],
+      "required": ["driver", "roles", "features"],
       "properties": {
-        "protocolVersion": { "type": "integer", "minimum": 1 },
         "driver": {
           "type": "object",
           "additionalProperties": false,

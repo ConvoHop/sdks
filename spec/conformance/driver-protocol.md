@@ -1,4 +1,4 @@
-# Conformance driver protocol, version 1
+# Conformance driver protocol
 
 A driver adapts one SDK to the [conformance runner](README.md). The runner
 starts it as a child process and exchanges JSON messages with it over
@@ -32,8 +32,8 @@ against it.
   may therefore process requests strictly in order.
 
 ```text
-runner → driver  {"id":1,"method":"hello","params":{"protocolVersions":[1],"runner":{"name":"convohop-conformance-runner","version":"0.1.0"}}}
-driver → runner  {"id":1,"result":{"protocolVersion":1,"driver":{"name":"example","version":"1.0.0","language":"python"},"roles":{"backend":{"operations":["principals.create"]}},"features":[]}}
+runner → driver  {"id":1,"method":"hello","params":{"runner":{"name":"convohop-conformance-runner","version":"0.1.0"}}}
+driver → runner  {"id":1,"result":{"driver":{"name":"example","version":"1.0.0","language":"python"},"roles":{"backend":{"operations":["principals.create"]}},"features":[]}}
 runner → driver  {"id":2,"method":"reset","params":{}}
 driver → runner  {"id":2,"result":{}}
 ```
@@ -52,8 +52,7 @@ running.
 | Code | Use |
 | --- | --- |
 | `INVALID_REQUEST` | The line is not JSON, the id is invalid, `method` is not a string, `params` is not an object, or `hello` is not the first request or is sent twice. |
-| `PROTOCOL_VERSION_UNSUPPORTED` | `hello` offered no version the driver speaks. |
-| `UNKNOWN_METHOD` | The method is not defined by this protocol version. |
+| `UNKNOWN_METHOD` | The driver does not implement the method. |
 | `INVALID_PARAMS` | A parameter is missing, has the wrong type, or cannot be converted to the SDK's types; or a handle is reused. |
 | `UNKNOWN_HANDLE` | A client or subscription handle is not open. |
 | `UNSUPPORTED` | The request needs a role, operation or feature the driver did not declare. |
@@ -88,21 +87,19 @@ A driver that declares `retryAfter` reports that delay as `retryAfterMs`
 
 ### hello
 
-The first request, sent exactly once. The runner offers the protocol
-versions it speaks, and the driver selects one and declares what it
-supports.
+The first request, sent exactly once. The runner identifies itself, and the
+driver declares what it supports.
 
 Params:
 
 ```json
-{ "protocolVersions": [1], "runner": { "name": "convohop-conformance-runner", "version": "0.1.0" } }
+{ "runner": { "name": "convohop-conformance-runner", "version": "0.1.0" } }
 ```
 
 Result:
 
 ```json
 {
-  "protocolVersion": 1,
   "driver": {
     "name": "convohop-typescript-reference",
     "version": "0.1.0",
@@ -117,8 +114,6 @@ Result:
 }
 ```
 
-- `protocolVersion` must be one of the offered versions. If none is
-  supported, answer `PROTOCOL_VERSION_UNSUPPORTED`.
 - `driver.language` is a lowercase language name, such as `python`, `go`,
   `kotlin` or `csharp`. `packages` optionally lists the SDK packages under
   test and their versions; it appears in reports.
@@ -263,6 +258,10 @@ A driver must also exit when its stdin closes.
 A feature is optional behaviour that a driver declares in `hello`.
 Scenarios and steps that need an undeclared feature are skipped.
 
+The protocol has no version number. It changes additively: new optional
+behaviour becomes a new feature, and a driver that predates a new method
+answers it with `UNKNOWN_METHOD`.
+
 | Feature | The driver |
 | --- | --- |
 | `realtime` | Implements `realtime.subscribe`, `realtime.collect` and `realtime.close` for user clients. |
@@ -286,7 +285,6 @@ current scenario and starts a fresh driver for the next one:
 
 - writing anything other than a valid response to stdout;
 - answering an id that is not outstanding;
-- selecting a protocol version that was not offered;
 - missing a deadline; or
 - exiting before `shutdown`.
 

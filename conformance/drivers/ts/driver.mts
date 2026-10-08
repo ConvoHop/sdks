@@ -1,4 +1,4 @@
-// ConvoHop conformance reference driver: NDJSON over stdio, protocol v1 (spec/conformance/driver-protocol.md).
+// ConvoHop conformance reference driver: NDJSON over stdio (spec/conformance/driver-protocol.md).
 import { createInterface } from "node:readline";
 import { setTimeout as delay } from "node:timers/promises";
 import { parseArgs } from "node:util";
@@ -6,11 +6,10 @@ import { ParamsError, counter, handle, integer, isRecord, optionalText, record, 
 import { FEATURES, MemoryStorage, OPERATIONS, PACKAGES, ROLES, createClient, driverError, operation, verifyWebhook, watch,
   type DriverError, type RealtimeHandle, type Role, type SdkClient } from "./sdk.mjs";
 
-const PROTOCOL_VERSION = 1;
 const DRIVER = { name: "convohop-typescript-reference", version: "0.1.0", language: "typescript" } as const;
 
-type ProtocolCode = "INVALID_REQUEST" | "PROTOCOL_VERSION_UNSUPPORTED" | "UNKNOWN_METHOD" | "INVALID_PARAMS" |
-  "UNKNOWN_HANDLE" | "UNSUPPORTED" | "DRIVER_FAILURE";
+type ProtocolCode = "INVALID_REQUEST" | "UNKNOWN_METHOD" | "INVALID_PARAMS" | "UNKNOWN_HANDLE" | "UNSUPPORTED" |
+  "DRIVER_FAILURE";
 
 class ProtocolError extends Error {
   constructor(readonly code: ProtocolCode, message: string) { super(message); }
@@ -63,15 +62,10 @@ function stop(entry: Subscription): void {
   for (const wake of entry.waiters) wake();
 }
 
-function hello(args: Args): unknown {
+function hello(_args: Args): unknown {
   if (negotiated) throw new ProtocolError("INVALID_REQUEST", "hello was already negotiated");
-  const versions = args.protocolVersions;
-  if (!Array.isArray(versions) || !versions.every(version => Number.isSafeInteger(version)))
-    throw new ParamsError("protocolVersions must be an array of integers");
-  if (!versions.includes(PROTOCOL_VERSION))
-    throw new ProtocolError("PROTOCOL_VERSION_UNSUPPORTED", `This driver speaks protocol version ${PROTOCOL_VERSION}`);
   negotiated = true;
-  return { protocolVersion: PROTOCOL_VERSION, driver: { ...DRIVER, packages: PACKAGES },
+  return { driver: { ...DRIVER, packages: PACKAGES },
     roles: Object.fromEntries(roles.map(role => [role, { operations: OPERATIONS[role] }])), features: FEATURES };
 }
 

@@ -1,8 +1,8 @@
 import { defineEmitter } from "../lib/emitter.mjs";
 import { operationCatalog } from "../lib/ir-model.mjs";
 
-export const DOCUMENTS_PATH = "schema/operations-v1.graphql";
-export const CATALOG_PATH = "schema/v1-operations.json";
+export const DOCUMENTS_PATH = "schema/operations.graphql";
+export const CATALOG_PATH = "schema/operations.json";
 
 /** Language-neutral operation documents and the runtime operation catalog. */
 export default defineEmitter({

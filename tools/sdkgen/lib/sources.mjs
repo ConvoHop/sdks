@@ -8,12 +8,12 @@ import { codeUnitCompare } from "./naming.mjs";
 /** Repository-relative inputs. Every path may be overridden (tests point them at fixtures). */
 export const DEFAULT_PATHS = Object.freeze({
   schemaDir: "schema",
-  annotations: "schema/v1-annotations.json",
-  annotationsSchema: "schema/v1-annotations.schema.json",
-  irSchema: "schema/v1-ir.schema.json",
+  annotations: "schema/annotations.json",
+  annotationsSchema: "schema/annotations.schema.json",
+  irSchema: "schema/ir.schema.json",
 });
 
-const PLANE_FILE = /^([a-z][A-Za-z0-9]*)-v1\.graphql$/;
+const PLANE_FILE = /^([a-z][A-Za-z0-9]*)\.graphql$/;
 
 /** An input file is missing, unreadable, not valid JSON or not a valid GraphQL schema. */
 export class SourceError extends Error {}
@@ -41,8 +41,8 @@ export function loadSources({ root, paths = {} }) {
 }
 
 /**
- * Finds `<plane>-v1.graphql` type-system files. Executable documents with the
- * same naming pattern (the generated `operations-v1.graphql`) are skipped.
+ * Finds `<plane>.graphql` type-system files. Executable documents with the
+ * same naming pattern (the generated `operations.graphql`) are skipped.
  */
 export function discoverPlanes(directory, displayDirectory) {
   const files = attempt(displayDirectory, "cannot be read", () => readdirSync(directory));

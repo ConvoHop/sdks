@@ -1,4 +1,4 @@
-import { v1Id, v1String, type PageOptions } from "@convohop/core";
+import { parseId, parseString, type PageOptions } from "@convohop/core";
 
 export function required<T>(value: T | null | undefined): T {
   if (value == null) throw new TypeError("Missing current authority result");
@@ -15,11 +15,11 @@ export function pageLimit(limit: number | undefined, fallback = 100): number {
 }
 /** Cursor and limit for reads whose authority default applies when `limit` is omitted. */
 export function pageInput(options: PageOptions): { cursor?: string; limit?: number } {
-  return { ...(options.cursor === undefined ? {} : { cursor: v1String(options.cursor) }),
+  return { ...(options.cursor === undefined ? {} : { cursor: parseString(options.cursor) }),
     ...(options.limit === undefined ? {} : { limit: pageLimit(options.limit) }) };
 }
 export function actAsInput(options: ActAsOptions): { actAsPrincipalId?: string } {
-  return options.actAs === undefined ? {} : { actAsPrincipalId: v1Id(options.actAs) };
+  return options.actAs === undefined ? {} : { actAsPrincipalId: parseId(options.actAs) };
 }
 export function mismatch(what: string): TypeError {
   return new TypeError(`${what} does not match the request`);

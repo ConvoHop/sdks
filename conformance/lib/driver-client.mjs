@@ -4,7 +4,6 @@ import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 import { setTimeout as delay } from "node:timers/promises";
 import { compileDefinition, formatErrors } from "./json-schema.mjs";
-import { PROTOCOL_VERSION } from "./files.mjs";
 
 /** The driver answered with a protocol error ({"error": {...}}). */
 export class DriverProtocolError extends Error {
@@ -124,14 +123,9 @@ export class DriverClient {
     });
   }
 
-  /** Negotiates protocol v1 and returns the driver's declaration. */
+  /** Introduces the runner and returns the driver's declaration. */
   async hello(runner) {
-    const result = await this.request("hello", { protocolVersions: [PROTOCOL_VERSION], runner }, { timeoutMs: 30_000 });
-    if (result.protocolVersion !== PROTOCOL_VERSION) {
-      this.#fatal(`driver selected protocol version ${result.protocolVersion}, which was not offered`);
-      throw this.#dead;
-    }
-    return result;
+    return this.request("hello", { runner }, { timeoutMs: 30_000 });
   }
 
   /** Asks the driver to exit, then kills it if it does not. */

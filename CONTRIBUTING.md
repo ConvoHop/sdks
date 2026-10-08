@@ -71,19 +71,19 @@ Each package has its own tests in `packages/<name>/test/`.
 
 ## Generated code
 
-`schema/communication-v1.graphql` and `schema/management-v1.graphql` are
+`schema/communication.graphql` and `schema/management.graphql` are
 exported by the ConvoHop API and are the source of truth.
-`schema/v1-annotations.json` adds the facts that GraphQL can't express. See
+`schema/annotations.json` adds the facts that GraphQL can't express. See
 [Annotating operations](#annotating-operations). The generator in
 `tools/sdkgen` builds a language-neutral IR from them and generates these
 files from the IR:
 
-- `schema/v1-ir.json`
-- `schema/operations-v1.graphql`
-- `schema/v1-operations.json`
-- `packages/core/src/generated/v1-operations.ts`
-- `packages/core/src/generated/v1-generated.ts`
-- `docs/snippets/v1/`
+- `schema/ir.json`
+- `schema/operations.graphql`
+- `schema/operations.json`
+- `packages/core/src/generated/operations.ts`
+- `packages/core/src/generated/graphql-types.ts`
+- `docs/snippets/`
 
 ```sh
 npm run generate:graphql   # regenerate after a schema or annotation change
@@ -106,7 +106,7 @@ API and how to add a language.
 Each root field of each GraphQL schema in `schema/` is an operation with the
 ID `<plane>.<field>`, for example `communication.sendMessage`. Every operation
 needs an entry under `operations` in
-[`schema/v1-annotations.json`](schema/v1-annotations.json). The entry records
+[`schema/annotations.json`](schema/annotations.json). The entry records
 which SDKs expose the operation, who can call it, and how it retries,
 paginates, streams and fails. Every language's generator relies on it.
 
@@ -129,7 +129,7 @@ When you add, rename or remove an operation:
    the file. Entries can only refer to catalog items.
 5. Run `npm run generate:graphql` until it passes. Commit the schema, the
    annotations and every regenerated file together, including
-   `schema/v1-ir.json` and `docs/snippets/v1/`.
+   `schema/ir.json` and `docs/snippets/`.
 
 If you include this repository as a Git submodule, run the commands inside the
 submodule.
@@ -215,15 +215,18 @@ change. An absent marker then means the original.
 - **No version markers in names.** Don't put versions in file or directory
   names, type or export names, routes, configuration keys, format or mode
   tags, schema-version payload fields, pull request titles or documentation
-  headings. Existing `v1` and `V1` names predate this rule and are being
-  removed. Don't add new ones.
+  headings. `npm test` runs `test/names.test.mjs`, which fails when a
+  tracked path, an exported identifier or a GraphQL schema identifier gains
+  a version marker. Its allowlist names the reason for each version that
+  stays.
 - **Keep legitimate versions.** These stay: the Standard Webhooks `v1,`
   signature prefix, LiveKit's `/rtc/v1` paths, npm package versions and
   release tags (see [RELEASING.md](RELEASING.md)), Go module majors, GitHub
   Actions `@vN` references, dependency majors, versions that external
-  specifications or vendors define (such as SLSA and in-toto type URIs),
-  signing-key rotation versions, database row versions, sequence numbers, and
-  tests that check that retired `/v1` paths fail.
+  specifications or vendors define (such as SLSA and in-toto type URIs and
+  the FCM HTTP v1 API), versions that are data (such as `catalogVersion` and
+  `secretVersion`), signing-key rotation versions, database row versions,
+  sequence numbers, and tests that check that retired `/v1` paths fail.
 
 ## Adding a language or platform
 

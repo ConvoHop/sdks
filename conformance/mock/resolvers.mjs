@@ -11,7 +11,7 @@ const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 const DECIMAL = /^(0|[1-9][0-9]*)$/;
 const I64_MAX = 9223372036854775807n;
 const isRecord = value => value !== null && typeof value === "object" && !Array.isArray(value);
-// transport.http.maxDocumentBytes in schema/v1-ir.json; conformance/test/spec.test.mjs keeps them equal.
+// transport.http.maxDocumentBytes in schema/ir.json; conformance/test/spec.test.mjs keeps them equal.
 export const MAX_DOCUMENT_BYTES = 32768;
 
 const SCALARS = {
@@ -39,8 +39,8 @@ function strictSchema(file) {
 }
 
 export const schemas = Object.freeze({
-  communication: strictSchema("communication-v1.graphql"),
-  management: strictSchema("management-v1.graphql"),
+  communication: strictSchema("communication.graphql"),
+  management: strictSchema("management.graphql"),
 });
 
 const reply = (requestId, result) => ({ status: "ok", requestId, serverTime: new Date().toISOString(), receiptId: null,

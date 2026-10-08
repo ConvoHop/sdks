@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "test": "npm test --workspaces && npm run test:sdkgen",
+    "test": "npm test --workspaces && npm run test:sdkgen && node --test test/names.test.mjs",
     "test:conformance": "npm test -w conformance",
     "conformance": "npm run build && node conformance/runner.mjs",
     "generate:conformance": "npm run build -w packages/server && node conformance/lib/webhook-vectors.mjs --write && node conformance/lib/push-vectors.mjs --write",

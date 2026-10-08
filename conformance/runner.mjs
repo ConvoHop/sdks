@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { DriverSlot, Engine, redact } from "./lib/engine.mjs";
 import { parseCommand } from "./lib/driver-client.mjs";
-import { REFERENCE_DRIVER, REPORT_DIR, RUNNER, SCENARIO_DIR, PROTOCOL_VERSION } from "./lib/files.mjs";
+import { REFERENCE_DRIVER, REPORT_DIR, RUNNER, SCENARIO_DIR } from "./lib/files.mjs";
 import { failureText, totals, writeReports } from "./lib/report.mjs";
 import { loadSuites, selected } from "./lib/scenarios.mjs";
 import { loadSpec } from "./lib/spec.mjs";
@@ -144,7 +144,7 @@ export async function run(argv, { stdout = process.stdout, stderr = process.stde
   }
 
   const summary = {
-    runner: RUNNER, protocolVersion: PROTOCOL_VERSION, driver: describeDriver(primary.hello),
+    runner: RUNNER, driver: describeDriver(primary.hello),
     fixtureDriver: fixture ? describeDriver(fixture.hello) : null,
     target: { kind: target.kind, name: target.descriptor.name, capabilities: target.descriptor.capabilities ?? [] },
     startedAt, durationMs: Math.round(performance.now() - clock), suites: results,

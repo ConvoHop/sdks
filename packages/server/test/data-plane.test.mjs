@@ -1,12 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ScopeRequiredProblem, V1Problem, V1ProjectServerClient, v1Operations } from "@convohop/server";
+import { ScopeRequiredProblem, ConvoHopProblem, ProjectServerClient, operationCatalog } from "@convohop/server";
 import { full, reply } from "../../../test/graphql-fixtures.mjs";
 
 const schema = name => JSON.parse(readFileSync(new URL(`../../../schema/${name}`, import.meta.url), "utf8"));
-const annotations = schema("v1-annotations.json"), scopeNames = new Set(schema("v1-ir.json").scopes.map(scope => scope.name));
-const operationKeys = new Map(Object.entries(v1Operations).map(([key, operation]) => [operation.operationName, key]));
+const annotations = schema("annotations.json"), scopeNames = new Set(schema("ir.json").scopes.map(scope => scope.name));
+const operationKeys = new Map(Object.entries(operationCatalog).map(([key, operation]) => [operation.operationName, key]));
 /** Backend-key operations, each with its alternative scope sets; every scope in one set is required. */
 const backendKeyScopes = new Map(Object.entries(annotations.operations).flatMap(([key, operation]) => {
   const alternatives = operation.auth.filter(entry => entry.credential === "backendKey").map(entry => entry.scopes ?? []);
@@ -91,7 +91,7 @@ const calls = [
 
 function serverWith(respond) {
   const requests = [];
-  const server = new V1ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation, backendKey,
+  const server = new ProjectServerClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation, backendKey,
     fetch: async (_url, options) => {
       const request = JSON.parse(options.body), key = operationKeys.get(request.operationName);
       assert.ok(key, request.operationName);
@@ -132,7 +132,7 @@ test("every annotated backend-key operation has a typed Server SDK method, or a 
   for (const [key, call, input] of calls) {
     const before = requests.length, scope = backendKeyScopes.get(key)[0]?.[0];
     await assert.rejects(call(server), error => {
-      assert.ok(error instanceof V1Problem, key);
+      assert.ok(error instanceof ConvoHopProblem, key);
       assert.equal(error.requestId, requests.at(-1).requestId, key);
       assert.equal(error.message.includes(backendKey), false, key);
       if (scope === undefined) {
@@ -254,14 +254,14 @@ test("ending a live session completes only with an enforced media cutoff", async
     failure: { code: "LIVE_SESSION_CLOSED", message: "The live session already ended" } })]);
   await assert.rejects((await failed.server.liveSession(liveSessionId).end({ expectedGeneration: "1",
     expectedRevision: "6" }, { requestId })).completed(), error => {
-    assert.ok(error instanceof V1Problem);
+    assert.ok(error instanceof ConvoHopProblem);
     assert.deepEqual([error.code, error.requestId, error.outcome, error.status], ["LIVE_SESSION_CLOSED", requestId, "accepted", 409]);
     return true;
   });
 
   const pending = liveServer([liveOperation("RUNNING"), liveOperation("RUNNING")]);
   await assert.rejects(pending.server.liveOperation(operationId).completed({ timeoutMs: 1 }),
-    { name: "V1Problem", code: "RESOLUTION_REQUIRED", outcome: "accepted" });
+    { name: "ConvoHopProblem", code: "RESOLUTION_REQUIRED", outcome: "accepted" });
   await assert.rejects(pending.server.liveOperation(operationId).completed({ timeoutMs: 0 }), RangeError);
 
   const moved = liveServer([liveOperation("RUNNING"), liveOperation("RUNNING", { liveSessionId: crypto.randomUUID() })]);
