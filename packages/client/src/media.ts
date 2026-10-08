@@ -44,9 +44,8 @@ function register(grant: NativeGrant) {
         this.addEventListener("open", event => {
           if (this.#admitted) return;
           event.stopImmediatePropagation();
-          const prelude = JSON.stringify({ type: "convohop.admission.v1", protocolVersion: "1",
-            admissionAttemptId: gate.attemptId, mode: gate.grant.admissionTicket.mode,
-            ticket: gate.grant.admissionTicket, leaseProof: gate.grant.forwardingLease });
+          const prelude = JSON.stringify({ type: "convohop.admission", admissionAttemptId: gate.attemptId,
+            mode: gate.grant.admissionTicket.mode, ticket: gate.grant.admissionTicket, leaseProof: gate.grant.forwardingLease });
           if (new TextEncoder().encode(prelude).length > 16384) {
             gate.reject(new Error("Native admission exceeds the protocol bound"));
             Native.prototype.close.call(this, 1008, "Admission too large"); return;
@@ -58,7 +57,7 @@ function register(grant: NativeGrant) {
           event.stopImmediatePropagation();
           try {
             const frame = parseObject(JSON.parse(parseString(event.data)));
-            if (frame.type !== "convohop.admitted.v1" || frame.leaseExpiresAt !== gate.grant.leaseExpiresAt) throw new Error("Native admission was not accepted");
+            if (frame.type !== "convohop.admitted" || frame.leaseExpiresAt !== gate.grant.leaseExpiresAt) throw new Error("Native admission was not accepted");
             if (frame.participationId !== gate.grant.participationId)
               throw new Error("Native admission participation mismatch");
             const value = { admissionId: parseId(frame.admissionId), nativeConnectionId: parseId(frame.nativeConnectionId) };
@@ -169,8 +168,8 @@ export class MediaConnection {
     const result = new MediaConnection(participation, options);
     const { requestId, grant } = await participation.connectionGrant(options);
     const ticket = parseObject(grant.admissionTicket), lease = parseObject(grant.forwardingLease);
-    if (ticket.participationId !== participation.participationId || lease.participationId !== participation.participationId ||
-        lease.leaseVersion !== "2") throw new TypeError("Native proof is not participation-bound");
+    if (ticket.participationId !== participation.participationId || lease.participationId !== participation.participationId)
+      throw new TypeError("Native proof is not participation-bound");
     await participation.connectionAttempted();
     await result.#open({ ...grant, admissionTicket: ticket, forwardingLease: lease }, requestId);
     return result;

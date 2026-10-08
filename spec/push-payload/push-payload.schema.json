@@ -59,12 +59,11 @@
       "description": "A message for the recipient.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["eventId", "eventType", "eventVersion", "occurredAt", "projectId", "subjectRef", "recipientId",
+      "required": ["eventId", "eventType", "occurredAt", "projectId", "subjectRef", "recipientId",
         "conversationId", "senderId", "connected", "messageId"],
       "properties": {
         "eventId": { "$ref": "#/$defs/uuid" },
         "eventType": { "const": "notification.message" },
-        "eventVersion": { "const": "1" },
         "occurredAt": { "$ref": "#/$defs/timestamp" },
         "projectId": { "$ref": "#/$defs/uuid" },
         "subjectRef": {
@@ -86,12 +85,11 @@
       "description": "An incoming call: a ring for the recipient.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["eventId", "eventType", "eventVersion", "occurredAt", "projectId", "subjectRef", "recipientId",
+      "required": ["eventId", "eventType", "occurredAt", "projectId", "subjectRef", "recipientId",
         "conversationId", "senderId", "connected", "liveSessionId", "alertId", "expiresAt", "mediaProfile"],
       "properties": {
         "eventId": { "$ref": "#/$defs/uuid" },
         "eventType": { "const": "notification.call" },
-        "eventVersion": { "const": "1" },
         "occurredAt": { "$ref": "#/$defs/timestamp" },
         "projectId": { "$ref": "#/$defs/uuid" },
         "subjectRef": { "$ref": "#/$defs/liveSessionRef" },
@@ -109,12 +107,11 @@
       "description": "A ring that stopped for the recipient.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["eventId", "eventType", "eventVersion", "occurredAt", "projectId", "subjectRef", "recipientId",
+      "required": ["eventId", "eventType", "occurredAt", "projectId", "subjectRef", "recipientId",
         "conversationId", "senderId", "connected", "liveSessionId", "alertId", "expiresAt", "mediaProfile", "reason"],
       "properties": {
         "eventId": { "$ref": "#/$defs/uuid" },
         "eventType": { "const": "notification.callCancelled" },
-        "eventVersion": { "const": "1" },
         "occurredAt": { "$ref": "#/$defs/timestamp" },
         "projectId": { "$ref": "#/$defs/uuid" },
         "subjectRef": { "$ref": "#/$defs/liveSessionRef" },
@@ -164,7 +161,7 @@
       }
     },
     "data": {
-      "description": "The convohop object every payload carries: the event's fields without eventVersion, subjectRef, connected and preview. APNs VoIP, FCM and Web Push payloads also carry the visible title and body here.",
+      "description": "The convohop object every payload carries: the event's fields without subjectRef, connected and preview. APNs VoIP, FCM and Web Push payloads also carry the visible title and body here.",
       "type": "object",
       "additionalProperties": false,
       "required": ["eventId", "eventType", "occurredAt", "projectId", "recipientId", "conversationId", "senderId"],

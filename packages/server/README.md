@@ -236,8 +236,8 @@ and message or call, for your [push notifications](#push-payloads). Narrow on
 `event.known`, then on `event.eventType`. An event type that this SDK doesn't
 know returns `known: false` and never throws, so acknowledge it. So does a
 notification event that doesn't match the
-[push payload contract](../../spec/push-payload/README.md), such as one with
-another `eventVersion`.
+[push payload contract](../../spec/push-payload/README.md), such as one
+missing a required field.
 `webhooks.verifySignature()` checks only the headers, timestamp and
 signature, and returns `{ webhookId, timestamp }` for bodies you parse
 yourself.

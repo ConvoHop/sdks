@@ -52,7 +52,6 @@ subscription CommunicationConversationEvents($context: RequestContextInput!, $in
       eventId
       conversationId
       sequence
-      eventVersion
       type
       occurredAt
       subjectRef {

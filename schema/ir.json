@@ -1011,9 +1011,9 @@
       "input": null,
       "result": {"type": {"kind": "object", "name": "CapabilitiesReply", "nullable": false}},
       "document": {
-        "text": "query CommunicationCapabilities($context: RequestContextInput!) {\n  capabilities(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      contractVersion\n      serverRelease\n      publicApiVersion\n      wssVersions\n      capabilityRevision\n      limitsRevision\n      features {\n        chat\n        inbox\n        lexicalSearch\n        typing\n        webhooks\n        liveSessions\n        liveBroadcast\n      }\n      limits {\n        key\n        value {\n          maximum\n          unit\n          scope\n          milliseconds\n          policyId\n          revision\n        }\n      }\n      environment\n      productionQualified\n      mediaPolicy {\n        leasePolicyId\n        leaseProtocolVersion\n        maxLeaseMs\n        renewAttemptMs\n        preludeMaxBytes\n        preludeTimeoutMs\n        clockProfileId\n      }\n      geoControlAuthorityId\n      offerings\n      geos\n      installationProfiles\n      portalIdentity\n    }\n  }\n}",
-        "bytes": 1117,
-        "selectedFields": 54,
+        "text": "query CommunicationCapabilities($context: RequestContextInput!) {\n  capabilities(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      serverRelease\n      capabilityRevision\n      limitsRevision\n      features {\n        chat\n        inbox\n        lexicalSearch\n        typing\n        webhooks\n        liveSessions\n        liveBroadcast\n      }\n      limits {\n        key\n        value {\n          maximum\n          unit\n          scope\n          milliseconds\n          policyId\n          revision\n        }\n      }\n      environment\n      productionQualified\n      mediaPolicy {\n        leasePolicyId\n        maxLeaseMs\n        renewAttemptMs\n        preludeMaxBytes\n        preludeTimeoutMs\n        clockProfileId\n      }\n      geoControlAuthorityId\n      offerings\n      geos\n      installationProfiles\n      portalIdentity\n    }\n  }\n}",
+        "bytes": 1025,
+        "selectedFields": 50,
         "depth": 4
       },
       "idempotency": "safe",
@@ -1579,9 +1579,9 @@
       "input": {"argument": "input", "type": "EventsRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "EventsReply", "nullable": false}},
       "document": {
-        "text": "query CommunicationEvents($context: RequestContextInput!, $input: EventsRequestInput!) {\n  events(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        eventId\n        conversationId\n        sequence\n        eventVersion\n        type\n        occurredAt\n        subjectRef {\n          kind\n          id\n        }\n        payload {\n          messageId\n          revision\n          revisionSequence\n          principalId\n          membershipEpoch\n          visibilityEpoch\n          kind\n          throughSequence\n          callId\n          generation\n          state\n          cutoffEvidence\n          liveSessionId\n        }\n      }\n      complete\n      refreshRequired\n      nextCursor {\n        incarnation\n        conversationId\n        sequence\n      }\n    }\n  }\n}",
-        "bytes": 986,
-        "selectedFields": 46,
+        "text": "query CommunicationEvents($context: RequestContextInput!, $input: EventsRequestInput!) {\n  events(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        eventId\n        conversationId\n        sequence\n        type\n        occurredAt\n        subjectRef {\n          kind\n          id\n        }\n        payload {\n          messageId\n          revision\n          revisionSequence\n          principalId\n          membershipEpoch\n          visibilityEpoch\n          kind\n          throughSequence\n          callId\n          generation\n          state\n          cutoffEvidence\n          liveSessionId\n        }\n      }\n      complete\n      refreshRequired\n      nextCursor {\n        incarnation\n        conversationId\n        sequence\n      }\n    }\n  }\n}",
+        "bytes": 965,
+        "selectedFields": 45,
         "depth": 4
       },
       "idempotency": "safe",
@@ -4871,9 +4871,9 @@
       "input": {"argument": "input", "type": "EventsRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "EventPage", "nullable": false}},
       "document": {
-        "text": "subscription CommunicationConversationEvents($context: RequestContextInput!, $input: EventsRequestInput!) {\n  conversationEvents(context: $context, input: $input) {\n    items {\n      eventId\n      conversationId\n      sequence\n      eventVersion\n      type\n      occurredAt\n      subjectRef {\n        kind\n        id\n      }\n      payload {\n        messageId\n        revision\n        revisionSequence\n        principalId\n        membershipEpoch\n        visibilityEpoch\n        kind\n        throughSequence\n        callId\n        generation\n        state\n        cutoffEvidence\n        liveSessionId\n      }\n    }\n    complete\n    refreshRequired\n    nextCursor {\n      incarnation\n      conversationId\n      sequence\n    }\n  }\n}",
-        "bytes": 728,
-        "selectedFields": 31,
+        "text": "subscription CommunicationConversationEvents($context: RequestContextInput!, $input: EventsRequestInput!) {\n  conversationEvents(context: $context, input: $input) {\n    items {\n      eventId\n      conversationId\n      sequence\n      type\n      occurredAt\n      subjectRef {\n        kind\n        id\n      }\n      payload {\n        messageId\n        revision\n        revisionSequence\n        principalId\n        membershipEpoch\n        visibilityEpoch\n        kind\n        throughSequence\n        callId\n        generation\n        state\n        cutoffEvidence\n        liveSessionId\n      }\n    }\n    complete\n    refreshRequired\n    nextCursor {\n      incarnation\n      conversationId\n      sequence\n    }\n  }\n}",
+        "bytes": 709,
+        "selectedFields": 30,
         "depth": 3
       },
       "idempotency": "safe",
@@ -4943,9 +4943,9 @@
       "input": null,
       "result": {"type": {"kind": "object", "name": "CapabilitiesReply", "nullable": false}},
       "document": {
-        "text": "query ManagementCapabilities($context: RequestContextInput!) {\n  capabilities(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      contractVersion\n      serverRelease\n      publicApiVersion\n      wssVersions\n      capabilityRevision\n      limitsRevision\n      features {\n        chat\n        inbox\n        lexicalSearch\n        typing\n        webhooks\n        liveSessions\n        liveBroadcast\n      }\n      limits {\n        key\n        value {\n          maximum\n          unit\n          scope\n          milliseconds\n          policyId\n          revision\n        }\n      }\n      environment\n      productionQualified\n      mediaPolicy {\n        leasePolicyId\n        leaseProtocolVersion\n        maxLeaseMs\n        renewAttemptMs\n        preludeMaxBytes\n        preludeTimeoutMs\n        clockProfileId\n      }\n      geoControlAuthorityId\n      offerings\n      geos\n      installationProfiles\n      portalIdentity\n    }\n  }\n}",
-        "bytes": 1114,
-        "selectedFields": 54,
+        "text": "query ManagementCapabilities($context: RequestContextInput!) {\n  capabilities(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      serverRelease\n      capabilityRevision\n      limitsRevision\n      features {\n        chat\n        inbox\n        lexicalSearch\n        typing\n        webhooks\n        liveSessions\n        liveBroadcast\n      }\n      limits {\n        key\n        value {\n          maximum\n          unit\n          scope\n          milliseconds\n          policyId\n          revision\n        }\n      }\n      environment\n      productionQualified\n      mediaPolicy {\n        leasePolicyId\n        maxLeaseMs\n        renewAttemptMs\n        preludeMaxBytes\n        preludeTimeoutMs\n        clockProfileId\n      }\n      geoControlAuthorityId\n      offerings\n      geos\n      installationProfiles\n      portalIdentity\n    }\n  }\n}",
+        "bytes": 1022,
+        "selectedFields": 50,
         "depth": 4
       },
       "idempotency": "safe",
@@ -6957,20 +6957,7 @@
       "kind": "object",
       "planes": ["communication", "management"],
       "fields": [
-        {"name": "contractVersion", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "serverRelease", "type": {"kind": "scalar", "name": "String", "nullable": false}},
-        {
-          "name": "publicApiVersion",
-          "type": {"kind": "scalar", "name": "String", "nullable": false}
-        },
-        {
-          "name": "wssVersions",
-          "type": {
-            "kind": "list",
-            "nullable": false,
-            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
-          }
-        },
         {
           "name": "capabilityRevision",
           "type": {"kind": "scalar", "name": "Decimal", "nullable": false}
@@ -7479,7 +7466,6 @@
         {"name": "eventId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
         {"name": "conversationId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
         {"name": "sequence", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}},
-        {"name": "eventVersion", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "type", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "occurredAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "subjectRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
@@ -8485,10 +8471,6 @@
       "planes": ["communication", "management"],
       "fields": [
         {"name": "leasePolicyId", "type": {"kind": "scalar", "name": "String", "nullable": false}},
-        {
-          "name": "leaseProtocolVersion",
-          "type": {"kind": "scalar", "name": "String", "nullable": false}
-        },
         {"name": "maxLeaseMs", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}},
         {"name": "renewAttemptMs", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}},
         {"name": "preludeMaxBytes", "type": {"kind": "scalar", "name": "String", "nullable": false}},
@@ -9897,7 +9879,6 @@
             "ofType": {"kind": "scalar", "name": "String", "nullable": false}
           }
         },
-        {"name": "payloadVersion", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "consentRef", "type": {"kind": "scalar", "name": "String", "nullable": false}}
       ]
     },

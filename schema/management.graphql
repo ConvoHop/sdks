@@ -9,10 +9,7 @@ type BroadcastPermissionChanged {
 }
 
 type Capabilities {
-	contractVersion: String!
 	serverRelease: String!
-	publicApiVersion: String!
-	wssVersions: [String!]!
 	capabilityRevision: Decimal!
 	limitsRevision: Decimal!
 	features: Features
@@ -55,7 +52,6 @@ input ConfigureWebhookRequestInput {
 	projectId: UUID!
 	url: String!
 	eventTypes: [String!]!
-	payloadVersion: String!
 	consentRef: String!
 }
 
@@ -295,7 +291,6 @@ type Event {
 	eventId: UUID!
 	conversationId: UUID!
 	sequence: Decimal!
-	eventVersion: String!
 	type: String!
 	occurredAt: String!
 	subjectRef: ResourceRef
@@ -706,7 +701,6 @@ type MediaCutoff {
 
 type MediaPolicy {
 	leasePolicyId: String!
-	leaseProtocolVersion: String!
 	maxLeaseMs: Decimal!
 	renewAttemptMs: Decimal!
 	preludeMaxBytes: String!

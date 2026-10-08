@@ -317,7 +317,7 @@ addresses or URLs. TURN/TLS evidence requires a relay candidate and
 
 The service requires the participation-aware ConvoHop media server (SFU),
 not a stock LiveKit server. This package admits each connection with a
-one-time `convohop.admission.v1` first frame and never reconnects with a
+one-time `convohop.admission` first frame and never reconnects with a
 cached token. It ignores the grant's `connectToken`, which is for
 [clients built on the official LiveKit SDKs](../../docs/sdk-strategy.md#calls-with-the-official-livekit-sdks).
 A server boot change ends the old

@@ -63,9 +63,9 @@ function intendedText(event, options) {
     body: options.body || (preview ? preview.text + (preview.truncated ? ELLIPSIS : "") : undefined) };
 }
 const optional = (name, value) => value === undefined ? {} : { [name]: value };
-/** The event without eventVersion, subjectRef, connected and preview. */
+/** The event without subjectRef, connected and preview. */
 function metadata(event) {
-  const { eventVersion, subjectRef, connected, preview, ...fields } = event;
+  const { subjectRef, connected, preview, ...fields } = event;
   return fields;
 }
 /** The request the README describes for an event, a clock and the text the request shows. */

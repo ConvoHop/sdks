@@ -203,7 +203,7 @@ export class Domain {
   #append(conversation, type, subjectRef, payload) {
     conversation.sequence += 1n;
     const event = { eventId: this.nextId(), conversationId: conversation.conversationId, sequence: String(conversation.sequence),
-      eventVersion: "1", type, occurredAt: iso(), subjectRef, payload };
+      type, occurredAt: iso(), subjectRef, payload };
     conversation.events.push(event);
     this.bus.emit("event", conversation, event);
     return event;

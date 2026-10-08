@@ -74,7 +74,6 @@ query CommunicationEvents($context: RequestContextInput!, $input: EventsRequestI
         eventId
         conversationId
         sequence
-        eventVersion
         type
         occurredAt
         subjectRef {

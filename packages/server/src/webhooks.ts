@@ -47,8 +47,6 @@ export interface WebhookNotificationPreview {
 /** Fields every notification event carries besides the envelope. */
 interface WebhookNotificationFields extends WebhookEnvelope {
   known: true;
-  /** The contract version. An event with another version is a `WebhookUnknownEvent`. */
-  eventVersion: "1";
   /** The principal to notify. Each recipient gets its own event. */
   recipientId: string;
   conversationId: string;
@@ -334,8 +332,7 @@ function subject(source: Fields, kind: "message" | "liveSession", id: string): v
 function notification(value: unknown): WebhookNotificationEvent {
   const source = asObject(value, "event"), eventType = source.eventType;
   need(typeof eventType === "string" && notificationEventTypes.has(eventType), "eventType must be a notification event type");
-  need(source.eventVersion === "1", "eventVersion must be \"1\"");
-  const fields = { eventId: uuid(source, "eventId"), eventVersion: "1" as const, occurredAt: timestamp(source, "occurredAt"),
+  const fields = { eventId: uuid(source, "eventId"), occurredAt: timestamp(source, "occurredAt"),
     projectId: uuid(source, "projectId"), known: true as const, recipientId: uuid(source, "recipientId"),
     conversationId: uuid(source, "conversationId"), senderId: uuid(source, "senderId"), connected: flag(source, "connected") };
   if (eventType === "notification.message") {

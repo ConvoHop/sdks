@@ -57,7 +57,7 @@ authorized replay cursors; do not silently reset invalid/expired cursors.
 Visibility changes invalidate old receipt coverage.
 
 Native media uses one-attempt admission and server-owned forwarding leases.
-The Web client admits with the `convohop.admission.v1` prelude. Clients that
+The Web client admits with the `convohop.admission` prelude. Clients that
 wrap a stock LiveKit SDK connect with the grant's single-use `connectToken`
 and resume only with it or SFU-pushed refresh tokens (see
 `docs/sdk-strategy.md`). Never bypass admission or reuse cached credentials

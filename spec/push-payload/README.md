@@ -37,7 +37,6 @@ Each recipient gets its own event. Three event types exist:
 | --- | --- | --- |
 | `eventId` | All | UUID of the event. Retries and replays of its webhook keep it. |
 | `eventType` | All | One of the three types. |
-| `eventVersion` | All | `"1"`. |
 | `occurredAt` | All | When the message was sent, the ring started or the ring stopped. |
 | `projectId` | All | UUID. |
 | `subjectRef` | All | `{ "id": <messageId>, "kind": "message" }`, or `{ "id": <liveSessionId>, "kind": "liveSession" }` for calls and cancellations. |
@@ -79,10 +78,9 @@ Values follow these rules:
 Producers send exactly these fields as [canonical JSON](#size-and-truncation),
 and `subjectRef.id` equals `messageId` or `liveSessionId`. Every valid event
 fits the 4096-byte webhook body limit: a 512-code-point preview takes at most
-3072 bytes. Consumers ignore fields they don't know. An event with another
-`eventVersion`, or one that breaks these rules, isn't a notification event:
-webhook verifiers return it like an event type they don't know, and builders
-reject it.
+3072 bytes. Consumers ignore fields they don't know. An event that breaks
+these rules isn't a notification event: webhook verifiers return it like an
+event type they don't know, and builders reject it.
 
 ### Recipients and delivery
 
@@ -151,8 +149,8 @@ when the event doesn't apply to it or the lifetime is zero or less.
 ### Requests
 
 Every request carries a `convohop` object
-([`$defs/data`](push-payload.schema.json)): the event without
-`eventVersion`, `subjectRef`, `connected` and `preview`. The APNs VoIP, FCM
+([`$defs/data`](push-payload.schema.json)): the event without `subjectRef`,
+`connected` and `preview`. The APNs VoIP, FCM
 and Web Push requests, which have no visible alert of their own, add `title`
 and `body` to it.
 
