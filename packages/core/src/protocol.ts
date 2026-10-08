@@ -8,6 +8,8 @@ export type SendReceipt = NonNullable<OperationPayload<"communication.sendMessag
 export type SearchHit = NonNullable<OperationPayload<"communication.search">["result"]>["items"][number] & { message: ConversationMessage };
 export type Membership = NonNullable<OperationPayload<"communication.members">["result"]>["items"][number];
 export type Conversation = NonNullable<OperationPayload<"communication.getConversation">["result"]>;
+/** Whether a member muted message push notifications for a conversation, and until when. */
+export type ConversationMute = OperationPayload<"communication.conversationMute">["result"];
 export type SessionMetadata = OperationPayload<"communication.currentSession">["result"];
 type SessionResult = NonNullable<OperationPayload<"communication.issueSession">["result"]>;
 export type SessionBootstrap = SessionResult & { session: NonNullable<SessionResult["session"]> };

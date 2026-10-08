@@ -1,5 +1,6 @@
 import {
-  ConvoHopProblem, parseId, type CommandOptions, type OperationPayload, type PageOptions, type GraphqlTypes, type ConversationMessage, type ProtocolObject,
+  ConvoHopProblem, parseId, parseString, type CommandOptions, type ConversationMute, type OperationPayload, type PageOptions,
+  type GraphqlTypes, type ConversationMessage, type ProtocolObject,
 } from "@convohop/core";
 import type { ConvoHopClient } from "./client.js";
 import { MediaConnection, type MediaOptions } from "./media.js";
@@ -49,6 +50,25 @@ export class ConversationHandle {
       return this.client.delete(message, options.requestId);
     },
   };
+  /**
+   * This user's mute of message push notifications for the conversation. `until` (RFC 3339, in the future) applies
+   * only to a mute. Calls still ring a muted member.
+   */
+  readonly mute = {
+    get: async (): Promise<ConversationMute> => this.#own((await this.client.http.execute("communication.conversationMute",
+      this.client.projectId, { conversationId: this.conversationId })).result),
+    set: async (input: { muted: boolean; until?: string }, options: CommandOptions = {}): Promise<ConversationMute> => {
+      if (typeof input.muted !== "boolean") throw new TypeError("muted must be a boolean");
+      return this.#own((await this.client.http.execute("communication.setConversationMute", this.client.projectId,
+        { conversationId: this.conversationId, muted: input.muted,
+          ...(input.until === undefined ? {} : { until: parseString(input.until) }) }, options.requestId)).result);
+    },
+  };
+  #own(mute: ConversationMute): ConversationMute {
+    if (mute.conversationId !== this.conversationId || mute.principalId !== this.client.principalId)
+      throw new TypeError("Conversation mute does not match the request");
+    return mute;
+  }
 }
 
 export class ConversationLive {

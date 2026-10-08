@@ -33,7 +33,7 @@ flowchart LR
 | [`driver-protocol.md`](driver-protocol.md) | The runner-to-driver protocol, with its [schema](driver-protocol.schema.json). |
 | [`targets.md`](targets.md) | Target descriptors, capabilities and the optional control API, with the [descriptor schema](target.schema.json). |
 | [`webhook-signatures.md`](webhook-signatures.md) | The webhook signature scheme and its [vectors](vectors/webhooks.json), with their [schema](webhook-vectors.schema.json). |
-| [`../push-payload/`](../push-payload/README.md) | The provisional push payload contract and its [vectors](../push-payload/vectors.json), with their [schema](../push-payload/push-payload.schema.json). Each server SDK's own tests run these vectors, not drivers. |
+| [`../push-payload/`](../push-payload/README.md) | The push payload contract and its [vectors](../push-payload/vectors.json), with their [schema](../push-payload/push-payload.schema.json). Each server SDK's own tests run these vectors, not drivers. |
 | [`conformance/runner.mjs`](../../conformance/runner.mjs) | The runner CLI; its modules are in [`conformance/lib/`](../../conformance/lib). |
 | [`conformance/drivers/ts/`](../../conformance/drivers/ts) | The TypeScript reference driver. |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |

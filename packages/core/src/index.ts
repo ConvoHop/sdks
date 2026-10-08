@@ -7,7 +7,8 @@ export {
   parseMembership, parseConversation,
 } from "./protocol.js";
 export type {
-  ProtocolObject, ConversationCursor, ItemPage, ConversationMessage, SendReceipt, SearchHit, Membership, Conversation, SessionMetadata,
+  ProtocolObject, ConversationCursor, ItemPage, ConversationMessage, SendReceipt, SearchHit, Membership, Conversation, ConversationMute,
+  SessionMetadata,
   SessionBootstrap, SessionRefresh, SessionRefreshState, ProjectRoute, RecoveryState, RecoveryStorage,
   AsyncRecoveryStorage, CommandOptions, PageOptions,
 } from "./protocol.js";

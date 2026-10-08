@@ -70,6 +70,9 @@ history in descending creation order. `edit(message, text)` and
 `delete(message)` use the expected revision. Search hits contain
 `{conversationId, message}`. `reportRead` binds current membership/visibility
 epochs and records device coverage, not human-read attestation.
+`conversation(id).mute.set({ muted, until })` mutes this user's message push
+notifications for the conversation, optionally until a future RFC 3339 time,
+and `mute.get()` reads it. Calls still ring a muted member.
 
 `watch` catches up with an authority-issued cursor, applies ordered event
 pages and persists the frontier only after the application callback succeeds.

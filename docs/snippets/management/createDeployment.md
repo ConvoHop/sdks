@@ -124,6 +124,7 @@ mutation ManagementCreateDeployment($context: RequestContextInput!, $input: Crea
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }

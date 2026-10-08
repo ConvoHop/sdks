@@ -107,6 +107,8 @@ method needs the backend-key scope listed:
 | `conversation(id).members.addBatch(entries)`, `addMembers(conversationId, entries)` | `addMembers` | `membershipManage` |
 | `conversation(id).members.remove(input)` | `removeMember` | `membershipManage` |
 | `conversation(id).members.setBroadcastPermission(input)` | `setBroadcastPermission` | `membershipManage` |
+| `conversation(id).members.getMute(principalId)` | `conversationMute` | `membershipManage` |
+| `conversation(id).members.setMute(input)` | `setConversationMute` | `membershipManage` |
 | `conversation(id).members.grantHistory(input)` | `historyGrant` | `historyManage` |
 | `conversation(id).messages.list(options)` | `messages` | `messageRead` |
 | `conversation(id).messages.get(messageId, options)` | `getMessage` | `messageRead` |
@@ -135,6 +137,10 @@ method needs the backend-key scope listed:
   returns its operation. `completed()` resolves only after the authority
   reports the media cutoff as enforced. Its timeout throws
   `RESOLUTION_REQUIRED`, which isn't a cutoff.
+- `members.getMute` and `members.setMute` act as the named member, and the
+  authority audits them. A mute stops that member's `notification.message`
+  events until you unmute it or its optional `until` time passes. Calls
+  still ring a muted member.
 - Each result is checked against its request, for example the conversation,
   message or principal ID. A mismatch throws instead of being returned.
 
@@ -231,9 +237,7 @@ and message or call, for your [push notifications](#push-payloads). Narrow on
 know returns `known: false` and never throws, so acknowledge it. So does a
 notification event that doesn't match the
 [push payload contract](../../spec/push-payload/README.md), such as one
-missing a required field. The event types are provisional until the webhook
-contract (ConvoHop/ConveHop#10) merges, and the notification events until
-ConvoHop sends them.
+missing a required field.
 `webhooks.verifySignature()` checks only the headers, timestamp and
 signature, and returns `{ webhookId, timestamp }` for bodies you parse
 yourself.
@@ -260,17 +264,18 @@ negative tolerance or a body that is neither a string nor a `Uint8Array`.
 
 ## Push payloads
 
-> [!IMPORTANT]
-> Provisional. ConvoHop doesn't send notification events yet. The builders
-> follow the [push payload contract](../../spec/push-payload/README.md), and
-> both can change until ConvoHop sends the events.
-
 ConvoHop doesn't send push notifications for you
 ([bring your own](../../docs/sdk-strategy.md#push-notifications-bring-your-own)).
 `push` builds APNs, FCM and Web Push requests from a verified notification
 event. Its builders are pure functions: they hold no credentials and send
 nothing. Your push library adds the device token and the APNs or FCM
 authorization, encrypts and VAPID-signs Web Push messages, and sends them.
+The builders follow the [push payload contract](../../spec/push-payload/README.md).
+To receive the events, subscribe a webhook endpoint to
+`notification.message`, `notification.call` and `notification.callCancelled`.
+Deliveries are at least once and unordered, so deduplicate on `eventId`, as
+[Recipients and delivery](../../spec/push-payload/README.md#recipients-and-delivery)
+describes.
 
 ```ts
 import { push, type WebhookEvent, type WebhookNotificationEvent } from "@convohop/server";
@@ -325,7 +330,8 @@ The options are:
   string is the same as none.
 - `preview` (default `true`): whether a message event's `preview` becomes
   the body when you pass no `body`. Events carry a preview only when the
-  project opts in to message previews.
+  project opts in to message previews, with the `management.projectPolicy`
+  change `enableMessagePreview`. Previews are off by default.
 - `now`: the clock, which defaults to the current time.
 
 The requests follow these rules:

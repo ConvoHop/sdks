@@ -123,6 +123,7 @@ mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateP
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }

@@ -58,6 +58,11 @@ const calls = [
   ["communication.setBroadcastPermission", server => server.conversation(conversationId).members.setBroadcastPermission({
     principalId: memberId, allowed: false, expectedMembershipRevision: "3" }),
   { conversationId, principalId: memberId, allowed: false, expectedMembershipRevision: "3" }],
+  ["communication.conversationMute", server => server.conversation(conversationId).members.getMute(memberId),
+    { conversationId, actAsPrincipalId: memberId }],
+  ["communication.setConversationMute", server => server.conversation(conversationId).members.setMute({
+    principalId: memberId, muted: true, until: "2030-01-01T00:00:00Z" }),
+  { conversationId, muted: true, until: "2030-01-01T00:00:00Z", actAsPrincipalId: memberId }],
   ["communication.historyGrant", server => server.conversation(conversationId).members.grantHistory({ principalId: memberId,
     expectedRevision: "3", membershipEpoch: "2", fromSequence: beyondSafeInteger }),
   { conversationId, principalId: memberId, expectedRevision: "3", membershipEpoch: "2", fromSequence: beyondSafeInteger }],
@@ -211,6 +216,29 @@ test("results that do not match the request are rejected rather than returned", 
     { name: "TypeError", message: "Search hit does not match the request" });
   await assert.rejects(server.principals.create({ externalUserId: "fixture-user" }),
     { name: "TypeError", message: "Principal does not match the request" });
+});
+
+test("member mutes act as the member and reject a result for anyone else", async () => {
+  const muted = { conversationId, principalId: memberId, muted: true, until: "2030-01-01T00:00:00Z" };
+  const answers = [muted, { ...muted, muted: false, until: null }, { ...muted, principalId }];
+  const { server, requests } = serverWith(request => reply(request, { result: full("ConversationMute", answers.shift()) }));
+  const members = server.conversation(conversationId).members;
+  await assert.rejects(members.setMute({ principalId: memberId, muted: "yes" }),
+    { name: "TypeError", message: "muted must be a boolean" });
+  await assert.rejects(members.setMute({ principalId: "not-a-uuid", muted: false }), TypeError);
+  await assert.rejects(members.getMute("not-a-uuid"), TypeError);
+  assert.equal(requests.length, 0);
+
+  assert.deepEqual(await members.setMute({ principalId: memberId, muted: true, until: muted.until }, { requestId }), muted);
+  assert.deepEqual(await members.setMute({ principalId: memberId, muted: false }),
+    { ...muted, muted: false, until: null });
+  await assert.rejects(members.getMute(memberId), { name: "TypeError", message: "Mute does not match the request" });
+  assert.deepEqual(requests.map(request => [request.key, request.input]), [
+    ["communication.setConversationMute", { conversationId, muted: true, until: muted.until, actAsPrincipalId: memberId }],
+    ["communication.setConversationMute", { conversationId, muted: false, actAsPrincipalId: memberId }],
+    ["communication.conversationMute", { conversationId, actAsPrincipalId: memberId }],
+  ]);
+  assert.equal(requests[0].requestId, requestId);
 });
 
 function cutoff(state) {

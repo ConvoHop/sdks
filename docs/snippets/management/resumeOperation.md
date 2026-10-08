@@ -135,6 +135,7 @@ mutation ManagementResumeOperation($context: RequestContextInput!, $input: Resum
         }
         replayedDeliveries
         skippedDeliveries
+        messagePreview
       }
       blockedReason
     }

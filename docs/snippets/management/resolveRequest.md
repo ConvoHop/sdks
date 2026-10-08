@@ -145,6 +145,12 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
               canStartBroadcast
             }
           }
+          conversationMute {
+            conversationId
+            principalId
+            muted
+            until
+          }
           credentialDeliveryReceipt {
             deliveryId
           }

@@ -550,6 +550,12 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
               canStartBroadcast
             }
           }
+          conversationMute {
+            conversationId
+            principalId
+            muted
+            until
+          }
           credentialDeliveryReceipt {
             deliveryId
           }
@@ -816,8 +822,23 @@ query CommunicationGetOperation($context: RequestContextInput!, $input: GetOpera
         }
         replayedDeliveries
         skippedDeliveries
+        messagePreview
       }
       blockedReason
+    }
+  }
+}
+
+query CommunicationConversationMute($context: RequestContextInput!, $input: ConversationMuteInput!) {
+  conversationMute(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    result {
+      conversationId
+      principalId
+      muted
+      until
     }
   }
 }
@@ -1684,6 +1705,22 @@ mutation CommunicationSetBroadcastPermission($context: RequestContextInput!, $in
   }
 }
 
+mutation CommunicationSetConversationMute($context: RequestContextInput!, $input: SetConversationMuteInput!) {
+  setConversationMute(context: $context, input: $input) {
+    status
+    requestId
+    receiptId
+    committedAt
+    replayed
+    result {
+      conversationId
+      principalId
+      muted
+      until
+    }
+  }
+}
+
 mutation CommunicationStartLiveSession($context: RequestContextInput!, $input: StartLiveSessionInput!) {
   startLiveSession(context: $context, input: $input) {
     status
@@ -2123,6 +2160,7 @@ query ManagementGetProject($context: RequestContextInput!, $input: GetProjectReq
       status
       revision
       policyRevision
+      messagePreview
     }
   }
 }
@@ -2456,6 +2494,12 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
               canStartBroadcast
             }
           }
+          conversationMute {
+            conversationId
+            principalId
+            muted
+            until
+          }
           credentialDeliveryReceipt {
             deliveryId
           }
@@ -2722,6 +2766,7 @@ query ManagementGetOperation($context: RequestContextInput!, $input: GetOperatio
         }
         replayedDeliveries
         skippedDeliveries
+        messagePreview
       }
       blockedReason
     }
@@ -2826,6 +2871,7 @@ mutation ManagementCreateDeployment($context: RequestContextInput!, $input: Crea
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
@@ -2901,6 +2947,7 @@ mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateP
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
@@ -2976,6 +3023,7 @@ mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: Issue
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
@@ -3051,6 +3099,7 @@ mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: Revo
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
@@ -3126,6 +3175,7 @@ mutation ManagementProjectPolicy($context: RequestContextInput!, $input: Project
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
@@ -3238,6 +3288,7 @@ mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseO
         }
         replayedDeliveries
         skippedDeliveries
+        messagePreview
       }
       blockedReason
     }
@@ -3330,6 +3381,7 @@ mutation ManagementResumeOperation($context: RequestContextInput!, $input: Resum
         }
         replayedDeliveries
         skippedDeliveries
+        messagePreview
       }
       blockedReason
     }
@@ -3407,6 +3459,7 @@ mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: Conf
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
@@ -3482,6 +3535,7 @@ mutation ManagementUpdateWebhook($context: RequestContextInput!, $input: UpdateW
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
@@ -3557,6 +3611,7 @@ mutation ManagementRotateWebhookSecret($context: RequestContextInput!, $input: R
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
@@ -3632,6 +3687,7 @@ mutation ManagementDisableWebhook($context: RequestContextInput!, $input: Disabl
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
@@ -3707,6 +3763,7 @@ mutation ManagementReplayWebhookDeliveries($context: RequestContextInput!, $inpu
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
