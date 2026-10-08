@@ -421,6 +421,7 @@ function checkSemantics({ annotations, planes, operations, index, report }) {
     } else if (operation.kind === "mutation" && entry.idempotency === "safe") {
       report(at("idempotency"), `mutations cannot be "safe"`);
     }
+    if (entry.destructive && operation.kind !== "mutation") report(at("destructive"), `${operation.kind} operations are read-only and cannot be destructive`);
     if (entry.idempotency === "permitBound" && carried !== entry.auth.length) {
       report(at("idempotency"), `"permitBound" requires every auth entry to use a context-carried permit credential`);
     } else if (operation.kind === "mutation" && carried > 0 && entry.idempotency !== "permitBound") {

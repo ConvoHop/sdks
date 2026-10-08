@@ -2743,6 +2743,7 @@
         "depth": 2
       },
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
@@ -2996,6 +2997,7 @@
         "depth": 4
       },
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
@@ -3419,6 +3421,7 @@
         "depth": 2
       },
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.removed"]},
       "errors": {
@@ -3763,6 +3766,7 @@
         "depth": 2
       },
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.deleted"]},
       "errors": {
@@ -4522,6 +4526,7 @@
         "depth": 4
       },
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.ended"]},
       "longRunning": {"poll": "communication.liveSessionOperation", "refField": "operation"},
@@ -6104,6 +6109,7 @@
         "depth": 5
       },
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "longRunning": {"poll": "management.getOperation", "refField": "operation"},
@@ -6609,6 +6615,7 @@
         "depth": 5
       },
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "longRunning": {"poll": "management.getOperation", "refField": "operation"},
@@ -6683,6 +6690,7 @@
         "depth": 5
       },
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "longRunning": {"poll": "management.getOperation", "refField": "operation"},

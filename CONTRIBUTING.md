@@ -56,6 +56,8 @@ on other JDKs and how to run the conformance scenarios with its driver.
 | `packages/client` | Client SDK (`@convohop/client`) for browsers and React Native, with realtime and media |
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
 | `jvm/` | Java and Kotlin server SDK (`com.convohop:convohop-server` and `com.convohop:convohop-server-kotlin`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/jvm/` |
+| `packages/cli` | The `convohop` command-line tool (`@convohop/cli`), built on `@convohop/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
+| `packages/mcp` | An MCP server (`@convohop/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
 | `tools/sdkgen/` | The SDK generator: annotation check, IR builder, emitters and their tests. See [SDK generation](docs/sdk-generation.md) |
 | `tools/docgen/` | The docs pipeline: public API extractors, the docs generator, the example code runner and their tests. See [Docs pipeline](docs/docs-pipeline.md) |
@@ -178,13 +180,15 @@ Each entry has these fields:
 | `layer` | `client`: client SDKs only, and the operation accepts only client credentials. `server`: server SDKs only, and it accepts no client credentials. `both`: every SDK, and `auth` lists at least one client credential and one server credential. |
 | `auth` | Alternative ways to authorize the call. Any one of them is enough. Each is `{ "credential": ..., "scopes": [...], "condition": ... }`. `scopes` lists every scope a backend key needs. `scopes` and `condition` are optional. |
 | `idempotency` | Queries and subscriptions are `safe`. A mutation is `idempotent` (deduplicated by request ID, so an unknown outcome can be resolved), `singleUse` (like `idempotent`, but returns a short-lived credential for one connection), `permitBound` (authorized by a permit in the request context) or `ephemeral` (a transient signal that's never retried). |
+| `destructive` | Optional. `true` for a mutation that deletes, revokes, removes, disables or ends something, or retires a secret. Omit it for every other operation. The MCP server marks these tools `destructiveHint`, and the CLI asks before it runs them. |
 | `pagination` | `{ "style": "none" }`, or a style from `cursor`, `sequence`, `replay` and `bounded` with `pagePath`, the path from the result to the page object (`[]` when the result is the page). `cursor`, `sequence` and `replay` also name the input's `limitField` and `cursorField`. |
 | `realtime` | `{ "mode": "none" }`, with an optional `emits` list of event types for mutations, or `{ "mode": "subscription", "channel": ... }` for subscriptions. |
 | `longRunning` | Optional. `{ "poll": ..., "refField": ... }` for a mutation that starts work that finishes later. |
 | `errors` | `{ "sets": [...], "codes": [...] }`. Error sets from `errorSets`, plus other codes from `errorCodes` that callers should handle. The list isn't exhaustive. |
 
 The check also catches inconsistencies, such as a mutation marked `safe`, a
-`layer` that doesn't match the credentials in `auth`, or a paged result that
+query or subscription marked `destructive`, a `layer` that doesn't match the
+credentials in `auth`, or a paged result that
 lacks the fields its style needs. `planes.<plane>.context.rules` decide which
 request-context fields each operation must send or must not send. If a new
 operation needs different rules, add it to a rule's `only` or `except` list.

@@ -175,7 +175,7 @@ test("runEmitters renders and syncs with every emitter's owned directories", t =
 });
 
 test("the configured emitters are valid and uniquely named", () => {
-  assert.deepEqual(config.emitters.map(entry => entry.name), ["ir", "graphql-operations", "typescript", "doc-snippets", "java"]);
+  assert.deepEqual(config.emitters.map(entry => entry.name), ["ir", "graphql-operations", "typescript", "doc-snippets", "java", "mcp-tools", "cli-operations"]);
   assert.ok(config.emitters.every(entry => Object.isFrozen(entry)));
   assert.deepEqual(Object.keys(config.options).filter(name => !config.emitters.some(entry => entry.name === name)), [], "options for unknown emitters");
 });

@@ -1233,6 +1233,7 @@
       "layer": "server",
       "auth": [{"credential": "backendKey", "scopes": ["principalManage"]}],
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
@@ -1293,6 +1294,7 @@
         {"credential": "backendKey", "scopes": ["sessionManage"]}
       ],
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
@@ -1403,6 +1405,7 @@
       "layer": "server",
       "auth": [{"credential": "backendKey", "scopes": ["membershipManage"]}],
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.removed"]},
       "errors": {
@@ -1488,6 +1491,7 @@
         {"credential": "backendKey", "scopes": ["moderation"]}
       ],
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.deleted"]},
       "errors": {
@@ -1671,6 +1675,7 @@
         {"credential": "backendKey", "scopes": ["callManage"]}
       ],
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.ended"]},
       "longRunning": {"poll": "communication.liveSessionOperation", "refField": "operation"},
@@ -1951,6 +1956,7 @@
       "layer": "server",
       "auth": [{"credential": "portalCredential", "condition": "owner"}],
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "longRunning": {"poll": "management.getOperation", "refField": "operation"},
@@ -2026,6 +2032,7 @@
       "layer": "server",
       "auth": [{"credential": "portalCredential", "condition": "owner"}],
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "longRunning": {"poll": "management.getOperation", "refField": "operation"},
@@ -2052,6 +2059,7 @@
       "layer": "server",
       "auth": [{"credential": "portalCredential", "condition": "owner"}],
       "idempotency": "idempotent",
+      "destructive": true,
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "longRunning": {"poll": "management.getOperation", "refField": "operation"},

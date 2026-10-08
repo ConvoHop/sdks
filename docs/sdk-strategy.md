@@ -177,8 +177,10 @@ a TypeScript reference driver against a deterministic mock, and can target a
 real deployment. The [JVM server SDK](../jvm/README.md) adds a Java and
 Kotlin generator and its own conformance driver. Generators for the other
 languages are in development.
-Later, the same IR could also generate a command-line tool and tools for AI
-agents.
+The same IR generates the operation catalog of the `convohop` command-line
+tool ([`packages/cli`](../packages/cli/README.md)) and the tools of an MCP
+server for AI agents ([`packages/mcp`](../packages/mcp/README.md)). Neither is
+released yet.
 
 The [docs pipeline](docs-pipeline.md) generates the SDK documentation in
 [`docs/site`](site): each SDK's reference, quickstarts and `llms.txt` files,
@@ -291,6 +293,7 @@ registry yet.
 | Go modules | `github.com/ConvoHop/sdks/go` | None |
 | Swift Package Manager | None | `ConvoHop`, from `github.com/ConvoHop/convohop-swift` |
 | pub.dev | None | `convohop` (Flutter) |
+| npm, tools | `@convohop/cli` (the `convohop` command), `@convohop/mcp` (an MCP server) | None |
 
 Notes:
 
@@ -319,6 +322,10 @@ Notes:
 - **Maven Central and pub.dev.** These names need namespace ownership
   verification before the first release. They're confirmed when verification
   completes.
+- **npm tools.** `@convohop/cli` and `@convohop/mcp` are built on
+  `@convohop/server` and use its server credentials, so they're listed with
+  the server SDK. They're private workspaces in this repository and aren't
+  released yet.
 
 ## Versioning
 
