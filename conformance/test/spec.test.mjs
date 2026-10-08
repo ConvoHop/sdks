@@ -71,8 +71,7 @@ describe("enumerations agree across the spec, the mock and the reference driver"
 });
 
 // Scenario expectations that schema/ir.json does not define yet.
-// TODO(#9): remove RATE_LIMITED (HTTP 429 with Retry-After) once the rate-limit problem types land.
-const PENDING_ERROR_CODES = new Set(["RATE_LIMITED"]);
+const PENDING_ERROR_CODES = new Set();
 // HTTP guards that generated SDK requests never trip, and the mock's own internal failures.
 const MOCK_ONLY_CODES = new Set(["METHOD_NOT_ALLOWED", "UNSUPPORTED_MEDIA_TYPE", "MOCK_FAILURE"]);
 const ROLE_CREDENTIALS = { user: "userSession", backend: "backendKey", management: "portalCredential" };
@@ -364,7 +363,7 @@ describe("webhook signature vectors", () => {
     assert.ok(valid.length >= 3);
     for (const vector of valid) {
       assert.deepEqual(verify({ ...vector, payload: `${vector.payload} ` }), { valid: false, code: "WEBHOOK_SIGNATURE_INVALID" }, vector.id);
-      assert.deepEqual(verify({ ...vector, secrets: ["whsec_dW5yZWxhdGVkLWZpeHR1cmUta2V5"] }),
+      assert.deepEqual(verify({ ...vector, secrets: ["whsec_dW5yZWxhdGVkLWZpeHR1cmUta2V5LXBhZGRlZC0wMzI="] }),
         { valid: false, code: "WEBHOOK_SIGNATURE_INVALID" }, vector.id);
       const [, timestamp] = Object.entries(vector.headers).find(([name]) => name.toLowerCase() === "webhook-timestamp");
       assert.deepEqual(verify({ ...vector, nowSeconds: Number(timestamp) + vector.toleranceSeconds + 1 }),

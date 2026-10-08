@@ -46,6 +46,7 @@ None of these commands need service credentials.
 | `tools/sdkgen/` | The SDK generator: annotation check, IR builder, emitters and their tests. See [SDK generation](docs/sdk-generation.md) |
 | `scripts/release/`, `test/release/` | Release scripts and their tests |
 | `spec/conformance/` | Language-neutral conformance scenarios, the driver protocol, target descriptors and webhook vectors, with their JSON Schemas |
+| `spec/push-payload/` | The provisional push payload contract: notification events, the APNs, FCM and Web Push requests built from them, a JSON Schema and shared vectors |
 | `conformance/` | The conformance runner, the TypeScript reference driver, the mock target and the harness's tests. A private npm workspace that is never published |
 | `test/` | Fixtures shared by the package and conformance test suites |
 | `release-please-config.json`, `.release-please-manifest.json` | The released packages and their current versions. See [RELEASING.md](RELEASING.md). |
@@ -235,6 +236,8 @@ and must pass the shared [conformance suite](spec/conformance/README.md)
 through its own [driver](spec/conformance/README.md#adding-a-driver) before
 release. Its generator is an emitter for the shared IR. See
 [Adding a language emitter](docs/sdk-generation.md#adding-a-language-emitter).
+A server SDK's push payload builders must also produce the shared
+[push payload vectors](spec/push-payload/README.md#vectors).
 Open a feature request to discuss the design before you start.
 
 ## Commits and pull requests

@@ -210,20 +210,30 @@ event delivered to two endpoints has the same `eventId` and different
 - `body` is the raw body as a `Uint8Array`, or a string that is its exact
   UTF-8 decoding. The SDK verifies those bytes as received and never
   re-serializes them.
-- `secrets` is one `whsec_` secret or an array of them. Pass every secret you
-  hold. ConvoHop signs with the current secret, with the next secret while a
-  rotation is pending (at most 5 minutes), and with the replaced secret for
-  24 hours after the rotation. A `v1` entry that matches any secret is
-  accepted. Entries with other version prefixes are ignored.
+- `secrets` is one `whsec_` secret or an array of them. ConvoHop issues
+  32-byte secrets, and the SDK accepts the 24 to 64 bytes that Standard
+  Webhooks allows. Pass every secret you hold. ConvoHop signs with the
+  current secret, with the next secret while a rotation is pending (at most
+  5 minutes), and with the replaced secret for 24 hours after the rotation.
+  A `v1` entry that matches any secret is accepted. Entries with other
+  version prefixes are ignored.
 - `toleranceSeconds` defaults to 300, and `now` defaults to the current time.
 
-`verify()` returns `{ webhookId, timestamp, event }`. The event carries
-metadata only: `eventId`, `eventType`, `occurredAt`, `projectId` and
-`subjectRef: { id, kind }`. Fetch content through the data plane, for example
-with `conversation(id).messages.get()`. Narrow on `event.known`, then on
-`event.eventType`. An event type that this SDK doesn't know returns
-`known: false` and never throws, so acknowledge it. The event types are
-provisional until the webhook contract (ConvoHop/ConveHop#10) merges.
+`verify()` returns `{ webhookId, timestamp, event }`. Every event carries
+`eventId`, `eventType`, `occurredAt`, `projectId` and
+`subjectRef: { id, kind }`. Resource events carry only that metadata, so
+fetch content through the data plane, for example with
+`conversation(id).messages.get()`. Per-recipient notification events
+(`notification.message`, `notification.call` and
+`notification.callCancelled`) also carry the recipient, conversation, sender
+and message or call, for your [push notifications](#push-payloads). Narrow on
+`event.known`, then on `event.eventType`. An event type that this SDK doesn't
+know returns `known: false` and never throws, so acknowledge it. So does a
+notification event that doesn't match the
+[push payload contract](../../spec/push-payload/README.md), such as one with
+another `eventVersion`. The event types are provisional until the webhook
+contract (ConvoHop/ConveHop#10) merges, and the notification events until
+ConvoHop sends them.
 `webhooks.verifySignature()` checks only the headers, timestamp and
 signature, and returns `{ webhookId, timestamp }` for bodies you parse
 yourself.
@@ -234,7 +244,7 @@ secrets, signatures or the body.
 
 | Code | Cause |
 | --- | --- |
-| `INVALID_SECRET` | No secret, or a secret that isn't `whsec_` followed by padded standard Base64 of 1 to 64 bytes. Fix your configuration. |
+| `INVALID_SECRET` | No secret, or a secret that isn't `whsec_` followed by padded standard Base64 of 24 to 64 bytes. Fix your configuration. |
 | `MISSING_HEADER` | `webhook-id`, `webhook-timestamp` or `webhook-signature` is absent or empty. |
 | `INVALID_HEADER` | One of those headers is repeated in a header record. A `Headers` object joins repeated values, which then fail a later check. |
 | `INVALID_TIMESTAMP` | `webhook-timestamp` isn't 1 to 15 digits of Unix seconds. |
@@ -247,6 +257,130 @@ secrets, signatures or the body.
 
 Invalid arguments throw `RangeError` or `TypeError` instead, for example a
 negative tolerance or a body that is neither a string nor a `Uint8Array`.
+
+## Push payloads
+
+> [!IMPORTANT]
+> Provisional. ConvoHop doesn't send notification events yet. The builders
+> follow the [push payload contract](../../spec/push-payload/README.md), and
+> both can change until ConvoHop sends the events.
+
+ConvoHop doesn't send push notifications for you
+([bring your own](../../docs/sdk-strategy.md#push-notifications-bring-your-own)).
+`push` builds APNs, FCM and Web Push requests from a verified notification
+event. Its builders are pure functions: they hold no credentials and send
+nothing. Your push library adds the device token and the APNs or FCM
+authorization, encrypts and VAPID-signs Web Push messages, and sends them.
+
+```ts
+import { push, type WebhookEvent, type WebhookNotificationEvent } from "@convohop/server";
+
+// Your queue worker, for events that webhooks.verify() accepted.
+export async function handle(event: WebhookEvent): Promise<void> {
+  if (!event.known) return;
+  switch (event.eventType) {
+    case "notification.message":
+    case "notification.call":
+    case "notification.callCancelled":
+      await notify(event);
+      break;
+    // Your other event types.
+  }
+}
+
+async function notify(event: WebhookNotificationEvent): Promise<void> {
+  const title = await displayName(event.senderId); // Your own text and localization.
+  for (const device of await devicesOf(event.recipientId)) { // Your own token store.
+    if (device.platform === "ios") {
+      // A CallKit app gets incoming calls as VoIP pushes. apnsVoip() returns null for other events.
+      const voip = push.apnsVoip(event, { bundleId, title });
+      const alert = voip ? null : push.apnsAlert(event, { bundleId, title });
+      if (voip) await sendApns(device.voipToken, voip.headers, voip.payload);
+      if (alert) await sendApns(device.token, alert.headers, alert.payload);
+    } else if (device.platform === "android") {
+      const request = push.fcm(event, { title });
+      if (request) await sendFcm({ ...request.message, token: device.token });
+    } else {
+      const request = push.webPush(event, { title });
+      if (request) await sendWebPush(device.subscription, JSON.stringify(request.payload), request.headers);
+    }
+  }
+}
+```
+
+Each builder returns a request, or `null` when the event doesn't apply to
+its platform or is stale. Send nothing for `null`.
+
+| Builder | Request | `null` for | Limit (bytes) |
+| --- | --- | --- | --- |
+| `push.apnsAlert(event, options)` | APNs `headers` and `payload` for an alert | A `notification.callCancelled` that isn't a missed call | 4096 of `payload` |
+| `push.apnsVoip(event, options)` | APNs `headers` and `payload` for a PushKit VoIP push, on the `<bundleId>.voip` topic | Every event but `notification.call` | 5120 of `payload` |
+| `push.fcm(event, options?)` | An FCM HTTP v1 `message` with `data` and Android options. Add `token`. | Stale events only | 4096 of `message.data` |
+| `push.webPush(event, options?)` | RFC 8030 `headers` (`TTL`, `Urgency` and `Topic`) and a `payload` for your library to encrypt | Stale events only | 3993 of `payload`, the RFC 8291 plaintext limit |
+
+The options are:
+
+- `bundleId`: your app's bundle ID. The APNs builders require it.
+- `title` and `body`: the visible text, such as the sender's name. An empty
+  string is the same as none.
+- `preview` (default `true`): whether a message event's `preview` becomes
+  the body when you pass no `body`. Events carry a preview only when the
+  project opts in to message previews.
+- `now`: the clock, which defaults to the current time.
+
+The requests follow these rules:
+
+- **Metadata only by default.** Every request carries `convohop`: the
+  event's identifiers, without `connected` and the preview. A request has
+  message text only when you pass it or the event carries a preview. An
+  APNs alert without a body uses a `loc-key` that you define in your app's
+  `Localizable.strings`: `CONVOHOP_MESSAGE`, `CONVOHOP_CALL` or
+  `CONVOHOP_MISSED_CALL`. Its `mutable-content` lets a Notification Service
+  Extension fetch the content with the user's session.
+- **Lifetime.** Messages and missed calls stay relevant for a day after
+  `occurredAt`, and calls and other cancellations until the ring's
+  `expiresAt`, but never more than 28 days. That sets `apns-expiration`, the
+  FCM `ttl` and the Web Push `TTL`.
+- **Collapse.** Calls and cancellations collapse on the ring's `alertId`, as
+  the `apns-collapse-id` of alerts, the FCM `collapse_key` and the Web Push
+  `Topic`. A missed-call alert replaces the ring's incoming-call alert.
+- **Size.** A request over its limit has its body, and then its title,
+  shortened to whole code points followed by `…`. Metadata always fits.
+- **FCM.** Requests carry Android options only, at high priority; send to
+  Apple devices with the APNs requests. Show a notification for every
+  high-priority message, or Android can lower the app's later messages to
+  normal priority.
+- **`connected`.** An event's `connected` is a hint for your sending policy,
+  for example to skip a message push for a user who is online. The builders
+  ignore it.
+- **Push libraries.** The requests use each service's wire format: APNs
+  HTTP/2 headers, an FCM HTTP v1 REST message and RFC 8030 headers. Where
+  your library has its own options, pass the values there. `firebase-admin`,
+  for example, takes `android` as `{ priority: "high", ttl, collapseKey }`,
+  with `ttl` in milliseconds. The `web-push` package sets `Urgency` from its
+  `urgency` option, which defaults to `normal`, after adding the headers you
+  pass. So pass the request's `headers` as its options,
+  `{ TTL: Number(headers.TTL), urgency: headers.Urgency, topic: headers.Topic }`,
+  not as `{ headers }`, or call and cancellation pushes go out at normal
+  urgency.
+
+iOS requires an app to report every VoIP push to CallKit as an incoming
+call. An app that doesn't is terminated, and iOS can stop delivering its
+VoIP pushes. So `apnsVoip()` builds requests for `notification.call` only,
+and a `notification.callCancelled` reaches iOS another way. An app ringing
+through CallKit ends the ringing when its realtime connection reports that
+the call stopped ringing, or at `expiresAt` at the latest. A missed call
+(`reason` `ended` or `expired`) gets an APNs alert that replaces the
+incoming-call alert. `answered` and `declined` get no APNs request. See
+[Calls on iOS](../../spec/push-payload/README.md#calls-on-ios).
+
+An invalid option or event throws `PushPayloadError`. Options are checked
+first, and the message names the field but never contains its value.
+
+| Code | Cause |
+| --- | --- |
+| `INVALID_OPTIONS` | An option has the wrong type, `title` or `body` has a lone surrogate, `now` isn't a valid `Date`, or `bundleId` isn't a bundle ID: letters, digits and hyphens in dot-separated parts, at most 155 characters. |
+| `INVALID_EVENT` | The event isn't a notification event under the push payload contract. `webhooks.verify()` returns such events as `known: false`. |
 
 ## Management and credential delivery
 

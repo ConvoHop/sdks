@@ -1,12 +1,12 @@
-## `configureWebhook`
+## `updateWebhook`
 
-Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.
+Change the event types of a webhook endpoint, or enable or disable it.
 
-- **Operation:** `management.configureWebhook`, a mutation sent as `ManagementConfigureWebhook`.
+- **Operation:** `management.updateWebhook`, a mutation sent as `ManagementUpdateWebhook`.
 - **Layer:** server (server SDKs).
 - **Authorization:** `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
 - **Idempotency:** `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
-- **Long-running:** poll `management.getOperation` with `input.operationId` set to `configureWebhook.operation.operationId` from the result until the work completes.
+- **Long-running:** poll `management.getOperation` with `input.operationId` set to `updateWebhook.operation.operationId` from the result until the work completes.
 
 **Context** (`context: RequestContextInput!`)
 
@@ -18,17 +18,17 @@ Create a webhook endpoint for project events. The signing secret is delivered on
 | `observedServingEpoch` | `Decimal` | optional |
 | `credentialDeliveryPermit` | `SignedProof` | forbidden |
 
-**Input** (`input: ConfigureWebhookRequestInput!`)
+**Input** (`input: UpdateWebhookRequestInput!`)
 
 | Field | Type |
 | --- | --- |
 | `projectId` | `UUID!` |
-| `url` | `String!` |
+| `endpointId` | `UUID!` |
+| `expectedRevision` | `Decimal!` |
 | `eventTypes` | `[String!]!` |
-| `payloadVersion` | `String!` |
-| `consentRef` | `String!` |
+| `enabled` | `Boolean!` |
 
-**Result** (`ConfigureWebhookReply!`)
+**Result** (`UpdateWebhookReply!`)
 
 | Field | Type |
 | --- | --- |
@@ -44,7 +44,7 @@ Create a webhook endpoint for project events. The signing secret is delivered on
 
 **Errors**
 
-- Returned by the authority: `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `WEBHOOK_DESTINATION_DENIED`, `WEBHOOK_ENDPOINT_LIMIT`.
+- Returned by the authority: `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`, `REVISION_CONFLICT`, `WEBHOOK_ENDPOINT_LIMIT`, `WEBHOOK_SECRET_UNACKNOWLEDGED`.
 - Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `IDEMPOTENCY_CONFLICT`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
 - Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RECOVERY_STORAGE_FAILURE`, `RESOLUTION_REQUIRED`, `TRANSPORT_UNKNOWN`.
 - Transient, so a retry with the same `requestId` and input may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `OUTCOME_UNKNOWN`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.
@@ -53,8 +53,8 @@ Create a webhook endpoint for project events. The signing secret is delivered on
 **GraphQL**
 
 ```graphql
-mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: ConfigureWebhookRequestInput!) {
-  configureWebhook(context: $context, input: $input) {
+mutation ManagementUpdateWebhook($context: RequestContextInput!, $input: UpdateWebhookRequestInput!) {
+  updateWebhook(context: $context, input: $input) {
     status
     requestId
     serverTime

@@ -37,7 +37,7 @@ planned languages, push notifications, package names, versioning and support.
 | SDK | Package | Runtime | Covers |
 | --- | --- | --- | --- |
 | [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, and calls with explicit connect and capture |
-| [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, and webhook verification |
+| [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and provisional push payload builders |
 
 Both packages depend on [`@convohop/core`](packages/core/README.md), which
 holds the generated GraphQL types and operations and the shared transport.
@@ -199,6 +199,8 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
   verify them
 - [Conformance suite](spec/conformance/README.md): scenarios, the driver
   protocol, targets and webhook signature vectors
+- [Push payload contract](spec/push-payload/README.md): provisional
+  notification events, the push requests built from them and shared vectors
 - [Contributing](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)
 - [Code of conduct](CODE_OF_CONDUCT.md)

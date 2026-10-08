@@ -33,6 +33,7 @@ flowchart LR
 | [`driver-protocol.md`](driver-protocol.md) | The runner-to-driver protocol, with its [schema](driver-protocol.schema.json). |
 | [`targets.md`](targets.md) | Target descriptors, capabilities and the optional control API, with the [descriptor schema](target.schema.json). |
 | [`webhook-signatures.md`](webhook-signatures.md) | The webhook signature scheme and its [vectors](vectors/webhooks.json), with their [schema](webhook-vectors.schema.json). |
+| [`../push-payload/`](../push-payload/README.md) | The provisional push payload contract and its [vectors](../push-payload/vectors.json), with their [schema](../push-payload/push-payload.schema.json). Each server SDK's own tests run these vectors, not drivers. |
 | [`conformance/runner.mjs`](../../conformance/runner.mjs) | The runner CLI; its modules are in [`conformance/lib/`](../../conformance/lib). |
 | [`conformance/drivers/ts/`](../../conformance/drivers/ts) | The TypeScript reference driver. |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |
@@ -251,8 +252,8 @@ against the IR, so `npm test` fails when they drift apart:
   `requests.retry` step may expect any IR code, because the retry resends
   the original mutation. Error code names appear only in the code fields of
   `expect.error` and `expect.errors`, so none escapes this check.
-  `RATE_LIMITED` is accepted until the rate-limit problem types reach
-  `schema/`; the test then reports that the exception can go.
+  Codes listed in the test's `PENDING_ERROR_CODES` are accepted until the
+  IR defines them; the test then reports that the exception can go.
 - An expected error that pins an HTTP `status` uses the status the IR gives
   its code.
 - The mock's backend-key scopes and GraphQL document size limit
@@ -264,7 +265,7 @@ against the IR, so `npm test` fails when they drift apart:
   leaves no rule satisfied gets `SCOPE_REQUIRED`, with a message that names
   the scope.
 - Every problem the mock raises has a literal code that the IR defines, with
-  the IR's HTTP status for that code. The exceptions are `RATE_LIMITED`, as
+  the IR's HTTP status for that code. The exceptions are pending codes, as
   above, and the mock's own `METHOD_NOT_ALLOWED`, `UNSUPPORTED_MEDIA_TYPE`
   and `MOCK_FAILURE`, which generated SDK requests never trigger unless the
   mock itself fails.
@@ -347,7 +348,7 @@ npm run conformance           # run every scenario against the mock
 npm run conformance -- --filter realtime --filter errors.rate-limited
 npm run conformance -- --target conformance/targets/dev-stack.json
 npm run test:conformance      # the harness's own tests (also part of npm test)
-npm run generate:conformance  # regenerate vectors/webhooks.json
+npm run generate:conformance  # regenerate vectors/webhooks.json and ../push-payload/vectors.json
 ```
 
 The harness is the private `conformance` npm workspace. It is never
@@ -386,7 +387,9 @@ the GitHub Actions job summary.
 `npm run test:conformance` builds the reference driver and the packages it
 references and runs the harness's own `node:test` suites in
 [`conformance/test/`](../../conformance/test): the
-schemas, catalog, scenarios and vectors; the runner's modules; the mock;
+schemas, catalog, scenarios and webhook vectors; the
+[push payload vectors](../push-payload/README.md#vectors), against rules
+written independently of the builders; the runner's modules; the mock;
 the driver client, against a scriptable fake driver; and end-to-end runner
 invocations, including the reference driver against the mock and a
 dev-stack descriptor pointed at a local mock.

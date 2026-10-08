@@ -778,7 +778,10 @@ type Mutation {
 	pauseOperation(context: RequestContextInput!, input: PauseOperationRequestInput!): PauseOperationReply!
 	resumeOperation(context: RequestContextInput!, input: ResumeOperationRequestInput!): ResumeOperationReply!
 	configureWebhook(context: RequestContextInput!, input: ConfigureWebhookRequestInput!): ConfigureWebhookReply!
+	updateWebhook(context: RequestContextInput!, input: UpdateWebhookRequestInput!): UpdateWebhookReply!
+	rotateWebhookSecret(context: RequestContextInput!, input: RotateWebhookSecretRequestInput!): RotateWebhookSecretReply!
 	disableWebhook(context: RequestContextInput!, input: DisableWebhookRequestInput!): DisableWebhookReply!
+	replayWebhookDeliveries(context: RequestContextInput!, input: ReplayWebhookDeliveriesRequestInput!): ReplayWebhookDeliveriesReply!
 }
 
 type Operation {
@@ -816,6 +819,8 @@ type OperationResult {
 	endpointId: UUID
 	enabled: Boolean
 	liveSessionCompletion: LiveSessionOperationCompletion
+	replayedDeliveries: Int
+	skippedDeliveries: Int
 }
 
 type OperationStep {
@@ -896,6 +901,28 @@ type PauseOperationReply {
 input PauseOperationRequestInput {
 	operationId: UUID!
 	expectedRevision: Decimal!
+}
+
+"""
+GraphQL error `extensions` when `code` is `PLAN_LIMIT_EXCEEDED`. The plan does not permit the resource or feature (`status` 403 in an HTTP 200 GraphQL response, WebSocket close 4403). Not retryable without a plan or limit change.
+"""
+type PlanLimitExceededProblem {
+	"""
+	PLAN_LIMIT_EXCEEDED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	`maxProjects`, `broadcastEnabled`, or a canonical usage meter key whose allowance is zero.
+	"""
+	planLimit: String!
+	"""
+	The plan's value for `planLimit`: a decimal count, or `false` for a disabled feature.
+	"""
+	limit: String!
 }
 
 input PolicyChangeInput {
@@ -984,9 +1011,58 @@ type Query {
 	deploymentUsage(context: RequestContextInput!, input: DeploymentUsageRequestInput!): DeploymentUsageReply!
 	projectUsage(context: RequestContextInput!, input: ProjectUsageRequestInput!): ProjectUsageReply!
 	organizationUsage(context: RequestContextInput!, input: OrganizationUsageRequestInput!): OrganizationUsageReply!
+	webhookEndpoints(context: RequestContextInput!, input: WebhookEndpointsRequestInput!): WebhookEndpointsReply!
 	webhookDeliveries(context: RequestContextInput!, input: WebhookDeliveriesRequestInput!): WebhookDeliveriesReply!
 	resolveRequest(context: RequestContextInput!, input: ResolveRequestRequestInput!): ResolveRequestReply!
 	getOperation(context: RequestContextInput!, input: GetOperationRequestInput!): GetOperationReply!
+}
+
+"""
+GraphQL error `extensions` when `code` is `QUOTA_EXCEEDED`. A hard usage quota refused new work until the period ends (HTTP 429, WebSocket close 4429). Calls and connections already in progress continue. Not retryable before `periodEnd`.
+"""
+type QuotaExceededProblem {
+	"""
+	QUOTA_EXCEEDED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.
+	"""
+	retryAfter: Int!
+	"""
+	Canonical usage meter key, such as `connection_minutes`.
+	"""
+	meter: String!
+	"""
+	The exhausted allowance.
+	"""
+	limit: Decimal!
+	"""
+	RFC 3339 UTC end of the quota period.
+	"""
+	periodEnd: String!
+}
+
+"""
+GraphQL error `extensions` when `code` is `RATE_LIMITED`. A per-second limit refused the request before any effect (HTTP 429, WebSocket close 4429). Resend the same request identity after `retryAfter` seconds.
+"""
+type RateLimitedProblem {
+	"""
+	RATE_LIMITED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.
+	"""
+	retryAfter: Int!
 }
 
 type ReadReceipt {
@@ -1003,6 +1079,26 @@ type ReceiptPage {
 	complete: Boolean!
 	refreshRequired: Boolean!
 	nextCursor: String
+}
+
+type ReplayWebhookDeliveriesReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input ReplayWebhookDeliveriesRequestInput {
+	projectId: UUID!
+	endpointId: UUID!
+	effectId: UUID
+	since: String
+	until: String
 }
 
 input RequestContextInput {
@@ -1116,6 +1212,24 @@ input RevokeBackendKeyRequestInput {
 	revokeIssuedSessions: Boolean!
 }
 
+type RotateWebhookSecretReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input RotateWebhookSecretRequestInput {
+	projectId: UUID!
+	endpointId: UUID!
+	expectedRevision: Decimal!
+}
+
 type SearchHit {
 	conversationId: UUID!
 	message: Message
@@ -1172,6 +1286,26 @@ type TypingStatus {
 
 scalar UUID
 
+type UpdateWebhookReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OperationResult
+}
+
+input UpdateWebhookRequestInput {
+	projectId: UUID!
+	endpointId: UUID!
+	expectedRevision: Decimal!
+	eventTypes: [String!]!
+	enabled: Boolean!
+}
+
 type UsageMeter {
 	meter: String!
 	unit: String!
@@ -1203,6 +1337,13 @@ type WebhookDelivery {
 	attempts: Decimal!
 	lastOutcome: String
 	nextAttemptAt: String!
+	eventType: String
+	createdAt: String
+	replayedAt: String
+	lastAttemptAt: String
+	lastHttpStatus: Int
+	lastLatencyMs: Int
+	lastErrorCode: String
 }
 
 type WebhookDeliveryPage {
@@ -1210,6 +1351,51 @@ type WebhookDeliveryPage {
 	complete: Boolean!
 	refreshRequired: Boolean!
 	nextCursor: String
+	observedAt: String
+	partialReason: String
+	sourceRevision: Decimal
+}
+
+type WebhookEndpoint {
+	endpointId: UUID!
+	url: String!
+	eventTypes: [String!]!
+	enabled: Boolean!
+	status: String!
+	disabledReason: String
+	revision: Decimal!
+	secretVersion: String!
+	rotationPending: Boolean!
+	rotationOverlapUntil: String
+	consecutiveFailures: Int!
+	failingSince: String
+	lastSuccessAt: String
+	lastFailureAt: String
+}
+
+type WebhookEndpointPage {
+	items: [WebhookEndpoint!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+	observedAt: String
+	partialReason: String
+}
+
+type WebhookEndpointsReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: WebhookEndpointPage
+}
+
+input WebhookEndpointsRequestInput {
+	projectId: UUID!
 }
 
 """

@@ -62,7 +62,8 @@ backend, bots and AI agents can work with conversations directly:
 - Send messages as a bot or system identity, or on behalf of a user with an
   audit trail.
 - Read calls and call history.
-- Verify and parse webhook events.
+- Verify and parse webhook events, and build push payloads from notification
+  events.
 
 > [!NOTE]
 > Backend keys reach the data plane through three backend-key scopes:
@@ -70,7 +71,8 @@ backend, bots and AI agents can work with conversations directly:
 > call reads. Each one is granted explicitly, so a backend key doesn't get
 > access to everyone's messages by default. The Node.js server SDK covers
 > management, identities and sessions, conversations and membership, the
-> data plane and webhook verification today. See its
+> data plane and webhook verification today, and has provisional push
+> payload builders. See its
 > [data-plane methods](../packages/server/README.md#data-plane-methods).
 
 Server SDKs don't open end-user media connections. Joining calls from
@@ -244,8 +246,12 @@ How it works:
 > Per-recipient notification events, and webhook delivery to your endpoints,
 > are in development. Event names and fields aren't final. The Node.js
 > server SDK already verifies webhook signatures, with
-> [`webhooks.verify()`](../packages/server/README.md#webhooks). Its typed
-> events are provisional, and its payload builders are planned.
+> [`webhooks.verify()`](../packages/server/README.md#webhooks), and builds
+> APNs, FCM and Web Push requests from notification events, with its
+> [push payload builders](../packages/server/README.md#push-payloads). Its
+> typed events and builders are provisional. The draft
+> [push payload contract](../spec/push-payload/README.md) defines the
+> events, the requests and shared vectors for every server SDK.
 
 The SDK helpers are all optional:
 

@@ -559,6 +559,27 @@
         "retryable": false
       },
       {
+        "name": "PLAN_LIMIT_EXCEEDED",
+        "summary": "The plan does not permit the resource or feature. extensions.planLimit names the limit and extensions.limit holds the plan's value. Change the plan or the limit before trying again.",
+        "origin": "server",
+        "status": 403,
+        "retryable": false
+      },
+      {
+        "name": "QUOTA_EXCEEDED",
+        "summary": "A hard usage quota refused new work until the quota period ends. extensions.meter, extensions.limit and extensions.periodEnd describe the quota, and extensions.retryAfter (HTTP Retry-After) counts the seconds until it resets. Work already in progress continues.",
+        "origin": "server",
+        "status": 429,
+        "retryable": false
+      },
+      {
+        "name": "RATE_LIMITED",
+        "summary": "A per-second rate limit refused the request before it had any effect. Wait extensions.retryAfter seconds (HTTP Retry-After), then resend the request with the same requestId.",
+        "origin": "server",
+        "status": 429,
+        "retryable": true
+      },
+      {
         "name": "RECOVERY_STORAGE_FAILURE",
         "summary": "Caller-provided recovery storage did not confirm durability. Keep the original request and its outcome.",
         "origin": "sdk",
@@ -674,9 +695,37 @@
         "retryable": false
       },
       {
+        "name": "WEBHOOK_DESTINATION_DENIED",
+        "summary": "The webhook URL is not a public HTTPS destination.",
+        "origin": "server",
+        "status": 400,
+        "retryable": false
+      },
+      {
+        "name": "WEBHOOK_ENDPOINT_DISABLED",
+        "summary": "The webhook endpoint is disabled. Enable it, then replay its deliveries.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
         "name": "WEBHOOK_ENDPOINT_LIMIT",
         "summary": "The project reached its webhook endpoint limit.",
         "origin": "server",
+        "retryable": false
+      },
+      {
+        "name": "WEBHOOK_ROTATION_PENDING",
+        "summary": "A signing-secret rotation is already waiting for acknowledgement.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "WEBHOOK_SECRET_UNACKNOWLEDGED",
+        "summary": "The endpoint's signing secret has not been acknowledged yet.",
+        "origin": "server",
+        "status": 409,
         "retryable": false
       },
       {
@@ -729,6 +778,11 @@
           "RESOLUTION_REQUIRED",
           "RECOVERY_STORAGE_FAILURE"
         ]
+      },
+      {
+        "name": "rateLimited",
+        "summary": "Operations charged against a per-second rate limit of the caller, project or client address.",
+        "codes": ["RATE_LIMITED"]
       },
       {
         "name": "request",
@@ -966,7 +1020,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http"],
+        "sets": ["request", "http", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -979,6 +1033,7 @@
           "HTTP_FAILURE",
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1026,7 +1081,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http"],
+        "sets": ["request", "http", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1039,6 +1094,7 @@
           "HTTP_FAILURE",
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1086,7 +1142,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1100,6 +1156,7 @@
           "INCARNATION_MISMATCH",
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1153,7 +1210,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1168,6 +1225,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1225,7 +1283,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1240,6 +1298,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1304,7 +1363,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1319,6 +1378,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1383,7 +1443,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1399,6 +1459,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "PAGE_ITEM_TOO_LARGE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1456,7 +1517,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1472,6 +1533,7 @@
           "INVALID_RESPONSE",
           "MESSAGE_DELETED",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1533,7 +1595,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1551,6 +1613,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1611,7 +1674,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1626,6 +1689,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1689,7 +1753,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1707,6 +1771,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "PAGE_ITEM_TOO_LARGE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1771,7 +1836,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1788,6 +1853,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "PAGE_ITEM_TOO_LARGE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1845,7 +1911,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1861,6 +1927,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1908,16 +1975,16 @@
       "input": {"argument": "input", "type": "GetOperationRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "GetOperationReply", "nullable": false}},
       "document": {
-        "text": "query CommunicationGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {\n  getOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n      }\n      blockedReason\n    }\n  }\n}",
-        "bytes": 1572,
-        "selectedFields": 73,
+        "text": "query CommunicationGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {\n  getOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n      }\n      blockedReason\n    }\n  }\n}",
+        "bytes": 1625,
+        "selectedFields": 75,
         "depth": 6
       },
       "idempotency": "safe",
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -1932,6 +1999,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -1990,7 +2058,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2005,6 +2073,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2063,7 +2132,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2078,6 +2147,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2143,7 +2213,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2159,6 +2229,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2224,7 +2295,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2240,6 +2311,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2301,7 +2373,7 @@
       },
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2316,6 +2388,7 @@
           "INCARNATION_MISMATCH",
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2373,7 +2446,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2388,6 +2461,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2444,7 +2518,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2460,6 +2534,7 @@
           "INVALID_RESPONSE",
           "NOT_A_SESSION_REQUEST",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -2516,7 +2591,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "ALREADY_EXISTS",
@@ -2533,6 +2615,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2590,7 +2673,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2607,6 +2697,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2665,7 +2756,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2683,6 +2781,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2740,7 +2839,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2758,6 +2864,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2819,7 +2926,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2836,6 +2950,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2894,7 +3009,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["conversation.created"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2913,6 +3035,7 @@
           "MEMBER_LIMIT",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -2973,7 +3096,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["conversation.updated"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -2990,6 +3120,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3048,7 +3179,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.added", "member.roleChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3067,6 +3205,7 @@
           "MEMBER_LIMIT",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3125,7 +3264,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.added", "member.roleChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3144,6 +3290,7 @@
           "MEMBER_LIMIT",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3202,7 +3349,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.removed"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3220,6 +3374,7 @@
           "MEMBERSHIP_COUNT_INVALID",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3278,7 +3433,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.historyExpanded"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3295,6 +3457,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3356,7 +3519,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.created"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3373,6 +3543,9 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "PLAN_LIMIT_EXCEEDED",
+          "QUOTA_EXCEEDED",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3433,7 +3606,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.edited"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3451,6 +3631,7 @@
           "MESSAGE_DELETED",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3512,7 +3693,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["message.deleted"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3530,6 +3718,7 @@
           "MESSAGE_DELETED",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3588,7 +3777,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["receipt.reported"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3605,6 +3801,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3662,7 +3859,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication"],
+        "sets": ["request", "http", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3677,6 +3874,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "NOT_FOUND",
+          "RATE_LIMITED",
           "REQUEST_TOO_LARGE",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
@@ -3732,7 +3930,14 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["member.broadcastPermissionChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3749,6 +3954,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3808,7 +4014,14 @@
       "realtime": {"mode": "none", "emits": ["live.started", "live.ready"]},
       "longRunning": {"poll": "communication.liveSessionOperation", "refField": "operation"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3827,6 +4040,9 @@
           "MEDIA_RECOVERING",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "PLAN_LIMIT_EXCEEDED",
+          "QUOTA_EXCEEDED",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3883,7 +4099,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.participationChanged"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3903,6 +4127,9 @@
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
           "PARTICIPATION_MISMATCH",
+          "PLAN_LIMIT_EXCEEDED",
+          "QUOTA_EXCEEDED",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -3962,7 +4189,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.alerted"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -3983,6 +4218,7 @@
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
           "PARTICIPATION_MISMATCH",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4040,7 +4276,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none", "emits": ["live.participationChanged", "live.ended"]},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -4061,6 +4305,7 @@
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
           "PARTICIPATION_MISMATCH",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4121,7 +4366,15 @@
       "realtime": {"mode": "none", "emits": ["live.ended"]},
       "longRunning": {"poll": "communication.liveSessionOperation", "refField": "operation"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -4142,6 +4395,7 @@
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
           "PARTICIPATION_MISMATCH",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4202,7 +4456,15 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "communication", "mutation", "communicationMutation", "live"],
+        "sets": [
+          "request",
+          "http",
+          "communication",
+          "mutation",
+          "communicationMutation",
+          "live",
+          "rateLimited"
+        ],
         "codes": [
           "ADMISSION_LIMIT",
           "ALREADY_CONNECTED",
@@ -4228,6 +4490,7 @@
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
           "PARTICIPATION_MISMATCH",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4290,7 +4553,8 @@
           "communication",
           "mutation",
           "communicationMutation",
-          "credentialDelivery"
+          "credentialDelivery",
+          "rateLimited"
         ],
         "codes": [
           "ADMISSION_LIMIT",
@@ -4311,6 +4575,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4375,7 +4640,8 @@
           "communication",
           "mutation",
           "communicationMutation",
-          "credentialDelivery"
+          "credentialDelivery",
+          "rateLimited"
         ],
         "codes": [
           "ADMISSION_LIMIT",
@@ -4397,6 +4663,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_EXPIRED",
           "REQUEST_TOO_LARGE",
@@ -4460,7 +4727,7 @@
       },
       "realtime": {"mode": "subscription", "channel": "conversationEvents"},
       "errors": {
-        "sets": ["request", "communication"],
+        "sets": ["request", "communication", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
@@ -4476,6 +4743,9 @@
           "INCARNATION_MISMATCH",
           "INVALID_REQUEST",
           "NOT_FOUND",
+          "PLAN_LIMIT_EXCEEDED",
+          "QUOTA_EXCEEDED",
+          "RATE_LIMITED",
           "RESYNC_REQUIRED",
           "RETRY_EXHAUSTED",
           "UNAUTHENTICATED",
@@ -5071,6 +5341,77 @@
       }
     },
     {
+      "id": "management.webhookEndpoints",
+      "plane": "management",
+      "kind": "query",
+      "field": "webhookEndpoints",
+      "operationName": "ManagementWebhookEndpoints",
+      "summary": "List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "WebhookEndpointsRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "WebhookEndpointsRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "WebhookEndpointsReply", "nullable": false}},
+      "document": {
+        "text": "query ManagementWebhookEndpoints($context: RequestContextInput!, $input: WebhookEndpointsRequestInput!) {\n  webhookEndpoints(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        endpointId\n        url\n        eventTypes\n        enabled\n        status\n        disabledReason\n        revision\n        secretVersion\n        rotationPending\n        rotationOverlapUntil\n        consecutiveFailures\n        failingSince\n        lastSuccessAt\n        lastFailureAt\n      }\n      complete\n      refreshRequired\n      nextCursor\n      observedAt\n      partialReason\n    }\n  }\n}",
+        "bytes": 789,
+        "selectedFields": 36,
+        "depth": 3
+      },
+      "idempotency": "safe",
+      "pagination": {
+        "style": "bounded",
+        "pagePath": ["result"],
+        "pageType": "WebhookEndpointPage",
+        "itemType": "WebhookEndpoint"
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "REQUEST_TOO_LARGE",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
       "id": "management.webhookDeliveries",
       "plane": "management",
       "kind": "query",
@@ -5105,9 +5446,9 @@
       "input": {"argument": "input", "type": "WebhookDeliveriesRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "WebhookDeliveriesReply", "nullable": false}},
       "document": {
-        "text": "query ManagementWebhookDeliveries($context: RequestContextInput!, $input: WebhookDeliveriesRequestInput!) {\n  webhookDeliveries(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        effectId\n        eventId\n        state\n        attempts\n        lastOutcome\n        nextAttemptAt\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
-        "bytes": 572,
-        "selectedFields": 26,
+        "text": "query ManagementWebhookDeliveries($context: RequestContextInput!, $input: WebhookDeliveriesRequestInput!) {\n  webhookDeliveries(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        effectId\n        eventId\n        state\n        attempts\n        lastOutcome\n        nextAttemptAt\n        eventType\n        createdAt\n        replayedAt\n        lastAttemptAt\n        lastHttpStatus\n        lastLatencyMs\n        lastErrorCode\n      }\n      complete\n      refreshRequired\n      nextCursor\n      observedAt\n      partialReason\n      sourceRevision\n    }\n  }\n}",
+        "bytes": 774,
+        "selectedFields": 36,
         "depth": 3
       },
       "idempotency": "safe",
@@ -5243,9 +5584,9 @@
       "input": {"argument": "input", "type": "GetOperationRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "GetOperationReply", "nullable": false}},
       "document": {
-        "text": "query ManagementGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {\n  getOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n      }\n      blockedReason\n    }\n  }\n}",
-        "bytes": 1569,
-        "selectedFields": 73,
+        "text": "query ManagementGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {\n  getOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n      }\n      blockedReason\n    }\n  }\n}",
+        "bytes": 1622,
+        "selectedFields": 75,
         "depth": 6
       },
       "idempotency": "safe",
@@ -5318,7 +5659,7 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {
-        "sets": ["request", "http", "mutation"],
+        "sets": ["request", "http", "mutation", "rateLimited"],
         "codes": [
           "ADMISSION_LIMIT",
           "ALREADY_EXISTS",
@@ -5334,6 +5675,7 @@
           "INVALID_REQUEST",
           "INVALID_RESPONSE",
           "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_TOO_LARGE",
           "RESOLUTION_REQUIRED",
@@ -5379,9 +5721,9 @@
       "input": {"argument": "input", "type": "CreateDeploymentRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "CreateDeploymentReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementCreateDeployment($context: RequestContextInput!, $input: CreateDeploymentRequestInput!) {\n  createDeployment(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n    }\n  }\n}",
-        "bytes": 1250,
-        "selectedFields": 59,
+        "text": "mutation ManagementCreateDeployment($context: RequestContextInput!, $input: CreateDeploymentRequestInput!) {\n  createDeployment(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
+        "bytes": 1299,
+        "selectedFields": 61,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -5451,9 +5793,9 @@
       "input": {"argument": "input", "type": "CreateProjectRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "CreateProjectReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateProjectRequestInput!) {\n  createProject(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n    }\n  }\n}",
-        "bytes": 1241,
-        "selectedFields": 59,
+        "text": "mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateProjectRequestInput!) {\n  createProject(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
+        "bytes": 1290,
+        "selectedFields": 61,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -5479,6 +5821,7 @@
           "INVALID_RESPONSE",
           "NOT_FOUND",
           "OUTCOME_UNKNOWN",
+          "PLAN_LIMIT_EXCEEDED",
           "RECOVERY_STORAGE_FAILURE",
           "REQUEST_TOO_LARGE",
           "RESOLUTION_REQUIRED",
@@ -5524,9 +5867,9 @@
       "input": {"argument": "input", "type": "IssueBackendKeyRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "IssueBackendKeyReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: IssueBackendKeyRequestInput!) {\n  issueBackendKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n    }\n  }\n}",
-        "bytes": 1247,
-        "selectedFields": 59,
+        "text": "mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: IssueBackendKeyRequestInput!) {\n  issueBackendKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
+        "bytes": 1296,
+        "selectedFields": 61,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -5595,9 +5938,9 @@
       "input": {"argument": "input", "type": "RevokeBackendKeyRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "RevokeBackendKeyReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: RevokeBackendKeyRequestInput!) {\n  revokeBackendKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n    }\n  }\n}",
-        "bytes": 1250,
-        "selectedFields": 59,
+        "text": "mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: RevokeBackendKeyRequestInput!) {\n  revokeBackendKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
+        "bytes": 1299,
+        "selectedFields": 61,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -5667,9 +6010,9 @@
       "input": {"argument": "input", "type": "ProjectPolicyRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ProjectPolicyReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementProjectPolicy($context: RequestContextInput!, $input: ProjectPolicyRequestInput!) {\n  projectPolicy(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n    }\n  }\n}",
-        "bytes": 1241,
-        "selectedFields": 59,
+        "text": "mutation ManagementProjectPolicy($context: RequestContextInput!, $input: ProjectPolicyRequestInput!) {\n  projectPolicy(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
+        "bytes": 1290,
+        "selectedFields": 61,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -5811,9 +6154,9 @@
       "input": {"argument": "input", "type": "PauseOperationRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "PauseOperationReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseOperationRequestInput!) {\n  pauseOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n      }\n      blockedReason\n    }\n  }\n}",
-        "bytes": 1578,
-        "selectedFields": 73,
+        "text": "mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseOperationRequestInput!) {\n  pauseOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n      }\n      blockedReason\n    }\n  }\n}",
+        "bytes": 1631,
+        "selectedFields": 75,
         "depth": 6
       },
       "idempotency": "idempotent",
@@ -5882,9 +6225,9 @@
       "input": {"argument": "input", "type": "ResumeOperationRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ResumeOperationReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementResumeOperation($context: RequestContextInput!, $input: ResumeOperationRequestInput!) {\n  resumeOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n      }\n      blockedReason\n    }\n  }\n}",
-        "bytes": 1581,
-        "selectedFields": 73,
+        "text": "mutation ManagementResumeOperation($context: RequestContextInput!, $input: ResumeOperationRequestInput!) {\n  resumeOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n      }\n      blockedReason\n    }\n  }\n}",
+        "bytes": 1634,
+        "selectedFields": 75,
         "depth": 6
       },
       "idempotency": "idempotent",
@@ -5953,9 +6296,9 @@
       "input": {"argument": "input", "type": "ConfigureWebhookRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ConfigureWebhookReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: ConfigureWebhookRequestInput!) {\n  configureWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n    }\n  }\n}",
-        "bytes": 1250,
-        "selectedFields": 59,
+        "text": "mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: ConfigureWebhookRequestInput!) {\n  configureWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
+        "bytes": 1299,
+        "selectedFields": 61,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -5986,7 +6329,156 @@
           "RETRY_EXHAUSTED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
+          "WEBHOOK_DESTINATION_DENIED",
           "WEBHOOK_ENDPOINT_LIMIT"
+        ]
+      }
+    },
+    {
+      "id": "management.updateWebhook",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "updateWebhook",
+      "operationName": "ManagementUpdateWebhook",
+      "summary": "Change the event types of a webhook endpoint, or enable or disable it.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "UpdateWebhookRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "UpdateWebhookRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "UpdateWebhookReply", "nullable": false}},
+      "document": {
+        "text": "mutation ManagementUpdateWebhook($context: RequestContextInput!, $input: UpdateWebhookRequestInput!) {\n  updateWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
+        "bytes": 1290,
+        "selectedFields": 61,
+        "depth": 5
+      },
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "OUTCOME_UNKNOWN",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "REVISION_CONFLICT",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED",
+          "WEBHOOK_ENDPOINT_LIMIT",
+          "WEBHOOK_SECRET_UNACKNOWLEDGED"
+        ]
+      }
+    },
+    {
+      "id": "management.rotateWebhookSecret",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "rotateWebhookSecret",
+      "operationName": "ManagementRotateWebhookSecret",
+      "summary": "Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "RotateWebhookSecretRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "RotateWebhookSecretRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "RotateWebhookSecretReply", "nullable": false}},
+      "document": {
+        "text": "mutation ManagementRotateWebhookSecret($context: RequestContextInput!, $input: RotateWebhookSecretRequestInput!) {\n  rotateWebhookSecret(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
+        "bytes": 1308,
+        "selectedFields": 61,
+        "depth": 5
+      },
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "OUTCOME_UNKNOWN",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "REVISION_CONFLICT",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED",
+          "WEBHOOK_ROTATION_PENDING",
+          "WEBHOOK_SECRET_UNACKNOWLEDGED"
         ]
       }
     },
@@ -6025,9 +6517,9 @@
       "input": {"argument": "input", "type": "DisableWebhookRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "DisableWebhookReply", "nullable": false}},
       "document": {
-        "text": "mutation ManagementDisableWebhook($context: RequestContextInput!, $input: DisableWebhookRequestInput!) {\n  disableWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n    }\n  }\n}",
-        "bytes": 1244,
-        "selectedFields": 59,
+        "text": "mutation ManagementDisableWebhook($context: RequestContextInput!, $input: DisableWebhookRequestInput!) {\n  disableWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
+        "bytes": 1293,
+        "selectedFields": 61,
         "depth": 5
       },
       "idempotency": "idempotent",
@@ -6059,6 +6551,88 @@
           "REVISION_CONFLICT",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.replayWebhookDeliveries",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "replayWebhookDeliveries",
+      "operationName": "ManagementReplayWebhookDeliveries",
+      "summary": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {
+            "kind": "input",
+            "name": "ReplayWebhookDeliveriesRequestInput",
+            "nullable": false
+          }
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {
+        "argument": "input",
+        "type": "ReplayWebhookDeliveriesRequestInput",
+        "required": true
+      },
+      "result": {
+        "type": {"kind": "object", "name": "ReplayWebhookDeliveriesReply", "nullable": false}
+      },
+      "document": {
+        "text": "mutation ManagementReplayWebhookDeliveries($context: RequestContextInput!, $input: ReplayWebhookDeliveriesRequestInput!) {\n  replayWebhookDeliveries(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n    }\n  }\n}",
+        "bytes": 1320,
+        "selectedFields": 61,
+        "depth": 5
+      },
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "longRunning": {"poll": "management.getOperation", "refField": "operation"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "OUTCOME_UNKNOWN",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED",
+          "WEBHOOK_ENDPOINT_DISABLED"
         ]
       }
     }
@@ -7969,8 +8543,17 @@
         {
           "name": "liveSessionCompletion",
           "type": {"kind": "object", "name": "LiveSessionOperationCompletion", "nullable": true}
-        }
+        },
+        {"name": "replayedDeliveries", "type": {"kind": "scalar", "name": "Int", "nullable": true}},
+        {"name": "skippedDeliveries", "type": {"kind": "scalar", "name": "Int", "nullable": true}}
       ]
+    },
+    {
+      "name": "Int",
+      "kind": "scalar",
+      "planes": ["communication", "management"],
+      "builtIn": true,
+      "representation": "integer"
     },
     {
       "name": "OperationStep",
@@ -8049,6 +8632,33 @@
       "constraints": {"minimum": 1, "maximum": 100}
     },
     {
+      "name": "PlanLimitExceededProblem",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "description": "GraphQL error `extensions` when `code` is `PLAN_LIMIT_EXCEEDED`. The plan does not permit the resource or feature (`status` 403 in an HTTP 200 GraphQL response, WebSocket close 4403). Not retryable without a plan or limit change.",
+      "fields": [
+        {
+          "name": "code",
+          "description": "PLAN_LIMIT_EXCEEDED",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "status", "type": {"kind": "scalar", "name": "Int", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "outcome", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "retryable", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "planLimit",
+          "description": "`maxProjects`, `broadcastEnabled`, or a canonical usage meter key whose allowance is zero.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {
+          "name": "limit",
+          "description": "The plan's value for `planLimit`: a decimal count, or `false` for a disabled feature.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        }
+      ]
+    },
+    {
       "name": "PolicyChangeInput",
       "kind": "input",
       "planes": ["communication", "management"],
@@ -8120,6 +8730,65 @@
       "representation": "object",
       "summary": "Application-defined JSON object. Numbers must stay within the interoperable safe-integer range.",
       "constraints": {"maxCanonicalJsonBytes": 8192}
+    },
+    {
+      "name": "QuotaExceededProblem",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "description": "GraphQL error `extensions` when `code` is `QUOTA_EXCEEDED`. A hard usage quota refused new work until the period ends (HTTP 429, WebSocket close 4429). Calls and connections already in progress continue. Not retryable before `periodEnd`.",
+      "fields": [
+        {
+          "name": "code",
+          "description": "QUOTA_EXCEEDED",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "status", "type": {"kind": "scalar", "name": "Int", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "outcome", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "retryable", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "retryAfter",
+          "description": "Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.",
+          "type": {"kind": "scalar", "name": "Int", "nullable": false}
+        },
+        {
+          "name": "meter",
+          "description": "Canonical usage meter key, such as `connection_minutes`.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {
+          "name": "limit",
+          "description": "The exhausted allowance.",
+          "type": {"kind": "scalar", "name": "Decimal", "nullable": false}
+        },
+        {
+          "name": "periodEnd",
+          "description": "RFC 3339 UTC end of the quota period.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        }
+      ]
+    },
+    {
+      "name": "RateLimitedProblem",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "description": "GraphQL error `extensions` when `code` is `RATE_LIMITED`. A per-second limit refused the request before any effect (HTTP 429, WebSocket close 4429). Resend the same request identity after `retryAfter` seconds.",
+      "fields": [
+        {
+          "name": "code",
+          "description": "RATE_LIMITED",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "status", "type": {"kind": "scalar", "name": "Int", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "outcome", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "retryable", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "retryAfter",
+          "description": "Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.",
+          "type": {"kind": "scalar", "name": "Int", "nullable": false}
+        }
+      ]
     },
     {
       "name": "ReadReceipt",
@@ -8876,7 +9545,14 @@
         {"name": "state", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "attempts", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}},
         {"name": "lastOutcome", "type": {"kind": "scalar", "name": "String", "nullable": true}},
-        {"name": "nextAttemptAt", "type": {"kind": "scalar", "name": "String", "nullable": false}}
+        {"name": "nextAttemptAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "eventType", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "createdAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "lastAttemptAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "lastHttpStatus", "type": {"kind": "scalar", "name": "Int", "nullable": true}},
+        {"name": "lastLatencyMs", "type": {"kind": "scalar", "name": "Int", "nullable": true}},
+        {"name": "lastErrorCode", "type": {"kind": "scalar", "name": "String", "nullable": true}}
       ]
     },
     {
@@ -8897,7 +9573,70 @@
           "name": "refreshRequired",
           "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
         },
-        {"name": "nextCursor", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+        {"name": "nextCursor", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "observedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "partialReason", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "sourceRevision", "type": {"kind": "scalar", "name": "Decimal", "nullable": true}}
+      ]
+    },
+    {
+      "name": "WebhookEndpoint",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "endpointId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "url", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "eventTypes",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        },
+        {"name": "enabled", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "disabledReason", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "revision", "type": {"kind": "scalar", "name": "Decimal", "nullable": false}},
+        {"name": "secretVersion", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "rotationPending",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
+        },
+        {
+          "name": "rotationOverlapUntil",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        },
+        {
+          "name": "consecutiveFailures",
+          "type": {"kind": "scalar", "name": "Int", "nullable": false}
+        },
+        {"name": "failingSince", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "lastSuccessAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "lastFailureAt", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "WebhookEndpointPage",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {
+          "name": "items",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "WebhookEndpoint", "nullable": false}
+          }
+        },
+        {"name": "complete", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "refreshRequired",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
+        },
+        {"name": "nextCursor", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "observedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "partialReason", "type": {"kind": "scalar", "name": "String", "nullable": true}}
       ]
     },
     {
@@ -9365,6 +10104,34 @@
       ]
     },
     {
+      "name": "ReplayWebhookDeliveriesReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {"name": "result", "type": {"kind": "object", "name": "OperationResult", "nullable": true}}
+      ]
+    },
+    {
+      "name": "ReplayWebhookDeliveriesRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "projectId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "endpointId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "effectId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "since", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "until", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
       "name": "ResumeOperationReply",
       "kind": "object",
       "planes": ["management"],
@@ -9426,6 +10193,73 @@
       ]
     },
     {
+      "name": "RotateWebhookSecretReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {"name": "result", "type": {"kind": "object", "name": "OperationResult", "nullable": true}}
+      ]
+    },
+    {
+      "name": "RotateWebhookSecretRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "projectId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "endpointId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {
+          "name": "expectedRevision",
+          "type": {"kind": "scalar", "name": "Decimal", "nullable": false}
+        }
+      ]
+    },
+    {
+      "name": "UpdateWebhookReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {"name": "result", "type": {"kind": "object", "name": "OperationResult", "nullable": true}}
+      ]
+    },
+    {
+      "name": "UpdateWebhookRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "projectId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "endpointId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {
+          "name": "expectedRevision",
+          "type": {"kind": "scalar", "name": "Decimal", "nullable": false}
+        },
+        {
+          "name": "eventTypes",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        },
+        {"name": "enabled", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}}
+      ]
+    },
+    {
       "name": "WebhookDeliveriesReply",
       "kind": "object",
       "planes": ["management"],
@@ -9451,6 +10285,33 @@
       "fields": [
         {"name": "projectId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
         {"name": "endpointId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}}
+      ]
+    },
+    {
+      "name": "WebhookEndpointsReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "WebhookEndpointPage", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "WebhookEndpointsRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "projectId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}}
       ]
     }
   ]
