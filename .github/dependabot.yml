@@ -44,3 +44,25 @@ updates:
       github-actions:
         patterns:
           - "*"
+
+  # Tested TypeScript docs snippets (docs/languages/typescript/examples).
+  # Major updates stay ungrouped so each one is checked against its quickstart,
+  # for example the units of firebase-admin's ttl.
+  - package-ecosystem: npm
+    directory: /docs/languages/typescript/examples
+    schedule:
+      interval: weekly
+    # @types/node follows the engines.node floor (22.x); bump it with the floor.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: docs
+      include: scope
+    groups:
+      docs-typescript-examples:
+        update-types:
+          - minor
+          - patch

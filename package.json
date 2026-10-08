@@ -18,7 +18,12 @@
     "check:graphql": "node tools/sdkgen/cli.mjs generate --check",
     "check:annotations": "node tools/sdkgen/cli.mjs check-annotations",
     "test:sdkgen": "node --test \"tools/sdkgen/test/*.test.mjs\"",
-    "check:release": "npm run build && node --test test/release/*.test.mjs"
+    "check:release": "npm run build && node --test test/release/*.test.mjs",
+    "extract:docs": "node tools/docgen/cli.mjs extract",
+    "generate:docs": "node tools/docgen/cli.mjs generate",
+    "check:docs": "node tools/docgen/cli.mjs generate --check",
+    "test:docs": "node tools/docgen/cli.mjs test",
+    "test:docgen": "node --test \"tools/docgen/test/*.test.mjs\""
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
