@@ -1,0 +1,112 @@
+# Builds and tests the Android SDK in android/, its own Gradle build: the
+# pure-JVM runtime (:core), push and incoming calls (:push) and the Android
+# library (:convohop). Unit tests run on the JVM and under Robolectric on
+# every Android version they name, lint checks the libraries, and the
+# libraries are published to a directory in the build (dry run). No job
+# starts an emulator. See android/README.md.
+name: Android
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/android.yml
+      - android/**
+      - conformance/**
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/android.yml
+      - android/**
+      - conformance/**
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+
+permissions: {}
+
+jobs:
+  build:
+    name: Generate, build, test, lint and publish locally
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Check the generated code, including the Android SDK's Kotlin
+        run: npm run check:graphql
+      - name: Test the generators against their golden files
+        run: npm run test:sdkgen
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            android/**/*.gradle.kts
+            android/gradle/libs.versions.toml
+            android/gradle/wrapper/gradle-wrapper.properties
+            conformance/drivers/android/build.gradle.kts
+      # gradle.properties caps the build at two workers and a 2 GiB daemon.
+      - name: Compile, test (JVM and Robolectric) and lint
+        working-directory: android
+        run: ./gradlew --no-daemon --console=plain build lint
+      - name: Publish to a Maven repository in the build directory (dry run)
+        working-directory: android
+        run: ./gradlew --no-daemon --console=plain publishAllPublicationsToBuildRepository
+      - name: Check the publications
+        working-directory: android
+        run: |
+          python3 - build/repo/com/convohop <<'EOF'
+          import pathlib, re, sys, zipfile
+          root = pathlib.Path(sys.argv[1])
+          for artifact, packaging in (("convohop-android", "aar"), ("convohop-android-push", "aar"), ("convohop-android-core", "jar")):
+              versions = [path for path in (root / artifact).iterdir() if path.is_dir()]
+              if len(versions) != 1:
+                  sys.exit(f"{artifact}: expected one version, found {versions}")
+              names = sorted(path.name for path in versions[0].iterdir())
+              def find(suffix):
+                  found = [name for name in names if name.endswith(suffix) and (suffix == "-sources.jar" or not name.endswith("-sources.jar"))]
+                  if not found:
+                      sys.exit(f"{artifact}: no {suffix} file in {names}")
+                  return versions[0] / found[-1]
+              for suffix in (".pom", ".module", "-sources.jar"):
+                  find(suffix)
+              main = find(f".{packaging}")
+              if packaging == "aar":
+                  with zipfile.ZipFile(main) as aar:
+                      manifest = aar.read("AndroidManifest.xml").decode()
+                  if 'android:minSdkVersion="24"' not in manifest:
+                      sys.exit(f"{artifact}: the AAR's manifest does not declare minSdkVersion 24")
+              print(f"{artifact}: {main.name}")
+          EOF
+      - name: Upload the Maven repository
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-maven-repo
+          path: android/build/repo/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload the test and lint reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-reports
+          path: |
+            android/*/build/reports/
+            android/*/build/test-results/
+            conformance/drivers/android/build/reports/
+          if-no-files-found: ignore
+          retention-days: 14

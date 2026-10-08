@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification channel names. Override them in your app to translate them. -->
+    <string name="convohop_channel_calls">Incoming calls</string>
+    <string name="convohop_channel_missed_calls">Missed calls</string>
+    <string name="convohop_channel_messages">Messages</string>
+    <!-- Shown when a push carries no visible text, which is the default. -->
+    <string name="convohop_message_fallback">New message</string>
+    <string name="convohop_call_fallback">Incoming call</string>
+    <string name="convohop_video_call_fallback">Incoming video call</string>
+    <string name="convohop_missed_call">Missed call</string>
+    <!-- Call actions where the system call style isn't available. -->
+    <string name="convohop_answer">Answer</string>
+    <string name="convohop_decline">Decline</string>
+</resources>

@@ -114,3 +114,23 @@ updates:
         update-types:
           - minor
           - patch
+
+  # The Android SDK's own Gradle build (android/), including its wrapper.
+  - package-ecosystem: gradle
+    directory: /android
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    # Gradle has no development dependency type, so test-only updates get
+    # the fix prefix too.
+    commit-message:
+      prefix: fix
+      include: scope
+    groups:
+      android-gradle:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
