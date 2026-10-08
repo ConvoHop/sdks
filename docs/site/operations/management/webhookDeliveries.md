@@ -1,0 +1,102 @@
+# `management.webhookDeliveries`
+
+List recent deliveries of a webhook endpoint.
+
+- **Operation:** `management.webhookDeliveries`, a query sent as `ManagementWebhookDeliveries`.
+- **Layer:** server (server SDKs).
+- **Authorization:** `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+- **Idempotency:** `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+- **Pagination:** `bounded`. One bounded page without a cursor input. complete reports whether every item fit. Uses page `WebhookDeliveryPage` at `webhookDeliveries.result` and items `WebhookDelivery`.
+
+**Context** (`context: RequestContextInput!`)
+
+| Field | Type | Use |
+| --- | --- | --- |
+| `requestId` | `UUID!` | required |
+| `projectId` | `UUID` | forbidden |
+| `incarnation` | `UUID` | optional |
+| `observedServingEpoch` | `Decimal` | optional |
+| `credentialDeliveryPermit` | `SignedProof` | forbidden |
+
+**Input** (`input: WebhookDeliveriesRequestInput!`)
+
+| Field | Type |
+| --- | --- |
+| `projectId` | `UUID!` |
+| `endpointId` | `UUID!` |
+
+**Result** (`WebhookDeliveriesReply!`)
+
+| Field | Type |
+| --- | --- |
+| `status` | `String!` |
+| `requestId` | `UUID!` |
+| `serverTime` | `String` |
+| `receiptId` | `UUID` |
+| `committedAt` | `String` |
+| `replayed` | `Boolean` |
+| `operation` | `OperationRef` |
+| `resourceRef` | `ResourceRef` |
+| `result` | `WebhookDeliveryPage` |
+
+**Errors**
+
+- Returned by the authority: `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`.
+- Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
+- Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `TRANSPORT_UNKNOWN`.
+- Transient, so repeating the request may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.
+- Error sets: `request`, `http`.
+
+**GraphQL**
+
+```graphql
+query ManagementWebhookDeliveries($context: RequestContextInput!, $input: WebhookDeliveriesRequestInput!) {
+  webhookDeliveries(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        effectId
+        eventId
+        state
+        attempts
+        lastOutcome
+        nextAttemptAt
+        eventType
+        createdAt
+        replayedAt
+        lastAttemptAt
+        lastHttpStatus
+        lastLatencyMs
+        lastErrorCode
+      }
+      complete
+      refreshRequired
+      nextCursor
+      observedAt
+      partialReason
+      sourceRevision
+    }
+  }
+}
+```
+
+## SDK members
+
+| Language | Members |
+| --- | --- |
+| [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |

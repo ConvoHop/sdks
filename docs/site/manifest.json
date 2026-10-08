@@ -1,0 +1,694 @@
+{
+  "$schema": "../../spec/docs/manifest.schema.json",
+  "title": "ConvoHop SDK documentation",
+  "description": "Reference documentation, quickstarts and tested examples for the ConvoHop SDKs.",
+  "topics": [
+    {
+      "id": "server",
+      "title": "Server",
+      "summary": "Call ConvoHop from your backend with a backend key: principals, sessions, conversations and messages."
+    },
+    {
+      "id": "client",
+      "title": "Client",
+      "summary": "Sign in a user with a session token, then send, watch and replay messages."
+    },
+    {
+      "id": "webhooks",
+      "title": "Webhooks",
+      "summary": "Verify signed webhook deliveries and handle events."
+    },
+    {
+      "id": "push",
+      "title": "Push notifications",
+      "summary": "Deliver messages and calls to your users' devices as APNs, FCM and Web Push notifications."
+    },
+    {"id": "calling", "title": "Calling", "summary": "Start, join and end voice and video calls."}
+  ],
+  "languages": [
+    {
+      "id": "typescript",
+      "name": "TypeScript",
+      "status": "preview",
+      "codeFence": "ts",
+      "home": "typescript/index.md",
+      "reference": "typescript/reference/index.md",
+      "coverage": "typescript/reference/operations.md",
+      "llmsFull": "typescript/llms-full.txt",
+      "packages": [
+        {
+          "name": "@convohop/server",
+          "slug": "server",
+          "layer": "server",
+          "summary": "Server SDK for trusted Node.js runtimes: backend-key data-plane calls, management, webhook verification and push requests.",
+          "runtime": "Node.js 22 or later",
+          "source": "packages/server",
+          "reference": "typescript/reference/server.md",
+          "data": "typescript/reference/server.json"
+        },
+        {
+          "name": "@convohop/client",
+          "slug": "client",
+          "layer": "client",
+          "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.",
+          "runtime": "Current browsers. React Native isn't verified yet.",
+          "source": "packages/client",
+          "reference": "typescript/reference/client.md",
+          "data": "typescript/reference/client.json"
+        }
+      ],
+      "quickstarts": [
+        {"topic": "server", "path": "typescript/quickstarts/server.md"},
+        {"topic": "client", "path": "typescript/quickstarts/client.md"},
+        {"topic": "webhooks", "path": "typescript/quickstarts/webhooks.md"},
+        {"topic": "push", "path": "typescript/quickstarts/push.md"},
+        {"topic": "calling", "path": "typescript/quickstarts/calling.md"}
+      ]
+    }
+  ],
+  "operations": {"index": "operations/index.md", "data": "operations/index.json"},
+  "llms": {"index": "llms.txt", "full": "llms-full.txt"},
+  "pages": [
+    {
+      "path": "index.md",
+      "kind": "home",
+      "title": "ConvoHop SDK documentation",
+      "description": "Reference documentation, quickstarts and tested examples for the ConvoHop SDKs."
+    },
+    {
+      "path": "typescript/index.md",
+      "kind": "language",
+      "title": "TypeScript SDKs",
+      "description": "@convohop/server and @convohop/client wrap the ConvoHop API for TypeScript and JavaScript. The server SDK runs in your backend with a secret backend key, and the client SDK runs in your users' apps with a short-lived session for one user.",
+      "language": "typescript"
+    },
+    {
+      "path": "typescript/quickstarts/server.md",
+      "kind": "quickstart",
+      "title": "TypeScript server quickstart",
+      "description": "Call ConvoHop from your Node.js backend with @convohop/server: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.",
+      "language": "typescript",
+      "topic": "server"
+    },
+    {
+      "path": "typescript/quickstarts/client.md",
+      "kind": "quickstart",
+      "title": "TypeScript client quickstart",
+      "description": "Use ConvoHop in your users' browsers with @convohop/client: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads.",
+      "language": "typescript",
+      "topic": "client"
+    },
+    {
+      "path": "typescript/quickstarts/webhooks.md",
+      "kind": "quickstart",
+      "title": "TypeScript webhooks quickstart",
+      "description": "Receive ConvoHop events in your backend with @convohop/server: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
+      "language": "typescript",
+      "topic": "webhooks"
+    },
+    {
+      "path": "typescript/quickstarts/push.md",
+      "kind": "quickstart",
+      "title": "TypeScript push notifications quickstart",
+      "description": "Send push notifications for ConvoHop messages and calls: @convohop/server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.",
+      "language": "typescript",
+      "topic": "push"
+    },
+    {
+      "path": "typescript/quickstarts/calling.md",
+      "kind": "quickstart",
+      "title": "TypeScript calling quickstart",
+      "description": "Add voice and video calls to a conversation with @convohop/client: start a call and ring other members, join the current call, and leave or end it.",
+      "language": "typescript",
+      "topic": "calling"
+    },
+    {
+      "path": "typescript/reference/index.md",
+      "kind": "reference-index",
+      "title": "TypeScript reference",
+      "description": "The public API of each TypeScript package, generated from its declarations.",
+      "language": "typescript"
+    },
+    {
+      "path": "typescript/reference/server.md",
+      "kind": "reference",
+      "title": "@convohop/server",
+      "description": "Server SDK for trusted Node.js runtimes: backend-key data-plane calls, management, webhook verification and push requests.",
+      "language": "typescript",
+      "package": "@convohop/server"
+    },
+    {
+      "path": "typescript/reference/client.md",
+      "kind": "reference",
+      "title": "@convohop/client",
+      "description": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.",
+      "language": "typescript",
+      "package": "@convohop/client"
+    },
+    {
+      "path": "typescript/reference/operations.md",
+      "kind": "coverage",
+      "title": "TypeScript operation coverage",
+      "description": "The TypeScript SDK members that send each API operation. 52 of the 76 operations that TypeScript packages can send have a method.",
+      "language": "typescript"
+    },
+    {
+      "path": "operations/index.md",
+      "kind": "operation-index",
+      "title": "API operations",
+      "description": "Every operation in the ConvoHop GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it."
+    },
+    {
+      "path": "operations/communication/capabilities.md",
+      "kind": "operation",
+      "title": "communication.capabilities",
+      "description": "Describe the features, limits and API model the authority supports.",
+      "operation": "communication.capabilities"
+    },
+    {
+      "path": "operations/communication/route.md",
+      "kind": "operation",
+      "title": "communication.route",
+      "description": "Return the signed route: project incarnation, serving epoch and realtime endpoint. Call it before other communication operations and again after WRONG_REGION.",
+      "operation": "communication.route"
+    },
+    {
+      "path": "operations/communication/currentSession.md",
+      "kind": "operation",
+      "title": "communication.currentSession",
+      "description": "Return the calling user session.",
+      "operation": "communication.currentSession"
+    },
+    {
+      "path": "operations/communication/getPrincipal.md",
+      "kind": "operation",
+      "title": "communication.getPrincipal",
+      "description": "Read a principal (an application user).",
+      "operation": "communication.getPrincipal"
+    },
+    {
+      "path": "operations/communication/getConversation.md",
+      "kind": "operation",
+      "title": "communication.getConversation",
+      "description": "Read a conversation.",
+      "operation": "communication.getConversation"
+    },
+    {
+      "path": "operations/communication/members.md",
+      "kind": "operation",
+      "title": "communication.members",
+      "description": "List the members of a conversation.",
+      "operation": "communication.members"
+    },
+    {
+      "path": "operations/communication/messages.md",
+      "kind": "operation",
+      "title": "communication.messages",
+      "description": "List the messages of a conversation, newest first. A backend key reads the full history, or the history visible to the member named by actAsPrincipalId.",
+      "operation": "communication.messages"
+    },
+    {
+      "path": "operations/communication/getMessage.md",
+      "kind": "operation",
+      "title": "communication.getMessage",
+      "description": "Read one message. A backend key reads any message, or reads as the member named by actAsPrincipalId.",
+      "operation": "communication.getMessage"
+    },
+    {
+      "path": "operations/communication/events.md",
+      "kind": "operation",
+      "title": "communication.events",
+      "description": "Replay committed conversation events after a cursor, in sequence order.",
+      "operation": "communication.events"
+    },
+    {
+      "path": "operations/communication/receipts.md",
+      "kind": "operation",
+      "title": "communication.receipts",
+      "description": "List the delivery and read receipts of a conversation.",
+      "operation": "communication.receipts"
+    },
+    {
+      "path": "operations/communication/inbox.md",
+      "kind": "operation",
+      "title": "communication.inbox",
+      "description": "List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.",
+      "operation": "communication.inbox"
+    },
+    {
+      "path": "operations/communication/search.md",
+      "kind": "operation",
+      "title": "communication.search",
+      "description": "Search the messages visible to the calling user. A backend key searches as the member named by actAsPrincipalId, or within scope.conversationIds.",
+      "operation": "communication.search"
+    },
+    {
+      "path": "operations/communication/resolveRequest.md",
+      "kind": "operation",
+      "title": "communication.resolveRequest",
+      "description": "Look up the stored outcome of an earlier communication mutation by its requestId.",
+      "operation": "communication.resolveRequest"
+    },
+    {
+      "path": "operations/communication/getOperation.md",
+      "kind": "operation",
+      "title": "communication.getOperation",
+      "description": "Read the state of a long-running communication operation.",
+      "operation": "communication.getOperation"
+    },
+    {
+      "path": "operations/communication/conversationMute.md",
+      "kind": "operation",
+      "title": "communication.conversationMute",
+      "description": "Read whether a member has muted message push notifications for a conversation. A backend key must name the member with actAsPrincipalId.",
+      "operation": "communication.conversationMute"
+    },
+    {
+      "path": "operations/communication/currentLiveSession.md",
+      "kind": "operation",
+      "title": "communication.currentLiveSession",
+      "description": "Return the active live session of a conversation, if any.",
+      "operation": "communication.currentLiveSession"
+    },
+    {
+      "path": "operations/communication/liveSession.md",
+      "kind": "operation",
+      "title": "communication.liveSession",
+      "description": "Read a live session.",
+      "operation": "communication.liveSession"
+    },
+    {
+      "path": "operations/communication/liveSessions.md",
+      "kind": "operation",
+      "title": "communication.liveSessions",
+      "description": "List the live sessions of a conversation.",
+      "operation": "communication.liveSessions"
+    },
+    {
+      "path": "operations/communication/liveSessionParticipants.md",
+      "kind": "operation",
+      "title": "communication.liveSessionParticipants",
+      "description": "List the participants of a live session.",
+      "operation": "communication.liveSessionParticipants"
+    },
+    {
+      "path": "operations/communication/liveSessionAlerts.md",
+      "kind": "operation",
+      "title": "communication.liveSessionAlerts",
+      "description": "List the live session alerts addressed to the calling user.",
+      "operation": "communication.liveSessionAlerts"
+    },
+    {
+      "path": "operations/communication/liveSessionOperation.md",
+      "kind": "operation",
+      "title": "communication.liveSessionOperation",
+      "description": "Read the state of a live session start or end operation.",
+      "operation": "communication.liveSessionOperation"
+    },
+    {
+      "path": "operations/communication/sessionRequestOutcome.md",
+      "kind": "operation",
+      "title": "communication.sessionRequestOutcome",
+      "description": "Look up the outcome of an earlier issueSession or renewSession request, including the session it produced.",
+      "operation": "communication.sessionRequestOutcome"
+    },
+    {
+      "path": "operations/communication/createPrincipal.md",
+      "kind": "operation",
+      "title": "communication.createPrincipal",
+      "description": "Create a principal for an application user.",
+      "operation": "communication.createPrincipal"
+    },
+    {
+      "path": "operations/communication/disablePrincipal.md",
+      "kind": "operation",
+      "title": "communication.disablePrincipal",
+      "description": "Disable a principal.",
+      "operation": "communication.disablePrincipal"
+    },
+    {
+      "path": "operations/communication/issueSession.md",
+      "kind": "operation",
+      "title": "communication.issueSession",
+      "description": "Issue a short-lived user session token for a principal and device.",
+      "operation": "communication.issueSession"
+    },
+    {
+      "path": "operations/communication/renewSession.md",
+      "kind": "operation",
+      "title": "communication.renewSession",
+      "description": "Renew a user session before it expires.",
+      "operation": "communication.renewSession"
+    },
+    {
+      "path": "operations/communication/revokeSession.md",
+      "kind": "operation",
+      "title": "communication.revokeSession",
+      "description": "Revoke a user session.",
+      "operation": "communication.revokeSession"
+    },
+    {
+      "path": "operations/communication/createConversation.md",
+      "kind": "operation",
+      "title": "communication.createConversation",
+      "description": "Create a conversation with its initial members.",
+      "operation": "communication.createConversation"
+    },
+    {
+      "path": "operations/communication/updateConversation.md",
+      "kind": "operation",
+      "title": "communication.updateConversation",
+      "description": "Update the title or properties of a conversation.",
+      "operation": "communication.updateConversation"
+    },
+    {
+      "path": "operations/communication/addMember.md",
+      "kind": "operation",
+      "title": "communication.addMember",
+      "description": "Add a member, or change the role of an active member.",
+      "operation": "communication.addMember"
+    },
+    {
+      "path": "operations/communication/addMembers.md",
+      "kind": "operation",
+      "title": "communication.addMembers",
+      "description": "Add several members in one request.",
+      "operation": "communication.addMembers"
+    },
+    {
+      "path": "operations/communication/removeMember.md",
+      "kind": "operation",
+      "title": "communication.removeMember",
+      "description": "Remove a member from a conversation.",
+      "operation": "communication.removeMember"
+    },
+    {
+      "path": "operations/communication/historyGrant.md",
+      "kind": "operation",
+      "title": "communication.historyGrant",
+      "description": "Expand the history a member can see to an earlier sequence.",
+      "operation": "communication.historyGrant"
+    },
+    {
+      "path": "operations/communication/sendMessage.md",
+      "kind": "operation",
+      "title": "communication.sendMessage",
+      "description": "Send a message. A backend key sends as its service principal, or as the member named by actAsPrincipalId.",
+      "operation": "communication.sendMessage"
+    },
+    {
+      "path": "operations/communication/editMessage.md",
+      "kind": "operation",
+      "title": "communication.editMessage",
+      "description": "Edit a message.",
+      "operation": "communication.editMessage"
+    },
+    {
+      "path": "operations/communication/deleteMessage.md",
+      "kind": "operation",
+      "title": "communication.deleteMessage",
+      "description": "Delete a message.",
+      "operation": "communication.deleteMessage"
+    },
+    {
+      "path": "operations/communication/reportReceipt.md",
+      "kind": "operation",
+      "title": "communication.reportReceipt",
+      "description": "Report delivery or read progress through a sequence.",
+      "operation": "communication.reportReceipt"
+    },
+    {
+      "path": "operations/communication/typing.md",
+      "kind": "operation",
+      "title": "communication.typing",
+      "description": "Send an ephemeral typing signal.",
+      "operation": "communication.typing"
+    },
+    {
+      "path": "operations/communication/setBroadcastPermission.md",
+      "kind": "operation",
+      "title": "communication.setBroadcastPermission",
+      "description": "Allow or deny a member to publish media in live sessions.",
+      "operation": "communication.setBroadcastPermission"
+    },
+    {
+      "path": "operations/communication/setConversationMute.md",
+      "kind": "operation",
+      "title": "communication.setConversationMute",
+      "description": "Mute or unmute message push notifications for a member of a conversation, optionally until a time. Calls still ring. A backend key must name the member with actAsPrincipalId.",
+      "operation": "communication.setConversationMute"
+    },
+    {
+      "path": "operations/communication/startLiveSession.md",
+      "kind": "operation",
+      "title": "communication.startLiveSession",
+      "description": "Start a live session (a call) in a conversation. Readiness completes asynchronously.",
+      "operation": "communication.startLiveSession"
+    },
+    {
+      "path": "operations/communication/joinLiveSession.md",
+      "kind": "operation",
+      "title": "communication.joinLiveSession",
+      "description": "Join a live session.",
+      "operation": "communication.joinLiveSession"
+    },
+    {
+      "path": "operations/communication/alertLiveSession.md",
+      "kind": "operation",
+      "title": "communication.alertLiveSession",
+      "description": "Alert (ring) conversation members about a live session.",
+      "operation": "communication.alertLiveSession"
+    },
+    {
+      "path": "operations/communication/leaveLiveSession.md",
+      "kind": "operation",
+      "title": "communication.leaveLiveSession",
+      "description": "Leave a live session.",
+      "operation": "communication.leaveLiveSession"
+    },
+    {
+      "path": "operations/communication/endLiveSession.md",
+      "kind": "operation",
+      "title": "communication.endLiveSession",
+      "description": "End a live session for every participant. Completes asynchronously.",
+      "operation": "communication.endLiveSession"
+    },
+    {
+      "path": "operations/communication/liveSessionCredentials.md",
+      "kind": "operation",
+      "title": "communication.liveSessionCredentials",
+      "description": "Obtain a media credential for one connection of the caller's participation.",
+      "operation": "communication.liveSessionCredentials"
+    },
+    {
+      "path": "operations/communication/redeemCredential.md",
+      "kind": "operation",
+      "title": "communication.redeemCredential",
+      "description": "Redeem a delivered credential with its delivery permit.",
+      "operation": "communication.redeemCredential"
+    },
+    {
+      "path": "operations/communication/acknowledgeCredential.md",
+      "kind": "operation",
+      "title": "communication.acknowledgeCredential",
+      "description": "Acknowledge that a redeemed credential is stored, closing the delivery.",
+      "operation": "communication.acknowledgeCredential"
+    },
+    {
+      "path": "operations/communication/conversationEvents.md",
+      "kind": "operation",
+      "title": "communication.conversationEvents",
+      "description": "Subscribe to conversation events in sequence order, resuming after a cursor.",
+      "operation": "communication.conversationEvents"
+    },
+    {
+      "path": "operations/management/capabilities.md",
+      "kind": "operation",
+      "title": "management.capabilities",
+      "description": "Describe the management features and limits the authority supports.",
+      "operation": "management.capabilities"
+    },
+    {
+      "path": "operations/management/organizations.md",
+      "kind": "operation",
+      "title": "management.organizations",
+      "description": "List the organizations the caller can access.",
+      "operation": "management.organizations"
+    },
+    {
+      "path": "operations/management/getOrganization.md",
+      "kind": "operation",
+      "title": "management.getOrganization",
+      "description": "Read an organization.",
+      "operation": "management.getOrganization"
+    },
+    {
+      "path": "operations/management/getDeployment.md",
+      "kind": "operation",
+      "title": "management.getDeployment",
+      "description": "Read a deployment.",
+      "operation": "management.getDeployment"
+    },
+    {
+      "path": "operations/management/getProject.md",
+      "kind": "operation",
+      "title": "management.getProject",
+      "description": "Read a project.",
+      "operation": "management.getProject"
+    },
+    {
+      "path": "operations/management/deploymentHealth.md",
+      "kind": "operation",
+      "title": "management.deploymentHealth",
+      "description": "Read the health of a deployment.",
+      "operation": "management.deploymentHealth"
+    },
+    {
+      "path": "operations/management/deploymentUsage.md",
+      "kind": "operation",
+      "title": "management.deploymentUsage",
+      "description": "Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "operation": "management.deploymentUsage"
+    },
+    {
+      "path": "operations/management/projectUsage.md",
+      "kind": "operation",
+      "title": "management.projectUsage",
+      "description": "Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "operation": "management.projectUsage"
+    },
+    {
+      "path": "operations/management/organizationUsage.md",
+      "kind": "operation",
+      "title": "management.organizationUsage",
+      "description": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "operation": "management.organizationUsage"
+    },
+    {
+      "path": "operations/management/webhookEndpoints.md",
+      "kind": "operation",
+      "title": "management.webhookEndpoints",
+      "description": "List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.",
+      "operation": "management.webhookEndpoints"
+    },
+    {
+      "path": "operations/management/webhookDeliveries.md",
+      "kind": "operation",
+      "title": "management.webhookDeliveries",
+      "description": "List recent deliveries of a webhook endpoint.",
+      "operation": "management.webhookDeliveries"
+    },
+    {
+      "path": "operations/management/resolveRequest.md",
+      "kind": "operation",
+      "title": "management.resolveRequest",
+      "description": "Look up the stored outcome of an earlier management mutation by its requestId.",
+      "operation": "management.resolveRequest"
+    },
+    {
+      "path": "operations/management/getOperation.md",
+      "kind": "operation",
+      "title": "management.getOperation",
+      "description": "Read the state of a long-running management operation.",
+      "operation": "management.getOperation"
+    },
+    {
+      "path": "operations/management/createOrganization.md",
+      "kind": "operation",
+      "title": "management.createOrganization",
+      "description": "Create an organization.",
+      "operation": "management.createOrganization"
+    },
+    {
+      "path": "operations/management/createDeployment.md",
+      "kind": "operation",
+      "title": "management.createDeployment",
+      "description": "Create a deployment in an organization. Completes asynchronously.",
+      "operation": "management.createDeployment"
+    },
+    {
+      "path": "operations/management/createProject.md",
+      "kind": "operation",
+      "title": "management.createProject",
+      "description": "Create a project in a ready deployment. Completes asynchronously.",
+      "operation": "management.createProject"
+    },
+    {
+      "path": "operations/management/issueBackendKey.md",
+      "kind": "operation",
+      "title": "management.issueBackendKey",
+      "description": "Issue a scoped backend key. The secret is delivered once through a credential delivery.",
+      "operation": "management.issueBackendKey"
+    },
+    {
+      "path": "operations/management/revokeBackendKey.md",
+      "kind": "operation",
+      "title": "management.revokeBackendKey",
+      "description": "Revoke a backend key, optionally revoking the sessions it issued.",
+      "operation": "management.revokeBackendKey"
+    },
+    {
+      "path": "operations/management/projectPolicy.md",
+      "kind": "operation",
+      "title": "management.projectPolicy",
+      "description": "Change the policy of a project.",
+      "operation": "management.projectPolicy"
+    },
+    {
+      "path": "operations/management/credentialPermit.md",
+      "kind": "operation",
+      "title": "management.credentialPermit",
+      "description": "Issue a signed permit that authorizes redeeming one credential delivery.",
+      "operation": "management.credentialPermit"
+    },
+    {
+      "path": "operations/management/pauseOperation.md",
+      "kind": "operation",
+      "title": "management.pauseOperation",
+      "description": "Pause a long-running operation.",
+      "operation": "management.pauseOperation"
+    },
+    {
+      "path": "operations/management/resumeOperation.md",
+      "kind": "operation",
+      "title": "management.resumeOperation",
+      "description": "Resume a paused operation.",
+      "operation": "management.resumeOperation"
+    },
+    {
+      "path": "operations/management/configureWebhook.md",
+      "kind": "operation",
+      "title": "management.configureWebhook",
+      "description": "Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.",
+      "operation": "management.configureWebhook"
+    },
+    {
+      "path": "operations/management/updateWebhook.md",
+      "kind": "operation",
+      "title": "management.updateWebhook",
+      "description": "Change the event types of a webhook endpoint, or enable or disable it.",
+      "operation": "management.updateWebhook"
+    },
+    {
+      "path": "operations/management/rotateWebhookSecret.md",
+      "kind": "operation",
+      "title": "management.rotateWebhookSecret",
+      "description": "Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.",
+      "operation": "management.rotateWebhookSecret"
+    },
+    {
+      "path": "operations/management/disableWebhook.md",
+      "kind": "operation",
+      "title": "management.disableWebhook",
+      "description": "Disable a webhook endpoint.",
+      "operation": "management.disableWebhook"
+    },
+    {
+      "path": "operations/management/replayWebhookDeliveries.md",
+      "kind": "operation",
+      "title": "management.replayWebhookDeliveries",
+      "description": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.",
+      "operation": "management.replayWebhookDeliveries"
+    }
+  ]
+}
