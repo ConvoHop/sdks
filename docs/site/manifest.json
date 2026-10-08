@@ -21,7 +21,7 @@
     {
       "id": "push",
       "title": "Push notifications",
-      "summary": "Turn notification events into APNs, FCM and Web Push requests."
+      "summary": "Deliver messages and calls to your users' devices as APNs, FCM and Web Push notifications."
     },
     {"id": "calling", "title": "Calling", "summary": "Start, join and end voice and video calls."}
   ],

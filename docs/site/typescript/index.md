@@ -40,7 +40,7 @@ Every TypeScript sample in these docs is a region of a file in [the examples pac
 | [Server](quickstarts/server.md) | Call ConvoHop from your backend with a backend key: principals, sessions, conversations and messages. |
 | [Client](quickstarts/client.md) | Sign in a user with a session token, then send, watch and replay messages. |
 | [Webhooks](quickstarts/webhooks.md) | Verify signed webhook deliveries and handle events. |
-| [Push notifications](quickstarts/push.md) | Turn notification events into APNs, FCM and Web Push requests. |
+| [Push notifications](quickstarts/push.md) | Deliver messages and calls to your users' devices as APNs, FCM and Web Push notifications. |
 | [Calling](quickstarts/calling.md) | Start, join and end voice and video calls. |
 
 ## Reference
