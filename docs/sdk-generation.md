@@ -167,6 +167,8 @@ Android Kotlin and Dart SDKs can follow the TypeScript one. To add one:
    `npm run generate:graphql`.
 5. Pair the generated code with the small hand-written runtime described in
    the [SDK strategy](sdk-strategy.md#how-the-sdks-are-built).
+6. Document the SDK: add its reference, quickstarts and tested example code
+   to the [docs pipeline](docs-pipeline.md#adding-a-language).
 
 ## Tests and golden files
 
@@ -248,7 +250,8 @@ realtime behavior, context, input, result, errors and GraphQL document.
 `index.json` names the IR it was built from and lists every operation with
 its snippet path.
 
-Snippets are language-neutral. Language-specific examples are expected to be
-added by the documentation pipeline. Snippets use only CommonMark and GFM
+Snippets are language-neutral. The [docs pipeline](docs-pipeline.md) turns
+each one into an operation page in [`docs/site`](site) and lists the SDK
+members that send the operation. Snippets use only CommonMark and GFM
 tables, without HTML, and escape MDX-significant characters, so they render as
 Markdown and as MDX.

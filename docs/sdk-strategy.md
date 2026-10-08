@@ -178,6 +178,12 @@ real deployment. The generators for other languages are in development.
 Later, the same IR could also generate a command-line tool and tools for AI
 agents.
 
+The [docs pipeline](docs-pipeline.md) generates the SDK documentation in
+[`docs/site`](site): each SDK's reference, quickstarts and `llms.txt` files,
+from the IR and the SDK's public API. CI compiles and runs the quickstarts'
+code. A new SDK adds its docs with a configuration file and an extractor for
+its public API.
+
 ### Calls with the official LiveKit SDKs
 
 The iOS, macOS, Android, React Native and Flutter SDKs join calls with the
