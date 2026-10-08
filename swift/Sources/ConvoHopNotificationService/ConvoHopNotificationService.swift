@@ -17,7 +17,9 @@ import UserNotifications
 ///
 /// ```swift
 /// final class NotificationService: UNNotificationServiceExtension {
-///     private let service = ConvoHopNotificationService { notification in
+///     private let service = ConvoHopNotificationService(
+///         ledger: ConvoHopNotificationLedger(suiteName: "group.com.example.chat")
+///     ) { notification in
 ///         // A client for notification.recipientId with a short-lived session from your App Group, or nil.
 ///         try await SharedSession.client(for: notification)
 ///     }
@@ -36,6 +38,10 @@ import UserNotifications
 /// ```
 ///
 /// Create the client with in-memory recovery storage, and don't persist its session token.
+///
+/// A missed-call push reaches the extension, not your app. Pass a ledger on the App Group suite that
+/// `ConvoHopCallsConfiguration.ledgerSuiteName` names, so `ConvoHopCalls` doesn't ring for a VoIP push of that ring that
+/// arrives later.
 public final class ConvoHopNotificationService: @unchecked Sendable {
     /// Returns a client for the push's project and recipient, or `nil` to deliver the push unchanged.
     public typealias ClientFactory = @Sendable (ConvoHopNotification) async throws -> ConvoHopClient?
@@ -44,15 +50,20 @@ public final class ConvoHopNotificationService: @unchecked Sendable {
     public static let maximumBodyLength = 1024
 
     private let timeout: TimeInterval
+    private let ledger: ConvoHopNotificationLedger?
     private let makeClient: ClientFactory
     private let lock = NSLock()
     private var deliveries: [Delivery] = []
 
     /// - Parameters:
     ///   - timeout: How long to wait for the message, in seconds. iOS gives an extension about 30.
+    ///   - ledger: Where to record rings that stopped, shared with your app through an App Group.
     ///   - client: Creates a client for the push.
-    public init(timeout: TimeInterval = 20, client: @escaping ClientFactory) {
+    public init(
+        timeout: TimeInterval = 20, ledger: ConvoHopNotificationLedger? = nil, client: @escaping ClientFactory
+    ) {
         self.timeout = max(0, timeout)
+        self.ledger = ledger
         makeClient = client
     }
 
@@ -62,8 +73,11 @@ public final class ConvoHopNotificationService: @unchecked Sendable {
         _ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void
     ) {
         let delivery = Delivery(original: request.content, handler: contentHandler)
-        guard let notification = try? ConvoHopNotification.parse(userInfo: request.content.userInfo),
-            case .message(let messageId) = notification.kind, notification.body == nil
+        let notification = try? ConvoHopNotification.parse(userInfo: request.content.userInfo)
+        if let notification, case .callCancelled(let alert, let reason) = notification.kind {
+            ledger?.markStopped(alert, reason: reason)
+        }
+        guard let notification, case .message(let messageId) = notification.kind, notification.body == nil
         else { return delivery.finish(text: nil) }
         lock.lock()
         deliveries.removeAll { $0.isFinished }
