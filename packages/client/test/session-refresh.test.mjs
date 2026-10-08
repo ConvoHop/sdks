@@ -778,3 +778,231 @@ test("existing live handles use the verified replacement without replaying spent
   assert.equal(setup.client.http.recoveryStates[0].mediaAdmissionAttempted, true);
   assert.doesNotMatch([...setup.saved.values.values()].join(""), /native-test-secret|native-ticket-secret|native-lease-secret|native-connect-secret|session-test-secret/);
 });
+
+async function settle(turns = 25) { for (let index = 0; index < turns; index++) await turn(); }
+async function until(condition) {
+  for (let index = 0; index < 500 && !condition(); index++) await turn();
+  assert.ok(condition(), "Scheduled renewal work did not settle");
+}
+function clock(t) {
+  const start = Math.floor(Date.now() / 1000) * 1000;
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: start });
+  const flush = async () => { for (let index = 0; index < 4; index++) { await settle(); t.mock.timers.tick(0); } await settle(); };
+  return {
+    start,
+    // Jumps the mocked clock to `offset` ms after start, letting zero-delay re-arms and in-flight work run at each instant.
+    async at(offset) {
+      await flush();
+      assert.ok(start + offset >= Date.now(), "The mocked clock only moves forward");
+      t.mock.timers.tick(start + offset - Date.now());
+      await flush();
+    },
+  };
+}
+function outage(status, extra = {}) {
+  return Response.json({ code: status === 429 ? "RATE_LIMITED" : "UNAVAILABLE", outcome: "rejected",
+    message: "Fixture outage", ...extra }, { status });
+}
+
+test("a failed enrollment binds nothing, and the next initialize proves the bearer again", async () => {
+  const setup = fixture();
+  let unavailable = true;
+  setup.handle = ({ operation }) => operation === "communication.currentSession" && unavailable ? outage(503) : undefined;
+  await assert.rejects(setup.client.initialize(), { code: "UNAVAILABLE", status: 503 });
+  assert.equal(setup.client.sessionRefreshState, "uninitialized");
+  unavailable = false;
+  await setup.client.initialize();
+  assert.equal(setup.client.sessionRefreshState, "ready");
+  assert.deepEqual(setup.client.sessionBinding, setup.original);
+  assert.equal(setup.requests.filter(call => call.operation === "communication.currentSession").length, 2);
+});
+
+test("scheduling validates its lead and requires the renewal hook", () => {
+  assert.throws(() => fixture({ enabled: false }).client.scheduleSessionRefresh(), { code: "SESSION_REFRESH_REQUIRED" });
+  const setup = fixture();
+  for (const leadMs of [-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, 2 ** 53])
+    assert.throws(() => setup.client.scheduleSessionRefresh({ leadMs }), RangeError);
+  assert.equal(setup.requests.length, 0);
+});
+
+test("scheduled renewal runs the default minute before JWT-second expiry, again after each renewal, until disposed", async t => {
+  const time = clock(t), setup = fixture(), calls = [], refreshed = [], errors = [];
+  setup.current.expiresAt = new Date(time.start + 600123).toISOString();
+  await setup.client.initialize();
+  setup.refreshHook = async () => { calls.push(Date.now() - time.start); return setup.renew(); };
+  const stop = setup.client.scheduleSessionRefresh({
+    onRefreshed: session => refreshed.push(session), onError: error => errors.push(error) });
+  t.after(stop);
+  await time.at(539000);
+  assert.deepEqual(calls, []);
+  await time.at(540000);
+  assert.deepEqual(calls, [540000]);
+  assert.equal(refreshed.length, 1);
+  assert.equal(refreshed[0].sessionRevision, "2");
+  assert.deepEqual(refreshed[0], setup.client.sessionBinding);
+  // The renewal added a minute, leaving two: the next one is due a minute later.
+  await time.at(599000);
+  assert.deepEqual(calls, [540000]);
+  await time.at(600000);
+  assert.deepEqual(calls, [540000, 600000]);
+  assert.equal(setup.requests.at(-1).credential, setup.lastRenewal.sessionToken);
+  stop();
+  await time.at(3600000);
+  assert.deepEqual(calls, [540000, 600000]);
+  assert.equal(refreshed.length, 2);
+  assert.deepEqual(errors, []);
+});
+
+test("a session shorter than the lead renews halfway through its remaining life instead of looping", async t => {
+  const time = clock(t), setup = fixture(), calls = [];
+  await setup.client.initialize();
+  setup.refreshHook = async () => { calls.push(Date.now() - time.start); return setup.renew(); };
+  t.after(setup.client.scheduleSessionRefresh({ leadMs: 3600000 }));
+  await time.at(59000);
+  assert.deepEqual(calls, []);
+  await time.at(60000);
+  assert.deepEqual(calls, [60000]);
+  // Expiry moved to 180 s, so half of the remaining two minutes.
+  await time.at(119000);
+  assert.deepEqual(calls, [60000]);
+  await time.at(120000);
+  assert.deepEqual(calls, [60000, 120000]);
+});
+
+test("renewal hook failures that leave the session verified retry with backoff, never past expiry", async t => {
+  const time = clock(t), setup = fixture(), calls = [], errors = [];
+  await setup.client.initialize();
+  setup.refreshHook = async () => { calls.push(Date.now() - time.start); throw new Error("Backend renewal unavailable"); };
+  t.after(setup.client.scheduleSessionRefresh({ leadMs: 30000, onError: error => errors.push(error) }));
+  // Expiry is 120 s: retries back off 1, 2, 4 and 8 s, and the last one runs a second before expiry.
+  const expected = [90000, 91000, 93000, 97000, 105000, 119000];
+  for (const [index, offset] of expected.entries()) {
+    await time.at(offset - 1000);
+    assert.equal(calls.length, index);
+    await time.at(offset);
+    assert.equal(calls.length, index + 1);
+  }
+  await time.at(600000);
+  assert.deepEqual(calls, expected);
+  assert.deepEqual(errors.map(error => error.code), expected.map(() => "SESSION_REFRESH_FAILED"));
+  assert.equal(setup.client.sessionRefreshState, "ready");
+  assert.deepEqual(setup.client.sessionBinding, setup.original);
+});
+
+test("a successful scheduled renewal resets the retry backoff", async t => {
+  const time = clock(t), setup = fixture(), calls = [], errors = [];
+  await setup.client.initialize();
+  setup.refreshHook = async () => {
+    calls.push(Date.now() - time.start);
+    if (calls.length % 2) throw new Error("Backend renewal unavailable");
+    return setup.renew();
+  };
+  t.after(setup.client.scheduleSessionRefresh({ leadMs: 30000, onError: error => errors.push(error) }));
+  for (const offset of [90000, 91000, 150000, 151000]) await time.at(offset);
+  assert.deepEqual(calls, [90000, 91000, 150000, 151000]);
+  assert.equal(errors.length, 2);
+  assert.equal(setup.renewals, 2);
+});
+
+test("an unverified scheduled renewal blocks the client and stops the schedule", async t => {
+  const time = clock(t), setup = fixture(), errors = [];
+  await setup.client.initialize();
+  setup.refreshHook = async () => { const next = setup.renew(); throw new Error(next.sessionToken); };
+  t.after(setup.client.scheduleSessionRefresh({ leadMs: 30000, onError: error => errors.push(error) }));
+  await time.at(90000);
+  assert.equal(setup.hookCalls.length, 1);
+  assert.deepEqual(errors.map(error => error.code), ["SESSION_REFRESH_UNVERIFIED"]);
+  assert.equal(setup.client.sessionRefreshState, "blocked");
+  await time.at(600000);
+  assert.equal(setup.hookCalls.length, 1);
+  assert.equal(errors.length, 1);
+});
+
+test("scheduling an uninitialized client proves the bearer first, retrying only transient failures", async t => {
+  const time = clock(t), setup = fixture(), errors = [];
+  const outages = [["communication.route", 503], ["communication.currentSession", 429]];
+  setup.handle = ({ operation }) => {
+    if (outages[0]?.[0] !== operation) return;
+    const [, status] = outages.shift();
+    return outage(status, status === 429 ? { retryAfter: 5 } : {});
+  };
+  t.after(setup.client.scheduleSessionRefresh({ leadMs: 30000, onError: error => errors.push(error) }));
+  await time.at(0);
+  assert.deepEqual(errors.map(error => error.status), [503]);
+  await time.at(999);
+  assert.equal(setup.requests.length, 1);
+  await time.at(1000);
+  assert.deepEqual(errors.map(error => error.status), [503, 429]);
+  // The authority's retryAfter outranks the two-second backoff.
+  await time.at(5999);
+  assert.equal(setup.requests.length, 3);
+  assert.equal(setup.client.sessionRefreshState, "uninitialized");
+  await time.at(6000);
+  assert.equal(setup.client.sessionRefreshState, "ready");
+  assert.deepEqual(setup.requests.map(call => call.operation), ["communication.route", "communication.route",
+    "communication.currentSession", "communication.route", "communication.currentSession"]);
+  setup.refreshHook = async () => {
+    if (setup.hookCalls.length === 1) throw new Error("Backend renewal unavailable");
+    return setup.renew();
+  };
+  await time.at(89000);
+  assert.equal(setup.hookCalls.length, 0);
+  await time.at(90000);
+  assert.equal(setup.hookCalls.length, 1);
+  // Initializing reset the backoff, so the failed renewal is retried after one second.
+  await time.at(91000);
+  assert.equal(setup.renewals, 1);
+  assert.deepEqual(errors.map(error => error.code), ["UNAVAILABLE", "RATE_LIMITED", "SESSION_REFRESH_FAILED"]);
+});
+
+test("a scheduled initialization that the authority rejects is reported once and not retried", async t => {
+  const time = clock(t), setup = fixture(), errors = [];
+  setup.deniedTokens.add(setup.originalToken);
+  t.after(setup.client.scheduleSessionRefresh({ onError: error => errors.push(error) }));
+  await time.at(0);
+  await time.at(600000);
+  assert.deepEqual(errors.map(error => [error.code, error.status]), [["UNAUTHENTICATED", 401]]);
+  assert.equal(setup.requests.length, 1);
+  assert.equal(setup.client.sessionRefreshState, "uninitialized");
+});
+
+for (const outcome of ["renewed", "failed"]) {
+  test(`disposing a schedule during its renewal suppresses the ${outcome} callback and later renewals`, async t => {
+    const time = clock(t), setup = fixture(), refreshed = [], errors = [], gate = deferred();
+    await setup.client.initialize();
+    setup.refreshHook = async () => {
+      await gate.promise;
+      if (outcome === "failed") throw new Error("Backend renewal unavailable");
+      return setup.renew();
+    };
+    const stop = setup.client.scheduleSessionRefresh({ leadMs: 30000,
+      onRefreshed: session => refreshed.push(session), onError: error => errors.push(error) });
+    await time.at(90000);
+    assert.equal(setup.client.sessionRefreshState, "refreshing");
+    stop();
+    gate.resolve();
+    await until(() => setup.client.sessionRefreshState === "ready");
+    await time.at(600000);
+    assert.equal(setup.hookCalls.length, 1);
+    assert.deepEqual(refreshed, []);
+    assert.deepEqual(errors, []);
+  });
+}
+
+test("throwing schedule callbacks neither stop renewal nor leak rejections", async t => {
+  const time = clock(t), setup = fixture(), calls = [], reported = [];
+  await setup.client.initialize();
+  setup.refreshHook = async () => {
+    calls.push(Date.now() - time.start);
+    if (calls.length === 1) throw new Error("Backend renewal unavailable");
+    return setup.renew();
+  };
+  t.after(setup.client.scheduleSessionRefresh({ leadMs: 30000,
+    onRefreshed: () => { throw new Error("Application refresh listener failed"); },
+    onError: error => { reported.push(error.message); throw new Error("Application error listener failed"); } }));
+  for (const offset of [90000, 91000, 150000]) await time.at(offset);
+  assert.deepEqual(calls, [90000, 91000, 150000]);
+  assert.equal(reported.length, 3);
+  assert.deepEqual(reported.slice(1), ["Application refresh listener failed", "Application refresh listener failed"]);
+  assert.equal(setup.renewals, 2);
+});

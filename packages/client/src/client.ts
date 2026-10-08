@@ -9,6 +9,7 @@ import {
   timestamp, validateOutput, type TransportAuthentication,
 } from "@convohop/core/internal";
 import { ConversationHandle, LiveSessionHandle } from "./live.js";
+import { asError, pageLimit } from "./util.js";
 export interface ConvoHopClientOptions {
   baseUrl: string; projectId: string; sessionToken: string; incarnation: string; principalId: string;
   recoveryStorage?: RecoveryStorage; fetch?: typeof fetch; sessionRefresh?: SessionRefresh;
@@ -17,6 +18,8 @@ export interface ConvoHopClientOptions {
 export type ReadReceipt = NonNullable<OperationPayload<"communication.receipts">["result"]>["items"][number];
 /** One conversation in the user's inbox. */
 export type InboxItem = NonNullable<OperationPayload<"communication.inbox">["result"]>["items"][number];
+/** A page of the inbox. An incomplete page with no cursor carries `partialReason`, such as `INBOX_WINDOW_LIMIT`. */
+export type InboxPage = ItemPage<InboxItem> & { partialReason?: string };
 /** The project's features and limits, as `communication.capabilities` reports them. */
 export type ProjectCapabilities = NonNullable<OperationPayload<"communication.capabilities">["result"]>;
 export interface SessionRefreshSchedule {
@@ -76,14 +79,16 @@ export class ConvoHopClient {
     const value = this.#validateRoute((await this.http.execute("communication.route", this.projectId, {})).result);
     this.http.servingEpoch = value.servingEpoch;
     if (this.#sessionRefresh) {
-      this.#sessionInitialization ??= this.http.execute("communication.currentSession", this.projectId, {}).then(proof => {
+      const enrollment = this.#sessionInitialization ??= this.http.execute("communication.currentSession", this.projectId, {}).then(proof => {
         const binding = currentSession(proof);
         if (binding.principalId !== this.principalId || binding.incarnation !== this.http.incarnation)
           throw new ConvoHopProblem("SESSION_REFRESH_REJECTED", proof.requestId, "rejected", 409,
             "Original session authority does not match this client's principal and incarnation");
         this.#session = binding;
       });
-      await this.#sessionInitialization;
+      // A failed enrollment binds nothing, so a later initialize() proves the bearer again instead of repeating the failure.
+      try { await enrollment; }
+      catch (error) { if (this.#sessionInitialization === enrollment) this.#sessionInitialization = undefined; throw error; }
     }
     this.http.servingEpoch = value.servingEpoch; this.#route = value; return value;
   }
@@ -113,8 +118,10 @@ export class ConvoHopClient {
     let timer: ReturnType<typeof setTimeout> | undefined, disposed = false, failures = 0;
     // One target per session revision: never earlier than halfway through the remaining lifetime, so short sessions don't renew in a loop.
     let target: { revision: string; at: number } | undefined;
+    // A throwing callback must neither stop renewal nor surface as an unhandled rejection.
     const report = (error: unknown) => {
-      if (!disposed) options.onError?.(error instanceof Error ? error : new Error("Session refresh failed"));
+      if (disposed) return;
+      try { options.onError?.(asError(error, "Session refresh failed")); } catch { /* the app's own handler failed */ }
     };
     const arm = (delay: number) => {
       if (!disposed) timer = setTimeout(run, Math.min(Math.max(0, delay), 2147483647));
@@ -131,9 +138,10 @@ export class ConvoHopClient {
       if (disposed) return;
       const binding = this.#session;
       if (!binding) {
-        this.initialize().then(() => arm(0), error => {
+        this.initialize().then(() => { failures = 0; arm(0); }, error => {
           report(error);
-          if (error instanceof ConvoHopProblem && [0, 429, 503].includes(error.status)) arm(1000 * 2 ** Math.min(failures++, 5));
+          if (error instanceof ConvoHopProblem && [0, 429, 503].includes(error.status))
+            arm(Math.max(1000 * 2 ** Math.min(failures++, 5), (error.retryAfter ?? 0) * 1000));
         });
         return;
       }
@@ -145,7 +153,7 @@ export class ConvoHopClient {
       if (target.at > now) { arm(target.at - now); return; }
       this.refreshSession().then(session => {
         failures = 0;
-        if (!disposed) options.onRefreshed?.(session);
+        if (!disposed) try { options.onRefreshed?.(session); } catch (error) { report(error); }
         arm(0);
       }, retry);
     };
@@ -260,11 +268,11 @@ export class ConvoHopClient {
     list: async (options: PageOptions = {}): Promise<OperationPayload<"communication.liveSessionAlerts">["result"]> =>
       (await this.http.execute("communication.liveSessionAlerts", this.projectId, options)).result,
   };
-  /** Messages before `beforeSequence` (or the newest), newest first. A page can hold fewer than `limit` messages. */
-  async messages(id: string, beforeSequence?: string, limit = 100): Promise<ItemPage<ConversationMessage>> {
+  /** Up to `limit` (1..100, default 100) messages before `beforeSequence` or the newest, newest first. Pages can hold fewer. */
+  async messages(id: string, beforeSequence?: string, limit?: number): Promise<ItemPage<ConversationMessage>> {
     const conversationId = parseId(id);
     const page = parsePage((await this.http.execute("communication.messages", this.projectId,
-      { conversationId, limit, ...(beforeSequence === undefined ? {} : { beforeSequence: parseCounter(beforeSequence) }) })).result, parseMessage);
+      { conversationId, limit: pageLimit(limit), ...(beforeSequence === undefined ? {} : { beforeSequence: parseCounter(beforeSequence) }) })).result, parseMessage);
     if (page.items.some(message => message.conversationId !== conversationId)) throw new TypeError("Message is outside this conversation");
     return page;
   }
@@ -320,15 +328,17 @@ export class ConvoHopClient {
   async members(id: string, options: PageOptions = {}): Promise<ItemPage<Membership>> {
     const conversationId = parseId(id);
     const page = parsePage((await this.http.execute("communication.members", this.projectId,
-      { conversationId, limit: options.limit ?? 100, ...(options.cursor === undefined ? {} : { cursor: parseString(options.cursor) }) })).result,
+      { conversationId, limit: pageLimit(options.limit), ...(options.cursor === undefined ? {} : { cursor: parseString(options.cursor) }) })).result,
       parseMembership);
     if (page.items.some(member => member.conversationId !== conversationId)) throw new TypeError("Member is outside this conversation");
     return page;
   }
-  async inbox(options: PageOptions = {}): Promise<ItemPage<InboxItem>> {
-    return parsePage((await this.http.execute("communication.inbox", this.projectId,
-      { limit: options.limit ?? 100, ...(options.cursor === undefined ? {} : { cursor: parseString(options.cursor) }) })).result,
-      item => { validateOutput(item, "InboxItem!"); return item as InboxItem; });
+  async inbox(options: PageOptions = {}): Promise<InboxPage> {
+    const result = (await this.http.execute("communication.inbox", this.projectId,
+      { limit: pageLimit(options.limit), ...(options.cursor === undefined ? {} : { cursor: parseString(options.cursor) }) })).result;
+    const page: InboxPage = parsePage(result, item => { validateOutput(item, "InboxItem!"); return item as InboxItem; });
+    if (result?.partialReason != null) page.partialReason = parseString(result.partialReason);
+    return page;
   }
   async capabilities(): Promise<ProjectCapabilities> {
     const result = (await this.http.execute("communication.capabilities", this.projectId, {})).result;

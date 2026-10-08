@@ -139,8 +139,9 @@ export class ConversationStore {
     return () => { this.#listeners.delete(listener); };
   }
   /**
-   * Loads the conversation and follows it. While it is open this returns the current attempt; after an error it
-   * reconnects from the loaded state. It doesn't recover from `resyncRequired`: call {@link resync} for that.
+   * Loads the conversation and follows it, rejecting if that fails. While an attempt is running, including the
+   * reconnect after a session refresh, this returns it; after an error it reconnects from the loaded state. It doesn't
+   * recover from `resyncRequired`: call {@link resync} for that.
    */
   open(): Promise<void> {
     if (this.#status === "closed") return Promise.reject(new Error("The conversation store is closed"));
@@ -205,6 +206,7 @@ export class ConversationStore {
   async #load(generation: number, mode: "open" | "reconnect" | "resync"): Promise<void> {
     try {
       if (mode !== "reconnect") await this.#serial(() => this.#loadSnapshot(generation));
+      this.#check(generation);
       let stream: ConversationStream | undefined;
       const apply = (events: ProtocolObject[]) => this.#serial(() => this.#apply(generation, events));
       const onError = (error: Error) => this.#streamError(generation, stream, error);
@@ -348,8 +350,12 @@ export class ConversationStore {
       const next = ++this.#generation;
       this.#status = "reconnecting"; this.#error = error; this.#changed();
       const opening = this.client.refreshSession().then(() => this.#load(next, "reconnect"), failure => {
-        if (next === this.#generation) this.#fail(failure);
-      }).catch(() => undefined).finally(() => { if (this.#opening === opening) this.#opening = undefined; });
+        if (next !== this.#generation) return;
+        this.#fail(failure);
+        throw failure;
+      }).finally(() => { if (this.#opening === opening) this.#opening = undefined; });
+      // Nothing awaits this attempt unless the app calls open(), which then sees its failure.
+      opening.catch(() => undefined);
       this.#opening = opening;
       return;
     }
