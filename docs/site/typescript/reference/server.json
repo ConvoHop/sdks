@@ -1430,6 +1430,92 @@
       ]
     },
     {
+      "name": "Connectivity",
+      "kind": "interface",
+      "ref": "@convohop/server#Connectivity",
+      "anchor": "connectivity-interface",
+      "signatures": ["interface Connectivity"],
+      "docs": "Network reachability.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "online",
+          "kind": "property",
+          "ref": "@convohop/server#Connectivity.online",
+          "anchor": "connectivityonline-property",
+          "signatures": ["readonly online: boolean"],
+          "docs": "Whether the device may reach the network. Report `true` when it isn't known."
+        },
+        {
+          "name": "subscribe",
+          "kind": "method",
+          "ref": "@convohop/server#Connectivity.subscribe",
+          "anchor": "connectivitysubscribe-method",
+          "signatures": ["subscribe(listener: (online: boolean) => void): () => void"],
+          "docs": "Calls `listener` when reachability changes, until the returned function is called."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopPlatform",
+      "kind": "interface",
+      "ref": "@convohop/server#ConvoHopPlatform",
+      "anchor": "convohopplatform-interface",
+      "signatures": ["interface ConvoHopPlatform"],
+      "docs": "Runtime services for runtimes that lack a browser global, such as React Native. Every field is optional and\nfalls back to the global of the same name, looked up when it is used. The transport uses `randomUUID`, `sha256`\nand `URL`; `@convohop/client` also uses `WebSocket`, `connectivity` and `lifecycle`.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "randomUUID",
+          "kind": "property",
+          "ref": "@convohop/server#ConvoHopPlatform.randomUUID",
+          "anchor": "convohopplatformrandomuuid-property",
+          "signatures": ["randomUUID?: () => string"],
+          "docs": "A new random UUID in canonical lowercase form. Default: `crypto.randomUUID()`."
+        },
+        {
+          "name": "sha256",
+          "kind": "property",
+          "ref": "@convohop/server#ConvoHopPlatform.sha256",
+          "anchor": "convohopplatformsha256-property",
+          "signatures": ["sha256?: (data: Uint8Array) => Promise<Uint8Array>"],
+          "docs": "The 32-byte SHA-256 digest of `data`. Default: `crypto.subtle.digest(\"SHA-256\", data)`."
+        },
+        {
+          "name": "URL",
+          "kind": "property",
+          "ref": "@convohop/server#ConvoHopPlatform.URL",
+          "anchor": "convohopplatformurl-property",
+          "signatures": ["URL?: PlatformURLConstructor"],
+          "docs": "A WHATWG URL constructor. Default: the global `URL`. The SDK checks it before first use and refuses one that doesn't conform."
+        },
+        {
+          "name": "WebSocket",
+          "kind": "property",
+          "ref": "@convohop/server#ConvoHopPlatform.WebSocket",
+          "anchor": "convohopplatformwebsocket-property",
+          "signatures": ["WebSocket?: PlatformWebSocketConstructor"],
+          "docs": "Opens the realtime connection. Default: the global `WebSocket`."
+        },
+        {
+          "name": "connectivity",
+          "kind": "property",
+          "ref": "@convohop/server#ConvoHopPlatform.connectivity",
+          "anchor": "convohopplatformconnectivity-property",
+          "signatures": ["connectivity?: Connectivity"],
+          "docs": "Network reachability. The outbox waits while offline. Coming online starts a waiting outbox entry and realtime\nreconnection at once. Default in browsers: `navigator.onLine` and `online`/`offline` events; elsewhere always online."
+        },
+        {
+          "name": "lifecycle",
+          "kind": "property",
+          "ref": "@convohop/server#ConvoHopPlatform.lifecycle",
+          "anchor": "convohopplatformlifecycle-property",
+          "signatures": ["lifecycle?: Lifecycle"],
+          "docs": "Foreground state. Returning to `active` starts waiting realtime reconnection, due outbox entries and due session\nrenewal at once. It never changes retry budgets, request IDs or payloads. Default in browsers: page visibility."
+        }
+      ]
+    },
+    {
       "name": "ConvoHopTransportOptions",
       "kind": "interface",
       "ref": "@convohop/server#ConvoHopTransportOptions",
@@ -1493,6 +1579,14 @@
           "anchor": "convohoptransportoptionsfetch-property",
           "signatures": ["fetch?: typeof fetch"],
           "docs": ""
+        },
+        {
+          "name": "platform",
+          "kind": "property",
+          "ref": "@convohop/server#ConvoHopTransportOptions.platform",
+          "anchor": "convohoptransportoptionsplatform-property",
+          "signatures": ["platform?: ConvoHopPlatform"],
+          "docs": "Runtime services that replace missing globals, such as in React Native. See `ConvoHopPlatform`."
         }
       ]
     },
@@ -1572,6 +1666,33 @@
           "anchor": "itempagenextcursor-property",
           "signatures": ["nextCursor?: unknown"],
           "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "Lifecycle",
+      "kind": "interface",
+      "ref": "@convohop/server#Lifecycle",
+      "anchor": "lifecycle-interface",
+      "signatures": ["interface Lifecycle"],
+      "docs": "Whether the app is in the foreground.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "state",
+          "kind": "property",
+          "ref": "@convohop/server#Lifecycle.state",
+          "anchor": "lifecyclestate-property",
+          "signatures": ["readonly state: LifecycleState"],
+          "docs": ""
+        },
+        {
+          "name": "subscribe",
+          "kind": "method",
+          "ref": "@convohop/server#Lifecycle.subscribe",
+          "anchor": "lifecyclesubscribe-method",
+          "signatures": ["subscribe(listener: (state: LifecycleState) => void): () => void"],
+          "docs": "Calls `listener` when the state changes, until the returned function is called."
         }
       ]
     },
@@ -1668,6 +1789,164 @@
           "ref": "@convohop/server#PageOptions.limit",
           "anchor": "pageoptionslimit-property",
           "signatures": ["limit?: number"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PlatformURL",
+      "kind": "interface",
+      "ref": "@convohop/server#PlatformURL",
+      "anchor": "platformurl-interface",
+      "signatures": ["interface PlatformURL"],
+      "docs": "The parts of a WHATWG `URL` the SDKs read.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "href",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.href",
+          "anchor": "platformurlhref-property",
+          "signatures": ["readonly href: string"],
+          "docs": ""
+        },
+        {
+          "name": "origin",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.origin",
+          "anchor": "platformurlorigin-property",
+          "signatures": ["readonly origin: string"],
+          "docs": ""
+        },
+        {
+          "name": "protocol",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.protocol",
+          "anchor": "platformurlprotocol-property",
+          "signatures": ["readonly protocol: string"],
+          "docs": ""
+        },
+        {
+          "name": "username",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.username",
+          "anchor": "platformurlusername-property",
+          "signatures": ["readonly username: string"],
+          "docs": ""
+        },
+        {
+          "name": "password",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.password",
+          "anchor": "platformurlpassword-property",
+          "signatures": ["readonly password: string"],
+          "docs": ""
+        },
+        {
+          "name": "host",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.host",
+          "anchor": "platformurlhost-property",
+          "signatures": ["readonly host: string"],
+          "docs": ""
+        },
+        {
+          "name": "hostname",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.hostname",
+          "anchor": "platformurlhostname-property",
+          "signatures": ["readonly hostname: string"],
+          "docs": ""
+        },
+        {
+          "name": "port",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.port",
+          "anchor": "platformurlport-property",
+          "signatures": ["readonly port: string"],
+          "docs": ""
+        },
+        {
+          "name": "pathname",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.pathname",
+          "anchor": "platformurlpathname-property",
+          "signatures": ["readonly pathname: string"],
+          "docs": ""
+        },
+        {
+          "name": "search",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.search",
+          "anchor": "platformurlsearch-property",
+          "signatures": ["readonly search: string"],
+          "docs": ""
+        },
+        {
+          "name": "hash",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformURL.hash",
+          "anchor": "platformurlhash-property",
+          "signatures": ["readonly hash: string"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PlatformWebSocket",
+      "kind": "interface",
+      "ref": "@convohop/server#PlatformWebSocket",
+      "anchor": "platformwebsocket-interface",
+      "signatures": ["interface PlatformWebSocket"],
+      "docs": "The parts of a `WebSocket` the client uses.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "onopen",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformWebSocket.onopen",
+          "anchor": "platformwebsocketonopen-property",
+          "signatures": ["onopen: Handler<unknown> | null"],
+          "docs": ""
+        },
+        {
+          "name": "onmessage",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformWebSocket.onmessage",
+          "anchor": "platformwebsocketonmessage-property",
+          "signatures": ["onmessage: Handler<{\n    readonly data: unknown;\n}> | null"],
+          "docs": ""
+        },
+        {
+          "name": "onerror",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformWebSocket.onerror",
+          "anchor": "platformwebsocketonerror-property",
+          "signatures": ["onerror: Handler<unknown> | null"],
+          "docs": ""
+        },
+        {
+          "name": "onclose",
+          "kind": "property",
+          "ref": "@convohop/server#PlatformWebSocket.onclose",
+          "anchor": "platformwebsocketonclose-property",
+          "signatures": ["onclose: Handler<{\n    readonly code: number;\n}> | null"],
+          "docs": ""
+        },
+        {
+          "name": "send",
+          "kind": "method",
+          "ref": "@convohop/server#PlatformWebSocket.send",
+          "anchor": "platformwebsocketsend-method",
+          "signatures": ["send(data: string): void"],
+          "docs": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "ref": "@convohop/server#PlatformWebSocket.close",
+          "anchor": "platformwebsocketclose-method",
+          "signatures": ["close(code?: number, reason?: string): void"],
           "docs": ""
         }
       ]
@@ -3175,6 +3454,15 @@
       "docs": ""
     },
     {
+      "name": "LifecycleState",
+      "kind": "type",
+      "ref": "@convohop/server#LifecycleState",
+      "anchor": "lifecyclestate-type",
+      "signatures": ["type LifecycleState = \"active\" | \"background\""],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
       "name": "LiveAlertBatch",
       "kind": "type",
       "ref": "@convohop/server#LiveAlertBatch",
@@ -3319,6 +3607,28 @@
         "type OperationStatus = NonNullable<OperationPayload<\"communication.getOperation\">[\"result\"]>"
       ],
       "docs": ""
+    },
+    {
+      "name": "PlatformURLConstructor",
+      "kind": "type",
+      "ref": "@convohop/server#PlatformURLConstructor",
+      "anchor": "platformurlconstructor-type",
+      "signatures": [
+        "type PlatformURLConstructor = new (url: string, base?: string) => PlatformURL"
+      ],
+      "docs": "A WHATWG URL constructor, such as the global `URL` or a polyfill's.",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "PlatformWebSocketConstructor",
+      "kind": "type",
+      "ref": "@convohop/server#PlatformWebSocketConstructor",
+      "anchor": "platformwebsocketconstructor-type",
+      "signatures": [
+        "type PlatformWebSocketConstructor = new (url: string, protocols?: string | string[]) => PlatformWebSocket"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
     },
     {
       "name": "Principal",

@@ -1098,6 +1098,94 @@ Re-exported from `@convohop/core`.
 requestId?: string
 ```
 
+### `Connectivity` interface
+
+```ts
+interface Connectivity
+```
+
+Network reachability.
+
+Re-exported from `@convohop/core`.
+
+#### `Connectivity.online` property
+
+```ts
+readonly online: boolean
+```
+
+Whether the device may reach the network. Report `true` when it isn't known.
+
+#### `Connectivity.subscribe` method
+
+```ts
+subscribe(listener: (online: boolean) => void): () => void
+```
+
+Calls `listener` when reachability changes, until the returned function is called.
+
+### `ConvoHopPlatform` interface
+
+```ts
+interface ConvoHopPlatform
+```
+
+Runtime services for runtimes that lack a browser global, such as React Native. Every field is optional and
+falls back to the global of the same name, looked up when it is used. The transport uses `randomUUID`, `sha256`
+and `URL`; `@convohop/client` also uses `WebSocket`, `connectivity` and `lifecycle`.
+
+Re-exported from `@convohop/core`.
+
+#### `ConvoHopPlatform.randomUUID` property
+
+```ts
+randomUUID?: () => string
+```
+
+A new random UUID in canonical lowercase form. Default: `crypto.randomUUID()`.
+
+#### `ConvoHopPlatform.sha256` property
+
+```ts
+sha256?: (data: Uint8Array) => Promise<Uint8Array>
+```
+
+The 32-byte SHA-256 digest of `data`. Default: `crypto.subtle.digest("SHA-256", data)`.
+
+#### `ConvoHopPlatform.URL` property
+
+```ts
+URL?: PlatformURLConstructor
+```
+
+A WHATWG URL constructor. Default: the global `URL`. The SDK checks it before first use and refuses one that doesn't conform.
+
+#### `ConvoHopPlatform.WebSocket` property
+
+```ts
+WebSocket?: PlatformWebSocketConstructor
+```
+
+Opens the realtime connection. Default: the global `WebSocket`.
+
+#### `ConvoHopPlatform.connectivity` property
+
+```ts
+connectivity?: Connectivity
+```
+
+Network reachability. The outbox waits while offline. Coming online starts a waiting outbox entry and realtime
+reconnection at once. Default in browsers: `navigator.onLine` and `online`/`offline` events; elsewhere always online.
+
+#### `ConvoHopPlatform.lifecycle` property
+
+```ts
+lifecycle?: Lifecycle
+```
+
+Foreground state. Returning to `active` starts waiting realtime reconnection, due outbox entries and due session
+renewal at once. It never changes retry budgets, request IDs or payloads. Default in browsers: page visibility.
+
 ### `ConvoHopTransportOptions` interface
 
 ```ts
@@ -1147,6 +1235,14 @@ asyncRecoveryStorage?: AsyncRecoveryStorage
 ```ts
 fetch?: typeof fetch
 ```
+
+#### `ConvoHopTransportOptions.platform` property
+
+```ts
+platform?: ConvoHopPlatform
+```
+
+Runtime services that replace missing globals, such as in React Native. See `ConvoHopPlatform`.
 
 ### `InboxOptions` interface
 
@@ -1209,6 +1305,30 @@ refreshRequired: boolean
 ```ts
 nextCursor?: unknown
 ```
+
+### `Lifecycle` interface
+
+```ts
+interface Lifecycle
+```
+
+Whether the app is in the foreground.
+
+Re-exported from `@convohop/core`.
+
+#### `Lifecycle.state` property
+
+```ts
+readonly state: LifecycleState
+```
+
+#### `Lifecycle.subscribe` method
+
+```ts
+subscribe(listener: (state: LifecycleState) => void): () => void
+```
+
+Calls `listener` when the state changes, until the returned function is called.
 
 ### `LiveWaitOptions` interface
 
@@ -1280,6 +1400,132 @@ cursor?: string
 
 ```ts
 limit?: number
+```
+
+### `PlatformURL` interface
+
+```ts
+interface PlatformURL
+```
+
+The parts of a WHATWG `URL` the SDKs read.
+
+Re-exported from `@convohop/core`.
+
+#### `PlatformURL.href` property
+
+```ts
+readonly href: string
+```
+
+#### `PlatformURL.origin` property
+
+```ts
+readonly origin: string
+```
+
+#### `PlatformURL.protocol` property
+
+```ts
+readonly protocol: string
+```
+
+#### `PlatformURL.username` property
+
+```ts
+readonly username: string
+```
+
+#### `PlatformURL.password` property
+
+```ts
+readonly password: string
+```
+
+#### `PlatformURL.host` property
+
+```ts
+readonly host: string
+```
+
+#### `PlatformURL.hostname` property
+
+```ts
+readonly hostname: string
+```
+
+#### `PlatformURL.port` property
+
+```ts
+readonly port: string
+```
+
+#### `PlatformURL.pathname` property
+
+```ts
+readonly pathname: string
+```
+
+#### `PlatformURL.search` property
+
+```ts
+readonly search: string
+```
+
+#### `PlatformURL.hash` property
+
+```ts
+readonly hash: string
+```
+
+### `PlatformWebSocket` interface
+
+```ts
+interface PlatformWebSocket
+```
+
+The parts of a `WebSocket` the client uses.
+
+Re-exported from `@convohop/core`.
+
+#### `PlatformWebSocket.onopen` property
+
+```ts
+onopen: Handler<unknown> | null
+```
+
+#### `PlatformWebSocket.onmessage` property
+
+```ts
+onmessage: Handler<{
+    readonly data: unknown;
+}> | null
+```
+
+#### `PlatformWebSocket.onerror` property
+
+```ts
+onerror: Handler<unknown> | null
+```
+
+#### `PlatformWebSocket.onclose` property
+
+```ts
+onclose: Handler<{
+    readonly code: number;
+}> | null
+```
+
+#### `PlatformWebSocket.send` method
+
+```ts
+send(data: string): void
+```
+
+#### `PlatformWebSocket.close` method
+
+```ts
+close(code?: number, reason?: string): void
 ```
 
 ### `ProjectRoute` interface
@@ -2489,6 +2735,14 @@ collapse_key?: string
 type InboxPage = NonNullable<OperationPayload<"communication.inbox">["result"]>
 ```
 
+### `LifecycleState` type
+
+```ts
+type LifecycleState = "active" | "background"
+```
+
+Re-exported from `@convohop/core`.
+
 ### `LiveAlertBatch` type
 
 ```ts
@@ -2588,6 +2842,24 @@ Re-exported from `@convohop/core`.
 ```ts
 type OperationStatus = NonNullable<OperationPayload<"communication.getOperation">["result"]>
 ```
+
+### `PlatformURLConstructor` type
+
+```ts
+type PlatformURLConstructor = new (url: string, base?: string) => PlatformURL
+```
+
+A WHATWG URL constructor, such as the global `URL` or a polyfill's.
+
+Re-exported from `@convohop/core`.
+
+### `PlatformWebSocketConstructor` type
+
+```ts
+type PlatformWebSocketConstructor = new (url: string, protocols?: string | string[]) => PlatformWebSocket
+```
+
+Re-exported from `@convohop/core`.
 
 ### `Principal` type
 
