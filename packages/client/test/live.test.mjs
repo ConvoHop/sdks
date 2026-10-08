@@ -39,6 +39,25 @@ test("conversation handles are synchronous, nonthenable and do not make hidden r
   assert.equal(setup.requests[0].operationName, "CommunicationCurrentLiveSession");
 });
 
+test("conversation mute reads and sets only this user's own mute", async () => {
+  const conversationId = id(), until = new Date(Date.now() + 3600000).toISOString(), answers = [];
+  const setup = fixture(() => ({ result: answers.shift() }));
+  const own = { conversationId, principalId: setup.client.principalId, muted: true, until };
+  answers.push(own, { ...own, muted: false, until: null }, { ...own, principalId: id() });
+  const thread = setup.client.conversation(conversationId);
+  await assert.rejects(thread.mute.set({ muted: "yes" }), { name: "TypeError", message: "muted must be a boolean" });
+  await assert.rejects(thread.mute.set({ muted: true, until: 1 }), TypeError);
+  assert.equal(setup.requests.length, 0);
+  assert.deepEqual(await thread.mute.set({ muted: true, until }), own);
+  assert.deepEqual(await thread.mute.get(), { ...own, muted: false, until: null });
+  await assert.rejects(thread.mute.get(), { name: "TypeError", message: "Conversation mute does not match the request" });
+  assert.deepEqual(setup.requests.map(request => [request.operationName, request.variables.input]), [
+    ["CommunicationSetConversationMute", { conversationId, muted: true, until }],
+    ["CommunicationConversationMute", { conversationId }],
+    ["CommunicationConversationMute", { conversationId }],
+  ]);
+});
+
 test("current live discovery returns one typed nullable LiveSession without a union discriminator", async () => {
   const session = live(), setup = fixture(() => ({ result: session }));
   const value = await setup.client.conversation(session.conversationId).live.current();

@@ -77,6 +77,7 @@ query ManagementGetProject($context: RequestContextInput!, $input: GetProjectReq
       status
       revision
       policyRevision
+      messagePreview
     }
   }
 }

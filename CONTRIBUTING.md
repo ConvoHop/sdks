@@ -46,7 +46,7 @@ None of these commands need service credentials.
 | `tools/sdkgen/` | The SDK generator: annotation check, IR builder, emitters and their tests. See [SDK generation](docs/sdk-generation.md) |
 | `scripts/release/`, `test/release/` | Release scripts and their tests |
 | `spec/conformance/` | Language-neutral conformance scenarios, the driver protocol, target descriptors and webhook vectors, with their JSON Schemas |
-| `spec/push-payload/` | The provisional push payload contract: notification events, the APNs, FCM and Web Push requests built from them, a JSON Schema and shared vectors |
+| `spec/push-payload/` | The push payload contract: notification events, the APNs, FCM and Web Push requests built from them, a JSON Schema and shared vectors |
 | `conformance/` | The conformance runner, the TypeScript reference driver, the mock target and the harness's tests. A private npm workspace that is never published |
 | `test/` | Fixtures shared by the package and conformance test suites |
 | `release-please-config.json`, `.release-please-manifest.json` | The released packages and their current versions. See [RELEASING.md](RELEASING.md). |

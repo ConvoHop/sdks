@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:convohop:push-payload",
-  "title": "ConvoHop push payload contract (provisional)",
+  "title": "ConvoHop push payload contract",
   "description": "The root validates a per-recipient notification event. $defs describe the builder options, the push requests built from an event and the shared vector file (#/$defs/vectors). See spec/push-payload/README.md. Strings are sequences of Unicode scalar values: implementations whose strings can hold lone surrogates must reject them, which this schema can't express portably.",
   "$ref": "#/$defs/notificationEvent",
   "$defs": {
@@ -411,10 +411,9 @@
       "description": "The shared vector file, spec/push-payload/vectors.json.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["description", "status", "vectors", "invalidEvents"],
+      "required": ["description", "vectors", "invalidEvents"],
       "properties": {
         "description": { "type": "string" },
-        "status": { "const": "provisional" },
         "vectors": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/vector" } },
         "invalidEvents": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/invalidEvent" } }
       }

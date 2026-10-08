@@ -123,6 +123,7 @@ mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: Revo
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }

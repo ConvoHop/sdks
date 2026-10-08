@@ -72,6 +72,13 @@ type ConversationMemberBatch {
 	items: [Member!]!
 }
 
+type ConversationMute {
+	conversationId: UUID!
+	principalId: UUID!
+	muted: Boolean!
+	until: String
+}
+
 type CreateDeploymentReply {
 	status: String!
 	requestId: UUID!
@@ -821,6 +828,7 @@ type OperationResult {
 	liveSessionCompletion: LiveSessionOperationCompletion
 	replayedDeliveries: Int
 	skippedDeliveries: Int
+	messagePreview: Boolean
 }
 
 type OperationStep {
@@ -949,6 +957,7 @@ type Project {
 	status: String!
 	revision: Decimal!
 	policyRevision: Decimal!
+	messagePreview: Boolean!
 }
 
 type ProjectPolicyReply {
@@ -1174,6 +1183,7 @@ type RetainedResult {
 	broadcastPermissionChanged: BroadcastPermissionChanged
 	conversation: Conversation
 	conversationMemberBatch: ConversationMemberBatch
+	conversationMute: ConversationMute
 	credentialDeliveryReceipt: CredentialDeliveryReceipt
 	deliveryAck: DeliveryAck
 	liveAlertBatch: LiveAlertBatch

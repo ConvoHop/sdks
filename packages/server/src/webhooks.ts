@@ -1,8 +1,6 @@
 /**
- * Webhook event types the authority sends.
- *
- * @experimental Provisional until the ConvoHop webhook contract (ConvoHop/ConveHop#10) merges. The `notification.*`
- * types follow the provisional push payload contract in `spec/push-payload/`.
+ * Webhook event types the authority sends. The `notification.*` types follow the push payload contract in
+ * `spec/push-payload/`.
  */
 export type WebhookEventType =
   | "conversation.created" | "conversation.updated"
@@ -13,9 +11,7 @@ export type WebhookEventType =
   | WebhookNotificationEventType;
 /**
  * Per-recipient notification event types, for your push notifications: a message for the recipient, an incoming
- * call, and a call that stopped ringing for the recipient.
- *
- * @experimental Provisional: the contract is `spec/push-payload/`, and the authority doesn't send these events yet.
+ * call, and a call that stopped ringing for the recipient. The contract is `spec/push-payload/`.
  */
 export type WebhookNotificationEventType = "notification.message" | "notification.call" | "notification.callCancelled";
 
@@ -24,11 +20,11 @@ interface WebhookEnvelope {
   eventId: string; eventType: string; occurredAt: string; projectId: string;
   subjectRef: { id: string; kind: string };
 }
-/** @experimental Provisional until ConvoHop/ConveHop#10 merges. */
+/** A change to a conversation, member, message, receipt or call. `subjectRef` names the resource. */
 export interface WebhookResourceEvent extends WebhookEnvelope {
   known: true; eventType: Exclude<WebhookEventType, "webhook.endpointDisabled" | WebhookNotificationEventType>;
 }
-/** @experimental Provisional until ConvoHop/ConveHop#10 merges. */
+/** One of the project's other webhook endpoints was disabled after repeated failures. `subjectRef.id` names it. */
 export interface WebhookEndpointDisabledEvent extends WebhookEnvelope {
   known: true; eventType: "webhook.endpointDisabled"; subjectRef: { id: string; kind: "webhookEndpoint" };
 }
@@ -64,13 +60,13 @@ interface WebhookNotificationFields extends WebhookEnvelope {
    */
   connected: boolean;
 }
-/** @experimental Provisional: see `spec/push-payload/`. */
+/** A message for the recipient. */
 export interface WebhookMessageNotificationEvent extends WebhookNotificationFields {
   eventType: "notification.message"; subjectRef: { id: string; kind: "message" };
   messageId: string;
   preview?: WebhookNotificationPreview;
 }
-/** @experimental Provisional: see `spec/push-payload/`. */
+/** An incoming call: one ring for the recipient. */
 export interface WebhookCallNotificationEvent extends WebhookNotificationFields {
   eventType: "notification.call"; subjectRef: { id: string; kind: "liveSession" };
   liveSessionId: string;
@@ -80,7 +76,7 @@ export interface WebhookCallNotificationEvent extends WebhookNotificationFields 
   expiresAt: string;
   mediaProfile: WebhookCallMediaProfile;
 }
-/** @experimental Provisional: see `spec/push-payload/`. */
+/** A ring that stopped for the recipient. Only recipients of the ring's `notification.call` get it. */
 export interface WebhookCallCancelledNotificationEvent extends WebhookNotificationFields {
   eventType: "notification.callCancelled"; subjectRef: { id: string; kind: "liveSession" };
   liveSessionId: string;
@@ -92,9 +88,7 @@ export interface WebhookCallCancelledNotificationEvent extends WebhookNotificati
   reason: WebhookCallCancelReason;
 }
 /**
- * A per-recipient notification event: the input of the push payload builders.
- *
- * @experimental Provisional: the contract is `spec/push-payload/`, and the authority doesn't send these events yet.
+ * A per-recipient notification event: the input of the push payload builders. The contract is `spec/push-payload/`.
  */
 export type WebhookNotificationEvent =
   | WebhookMessageNotificationEvent | WebhookCallNotificationEvent | WebhookCallCancelledNotificationEvent;
@@ -104,11 +98,7 @@ export type WebhookNotificationEvent =
  * Acknowledge it; it never makes `verify()` throw.
  */
 export interface WebhookUnknownEvent extends WebhookEnvelope { known: false }
-/**
- * A verified delivery's event. Narrow on `known`, then on `eventType`.
- *
- * @experimental Provisional until ConvoHop/ConveHop#10 merges.
- */
+/** A verified delivery's event. Narrow on `known`, then on `eventType`. */
 export type WebhookEvent = WebhookResourceEvent | WebhookEndpointDisabledEvent | WebhookNotificationEvent | WebhookUnknownEvent;
 
 /**

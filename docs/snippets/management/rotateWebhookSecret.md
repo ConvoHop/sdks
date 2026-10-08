@@ -122,6 +122,7 @@ mutation ManagementRotateWebhookSecret($context: RequestContextInput!, $input: R
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }

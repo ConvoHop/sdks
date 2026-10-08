@@ -122,6 +122,7 @@ mutation ManagementProjectPolicy($context: RequestContextInput!, $input: Project
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }

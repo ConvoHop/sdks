@@ -7,7 +7,7 @@ export type {
   SearchPage, SessionRequestOutcome, SessionRevocation,
 } from "./project.js";
 export type {
-  ActAsCommandOptions, MemberPage, MemberRole, MessageListOptions, MessagePage, ServerConversation,
+  ActAsCommandOptions, MemberPage, MemberRole, MessageListOptions, MessagePage, ServerConversation, SetMemberMuteInput,
 } from "./conversation.js";
 export type {
   LiveAlertBatch, LiveEndReceipt, LiveOperationCompletion, LiveParticipantPage, LiveSession, LiveOperation,

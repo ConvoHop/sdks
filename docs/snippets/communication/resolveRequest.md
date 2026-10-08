@@ -147,6 +147,12 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
               canStartBroadcast
             }
           }
+          conversationMute {
+            conversationId
+            principalId
+            muted
+            until
+          }
           credentialDeliveryReceipt {
             deliveryId
           }

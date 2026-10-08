@@ -122,6 +122,7 @@ mutation ManagementDisableWebhook($context: RequestContextInput!, $input: Disabl
       }
       replayedDeliveries
       skippedDeliveries
+      messagePreview
     }
   }
 }
