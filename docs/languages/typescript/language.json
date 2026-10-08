@@ -1,0 +1,38 @@
+{
+  "$schema": "../../../spec/docs/language.schema.json",
+  "id": "typescript",
+  "name": "TypeScript",
+  "order": 10,
+  "status": "preview",
+  "codeFence": "ts",
+  "regionComment": "//",
+  "testedFences": ["ts", "typescript", "tsx", "mts", "cts", "js", "javascript", "jsx", "mjs", "cjs"],
+  "snippetRoots": ["examples/src"],
+  "packages": [
+    {
+      "name": "@convohop/server",
+      "slug": "server",
+      "layer": "server",
+      "summary": "Server SDK for trusted Node.js runtimes: backend-key data-plane calls, management, webhook verification and push requests.",
+      "runtime": "Node.js 22 or later",
+      "source": "packages/server"
+    },
+    {
+      "name": "@convohop/client",
+      "slug": "client",
+      "layer": "client",
+      "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.",
+      "runtime": "Current browsers. React Native isn't verified yet.",
+      "source": "packages/client"
+    }
+  ],
+  "quickstarts": ["server", "client", "webhooks", "push", "calling"],
+  "operations": "operations.json",
+  "extract": {
+    "command": ["node", "tools/docgen/extractors/typescript.mjs", "docs/languages/typescript/language.json"]
+  },
+  "test": {
+    "install": ["npm", "ci", "--prefix", "docs/languages/typescript/examples", "--ignore-scripts", "--omit=optional", "--no-audit", "--no-fund"],
+    "command": ["npm", "test", "--prefix", "docs/languages/typescript/examples"]
+  }
+}

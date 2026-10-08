@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ConvoHop docs pipeline language",
+  "description": "One SDK language in the docs pipeline, stored as docs/languages/<id>/language.json. Paths are relative to that directory. Commands are argument vectors that docgen runs from the repository root without a shell. See docs/docs-pipeline.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema", "id", "name", "order", "status", "codeFence", "testedFences", "regionComment", "snippetRoots",
+    "packages", "quickstarts", "operations", "extract", "test"
+  ],
+  "properties": {
+    "$schema": { "const": "../../../spec/docs/language.schema.json" },
+    "id": {
+      "$ref": "#/$defs/id",
+      "description": "The language's directory name under docs/languages and docs/site."
+    },
+    "name": { "$ref": "#/$defs/line", "description": "Display name, such as TypeScript." },
+    "order": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000,
+      "description": "Navigation sort key. Ties sort by id."
+    },
+    "status": {
+      "enum": ["preview", "stable"],
+      "description": "preview until the language's SDK is released and supported."
+    },
+    "codeFence": {
+      "$ref": "#/$defs/fence",
+      "description": "Info string of the code blocks that docgen renders for this language, such as ts."
+    },
+    "testedFences": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/fence" },
+      "description": "Info strings that quickstarts may use only through include fences, so every code block in the language is tested. Must contain codeFence."
+    },
+    "regionComment": {
+      "type": "string",
+      "maxLength": 4,
+      "pattern": "^[^\\sA-Za-z0-9]*$",
+      "description": "The line-comment token before #region and #endregion markers: // gives // #region <name>, # gives # #region <name>, which formatters such as Black keep. Empty where #region is itself a directive, as in C#."
+    },
+    "snippetRoots": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/path" },
+      "description": "Directories whose files quickstarts may include. Their tests must compile or run every file."
+    },
+    "packages": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/package" },
+      "description": "Documented packages in display order. The extractor prints them in this order."
+    },
+    "quickstarts": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/id" },
+      "description": "Topic IDs from tools/docgen/docgen.config.mjs that have a quickstarts/<topic>.md file. Pages follow the configured topic order."
+    },
+    "operations": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^[A-Za-z0-9_-][A-Za-z0-9_.-]*\\.json$",
+      "description": "File name of the operation map (operation-map.schema.json) in the language directory, such as operations.json."
+    },
+    "extract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command"],
+      "properties": {
+        "command": {
+          "$ref": "#/$defs/command",
+          "description": "Prints the packages' public surface (surface.schema.json, without $schema) on stdout and exits 0."
+        }
+      }
+    },
+    "test": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command"],
+      "properties": {
+        "install": {
+          "$ref": "#/$defs/command",
+          "description": "Installs the snippet tests' dependencies from a lockfile. Runs before command when docgen test gets --install."
+        },
+        "command": {
+          "$ref": "#/$defs/command",
+          "description": "Compiles every file under snippetRoots and runs their tests. Exits 0 on success."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "maxLength": 32, "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+    "line": { "type": "string", "minLength": 1, "maxLength": 300, "pattern": "^[^\\n]+$" },
+    "fence": { "type": "string", "maxLength": 20, "pattern": "^[a-z][a-z0-9+#-]*$" },
+    "path": {
+      "type": "string",
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9_@+=,-][A-Za-z0-9_.@+=,-]*(/[A-Za-z0-9_@+=,-][A-Za-z0-9_.@+=,-]*)*$"
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "slug", "layer", "summary", "runtime", "source"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 214,
+          "pattern": "^[^\\s`<>{}#]+$",
+          "description": "The name users install or import, such as @convohop/server."
+        },
+        "slug": {
+          "$ref": "#/$defs/id",
+          "description": "File name of the package's reference page, docs/site/<language>/reference/<slug>.md."
+        },
+        "layer": {
+          "enum": ["server", "client"],
+          "description": "server packages use backend keys or operator tokens; client packages use user sessions."
+        },
+        "summary": { "$ref": "#/$defs/line", "description": "One sentence of Markdown." },
+        "runtime": { "$ref": "#/$defs/line", "description": "Supported runtimes, in Markdown." },
+        "source": { "$ref": "#/$defs/path", "description": "The package's source directory, relative to the repository root." }
+      }
+    }
+  }
+}

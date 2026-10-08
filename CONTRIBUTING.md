@@ -31,6 +31,8 @@ npm test                   # builds, then runs the package, generator and confor
 npm run check:packages     # publint and Are the Types Wrong? on every package
 npm run check:release      # release scripts, release configuration and workflow rules
 npm run conformance        # conformance scenarios, reference driver against the mock
+npm run test:docgen        # docs pipeline tests
+npm run check:docs         # generated docs in docs/site match their inputs
 ```
 
 None of these commands need service credentials.
@@ -44,14 +46,18 @@ None of these commands need service credentials.
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
 | `tools/sdkgen/` | The SDK generator: annotation check, IR builder, emitters and their tests. See [SDK generation](docs/sdk-generation.md) |
+| `tools/docgen/` | The docs pipeline: public API extractors, the docs generator, the example code runner and their tests. See [Docs pipeline](docs/docs-pipeline.md) |
 | `scripts/release/`, `test/release/` | Release scripts and their tests |
 | `spec/conformance/` | Language-neutral conformance scenarios, the driver protocol, target descriptors and webhook vectors, with their JSON Schemas |
 | `spec/push-payload/` | The push payload contract: notification events, the APNs, FCM and Web Push requests built from them, a JSON Schema and shared vectors |
+| `spec/docs/` | JSON Schemas for the docs pipeline's inputs and its output in `docs/site` |
 | `conformance/` | The conformance runner, the TypeScript reference driver, the mock target and the harness's tests. A private npm workspace that is never published |
 | `test/` | Fixtures shared by the package and conformance test suites |
 | `release-please-config.json`, `.release-please-manifest.json` | The released packages and their current versions. See [RELEASING.md](RELEASING.md). |
 | `.github/workflows/` | CI, conformance, release and pull request title workflows |
 | `docs/` | Public design and policy documents, and generated operation snippets |
+| `docs/languages/` | Each language's docs inputs: its configuration, extracted public API, quickstarts and tested example code |
+| `docs/site/` | The generated SDK docs: Markdown pages, JSON data, `llms.txt` and `llms-full.txt` |
 
 Each package has its own tests in `packages/<name>/test/`.
 
@@ -100,6 +106,22 @@ npm run check:graphql      # fails if any generated file is missing, stale or ed
 
 [SDK generation](docs/sdk-generation.md) describes the IR, the emitter plugin
 API and how to add a language.
+
+The [docs pipeline](docs/docs-pipeline.md) generates `docs/site/` from the
+IR, the operation snippets and each language's inputs in `docs/languages/`.
+Those inputs include the language's public API, which an extractor reads
+from the built packages into `surface.json`. After you change the schemas,
+the annotations, a package's public API or a docs input, regenerate both:
+
+```sh
+npm run build                             # the TypeScript extractor reads the built declarations
+npm run extract:docs -- typescript        # refresh the language's surface.json
+npm run generate:docs                     # regenerate docs/site
+npm run test:docs -- --install typescript # compile and run the language's example code
+```
+
+CI fails if `surface.json` or `docs/site` is stale. Resolve conflicts in
+them the same way: regenerate, don't merge by hand.
 
 ## Annotating operations
 
@@ -176,6 +198,10 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   [conformance scenario](spec/conformance/README.md#adding-a-scenario).
   Run `npm run conformance` when you change a scenario or SDK behavior that
   one covers.
+- The docs pipeline's tests live in `tools/docgen/test/`. Run them with
+  `npm run test:docgen`. Code in the docs is tested too: put it in a
+  language's example code and include it by region, as
+  [Tested code](docs/docs-pipeline.md#tested-code) describes.
 
 ## SDK design rules
 
@@ -238,6 +264,10 @@ release. Its generator is an emitter for the shared IR. See
 [Adding a language emitter](docs/sdk-generation.md#adding-a-language-emitter).
 A server SDK's push payload builders must also produce the shared
 [push payload vectors](spec/push-payload/README.md#vectors).
+Its docs come from a `docs/languages/<id>/` directory and an extractor for
+its public API. See
+[Adding a language](docs/docs-pipeline.md#adding-a-language) in the docs
+pipeline.
 Open a feature request to discuss the design before you start.
 
 ## Commits and pull requests

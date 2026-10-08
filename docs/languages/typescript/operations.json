@@ -1,0 +1,117 @@
+{
+  "$schema": "../../../spec/docs/operation-map.schema.json",
+  "operations": {
+    "communication.capabilities": ["@convohop/server#ProjectServerClient.capabilities"],
+    "communication.route": [
+      "@convohop/server#ProjectServerClient.initialize",
+      "@convohop/client#ConvoHopClient.initialize",
+      "@convohop/client#ConvoHopClient.refreshSession"
+    ],
+    "communication.currentSession": ["@convohop/client#ConvoHopClient.initialize", "@convohop/client#ConvoHopClient.refreshSession"],
+    "communication.getPrincipal": ["@convohop/server#ProjectServerClient.principals.get"],
+    "communication.getConversation": [
+      "@convohop/server#ServerConversation.get",
+      "@convohop/client#ConvoHopClient.getConversation",
+      "@convohop/client#ConversationHandle.get"
+    ],
+    "communication.members": ["@convohop/server#ServerConversation.members.list"],
+    "communication.messages": [
+      "@convohop/server#ServerConversation.messages.list",
+      "@convohop/client#ConvoHopClient.messages",
+      "@convohop/client#ConversationHandle.messages.list"
+    ],
+    "communication.getMessage": ["@convohop/server#ServerConversation.messages.get"],
+    "communication.events": [
+      "@convohop/client#ConvoHopClient.events",
+      "@convohop/client#ConvoHopClient.watch",
+      "@convohop/client#ConvoHopClient.resyncAuthorizedHistory"
+    ],
+    "communication.receipts": ["@convohop/client#ConvoHopClient.receipts"],
+    "communication.inbox": ["@convohop/server#ProjectServerClient.inbox"],
+    "communication.search": ["@convohop/server#ProjectServerClient.search", "@convohop/client#ConvoHopClient.search"],
+    "communication.resolveRequest": [
+      "@convohop/server#ProjectServerClient.requests.resolve",
+      "@convohop/server#ProjectServerClient.requests.retry",
+      "@convohop/client#ConvoHopClient.requests.resolve",
+      "@convohop/client#ConvoHopClient.requests.retry",
+      "@convohop/client#ConvoHopClient.recoverPending"
+    ],
+    "communication.getOperation": ["@convohop/server#ProjectServerClient.operation"],
+    "communication.conversationMute": ["@convohop/server#ServerConversation.members.getMute", "@convohop/client#ConversationHandle.mute.get"],
+    "communication.currentLiveSession": ["@convohop/server#ServerConversation.live.current", "@convohop/client#ConversationLive.current"],
+    "communication.liveSession": [
+      "@convohop/server#ServerLiveSession.get",
+      "@convohop/client#ConvoHopClient.liveSession",
+      "@convohop/client#LiveSessionHandle.get:static",
+      "@convohop/client#LiveSessionHandle.get",
+      "@convohop/client#LiveSessionHandle.participation",
+      "@convohop/client#LiveStartOperation.ready",
+      "@convohop/client#LiveParticipationHandle.get"
+    ],
+    "communication.liveSessions": ["@convohop/server#ServerConversation.live.history", "@convohop/client#ConversationLive.history"],
+    "communication.liveSessionParticipants": ["@convohop/server#ServerLiveSession.participants", "@convohop/client#LiveSessionHandle.participants"],
+    "communication.liveSessionAlerts": ["@convohop/client#ConvoHopClient.liveAlerts.list"],
+    "communication.liveSessionOperation": [
+      "@convohop/server#ServerLiveOperation.get",
+      "@convohop/server#ServerLiveOperation.completed",
+      "@convohop/client#LiveStartOperation.get",
+      "@convohop/client#LiveStartOperation.completed",
+      "@convohop/client#LiveStartOperation.ready",
+      "@convohop/client#LiveEndOperation.get",
+      "@convohop/client#LiveEndOperation.completed"
+    ],
+    "communication.sessionRequestOutcome": [
+      "@convohop/server#ProjectServerClient.sessions.outcome",
+      "@convohop/server#ProjectServerClient.sessionRequestOutcome"
+    ],
+    "communication.createPrincipal": ["@convohop/server#ProjectServerClient.principals.create", "@convohop/server#ProjectServerClient.createPrincipal"],
+    "communication.disablePrincipal": ["@convohop/server#ProjectServerClient.principals.disable"],
+    "communication.issueSession": ["@convohop/server#ProjectServerClient.sessions.issue", "@convohop/server#ProjectServerClient.issueSession"],
+    "communication.renewSession": ["@convohop/server#ProjectServerClient.sessions.renew"],
+    "communication.revokeSession": ["@convohop/server#ProjectServerClient.sessions.revoke"],
+    "communication.createConversation": [
+      "@convohop/server#ProjectServerClient.conversations.create",
+      "@convohop/server#ProjectServerClient.createConversation"
+    ],
+    "communication.updateConversation": ["@convohop/server#ServerConversation.update"],
+    "communication.addMember": ["@convohop/server#ServerConversation.members.add"],
+    "communication.addMembers": ["@convohop/server#ProjectServerClient.addMembers", "@convohop/server#ServerConversation.members.addBatch"],
+    "communication.removeMember": ["@convohop/server#ServerConversation.members.remove"],
+    "communication.historyGrant": ["@convohop/server#ServerConversation.members.grantHistory"],
+    "communication.sendMessage": [
+      "@convohop/server#ServerConversation.messages.send",
+      "@convohop/client#ConvoHopClient.send",
+      "@convohop/client#ConversationHandle.messages.send"
+    ],
+    "communication.editMessage": [
+      "@convohop/server#ServerConversation.messages.edit",
+      "@convohop/client#ConvoHopClient.edit",
+      "@convohop/client#ConversationHandle.messages.edit"
+    ],
+    "communication.deleteMessage": [
+      "@convohop/server#ServerConversation.messages.delete",
+      "@convohop/client#ConvoHopClient.delete",
+      "@convohop/client#ConversationHandle.messages.delete"
+    ],
+    "communication.reportReceipt": ["@convohop/client#ConvoHopClient.reportRead"],
+    "communication.setBroadcastPermission": ["@convohop/server#ServerConversation.members.setBroadcastPermission"],
+    "communication.setConversationMute": ["@convohop/server#ServerConversation.members.setMute", "@convohop/client#ConversationHandle.mute.set"],
+    "communication.startLiveSession": [
+      "@convohop/client#ConversationLive.startVoice",
+      "@convohop/client#ConversationLive.startVideo",
+      "@convohop/client#ConversationLive.startBroadcast"
+    ],
+    "communication.joinLiveSession": ["@convohop/client#LiveSessionHandle.join"],
+    "communication.alertLiveSession": ["@convohop/server#ServerLiveSession.alert", "@convohop/client#LiveSessionHandle.alerts.send"],
+    "communication.leaveLiveSession": ["@convohop/client#LiveParticipationHandle.leave"],
+    "communication.endLiveSession": ["@convohop/server#ServerLiveSession.end", "@convohop/client#LiveSessionHandle.end"],
+    "communication.liveSessionCredentials": ["@convohop/client#LiveParticipationHandle.connect", "@convohop/client#MediaConnection.reconnect"],
+    "communication.conversationEvents": ["@convohop/client#ConvoHopClient.watch", "@convohop/client#ConvoHopClient.resyncAuthorizedHistory"],
+    "management.getOperation": ["@convohop/server#ConvoHopManagementClient.operation"],
+    "management.createOrganization": ["@convohop/server#ConvoHopManagementClient.createOrganization"],
+    "management.createDeployment": ["@convohop/server#ConvoHopManagementClient.createDeployment"],
+    "management.createProject": ["@convohop/server#ConvoHopManagementClient.createProject"],
+    "management.issueBackendKey": ["@convohop/server#ConvoHopManagementClient.issueBackendKey"],
+    "management.credentialPermit": ["@convohop/server#ConvoHopManagementClient.deliveryPermit"]
+  }
+}
