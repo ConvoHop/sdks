@@ -1,7 +1,10 @@
 import {
-  ConvoHopProblem, parseCounter, parseCursor, parseId, parseObject, parseString, type ProtocolObject, type RecoveryState, type SendReceipt,
+  ConvoHopProblem, parseCounter, parseCursor, parseId, parseObject, parseString, type AsyncRecoveryStorage, type Connectivity,
+  type ProtocolObject, type RecoveryState, type SendReceipt,
 } from "@convohop/core";
+import { jsonClone, randomUUID } from "@convohop/core/internal";
 import type { ConvoHopClient } from "./client.js";
+import { connectivityOf, lifecycleOf, listen } from "./platform.js";
 import { asError, frozen, notify } from "./util.js";
 
 /**
@@ -27,16 +30,15 @@ export interface OutboxEntry {
   /** A failed entry may still have been delivered, so resending it can duplicate the message. */
   readonly unconfirmed?: boolean;
 }
-/** Network reachability. Browsers default to `navigator.onLine`; React Native apps pass one built on NetInfo. */
-export interface Connectivity {
-  readonly online: boolean;
-  subscribe(listener: (online: boolean) => void): () => void;
-}
 export interface OutboxOptions {
+  /** Network reachability for this outbox. Default: the client's `platform.connectivity`, else the browser's. */
   connectivity?: Connectivity;
   /**
-   * Keep unsent messages, including their text, in the client's `recoveryStorage` across reloads. Off by default;
-   * use one persistent outbox per client. Messages that may have been submitted are recovered, never re-sent as new.
+   * Keep unsent messages, including their text, in the client's `recoveryStorage` or `asyncRecoveryStorage` across
+   * reloads. Off by default; use one persistent outbox per client. Messages that may have been submitted are
+   * recovered, never re-sent as new. Asynchronous storage loads saved messages in the background; they are sent
+   * before messages added meanwhile, and {@link Outbox.flush} waits for them. Until they load, the limit of 100
+   * unsent messages counts only messages added meanwhile, so the outbox can hold up to 200.
    */
   persist?: boolean;
   /** Called when an entry fails and when persistence or a listener throws. */
@@ -53,6 +55,8 @@ interface Item {
   exhausted: boolean;
   messageId?: string; receipt?: SendReceipt; error?: Error; unconfirmed?: boolean;
   failures: number; notBefore: number;
+  /** The authority's `Retry-After` deadline, which waking for connectivity or the foreground keeps. */
+  holdUntil: number;
 }
 type Phase = "submit" | "retry" | "resolve";
 type Resolution = Awaited<ReturnType<ConvoHopClient["requests"]["resolve"]>>;
@@ -65,23 +69,6 @@ const unrecoverable = new Set(["IDEMPOTENCY_CONFLICT", "INCARNATION_MISMATCH", "
 function retryable(problem: ConvoHopProblem): boolean {
   return waiting.has(problem.code) || problem.status === 0 || problem.status === 408 || problem.status === 429 || problem.status >= 500;
 }
-function browserConnectivity(): Connectivity {
-  const scope = globalThis as {
-    navigator?: { onLine?: unknown };
-    addEventListener?: (type: string, listener: () => void) => void;
-    removeEventListener?: (type: string, listener: () => void) => void;
-  };
-  return {
-    get online() { return scope.navigator?.onLine !== false; },
-    subscribe(listener) {
-      if (typeof scope.addEventListener !== "function") return () => undefined;
-      const online = () => listener(true), offline = () => listener(false);
-      scope.addEventListener("online", online); scope.addEventListener("offline", offline);
-      return () => { scope.removeEventListener?.("online", online); scope.removeEventListener?.("offline", offline); };
-    },
-  };
-}
-
 /**
  * Sends messages optimistically and in order per conversation. Offline periods, session refreshes and uncertain
  * outcomes don't duplicate a message: an entry keeps one request ID, and the transport's retry budget, until it is
@@ -93,21 +80,36 @@ export class Outbox {
   readonly #listeners = new Set<() => void>();
   readonly #lanes = new Map<string, Promise<void>>();
   readonly #connectivity: Connectivity;
-  readonly #unsubscribe: () => void;
+  readonly #unsubscribe: (() => void)[] = [];
   readonly #key: string | undefined;
   readonly #onError: ((error: Error) => void) | undefined;
   #entries: readonly OutboxEntry[] | undefined;
   #timer: ReturnType<typeof setTimeout> | undefined;
   #closed = false;
+  /** Loading saved entries from asynchronous storage; nothing is sent or saved until it settles. */
+  #restoring: Promise<void> | undefined;
+  #deferredSave = false;
+  #writing: Promise<void> = Promise.resolve();
   constructor(client: ConvoHopClient, options: OutboxOptions = {}) {
     this.client = client; this.#onError = options.onError;
-    this.#connectivity = options.connectivity ?? browserConnectivity();
+    this.#connectivity = options.connectivity ?? connectivityOf(client.platform);
     if (options.persist) {
-      if (!client.storage) throw new TypeError("A persistent outbox requires the client's recoveryStorage");
-      this.#key = `convohop.outbox:${client.projectId}:${client.principalId}`;
-      this.#restore();
+      if (!client.storage && !client.asyncStorage)
+        throw new TypeError("A persistent outbox requires the client's recoveryStorage or asyncRecoveryStorage");
+      const key = this.#key = `convohop.outbox:${client.projectId}:${client.principalId}`;
+      if (client.storage) {
+        let text: unknown = null;
+        try { text = client.storage.getItem(key); } catch (error) { this.#report(error); }
+        for (const item of this.#parse(text)) this.#items.set(item.requestId, item);
+      } else {
+        const storage = client.asyncStorage!;
+        this.#restoring = Promise.resolve().then(() => this.#restore(storage, key));
+      }
     }
-    this.#unsubscribe = this.#connectivity.subscribe(online => { if (online) this.#wake(); });
+    try {
+      this.#unsubscribe.push(listen(this.#connectivity, online => { if (online) this.#wake(); }));
+      this.#unsubscribe.push(listen(lifecycleOf(client.platform), state => { if (state === "active") this.#pump(); }));
+    } catch (error) { this.close(); throw error; }
     this.#arm();
   }
   /** A frozen snapshot in send order, replaced on every change. */
@@ -126,7 +128,7 @@ export class Outbox {
     return () => { this.#listeners.delete(listener); };
   }
   send(conversationId: string, text: string, props: ProtocolObject = {}): OutboxEntry {
-    return this.#enqueue(parseId(conversationId), parseString(text), frozen(structuredClone(parseObject(props))));
+    return this.#enqueue(parseId(conversationId), parseString(text), frozen(jsonClone(parseObject(props))));
   }
   /** Sends a failed entry's message again as a new request, after the entries already waiting. */
   resend(requestId: string): OutboxEntry {
@@ -140,15 +142,19 @@ export class Outbox {
     const item = this.#items.get(requestId);
     if (!item) return;
     if (item.status === "sending" || item.status === "unknown") throw new Error("Wait for the message's outcome before discarding it");
-    this.#items.delete(requestId); this.#save(); this.#changed();
+    this.#items.delete(requestId); void this.#save(); this.#changed();
   }
   /** Releases a sent entry, typically once its message is shown from history. */
   settle(requestId: string): void {
     if (this.#items.get(requestId)?.status !== "sent") return;
     this.#items.delete(requestId); this.#changed();
   }
-  /** Attempts every waiting entry now, ignoring backoff, and resolves when each conversation's queue is idle or blocked. */
+  /**
+   * Attempts every waiting entry now, ignoring backoff, and resolves when each conversation's queue is idle or blocked.
+   * Waits for saved entries to load first.
+   */
   async flush(): Promise<void> {
+    await this.#restoring;
     for (const item of this.#items.values()) item.notBefore = 0;
     this.#pump();
     while (this.#lanes.size) await Promise.all([...this.#lanes.values()]);
@@ -156,7 +162,10 @@ export class Outbox {
   /** Stops sending. Persisted entries stay saved, and the client keeps its recovery state. */
   close(): void {
     if (this.#closed) return;
-    this.#closed = true; this.#unsubscribe();
+    this.#closed = true;
+    for (const unsubscribe of this.#unsubscribe.splice(0)) {
+      try { unsubscribe(); } catch (error) { this.#report(error); }
+    }
     if (this.#timer !== undefined) clearTimeout(this.#timer);
     this.#timer = undefined;
   }
@@ -165,17 +174,17 @@ export class Outbox {
     let unsent = 0;
     for (const item of this.#items.values()) if (item.status !== "sent") unsent++;
     if (unsent >= maxUnsent) throw new RangeError("The outbox is full; wait for queued messages to send");
-    const item: Item = { requestId: crypto.randomUUID(), conversationId, text, props, createdAt: new Date().toISOString(),
-      status: "queued", attempted: false, uncertain: false, exhausted: false, failures: 0, notBefore: 0 };
-    this.#items.set(item.requestId, item); this.#save(); this.#changed(); this.#pump();
+    const item: Item = { requestId: randomUUID(this.client.platform), conversationId, text, props, createdAt: new Date().toISOString(),
+      status: "queued", attempted: false, uncertain: false, exhausted: false, failures: 0, notBefore: 0, holdUntil: 0 };
+    this.#items.set(item.requestId, item); void this.#save(); this.#changed(); this.#pump();
     return this.entries.find(entry => entry.requestId === item.requestId)!;
   }
   #wake(): void {
-    for (const item of this.#items.values()) item.notBefore = 0;
+    for (const item of this.#items.values()) item.notBefore = Math.min(item.notBefore, item.holdUntil);
     this.#pump();
   }
   #pump(): void {
-    if (this.#closed || !this.#connectivity.online) return;
+    if (this.#closed || this.#restoring || !this.#connectivity.online) return;
     for (const item of this.#items.values())
       if ((item.status === "queued" || item.status === "unknown") && !this.#lanes.has(item.conversationId)) this.#lane(item.conversationId);
   }
@@ -219,7 +228,7 @@ export class Outbox {
         await this.#resolve(item);
       } else {
         // Recorded before submission, so a reload recovers this request instead of sending it again.
-        item.attempted = true; this.#save();
+        item.attempted = true; await this.#save();
         const receipt = await this.client.send(item.conversationId, item.text, item.requestId, item.props);
         this.#sent(item, receipt.messageId, receipt);
       }
@@ -291,18 +300,19 @@ export class Outbox {
     if (receipt !== undefined) item.receipt = receipt;
     let sent = 0;
     for (const entry of [...this.#items.values()].reverse()) if (entry.status === "sent" && ++sent > maxSent) this.#items.delete(entry.requestId);
-    this.#save();
+    void this.#save();
   }
   #later(item: Item, error: Error, retryAfter = 0): void {
-    const backoff = Math.min(30000, 1000 * 2 ** Math.min(item.failures++, 5));
+    const backoff = Math.min(30000, 1000 * 2 ** Math.min(item.failures++, 5)), now = Date.now();
     item.status = item.uncertain ? "unknown" : "queued"; item.error = error;
-    item.notBefore = Date.now() + Math.max(backoff + Math.floor(Math.random() * backoff / 4), retryAfter * 1000);
-    this.#save();
+    item.holdUntil = retryAfter > 0 ? now + retryAfter * 1000 : 0;
+    item.notBefore = now + Math.max(backoff + Math.floor(Math.random() * backoff / 4), retryAfter * 1000);
+    void this.#save();
   }
   #fail(item: Item, error: Error, unconfirmed: boolean): void {
     item.status = "failed"; item.error = error;
     if (unconfirmed) item.unconfirmed = true; else delete item.unconfirmed;
-    this.#save(); this.#report(error);
+    void this.#save(); this.#report(error);
   }
   #state(requestId: string): RecoveryState | undefined {
     return this.client.http.recoveryStates.find(state => state.requestId === requestId);
@@ -314,33 +324,68 @@ export class Outbox {
     this.#entries = undefined;
     notify(this.#listeners, error => this.#report(error));
   }
-  #save(): void {
-    if (this.#key === undefined) return;
+  /**
+   * Saves the unsent entries as they are now. Failures go to `onError`. Asynchronous writes run in order; the
+   * returned promise settles when this one has.
+   */
+  #save(): Promise<void> {
+    const key = this.#key;
+    if (key === undefined) return Promise.resolve();
+    if (this.#restoring) { this.#deferredSave = true; return Promise.resolve(); }
     const saved = [...this.#items.values()].filter(item => item.status !== "sent").map(item => ({
       requestId: item.requestId, conversationId: item.conversationId, text: item.text, props: item.props, createdAt: item.createdAt,
       attempted: item.attempted, ...(item.status === "failed" ? { failed: true } : {}), ...(item.unconfirmed ? { unconfirmed: true } : {}),
     }));
-    try {
-      if (saved.length) this.client.storage!.setItem(this.#key, JSON.stringify(saved));
-      else this.client.storage!.removeItem(this.#key);
-    } catch (error) { this.#report(error); }
+    const text = saved.length ? JSON.stringify(saved) : undefined, storage = this.client.storage;
+    if (storage) {
+      try { if (text) storage.setItem(key, text); else storage.removeItem(key); }
+      catch (error) { this.#report(error); }
+      return Promise.resolve();
+    }
+    const asyncStorage: AsyncRecoveryStorage = this.client.asyncStorage!;
+    const write = this.#writing.then(() => text ? asyncStorage.setItem(key, text) : asyncStorage.removeItem(key))
+      .catch((error: unknown) => this.#report(error));
+    this.#writing = write;
+    return write;
   }
-  #restore(): void {
+  async #restore(storage: AsyncRecoveryStorage, key: string): Promise<void> {
+    let text: unknown = null;
+    try { text = await storage.getItem(key); } catch (error) { this.#report(error); }
+    const restored = this.#parse(text), added = [...this.#items.values()];
+    this.#restoring = undefined;
+    // Saved entries were queued first, so they keep their place ahead of entries added while they loaded.
+    this.#items.clear();
+    for (const item of restored) this.#items.set(item.requestId, item);
+    for (const item of added) if (!this.#items.has(item.requestId)) this.#items.set(item.requestId, item);
+    if (this.#deferredSave) { this.#deferredSave = false; void this.#save(); }
+    this.#changed(); this.#pump(); this.#arm();
+  }
+  /** Saved entries from storage. Unreadable data and entries go to `onError` and are skipped. */
+  #parse(text: unknown): Item[] {
+    if (text === null || text === undefined) return [];
     let saved: unknown;
-    try { saved = JSON.parse(this.client.storage!.getItem(this.#key!) ?? "[]"); }
-    catch (error) { this.#report(error); return; }
-    if (!Array.isArray(saved)) { this.#report(new TypeError("Discarded an unreadable saved outbox")); return; }
-    for (const value of saved.slice(0, maxUnsent)) {
+    try {
+      if (typeof text !== "string") throw new TypeError("Stored outbox must be a string or null");
+      saved = JSON.parse(text);
+    } catch (error) { this.#report(error); return []; }
+    if (!Array.isArray(saved)) { this.#report(new TypeError("Discarded an unreadable saved outbox")); return []; }
+    // Messages sent while asynchronous storage loaded can double a full saved outbox.
+    const limit = 2 * maxUnsent;
+    if (saved.length > limit)
+      this.#report(new RangeError(`Discarded ${saved.length - limit} of ${saved.length} saved outbox entries, beyond the limit of ${limit}`));
+    const items = new Map<string, Item>();
+    for (const value of saved.slice(0, limit)) {
       try {
         const v = parseObject(value), requestId = parseId(v.requestId);
-        if (typeof v.attempted !== "boolean" || this.#items.has(requestId)) throw new TypeError("Invalid saved outbox entry");
+        if (typeof v.attempted !== "boolean" || items.has(requestId)) throw new TypeError("Invalid saved outbox entry");
         const failed = v.failed === true, attempted = v.attempted;
-        this.#items.set(requestId, { requestId, conversationId: parseId(v.conversationId), text: parseString(v.text),
+        items.set(requestId, { requestId, conversationId: parseId(v.conversationId), text: parseString(v.text),
           props: frozen(parseObject(v.props)), createdAt: parseString(v.createdAt), attempted, uncertain: attempted, exhausted: false,
-          status: failed ? "failed" : attempted ? "unknown" : "queued", failures: 0, notBefore: 0,
+          status: failed ? "failed" : attempted ? "unknown" : "queued", failures: 0, notBefore: 0, holdUntil: 0,
           ...(failed ? { error: new Error("The message failed before the app restarted") } : {}),
           ...(failed && v.unconfirmed === true ? { unconfirmed: true } : {}) });
       } catch (error) { this.#report(error); }
     }
+    return [...items.values()];
   }
 }

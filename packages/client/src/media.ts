@@ -1,20 +1,16 @@
-import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
-import { ConvoHopProblem, parseId, parseObject, parseString } from "@convohop/core";
-import type { LiveParticipationHandle, LiveConnectOptions, LiveConnectionGrant } from "./live.js";
+import type { RemoteTrack, Room } from "livekit-client";
+import { parseId, parseObject, parseString } from "@convohop/core";
+import { admitConnection } from "./admission.js";
+import type { LiveParticipationHandle, LiveConnectOptions, LiveConnectionAttempt } from "./live.js";
 
+type LiveKit = typeof import("livekit-client");
+let livekit: Promise<LiveKit> | undefined;
 /**
- * Checks where the single-use `connectToken` may be sent before anything is sent. Returns the media server URL.
- * Only the ConvoHop media server accepts the token; it admits at most one new connection with it.
+ * Loads `livekit-client` on first use. Evaluating it needs browser globals, such as `DOMException`, that other
+ * runtimes lack, so importing this SDK must not evaluate it.
  */
-function nativeTarget(grant: LiveConnectionGrant): { url: string; token: string } {
-  let url: URL;
-  try { url = new URL(parseString(grant.livekitUrl)); } catch { throw new TypeError("Invalid media origin"); }
-  if (url.search || url.hash || url.username || url.password ||
-      (url.protocol !== "wss:" && !(url.protocol === "ws:" && ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname))))
-    throw new TypeError("Invalid media origin");
-  if (!(Date.parse(grant.leaseExpiresAt) > Date.now())) throw new Error("Fresh media credentials are required");
-  if (typeof grant.connectToken !== "string" || !grant.connectToken) throw new TypeError("Missing media connect token");
-  return { url: grant.livekitUrl, token: grant.connectToken };
+function loadLiveKit(): Promise<LiveKit> {
+  return livekit ??= import("livekit-client").catch((error: unknown) => { livekit = undefined; throw error; });
 }
 export interface RemoteMedia {
   trackId: string; participantIdentity: string; kind: "audio" | "video"; element: HTMLMediaElement;
@@ -39,6 +35,7 @@ export interface MediaStats {
   transports?: { localCandidateType: string; remoteCandidateType: string; protocol: string; relayProtocol?: string }[];
 }
 export class MediaConnection {
+  readonly #kit: LiveKit;
   readonly #room: Room;
   readonly #tracks = new Map<string, { remote: RemoteMedia; track: RemoteTrack }>();
   #closed = false;
@@ -49,12 +46,10 @@ export class MediaConnection {
   readonly options: MediaOptions;
   /** The participation's `nativeConnectionId`: the LiveKit participant sid the media server assigned at admission. */
   nativeConnectionId: string | undefined;
-  private constructor(readonly participation: LiveParticipationHandle, options: LiveConnectOptions) {
+  private constructor(readonly participation: LiveParticipationHandle, options: LiveConnectOptions, kit: LiveKit) {
     const { requestId: _requestId, ...mediaOptions } = options;
+    const { Room, RoomEvent, Track } = this.#kit = kit;
     this.options = mediaOptions;
-    if (options.iceTransportPolicy !== undefined && options.iceTransportPolicy !== "all" && options.iceTransportPolicy !== "relay") {
-      throw new TypeError("ICE policy must be all or relay");
-    }
     this.#permissions = { ...participation.snapshot.permissions };
     this.#room = new Room({
       adaptiveStream: false, dynacast: false, singlePeerConnection: false,
@@ -102,29 +97,26 @@ export class MediaConnection {
       if (!this.#room.canPlaybackAudio) options.onAudioPlaybackBlocked?.();
     });
   }
-  /** @internal Connect never starts capture. */
+  /** @internal Connect never starts capture. The room exists only once the attempt is admitted and marked. */
   static async connectParticipation(participation: LiveParticipationHandle, options: LiveConnectOptions): Promise<MediaConnection> {
-    const result = new MediaConnection(participation, options);
-    const { requestId, grant } = await participation.connectionGrant(options);
-    const ticket = parseObject(grant.admissionTicket), lease = parseObject(grant.forwardingLease);
-    if (ticket.participationId !== participation.participationId || lease.participationId !== participation.participationId)
-      throw new TypeError("Native proof is not participation-bound");
-    const target = nativeTarget(grant);
-    // The durable marker precedes the only connection attempt; an uncertain admission is later resolved, never reused.
-    await participation.connectionAttempted();
-    await result.#open(target, requestId);
-    return result;
+    if (options.iceTransportPolicy !== undefined && options.iceTransportPolicy !== "all" && options.iceTransportPolicy !== "relay")
+      throw new TypeError("ICE policy must be all or relay");
+    const kit = await loadLiveKit();
+    return admitConnection(participation, options, async attempt => {
+      const result = new MediaConnection(participation, options, kit);
+      await result.#open(attempt);
+      return result;
+    }, participation.live.client.platform);
   }
-  async #open(target: { url: string; token: string }, requestId: string): Promise<void> {
+  async #open(attempt: LiveConnectionAttempt): Promise<void> {
     try {
       // One attempt: the token admits at most one new connection. LiveKit may later resume this connection.
-      await this.#room.connect(target.url, target.token, { autoSubscribe: true, maxRetries: 0,
+      await this.#room.connect(attempt.url, attempt.token, { autoSubscribe: true, maxRetries: 0,
         rtcConfig: { iceTransportPolicy: this.options.iceTransportPolicy ?? "all" } });
       this.nativeConnectionId = parseId(this.#room.localParticipant.sid);
-    } catch {
+    } catch (error) {
       await this.disconnect();
-      throw new ConvoHopProblem("MEDIA_CONNECT_FAILED", requestId, "unknown", 0,
-        "Native connection failed. The participation reservation remains; resolve and retry connect, or explicitly leave.");
+      throw error;
     }
   }
   reconnect(): Promise<MediaConnection> {
@@ -150,7 +142,7 @@ export class MediaConnection {
   async camera(enabled: boolean): Promise<void> {
     if (!this.connected || !this.#permissions.camera) throw new Error("Camera is not authorized for this participation");
     await this.#room.localParticipant.setCameraEnabled(enabled);
-    const track = this.#room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
+    const track = this.#room.localParticipant.getTrackPublication(this.#kit.Track.Source.Camera)?.track;
     if (enabled && track && this.options.localVideo) track.attach(this.options.localVideo);
   }
   async enableAudio(): Promise<void> { await this.#room.startAudio(); }

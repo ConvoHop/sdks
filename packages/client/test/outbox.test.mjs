@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { ConvoHopClient, Outbox } from "@convohop/client";
 import { reply, resolution } from "../../../test/graphql-fixtures.mjs";
+import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
 const id = () => crypto.randomUUID();
 const turn = () => new Promise(resolve => setImmediate(resolve));
@@ -25,6 +26,12 @@ function connectivity(online = true) {
     set(value) { online = value; for (const listener of listeners) listener(value); },
     subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); } };
 }
+function lifecycle(state = "active") {
+  const listeners = new Set();
+  return { listeners, get state() { return state; },
+    set(value) { state = value; for (const listener of listeners) listener(value); },
+    subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); } };
+}
 function problem(code, status, outcome = "rejected", extra = {}) {
   return Response.json({ errors: [{ message: "Fixture " + code, extensions: { code, outcome, status, ...extra } }] });
 }
@@ -32,7 +39,7 @@ function problem(code, status, outcome = "rejected", extra = {}) {
  * Clients of one fake authority that commits each request ID at most once. `onSend` and `onResolve` can answer a
  * request first; when they return undefined the authority commits the send, or reports what it has committed.
  */
-function authority({ recoveryStorage, projectId = id(), incarnation = id(), principalId = id() } = {}) {
+function authority({ recoveryStorage, projectId = id(), incarnation = id(), principalId = id(), clientOptions = {} } = {}) {
   const setup = { projectId, incarnation, principalId, sends: [], resolves: [], committed: new Map(), sequence: 0,
     onSend: undefined, onResolve: undefined };
   setup.ack = conversationId => {
@@ -45,7 +52,7 @@ function authority({ recoveryStorage, projectId = id(), incarnation = id(), prin
     return setup.committed.get(requestId);
   };
   setup.client = () => new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
-    sessionToken: "outbox-test-session", ...(recoveryStorage ? { recoveryStorage } : {}),
+    sessionToken: "outbox-test-session", ...(recoveryStorage ? { recoveryStorage } : {}), ...clientOptions,
     fetch: async (_url, options) => {
       const request = JSON.parse(options.body);
       if (request.operationName === "CommunicationSendMessage") {
@@ -391,4 +398,110 @@ test("without an injected connectivity the outbox follows the browser's online e
   await until(() => box.entries[0]?.status === "sent", "the online event");
   box.close();
   assert.equal(added.size, 0, "closing removes the listeners");
+});
+
+test("an asynchronously stored outbox sends saved messages first and stores each attempt before submitting it", async t => {
+  const saved = asyncStorage(), setup = authority({ clientOptions: { asyncRecoveryStorage: saved } });
+  const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`, conversationId = id(), savedId = id(), storedFirst = [];
+  saved.values.set(key, JSON.stringify([
+    { requestId: savedId, conversationId, text: "saved", props: {}, createdAt: new Date().toISOString(), attempted: false },
+  ]));
+  setup.onSend = request => {
+    storedFirst.push(JSON.parse(saved.values.get(key)).find(item => item.requestId === request.variables.context.requestId)?.attempted);
+    return undefined;
+  };
+  const { outbox: box, errors } = outbox(t, setup.client(), { persist: true });
+  const added = box.send(conversationId, "added while loading");
+  assert.deepEqual(box.entries.map(entry => entry.text), ["added while loading"]);
+  assert.equal(setup.sends.length, 0, "nothing is sent until saved messages have loaded");
+  await box.flush();
+  assert.deepEqual(sendIds(setup), [savedId, added.requestId], "saved messages keep their place");
+  assert.deepEqual(storedFirst, [true, true], "each attempt is stored before its message is submitted");
+  assert.deepEqual(statuses(box), ["sent", "sent"]);
+  await until(() => !saved.values.has(key), "the sent outbox to be cleared");
+  assert.deepEqual(errors, []);
+});
+
+test("unreadable asynchronous outbox storage is reported and new messages still send", async t => {
+  for (const [stored, message] of [[undefined, "storage denied"], [42, "Stored outbox must be a string or null"]]) {
+    const saved = asyncStorage({ onRead: async key => {
+      if (stored === undefined && key.startsWith("convohop.outbox:")) throw new Error("storage denied");
+    } });
+    const setup = authority({ clientOptions: { asyncRecoveryStorage: saved } });
+    if (stored !== undefined) saved.values.set(`convohop.outbox:${setup.projectId}:${setup.principalId}`, stored);
+    const { outbox: box, errors } = outbox(t, setup.client(), { persist: true });
+    box.send(id(), "still sent");
+    await box.flush();
+    assert.deepEqual(statuses(box), ["sent"]);
+    assert.deepEqual(errors.map(error => error.message), [message]);
+  }
+});
+
+test("messages sent while a full asynchronous outbox loads are kept across a restart, and only a longer list is cut", async t => {
+  const saved = asyncStorage(), setup = authority({ clientOptions: { asyncRecoveryStorage: saved } });
+  const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`, conversationId = id(), network = connectivity(false);
+  const entries = (count, prefix) => Array.from({ length: count }, (_, index) => ({ requestId: id(), conversationId,
+    text: prefix + index, props: {}, createdAt: new Date().toISOString(), attempted: false }));
+  const full = entries(100, "saved ");
+  saved.values.set(key, JSON.stringify(full));
+  const first = outbox(t, setup.client(), { persist: true, connectivity: network });
+  const added = Array.from({ length: 100 }, (_, index) => first.outbox.send(conversationId, "added " + index));
+  assert.throws(() => first.outbox.send(conversationId, "one too many while loading"), RangeError);
+  await first.outbox.flush();
+  const order = [...full.map(entry => entry.text), ...added.map(entry => entry.text)];
+  assert.deepEqual(first.outbox.entries.map(entry => entry.text), order, "saved messages first, then those sent while loading");
+  assert.throws(() => first.outbox.send(conversationId, "one too many"), RangeError);
+  await until(() => JSON.parse(saved.values.get(key) ?? "[]").length === 200, "the merged outbox to be saved");
+  first.outbox.close();
+
+  const second = outbox(t, setup.client(), { persist: true, connectivity: network });
+  await second.outbox.flush();
+  assert.deepEqual(second.outbox.entries.map(entry => entry.text), order, "a restart loses none of them");
+  second.outbox.close();
+
+  const longer = entries(201, "longer ");
+  saved.values.set(key, JSON.stringify(longer));
+  const third = outbox(t, setup.client(), { persist: true, connectivity: network });
+  await third.outbox.flush();
+  assert.deepEqual(third.outbox.entries.map(entry => entry.text), longer.slice(0, 200).map(entry => entry.text));
+  assert.deepEqual([...first.errors, ...second.errors].map(error => error.message), []);
+  assert.deepEqual(third.errors.map(error => error.message),
+    ["Discarded 1 of 201 saved outbox entries, beyond the limit of 200"]);
+  assert.equal(setup.sends.length, 0, "nothing was sent offline");
+});
+
+test("waking for connectivity or the foreground skips backoff but keeps the authority's Retry-After", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: Date.parse("2026-10-08T12:00:00Z") });
+  const network = connectivity(), foreground = lifecycle();
+  const setup = authority({ clientOptions: { platform: { lifecycle: foreground } } });
+  const { outbox: box } = outbox(t, setup.client(), { connectivity: network });
+  const limits = [{ retryAfter: 7 }, {}];
+  setup.onSend = () => limits.length ? problem("RATE_LIMITED", 429, "rejected", limits.shift()) : undefined;
+  box.send(id(), "later");
+  await until(() => box.entries[0].error !== undefined, "the first rate limit");
+  network.set(false); network.set(true); foreground.set("background"); foreground.set("active");
+  for (let index = 0; index < 20; index++) await turn();
+  assert.equal(setup.sends.length, 1, "a wake never sends before the authority's delay");
+  t.mock.timers.tick(7000);
+  await until(() => setup.sends.length === 2 && box.entries[0].status === "queued", "the second rate limit");
+  network.set(true);
+  await until(() => box.entries[0].status === "sent", "a wake to skip ordinary backoff");
+  assert.equal(setup.sends.length, 3);
+});
+
+test("returning to the foreground sends due messages, and the platform's connectivity is the default", async t => {
+  let online = false;
+  const quiet = { get online() { return online; }, subscribe: () => () => undefined }, foreground = lifecycle("background");
+  const setup = authority({ clientOptions: { platform: { connectivity: quiet, lifecycle: foreground } } });
+  const { outbox: box } = outbox(t, setup.client(), { connectivity: undefined });
+  box.send(id(), "x");
+  await box.flush();
+  assert.equal(setup.sends.length, 0, "the platform's connectivity is offline");
+  online = true;
+  foreground.set("active");
+  await until(() => box.entries[0].status === "sent", "the foreground wake");
+  box.close();
+  assert.equal(foreground.listeners.size, 0, "closing unsubscribes");
+  assert.throws(() => new Outbox(setup.client(), { connectivity: { online: true, subscribe: () => undefined } }),
+    { name: "TypeError", message: "subscribe must return an unsubscribe function" });
 });

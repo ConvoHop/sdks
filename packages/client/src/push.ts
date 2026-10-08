@@ -283,14 +283,33 @@ export function handleNotificationClick(clients: WebClients, event: WebNotificat
   return true;
 }
 
+/** A Web Push subscription, as `PushSubscription.toJSON()` returns it. */
+export interface WebPushSubscription {
+  readonly endpoint?: string;
+  readonly expirationTime?: number | null;
+  readonly keys?: Readonly<Record<string, string>>;
+}
+/**
+ * Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend
+ * endpoint can store registrations from browsers and native apps. ConvoHop never sees them.
+ *
+ * - `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.
+ * - `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.
+ * - `apnsVoip`: an iOS PushKit token for incoming calls.
+ * - `fcm`: an Android Firebase Cloud Messaging registration token.
+ */
+export type PushRegistration =
+  | { readonly kind: "webPush"; readonly subscription: WebPushSubscription }
+  | { readonly kind: "apns" | "apnsVoip"; readonly token: string; readonly environment?: "development" | "production" }
+  | { readonly kind: "fcm"; readonly token: string };
 export interface WebPushSubscribeOptions {
   /** Your VAPID public key, as base64url or bytes. Your backend signs pushes with its private key. */
   applicationServerKey: string | Uint8Array;
   /**
-   * Stores the subscription with your backend, for the signed-in user, so it can send pushes to this browser.
-   * ConvoHop never sees subscriptions. Called on every subscribe, so your backend can refresh what it stored.
+   * Stores the registration with your backend, for the signed-in user, so it can send pushes to this browser.
+   * Called on every subscribe, so your backend can refresh what it stored.
    */
-  register: (subscription: PushSubscriptionJSON) => Promise<void> | void;
+  register: (registration: PushRegistration) => Promise<void> | void;
 }
 function keyBytes(key: string | Uint8Array): Uint8Array<ArrayBuffer> {
   if (key instanceof Uint8Array) return new Uint8Array(key);
@@ -318,7 +337,7 @@ export async function subscribePush(registration: ServiceWorkerRegistration, opt
     subscription = null;
   }
   subscription ??= await manager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
-  await options.register(subscription.toJSON());
+  await options.register(Object.freeze({ kind: "webPush", subscription: subscription.toJSON() }));
   return subscription;
 }
 /**
@@ -326,9 +345,9 @@ export async function subscribePush(registration: ServiceWorkerRegistration, opt
  * existed.
  */
 export async function unsubscribePush(registration: ServiceWorkerRegistration,
-  unregister?: (subscription: PushSubscriptionJSON) => Promise<void> | void): Promise<boolean> {
+  unregister?: (registration: PushRegistration) => Promise<void> | void): Promise<boolean> {
   const subscription = await registration.pushManager?.getSubscription();
   if (!subscription) return false;
-  await unregister?.(subscription.toJSON());
+  await unregister?.(Object.freeze({ kind: "webPush", subscription: subscription.toJSON() }));
   return subscription.unsubscribe();
 }

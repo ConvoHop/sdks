@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import * as livekit from "livekit-client";
 import { ConvoHopClient, MediaConnection, LiveSessionHandle, LiveParticipationHandle, operationCatalog } from "@convohop/client";
 import { validateOutput } from "@convohop/core/internal";
 import { full, reply } from "../../../test/graphql-fixtures.mjs";
@@ -145,7 +146,7 @@ test("viewer and audio-only capture controls fail before local device access", a
   ]) {
     const setup = fixture(() => { throw new Error("no request expected"); });
     const participation = new LiveParticipationHandle(new LiveSessionHandle(setup.client, live()), participant({ permissions }));
-    const connection = new MediaConnection(participation, {});
+    const connection = new MediaConnection(participation, {}, livekit);
     connection.nativeConnectionId = id();
     for (const control of controls) await assert.rejects(connection[control](true), /not authorized/);
     const stats = await connection.stats();
@@ -223,9 +224,9 @@ test("receive-only reconnect never carries the old explicit credential request I
   const setup = fixture(() => { throw new Error("no network request expected"); });
   const p = new LiveParticipationHandle(new LiveSessionHandle(setup.client, live()), participant());
   let received;
-  const next = new MediaConnection(p, {});
+  const next = new MediaConnection(p, {}, livekit);
   p.connect = async options => { received = options; return next; };
-  const connection = new MediaConnection(p, { requestId: id(), iceTransportPolicy: "relay" });
+  const connection = new MediaConnection(p, { requestId: id(), iceTransportPolicy: "relay" }, livekit);
   assert.equal(await connection.reconnect(), next);
   assert.deepEqual(received, { iceTransportPolicy: "relay" });
   const stats = await next.stats();
@@ -267,4 +268,103 @@ test("expired unknown issuance is resolved before a separately identified fresh 
   assert.equal(setup.client.http.recoveryStates.find(state => state.requestId === original).retryDeadline, deadline);
   const last = setup.requests.slice(-3).map(request => request.operationName);
   assert.deepEqual(last, ["CommunicationLiveSession", "CommunicationResolveRequest", "CommunicationLiveSessionCredentials"]);
+});
+
+function connectorFixture(fields = {}) {
+  const p = participant(), session = live({ myParticipation: p }), expires = new Date(Date.now() + 60000).toISOString();
+  const grant = { liveSessionId: session.liveSessionId, participationId: p.participationId, generation: "1",
+    roomName: "fixture", participantIdentity: "fixture", livekitUrl: "wss://media.example.test",
+    transportToken: "never-persist-bearer", admissionTicket: { participationId: p.participationId },
+    forwardingLease: { participationId: p.participationId }, transportExpiresAt: expires, admissionExpiresAt: expires,
+    leaseExpiresAt: expires, leasePolicyId: "fixture", connectToken: "never-persist-connect-token", ...fields };
+  const setup = fixture(key => {
+    if (key === "communication.liveSession") return { result: session };
+    if (key === "communication.liveSessionCredentials") return { result: grant };
+    throw new Error(`Unexpected operation ${key}`);
+  });
+  const native = { disconnected: 0, open: true };
+  const connection = { get connected() { return native.open; }, async disconnect() { native.disconnected++; native.open = false; } };
+  return { setup, grant, native, connection,
+    participation: new LiveParticipationHandle(new LiveSessionHandle(setup.client, session), p) };
+}
+const credentialRequests = setup => setup.requests.filter(request => request.operationName === "CommunicationLiveSessionCredentials");
+
+test("connectWith records the attempt durably before a stock SDK connector gets the single-use token once", async () => {
+  const { setup, grant, connection, participation } = connectorFixture(), attempts = [];
+  const result = await participation.connectWith(async attempt => {
+    attempts.push(attempt);
+    assert.equal(setup.client.http.recoveryStates.find(state => state.requestId === attempt.requestId).mediaAdmissionAttempted, true);
+    assert.ok([...setup.values.values()].some(value => value.includes(attempt.requestId) && value.includes('"mediaAdmissionAttempted":true')),
+      "the marker is stored before the connector runs");
+    return connection;
+  });
+  assert.equal(result, connection);
+  assert.equal(attempts.length, 1);
+  assert.ok(Object.isFrozen(attempts[0]));
+  assert.deepEqual({ ...attempts[0] }, { requestId: credentialRequests(setup)[0].variables.context.requestId, mode: "INITIAL",
+    url: grant.livekitUrl, token: grant.connectToken, leaseExpiresAt: grant.leaseExpiresAt });
+  assert.equal(credentialRequests(setup).length, 1);
+  assert.ok([...setup.values.values()].every(value => !value.includes("never-persist")), "tokens are never stored");
+  await assert.rejects(participation.connectWith(async () => connection), /A native connection is connected; disconnect it first/);
+  await assert.rejects(participation.connect(), /A connector's native connection is connected; disconnect it first/);
+  assert.equal(credentialRequests(setup).length, 1);
+});
+
+test("connectWith admits one attempt at a time and checks the media URL before marking", async () => {
+  const { setup, connection, participation } = connectorFixture(), gate = Promise.withResolvers(), entered = Promise.withResolvers();
+  const pending = participation.connectWith(async () => { entered.resolve(); await gate.promise; return connection; });
+  await entered.promise;
+  await assert.rejects(participation.connectWith(async () => connection), /A native connection attempt is in progress/);
+  await assert.rejects(participation.connect(), /A connector's native connection attempt is in progress/);
+  gate.resolve();
+  assert.equal(await pending, connection);
+  assert.equal(credentialRequests(setup).length, 1);
+
+  for (const livekitUrl of ["https://media.example.test", "ws://media.example.test", "wss://media.example.test/?access_token=x"]) {
+    const unsafe = connectorFixture({ livekitUrl });
+    let called = false;
+    await assert.rejects(unsafe.participation.connectWith(async () => { called = true; return unsafe.connection; }),
+      { name: "TypeError", message: "Invalid media origin" });
+    assert.equal(called, false);
+    assert.equal(unsafe.setup.client.http.recoveryStates[0].mediaAdmissionAttempted, undefined, "a refused URL is never marked as attempted");
+  }
+  const expired = connectorFixture({ leaseExpiresAt: new Date(Date.now() - 1).toISOString() });
+  await assert.rejects(expired.participation.connectWith(async () => expired.connection), /Fresh media credentials are required/);
+  const unbound = connectorFixture({ forwardingLease: { participationId: id() } });
+  await assert.rejects(unbound.participation.connectWith(async () => unbound.connection), /Native proof is not participation-bound/);
+});
+
+test("connector failures leave the admission unknown and never surface the native error", async () => {
+  const { setup, participation } = connectorFixture();
+  const error = await participation.connectWith(async attempt => {
+    throw new Error(`could not establish signal connection to ${attempt.url}/rtc?access_token=${attempt.token}`);
+  }).catch(caught => caught);
+  assert.equal(error.code, "MEDIA_CONNECT_FAILED");
+  assert.equal(error.outcome, "unknown");
+  assert.equal(error.requestId, credentialRequests(setup)[0].variables.context.requestId);
+  assert.equal(error.cause, undefined);
+  assert.ok(!`${error.message} ${error.stack} ${JSON.stringify(error)}`.includes("never-persist"));
+  assert.equal(setup.client.http.recoveryStates[0].mediaAdmissionAttempted, true);
+
+  const invalid = { name: "TypeError", message: "connector must resolve to a connection with connected and disconnect()" };
+  for (const value of [undefined, null, {}, { connected: true }]) {
+    const fixture = connectorFixture();
+    await assert.rejects(fixture.participation.connectWith(async () => value), invalid);
+  }
+  const unknownState = connectorFixture();
+  await assert.rejects(unknownState.participation.connectWith(async () => ({ disconnect: unknownState.connection.disconnect })), invalid);
+  assert.equal(unknownState.native.disconnected, 1, "a connection without connected is closed");
+  await assert.rejects(connectorFixture().participation.connectWith("connector"), { name: "TypeError", message: "connector must be a function" });
+});
+
+test("leaving during a connector's attempt closes its connection", async () => {
+  const { native, connection, participation } = connectorFixture(), gate = Promise.withResolvers(), entered = Promise.withResolvers();
+  const pending = participation.connectWith(async () => { entered.resolve(); await gate.promise; return connection; });
+  await entered.promise;
+  const leaving = participation.leave().catch(error => error);
+  gate.resolve();
+  await assert.rejects(pending, /Participation was left during connection/);
+  assert.equal(native.disconnected, 1);
+  assert.equal((await leaving).code, "TRANSPORT_UNKNOWN");
+  await assert.rejects(participation.connectWith(async () => connection), /Leave has been requested/);
 });

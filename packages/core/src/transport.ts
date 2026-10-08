@@ -1,11 +1,14 @@
 import { buildGraphqlRequest, operationPayload, operationKey, validateOperationPayload,
   type OperationInput, type OperationPayload } from "./graphql.js";
 import { operationCatalog, type OperationKey } from "./generated/operations.js";
-import { ConvoHopProblem, authorityProblem, boolean, canonical, fingerprint, origin, timestamp, parseCounter, parseId, parseObject, parseString,
-  type AsyncRecoveryStorage, type ProtocolObject, type RecoveryState, type RecoveryStorage } from "./protocol.js";
+import { ConvoHopProblem, authorityProblem, boolean, canonical, fingerprint, jsonClone, origin, timestamp, parseCounter, parseId, parseObject,
+  parseString, type AsyncRecoveryStorage, type ProtocolObject, type RecoveryState, type RecoveryStorage } from "./protocol.js";
+import { deadline, randomUUID, validatePlatform, type ConvoHopPlatform } from "./platform.js";
 export interface ConvoHopTransportOptions {
   baseUrl: string; credential?: string; namespace: string; incarnation?: string;
   recoveryStorage?: RecoveryStorage; asyncRecoveryStorage?: AsyncRecoveryStorage; fetch?: typeof fetch;
+  /** Runtime services that replace missing globals, such as in React Native. See {@link ConvoHopPlatform}. */
+  platform?: ConvoHopPlatform;
 }
 type SessionProbe = "communication.route" | "communication.currentSession";
 /** Whole-second retry delay from `extensions.retryAfter` or an HTTP `Retry-After` delta; anything else is ignored. */
@@ -25,6 +28,7 @@ export class ConvoHopTransport {
   readonly durableRecovery: boolean;
   readonly #authentication: TransportAuthentication;
   readonly #fetch: typeof fetch;
+  readonly #platform: Readonly<ConvoHopPlatform>;
   readonly #storage: RecoveryStorage | undefined;
   readonly #asyncStorage: AsyncRecoveryStorage | undefined;
   readonly #storageKey: string;
@@ -38,10 +42,11 @@ export class ConvoHopTransport {
   constructor(options: ConvoHopTransportOptions) {
     if (options.recoveryStorage !== undefined && options.asyncRecoveryStorage !== undefined)
       throw new TypeError("Choose recoveryStorage or asyncRecoveryStorage, not both");
-    this.baseUrl = origin(options.baseUrl);
+    this.#platform = validatePlatform(options.platform);
+    this.baseUrl = origin(options.baseUrl, this.#platform);
     this.#authentication = { credential: options.credential, barrier: undefined, blocked: false, active: new Set(),
       probe: (key, projectId, credential, observedServingEpoch) =>
-        this.#execute(key, projectId, {}, crypto.randomUUID(), undefined, this.incarnation, credential, observedServingEpoch) };
+        this.#execute(key, projectId, {}, randomUUID(this.#platform), undefined, this.incarnation, credential, observedServingEpoch) };
     transportAuthentication.set(this, this.#authentication);
     this.incarnation = options.incarnation ?? "management";
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
@@ -100,7 +105,7 @@ export class ConvoHopTransport {
   }
   get recoveryStates(): readonly RecoveryState[] {
     if (!this.#recoveryInitialized) throw new Error("Await initializeRecovery() before inspecting asynchronous recovery state");
-    return [...this.#states.values()].map(state => structuredClone(state));
+    return [...this.#states.values()].map(state => jsonClone(state));
   }
   /** @internal Persist the native attempt boundary without retaining a bearer grant. */
   markMediaAdmissionAttempted(requestId: string): void | Promise<void> {
@@ -133,10 +138,10 @@ export class ConvoHopTransport {
     this.#storage?.setItem(this.#storageKey, JSON.stringify([...this.#states.values()]));
   }
   async execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>,
-    requestId: string = crypto.randomUUID(), credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>> {
+    requestId: string = randomUUID(this.#platform), credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>> {
     const incarnation = this.incarnation;
-    const body = structuredClone(Object.fromEntries(Object.entries(parseObject(input)).filter(([, value]) => value !== undefined)));
-    const permit = credentialDeliveryPermit === undefined ? undefined : structuredClone(credentialDeliveryPermit);
+    const body = jsonClone(Object.fromEntries(Object.entries(parseObject(input)).filter(([, value]) => value !== undefined)));
+    const permit = credentialDeliveryPermit === undefined ? undefined : jsonClone(credentialDeliveryPermit);
     this.#plan(key, projectId, body, requestId, permit);
     return this.#authorized(requestId, credential =>
       this.#execute(key, projectId, body, requestId, permit, incarnation, credential));
@@ -191,7 +196,7 @@ export class ConvoHopTransport {
       return active.work;
     }
     const work = (async () => {
-      const hash = await fingerprint({ operation, projectId: projectId ?? null, input });
+      const hash = await fingerprint({ operation, projectId: projectId ?? null, input }, this.#platform);
       if (this.incarnation !== incarnation)
         throw new ConvoHopProblem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
       let state = this.#states.get(requestId);
@@ -209,7 +214,7 @@ export class ConvoHopTransport {
         }
         const now = Date.now();
         state = { requestId, incarnation, payloadFingerprint: hash, operation,
-          ...(projectId === undefined ? {} : { projectId }), input: structuredClone(input),
+          ...(projectId === undefined ? {} : { projectId }), input: jsonClone(input),
           firstSubmittedAt: now, retryDeadline: now + 60000,
           attemptCount: 0, lastAttemptAt: now, lastAttemptClassification: "notSubmitted", resolutionState: "pending" };
         this.#states.set(requestId, state);
@@ -261,7 +266,7 @@ export class ConvoHopTransport {
       throw new ConvoHopProblem("CREDENTIAL_REQUIRED", requestId, "unknown", 409,
         "Delivery permits cannot authorize request lookup; obtain a current permit and submit the same delivery identity explicitly");
     const key = operationCatalog[state.operation].plane === "management" ? "management.resolveRequest" : "communication.resolveRequest";
-    const resolution = (await this.#execute(key, state.projectId, { requestId }, crypto.randomUUID(),
+    const resolution = (await this.#execute(key, state.projectId, { requestId }, randomUUID(this.#platform),
       undefined, this.incarnation, credential)).result;
     if (!resolution) throw new TypeError("Missing current request resolution");
     if (resolution.state === "committed" || resolution.state === "accepted") return resolution;
@@ -270,10 +275,11 @@ export class ConvoHopTransport {
       throw new ConvoHopProblem("RESOLUTION_REQUIRED", requestId, "unknown", 409,
         "Previously observed commit or native admission cannot be retried from absent evidence");
     }
-    if (await fingerprint({ operation: state.operation, projectId: state.projectId ?? null, input: state.input }) !== state.payloadFingerprint)
+    if (await fingerprint({ operation: state.operation, projectId: state.projectId ?? null, input: state.input }, this.#platform) !==
+        state.payloadFingerprint)
       throw new Error("Recovery input fingerprint changed");
     await this.#mutate(state.operation, state.projectId, state.input, state.requestId, credential, undefined, true);
-    const current = (await this.#execute(key, state.projectId, { requestId }, crypto.randomUUID(),
+    const current = (await this.#execute(key, state.projectId, { requestId }, randomUUID(this.#platform),
       undefined, this.incarnation, credential)).result;
     if (!current) throw new TypeError("Missing current request resolution");
     return current;
@@ -298,14 +304,19 @@ export class ConvoHopTransport {
     const plan = this.#plan(key, projectId, input, requestId, credentialDeliveryPermit, observedServingEpoch);
     const headers: Record<string, string> = { accept: "application/json", "content-type": "application/json" };
     if (credential !== undefined) headers.authorization = "Bearer " + credential;
-    let response: Response;
+    let response: Response, text: string;
+    const url = this.baseUrl + "/graphql", timeout = deadline(12000);
     try {
-      response = await this.#fetch(this.baseUrl + "/graphql", { method: "POST", headers, redirect: "error", cache: "no-store", credentials: "omit",
-        signal: AbortSignal.timeout(12000), body: canonical(plan.body) });
-    } catch { throw new ConvoHopProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Authority response unavailable; resolve the original request"); }
-    let text: string;
-    try { text = await response.text(); }
-    catch { throw new ConvoHopProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Incomplete authority response; resolve the original request"); }
+      try {
+        response = await this.#fetch(url, { method: "POST", headers, redirect: "error", cache: "no-store",
+          credentials: "omit", ...(timeout.signal ? { signal: timeout.signal } : {}), body: canonical(plan.body) });
+      } catch { throw new ConvoHopProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Authority response unavailable; resolve the original request"); }
+      // Some runtimes, such as React Native, follow redirects despite `redirect: "error"`. Another URL's answer isn't the authority's.
+      if (response.redirected === true || (typeof response.url === "string" && response.url !== "" && response.url !== url))
+        throw new ConvoHopProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Authority response was redirected; resolve the original request");
+      try { text = await response.text(); }
+      catch { throw new ConvoHopProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Incomplete authority response; resolve the original request"); }
+    } finally { timeout.clear(); }
     if (text.length > 1_048_576) throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Authority response exceeds the bound");
     let decoded: unknown;
     try { decoded = JSON.parse(text); } catch { throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Unrecognized authority response"); }

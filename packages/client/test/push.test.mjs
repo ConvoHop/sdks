@@ -268,7 +268,8 @@ test("subscribePush registers a subscription for the VAPID key, reusing or repla
   assert.equal(fresh.calls.length, 1);
   assert.equal(fresh.calls[0].userVisibleOnly, true);
   assert.deepEqual([...fresh.calls[0].applicationServerKey], [...vapid], "base64url keys are decoded");
-  assert.deepEqual(registered, [created.toJSON()]);
+  assert.deepEqual(registered, [{ kind: "webPush", subscription: created.toJSON() }], "the backend gets a PushRegistration");
+  assert.ok(Object.isFrozen(registered[0]));
 
   const same = pushRegistration(calls => subscription(vapid, calls));
   const reused = await subscribePush(same.registration, { applicationServerKey: vapid, register: value => { registered.push(value); } });
@@ -298,8 +299,8 @@ test("unsubscribePush lets the backend forget the subscription first", async () 
   const order = [];
   const current = pushRegistration(calls => subscription(vapid, calls));
   current.manager.current.unsubscribe = async () => { order.push("unsubscribe"); return true; };
-  assert.equal(await unsubscribePush(current.registration, async value => { order.push(value.endpoint); }), true);
-  assert.deepEqual(order, ["https://push.example/0", "unsubscribe"]);
+  assert.equal(await unsubscribePush(current.registration, async value => { order.push(value.kind, value.subscription.endpoint); }), true);
+  assert.deepEqual(order, ["webPush", "https://push.example/0", "unsubscribe"]);
   assert.equal(await unsubscribePush(pushRegistration().registration), false);
   assert.equal(await unsubscribePush({}), false);
   const failing = pushRegistration(calls => subscription(vapid, calls));

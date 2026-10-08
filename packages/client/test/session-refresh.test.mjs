@@ -18,7 +18,7 @@ function storage() {
 function denied() {
   return Response.json({ code: "UNAUTHENTICATED", outcome: "rejected", message: "Fixture credential denied" }, { status: 401 });
 }
-function fixture({ enabled = true, revision = "1" } = {}) {
+function fixture({ enabled = true, revision = "1", platform } = {}) {
   const projectId = id(), incarnation = id(), principalId = id(), saved = storage();
   const original = { sessionId: id(), principalId, deviceId: id(), incarnation, sessionRevision: revision,
     expiresAt: new Date(Math.floor(Date.now() / 1000) * 1000 + 120123).toISOString(), status: "active" };
@@ -81,7 +81,7 @@ function fixture({ enabled = true, revision = "1" } = {}) {
     throw new Error(`Unexpected fixture operation ${operation}`);
   };
   setup.client = new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
-    sessionToken: originalToken, recoveryStorage: saved, fetch: setup.fetch,
+    sessionToken: originalToken, recoveryStorage: saved, fetch: setup.fetch, ...(platform ? { platform } : {}),
     ...(enabled ? { sessionRefresh: async current => {
       setup.hookCalls.push(current);
       return setup.refreshHook(current);
@@ -1005,4 +1005,30 @@ test("throwing schedule callbacks neither stop renewal nor leak rejections", asy
   assert.equal(reported.length, 3);
   assert.deepEqual(reported.slice(1), ["Application refresh listener failed", "Application refresh listener failed"]);
   assert.equal(setup.renewals, 2);
+});
+
+test("returning to the foreground re-checks a waiting renewal against the wall clock", async t => {
+  // Only Date is mocked, so the renewal timer stays a real pending timer, like one a suspended app hasn't run.
+  t.mock.timers.enable({ apis: ["Date"], now: Math.floor(Date.now() / 1000) * 1000 });
+  // Real milliseconds, so that real zero-delay timers armed before the pause run first.
+  const pause = async () => { await new Promise(resolve => setTimeout(resolve, 5)); await settle(); };
+  const listeners = new Set();
+  const lifecycle = { state: "active", subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); } };
+  const foreground = state => { lifecycle.state = state; for (const listener of listeners) listener(state); };
+  const setup = fixture({ platform: { lifecycle } });
+  await setup.client.initialize();
+  const stop = setup.client.scheduleSessionRefresh({ leadMs: 30000 });
+  t.after(stop);
+  await pause();
+  assert.equal(setup.hookCalls.length, 0, "renewal is due 90 seconds before the two-minute expiry");
+  t.mock.timers.setTime(Date.now() + 100000);
+  foreground("background");
+  await pause();
+  assert.equal(setup.hookCalls.length, 0, "the suspended timer hasn't run");
+  foreground("active");
+  await pause();
+  await until(() => setup.renewals === 1);
+  assert.equal(setup.client.sessionBinding.sessionRevision, "2");
+  stop();
+  assert.equal(listeners.size, 0, "disposing the schedule unsubscribes");
 });
