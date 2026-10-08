@@ -88,7 +88,8 @@ function isInside(parent, child) {
 
 class Program {
   constructor(root) {
-    this.root = resolve(root);
+    // Package directories are real paths, so the root must be one too for relative paths between them.
+    this.root = realpathSync(resolve(root));
     this.modules = new Map();
     this.packages = new Map();
     this.exportTables = new Map();
@@ -101,7 +102,7 @@ class Program {
     let info = null;
     if (existsSync(join(link, "package.json"))) {
       const dir = realpathSync(link);
-      if (isInside(realpathSync(this.root), dir) && !dir.split(sep).includes("node_modules")) {
+      if (isInside(this.root, dir) && !dir.split(sep).includes("node_modules")) {
         info = { name, dir, manifest: JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) };
       }
     }
