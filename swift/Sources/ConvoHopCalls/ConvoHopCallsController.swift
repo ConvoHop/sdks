@@ -56,7 +56,8 @@ public struct ConvoHopCallsConfiguration: Sendable {
 /// Receives what CallKit and PushKit report. Every method has an empty default.
 @MainActor
 public protocol ConvoHopCallsDelegate: AnyObject {
-    /// Register the VoIP token with ConvoHop as an `APNS_VOIP` device. `nil` means iOS invalidated it.
+    /// Send the VoIP token, as `ConvoHopPushToken.hex(_:)`, to your backend, which sends VoIP pushes for calls.
+    /// ConvoHop never stores device tokens. `nil` means iOS invalidated the token: remove it from your backend.
     func convoHopCalls(_ calls: ConvoHopCalls, didUpdateVoIPToken token: Data?)
     /// A call rings in CallKit.
     func convoHopCalls(_ calls: ConvoHopCalls, didReceiveIncomingCall call: ConvoHopCall)

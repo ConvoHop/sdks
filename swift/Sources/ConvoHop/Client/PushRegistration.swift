@@ -11,7 +11,7 @@ import AppKit
 /// ConvoHop never stores device tokens. Send the token from
 /// `application(_:didRegisterForRemoteNotificationsWithDeviceToken:)` to your backend as
 /// ``ConvoHopPushToken/hex(_:)``. Your backend delivers the push requests it builds from ConvoHop's notification
-/// webhooks. For calls, register the VoIP token from `ConvoHopCalls` too.
+/// webhooks. For calls, send your backend the VoIP token from `ConvoHopCalls` too.
 @MainActor
 public enum ConvoHopPushRegistration {
     /// Requests authorization, then registers for remote notifications whatever the user chose.
