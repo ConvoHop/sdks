@@ -79,7 +79,7 @@ export interface OperationTypes {
   "management.replayWebhookDeliveries": { variables: Generated.ManagementReplayWebhookDeliveriesMutationVariables; result: Generated.ManagementReplayWebhookDeliveriesMutation };
 }
 export type OperationKey = keyof OperationTypes;
-export interface OperationCatalogEntry { plane: string; kind: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }
+export interface OperationCatalogEntry { plane: string; kind: string; idempotency: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }
 export type OutputShape = { kind: "scalar" } | { kind: "enum"; values: readonly string[] } | { kind: "object"; fields: Readonly<Record<string, string>> };
 export const outputShapes: Readonly<Record<string, OutputShape>> = {
   "AcknowledgeCredentialReply": {
@@ -2067,6 +2067,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.capabilities": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "capabilities",
     "operationName": "CommunicationCapabilities",
     "query": "query CommunicationCapabilities($context: RequestContextInput!) {\n  capabilities(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      serverRelease\n      capabilityRevision\n      limitsRevision\n      features {\n        chat\n        inbox\n        lexicalSearch\n        typing\n        webhooks\n        liveSessions\n        liveBroadcast\n      }\n      limits {\n        key\n        value {\n          maximum\n          unit\n          scope\n          milliseconds\n          policyId\n          revision\n        }\n      }\n      environment\n      productionQualified\n      mediaPolicy {\n        leasePolicyId\n        maxLeaseMs\n        renewAttemptMs\n        preludeMaxBytes\n        preludeTimeoutMs\n        clockProfileId\n      }\n      geoControlAuthorityId\n      offerings\n      geos\n      installationProfiles\n      portalIdentity\n    }\n  }\n}",
@@ -2076,6 +2077,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.route": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "route",
     "operationName": "CommunicationRoute",
     "query": "query CommunicationRoute($context: RequestContextInput!) {\n  route(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result\n  }\n}",
@@ -2085,6 +2087,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.currentSession": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "currentSession",
     "operationName": "CommunicationCurrentSession",
     "query": "query CommunicationCurrentSession($context: RequestContextInput!) {\n  currentSession(context: $context) {\n    status\n    requestId\n    serverTime\n    result {\n      sessionId\n      principalId\n      deviceId\n      incarnation\n      sessionRevision\n      expiresAt\n      status\n    }\n  }\n}",
@@ -2094,6 +2097,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.getPrincipal": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "getPrincipal",
     "operationName": "CommunicationGetPrincipal",
     "query": "query CommunicationGetPrincipal($context: RequestContextInput!, $input: GetPrincipalRequestInput!) {\n  getPrincipal(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      principalId\n      externalUserId\n      status\n      revision\n    }\n  }\n}",
@@ -2105,6 +2109,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.getConversation": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "getConversation",
     "operationName": "CommunicationGetConversation",
     "query": "query CommunicationGetConversation($context: RequestContextInput!, $input: GetConversationRequestInput!) {\n  getConversation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      conversationId\n      revision\n      title\n      props\n      latestSequence\n      membership {\n        conversationId\n        principalId\n        role\n        status\n        membershipEpoch\n        visibilityEpoch\n        revision\n        visibleFromSequence\n        canStartBroadcast\n      }\n    }\n  }\n}",
@@ -2116,6 +2121,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.members": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "members",
     "operationName": "CommunicationMembers",
     "query": "query CommunicationMembers($context: RequestContextInput!, $input: MembersRequestInput!) {\n  members(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        conversationId\n        principalId\n        role\n        status\n        membershipEpoch\n        visibilityEpoch\n        revision\n        visibleFromSequence\n        canStartBroadcast\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
@@ -2129,6 +2135,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.messages": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "messages",
     "operationName": "CommunicationMessages",
     "query": "query CommunicationMessages($context: RequestContextInput!, $input: MessagesRequestInput!) {\n  messages(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        messageId\n        conversationId\n        authorId\n        sequence\n        revision\n        revisionSequence\n        createdAt\n        deleted\n        text\n        props\n        editedAt\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
@@ -2143,6 +2150,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.getMessage": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "getMessage",
     "operationName": "CommunicationGetMessage",
     "query": "query CommunicationGetMessage($context: RequestContextInput!, $input: GetMessageRequestInput!) {\n  getMessage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      messageId\n      conversationId\n      authorId\n      sequence\n      revision\n      revisionSequence\n      createdAt\n      deleted\n      text\n      props\n      editedAt\n    }\n  }\n}",
@@ -2156,6 +2164,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.events": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "events",
     "operationName": "CommunicationEvents",
     "query": "query CommunicationEvents($context: RequestContextInput!, $input: EventsRequestInput!) {\n  events(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        eventId\n        conversationId\n        sequence\n        type\n        occurredAt\n        subjectRef {\n          kind\n          id\n        }\n        payload {\n          messageId\n          revision\n          revisionSequence\n          principalId\n          membershipEpoch\n          visibilityEpoch\n          kind\n          throughSequence\n          callId\n          generation\n          state\n          cutoffEvidence\n          liveSessionId\n        }\n      }\n      complete\n      refreshRequired\n      nextCursor {\n        incarnation\n        conversationId\n        sequence\n      }\n    }\n  }\n}",
@@ -2169,6 +2178,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.receipts": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "receipts",
     "operationName": "CommunicationReceipts",
     "query": "query CommunicationReceipts($context: RequestContextInput!, $input: ReceiptsRequestInput!) {\n  receipts(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        principalId\n        membershipEpoch\n        visibilityEpoch\n        deliveredThroughSequence\n        readThroughSequence\n        updatedAt\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
@@ -2182,6 +2192,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.inbox": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "inbox",
     "operationName": "CommunicationInbox",
     "query": "query CommunicationInbox($context: RequestContextInput!, $input: InboxRequestInput!) {\n  inbox(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        conversationId\n        title\n        activityAt\n        visibilityEpoch\n        latestVisibleMessage {\n          messageId\n          conversationId\n          authorId\n          sequence\n          revision\n          revisionSequence\n          createdAt\n          deleted\n          text\n          props\n          editedAt\n        }\n        hasUnread\n      }\n      complete\n      refreshRequired\n      nextCursor\n      partialReason\n    }\n  }\n}",
@@ -2195,6 +2206,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.search": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "search",
     "operationName": "CommunicationSearch",
     "query": "query CommunicationSearch($context: RequestContextInput!, $input: SearchRequestInput!) {\n  search(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        conversationId\n        message {\n          messageId\n          conversationId\n          authorId\n          sequence\n          revision\n          revisionSequence\n          createdAt\n          deleted\n          text\n          props\n          editedAt\n        }\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
@@ -2210,6 +2222,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.resolveRequest": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "resolveRequest",
     "operationName": "CommunicationResolveRequest",
     "query": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
@@ -2221,6 +2234,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.getOperation": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "getOperation",
     "operationName": "CommunicationGetOperation",
     "query": "query CommunicationGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {\n  getOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n        messagePreview\n      }\n      blockedReason\n    }\n  }\n}",
@@ -2232,6 +2246,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.conversationMute": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "conversationMute",
     "operationName": "CommunicationConversationMute",
     "query": "query CommunicationConversationMute($context: RequestContextInput!, $input: ConversationMuteInput!) {\n  conversationMute(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      conversationId\n      principalId\n      muted\n      until\n    }\n  }\n}",
@@ -2244,6 +2259,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.currentLiveSession": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "currentLiveSession",
     "operationName": "CommunicationCurrentLiveSession",
     "query": "query CommunicationCurrentLiveSession($context: RequestContextInput!, $input: ConversationLiveInput!) {\n  currentLiveSession(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      liveSessionId\n      conversationId\n      creatorId\n      kind\n      mediaProfile\n      state\n      generation\n      revision\n      createdAt\n      expiresAt\n      myParticipation {\n        participationId\n        principalId\n        membershipEpoch\n        role\n        state\n        permissions {\n          microphone\n          camera\n          subscribe\n        }\n        reservationExpiresAt\n        nativeConnectionId\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      mediaCutoff {\n        state\n        scope {\n          kind\n          liveSessionId\n          generation\n          participationId\n        }\n        evidence\n        enforcedAt\n        operationId\n      }\n    }\n  }\n}",
@@ -2255,6 +2271,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.liveSession": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "liveSession",
     "operationName": "CommunicationLiveSession",
     "query": "query CommunicationLiveSession($context: RequestContextInput!, $input: LiveSessionInput!) {\n  liveSession(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      liveSessionId\n      conversationId\n      creatorId\n      kind\n      mediaProfile\n      state\n      generation\n      revision\n      createdAt\n      expiresAt\n      myParticipation {\n        participationId\n        principalId\n        membershipEpoch\n        role\n        state\n        permissions {\n          microphone\n          camera\n          subscribe\n        }\n        reservationExpiresAt\n        nativeConnectionId\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      mediaCutoff {\n        state\n        scope {\n          kind\n          liveSessionId\n          generation\n          participationId\n        }\n        evidence\n        enforcedAt\n        operationId\n      }\n    }\n  }\n}",
@@ -2266,6 +2283,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.liveSessions": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "liveSessions",
     "operationName": "CommunicationLiveSessions",
     "query": "query CommunicationLiveSessions($context: RequestContextInput!, $input: LiveSessionsInput!) {\n  liveSessions(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      items {\n        liveSessionId\n        conversationId\n        creatorId\n        kind\n        mediaProfile\n        state\n        generation\n        revision\n        createdAt\n        expiresAt\n        myParticipation {\n          participationId\n          principalId\n          membershipEpoch\n          role\n          state\n          permissions {\n            microphone\n            camera\n            subscribe\n          }\n          reservationExpiresAt\n          nativeConnectionId\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      nextCursor\n      complete\n      partialReason\n      refreshRequired\n    }\n  }\n}",
@@ -2279,6 +2297,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.liveSessionParticipants": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "liveSessionParticipants",
     "operationName": "CommunicationLiveSessionParticipants",
     "query": "query CommunicationLiveSessionParticipants($context: RequestContextInput!, $input: LiveParticipantsInput!) {\n  liveSessionParticipants(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      items {\n        participationId\n        principalId\n        membershipEpoch\n        role\n        state\n        permissions {\n          microphone\n          camera\n          subscribe\n        }\n        reservationExpiresAt\n        nativeConnectionId\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      nextCursor\n      complete\n      partialReason\n      refreshRequired\n    }\n  }\n}",
@@ -2292,6 +2311,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.liveSessionAlerts": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "liveSessionAlerts",
     "operationName": "CommunicationLiveSessionAlerts",
     "query": "query CommunicationLiveSessionAlerts($context: RequestContextInput!, $input: LiveAlertsInput!) {\n  liveSessionAlerts(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      items {\n        alertId\n        liveSessionId\n        conversationId\n        generation\n        membershipEpoch\n        createdAt\n        expiresAt\n      }\n      nextCursor\n      complete\n      partialReason\n      refreshRequired\n    }\n  }\n}",
@@ -2304,6 +2324,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.liveSessionOperation": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "liveSessionOperation",
     "operationName": "CommunicationLiveSessionOperation",
     "query": "query CommunicationLiveSessionOperation($context: RequestContextInput!, $input: LiveSessionOperationInput!) {\n  liveSessionOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      operationId\n      requestId\n      liveSessionId\n      kind\n      state\n      revision\n      requestedAt\n      completedAt\n      completion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      failure {\n        code\n        message\n      }\n    }\n  }\n}",
@@ -2315,6 +2336,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.sessionRequestOutcome": {
     "plane": "communication",
     "kind": "query",
+    "idempotency": "safe",
     "field": "sessionRequestOutcome",
     "operationName": "CommunicationSessionRequestOutcome",
     "query": "query CommunicationSessionRequestOutcome($context: RequestContextInput!, $input: SessionRequestOutcomeRequestInput!) {\n  sessionRequestOutcome(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    result {\n      state\n      requestId\n      checkedAt\n      operation\n      receiptId\n      committedAt\n      originalSession {\n        sessionId\n        principalId\n        deviceId\n        incarnation\n        sessionRevision\n        expiresAt\n        status\n      }\n      currentSession {\n        sessionId\n        principalId\n        deviceId\n        incarnation\n        sessionRevision\n        expiresAt\n        status\n      }\n      currentState\n    }\n  }\n}",
@@ -2326,6 +2348,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.createPrincipal": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "createPrincipal",
     "operationName": "CommunicationCreatePrincipal",
     "query": "mutation CommunicationCreatePrincipal($context: RequestContextInput!, $input: CreatePrincipalRequestInput!) {\n  createPrincipal(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      principalId\n      externalUserId\n      status\n      revision\n    }\n  }\n}",
@@ -2337,6 +2360,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.disablePrincipal": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "disablePrincipal",
     "operationName": "CommunicationDisablePrincipal",
     "query": "mutation CommunicationDisablePrincipal($context: RequestContextInput!, $input: DisablePrincipalRequestInput!) {\n  disablePrincipal(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      principalId\n      externalUserId\n      status\n      revision\n    }\n  }\n}",
@@ -2349,6 +2373,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.issueSession": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "issueSession",
     "operationName": "CommunicationIssueSession",
     "query": "mutation CommunicationIssueSession($context: RequestContextInput!, $input: IssueSessionRequestInput!) {\n  issueSession(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      session {\n        sessionId\n        principalId\n        deviceId\n        incarnation\n        sessionRevision\n        expiresAt\n        status\n      }\n      tokenExpiresAt\n      sessionToken\n    }\n  }\n}",
@@ -2362,6 +2387,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.renewSession": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "renewSession",
     "operationName": "CommunicationRenewSession",
     "query": "mutation CommunicationRenewSession($context: RequestContextInput!, $input: RenewSessionRequestInput!) {\n  renewSession(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      session {\n        sessionId\n        principalId\n        deviceId\n        incarnation\n        sessionRevision\n        expiresAt\n        status\n      }\n      tokenExpiresAt\n      sessionToken\n    }\n  }\n}",
@@ -2377,6 +2403,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.revokeSession": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "revokeSession",
     "operationName": "CommunicationRevokeSession",
     "query": "mutation CommunicationRevokeSession($context: RequestContextInput!, $input: RevokeSessionRequestInput!) {\n  revokeSession(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      sessionId\n      status\n      mediaCutoff {\n        state\n        scope {\n          kind\n          principalId\n          sessionId\n          deviceId\n          callId\n        }\n      }\n    }\n  }\n}",
@@ -2389,6 +2416,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.createConversation": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "createConversation",
     "operationName": "CommunicationCreateConversation",
     "query": "mutation CommunicationCreateConversation($context: RequestContextInput!, $input: CreateConversationRequestInput!) {\n  createConversation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      conversationId\n      revision\n      title\n      props\n      latestSequence\n      membership {\n        conversationId\n        principalId\n        role\n        status\n        membershipEpoch\n        visibilityEpoch\n        revision\n        visibleFromSequence\n        canStartBroadcast\n      }\n    }\n  }\n}",
@@ -2402,6 +2430,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.updateConversation": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "updateConversation",
     "operationName": "CommunicationUpdateConversation",
     "query": "mutation CommunicationUpdateConversation($context: RequestContextInput!, $input: UpdateConversationRequestInput!) {\n  updateConversation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      conversationId\n      revision\n      title\n      props\n      latestSequence\n      membership {\n        conversationId\n        principalId\n        role\n        status\n        membershipEpoch\n        visibilityEpoch\n        revision\n        visibleFromSequence\n        canStartBroadcast\n      }\n    }\n  }\n}",
@@ -2416,6 +2445,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.addMember": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "addMember",
     "operationName": "CommunicationAddMember",
     "query": "mutation CommunicationAddMember($context: RequestContextInput!, $input: AddMemberRequestInput!) {\n  addMember(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      conversationId\n      principalId\n      role\n      status\n      membershipEpoch\n      visibilityEpoch\n      revision\n      visibleFromSequence\n      canStartBroadcast\n    }\n  }\n}",
@@ -2430,6 +2460,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.addMembers": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "addMembers",
     "operationName": "CommunicationAddMembers",
     "query": "mutation CommunicationAddMembers($context: RequestContextInput!, $input: AddMembersInput!) {\n  addMembers(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    result {\n      items {\n        conversationId\n        principalId\n        role\n        status\n        membershipEpoch\n        visibilityEpoch\n        revision\n        visibleFromSequence\n        canStartBroadcast\n      }\n    }\n  }\n}",
@@ -2442,6 +2473,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.removeMember": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "removeMember",
     "operationName": "CommunicationRemoveMember",
     "query": "mutation CommunicationRemoveMember($context: RequestContextInput!, $input: RemoveMemberRequestInput!) {\n  removeMember(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      conversationId\n      principalId\n      role\n      status\n      membershipEpoch\n      visibilityEpoch\n      revision\n      visibleFromSequence\n      canStartBroadcast\n    }\n  }\n}",
@@ -2455,6 +2487,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.historyGrant": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "historyGrant",
     "operationName": "CommunicationHistoryGrant",
     "query": "mutation CommunicationHistoryGrant($context: RequestContextInput!, $input: HistoryGrantRequestInput!) {\n  historyGrant(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      conversationId\n      principalId\n      role\n      status\n      membershipEpoch\n      visibilityEpoch\n      revision\n      visibleFromSequence\n      canStartBroadcast\n    }\n  }\n}",
@@ -2470,6 +2503,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.sendMessage": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "sendMessage",
     "operationName": "CommunicationSendMessage",
     "query": "mutation CommunicationSendMessage($context: RequestContextInput!, $input: SendMessageRequestInput!) {\n  sendMessage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      messageId\n      conversationId\n      sequence\n      revision\n      status\n      cursor {\n        incarnation\n        conversationId\n        sequence\n      }\n    }\n  }\n}",
@@ -2484,6 +2518,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.editMessage": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "editMessage",
     "operationName": "CommunicationEditMessage",
     "query": "mutation CommunicationEditMessage($context: RequestContextInput!, $input: EditMessageRequestInput!) {\n  editMessage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      messageId\n      conversationId\n      authorId\n      sequence\n      revision\n      revisionSequence\n      createdAt\n      deleted\n      text\n      props\n      editedAt\n    }\n  }\n}",
@@ -2499,6 +2534,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.deleteMessage": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "deleteMessage",
     "operationName": "CommunicationDeleteMessage",
     "query": "mutation CommunicationDeleteMessage($context: RequestContextInput!, $input: DeleteMessageRequestInput!) {\n  deleteMessage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      messageId\n      conversationId\n      authorId\n      sequence\n      revision\n      revisionSequence\n      createdAt\n      deleted\n      text\n      props\n      editedAt\n    }\n  }\n}",
@@ -2512,6 +2548,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.reportReceipt": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "reportReceipt",
     "operationName": "CommunicationReportReceipt",
     "query": "mutation CommunicationReportReceipt($context: RequestContextInput!, $input: ReportReceiptRequestInput!) {\n  reportReceipt(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      principalId\n      membershipEpoch\n      visibilityEpoch\n      deliveredThroughSequence\n      readThroughSequence\n      updatedAt\n    }\n  }\n}",
@@ -2527,6 +2564,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.typing": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "ephemeral",
     "field": "typing",
     "operationName": "CommunicationTyping",
     "query": "mutation CommunicationTyping($context: RequestContextInput!, $input: TypingRequestInput!) {\n  typing(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      accepted\n    }\n  }\n}",
@@ -2539,6 +2577,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.setBroadcastPermission": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "setBroadcastPermission",
     "operationName": "CommunicationSetBroadcastPermission",
     "query": "mutation CommunicationSetBroadcastPermission($context: RequestContextInput!, $input: SetBroadcastPermissionInput!) {\n  setBroadcastPermission(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    result {\n      member {\n        conversationId\n        principalId\n        role\n        status\n        membershipEpoch\n        visibilityEpoch\n        revision\n        visibleFromSequence\n        canStartBroadcast\n      }\n      mediaCutoff {\n        state\n        scope {\n          kind\n          liveSessionId\n          generation\n          participationId\n        }\n        evidence\n        enforcedAt\n        operationId\n      }\n    }\n  }\n}",
@@ -2553,6 +2592,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.setConversationMute": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "setConversationMute",
     "operationName": "CommunicationSetConversationMute",
     "query": "mutation CommunicationSetConversationMute($context: RequestContextInput!, $input: SetConversationMuteInput!) {\n  setConversationMute(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    result {\n      conversationId\n      principalId\n      muted\n      until\n    }\n  }\n}",
@@ -2567,6 +2607,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.startLiveSession": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "startLiveSession",
     "operationName": "CommunicationStartLiveSession",
     "query": "mutation CommunicationStartLiveSession($context: RequestContextInput!, $input: StartLiveSessionInput!) {\n  startLiveSession(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    result {\n      liveSessionId\n      conversationId\n      kind\n      mediaProfile\n      operationId\n    }\n  }\n}",
@@ -2580,6 +2621,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.joinLiveSession": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "joinLiveSession",
     "operationName": "CommunicationJoinLiveSession",
     "query": "mutation CommunicationJoinLiveSession($context: RequestContextInput!, $input: JoinLiveSessionInput!) {\n  joinLiveSession(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    result {\n      liveSessionId\n      generation\n      participation {\n        participationId\n        principalId\n        membershipEpoch\n        role\n        state\n        permissions {\n          microphone\n          camera\n          subscribe\n        }\n        reservationExpiresAt\n        nativeConnectionId\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n    }\n  }\n}",
@@ -2592,6 +2634,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.alertLiveSession": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "alertLiveSession",
     "operationName": "CommunicationAlertLiveSession",
     "query": "mutation CommunicationAlertLiveSession($context: RequestContextInput!, $input: AlertLiveSessionInput!) {\n  alertLiveSession(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    result {\n      liveSessionId\n      created\n      suppressed\n    }\n  }\n}",
@@ -2605,6 +2648,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.leaveLiveSession": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "leaveLiveSession",
     "operationName": "CommunicationLeaveLiveSession",
     "query": "mutation CommunicationLeaveLiveSession($context: RequestContextInput!, $input: LeaveLiveSessionInput!) {\n  leaveLiveSession(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    result {\n      liveSessionId\n      participationId\n      mediaCutoff {\n        state\n        scope {\n          kind\n          liveSessionId\n          generation\n          participationId\n        }\n        evidence\n        enforcedAt\n        operationId\n      }\n    }\n  }\n}",
@@ -2618,6 +2662,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.endLiveSession": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "endLiveSession",
     "operationName": "CommunicationEndLiveSession",
     "query": "mutation CommunicationEndLiveSession($context: RequestContextInput!, $input: EndLiveSessionInput!) {\n  endLiveSession(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    result {\n      liveSessionId\n      operationId\n      mediaCutoff {\n        state\n        scope {\n          kind\n          liveSessionId\n          generation\n          participationId\n        }\n        evidence\n        enforcedAt\n        operationId\n      }\n    }\n  }\n}",
@@ -2631,6 +2676,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.liveSessionCredentials": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "singleUse",
     "field": "liveSessionCredentials",
     "operationName": "CommunicationLiveSessionCredentials",
     "query": "mutation CommunicationLiveSessionCredentials($context: RequestContextInput!, $input: LiveSessionCredentialsInput!) {\n  liveSessionCredentials(context: $context, input: $input) {\n    status\n    requestId\n    receiptId\n    committedAt\n    replayed\n    result {\n      liveSessionId\n      participationId\n      generation\n      roomName\n      participantIdentity\n      livekitUrl\n      transportToken\n      admissionTicket\n      forwardingLease\n      transportExpiresAt\n      admissionExpiresAt\n      leaseExpiresAt\n      leasePolicyId\n      connectToken\n    }\n  }\n}",
@@ -2646,6 +2692,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.redeemCredential": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "permitBound",
     "field": "redeemCredential",
     "operationName": "CommunicationRedeemCredential",
     "query": "mutation CommunicationRedeemCredential($context: RequestContextInput!, $input: RedeemCredentialRequestInput!) {\n  redeemCredential(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      kind\n      keyId\n      backendPrincipalId\n      backendKey\n      expiresAt\n      endpointId\n      secretVersion\n      secret\n    }\n  }\n}",
@@ -2657,6 +2704,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.acknowledgeCredential": {
     "plane": "communication",
     "kind": "mutation",
+    "idempotency": "permitBound",
     "field": "acknowledgeCredential",
     "operationName": "CommunicationAcknowledgeCredential",
     "query": "mutation CommunicationAcknowledgeCredential($context: RequestContextInput!, $input: AcknowledgeCredentialRequestInput!) {\n  acknowledgeCredential(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      deliveryId\n      acknowledged\n    }\n  }\n}",
@@ -2668,6 +2716,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "communication.conversationEvents": {
     "plane": "communication",
     "kind": "subscription",
+    "idempotency": "safe",
     "field": "conversationEvents",
     "operationName": "CommunicationConversationEvents",
     "query": "subscription CommunicationConversationEvents($context: RequestContextInput!, $input: EventsRequestInput!) {\n  conversationEvents(context: $context, input: $input) {\n    items {\n      eventId\n      conversationId\n      sequence\n      type\n      occurredAt\n      subjectRef {\n        kind\n        id\n      }\n      payload {\n        messageId\n        revision\n        revisionSequence\n        principalId\n        membershipEpoch\n        visibilityEpoch\n        kind\n        throughSequence\n        callId\n        generation\n        state\n        cutoffEvidence\n        liveSessionId\n      }\n    }\n    complete\n    refreshRequired\n    nextCursor {\n      incarnation\n      conversationId\n      sequence\n    }\n  }\n}",
@@ -2681,6 +2730,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.capabilities": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "capabilities",
     "operationName": "ManagementCapabilities",
     "query": "query ManagementCapabilities($context: RequestContextInput!) {\n  capabilities(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      serverRelease\n      capabilityRevision\n      limitsRevision\n      features {\n        chat\n        inbox\n        lexicalSearch\n        typing\n        webhooks\n        liveSessions\n        liveBroadcast\n      }\n      limits {\n        key\n        value {\n          maximum\n          unit\n          scope\n          milliseconds\n          policyId\n          revision\n        }\n      }\n      environment\n      productionQualified\n      mediaPolicy {\n        leasePolicyId\n        maxLeaseMs\n        renewAttemptMs\n        preludeMaxBytes\n        preludeTimeoutMs\n        clockProfileId\n      }\n      geoControlAuthorityId\n      offerings\n      geos\n      installationProfiles\n      portalIdentity\n    }\n  }\n}",
@@ -2690,6 +2740,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.organizations": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "organizations",
     "operationName": "ManagementOrganizations",
     "query": "query ManagementOrganizations($context: RequestContextInput!) {\n  organizations(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        orgId\n        name\n        status\n        revision\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
@@ -2699,6 +2750,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.getOrganization": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "getOrganization",
     "operationName": "ManagementGetOrganization",
     "query": "query ManagementGetOrganization($context: RequestContextInput!, $input: GetOrganizationRequestInput!) {\n  getOrganization(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      name\n      status\n      revision\n    }\n  }\n}",
@@ -2710,6 +2762,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.getDeployment": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "getDeployment",
     "operationName": "ManagementGetDeployment",
     "query": "query ManagementGetDeployment($context: RequestContextInput!, $input: GetDeploymentRequestInput!) {\n  getDeployment(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      deploymentId\n      orgId\n      offering\n      geoId\n      installationId\n      resourceOwner\n      approvedRegions\n      readiness\n      revision\n      consentRef\n      environment\n    }\n  }\n}",
@@ -2721,6 +2774,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.getProject": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "getProject",
     "operationName": "ManagementGetProject",
     "query": "query ManagementGetProject($context: RequestContextInput!, $input: GetProjectRequestInput!) {\n  getProject(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      deploymentId\n      name\n      environment\n      incarnation\n      servingRegion\n      servingEpoch\n      status\n      revision\n      policyRevision\n      messagePreview\n    }\n  }\n}",
@@ -2732,6 +2786,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.deploymentHealth": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "deploymentHealth",
     "operationName": "ManagementDeploymentHealth",
     "query": "query ManagementDeploymentHealth($context: RequestContextInput!, $input: DeploymentHealthRequestInput!) {\n  deploymentHealth(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      deploymentId\n      readiness\n      observedAt\n      services {\n        role\n        observedAt\n        details {\n          status\n        }\n      }\n    }\n  }\n}",
@@ -2743,6 +2798,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.deploymentUsage": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "deploymentUsage",
     "operationName": "ManagementDeploymentUsage",
     "query": "query ManagementDeploymentUsage($context: RequestContextInput!, $input: DeploymentUsageRequestInput!) {\n  deploymentUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      deploymentId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
@@ -2756,6 +2812,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.projectUsage": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "projectUsage",
     "operationName": "ManagementProjectUsage",
     "query": "query ManagementProjectUsage($context: RequestContextInput!, $input: ProjectUsageRequestInput!) {\n  projectUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
@@ -2769,6 +2826,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.organizationUsage": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "organizationUsage",
     "operationName": "ManagementOrganizationUsage",
     "query": "query ManagementOrganizationUsage($context: RequestContextInput!, $input: OrganizationUsageRequestInput!) {\n  organizationUsage(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      source\n      observedAt\n      complete\n      reason\n      from\n      to\n      meters {\n        meter\n        unit\n        quantity\n        emitted\n      }\n      aggregatedThrough\n    }\n  }\n}",
@@ -2782,6 +2840,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.webhookEndpoints": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "webhookEndpoints",
     "operationName": "ManagementWebhookEndpoints",
     "query": "query ManagementWebhookEndpoints($context: RequestContextInput!, $input: WebhookEndpointsRequestInput!) {\n  webhookEndpoints(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        endpointId\n        url\n        eventTypes\n        enabled\n        status\n        disabledReason\n        revision\n        secretVersion\n        rotationPending\n        rotationOverlapUntil\n        consecutiveFailures\n        failingSince\n        lastSuccessAt\n        lastFailureAt\n      }\n      complete\n      refreshRequired\n      nextCursor\n      observedAt\n      partialReason\n    }\n  }\n}",
@@ -2793,6 +2852,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.webhookDeliveries": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "webhookDeliveries",
     "operationName": "ManagementWebhookDeliveries",
     "query": "query ManagementWebhookDeliveries($context: RequestContextInput!, $input: WebhookDeliveriesRequestInput!) {\n  webhookDeliveries(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        effectId\n        eventId\n        state\n        attempts\n        lastOutcome\n        nextAttemptAt\n        eventType\n        createdAt\n        replayedAt\n        lastAttemptAt\n        lastHttpStatus\n        lastLatencyMs\n        lastErrorCode\n      }\n      complete\n      refreshRequired\n      nextCursor\n      observedAt\n      partialReason\n      sourceRevision\n    }\n  }\n}",
@@ -2805,6 +2865,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.resolveRequest": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "resolveRequest",
     "operationName": "ManagementResolveRequest",
     "query": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
@@ -2816,6 +2877,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.getOperation": {
     "plane": "management",
     "kind": "query",
+    "idempotency": "safe",
     "field": "getOperation",
     "operationName": "ManagementGetOperation",
     "query": "query ManagementGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {\n  getOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n        messagePreview\n      }\n      blockedReason\n    }\n  }\n}",
@@ -2827,6 +2889,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.createOrganization": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "createOrganization",
     "operationName": "ManagementCreateOrganization",
     "query": "mutation ManagementCreateOrganization($context: RequestContextInput!, $input: CreateOrganizationRequestInput!) {\n  createOrganization(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      name\n      status\n      revision\n    }\n  }\n}",
@@ -2839,6 +2902,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.createDeployment": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "createDeployment",
     "operationName": "ManagementCreateDeployment",
     "query": "mutation ManagementCreateDeployment($context: RequestContextInput!, $input: CreateDeploymentRequestInput!) {\n  createDeployment(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
@@ -2854,6 +2918,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.createProject": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "createProject",
     "operationName": "ManagementCreateProject",
     "query": "mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateProjectRequestInput!) {\n  createProject(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
@@ -2868,6 +2933,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.issueBackendKey": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "issueBackendKey",
     "operationName": "ManagementIssueBackendKey",
     "query": "mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: IssueBackendKeyRequestInput!) {\n  issueBackendKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
@@ -2882,6 +2948,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.revokeBackendKey": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "revokeBackendKey",
     "operationName": "ManagementRevokeBackendKey",
     "query": "mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: RevokeBackendKeyRequestInput!) {\n  revokeBackendKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
@@ -2896,6 +2963,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.projectPolicy": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "projectPolicy",
     "operationName": "ManagementProjectPolicy",
     "query": "mutation ManagementProjectPolicy($context: RequestContextInput!, $input: ProjectPolicyRequestInput!) {\n  projectPolicy(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
@@ -2909,6 +2977,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.credentialPermit": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "credentialPermit",
     "operationName": "ManagementCredentialPermit",
     "query": "mutation ManagementCredentialPermit($context: RequestContextInput!, $input: CredentialPermitRequestInput!) {\n  credentialPermit(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result\n  }\n}",
@@ -2922,6 +2991,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.pauseOperation": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "pauseOperation",
     "operationName": "ManagementPauseOperation",
     "query": "mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseOperationRequestInput!) {\n  pauseOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n        messagePreview\n      }\n      blockedReason\n    }\n  }\n}",
@@ -2934,6 +3004,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.resumeOperation": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "resumeOperation",
     "operationName": "ManagementResumeOperation",
     "query": "mutation ManagementResumeOperation($context: RequestContextInput!, $input: ResumeOperationRequestInput!) {\n  resumeOperation(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      kind\n      targetRef {\n        kind\n        id\n      }\n      state\n      revision\n      requestedAt\n      updatedAt\n      steps {\n        stepId\n        state\n      }\n      result {\n        projectId\n        incarnation\n        status\n        backend\n        environment\n        policyRevision\n        expiresAt\n        kind\n        resourceRef {\n          kind\n          id\n        }\n        delivery {\n          deliveryId\n          kind\n          projectId\n          installationId\n          resourceRef {\n            kind\n            id\n          }\n          expiresAt\n          payloadDigest\n          recipientActorRef {\n            tenantId\n            objectId\n          }\n        }\n        keyId\n        endpointId\n        enabled\n        liveSessionCompletion {\n          liveSessionId\n          generation\n          state\n          revision\n          completedAt\n          mediaCutoff {\n            state\n            scope {\n              kind\n              liveSessionId\n              generation\n              participationId\n            }\n            evidence\n            enforcedAt\n            operationId\n          }\n        }\n        replayedDeliveries\n        skippedDeliveries\n        messagePreview\n      }\n      blockedReason\n    }\n  }\n}",
@@ -2946,6 +3017,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.configureWebhook": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "configureWebhook",
     "operationName": "ManagementConfigureWebhook",
     "query": "mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: ConfigureWebhookRequestInput!) {\n  configureWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
@@ -2960,6 +3032,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.updateWebhook": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "updateWebhook",
     "operationName": "ManagementUpdateWebhook",
     "query": "mutation ManagementUpdateWebhook($context: RequestContextInput!, $input: UpdateWebhookRequestInput!) {\n  updateWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
@@ -2975,6 +3048,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.rotateWebhookSecret": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "rotateWebhookSecret",
     "operationName": "ManagementRotateWebhookSecret",
     "query": "mutation ManagementRotateWebhookSecret($context: RequestContextInput!, $input: RotateWebhookSecretRequestInput!) {\n  rotateWebhookSecret(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
@@ -2988,6 +3062,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.disableWebhook": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "disableWebhook",
     "operationName": "ManagementDisableWebhook",
     "query": "mutation ManagementDisableWebhook($context: RequestContextInput!, $input: DisableWebhookRequestInput!) {\n  disableWebhook(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",
@@ -3001,6 +3076,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "management.replayWebhookDeliveries": {
     "plane": "management",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "replayWebhookDeliveries",
     "operationName": "ManagementReplayWebhookDeliveries",
     "query": "mutation ManagementReplayWebhookDeliveries($context: RequestContextInput!, $input: ReplayWebhookDeliveriesRequestInput!) {\n  replayWebhookDeliveries(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      projectId\n      incarnation\n      status\n      backend\n      environment\n      policyRevision\n      expiresAt\n      kind\n      resourceRef {\n        kind\n        id\n      }\n      delivery {\n        deliveryId\n        kind\n        projectId\n        installationId\n        resourceRef {\n          kind\n          id\n        }\n        expiresAt\n        payloadDigest\n        recipientActorRef {\n          tenantId\n          objectId\n        }\n      }\n      keyId\n      endpointId\n      enabled\n      liveSessionCompletion {\n        liveSessionId\n        generation\n        state\n        revision\n        completedAt\n        mediaCutoff {\n          state\n          scope {\n            kind\n            liveSessionId\n            generation\n            participationId\n          }\n          evidence\n          enforcedAt\n          operationId\n        }\n      }\n      replayedDeliveries\n      skippedDeliveries\n      messagePreview\n    }\n  }\n}",

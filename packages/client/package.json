@@ -20,6 +20,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./push": {
+      "types": "./dist/push.d.ts",
+      "default": "./dist/push.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

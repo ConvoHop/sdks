@@ -162,7 +162,8 @@ export class ConvoHopTransport {
     await this.initializeRecovery();
     if (this.incarnation !== incarnation)
       throw new ConvoHopProblem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
-    const result = operationPayload(key, operation.kind === "mutation"
+    // Ephemeral signals are neither deduplicated nor resolvable, so they keep no recovery state.
+    const result = operationPayload(key, recorded(operation)
       ? await this.#mutate(key, projectId, body, requestId, credential, credentialDeliveryPermit)
       : await this.#request(key, projectId, body, requestId, credential, credentialDeliveryPermit, observedServingEpoch));
     if (key === "communication.resolveRequest" || key === "management.resolveRequest") {
@@ -330,7 +331,7 @@ export class ConvoHopTransport {
       validateOperationPayload(plan.operation, value);
       if (!["ok", "committed", "accepted"].includes(parseString(value.status))) throw new TypeError("Unrecognized authority envelope");
       if (parseId(value.requestId) !== requestId) throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Mismatched authority request identity");
-      if (plan.operation.kind === "mutation") {
+      if (recorded(plan.operation)) {
         if (value.status === "committed") {
           parseId(value.receiptId); timestamp(value.committedAt); boolean(value.replayed);
         } else if (value.status === "accepted") {
@@ -343,6 +344,9 @@ export class ConvoHopTransport {
       throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Malformed authority response; resolve the original request");
     }
   }
+}
+function recorded(operation: { kind: string; idempotency: string }): boolean {
+  return operation.kind === "mutation" && operation.idempotency !== "ephemeral";
 }
 /** @internal Returns authentication state only to the code that constructs the transport. */
 export function authenticatedTransport(options: ConvoHopTransportOptions): {

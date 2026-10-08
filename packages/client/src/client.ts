@@ -1,5 +1,5 @@
 import {
-  ConvoHopProblem, parseConversation, parseCounter, parseCursor, parseId, parseMessage, operationCatalog, parsePage, parseObject, parseSearchHit, parseString,
+  ConvoHopProblem, parseConversation, parseCounter, parseCursor, parseId, parseMembership, parseMessage, operationCatalog, parsePage, parseObject, parseSearchHit, parseString,
   type OperationPayload, type PageOptions, type Conversation, type ConversationCursor, type Membership, type ConversationMessage, type ItemPage, type ProtocolObject,
   type RecoveryStorage, type ProjectRoute, type SearchHit, type SendReceipt, type SessionMetadata, type SessionBootstrap,
   type SessionRefresh, type SessionRefreshState, type ConvoHopTransport,
@@ -12,6 +12,18 @@ import { ConversationHandle, LiveSessionHandle } from "./live.js";
 export interface ConvoHopClientOptions {
   baseUrl: string; projectId: string; sessionToken: string; incarnation: string; principalId: string;
   recoveryStorage?: RecoveryStorage; fetch?: typeof fetch; sessionRefresh?: SessionRefresh;
+}
+/** One member's delivery and read progress, valid for its membership and visibility epochs. */
+export type ReadReceipt = NonNullable<OperationPayload<"communication.receipts">["result"]>["items"][number];
+/** One conversation in the user's inbox. */
+export type InboxItem = NonNullable<OperationPayload<"communication.inbox">["result"]>["items"][number];
+/** The project's features and limits, as `communication.capabilities` reports them. */
+export type ProjectCapabilities = NonNullable<OperationPayload<"communication.capabilities">["result"]>;
+export interface SessionRefreshSchedule {
+  /** How long before the session expires to renew it, in milliseconds. Default 60000. */
+  leadMs?: number;
+  onRefreshed?: (session: SessionMetadata) => void;
+  onError?: (error: Error) => void;
 }
 interface ReplayRefresh {
   suspend: () => Promise<void>;
@@ -87,6 +99,58 @@ export class ConvoHopClient {
     });
     this.#refreshing = pending;
     return pending;
+  }
+  /**
+   * Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is
+   * called. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the
+   * `sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.
+   */
+  scheduleSessionRefresh(options: SessionRefreshSchedule = {}): () => void {
+    const lead = options.leadMs ?? 60000;
+    if (!Number.isSafeInteger(lead) || lead < 0) throw new RangeError("leadMs must be a non-negative safe integer");
+    if (!this.#sessionRefresh) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+      "Configure sessionRefresh before scheduling renewal");
+    let timer: ReturnType<typeof setTimeout> | undefined, disposed = false, failures = 0;
+    // One target per session revision: never earlier than halfway through the remaining lifetime, so short sessions don't renew in a loop.
+    let target: { revision: string; at: number } | undefined;
+    const report = (error: unknown) => {
+      if (!disposed) options.onError?.(error instanceof Error ? error : new Error("Session refresh failed"));
+    };
+    const arm = (delay: number) => {
+      if (!disposed) timer = setTimeout(run, Math.min(Math.max(0, delay), 2147483647));
+    };
+    const retry = (error: unknown) => {
+      report(error);
+      const binding = this.#session;
+      if (disposed || this.sessionRefreshState !== "ready" || !binding) return;
+      const remaining = sessionExpiry(binding) - Date.now();
+      if (remaining > 1000) arm(Math.min(1000 * 2 ** Math.min(failures++, 5), remaining - 1000));
+    };
+    const run = () => {
+      timer = undefined;
+      if (disposed) return;
+      const binding = this.#session;
+      if (!binding) {
+        this.initialize().then(() => arm(0), error => {
+          report(error);
+          if (error instanceof ConvoHopProblem && [0, 429, 503].includes(error.status)) arm(1000 * 2 ** Math.min(failures++, 5));
+        });
+        return;
+      }
+      const now = Date.now();
+      if (target?.revision !== binding.sessionRevision) {
+        const remaining = sessionExpiry(binding) - now;
+        target = { revision: binding.sessionRevision, at: now + Math.max(remaining - lead, Math.floor(remaining / 2)) };
+      }
+      if (target.at > now) { arm(target.at - now); return; }
+      this.refreshSession().then(session => {
+        failures = 0;
+        if (!disposed) options.onRefreshed?.(session);
+        arm(0);
+      }, retry);
+    };
+    arm(0);
+    return () => { disposed = true; if (timer !== undefined) clearTimeout(timer); };
   }
   #suspendReplay(stream: ConversationStream): void {
     const quiescing = this.#quiescing, controls = replayRefresh.get(stream);
@@ -196,12 +260,17 @@ export class ConvoHopClient {
     list: async (options: PageOptions = {}): Promise<OperationPayload<"communication.liveSessionAlerts">["result"]> =>
       (await this.http.execute("communication.liveSessionAlerts", this.projectId, options)).result,
   };
-  async messages(id: string, beforeSequence?: string): Promise<ItemPage<ConversationMessage>> {
-    return parsePage((await this.http.execute("communication.messages", this.projectId,
-      { conversationId: parseId(id), limit: 100, ...(beforeSequence === undefined ? {} : { beforeSequence: parseCounter(beforeSequence) }) })).result, parseMessage);
+  /** Messages before `beforeSequence` (or the newest), newest first. A page can hold fewer than `limit` messages. */
+  async messages(id: string, beforeSequence?: string, limit = 100): Promise<ItemPage<ConversationMessage>> {
+    const conversationId = parseId(id);
+    const page = parsePage((await this.http.execute("communication.messages", this.projectId,
+      { conversationId, limit, ...(beforeSequence === undefined ? {} : { beforeSequence: parseCounter(beforeSequence) }) })).result, parseMessage);
+    if (page.items.some(message => message.conversationId !== conversationId)) throw new TypeError("Message is outside this conversation");
+    return page;
   }
-  async send(id: string, text: string, requestId?: string): Promise<SendReceipt> {
-    const result = (await this.http.execute("communication.sendMessage", this.projectId, { conversationId: parseId(id), text, props: {} }, requestId)).result;
+  async send(id: string, text: string, requestId?: string, props?: ProtocolObject): Promise<SendReceipt> {
+    const result = (await this.http.execute("communication.sendMessage", this.projectId,
+      { conversationId: parseId(id), text, props: props === undefined ? {} : parseObject(props) }, requestId)).result;
     if (!result) throw new TypeError("Missing send receipt");
     const cursor = parseCursor(result.cursor);
     if (result.status !== "sent" || result.conversationId !== id || cursor.conversationId !== id ||
@@ -221,13 +290,60 @@ export class ConvoHopClient {
       { conversationId: parseId(id), limit: 100, ...(after === undefined ? {} : { after }) })).result,
       this.http.incarnation, id, after);
   }
-  async reportRead(id: string, membership: Membership, throughSequence: string): Promise<ProtocolObject> {
-    return parseObject((await this.http.execute("communication.reportReceipt", this.projectId,
-      { conversationId: parseId(id), kind: "read", membershipEpoch: membership.membershipEpoch,
-        visibilityEpoch: membership.visibilityEpoch, throughSequence: parseCounter(throughSequence) })).result);
+  /** Reports reading through a message's sequence, which also covers its delivery. Returns the user's current receipt. */
+  async reportRead(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt> {
+    return this.#reportReceipt("read", id, membership, throughSequence);
   }
-  async receipts(id: string): Promise<ItemPage<ProtocolObject>> {
-    return parsePage((await this.http.execute("communication.receipts", this.projectId, { conversationId: parseId(id), limit: 100 })).result, parseObject);
+  /** Reports delivery through a message's sequence. Returns the user's current receipt. */
+  async reportDelivered(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt> {
+    return this.#reportReceipt("delivered", id, membership, throughSequence);
+  }
+  async #reportReceipt(kind: "delivered" | "read", id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt> {
+    const result = (await this.http.execute("communication.reportReceipt", this.projectId,
+      { conversationId: parseId(id), kind, membershipEpoch: membership.membershipEpoch,
+        visibilityEpoch: membership.visibilityEpoch, throughSequence: parseCounter(throughSequence) })).result;
+    if (!result || result.principalId !== this.principalId) throw new TypeError("Receipt does not belong to this user");
+    return result;
+  }
+  async receipts(id: string, cursor?: string): Promise<ItemPage<ReadReceipt>> {
+    return parsePage((await this.http.execute("communication.receipts", this.projectId,
+      { conversationId: parseId(id), limit: 100, ...(cursor === undefined ? {} : { cursor: parseString(cursor) }) })).result,
+      item => { validateOutput(item, "ReadReceipt!"); return item as ReadReceipt; });
+  }
+  async getMessage(id: string, messageId: string): Promise<ConversationMessage> {
+    const conversationId = parseId(id), wanted = parseId(messageId);
+    const message = parseMessage((await this.http.execute("communication.getMessage", this.projectId,
+      { conversationId, messageId: wanted })).result);
+    if (message.conversationId !== conversationId || message.messageId !== wanted) throw new TypeError("Message does not match the request");
+    return message;
+  }
+  async members(id: string, options: PageOptions = {}): Promise<ItemPage<Membership>> {
+    const conversationId = parseId(id);
+    const page = parsePage((await this.http.execute("communication.members", this.projectId,
+      { conversationId, limit: options.limit ?? 100, ...(options.cursor === undefined ? {} : { cursor: parseString(options.cursor) }) })).result,
+      parseMembership);
+    if (page.items.some(member => member.conversationId !== conversationId)) throw new TypeError("Member is outside this conversation");
+    return page;
+  }
+  async inbox(options: PageOptions = {}): Promise<ItemPage<InboxItem>> {
+    return parsePage((await this.http.execute("communication.inbox", this.projectId,
+      { limit: options.limit ?? 100, ...(options.cursor === undefined ? {} : { cursor: parseString(options.cursor) }) })).result,
+      item => { validateOutput(item, "InboxItem!"); return item as InboxItem; });
+  }
+  async capabilities(): Promise<ProjectCapabilities> {
+    const result = (await this.http.execute("communication.capabilities", this.projectId, {})).result;
+    if (!result) throw new TypeError("Missing project capabilities");
+    return result;
+  }
+  /**
+   * Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,
+   * retried or resolved. Check `features.typing` in {@link capabilities} first.
+   */
+  async typing(id: string, isTyping: boolean): Promise<boolean> {
+    if (typeof isTyping !== "boolean") throw new TypeError("isTyping must be a boolean");
+    const result = (await this.http.execute("communication.typing", this.projectId, { conversationId: parseId(id), isTyping })).result;
+    if (!result) throw new TypeError("Missing typing status");
+    return result.accepted;
   }
   async search(query: string, conversationIds?: string[]): Promise<ItemPage<SearchHit>> {
     return parsePage((await this.http.execute("communication.search", this.projectId,
