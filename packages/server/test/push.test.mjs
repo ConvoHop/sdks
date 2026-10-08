@@ -16,7 +16,7 @@ const senderId = "3d4e5f60-7182-4930-84a5-b6c7d8e9f012", messageId = "4e5f6071-8
 const liveSessionId = "5f607182-93a4-4b52-a6c7-d8e9f0122334", alertId = "60718293-a4b5-4c63-b7d8-e9f012233445";
 const collapse = "60718293a4b54c63b7d8e9f012233445";
 
-const common = { eventId, eventVersion: "1", projectId, recipientId, conversationId, senderId, connected: false };
+const common = { eventId, projectId, recipientId, conversationId, senderId, connected: false };
 const messageEvent = (fields = {}) => ({ ...common, eventType: "notification.message", occurredAt: at(-60),
   subjectRef: { id: messageId, kind: "message" }, messageId, ...fields });
 const callEvent = (fields = {}) => ({ ...common, eventType: "notification.call", occurredAt: at(-5),
@@ -260,7 +260,6 @@ test("events outside the push payload contract fail with INVALID_EVENT, without 
   const marker = "value-marker-4f2a";
   const invalid = [undefined, null, "event", [], {},
     { ...messageEvent(), eventType: "message.created", subjectRef: { id: messageId, kind: "message" } },
-    messageEvent({ eventVersion: "2" }), messageEvent({ eventVersion: undefined }),
     messageEvent({ preview: { text: "a\uD800", truncated: false } }), messageEvent({ preview: { text: "x".repeat(513), truncated: false } }),
     messageEvent({ subjectRef: { id: liveSessionId, kind: "message" } }), callEvent({ alertId: alertId.toUpperCase() }),
     callEvent({ expiresAt: "2026-02-29T00:00:00Z" }), cancelEvent(undefined), cancelEvent("answered", { reason: "not a reason" }),

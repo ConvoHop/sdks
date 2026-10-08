@@ -25,7 +25,6 @@ Create a webhook endpoint for project events. The signing secret is delivered on
 | `projectId` | `UUID!` |
 | `url` | `String!` |
 | `eventTypes` | `[String!]!` |
-| `payloadVersion` | `String!` |
 | `consentRef` | `String!` |
 
 **Result** (`ConfigureWebhookReply!`)

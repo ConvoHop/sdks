@@ -61,10 +61,7 @@ query ManagementCapabilities($context: RequestContextInput!) {
       id
     }
     result {
-      contractVersion
       serverRelease
-      publicApiVersion
-      wssVersions
       capabilityRevision
       limitsRevision
       features {
@@ -91,7 +88,6 @@ query ManagementCapabilities($context: RequestContextInput!) {
       productionQualified
       mediaPolicy {
         leasePolicyId
-        leaseProtocolVersion
         maxLeaseMs
         renewAttemptMs
         preludeMaxBytes

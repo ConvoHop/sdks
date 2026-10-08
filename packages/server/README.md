@@ -230,8 +230,8 @@ and message or call, for your [push notifications](#push-payloads). Narrow on
 `event.known`, then on `event.eventType`. An event type that this SDK doesn't
 know returns `known: false` and never throws, so acknowledge it. So does a
 notification event that doesn't match the
-[push payload contract](../../spec/push-payload/README.md), such as one with
-another `eventVersion`. The event types are provisional until the webhook
+[push payload contract](../../spec/push-payload/README.md), such as one
+missing a required field. The event types are provisional until the webhook
 contract (ConvoHop/ConveHop#10) merges, and the notification events until
 ConvoHop sends them.
 `webhooks.verifySignature()` checks only the headers, timestamp and

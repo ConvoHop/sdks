@@ -70,14 +70,14 @@ function uuidFor(name) {
 // Events list their fields in the schema's order.
 function message(name, { occurredAt = iso(NOW - 5), connected = false, preview } = {}) {
   return {
-    eventId: uuidFor(name), eventType: "notification.message", eventVersion: "1", occurredAt, projectId: PROJECT,
+    eventId: uuidFor(name), eventType: "notification.message", occurredAt, projectId: PROJECT,
     subjectRef: { id: MESSAGE, kind: "message" }, recipientId: RECIPIENT, conversationId: CONVERSATION, senderId: SENDER,
     connected, messageId: MESSAGE, ...(preview === undefined ? {} : { preview }),
   };
 }
 function call(name, { occurredAt = iso(NOW - 2), expiresAt = iso(NOW + 45), mediaProfile = "AUDIO_VIDEO" } = {}) {
   return {
-    eventId: uuidFor(name), eventType: "notification.call", eventVersion: "1", occurredAt, projectId: PROJECT,
+    eventId: uuidFor(name), eventType: "notification.call", occurredAt, projectId: PROJECT,
     subjectRef: { id: LIVE_SESSION, kind: "liveSession" }, recipientId: RECIPIENT, conversationId: CONVERSATION,
     senderId: SENDER, connected: false, liveSessionId: LIVE_SESSION, alertId: ALERT, expiresAt, mediaProfile,
   };
@@ -394,23 +394,8 @@ const INVALID_EVENTS = [
     event: without(cancelled("cancel-without-reason", "expired"), "reason"),
   },
   {
-    id: "event-version-missing",
-    title: "eventVersion is required",
-    event: without(message("event-version-missing"), "eventVersion"),
-  },
-  {
-    id: "event-version-number",
-    title: "eventVersion is the string \"1\", not a number",
-    event: { ...message("event-version-number"), eventVersion: 1 },
-  },
-  {
-    id: "event-version-2",
-    title: "Another eventVersion is another contract",
-    event: { ...message("event-version-2"), eventVersion: "2" },
-  },
-  {
     id: "unknown-notification-type",
-    title: "A notification event type this version doesn't know",
+    title: "A notification event type the contract doesn't define",
     event: { ...message("unknown-notification-type"), eventType: "notification.reaction" },
   },
 ];

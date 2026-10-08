@@ -33,7 +33,7 @@
           "expect": { "events": {
             "$sequences": { "from": "${saved.history.items.0.sequence}", "to": "${saved.m3.sequence}" },
             "$contains": { "eventId": { "$type": "uuid" }, "conversationId": "${saved.conversation.conversationId}", "sequence": "${saved.m1.sequence}",
-              "eventVersion": { "$type": "string" }, "type": { "$type": "string" }, "occurredAt": { "$type": "timestamp" },
+              "type": { "$type": "string" }, "occurredAt": { "$type": "timestamp" },
               "subjectRef": { "kind": "message", "id": "${saved.m1.messageId}" },
               "payload": { "messageId": "${saved.m1.messageId}", "revision": "1", "revisionSequence": "${saved.m1.sequence}" } } } } },
         { "do": "invoke", "client": "bob", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "four" }, "save": "m4" },

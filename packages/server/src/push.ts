@@ -36,9 +36,9 @@ export interface ApnsPushOptions extends PushOptions {
 }
 
 /**
- * The `convohop` metadata every payload carries for your app: the event's fields without `eventVersion`, `subjectRef`,
- * `connected` and `preview`. APNs VoIP, FCM and Web Push payloads also carry the visible `title` and `body` here,
- * because they have no visible alert of their own.
+ * The `convohop` metadata every payload carries for your app: the event's fields without `subjectRef`, `connected`
+ * and `preview`. APNs VoIP, FCM and Web Push payloads also carry the visible `title` and `body` here, because they
+ * have no visible alert of their own.
  */
 export type PushData = {
   eventId: string;

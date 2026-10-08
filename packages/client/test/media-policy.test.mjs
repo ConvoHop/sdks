@@ -26,7 +26,7 @@ for (const fail of [false, true]) {
     const grant = { liveSessionId, participationId, generation: "1", roomName: "fixture", participantIdentity: "fixture",
       livekitUrl: "ws://localhost:17880", transportToken: "fixture-private-grant",
       admissionTicket: { participationId, signature: "fixture-private-ticket" },
-      forwardingLease: { participationId, leaseVersion: "2", signature: "fixture-private-proof" },
+      forwardingLease: { participationId, signature: "fixture-private-proof" },
       transportExpiresAt: expires, admissionExpiresAt: expires, leaseExpiresAt: expires, leasePolicyId: "fixture",
       connectToken: "fixture-private-connect-token" };
     const transportOptions = { baseUrl: "http://localhost:18080", namespace: "native-async", incarnation, asyncRecoveryStorage: saved };

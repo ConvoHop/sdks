@@ -17,10 +17,7 @@ query CommunicationCapabilities($context: RequestContextInput!) {
       id
     }
     result {
-      contractVersion
       serverRelease
-      publicApiVersion
-      wssVersions
       capabilityRevision
       limitsRevision
       features {
@@ -47,7 +44,6 @@ query CommunicationCapabilities($context: RequestContextInput!) {
       productionQualified
       mediaPolicy {
         leasePolicyId
-        leaseProtocolVersion
         maxLeaseMs
         renewAttemptMs
         preludeMaxBytes
@@ -301,7 +297,6 @@ query CommunicationEvents($context: RequestContextInput!, $input: EventsRequestI
         eventId
         conversationId
         sequence
-        eventVersion
         type
         occurredAt
         subjectRef {
@@ -1913,7 +1908,6 @@ subscription CommunicationConversationEvents($context: RequestContextInput!, $in
       eventId
       conversationId
       sequence
-      eventVersion
       type
       occurredAt
       subjectRef {
@@ -1965,10 +1959,7 @@ query ManagementCapabilities($context: RequestContextInput!) {
       id
     }
     result {
-      contractVersion
       serverRelease
-      publicApiVersion
-      wssVersions
       capabilityRevision
       limitsRevision
       features {
@@ -1995,7 +1986,6 @@ query ManagementCapabilities($context: RequestContextInput!) {
       productionQualified
       mediaPolicy {
         leasePolicyId
-        leaseProtocolVersion
         maxLeaseMs
         renewAttemptMs
         preludeMaxBytes

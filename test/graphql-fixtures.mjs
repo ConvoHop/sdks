@@ -30,5 +30,5 @@ export function resolution(requestId, state, retainedResult = null) {
 
 export function event(conversationId, sequence) {
   return full("Event", { eventId: crypto.randomUUID(), conversationId, sequence,
-    eventVersion: "1", type: "messageCreated", occurredAt: new Date().toISOString() });
+    type: "messageCreated", occurredAt: new Date().toISOString() });
 }

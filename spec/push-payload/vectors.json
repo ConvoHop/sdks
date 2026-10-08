@@ -8,7 +8,6 @@
       "event": {
         "eventId": "cccbe606-6dbd-41bb-ad43-c30e0b6b89ad",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -101,7 +100,6 @@
       "event": {
         "eventId": "f223d7bb-3e07-4b87-b8f0-183b9827053d",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -197,7 +195,6 @@
       "event": {
         "eventId": "8504b5b1-ff93-4107-a069-ef4cef7624cc",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -309,7 +306,6 @@
       "event": {
         "eventId": "b12bb5a1-3761-4087-9f25-dd40c0f1c2b0",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -410,7 +406,6 @@
       "event": {
         "eventId": "cb5c6946-6338-47ed-b05d-6411b7663030",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -511,7 +506,6 @@
       "event": {
         "eventId": "09af5d31-108b-444d-bbd4-04e97a097135",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -613,7 +607,6 @@
       "event": {
         "eventId": "000819df-68d7-4651-8edb-e40ae3c716c6",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -713,7 +706,6 @@
       "event": {
         "eventId": "b21f7699-9cb9-4018-8c9d-e9f9c55f636c",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -814,7 +806,6 @@
       "event": {
         "eventId": "8be266a1-b184-4a9b-bfd7-0d8ed7403170",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-09T12:00:00Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -844,7 +835,6 @@
       "event": {
         "eventId": "5c87ead4-ea24-4fd7-a44e-7c470da143c7",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-09T12:00:01Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -937,7 +927,6 @@
       "event": {
         "eventId": "46dcefeb-a1b8-47da-a476-05743cb08023",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T17:29:59.999999999+05:30",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -1030,7 +1019,6 @@
       "event": {
         "eventId": "ea01c269-a057-4d88-a4b0-82d5caf9b06f",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -1131,7 +1119,6 @@
       "event": {
         "eventId": "7835dc8b-f295-42ae-8a90-a36dee083946",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -1232,7 +1219,6 @@
       "event": {
         "eventId": "daff1b70-80d5-4f01-9a3b-e7775b5d70ab",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -1373,7 +1359,6 @@
       "event": {
         "eventId": "bb844b35-6915-4faa-b077-2b3d3ce06783",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -1503,7 +1488,6 @@
       "event": {
         "eventId": "266a4aad-4151-4cb2-ae7f-5e0d25c3c951",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -1637,7 +1621,6 @@
       "event": {
         "eventId": "64fdad82-965f-4e76-a6be-865bf60d7dc9",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -1670,7 +1653,6 @@
       "event": {
         "eventId": "389aa873-558f-4530-a6d4-f69d5ea994a5",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -1800,7 +1782,6 @@
       "event": {
         "eventId": "b079d153-4389-46aa-88fe-3e502f19231b",
         "eventType": "notification.callCancelled",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:59Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -1908,7 +1889,6 @@
       "event": {
         "eventId": "76e40630-6404-469c-8269-34f26b2d3121",
         "eventType": "notification.callCancelled",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:59Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2019,7 +1999,6 @@
       "event": {
         "eventId": "2855d1c2-92fe-4dd7-a191-5370ad5de1d9",
         "eventType": "notification.callCancelled",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:59Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2094,7 +2073,6 @@
       "event": {
         "eventId": "f72c42f6-e999-4eb1-89c3-f766e9a82022",
         "eventType": "notification.callCancelled",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:59Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2128,7 +2106,6 @@
       "event": {
         "eventId": "7dad5091-002d-4436-a6bd-b742af237eb3",
         "eventType": "notification.callCancelled",
-        "eventVersion": "1",
         "occurredAt": "2026-10-09T12:00:00Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2162,7 +2139,6 @@
       "event": {
         "eventId": "eb27f651-43de-4281-9dc8-4874a9839852",
         "eventType": "notification.callCancelled",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:59Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2235,7 +2211,6 @@
       "event": {
         "eventId": "ef61f6b8-c965-4180-bd98-c1c517b8e409",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2333,7 +2308,6 @@
       "event": {
         "eventId": "fddeaed4-d5e5-4878-aac7-d92d2dbbfa8f",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2431,7 +2405,6 @@
       "event": {
         "eventId": "960b2369-9f34-484f-9593-5d523eefb86a",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2568,7 +2541,6 @@
       "event": {
         "eventId": "73d96185-81e0-4871-ad43-86625d8823e6",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2705,7 +2677,6 @@
       "event": {
         "eventId": "8d0f2dbc-bb81-4c85-8a76-5b9ee046f7ec",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2803,7 +2774,6 @@
       "event": {
         "eventId": "450454c7-2654-4de2-8187-50b2e713deeb",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2901,7 +2871,6 @@
       "event": {
         "eventId": "f7179a0a-8a6d-434d-9e35-e396d4d09b4a",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -2999,7 +2968,6 @@
       "event": {
         "eventId": "d7d4aae8-779f-4778-8c90-cf2e51e2b3f0",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3097,7 +3065,6 @@
       "event": {
         "eventId": "870168a0-94b8-431c-a419-4d9e3749a85a",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3195,7 +3162,6 @@
       "event": {
         "eventId": "c76b3a64-6be0-4801-8504-5b5b8c54ad7c",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3293,7 +3259,6 @@
       "event": {
         "eventId": "5f1c0d1b-4559-41b4-86c0-e10631ded8bc",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3393,7 +3358,6 @@
       "event": {
         "eventId": "9572c3a2-dd76-4dc8-ad85-bc66fe7b2850",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3414,7 +3378,6 @@
       "event": {
         "eventId": "337cb346-a36b-4f3c-a99c-0b9a5a0d85ce",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3435,7 +3398,6 @@
       "event": {
         "eventId": "d45c1c4c-feaf-464a-b8ee-d8a94214e8d6",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3457,7 +3419,6 @@
       "event": {
         "eventId": "50580096-8bd2-4975-b743-2df42df6f98d",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3482,7 +3443,6 @@
       "event": {
         "eventId": "e5c65a90-5ab1-4a21-ad6a-47fccfb8610f",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3507,7 +3467,6 @@
       "event": {
         "eventId": "83237c74-1d6a-415a-be42-f7a017ec9064",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3531,7 +3490,6 @@
       "event": {
         "eventId": "08308593-4a2d-4ed2-bc16-a8c69d6c90b1",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3552,7 +3510,6 @@
       "event": {
         "eventId": "5746399d-615e-4089-bebb-2ec98d93b1f8",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3573,7 +3530,6 @@
       "event": {
         "eventId": "a88108f6-da98-4984-b5d5-53ea289b3f50",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3593,7 +3549,6 @@
       "event": {
         "eventId": "806720a1-7cec-49d0-8592-624d1da2e240",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3614,7 +3569,6 @@
       "event": {
         "eventId": "016d7fed-e240-46bb-8012-7e9333485cae",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-02-30T12:00:00Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3635,7 +3589,6 @@
       "event": {
         "eventId": "47ed9c82-3c7f-43c2-a9ab-f8e5df3d5498",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3659,7 +3612,6 @@
       "event": {
         "eventId": "b26af65e-ad1e-4aab-9932-84e384643628",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10t11:59:55z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3680,7 +3632,6 @@
       "event": {
         "eventId": "3dc85d09-48b9-44f3-a11f-50f7a474dfc3",
         "eventType": "notification.message",
-        "eventVersion": "1",
         "occurredAt": "2026-12-31T23:59:60Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3701,7 +3652,6 @@
       "event": {
         "eventId": "abe186c4-935e-42f0-82a9-1dc7de8cff0a",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58.0000000001Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3725,7 +3675,6 @@
       "event": {
         "eventId": "94b762ee-3621-4da5-be78-3327e0b704a9",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3749,7 +3698,6 @@
       "event": {
         "eventId": "7e6401f7-8fe9-4029-a890-86f1e91282ae",
         "eventType": "notification.call",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:58Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3772,7 +3720,6 @@
       "event": {
         "eventId": "b8b74723-2894-466b-b610-6cf202b7b063",
         "eventType": "notification.callCancelled",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:59Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {
@@ -3791,74 +3738,11 @@
       "schemaValid": false
     },
     {
-      "id": "event-version-missing",
-      "title": "eventVersion is required",
-      "event": {
-        "eventId": "5b771570-a3e7-4839-bbf0-68c4b3d031f0",
-        "eventType": "notification.message",
-        "occurredAt": "2026-10-10T11:59:55Z",
-        "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
-        "subjectRef": {
-          "id": "d9b3f7e5-2c8a-4d1f-8e6b-3a2c1b0f9e8d",
-          "kind": "message"
-        },
-        "recipientId": "b7e2c9d4-3a1f-4e8b-a6c5-0d9f8e7a6b5c",
-        "conversationId": "6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c",
-        "senderId": "c4a8e1f2-7d3b-4c9e-b2a1-6f5e4d3c2b1a",
-        "connected": false,
-        "messageId": "d9b3f7e5-2c8a-4d1f-8e6b-3a2c1b0f9e8d"
-      },
-      "schemaValid": false
-    },
-    {
-      "id": "event-version-number",
-      "title": "eventVersion is the string \"1\", not a number",
-      "event": {
-        "eventId": "1338c99e-19f5-463c-bc30-2c6321656807",
-        "eventType": "notification.message",
-        "eventVersion": 1,
-        "occurredAt": "2026-10-10T11:59:55Z",
-        "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
-        "subjectRef": {
-          "id": "d9b3f7e5-2c8a-4d1f-8e6b-3a2c1b0f9e8d",
-          "kind": "message"
-        },
-        "recipientId": "b7e2c9d4-3a1f-4e8b-a6c5-0d9f8e7a6b5c",
-        "conversationId": "6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c",
-        "senderId": "c4a8e1f2-7d3b-4c9e-b2a1-6f5e4d3c2b1a",
-        "connected": false,
-        "messageId": "d9b3f7e5-2c8a-4d1f-8e6b-3a2c1b0f9e8d"
-      },
-      "schemaValid": false
-    },
-    {
-      "id": "event-version-2",
-      "title": "Another eventVersion is another contract",
-      "event": {
-        "eventId": "dfacf7c0-93a8-43a9-a4ef-914c55bb6a99",
-        "eventType": "notification.message",
-        "eventVersion": "2",
-        "occurredAt": "2026-10-10T11:59:55Z",
-        "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
-        "subjectRef": {
-          "id": "d9b3f7e5-2c8a-4d1f-8e6b-3a2c1b0f9e8d",
-          "kind": "message"
-        },
-        "recipientId": "b7e2c9d4-3a1f-4e8b-a6c5-0d9f8e7a6b5c",
-        "conversationId": "6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c",
-        "senderId": "c4a8e1f2-7d3b-4c9e-b2a1-6f5e4d3c2b1a",
-        "connected": false,
-        "messageId": "d9b3f7e5-2c8a-4d1f-8e6b-3a2c1b0f9e8d"
-      },
-      "schemaValid": false
-    },
-    {
       "id": "unknown-notification-type",
-      "title": "A notification event type this version doesn't know",
+      "title": "A notification event type the contract doesn't define",
       "event": {
         "eventId": "9e4231fe-c4ff-4cff-b17b-7463ed6b8697",
         "eventType": "notification.reaction",
-        "eventVersion": "1",
         "occurredAt": "2026-10-10T11:59:55Z",
         "projectId": "8d3f6a2c-1b4e-4f7a-9c0d-5e6f7a8b9c0d",
         "subjectRef": {

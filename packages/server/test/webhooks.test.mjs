@@ -29,7 +29,7 @@ function sign(secret, id, timestamp, body) {
 const now = new Date("2026-10-10T12:00:00.000Z"), timestamp = now.getTime() / 1000, webhookId = randomUUID();
 const current = newSecret(), next = newSecret(), replaced = newSecret();
 function envelope(fields = {}) {
-  return { eventId: randomUUID(), eventType: "message.created", eventVersion: "1", occurredAt: now.toISOString(),
+  return { eventId: randomUUID(), eventType: "message.created", occurredAt: now.toISOString(),
     projectId: randomUUID(), subjectRef: { id: randomUUID(), kind: "message" }, ...fields };
 }
 function delivery(body, { secrets = current, signers = [current], id = webhookId, at = timestamp } = {}) {
@@ -97,7 +97,7 @@ test("unknown event types and fields pass through and never throw", async () => 
 
 /** A notification event under the push payload contract (spec/push-payload/). */
 function notification(eventType, fields = {}) {
-  const common = { eventId: randomUUID(), eventType, eventVersion: "1", occurredAt: now.toISOString(), projectId: randomUUID(),
+  const common = { eventId: randomUUID(), eventType, occurredAt: now.toISOString(), projectId: randomUUID(),
     recipientId: randomUUID(), conversationId: randomUUID(), senderId: randomUUID(), connected: false };
   if (eventType === "notification.message") {
     const messageId = randomUUID();
@@ -135,10 +135,9 @@ test("the largest notification event fits in a webhook body", async () => {
 
 test("notification events that break the push payload contract verify as unknown events", async () => {
   const message = notification("notification.message"), call = notification("notification.call");
-  const cancelled = notification("notification.callCancelled"), { eventVersion: _version, ...unversioned } = message;
+  const cancelled = notification("notification.callCancelled");
   const { reason: _reason, ...reasonless } = cancelled;
-  const malformed = [unversioned, { ...message, eventVersion: 1 }, { ...message, eventVersion: "2" },
-    { ...message, subjectRef: { id: randomUUID(), kind: "message" } },
+  const malformed = [{ ...message, subjectRef: { id: randomUUID(), kind: "message" } },
     { ...message, subjectRef: { id: message.messageId, kind: "liveSession" } },
     { ...call, subjectRef: { id: call.liveSessionId, kind: "message" } },
     { ...message, recipientId: message.recipientId.toUpperCase() },
