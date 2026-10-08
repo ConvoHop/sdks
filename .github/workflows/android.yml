@@ -60,9 +60,10 @@ jobs:
             android/gradle/wrapper/gradle-wrapper.properties
             conformance/drivers/android/build.gradle.kts
       # gradle.properties caps the build at two workers and a 2 GiB daemon.
+      # --continue reports every failing test and lint finding in one run.
       - name: Compile, test (JVM and Robolectric) and lint
         working-directory: android
-        run: ./gradlew --no-daemon --console=plain build lint
+        run: ./gradlew --no-daemon --console=plain --continue build lint
       - name: Publish to a Maven repository in the build directory (dry run)
         working-directory: android
         run: ./gradlew --no-daemon --console=plain publishAllPublicationsToBuildRepository

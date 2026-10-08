@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Message and missed-call notifications on Android 13 and later. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -10,10 +11,12 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application>
+        <!-- Used only on Android 8 and later; earlier versions ring with the notification alone. -->
         <service
             android:name=".ConvoHopConnectionService"
             android:exported="true"
-            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
+            tools:targetApi="26">
             <intent-filter>
                 <action android:name="android.telecom.ConnectionService" />
             </intent-filter>
