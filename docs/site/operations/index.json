@@ -1,0 +1,1497 @@
+{
+  "$schema": "../../../spec/docs/operation-index.schema.json",
+  "operations": [
+    {
+      "id": "communication.capabilities",
+      "plane": "communication",
+      "kind": "query",
+      "field": "capabilities",
+      "operationName": "CommunicationCapabilities",
+      "layer": "both",
+      "summary": "Describe the features, limits and API model the authority supports.",
+      "page": "communication/capabilities.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.capabilities",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientcapabilities-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.route",
+      "plane": "communication",
+      "kind": "query",
+      "field": "route",
+      "operationName": "CommunicationRoute",
+      "layer": "both",
+      "summary": "Return the signed route: project incarnation, serving epoch and realtime endpoint. Call it before other communication operations and again after WRONG_REGION.",
+      "page": "communication/route.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.initialize",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientinitialize-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.initialize",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientinitialize-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.refreshSession",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientrefreshsession-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.currentSession",
+      "plane": "communication",
+      "kind": "query",
+      "field": "currentSession",
+      "operationName": "CommunicationCurrentSession",
+      "layer": "client",
+      "summary": "Return the calling user session.",
+      "page": "communication/currentSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.initialize",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientinitialize-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.refreshSession",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientrefreshsession-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.getPrincipal",
+      "plane": "communication",
+      "kind": "query",
+      "field": "getPrincipal",
+      "operationName": "CommunicationGetPrincipal",
+      "layer": "server",
+      "summary": "Read a principal (an application user).",
+      "page": "communication/getPrincipal.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.principals.get",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientprincipalsget-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.getConversation",
+      "plane": "communication",
+      "kind": "query",
+      "field": "getConversation",
+      "operationName": "CommunicationGetConversation",
+      "layer": "both",
+      "summary": "Read a conversation.",
+      "page": "communication/getConversation.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.get",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationget-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.getConversation",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientgetconversation-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.get",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationhandleget-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.members",
+      "plane": "communication",
+      "kind": "query",
+      "field": "members",
+      "operationName": "CommunicationMembers",
+      "layer": "both",
+      "summary": "List the members of a conversation.",
+      "page": "communication/members.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.members.list",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmemberslist-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.messages",
+      "plane": "communication",
+      "kind": "query",
+      "field": "messages",
+      "operationName": "CommunicationMessages",
+      "layer": "both",
+      "summary": "List the messages of a conversation, newest first. A backend key reads the full history, or the history visible to the member named by actAsPrincipalId.",
+      "page": "communication/messages.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.messages.list",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmessageslist-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.messages",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientmessages-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.messages.list",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationhandlemessageslist-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.getMessage",
+      "plane": "communication",
+      "kind": "query",
+      "field": "getMessage",
+      "operationName": "CommunicationGetMessage",
+      "layer": "both",
+      "summary": "Read one message. A backend key reads any message, or reads as the member named by actAsPrincipalId.",
+      "page": "communication/getMessage.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.messages.get",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmessagesget-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.events",
+      "plane": "communication",
+      "kind": "query",
+      "field": "events",
+      "operationName": "CommunicationEvents",
+      "layer": "client",
+      "summary": "Replay committed conversation events after a cursor, in sequence order.",
+      "page": "communication/events.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.events",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientevents-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.watch",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientresyncauthorizedhistory-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.receipts",
+      "plane": "communication",
+      "kind": "query",
+      "field": "receipts",
+      "operationName": "CommunicationReceipts",
+      "layer": "client",
+      "summary": "List the delivery and read receipts of a conversation.",
+      "page": "communication/receipts.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.receipts",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientreceipts-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.inbox",
+      "plane": "communication",
+      "kind": "query",
+      "field": "inbox",
+      "operationName": "CommunicationInbox",
+      "layer": "both",
+      "summary": "List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.",
+      "page": "communication/inbox.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.inbox",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientinbox-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.search",
+      "plane": "communication",
+      "kind": "query",
+      "field": "search",
+      "operationName": "CommunicationSearch",
+      "layer": "both",
+      "summary": "Search the messages visible to the calling user. A backend key searches as the member named by actAsPrincipalId, or within scope.conversationIds.",
+      "page": "communication/search.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.search",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientsearch-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.search",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientsearch-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.resolveRequest",
+      "plane": "communication",
+      "kind": "query",
+      "field": "resolveRequest",
+      "operationName": "CommunicationResolveRequest",
+      "layer": "both",
+      "summary": "Look up the stored outcome of an earlier communication mutation by its requestId.",
+      "page": "communication/resolveRequest.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.requests.resolve",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientrequestsresolve-property"
+          },
+          {
+            "ref": "@convohop/server#ProjectServerClient.requests.retry",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientrequestsretry-property"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.requests.resolve",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientrequestsresolve-property"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.requests.retry",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientrequestsretry-property"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.recoverPending",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientrecoverpending-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.getOperation",
+      "plane": "communication",
+      "kind": "query",
+      "field": "getOperation",
+      "operationName": "CommunicationGetOperation",
+      "layer": "both",
+      "summary": "Read the state of a long-running communication operation.",
+      "page": "communication/getOperation.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.operation",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientoperation-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.conversationMute",
+      "plane": "communication",
+      "kind": "query",
+      "field": "conversationMute",
+      "operationName": "CommunicationConversationMute",
+      "layer": "both",
+      "summary": "Read whether a member has muted message push notifications for a conversation. A backend key must name the member with actAsPrincipalId.",
+      "page": "communication/conversationMute.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.members.getMute",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmembersgetmute-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.mute.get",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationhandlemuteget-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.currentLiveSession",
+      "plane": "communication",
+      "kind": "query",
+      "field": "currentLiveSession",
+      "operationName": "CommunicationCurrentLiveSession",
+      "layer": "both",
+      "summary": "Return the active live session of a conversation, if any.",
+      "page": "communication/currentLiveSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.live.current",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationlivecurrent-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationLive.current",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationlivecurrent-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.liveSession",
+      "plane": "communication",
+      "kind": "query",
+      "field": "liveSession",
+      "operationName": "CommunicationLiveSession",
+      "layer": "both",
+      "summary": "Read a live session.",
+      "page": "communication/liveSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerLiveSession.get",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverlivesessionget-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.liveSession",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientlivesession-method"
+          },
+          {
+            "ref": "@convohop/client#LiveSessionHandle.get:static",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livesessionhandleget-static-method"
+          },
+          {
+            "ref": "@convohop/client#LiveSessionHandle.get",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livesessionhandleget-method"
+          },
+          {
+            "ref": "@convohop/client#LiveSessionHandle.participation",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livesessionhandleparticipation-method"
+          },
+          {
+            "ref": "@convohop/client#LiveStartOperation.ready",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livestartoperationready-method"
+          },
+          {
+            "ref": "@convohop/client#LiveParticipationHandle.get",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#liveparticipationhandleget-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.liveSessions",
+      "plane": "communication",
+      "kind": "query",
+      "field": "liveSessions",
+      "operationName": "CommunicationLiveSessions",
+      "layer": "both",
+      "summary": "List the live sessions of a conversation.",
+      "page": "communication/liveSessions.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.live.history",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationlivehistory-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationLive.history",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationlivehistory-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.liveSessionParticipants",
+      "plane": "communication",
+      "kind": "query",
+      "field": "liveSessionParticipants",
+      "operationName": "CommunicationLiveSessionParticipants",
+      "layer": "both",
+      "summary": "List the participants of a live session.",
+      "page": "communication/liveSessionParticipants.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerLiveSession.participants",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverlivesessionparticipants-method"
+          },
+          {
+            "ref": "@convohop/client#LiveSessionHandle.participants",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livesessionhandleparticipants-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.liveSessionAlerts",
+      "plane": "communication",
+      "kind": "query",
+      "field": "liveSessionAlerts",
+      "operationName": "CommunicationLiveSessionAlerts",
+      "layer": "client",
+      "summary": "List the live session alerts addressed to the calling user.",
+      "page": "communication/liveSessionAlerts.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.liveAlerts.list",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientlivealertslist-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.liveSessionOperation",
+      "plane": "communication",
+      "kind": "query",
+      "field": "liveSessionOperation",
+      "operationName": "CommunicationLiveSessionOperation",
+      "layer": "both",
+      "summary": "Read the state of a live session start or end operation.",
+      "page": "communication/liveSessionOperation.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerLiveOperation.get",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverliveoperationget-method"
+          },
+          {
+            "ref": "@convohop/server#ServerLiveOperation.completed",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverliveoperationcompleted-method"
+          },
+          {
+            "ref": "@convohop/client#LiveStartOperation.get",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livestartoperationget-method"
+          },
+          {
+            "ref": "@convohop/client#LiveStartOperation.completed",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livestartoperationcompleted-method"
+          },
+          {
+            "ref": "@convohop/client#LiveStartOperation.ready",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livestartoperationready-method"
+          },
+          {
+            "ref": "@convohop/client#LiveEndOperation.get",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#liveendoperationget-method"
+          },
+          {
+            "ref": "@convohop/client#LiveEndOperation.completed",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#liveendoperationcompleted-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.sessionRequestOutcome",
+      "plane": "communication",
+      "kind": "query",
+      "field": "sessionRequestOutcome",
+      "operationName": "CommunicationSessionRequestOutcome",
+      "layer": "server",
+      "summary": "Look up the outcome of an earlier issueSession or renewSession request, including the session it produced.",
+      "page": "communication/sessionRequestOutcome.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.sessions.outcome",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientsessionsoutcome-property"
+          },
+          {
+            "ref": "@convohop/server#ProjectServerClient.sessionRequestOutcome",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientsessionrequestoutcome-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.createPrincipal",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "createPrincipal",
+      "operationName": "CommunicationCreatePrincipal",
+      "layer": "server",
+      "summary": "Create a principal for an application user.",
+      "page": "communication/createPrincipal.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.principals.create",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientprincipalscreate-property"
+          },
+          {
+            "ref": "@convohop/server#ProjectServerClient.createPrincipal",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientcreateprincipal-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.disablePrincipal",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "disablePrincipal",
+      "operationName": "CommunicationDisablePrincipal",
+      "layer": "server",
+      "summary": "Disable a principal.",
+      "page": "communication/disablePrincipal.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.principals.disable",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientprincipalsdisable-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.issueSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "issueSession",
+      "operationName": "CommunicationIssueSession",
+      "layer": "server",
+      "summary": "Issue a short-lived user session token for a principal and device.",
+      "page": "communication/issueSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.sessions.issue",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientsessionsissue-property"
+          },
+          {
+            "ref": "@convohop/server#ProjectServerClient.issueSession",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientissuesession-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.renewSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "renewSession",
+      "operationName": "CommunicationRenewSession",
+      "layer": "server",
+      "summary": "Renew a user session before it expires.",
+      "page": "communication/renewSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.sessions.renew",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientsessionsrenew-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.revokeSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "revokeSession",
+      "operationName": "CommunicationRevokeSession",
+      "layer": "both",
+      "summary": "Revoke a user session.",
+      "page": "communication/revokeSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.sessions.revoke",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientsessionsrevoke-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.createConversation",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "createConversation",
+      "operationName": "CommunicationCreateConversation",
+      "layer": "server",
+      "summary": "Create a conversation with its initial members.",
+      "page": "communication/createConversation.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.conversations.create",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientconversationscreate-property"
+          },
+          {
+            "ref": "@convohop/server#ProjectServerClient.createConversation",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientcreateconversation-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.updateConversation",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "updateConversation",
+      "operationName": "CommunicationUpdateConversation",
+      "layer": "both",
+      "summary": "Update the title or properties of a conversation.",
+      "page": "communication/updateConversation.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.update",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationupdate-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.addMember",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "addMember",
+      "operationName": "CommunicationAddMember",
+      "layer": "server",
+      "summary": "Add a member, or change the role of an active member.",
+      "page": "communication/addMember.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.members.add",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmembersadd-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.addMembers",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "addMembers",
+      "operationName": "CommunicationAddMembers",
+      "layer": "server",
+      "summary": "Add several members in one request.",
+      "page": "communication/addMembers.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ProjectServerClient.addMembers",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#projectserverclientaddmembers-method"
+          },
+          {
+            "ref": "@convohop/server#ServerConversation.members.addBatch",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmembersaddbatch-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.removeMember",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "removeMember",
+      "operationName": "CommunicationRemoveMember",
+      "layer": "server",
+      "summary": "Remove a member from a conversation.",
+      "page": "communication/removeMember.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.members.remove",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmembersremove-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.historyGrant",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "historyGrant",
+      "operationName": "CommunicationHistoryGrant",
+      "layer": "server",
+      "summary": "Expand the history a member can see to an earlier sequence.",
+      "page": "communication/historyGrant.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.members.grantHistory",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmembersgranthistory-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.sendMessage",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "sendMessage",
+      "operationName": "CommunicationSendMessage",
+      "layer": "both",
+      "summary": "Send a message. A backend key sends as its service principal, or as the member named by actAsPrincipalId.",
+      "page": "communication/sendMessage.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.messages.send",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmessagessend-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.send",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientsend-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.messages.send",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationhandlemessagessend-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.editMessage",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "editMessage",
+      "operationName": "CommunicationEditMessage",
+      "layer": "both",
+      "summary": "Edit a message.",
+      "page": "communication/editMessage.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.messages.edit",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmessagesedit-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.edit",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientedit-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.messages.edit",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationhandlemessagesedit-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.deleteMessage",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "deleteMessage",
+      "operationName": "CommunicationDeleteMessage",
+      "layer": "both",
+      "summary": "Delete a message.",
+      "page": "communication/deleteMessage.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.messages.delete",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmessagesdelete-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.delete",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientdelete-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.messages.delete",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationhandlemessagesdelete-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.reportReceipt",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "reportReceipt",
+      "operationName": "CommunicationReportReceipt",
+      "layer": "client",
+      "summary": "Report delivery or read progress through a sequence.",
+      "page": "communication/reportReceipt.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.reportRead",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientreportread-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.typing",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "typing",
+      "operationName": "CommunicationTyping",
+      "layer": "client",
+      "summary": "Send an ephemeral typing signal.",
+      "page": "communication/typing.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "communication.setBroadcastPermission",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "setBroadcastPermission",
+      "operationName": "CommunicationSetBroadcastPermission",
+      "layer": "server",
+      "summary": "Allow or deny a member to publish media in live sessions.",
+      "page": "communication/setBroadcastPermission.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.members.setBroadcastPermission",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmemberssetbroadcastpermission-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.setConversationMute",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "setConversationMute",
+      "operationName": "CommunicationSetConversationMute",
+      "layer": "both",
+      "summary": "Mute or unmute message push notifications for a member of a conversation, optionally until a time. Calls still ring. A backend key must name the member with actAsPrincipalId.",
+      "page": "communication/setConversationMute.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerConversation.members.setMute",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverconversationmemberssetmute-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.mute.set",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationhandlemuteset-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.startLiveSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "startLiveSession",
+      "operationName": "CommunicationStartLiveSession",
+      "layer": "client",
+      "summary": "Start a live session (a call) in a conversation. Readiness completes asynchronously.",
+      "page": "communication/startLiveSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#ConversationLive.startVoice",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationlivestartvoice-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationLive.startVideo",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationlivestartvideo-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationLive.startBroadcast",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationlivestartbroadcast-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.joinLiveSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "joinLiveSession",
+      "operationName": "CommunicationJoinLiveSession",
+      "layer": "client",
+      "summary": "Join a live session.",
+      "page": "communication/joinLiveSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#LiveSessionHandle.join",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livesessionhandlejoin-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.alertLiveSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "alertLiveSession",
+      "operationName": "CommunicationAlertLiveSession",
+      "layer": "both",
+      "summary": "Alert (ring) conversation members about a live session.",
+      "page": "communication/alertLiveSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerLiveSession.alert",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverlivesessionalert-method"
+          },
+          {
+            "ref": "@convohop/client#LiveSessionHandle.alerts.send",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livesessionhandlealertssend-property"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.leaveLiveSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "leaveLiveSession",
+      "operationName": "CommunicationLeaveLiveSession",
+      "layer": "client",
+      "summary": "Leave a live session.",
+      "page": "communication/leaveLiveSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#LiveParticipationHandle.leave",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#liveparticipationhandleleave-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.endLiveSession",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "endLiveSession",
+      "operationName": "CommunicationEndLiveSession",
+      "layer": "both",
+      "summary": "End a live session for every participant. Completes asynchronously.",
+      "page": "communication/endLiveSession.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ServerLiveSession.end",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#serverlivesessionend-method"
+          },
+          {
+            "ref": "@convohop/client#LiveSessionHandle.end",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#livesessionhandleend-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.liveSessionCredentials",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "liveSessionCredentials",
+      "operationName": "CommunicationLiveSessionCredentials",
+      "layer": "client",
+      "summary": "Obtain a media credential for one connection of the caller's participation.",
+      "page": "communication/liveSessionCredentials.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#LiveParticipationHandle.connect",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#liveparticipationhandleconnect-method"
+          },
+          {
+            "ref": "@convohop/client#MediaConnection.reconnect",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#mediaconnectionreconnect-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "communication.redeemCredential",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "redeemCredential",
+      "operationName": "CommunicationRedeemCredential",
+      "layer": "server",
+      "summary": "Redeem a delivered credential with its delivery permit.",
+      "page": "communication/redeemCredential.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "communication.acknowledgeCredential",
+      "plane": "communication",
+      "kind": "mutation",
+      "field": "acknowledgeCredential",
+      "operationName": "CommunicationAcknowledgeCredential",
+      "layer": "server",
+      "summary": "Acknowledge that a redeemed credential is stored, closing the delivery.",
+      "page": "communication/acknowledgeCredential.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "communication.conversationEvents",
+      "plane": "communication",
+      "kind": "subscription",
+      "field": "conversationEvents",
+      "operationName": "CommunicationConversationEvents",
+      "layer": "client",
+      "summary": "Subscribe to conversation events in sequence order, resuming after a cursor.",
+      "page": "communication/conversationEvents.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.watch",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientresyncauthorizedhistory-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "management.capabilities",
+      "plane": "management",
+      "kind": "query",
+      "field": "capabilities",
+      "operationName": "ManagementCapabilities",
+      "layer": "server",
+      "summary": "Describe the management features and limits the authority supports.",
+      "page": "management/capabilities.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.organizations",
+      "plane": "management",
+      "kind": "query",
+      "field": "organizations",
+      "operationName": "ManagementOrganizations",
+      "layer": "server",
+      "summary": "List the organizations the caller can access.",
+      "page": "management/organizations.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.getOrganization",
+      "plane": "management",
+      "kind": "query",
+      "field": "getOrganization",
+      "operationName": "ManagementGetOrganization",
+      "layer": "server",
+      "summary": "Read an organization.",
+      "page": "management/getOrganization.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.getDeployment",
+      "plane": "management",
+      "kind": "query",
+      "field": "getDeployment",
+      "operationName": "ManagementGetDeployment",
+      "layer": "server",
+      "summary": "Read a deployment.",
+      "page": "management/getDeployment.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.getProject",
+      "plane": "management",
+      "kind": "query",
+      "field": "getProject",
+      "operationName": "ManagementGetProject",
+      "layer": "server",
+      "summary": "Read a project.",
+      "page": "management/getProject.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.deploymentHealth",
+      "plane": "management",
+      "kind": "query",
+      "field": "deploymentHealth",
+      "operationName": "ManagementDeploymentHealth",
+      "layer": "server",
+      "summary": "Read the health of a deployment.",
+      "page": "management/deploymentHealth.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.deploymentUsage",
+      "plane": "management",
+      "kind": "query",
+      "field": "deploymentUsage",
+      "operationName": "ManagementDeploymentUsage",
+      "layer": "server",
+      "summary": "Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "page": "management/deploymentUsage.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.projectUsage",
+      "plane": "management",
+      "kind": "query",
+      "field": "projectUsage",
+      "operationName": "ManagementProjectUsage",
+      "layer": "server",
+      "summary": "Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "page": "management/projectUsage.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.organizationUsage",
+      "plane": "management",
+      "kind": "query",
+      "field": "organizationUsage",
+      "operationName": "ManagementOrganizationUsage",
+      "layer": "server",
+      "summary": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
+      "page": "management/organizationUsage.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.webhookEndpoints",
+      "plane": "management",
+      "kind": "query",
+      "field": "webhookEndpoints",
+      "operationName": "ManagementWebhookEndpoints",
+      "layer": "server",
+      "summary": "List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.",
+      "page": "management/webhookEndpoints.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.webhookDeliveries",
+      "plane": "management",
+      "kind": "query",
+      "field": "webhookDeliveries",
+      "operationName": "ManagementWebhookDeliveries",
+      "layer": "server",
+      "summary": "List recent deliveries of a webhook endpoint.",
+      "page": "management/webhookDeliveries.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.resolveRequest",
+      "plane": "management",
+      "kind": "query",
+      "field": "resolveRequest",
+      "operationName": "ManagementResolveRequest",
+      "layer": "server",
+      "summary": "Look up the stored outcome of an earlier management mutation by its requestId.",
+      "page": "management/resolveRequest.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.getOperation",
+      "plane": "management",
+      "kind": "query",
+      "field": "getOperation",
+      "operationName": "ManagementGetOperation",
+      "layer": "server",
+      "summary": "Read the state of a long-running management operation.",
+      "page": "management/getOperation.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ConvoHopManagementClient.operation",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#convohopmanagementclientoperation-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "management.createOrganization",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "createOrganization",
+      "operationName": "ManagementCreateOrganization",
+      "layer": "server",
+      "summary": "Create an organization.",
+      "page": "management/createOrganization.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ConvoHopManagementClient.createOrganization",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#convohopmanagementclientcreateorganization-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "management.createDeployment",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "createDeployment",
+      "operationName": "ManagementCreateDeployment",
+      "layer": "server",
+      "summary": "Create a deployment in an organization. Completes asynchronously.",
+      "page": "management/createDeployment.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ConvoHopManagementClient.createDeployment",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#convohopmanagementclientcreatedeployment-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "management.createProject",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "createProject",
+      "operationName": "ManagementCreateProject",
+      "layer": "server",
+      "summary": "Create a project in a ready deployment. Completes asynchronously.",
+      "page": "management/createProject.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ConvoHopManagementClient.createProject",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#convohopmanagementclientcreateproject-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "management.issueBackendKey",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "issueBackendKey",
+      "operationName": "ManagementIssueBackendKey",
+      "layer": "server",
+      "summary": "Issue a scoped backend key. The secret is delivered once through a credential delivery.",
+      "page": "management/issueBackendKey.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ConvoHopManagementClient.issueBackendKey",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#convohopmanagementclientissuebackendkey-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "management.revokeBackendKey",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "revokeBackendKey",
+      "operationName": "ManagementRevokeBackendKey",
+      "layer": "server",
+      "summary": "Revoke a backend key, optionally revoking the sessions it issued.",
+      "page": "management/revokeBackendKey.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.projectPolicy",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "projectPolicy",
+      "operationName": "ManagementProjectPolicy",
+      "layer": "server",
+      "summary": "Change the policy of a project.",
+      "page": "management/projectPolicy.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.credentialPermit",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "credentialPermit",
+      "operationName": "ManagementCredentialPermit",
+      "layer": "server",
+      "summary": "Issue a signed permit that authorizes redeeming one credential delivery.",
+      "page": "management/credentialPermit.md",
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/server#ConvoHopManagementClient.deliveryPermit",
+            "package": "@convohop/server",
+            "page": "../typescript/reference/server.md#convohopmanagementclientdeliverypermit-method"
+          }
+        ]
+      }
+    },
+    {
+      "id": "management.pauseOperation",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "pauseOperation",
+      "operationName": "ManagementPauseOperation",
+      "layer": "server",
+      "summary": "Pause a long-running operation.",
+      "page": "management/pauseOperation.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.resumeOperation",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "resumeOperation",
+      "operationName": "ManagementResumeOperation",
+      "layer": "server",
+      "summary": "Resume a paused operation.",
+      "page": "management/resumeOperation.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.configureWebhook",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "configureWebhook",
+      "operationName": "ManagementConfigureWebhook",
+      "layer": "server",
+      "summary": "Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.",
+      "page": "management/configureWebhook.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.updateWebhook",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "updateWebhook",
+      "operationName": "ManagementUpdateWebhook",
+      "layer": "server",
+      "summary": "Change the event types of a webhook endpoint, or enable or disable it.",
+      "page": "management/updateWebhook.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.rotateWebhookSecret",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "rotateWebhookSecret",
+      "operationName": "ManagementRotateWebhookSecret",
+      "layer": "server",
+      "summary": "Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.",
+      "page": "management/rotateWebhookSecret.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.disableWebhook",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "disableWebhook",
+      "operationName": "ManagementDisableWebhook",
+      "layer": "server",
+      "summary": "Disable a webhook endpoint.",
+      "page": "management/disableWebhook.md",
+      "languages": {"typescript": []}
+    },
+    {
+      "id": "management.replayWebhookDeliveries",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "replayWebhookDeliveries",
+      "operationName": "ManagementReplayWebhookDeliveries",
+      "layer": "server",
+      "summary": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.",
+      "page": "management/replayWebhookDeliveries.md",
+      "languages": {"typescript": []}
+    }
+  ]
+}

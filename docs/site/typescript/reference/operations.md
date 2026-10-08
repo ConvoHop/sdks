@@ -1,0 +1,93 @@
+# TypeScript operation coverage
+
+The TypeScript SDK members that send each API operation. 52 of the 76 operations that TypeScript packages can send have a method.
+
+## Communication
+
+Conversations, members, messages, receipts, realtime events and live sessions inside one project.
+
+| Operation | Layer | Members |
+| --- | --- | --- |
+| [`communication.capabilities`](../../operations/communication/capabilities.md) | both | [`ProjectServerClient.capabilities`](server.md#projectserverclientcapabilities-method) |
+| [`communication.route`](../../operations/communication/route.md) | both | [`ProjectServerClient.initialize`](server.md#projectserverclientinitialize-method), [`ConvoHopClient.initialize`](client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](client.md#convohopclientrefreshsession-method) |
+| [`communication.currentSession`](../../operations/communication/currentSession.md) | client | [`ConvoHopClient.initialize`](client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](client.md#convohopclientrefreshsession-method) |
+| [`communication.getPrincipal`](../../operations/communication/getPrincipal.md) | server | [`ProjectServerClient.principals.get`](server.md#projectserverclientprincipalsget-property) |
+| [`communication.getConversation`](../../operations/communication/getConversation.md) | both | [`ServerConversation.get`](server.md#serverconversationget-method), [`ConvoHopClient.getConversation`](client.md#convohopclientgetconversation-method), [`ConversationHandle.get`](client.md#conversationhandleget-method) |
+| [`communication.members`](../../operations/communication/members.md) | both | [`ServerConversation.members.list`](server.md#serverconversationmemberslist-method) |
+| [`communication.messages`](../../operations/communication/messages.md) | both | [`ServerConversation.messages.list`](server.md#serverconversationmessageslist-method), [`ConvoHopClient.messages`](client.md#convohopclientmessages-method), [`ConversationHandle.messages.list`](client.md#conversationhandlemessageslist-property) |
+| [`communication.getMessage`](../../operations/communication/getMessage.md) | both | [`ServerConversation.messages.get`](server.md#serverconversationmessagesget-method) |
+| [`communication.events`](../../operations/communication/events.md) | client | [`ConvoHopClient.events`](client.md#convohopclientevents-method), [`ConvoHopClient.watch`](client.md#convohopclientwatch-method), [`ConvoHopClient.resyncAuthorizedHistory`](client.md#convohopclientresyncauthorizedhistory-method) |
+| [`communication.receipts`](../../operations/communication/receipts.md) | client | [`ConvoHopClient.receipts`](client.md#convohopclientreceipts-method) |
+| [`communication.inbox`](../../operations/communication/inbox.md) | both | [`ProjectServerClient.inbox`](server.md#projectserverclientinbox-method) |
+| [`communication.search`](../../operations/communication/search.md) | both | [`ProjectServerClient.search`](server.md#projectserverclientsearch-method), [`ConvoHopClient.search`](client.md#convohopclientsearch-method) |
+| [`communication.resolveRequest`](../../operations/communication/resolveRequest.md) | both | [`ProjectServerClient.requests.resolve`](server.md#projectserverclientrequestsresolve-property), [`ProjectServerClient.requests.retry`](server.md#projectserverclientrequestsretry-property), [`ConvoHopClient.requests.resolve`](client.md#convohopclientrequestsresolve-property), [`ConvoHopClient.requests.retry`](client.md#convohopclientrequestsretry-property), [`ConvoHopClient.recoverPending`](client.md#convohopclientrecoverpending-method) |
+| [`communication.getOperation`](../../operations/communication/getOperation.md) | both | [`ProjectServerClient.operation`](server.md#projectserverclientoperation-method) |
+| [`communication.conversationMute`](../../operations/communication/conversationMute.md) | both | [`ServerConversation.members.getMute`](server.md#serverconversationmembersgetmute-method), [`ConversationHandle.mute.get`](client.md#conversationhandlemuteget-property) |
+| [`communication.currentLiveSession`](../../operations/communication/currentLiveSession.md) | both | [`ServerConversation.live.current`](server.md#serverconversationlivecurrent-method), [`ConversationLive.current`](client.md#conversationlivecurrent-method) |
+| [`communication.liveSession`](../../operations/communication/liveSession.md) | both | [`ServerLiveSession.get`](server.md#serverlivesessionget-method), [`ConvoHopClient.liveSession`](client.md#convohopclientlivesession-method), [`LiveSessionHandle.get` (static)](client.md#livesessionhandleget-static-method), [`LiveSessionHandle.get`](client.md#livesessionhandleget-method), [`LiveSessionHandle.participation`](client.md#livesessionhandleparticipation-method), [`LiveStartOperation.ready`](client.md#livestartoperationready-method), [`LiveParticipationHandle.get`](client.md#liveparticipationhandleget-method) |
+| [`communication.liveSessions`](../../operations/communication/liveSessions.md) | both | [`ServerConversation.live.history`](server.md#serverconversationlivehistory-method), [`ConversationLive.history`](client.md#conversationlivehistory-method) |
+| [`communication.liveSessionParticipants`](../../operations/communication/liveSessionParticipants.md) | both | [`ServerLiveSession.participants`](server.md#serverlivesessionparticipants-method), [`LiveSessionHandle.participants`](client.md#livesessionhandleparticipants-method) |
+| [`communication.liveSessionAlerts`](../../operations/communication/liveSessionAlerts.md) | client | [`ConvoHopClient.liveAlerts.list`](client.md#convohopclientlivealertslist-property) |
+| [`communication.liveSessionOperation`](../../operations/communication/liveSessionOperation.md) | both | [`ServerLiveOperation.get`](server.md#serverliveoperationget-method), [`ServerLiveOperation.completed`](server.md#serverliveoperationcompleted-method), [`LiveStartOperation.get`](client.md#livestartoperationget-method), [`LiveStartOperation.completed`](client.md#livestartoperationcompleted-method), [`LiveStartOperation.ready`](client.md#livestartoperationready-method), [`LiveEndOperation.get`](client.md#liveendoperationget-method), [`LiveEndOperation.completed`](client.md#liveendoperationcompleted-method) |
+| [`communication.sessionRequestOutcome`](../../operations/communication/sessionRequestOutcome.md) | server | [`ProjectServerClient.sessions.outcome`](server.md#projectserverclientsessionsoutcome-property), [`ProjectServerClient.sessionRequestOutcome`](server.md#projectserverclientsessionrequestoutcome-method) |
+| [`communication.createPrincipal`](../../operations/communication/createPrincipal.md) | server | [`ProjectServerClient.principals.create`](server.md#projectserverclientprincipalscreate-property), [`ProjectServerClient.createPrincipal`](server.md#projectserverclientcreateprincipal-method) |
+| [`communication.disablePrincipal`](../../operations/communication/disablePrincipal.md) | server | [`ProjectServerClient.principals.disable`](server.md#projectserverclientprincipalsdisable-property) |
+| [`communication.issueSession`](../../operations/communication/issueSession.md) | server | [`ProjectServerClient.sessions.issue`](server.md#projectserverclientsessionsissue-property), [`ProjectServerClient.issueSession`](server.md#projectserverclientissuesession-method) |
+| [`communication.renewSession`](../../operations/communication/renewSession.md) | server | [`ProjectServerClient.sessions.renew`](server.md#projectserverclientsessionsrenew-property) |
+| [`communication.revokeSession`](../../operations/communication/revokeSession.md) | both | [`ProjectServerClient.sessions.revoke`](server.md#projectserverclientsessionsrevoke-property) |
+| [`communication.createConversation`](../../operations/communication/createConversation.md) | server | [`ProjectServerClient.conversations.create`](server.md#projectserverclientconversationscreate-property), [`ProjectServerClient.createConversation`](server.md#projectserverclientcreateconversation-method) |
+| [`communication.updateConversation`](../../operations/communication/updateConversation.md) | both | [`ServerConversation.update`](server.md#serverconversationupdate-method) |
+| [`communication.addMember`](../../operations/communication/addMember.md) | server | [`ServerConversation.members.add`](server.md#serverconversationmembersadd-method) |
+| [`communication.addMembers`](../../operations/communication/addMembers.md) | server | [`ProjectServerClient.addMembers`](server.md#projectserverclientaddmembers-method), [`ServerConversation.members.addBatch`](server.md#serverconversationmembersaddbatch-method) |
+| [`communication.removeMember`](../../operations/communication/removeMember.md) | server | [`ServerConversation.members.remove`](server.md#serverconversationmembersremove-method) |
+| [`communication.historyGrant`](../../operations/communication/historyGrant.md) | server | [`ServerConversation.members.grantHistory`](server.md#serverconversationmembersgranthistory-method) |
+| [`communication.sendMessage`](../../operations/communication/sendMessage.md) | both | [`ServerConversation.messages.send`](server.md#serverconversationmessagessend-method), [`ConvoHopClient.send`](client.md#convohopclientsend-method), [`ConversationHandle.messages.send`](client.md#conversationhandlemessagessend-property) |
+| [`communication.editMessage`](../../operations/communication/editMessage.md) | both | [`ServerConversation.messages.edit`](server.md#serverconversationmessagesedit-method), [`ConvoHopClient.edit`](client.md#convohopclientedit-method), [`ConversationHandle.messages.edit`](client.md#conversationhandlemessagesedit-property) |
+| [`communication.deleteMessage`](../../operations/communication/deleteMessage.md) | both | [`ServerConversation.messages.delete`](server.md#serverconversationmessagesdelete-method), [`ConvoHopClient.delete`](client.md#convohopclientdelete-method), [`ConversationHandle.messages.delete`](client.md#conversationhandlemessagesdelete-property) |
+| [`communication.reportReceipt`](../../operations/communication/reportReceipt.md) | client | [`ConvoHopClient.reportRead`](client.md#convohopclientreportread-method) |
+| [`communication.typing`](../../operations/communication/typing.md) | client | Not wrapped by a method |
+| [`communication.setBroadcastPermission`](../../operations/communication/setBroadcastPermission.md) | server | [`ServerConversation.members.setBroadcastPermission`](server.md#serverconversationmemberssetbroadcastpermission-method) |
+| [`communication.setConversationMute`](../../operations/communication/setConversationMute.md) | both | [`ServerConversation.members.setMute`](server.md#serverconversationmemberssetmute-method), [`ConversationHandle.mute.set`](client.md#conversationhandlemuteset-property) |
+| [`communication.startLiveSession`](../../operations/communication/startLiveSession.md) | client | [`ConversationLive.startVoice`](client.md#conversationlivestartvoice-method), [`ConversationLive.startVideo`](client.md#conversationlivestartvideo-method), [`ConversationLive.startBroadcast`](client.md#conversationlivestartbroadcast-method) |
+| [`communication.joinLiveSession`](../../operations/communication/joinLiveSession.md) | client | [`LiveSessionHandle.join`](client.md#livesessionhandlejoin-method) |
+| [`communication.alertLiveSession`](../../operations/communication/alertLiveSession.md) | both | [`ServerLiveSession.alert`](server.md#serverlivesessionalert-method), [`LiveSessionHandle.alerts.send`](client.md#livesessionhandlealertssend-property) |
+| [`communication.leaveLiveSession`](../../operations/communication/leaveLiveSession.md) | client | [`LiveParticipationHandle.leave`](client.md#liveparticipationhandleleave-method) |
+| [`communication.endLiveSession`](../../operations/communication/endLiveSession.md) | both | [`ServerLiveSession.end`](server.md#serverlivesessionend-method), [`LiveSessionHandle.end`](client.md#livesessionhandleend-method) |
+| [`communication.liveSessionCredentials`](../../operations/communication/liveSessionCredentials.md) | client | [`LiveParticipationHandle.connect`](client.md#liveparticipationhandleconnect-method), [`MediaConnection.reconnect`](client.md#mediaconnectionreconnect-method) |
+| [`communication.redeemCredential`](../../operations/communication/redeemCredential.md) | server | Not wrapped by a method |
+| [`communication.acknowledgeCredential`](../../operations/communication/acknowledgeCredential.md) | server | Not wrapped by a method |
+| [`communication.conversationEvents`](../../operations/communication/conversationEvents.md) | client | [`ConvoHopClient.watch`](client.md#convohopclientwatch-method), [`ConvoHopClient.resyncAuthorizedHistory`](client.md#convohopclientresyncauthorizedhistory-method) |
+
+## Management
+
+Organizations, deployments, projects, backend keys and webhooks.
+
+| Operation | Layer | Members |
+| --- | --- | --- |
+| [`management.capabilities`](../../operations/management/capabilities.md) | server | Not wrapped by a method |
+| [`management.organizations`](../../operations/management/organizations.md) | server | Not wrapped by a method |
+| [`management.getOrganization`](../../operations/management/getOrganization.md) | server | Not wrapped by a method |
+| [`management.getDeployment`](../../operations/management/getDeployment.md) | server | Not wrapped by a method |
+| [`management.getProject`](../../operations/management/getProject.md) | server | Not wrapped by a method |
+| [`management.deploymentHealth`](../../operations/management/deploymentHealth.md) | server | Not wrapped by a method |
+| [`management.deploymentUsage`](../../operations/management/deploymentUsage.md) | server | Not wrapped by a method |
+| [`management.projectUsage`](../../operations/management/projectUsage.md) | server | Not wrapped by a method |
+| [`management.organizationUsage`](../../operations/management/organizationUsage.md) | server | Not wrapped by a method |
+| [`management.webhookEndpoints`](../../operations/management/webhookEndpoints.md) | server | Not wrapped by a method |
+| [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md) | server | Not wrapped by a method |
+| [`management.resolveRequest`](../../operations/management/resolveRequest.md) | server | Not wrapped by a method |
+| [`management.getOperation`](../../operations/management/getOperation.md) | server | [`ConvoHopManagementClient.operation`](server.md#convohopmanagementclientoperation-method) |
+| [`management.createOrganization`](../../operations/management/createOrganization.md) | server | [`ConvoHopManagementClient.createOrganization`](server.md#convohopmanagementclientcreateorganization-method) |
+| [`management.createDeployment`](../../operations/management/createDeployment.md) | server | [`ConvoHopManagementClient.createDeployment`](server.md#convohopmanagementclientcreatedeployment-method) |
+| [`management.createProject`](../../operations/management/createProject.md) | server | [`ConvoHopManagementClient.createProject`](server.md#convohopmanagementclientcreateproject-method) |
+| [`management.issueBackendKey`](../../operations/management/issueBackendKey.md) | server | [`ConvoHopManagementClient.issueBackendKey`](server.md#convohopmanagementclientissuebackendkey-method) |
+| [`management.revokeBackendKey`](../../operations/management/revokeBackendKey.md) | server | Not wrapped by a method |
+| [`management.projectPolicy`](../../operations/management/projectPolicy.md) | server | Not wrapped by a method |
+| [`management.credentialPermit`](../../operations/management/credentialPermit.md) | server | [`ConvoHopManagementClient.deliveryPermit`](server.md#convohopmanagementclientdeliverypermit-method) |
+| [`management.pauseOperation`](../../operations/management/pauseOperation.md) | server | Not wrapped by a method |
+| [`management.resumeOperation`](../../operations/management/resumeOperation.md) | server | Not wrapped by a method |
+| [`management.configureWebhook`](../../operations/management/configureWebhook.md) | server | Not wrapped by a method |
+| [`management.updateWebhook`](../../operations/management/updateWebhook.md) | server | Not wrapped by a method |
+| [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md) | server | Not wrapped by a method |
+| [`management.disableWebhook`](../../operations/management/disableWebhook.md) | server | Not wrapped by a method |
+| [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md) | server | Not wrapped by a method |

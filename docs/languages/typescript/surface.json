@@ -1,0 +1,4502 @@
+{
+  "$schema": "../../../spec/docs/surface.schema.json",
+  "language": "typescript",
+  "packages": [
+    {
+      "name": "@convohop/server",
+      "symbols": [
+        {
+          "name": "ActAsCommandOptions",
+          "kind": "interface",
+          "signatures": ["interface ActAsCommandOptions extends ActAsOptions, CommandOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "actAs",
+              "kind": "property",
+              "signatures": ["actAs?: string"],
+              "docs": "",
+              "inherited": "ActAsOptions"
+            },
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["requestId?: string"],
+              "docs": "",
+              "inherited": "CommandOptions"
+            }
+          ]
+        },
+        {
+          "name": "ActAsOptions",
+          "kind": "interface",
+          "signatures": ["interface ActAsOptions"],
+          "docs": "Acts as a member principal. Reads are scoped to that member's visibility, sends are authored by it; audited.",
+          "members": [
+            {"name": "actAs", "kind": "property", "signatures": ["actAs?: string"], "docs": ""}
+          ]
+        },
+        {
+          "name": "ApnsAlert",
+          "kind": "type",
+          "signatures": ["type ApnsAlert = { … }"],
+          "docs": "",
+          "members": [
+            {"name": "title", "kind": "property", "signatures": ["title?: string"], "docs": ""},
+            {"name": "body", "kind": "property", "signatures": ["body?: string"], "docs": ""},
+            {
+              "name": "loc-key",
+              "kind": "property",
+              "signatures": ["\"loc-key\"?: string"],
+              "docs": "Present when there is no body: `CONVOHOP_MESSAGE`, `CONVOHOP_CALL` or `CONVOHOP_MISSED_CALL`."
+            }
+          ]
+        },
+        {
+          "name": "ApnsAlertRequest",
+          "kind": "type",
+          "signatures": ["type ApnsAlertRequest = { … }"],
+          "docs": "",
+          "members": [
+            {
+              "name": "headers",
+              "kind": "property",
+              "signatures": ["headers: ApnsHeaders"],
+              "docs": ""
+            },
+            {
+              "name": "payload",
+              "kind": "property",
+              "signatures": ["payload: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "aps",
+                  "kind": "property",
+                  "signatures": ["aps: { … }"],
+                  "docs": "",
+                  "members": [
+                    {
+                      "name": "alert",
+                      "kind": "property",
+                      "signatures": ["alert: ApnsAlert"],
+                      "docs": ""
+                    },
+                    {
+                      "name": "sound",
+                      "kind": "property",
+                      "signatures": ["sound: string"],
+                      "docs": ""
+                    },
+                    {
+                      "name": "mutable-content",
+                      "kind": "property",
+                      "signatures": ["\"mutable-content\": 0 | 1"],
+                      "docs": ""
+                    },
+                    {
+                      "name": "thread-id",
+                      "kind": "property",
+                      "signatures": ["\"thread-id\": string"],
+                      "docs": ""
+                    }
+                  ]
+                },
+                {
+                  "name": "convohop",
+                  "kind": "property",
+                  "signatures": ["convohop: PushData"],
+                  "docs": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ApnsHeaders",
+          "kind": "type",
+          "signatures": ["type ApnsHeaders = { … }"],
+          "docs": "HTTP/2 headers for APNs. Your APNs client adds `authorization` and sends to `/3/device/<token>`.",
+          "members": [
+            {
+              "name": "apns-push-type",
+              "kind": "property",
+              "signatures": ["\"apns-push-type\": \"alert\" | \"voip\""],
+              "docs": ""
+            },
+            {
+              "name": "apns-topic",
+              "kind": "property",
+              "signatures": ["\"apns-topic\": string"],
+              "docs": ""
+            },
+            {
+              "name": "apns-priority",
+              "kind": "property",
+              "signatures": ["\"apns-priority\": \"5\" | \"10\""],
+              "docs": ""
+            },
+            {
+              "name": "apns-expiration",
+              "kind": "property",
+              "signatures": ["\"apns-expiration\": string"],
+              "docs": "Unix seconds after which APNs stops trying to deliver."
+            },
+            {
+              "name": "apns-collapse-id",
+              "kind": "property",
+              "signatures": ["\"apns-collapse-id\"?: string"],
+              "docs": "Calls and missed calls: the ring's collapse key, so a missed-call alert replaces the ring's incoming-call alert."
+            }
+          ]
+        },
+        {
+          "name": "ApnsPushOptions",
+          "kind": "interface",
+          "signatures": ["interface ApnsPushOptions extends PushOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "bundleId",
+              "kind": "property",
+              "signatures": ["bundleId: string"],
+              "docs": "The app's bundle ID: the `apns-topic` of alerts. VoIP pushes use `<bundleId>.voip`."
+            },
+            {
+              "name": "title",
+              "kind": "property",
+              "signatures": ["title?: string | undefined"],
+              "docs": "The visible title, such as the sender's or conversation's name. Omitted when empty.",
+              "inherited": "PushOptions"
+            },
+            {
+              "name": "body",
+              "kind": "property",
+              "signatures": ["body?: string | undefined"],
+              "docs": "The visible body. Replaces the message preview. Omitted when empty.",
+              "inherited": "PushOptions"
+            },
+            {
+              "name": "preview",
+              "kind": "property",
+              "signatures": ["preview?: boolean"],
+              "docs": "Whether a message event's preview becomes the body when `body` is empty. Defaults to `true`.",
+              "inherited": "PushOptions"
+            },
+            {
+              "name": "now",
+              "kind": "property",
+              "signatures": ["now?: Date"],
+              "docs": "The clock for the TTL and expiration. Defaults to the current time.",
+              "inherited": "PushOptions"
+            }
+          ]
+        },
+        {
+          "name": "ApnsVoipRequest",
+          "kind": "type",
+          "signatures": ["type ApnsVoipRequest = { … }"],
+          "docs": "",
+          "members": [
+            {
+              "name": "headers",
+              "kind": "property",
+              "signatures": ["headers: ApnsHeaders"],
+              "docs": ""
+            },
+            {
+              "name": "payload",
+              "kind": "property",
+              "signatures": ["payload: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "convohop",
+                  "kind": "property",
+                  "signatures": ["convohop: PushData"],
+                  "docs": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "AsyncRecoveryStorage",
+          "kind": "interface",
+          "signatures": ["interface AsyncRecoveryStorage"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "getItem",
+              "kind": "method",
+              "signatures": ["getItem(key: string): Promise<string | null>"],
+              "docs": ""
+            },
+            {
+              "name": "setItem",
+              "kind": "method",
+              "signatures": ["setItem(key: string, value: string): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "removeItem",
+              "kind": "method",
+              "signatures": ["removeItem(key: string): Promise<void>"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "Capabilities",
+          "kind": "type",
+          "signatures": [
+            "type Capabilities = NonNullable<OperationPayload<\"communication.capabilities\">[\"result\"]>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "CommandOptions",
+          "kind": "interface",
+          "signatures": ["interface CommandOptions"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["requestId?: string"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "Conversation",
+          "kind": "type",
+          "signatures": [
+            "type Conversation = NonNullable<OperationPayload<\"communication.getConversation\">[\"result\"]>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "ConversationCursor",
+          "kind": "type",
+          "signatures": [
+            "type ConversationCursor = NonNullable<NonNullable<OperationPayload<\"communication.events\">[\"result\"]>[\"nextCursor\"]>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "ConversationMessage",
+          "kind": "type",
+          "signatures": [
+            "type ConversationMessage = NonNullable<OperationPayload<\"communication.getMessage\">[\"result\"]>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "ConversationMute",
+          "kind": "type",
+          "signatures": [
+            "type ConversationMute = OperationPayload<\"communication.conversationMute\">[\"result\"]"
+          ],
+          "docs": "Whether a member muted message push notifications for a conversation, and until when.",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "ConvoHopManagementClient",
+          "kind": "class",
+          "signatures": ["class ConvoHopManagementClient"],
+          "docs": "Operator-token client for organizations, deployments, projects and backend keys.",
+          "members": [
+            {
+              "name": "http",
+              "kind": "property",
+              "signatures": ["readonly http: ConvoHopTransport"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(options: {\n    baseUrl: string;\n    accessToken: string;\n    actorId: string;\n    recoveryStorage?: RecoveryStorage;\n    asyncRecoveryStorage?: AsyncRecoveryStorage;\n    fetch?: typeof fetch;\n})"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "createOrganization",
+              "kind": "method",
+              "signatures": [
+                "createOrganization(name: string, termsRef: string): Promise<{\n    orgId: string;\n    name: string;\n    status: string;\n    revision: string;\n}>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "createDeployment",
+              "kind": "method",
+              "signatures": [
+                "createDeployment(orgId: string, configuration?: DeploymentOptions): Promise<{\n    status: string;\n    requestId: string;\n    serverTime: string | null;\n    receiptId: string | null;\n    committedAt: string | null;\n    replayed: boolean | null;\n    operation: {\n        operationId: string;\n        owner: string;\n        href: string;\n        state: string;\n    } | null;\n    resourceRef: {\n        kind: string;\n        id: string;\n    } | null;\n    result: { … } | null;\n}>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "createProject",
+              "kind": "method",
+              "signatures": [
+                "createProject(deploymentId: string, name: string, configuration?: ProjectOptions): Promise<{\n    status: string;\n    requestId: string;\n    serverTime: string | null;\n    receiptId: string | null;\n    committedAt: string | null;\n    replayed: boolean | null;\n    operation: {\n        operationId: string;\n        owner: string;\n        href: string;\n        state: string;\n    } | null;\n    resourceRef: {\n        kind: string;\n        id: string;\n    } | null;\n    result: { … } | null;\n}>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "operation",
+              "kind": "method",
+              "signatures": [
+                "operation(operationId: string): Promise<{\n    operationId: string;\n    kind: string;\n    state: string;\n    revision: string;\n    requestedAt: string;\n    updatedAt: string;\n    blockedReason: string | null;\n    targetRef: {\n        kind: string;\n        id: string;\n    } | null;\n    steps: Array<{\n        stepId: string;\n        state: string;\n    }>;\n    result: { … } | null;\n}>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "issueBackendKey",
+              "kind": "method",
+              "signatures": [
+                "issueBackendKey(projectId: string, name: string, scopes: string[], expiresAt: string): Promise<{\n    status: string;\n    requestId: string;\n    serverTime: string | null;\n    receiptId: string | null;\n    committedAt: string | null;\n    replayed: boolean | null;\n    operation: {\n        operationId: string;\n        owner: string;\n        href: string;\n        state: string;\n    } | null;\n    resourceRef: {\n        kind: string;\n        id: string;\n    } | null;\n    result: { … } | null;\n}>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "deliveryPermit",
+              "kind": "method",
+              "signatures": [
+                "deliveryPermit(projectId: string, deliveryId: string, redemptionRequestId: string): Promise<ProtocolObject>"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ConvoHopProblem",
+          "kind": "class",
+          "signatures": ["class ConvoHopProblem extends Error"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "code",
+              "kind": "property",
+              "signatures": ["readonly code: string"],
+              "docs": ""
+            },
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["readonly requestId: string"],
+              "docs": ""
+            },
+            {
+              "name": "outcome",
+              "kind": "property",
+              "signatures": ["readonly outcome: string"],
+              "docs": ""
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["readonly status: number"],
+              "docs": ""
+            },
+            {
+              "name": "retryAfter",
+              "kind": "property",
+              "signatures": ["readonly retryAfter?: number"],
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds.\nThe SDK never waits or resends on its own because of it."
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(code: string, requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {\n    retryAfter?: number;\n})"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ConvoHopTransport",
+          "kind": "class",
+          "signatures": ["class ConvoHopTransport"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "baseUrl",
+              "kind": "property",
+              "signatures": ["readonly baseUrl: string"],
+              "docs": ""
+            },
+            {
+              "name": "durableRecovery",
+              "kind": "property",
+              "signatures": ["readonly durableRecovery: boolean"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation: string"],
+              "docs": ""
+            },
+            {
+              "name": "servingEpoch",
+              "kind": "property",
+              "signatures": ["servingEpoch: string | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(options: ConvoHopTransportOptions)"],
+              "docs": ""
+            },
+            {
+              "name": "initializeRecovery",
+              "kind": "method",
+              "signatures": ["initializeRecovery(): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "recoveryStates",
+              "kind": "property",
+              "signatures": ["get recoveryStates(): readonly RecoveryState[]"],
+              "docs": ""
+            },
+            {
+              "name": "execute",
+              "kind": "method",
+              "signatures": [
+                "execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>, requestId?: string, credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "retry",
+              "kind": "method",
+              "signatures": [
+                "retry(requestId: string): Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ConvoHopTransportOptions",
+          "kind": "interface",
+          "signatures": ["interface ConvoHopTransportOptions"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {"name": "baseUrl", "kind": "property", "signatures": ["baseUrl: string"], "docs": ""},
+            {
+              "name": "credential",
+              "kind": "property",
+              "signatures": ["credential?: string"],
+              "docs": ""
+            },
+            {
+              "name": "namespace",
+              "kind": "property",
+              "signatures": ["namespace: string"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation?: string"],
+              "docs": ""
+            },
+            {
+              "name": "recoveryStorage",
+              "kind": "property",
+              "signatures": ["recoveryStorage?: RecoveryStorage"],
+              "docs": ""
+            },
+            {
+              "name": "asyncRecoveryStorage",
+              "kind": "property",
+              "signatures": ["asyncRecoveryStorage?: AsyncRecoveryStorage"],
+              "docs": ""
+            },
+            {
+              "name": "fetch",
+              "kind": "property",
+              "signatures": ["fetch?: typeof fetch"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "DeploymentOptions",
+          "kind": "type",
+          "signatures": [
+            "type DeploymentOptions = Omit<GraphqlTypes.CreateDeploymentRequestInput, \"orgId\">"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "FcmRequest",
+          "kind": "type",
+          "signatures": ["type FcmRequest = { … }"],
+          "docs": "",
+          "members": [
+            {
+              "name": "message",
+              "kind": "property",
+              "signatures": ["message: { … }"],
+              "docs": "An FCM HTTP v1 REST `messages:send` message without a target: add `token`. `convohop` is `PushData` as JSON.\nFirebase Admin SDKs take `android` in their own form, such as `firebase-admin`'s `ttl` in milliseconds.",
+              "members": [
+                {
+                  "name": "data",
+                  "kind": "property",
+                  "signatures": ["data: { … }"],
+                  "docs": "",
+                  "members": [
+                    {
+                      "name": "convohop",
+                      "kind": "property",
+                      "signatures": ["convohop: string"],
+                      "docs": ""
+                    }
+                  ]
+                },
+                {
+                  "name": "android",
+                  "kind": "property",
+                  "signatures": ["android: { … }"],
+                  "docs": "",
+                  "members": [
+                    {
+                      "name": "priority",
+                      "kind": "property",
+                      "signatures": ["priority: \"NORMAL\" | \"HIGH\""],
+                      "docs": ""
+                    },
+                    {"name": "ttl", "kind": "property", "signatures": ["ttl: string"], "docs": ""},
+                    {
+                      "name": "collapse_key",
+                      "kind": "property",
+                      "signatures": ["collapse_key?: string"],
+                      "docs": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "GraphqlTypes",
+          "kind": "namespace",
+          "signatures": ["namespace GraphqlTypes"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "InboxOptions",
+          "kind": "interface",
+          "signatures": ["interface InboxOptions extends PageOptions"],
+          "docs": "The inbox is always read as one member, so `actAs` is required.",
+          "members": [
+            {"name": "actAs", "kind": "property", "signatures": ["actAs: string"], "docs": ""},
+            {
+              "name": "cursor",
+              "kind": "property",
+              "signatures": ["cursor?: string"],
+              "docs": "",
+              "inherited": "PageOptions"
+            },
+            {
+              "name": "limit",
+              "kind": "property",
+              "signatures": ["limit?: number"],
+              "docs": "",
+              "inherited": "PageOptions"
+            }
+          ]
+        },
+        {
+          "name": "InboxPage",
+          "kind": "type",
+          "signatures": [
+            "type InboxPage = NonNullable<OperationPayload<\"communication.inbox\">[\"result\"]>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "ItemPage",
+          "kind": "interface",
+          "signatures": ["interface ItemPage<T>"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {"name": "items", "kind": "property", "signatures": ["items: T[]"], "docs": ""},
+            {
+              "name": "complete",
+              "kind": "property",
+              "signatures": ["complete: boolean"],
+              "docs": ""
+            },
+            {
+              "name": "refreshRequired",
+              "kind": "property",
+              "signatures": ["refreshRequired: boolean"],
+              "docs": ""
+            },
+            {
+              "name": "nextCursor",
+              "kind": "property",
+              "signatures": ["nextCursor?: unknown"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "LiveAlertBatch",
+          "kind": "type",
+          "signatures": [
+            "type LiveAlertBatch = OperationPayload<\"communication.alertLiveSession\">[\"result\"]"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "LiveEndReceipt",
+          "kind": "type",
+          "signatures": ["type LiveEndReceipt = OperationPayload<\"communication.endLiveSession\">"],
+          "docs": ""
+        },
+        {
+          "name": "LiveOperation",
+          "kind": "type",
+          "signatures": [
+            "type LiveOperation = OperationPayload<\"communication.liveSessionOperation\">[\"result\"]"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "LiveOperationCompletion",
+          "kind": "type",
+          "signatures": [
+            "type LiveOperationCompletion = NonNullable<LiveOperation[\"completion\"]>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "LiveParticipantPage",
+          "kind": "type",
+          "signatures": [
+            "type LiveParticipantPage = OperationPayload<\"communication.liveSessionParticipants\">[\"result\"]"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "LiveSession",
+          "kind": "type",
+          "signatures": [
+            "type LiveSession = OperationPayload<\"communication.liveSession\">[\"result\"]"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "LiveSessionPage",
+          "kind": "type",
+          "signatures": [
+            "type LiveSessionPage = OperationPayload<\"communication.liveSessions\">[\"result\"]"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "LiveWaitOptions",
+          "kind": "interface",
+          "signatures": ["interface LiveWaitOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "signal",
+              "kind": "property",
+              "signatures": ["signal?: AbortSignal"],
+              "docs": ""
+            },
+            {
+              "name": "timeoutMs",
+              "kind": "property",
+              "signatures": ["timeoutMs?: number"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "MemberPage",
+          "kind": "type",
+          "signatures": [
+            "type MemberPage = NonNullable<OperationPayload<\"communication.members\">[\"result\"]>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "MemberRole",
+          "kind": "type",
+          "signatures": ["type MemberRole = \"member\" | \"moderator\""],
+          "docs": ""
+        },
+        {
+          "name": "Membership",
+          "kind": "type",
+          "signatures": [
+            "type Membership = NonNullable<OperationPayload<\"communication.members\">[\"result\"]>[\"items\"][number]"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "MessageListOptions",
+          "kind": "interface",
+          "signatures": ["interface MessageListOptions extends ActAsOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "beforeSequence",
+              "kind": "property",
+              "signatures": ["beforeSequence?: string"],
+              "docs": ""
+            },
+            {"name": "limit", "kind": "property", "signatures": ["limit?: number"], "docs": ""},
+            {
+              "name": "actAs",
+              "kind": "property",
+              "signatures": ["actAs?: string"],
+              "docs": "",
+              "inherited": "ActAsOptions"
+            }
+          ]
+        },
+        {
+          "name": "MessagePage",
+          "kind": "type",
+          "signatures": [
+            "type MessagePage = NonNullable<OperationPayload<\"communication.messages\">[\"result\"]>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "OperationInput",
+          "kind": "type",
+          "signatures": [
+            "type OperationInput<K extends OperationKey> = OperationTypes[K][\"variables\"] extends {\n    input?: infer I;\n} ? NonNullable<I> : Record<string, never>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "OperationKey",
+          "kind": "type",
+          "signatures": ["type OperationKey = keyof OperationTypes"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "OperationPayload",
+          "kind": "type",
+          "signatures": [
+            "type OperationPayload<K extends OperationKey> = OperationTypes[K][\"result\"][FieldName<K> & keyof OperationTypes[K][\"result\"]]"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "OperationStatus",
+          "kind": "type",
+          "signatures": [
+            "type OperationStatus = NonNullable<OperationPayload<\"communication.getOperation\">[\"result\"]>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "OperationTypes",
+          "kind": "interface",
+          "signatures": ["interface OperationTypes"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "PageOptions",
+          "kind": "interface",
+          "signatures": ["interface PageOptions"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {"name": "cursor", "kind": "property", "signatures": ["cursor?: string"], "docs": ""},
+            {"name": "limit", "kind": "property", "signatures": ["limit?: number"], "docs": ""}
+          ]
+        },
+        {
+          "name": "Principal",
+          "kind": "type",
+          "signatures": [
+            "type Principal = NonNullable<OperationPayload<\"communication.getPrincipal\">[\"result\"]>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "ProjectOptions",
+          "kind": "type",
+          "signatures": [
+            "type ProjectOptions = Omit<GraphqlTypes.CreateProjectRequestInput, \"deploymentId\" | \"name\">"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "ProjectRoute",
+          "kind": "interface",
+          "signatures": ["interface ProjectRoute"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation: string"],
+              "docs": ""
+            },
+            {
+              "name": "servingEpoch",
+              "kind": "property",
+              "signatures": ["servingEpoch: string"],
+              "docs": ""
+            },
+            {
+              "name": "communicationBase",
+              "kind": "property",
+              "signatures": ["communicationBase: string"],
+              "docs": ""
+            },
+            {"name": "wssUrl", "kind": "property", "signatures": ["wssUrl: string"], "docs": ""},
+            {
+              "name": "expiresAt",
+              "kind": "property",
+              "signatures": ["expiresAt: string"],
+              "docs": ""
+            },
+            {
+              "name": "signature",
+              "kind": "property",
+              "signatures": ["signature: string"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ProjectServerClient",
+          "kind": "class",
+          "signatures": ["class ProjectServerClient"],
+          "docs": "Backend-key client for one project. Runs only in trusted server runtimes; never ship a backend key to a browser.\n\nEvery backend-key operation in `schema/annotations.json` has a typed method here; the README lists each method with\nthe scope it needs. A key without that scope fails with `ScopeRequiredProblem`. Message reads and sends accept\n`{ actAs: principalId }` to act as a member; the inbox requires it. Handles from `conversation(id)`,\n`liveSession(id)` and `liveOperation(id)` send nothing until a method is called.",
+          "members": [
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["readonly projectId: string"],
+              "docs": ""
+            },
+            {
+              "name": "http",
+              "kind": "property",
+              "signatures": ["readonly http: ConvoHopTransport"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(options: {\n    baseUrl: string;\n    projectId: string;\n    backendKey: string;\n    incarnation: string;\n    recoveryStorage?: RecoveryStorage;\n    asyncRecoveryStorage?: AsyncRecoveryStorage;\n    fetch?: typeof fetch;\n})"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "conversations",
+              "kind": "property",
+              "signatures": ["readonly conversations: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "create",
+                  "kind": "property",
+                  "signatures": [
+                    "create: (input: GraphqlTypes.CreateConversationRequestInput, options?: CommandOptions) => Promise<Conversation>"
+                  ],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "conversation",
+              "kind": "method",
+              "signatures": ["conversation(conversationId: string): ServerConversation"],
+              "docs": ""
+            },
+            {
+              "name": "liveSession",
+              "kind": "method",
+              "signatures": ["liveSession(liveSessionId: string): ServerLiveSession"],
+              "docs": ""
+            },
+            {
+              "name": "liveOperation",
+              "kind": "method",
+              "signatures": ["liveOperation(operationId: string): ServerLiveOperation"],
+              "docs": "Reattaches to a live operation by ID, for example after a restart or a `RESOLUTION_REQUIRED` timeout."
+            },
+            {
+              "name": "principals",
+              "kind": "property",
+              "signatures": ["readonly principals: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "create",
+                  "kind": "property",
+                  "signatures": [
+                    "create: (input: {\n    externalUserId: string;\n}, options?: CommandOptions) => Promise<Principal>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "get",
+                  "kind": "property",
+                  "signatures": ["get: (principalId: string) => Promise<Principal>"],
+                  "docs": ""
+                },
+                {
+                  "name": "disable",
+                  "kind": "property",
+                  "signatures": [
+                    "disable: (input: {\n    principalId: string;\n    expectedRevision: string;\n}, options?: CommandOptions) => Promise<Principal>"
+                  ],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "sessions",
+              "kind": "property",
+              "signatures": ["readonly sessions: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "issue",
+                  "kind": "property",
+                  "signatures": [
+                    "issue: (input: {\n    principalId: string;\n    deviceId: string;\n    requestedTtlMs?: string;\n}, options?: CommandOptions) => Promise<SessionBootstrap>"
+                  ],
+                  "docs": "Issues a user session (`sessionIssue`). The TTL is a decimal string of milliseconds and defaults to 15 minutes."
+                },
+                {
+                  "name": "renew",
+                  "kind": "property",
+                  "signatures": [
+                    "renew: (input: {\n    sessionId: string;\n    principalId: string;\n    deviceId: string;\n    expectedRevision: string;\n    requestedTtlMs?: string;\n}, options?: CommandOptions) => Promise<SessionBootstrap>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "revoke",
+                  "kind": "property",
+                  "signatures": [
+                    "revoke: (input: {\n    sessionId: string;\n    expectedRevision: string;\n}, options?: CommandOptions) => Promise<SessionRevocation>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "outcome",
+                  "kind": "property",
+                  "signatures": ["outcome: (requestId: string) => Promise<SessionRequestOutcome>"],
+                  "docs": "Reads the outcome of an issue or renew request (`sessionIssue` and `sessionManage`)."
+                }
+              ]
+            },
+            {
+              "name": "requests",
+              "kind": "property",
+              "signatures": ["readonly requests: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "resolve",
+                  "kind": "property",
+                  "signatures": ["resolve: (requestId: string) => Promise<RequestResolution>"],
+                  "docs": ""
+                },
+                {
+                  "name": "retry",
+                  "kind": "property",
+                  "signatures": ["retry: (requestId: string) => Promise<RequestResolution>"],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "capabilities",
+              "kind": "method",
+              "signatures": ["capabilities(): Promise<Capabilities>"],
+              "docs": ""
+            },
+            {
+              "name": "operation",
+              "kind": "method",
+              "signatures": ["operation(operationId: string): Promise<OperationStatus>"],
+              "docs": ""
+            },
+            {
+              "name": "inbox",
+              "kind": "method",
+              "signatures": ["inbox(options: InboxOptions): Promise<InboxPage>"],
+              "docs": "Lists the conversations visible to the `actAs` member, as that member's inbox (`messageRead`; audited)."
+            },
+            {
+              "name": "search",
+              "kind": "method",
+              "signatures": ["search(query: string, options?: SearchOptions): Promise<SearchPage>"],
+              "docs": "Searches messages (`messageRead`) as the `actAs` member, or within `conversationIds`."
+            },
+            {
+              "name": "initialize",
+              "kind": "method",
+              "signatures": ["initialize(): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "createPrincipal",
+              "kind": "method",
+              "signatures": ["createPrincipal(externalUserId: string): Promise<string>"],
+              "docs": ""
+            },
+            {
+              "name": "issueSession",
+              "kind": "method",
+              "signatures": [
+                "issueSession(principalId: string, deviceId: string, requestedTtlMs?: string): Promise<SessionBootstrap>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "sessionRequestOutcome",
+              "kind": "method",
+              "signatures": [
+                "sessionRequestOutcome(requestId: string): Promise<SessionRequestOutcome>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "createConversation",
+              "kind": "method",
+              "signatures": [
+                "createConversation(title: string, members: {\n    principalId: string;\n    role: \"member\" | \"moderator\";\n}[]): Promise<Conversation>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "addMembers",
+              "kind": "method",
+              "signatures": [
+                "addMembers(conversationId: string, members: GraphqlTypes.MemberBatchEntryInput[], requestId?: string): Promise<Membership[]>"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ProtocolObject",
+          "kind": "type",
+          "signatures": ["type ProtocolObject = Record<string, unknown>"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "PushData",
+          "kind": "type",
+          "signatures": ["type PushData = { … }"],
+          "docs": "The `convohop` metadata every payload carries for your app: the event's fields without `subjectRef`, `connected`\nand `preview`. APNs VoIP, FCM and Web Push payloads also carry the visible `title` and `body` here, because they\nhave no visible alert of their own.",
+          "members": [
+            {"name": "eventId", "kind": "property", "signatures": ["eventId: string"], "docs": ""},
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["eventType: WebhookNotificationEvent[\"eventType\"]"],
+              "docs": ""
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["occurredAt: string"],
+              "docs": ""
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": ""
+            },
+            {
+              "name": "recipientId",
+              "kind": "property",
+              "signatures": ["recipientId: string"],
+              "docs": ""
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["conversationId: string"],
+              "docs": ""
+            },
+            {"name": "senderId", "kind": "property", "signatures": ["senderId: string"], "docs": ""},
+            {
+              "name": "messageId",
+              "kind": "property",
+              "signatures": ["messageId?: string"],
+              "docs": ""
+            },
+            {
+              "name": "liveSessionId",
+              "kind": "property",
+              "signatures": ["liveSessionId?: string"],
+              "docs": ""
+            },
+            {"name": "alertId", "kind": "property", "signatures": ["alertId?: string"], "docs": ""},
+            {
+              "name": "expiresAt",
+              "kind": "property",
+              "signatures": ["expiresAt?: string"],
+              "docs": ""
+            },
+            {
+              "name": "mediaProfile",
+              "kind": "property",
+              "signatures": ["mediaProfile?: WebhookCallMediaProfile"],
+              "docs": ""
+            },
+            {
+              "name": "reason",
+              "kind": "property",
+              "signatures": ["reason?: WebhookCallCancelReason"],
+              "docs": ""
+            },
+            {"name": "title", "kind": "property", "signatures": ["title?: string"], "docs": ""},
+            {"name": "body", "kind": "property", "signatures": ["body?: string"], "docs": ""}
+          ]
+        },
+        {
+          "name": "PushOptions",
+          "kind": "interface",
+          "signatures": ["interface PushOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "title",
+              "kind": "property",
+              "signatures": ["title?: string | undefined"],
+              "docs": "The visible title, such as the sender's or conversation's name. Omitted when empty."
+            },
+            {
+              "name": "body",
+              "kind": "property",
+              "signatures": ["body?: string | undefined"],
+              "docs": "The visible body. Replaces the message preview. Omitted when empty."
+            },
+            {
+              "name": "preview",
+              "kind": "property",
+              "signatures": ["preview?: boolean"],
+              "docs": "Whether a message event's preview becomes the body when `body` is empty. Defaults to `true`."
+            },
+            {
+              "name": "now",
+              "kind": "property",
+              "signatures": ["now?: Date"],
+              "docs": "The clock for the TTL and expiration. Defaults to the current time."
+            }
+          ]
+        },
+        {
+          "name": "PushPayloadCode",
+          "kind": "type",
+          "signatures": ["type PushPayloadCode = \"INVALID_EVENT\" | \"INVALID_OPTIONS\""],
+          "docs": "Why a push payload couldn't be built:\n- `INVALID_OPTIONS`: an option has the wrong type, `title` or `body` has a lone surrogate, `now` isn't a valid\n  `Date`, or `bundleId` isn't an app bundle ID. Options are checked first.\n- `INVALID_EVENT`: the event doesn't match the push payload contract."
+        },
+        {
+          "name": "PushPayloadError",
+          "kind": "class",
+          "signatures": ["class PushPayloadError extends Error"],
+          "docs": "A push payload that couldn't be built. The message names the field but never contains its value.",
+          "members": [
+            {
+              "name": "code",
+              "kind": "property",
+              "signatures": ["readonly code: PushPayloadCode"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(code: PushPayloadCode, message: string)"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "RecoveryState",
+          "kind": "interface",
+          "signatures": ["interface RecoveryState"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["requestId: string"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation: string"],
+              "docs": ""
+            },
+            {
+              "name": "payloadFingerprint",
+              "kind": "property",
+              "signatures": ["payloadFingerprint: string"],
+              "docs": ""
+            },
+            {
+              "name": "operation",
+              "kind": "property",
+              "signatures": ["operation: OperationKey"],
+              "docs": ""
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId?: string"],
+              "docs": ""
+            },
+            {
+              "name": "input",
+              "kind": "property",
+              "signatures": ["input: ProtocolObject"],
+              "docs": ""
+            },
+            {
+              "name": "firstSubmittedAt",
+              "kind": "property",
+              "signatures": ["firstSubmittedAt: number"],
+              "docs": ""
+            },
+            {
+              "name": "retryDeadline",
+              "kind": "property",
+              "signatures": ["retryDeadline: number"],
+              "docs": ""
+            },
+            {
+              "name": "attemptCount",
+              "kind": "property",
+              "signatures": ["attemptCount: number"],
+              "docs": ""
+            },
+            {
+              "name": "lastAttemptAt",
+              "kind": "property",
+              "signatures": ["lastAttemptAt: number"],
+              "docs": ""
+            },
+            {
+              "name": "lastAttemptClassification",
+              "kind": "property",
+              "signatures": ["lastAttemptClassification: string"],
+              "docs": ""
+            },
+            {
+              "name": "resolutionState",
+              "kind": "property",
+              "signatures": [
+                "resolutionState: \"pending\" | \"unknown\" | \"committed\" | \"accepted\""
+              ],
+              "docs": ""
+            },
+            {
+              "name": "mediaAdmissionAttempted",
+              "kind": "property",
+              "signatures": ["mediaAdmissionAttempted?: true"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "RecoveryStorage",
+          "kind": "interface",
+          "signatures": ["interface RecoveryStorage"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "getItem",
+              "kind": "method",
+              "signatures": ["getItem(key: string): string | null"],
+              "docs": ""
+            },
+            {
+              "name": "setItem",
+              "kind": "method",
+              "signatures": ["setItem(key: string, value: string): void"],
+              "docs": ""
+            },
+            {
+              "name": "removeItem",
+              "kind": "method",
+              "signatures": ["removeItem(key: string): void"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "RequestResolution",
+          "kind": "type",
+          "signatures": [
+            "type RequestResolution = NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "ScopeRequiredProblem",
+          "kind": "class",
+          "signatures": ["class ScopeRequiredProblem extends ConvoHopProblem"],
+          "docs": "`SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable).\nClassify it by `instanceof ConvoHopProblem` and `code`; `scope` is a diagnostic detail.",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "code",
+              "kind": "property",
+              "signatures": ["readonly code: \"SCOPE_REQUIRED\""],
+              "docs": ""
+            },
+            {
+              "name": "scope",
+              "kind": "property",
+              "signatures": ["readonly scope: string | undefined"],
+              "docs": "The missing scope. The authority names it only in the message, so this is `undefined` when the message does not\nmatch the documented wording. A missing read scope is reported as the read scope even where its manage scope\n(for example `callManage` for `callRead`) would also satisfy the operation."
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {\n    retryAfter?: number;\n})"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["readonly requestId: string"],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "outcome",
+              "kind": "property",
+              "signatures": ["readonly outcome: string"],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["readonly status: number"],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "retryAfter",
+              "kind": "property",
+              "signatures": ["readonly retryAfter?: number"],
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds.\nThe SDK never waits or resends on its own because of it.",
+              "inherited": "ConvoHopProblem"
+            }
+          ]
+        },
+        {
+          "name": "SearchHit",
+          "kind": "type",
+          "signatures": [
+            "type SearchHit = NonNullable<OperationPayload<\"communication.search\">[\"result\"]>[\"items\"][number] & {\n    message: ConversationMessage;\n}"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "SearchOptions",
+          "kind": "interface",
+          "signatures": ["interface SearchOptions extends PageOptions, ActAsOptions"],
+          "docs": "Search as the `actAs` member, or across `conversationIds` (1 or more) with the backend's own visibility.",
+          "members": [
+            {
+              "name": "conversationIds",
+              "kind": "property",
+              "signatures": ["conversationIds?: readonly string[]"],
+              "docs": ""
+            },
+            {
+              "name": "cursor",
+              "kind": "property",
+              "signatures": ["cursor?: string"],
+              "docs": "",
+              "inherited": "PageOptions"
+            },
+            {
+              "name": "limit",
+              "kind": "property",
+              "signatures": ["limit?: number"],
+              "docs": "",
+              "inherited": "PageOptions"
+            },
+            {
+              "name": "actAs",
+              "kind": "property",
+              "signatures": ["actAs?: string"],
+              "docs": "",
+              "inherited": "ActAsOptions"
+            }
+          ]
+        },
+        {
+          "name": "SearchPage",
+          "kind": "type",
+          "signatures": [
+            "type SearchPage = Omit<NonNullable<OperationPayload<\"communication.search\">[\"result\"]>, \"items\"> & {\n    items: SearchHit[];\n}"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "SendReceipt",
+          "kind": "type",
+          "signatures": [
+            "type SendReceipt = NonNullable<OperationPayload<\"communication.sendMessage\">[\"result\"]> & {\n    cursor: ConversationCursor;\n}"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "ServerConversation",
+          "kind": "class",
+          "signatures": ["class ServerConversation"],
+          "docs": "Backend view of one conversation. Creating the handle sends no request; each method needs the scope named in the\nREADME. Message reads and sends accept `actAs` to act as a member principal.",
+          "members": [
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["readonly client: ProjectServerClient"],
+              "docs": ""
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["readonly conversationId: string"],
+              "docs": ""
+            },
+            {
+              "name": "messages",
+              "kind": "property",
+              "signatures": ["readonly messages: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "list",
+                  "kind": "method",
+                  "signatures": ["list(options?: MessageListOptions): Promise<MessagePage>"],
+                  "docs": ""
+                },
+                {
+                  "name": "get",
+                  "kind": "method",
+                  "signatures": [
+                    "get(messageId: string, options?: ActAsOptions): Promise<ConversationMessage>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "send",
+                  "kind": "method",
+                  "signatures": [
+                    "send(message: {\n    text: string;\n    props?: ProtocolObject;\n}, options?: ActAsCommandOptions): Promise<SendReceipt>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "edit",
+                  "kind": "method",
+                  "signatures": [
+                    "edit(input: Omit<GraphqlTypes.EditMessageRequestInput, \"conversationId\">, options?: CommandOptions): Promise<ConversationMessage>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "delete",
+                  "kind": "method",
+                  "signatures": [
+                    "delete(input: Omit<GraphqlTypes.DeleteMessageRequestInput, \"conversationId\">, options?: CommandOptions): Promise<ConversationMessage>"
+                  ],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "members",
+              "kind": "property",
+              "signatures": ["readonly members: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "list",
+                  "kind": "method",
+                  "signatures": ["list(options?: PageOptions): Promise<MemberPage>"],
+                  "docs": ""
+                },
+                {
+                  "name": "add",
+                  "kind": "method",
+                  "signatures": [
+                    "add(input: {\n    principalId: string;\n    role: MemberRole;\n    expectedRevision: string;\n}, options?: CommandOptions): Promise<Membership>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "addBatch",
+                  "kind": "method",
+                  "signatures": [
+                    "addBatch(members: GraphqlTypes.MemberBatchEntryInput[], options?: CommandOptions): Promise<Membership[]>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "remove",
+                  "kind": "method",
+                  "signatures": [
+                    "remove(input: {\n    principalId: string;\n    expectedRevision: string;\n}, options?: CommandOptions): Promise<Membership>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "grantHistory",
+                  "kind": "method",
+                  "signatures": [
+                    "grantHistory(input: Omit<GraphqlTypes.HistoryGrantRequestInput, \"conversationId\">, options?: CommandOptions): Promise<Membership>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "setBroadcastPermission",
+                  "kind": "method",
+                  "signatures": [
+                    "setBroadcastPermission(input: Omit<GraphqlTypes.SetBroadcastPermissionInput, \"conversationId\">, options?: CommandOptions): Promise<OperationPayload<\"communication.setBroadcastPermission\">>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "getMute",
+                  "kind": "method",
+                  "signatures": ["getMute(principalId: string): Promise<ConversationMute>"],
+                  "docs": "Reads a member's mute, acting as that member; audited."
+                },
+                {
+                  "name": "setMute",
+                  "kind": "method",
+                  "signatures": [
+                    "setMute(input: SetMemberMuteInput, options?: CommandOptions): Promise<ConversationMute>"
+                  ],
+                  "docs": "Sets a member's mute, acting as that member; audited. Calls still ring a muted member."
+                }
+              ]
+            },
+            {
+              "name": "live",
+              "kind": "property",
+              "signatures": ["readonly live: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "current",
+                  "kind": "method",
+                  "signatures": ["current(): Promise<LiveSession | null>"],
+                  "docs": ""
+                },
+                {
+                  "name": "history",
+                  "kind": "method",
+                  "signatures": ["history(options?: PageOptions): Promise<LiveSessionPage>"],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(client: ProjectServerClient, conversationId: string)"],
+              "docs": ""
+            },
+            {
+              "name": "get",
+              "kind": "method",
+              "signatures": ["get(): Promise<Conversation>"],
+              "docs": ""
+            },
+            {
+              "name": "update",
+              "kind": "method",
+              "signatures": [
+                "update(input: Omit<GraphqlTypes.UpdateConversationRequestInput, \"conversationId\">, options?: CommandOptions): Promise<Conversation>"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ServerLiveOperation",
+          "kind": "class",
+          "signatures": ["class ServerLiveOperation"],
+          "docs": "A live start or end operation. The first read locks its live session and kind; later reads must match.",
+          "members": [
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["readonly client: ProjectServerClient"],
+              "docs": ""
+            },
+            {
+              "name": "receipt",
+              "kind": "property",
+              "signatures": ["readonly receipt?: LiveEndReceipt | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "operationId",
+              "kind": "property",
+              "signatures": ["readonly operationId: string"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(client: ProjectServerClient, operationId: string, receipt?: LiveEndReceipt | undefined)"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "get",
+              "kind": "method",
+              "signatures": ["get(): Promise<LiveOperation>"],
+              "docs": ""
+            },
+            {
+              "name": "completed",
+              "kind": "method",
+              "signatures": [
+                "completed(options?: LiveWaitOptions): Promise<LiveOperationCompletion>"
+              ],
+              "docs": "Polls until the operation completes. An END completion must carry an enforced media cutoff. A failure throws a\n`ConvoHopProblem` with the live error code; the deadline throws `RESOLUTION_REQUIRED`, which is not a cutoff."
+            }
+          ]
+        },
+        {
+          "name": "ServerLiveSession",
+          "kind": "class",
+          "signatures": ["class ServerLiveSession"],
+          "docs": "Backend view of one live session (`callRead` or `callManage` to read; `callManage` to alert or end). Creating the\nhandle sends no request. Mutations take the generation and revision you observed, so a retry with the same\n`requestId` resends the original payload.",
+          "members": [
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["readonly client: ProjectServerClient"],
+              "docs": ""
+            },
+            {
+              "name": "liveSessionId",
+              "kind": "property",
+              "signatures": ["readonly liveSessionId: string"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(client: ProjectServerClient, liveSessionId: string)"],
+              "docs": ""
+            },
+            {
+              "name": "get",
+              "kind": "method",
+              "signatures": ["get(): Promise<LiveSession>"],
+              "docs": ""
+            },
+            {
+              "name": "participants",
+              "kind": "method",
+              "signatures": ["participants(options?: PageOptions): Promise<LiveParticipantPage>"],
+              "docs": ""
+            },
+            {
+              "name": "alert",
+              "kind": "method",
+              "signatures": [
+                "alert(input: {\n    expectedGeneration: string;\n    principalIds: readonly string[];\n}, options?: CommandOptions): Promise<LiveAlertBatch>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "end",
+              "kind": "method",
+              "signatures": [
+                "end(input: {\n    expectedGeneration: string;\n    expectedRevision: string;\n}, options?: CommandOptions): Promise<ServerLiveOperation>"
+              ],
+              "docs": "Requests the end. The returned operation completes once the authority has enforced the media cutoff."
+            }
+          ]
+        },
+        {
+          "name": "SessionBootstrap",
+          "kind": "type",
+          "signatures": [
+            "type SessionBootstrap = SessionResult & {\n    session: NonNullable<SessionResult[\"session\"]>;\n}"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "SessionMetadata",
+          "kind": "type",
+          "signatures": [
+            "type SessionMetadata = OperationPayload<\"communication.currentSession\">[\"result\"]"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "SessionRefresh",
+          "kind": "type",
+          "signatures": [
+            "type SessionRefresh = (current: Readonly<SessionMetadata>) => Promise<SessionBootstrap>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "SessionRefreshState",
+          "kind": "type",
+          "signatures": [
+            "type SessionRefreshState = \"disabled\" | \"uninitialized\" | \"ready\" | \"refreshing\" | \"blocked\""
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "SessionRequestOutcome",
+          "kind": "type",
+          "signatures": [
+            "type SessionRequestOutcome = (SessionOutcomeRead & {\n    state: \"notObservedYet\";\n}) | (CommittedSessionOutcome & {\n    currentState: \"missing\";\n}) | (CommittedSessionOutcome & {\n    currentState: \"active\" | \"expired\" | \"revoked\";\n    currentSession: SessionMetadata;\n})"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "SessionRevocation",
+          "kind": "type",
+          "signatures": [
+            "type SessionRevocation = NonNullable<OperationPayload<\"communication.revokeSession\">[\"result\"]>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "SetMemberMuteInput",
+          "kind": "interface",
+          "signatures": ["interface SetMemberMuteInput"],
+          "docs": "Mutes or unmutes a member's message push notifications. `until` (RFC 3339, in the future) applies only to a mute.",
+          "members": [
+            {
+              "name": "principalId",
+              "kind": "property",
+              "signatures": ["principalId: string"],
+              "docs": ""
+            },
+            {"name": "muted", "kind": "property", "signatures": ["muted: boolean"], "docs": ""},
+            {"name": "until", "kind": "property", "signatures": ["until?: string"], "docs": ""}
+          ]
+        },
+        {
+          "name": "WebPushRequest",
+          "kind": "type",
+          "signatures": ["type WebPushRequest = { … }"],
+          "docs": "",
+          "members": [
+            {
+              "name": "headers",
+              "kind": "property",
+              "signatures": ["headers: { … }"],
+              "docs": "RFC 8030 headers for your Web Push library, which encrypts the payload (RFC 8291) and signs (VAPID).\nWhere it sets `TTL`, `Urgency` or `Topic` from its own options, pass the values there, or its defaults replace them.",
+              "members": [
+                {"name": "TTL", "kind": "property", "signatures": ["TTL: string"], "docs": ""},
+                {
+                  "name": "Urgency",
+                  "kind": "property",
+                  "signatures": ["Urgency: \"very-low\" | \"low\" | \"normal\" | \"high\""],
+                  "docs": ""
+                },
+                {"name": "Topic", "kind": "property", "signatures": ["Topic?: string"], "docs": ""}
+              ]
+            },
+            {
+              "name": "payload",
+              "kind": "property",
+              "signatures": ["payload: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "convohop",
+                  "kind": "property",
+                  "signatures": ["convohop: PushData"],
+                  "docs": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "WebhookCallCancelReason",
+          "kind": "type",
+          "signatures": [
+            "type WebhookCallCancelReason = \"answered\" | \"declined\" | \"ended\" | \"expired\" | (string & {})"
+          ],
+          "docs": "Why a call stopped ringing for the recipient. `answered` and `declined` (by the recipient, on any device) only stop\nthe ringing. `ended` (the call ended or stopped ringing before the recipient answered) and `expired` (nobody answered\nby `expiresAt`) are missed calls. Treat an unknown reason as stop ringing, without a missed-call alert."
+        },
+        {
+          "name": "WebhookCallCancelledNotificationEvent",
+          "kind": "interface",
+          "signatures": [
+            "interface WebhookCallCancelledNotificationEvent extends WebhookNotificationFields"
+          ],
+          "docs": "A ring that stopped for the recipient. Only recipients of the ring's `notification.call` get it.",
+          "members": [
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["eventType: \"notification.callCancelled\""],
+              "docs": ""
+            },
+            {
+              "name": "subjectRef",
+              "kind": "property",
+              "signatures": ["subjectRef: { … }"],
+              "docs": "",
+              "members": [
+                {"name": "id", "kind": "property", "signatures": ["id: string"], "docs": ""},
+                {
+                  "name": "kind",
+                  "kind": "property",
+                  "signatures": ["kind: \"liveSession\""],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "liveSessionId",
+              "kind": "property",
+              "signatures": ["liveSessionId: string"],
+              "docs": ""
+            },
+            {
+              "name": "alertId",
+              "kind": "property",
+              "signatures": ["alertId: string"],
+              "docs": "The `alertId` of the ring that stopped."
+            },
+            {
+              "name": "expiresAt",
+              "kind": "property",
+              "signatures": ["expiresAt: string"],
+              "docs": "The stopped ring's original deadline (RFC 3339)."
+            },
+            {
+              "name": "mediaProfile",
+              "kind": "property",
+              "signatures": ["mediaProfile: WebhookCallMediaProfile"],
+              "docs": ""
+            },
+            {
+              "name": "reason",
+              "kind": "property",
+              "signatures": ["reason: WebhookCallCancelReason"],
+              "docs": ""
+            },
+            {
+              "name": "known",
+              "kind": "property",
+              "signatures": ["known: true"],
+              "docs": "",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "recipientId",
+              "kind": "property",
+              "signatures": ["recipientId: string"],
+              "docs": "The principal to notify. Each recipient gets its own event.",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["conversationId: string"],
+              "docs": "",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "senderId",
+              "kind": "property",
+              "signatures": ["senderId: string"],
+              "docs": "The principal who sent the message or started the ringing.",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "connected",
+              "kind": "property",
+              "signatures": ["connected: boolean"],
+              "docs": "Whether the recipient had an active realtime connection when the event was produced. It is a hint for your sending\npolicy: it isn't per device, and it can change before you send. The push builders ignore it.",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["eventId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["occurredAt: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            }
+          ]
+        },
+        {
+          "name": "WebhookCallMediaProfile",
+          "kind": "type",
+          "signatures": [
+            "type WebhookCallMediaProfile = \"AUDIO_ONLY\" | \"AUDIO_VIDEO\" | (string & {})"
+          ],
+          "docs": "A call's media profile. Unknown profiles pass through."
+        },
+        {
+          "name": "WebhookCallNotificationEvent",
+          "kind": "interface",
+          "signatures": ["interface WebhookCallNotificationEvent extends WebhookNotificationFields"],
+          "docs": "An incoming call: one ring for the recipient.",
+          "members": [
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["eventType: \"notification.call\""],
+              "docs": ""
+            },
+            {
+              "name": "subjectRef",
+              "kind": "property",
+              "signatures": ["subjectRef: { … }"],
+              "docs": "",
+              "members": [
+                {"name": "id", "kind": "property", "signatures": ["id: string"], "docs": ""},
+                {
+                  "name": "kind",
+                  "kind": "property",
+                  "signatures": ["kind: \"liveSession\""],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "liveSessionId",
+              "kind": "property",
+              "signatures": ["liveSessionId: string"],
+              "docs": ""
+            },
+            {
+              "name": "alertId",
+              "kind": "property",
+              "signatures": ["alertId: string"],
+              "docs": "This ring for this recipient. A later ring of the same call has a new `alertId`."
+            },
+            {
+              "name": "expiresAt",
+              "kind": "property",
+              "signatures": ["expiresAt: string"],
+              "docs": "When the ringing stops (RFC 3339)."
+            },
+            {
+              "name": "mediaProfile",
+              "kind": "property",
+              "signatures": ["mediaProfile: WebhookCallMediaProfile"],
+              "docs": ""
+            },
+            {
+              "name": "known",
+              "kind": "property",
+              "signatures": ["known: true"],
+              "docs": "",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "recipientId",
+              "kind": "property",
+              "signatures": ["recipientId: string"],
+              "docs": "The principal to notify. Each recipient gets its own event.",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["conversationId: string"],
+              "docs": "",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "senderId",
+              "kind": "property",
+              "signatures": ["senderId: string"],
+              "docs": "The principal who sent the message or started the ringing.",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "connected",
+              "kind": "property",
+              "signatures": ["connected: boolean"],
+              "docs": "Whether the recipient had an active realtime connection when the event was produced. It is a hint for your sending\npolicy: it isn't per device, and it can change before you send. The push builders ignore it.",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["eventId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["occurredAt: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            }
+          ]
+        },
+        {
+          "name": "WebhookDelivery",
+          "kind": "interface",
+          "signatures": ["interface WebhookDelivery extends WebhookSignature"],
+          "docs": "",
+          "members": [
+            {"name": "event", "kind": "property", "signatures": ["event: WebhookEvent"], "docs": ""},
+            {
+              "name": "webhookId",
+              "kind": "property",
+              "signatures": ["webhookId: string"],
+              "docs": "",
+              "inherited": "WebhookSignature"
+            },
+            {
+              "name": "timestamp",
+              "kind": "property",
+              "signatures": ["timestamp: number"],
+              "docs": "",
+              "inherited": "WebhookSignature"
+            }
+          ]
+        },
+        {
+          "name": "WebhookEndpointDisabledEvent",
+          "kind": "interface",
+          "signatures": ["interface WebhookEndpointDisabledEvent extends WebhookEnvelope"],
+          "docs": "One of the project's other webhook endpoints was disabled after repeated failures. `subjectRef.id` names it.",
+          "members": [
+            {"name": "known", "kind": "property", "signatures": ["known: true"], "docs": ""},
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["eventType: \"webhook.endpointDisabled\""],
+              "docs": ""
+            },
+            {
+              "name": "subjectRef",
+              "kind": "property",
+              "signatures": ["subjectRef: { … }"],
+              "docs": "",
+              "members": [
+                {"name": "id", "kind": "property", "signatures": ["id: string"], "docs": ""},
+                {
+                  "name": "kind",
+                  "kind": "property",
+                  "signatures": ["kind: \"webhookEndpoint\""],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["eventId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["occurredAt: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            }
+          ]
+        },
+        {
+          "name": "WebhookEvent",
+          "kind": "type",
+          "signatures": [
+            "type WebhookEvent = WebhookResourceEvent | WebhookEndpointDisabledEvent | WebhookNotificationEvent | WebhookUnknownEvent"
+          ],
+          "docs": "A verified delivery's event. Narrow on `known`, then on `eventType`."
+        },
+        {
+          "name": "WebhookEventType",
+          "kind": "type",
+          "signatures": [
+            "type WebhookEventType = \"conversation.created\" | \"conversation.updated\" | \"member.added\" | \"member.roleChanged\" | \"member.historyExpanded\" | \"member.removed\" | \"member.broadcastPermissionChanged\" | \"message.created\" | \"message.edited\" | \"message.deleted\" | \"receipt.reported\" | \"live.started\" | \"live.participationChanged\" | \"live.alerted\" | \"live.ready\" | \"live.connected\" | \"live.ended\" | \"webhook.endpointDisabled\" | WebhookNotificationEventType"
+          ],
+          "docs": "Webhook event types the authority sends. The `notification.*` types follow the push payload contract in\n`spec/push-payload/`."
+        },
+        {
+          "name": "WebhookHeaders",
+          "kind": "type",
+          "signatures": [
+            "type WebhookHeaders = {\n    get(name: string): string | null;\n} | Readonly<Record<string, string | readonly string[] | undefined>>"
+          ],
+          "docs": "A `Headers` object, or a record such as Node's `IncomingMessage.headers`. Names match case-insensitively."
+        },
+        {
+          "name": "WebhookMessageNotificationEvent",
+          "kind": "interface",
+          "signatures": [
+            "interface WebhookMessageNotificationEvent extends WebhookNotificationFields"
+          ],
+          "docs": "A message for the recipient.",
+          "members": [
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["eventType: \"notification.message\""],
+              "docs": ""
+            },
+            {
+              "name": "subjectRef",
+              "kind": "property",
+              "signatures": ["subjectRef: { … }"],
+              "docs": "",
+              "members": [
+                {"name": "id", "kind": "property", "signatures": ["id: string"], "docs": ""},
+                {
+                  "name": "kind",
+                  "kind": "property",
+                  "signatures": ["kind: \"message\""],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "messageId",
+              "kind": "property",
+              "signatures": ["messageId: string"],
+              "docs": ""
+            },
+            {
+              "name": "preview",
+              "kind": "property",
+              "signatures": ["preview?: WebhookNotificationPreview"],
+              "docs": ""
+            },
+            {
+              "name": "known",
+              "kind": "property",
+              "signatures": ["known: true"],
+              "docs": "",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "recipientId",
+              "kind": "property",
+              "signatures": ["recipientId: string"],
+              "docs": "The principal to notify. Each recipient gets its own event.",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["conversationId: string"],
+              "docs": "",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "senderId",
+              "kind": "property",
+              "signatures": ["senderId: string"],
+              "docs": "The principal who sent the message or started the ringing.",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "connected",
+              "kind": "property",
+              "signatures": ["connected: boolean"],
+              "docs": "Whether the recipient had an active realtime connection when the event was produced. It is a hint for your sending\npolicy: it isn't per device, and it can change before you send. The push builders ignore it.",
+              "inherited": "WebhookNotificationFields"
+            },
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["eventId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["occurredAt: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            }
+          ]
+        },
+        {
+          "name": "WebhookNotificationEvent",
+          "kind": "type",
+          "signatures": [
+            "type WebhookNotificationEvent = WebhookMessageNotificationEvent | WebhookCallNotificationEvent | WebhookCallCancelledNotificationEvent"
+          ],
+          "docs": "A per-recipient notification event: the input of the push payload builders. The contract is `spec/push-payload/`."
+        },
+        {
+          "name": "WebhookNotificationEventType",
+          "kind": "type",
+          "signatures": [
+            "type WebhookNotificationEventType = \"notification.message\" | \"notification.call\" | \"notification.callCancelled\""
+          ],
+          "docs": "Per-recipient notification event types, for your push notifications: a message for the recipient, an incoming\ncall, and a call that stopped ringing for the recipient. The contract is `spec/push-payload/`."
+        },
+        {
+          "name": "WebhookNotificationPreview",
+          "kind": "interface",
+          "signatures": ["interface WebhookNotificationPreview"],
+          "docs": "The start of the message text. Present only when the project opts in to previews and the message has text.",
+          "members": [
+            {
+              "name": "text",
+              "kind": "property",
+              "signatures": ["text: string"],
+              "docs": "1 to 512 Unicode code points."
+            },
+            {
+              "name": "truncated",
+              "kind": "property",
+              "signatures": ["truncated: boolean"],
+              "docs": "Whether the message text continues after `text`."
+            }
+          ]
+        },
+        {
+          "name": "WebhookResourceEvent",
+          "kind": "interface",
+          "signatures": ["interface WebhookResourceEvent extends WebhookEnvelope"],
+          "docs": "A change to a conversation, member, message, receipt or call. `subjectRef` names the resource.",
+          "members": [
+            {"name": "known", "kind": "property", "signatures": ["known: true"], "docs": ""},
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": [
+                "eventType: Exclude<WebhookEventType, \"webhook.endpointDisabled\" | WebhookNotificationEventType>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["eventId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["occurredAt: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "subjectRef",
+              "kind": "property",
+              "signatures": ["subjectRef: { … }"],
+              "docs": "",
+              "inherited": "WebhookEnvelope",
+              "members": [
+                {"name": "id", "kind": "property", "signatures": ["id: string"], "docs": ""},
+                {"name": "kind", "kind": "property", "signatures": ["kind: string"], "docs": ""}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "WebhookSignature",
+          "kind": "interface",
+          "signatures": ["interface WebhookSignature"],
+          "docs": "A verified delivery's `webhook-id` and `webhook-timestamp` (Unix seconds).",
+          "members": [
+            {
+              "name": "webhookId",
+              "kind": "property",
+              "signatures": ["webhookId: string"],
+              "docs": ""
+            },
+            {
+              "name": "timestamp",
+              "kind": "property",
+              "signatures": ["timestamp: number"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "WebhookUnknownEvent",
+          "kind": "interface",
+          "signatures": ["interface WebhookUnknownEvent extends WebhookEnvelope"],
+          "docs": "An event this SDK does not know, including a `notification.*` event that doesn't match the push payload contract.\nAcknowledge it; it never makes `verify()` throw.",
+          "members": [
+            {"name": "known", "kind": "property", "signatures": ["known: false"], "docs": ""},
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["eventId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["eventType: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["occurredAt: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": "",
+              "inherited": "WebhookEnvelope"
+            },
+            {
+              "name": "subjectRef",
+              "kind": "property",
+              "signatures": ["subjectRef: { … }"],
+              "docs": "",
+              "inherited": "WebhookEnvelope",
+              "members": [
+                {"name": "id", "kind": "property", "signatures": ["id: string"], "docs": ""},
+                {"name": "kind", "kind": "property", "signatures": ["kind: string"], "docs": ""}
+              ]
+            }
+          ]
+        },
+        {
+          "name": "WebhookVerificationCode",
+          "kind": "type",
+          "signatures": [
+            "type WebhookVerificationCode = \"INVALID_SECRET\" | \"MISSING_HEADER\" | \"INVALID_HEADER\" | \"INVALID_TIMESTAMP\" | \"TIMESTAMP_EXPIRED\" | \"TIMESTAMP_FUTURE\" | \"BODY_TOO_LARGE\" | \"TOO_MANY_SIGNATURES\" | \"NO_MATCHING_SIGNATURE\" | \"INVALID_BODY\""
+          ],
+          "docs": "Why a delivery failed verification. Checks run in this order and stop at the first failure:\n- `INVALID_SECRET`: no secret is given, or one is not `whsec_` followed by padded standard Base64 of 24 to 64 bytes.\n  This is your configuration, not the sender.\n- `MISSING_HEADER`: `webhook-id`, `webhook-timestamp` or `webhook-signature` is absent or empty.\n- `INVALID_HEADER`: one of those headers is repeated.\n- `INVALID_TIMESTAMP`: `webhook-timestamp` is not 1 to 15 ASCII digits (integer Unix seconds).\n- `TIMESTAMP_EXPIRED`: the timestamp is more than `toleranceSeconds` before now.\n- `TIMESTAMP_FUTURE`: the timestamp is more than `toleranceSeconds` after now.\n- `BODY_TOO_LARGE`: the body exceeds 4096 bytes.\n- `TOO_MANY_SIGNATURES`: `webhook-signature` has more than 8 entries.\n- `NO_MATCHING_SIGNATURE`: no `v1` entry matches any secret.\n- `INVALID_BODY`: `verify()` only; the signed body is not a UTF-8 JSON event envelope."
+        },
+        {
+          "name": "WebhookVerificationError",
+          "kind": "class",
+          "signatures": ["class WebhookVerificationError extends Error"],
+          "docs": "A delivery that failed verification. The message never contains secrets, signatures or the body.",
+          "members": [
+            {
+              "name": "code",
+              "kind": "property",
+              "signatures": ["readonly code: WebhookVerificationCode"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(code: WebhookVerificationCode, message: string)"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "WebhookVerifyOptions",
+          "kind": "interface",
+          "signatures": ["interface WebhookVerifyOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "headers",
+              "kind": "property",
+              "signatures": ["headers: WebhookHeaders"],
+              "docs": ""
+            },
+            {
+              "name": "body",
+              "kind": "property",
+              "signatures": ["body: string | Uint8Array"],
+              "docs": "The exact request body bytes, or their exact UTF-8 decoding. Never re-serialized JSON."
+            },
+            {
+              "name": "secrets",
+              "kind": "property",
+              "signatures": ["secrets: string | readonly string[]"],
+              "docs": "The endpoint's `whsec_` secrets: the current one and, during a rotation, the next or replaced one."
+            },
+            {
+              "name": "toleranceSeconds",
+              "kind": "property",
+              "signatures": ["toleranceSeconds?: number"],
+              "docs": "Allowed distance between `webhook-timestamp` and `now`, in whole seconds, inclusive. Defaults to 300."
+            },
+            {
+              "name": "now",
+              "kind": "property",
+              "signatures": ["now?: Date"],
+              "docs": "The verifier's clock. Defaults to the current time."
+            }
+          ]
+        },
+        {
+          "name": "operationCatalog",
+          "kind": "constant",
+          "signatures": ["const operationCatalog: Record<OperationKey, OperationCatalogEntry>"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseConversation",
+          "kind": "function",
+          "signatures": ["function parseConversation(value: unknown): Conversation"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseCounter",
+          "kind": "function",
+          "signatures": ["function parseCounter(value: unknown): string"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseCursor",
+          "kind": "function",
+          "signatures": ["function parseCursor(value: unknown): ConversationCursor"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseId",
+          "kind": "function",
+          "signatures": ["function parseId(value: unknown): string"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseMembership",
+          "kind": "function",
+          "signatures": ["function parseMembership(value: unknown): Membership"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseMessage",
+          "kind": "function",
+          "signatures": ["function parseMessage(value: unknown): ConversationMessage"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseObject",
+          "kind": "function",
+          "signatures": ["function parseObject(value: unknown): ProtocolObject"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parsePage",
+          "kind": "function",
+          "signatures": [
+            "function parsePage<T>(value: unknown, parse: (value: unknown) => T): ItemPage<T>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseSearchHit",
+          "kind": "function",
+          "signatures": ["function parseSearchHit(value: unknown): SearchHit"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseString",
+          "kind": "function",
+          "signatures": ["function parseString(value: unknown): string"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "push",
+          "kind": "constant",
+          "signatures": ["const push: Readonly<{ … }>"],
+          "docs": "Builds provider requests from per-recipient notification events (`notification.message`, `notification.call` and\n`notification.callCancelled`), as `webhooks.verify()` returns them. Each builder validates its options and then the\nevent, throwing `PushPayloadError`, and returns `null` when the event doesn't apply to the platform or is stale.\nPayloads are metadata-only unless you pass `title` or `body`, or the event carries an opted-in message preview.\nThe contract is `spec/push-payload/`.",
+          "members": [
+            {
+              "name": "apnsAlert",
+              "kind": "method",
+              "signatures": [
+                "apnsAlert(event: WebhookNotificationEvent, options: ApnsPushOptions): ApnsAlertRequest | null"
+              ],
+              "docs": "An APNs alert for a message, an incoming call, or a missed call (`callCancelled` with reason `ended` or\n`expired`); `null` for other cancellations. At most 4096 bytes."
+            },
+            {
+              "name": "apnsVoip",
+              "kind": "method",
+              "signatures": [
+                "apnsVoip(event: WebhookNotificationEvent, options: ApnsPushOptions): ApnsVoipRequest | null"
+              ],
+              "docs": "An APNs VoIP push for an incoming call; `null` for other events. iOS requires you to report every VoIP push to\nCallKit as a call. At most 5120 bytes."
+            },
+            {
+              "name": "fcm",
+              "kind": "method",
+              "signatures": [
+                "fcm(event: WebhookNotificationEvent, options?: PushOptions): FcmRequest | null"
+              ],
+              "docs": "An FCM data message for any notification event. At most 4096 bytes of `data` as JSON."
+            },
+            {
+              "name": "webPush",
+              "kind": "method",
+              "signatures": [
+                "webPush(event: WebhookNotificationEvent, options?: PushOptions): WebPushRequest | null"
+              ],
+              "docs": "A Web Push message for any notification event. At most 3993 bytes, the RFC 8291 plaintext limit."
+            }
+          ]
+        },
+        {
+          "name": "webhooks",
+          "kind": "constant",
+          "signatures": ["const webhooks: Readonly<{ … }>"],
+          "docs": "Verifies ConvoHop webhook deliveries (Standard Webhooks symmetric `v1`) with Web Crypto. Pass the raw body; respond\n`2xx` within 5 s, then process; de-duplicate on `webhook-id`. Failures throw `WebhookVerificationError`.",
+          "members": [
+            {
+              "name": "verify",
+              "kind": "method",
+              "signatures": ["verify(options: WebhookVerifyOptions): Promise<WebhookDelivery>"],
+              "docs": "Verifies the signature and timestamp, then parses the metadata-only event."
+            },
+            {
+              "name": "verifySignature",
+              "kind": "method",
+              "signatures": [
+                "verifySignature(options: WebhookVerifyOptions): Promise<WebhookSignature>"
+              ],
+              "docs": "Verifies only the signature and timestamp, for bodies you parse yourself."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "@convohop/client",
+      "symbols": [
+        {
+          "name": "AsyncRecoveryStorage",
+          "kind": "interface",
+          "signatures": ["interface AsyncRecoveryStorage"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "getItem",
+              "kind": "method",
+              "signatures": ["getItem(key: string): Promise<string | null>"],
+              "docs": ""
+            },
+            {
+              "name": "setItem",
+              "kind": "method",
+              "signatures": ["setItem(key: string, value: string): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "removeItem",
+              "kind": "method",
+              "signatures": ["removeItem(key: string): Promise<void>"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "CommandOptions",
+          "kind": "interface",
+          "signatures": ["interface CommandOptions"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["requestId?: string"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "Conversation",
+          "kind": "type",
+          "signatures": [
+            "type Conversation = NonNullable<OperationPayload<\"communication.getConversation\">[\"result\"]>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "ConversationCursor",
+          "kind": "type",
+          "signatures": [
+            "type ConversationCursor = NonNullable<NonNullable<OperationPayload<\"communication.events\">[\"result\"]>[\"nextCursor\"]>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "ConversationHandle",
+          "kind": "class",
+          "signatures": ["class ConversationHandle"],
+          "docs": "",
+          "members": [
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["readonly client: ConvoHopClient"],
+              "docs": ""
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["readonly conversationId: string"],
+              "docs": ""
+            },
+            {
+              "name": "live",
+              "kind": "property",
+              "signatures": ["readonly live: ConversationLive"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(client: ConvoHopClient, conversationId: string)"],
+              "docs": ""
+            },
+            {
+              "name": "get",
+              "kind": "method",
+              "signatures": [
+                "get(): Promise<{\n    conversationId: string;\n    revision: string;\n    title: string;\n    props: Record<string, unknown> | null;\n    latestSequence: string;\n    membership: {\n        conversationId: string;\n        principalId: string;\n        role: string;\n        status: string;\n        membershipEpoch: string;\n        visibilityEpoch: string;\n        revision: string;\n        visibleFromSequence: string;\n        canStartBroadcast: boolean;\n    } | null;\n}>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "messages",
+              "kind": "property",
+              "signatures": ["readonly messages: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "send",
+                  "kind": "property",
+                  "signatures": [
+                    "send: (message: {\n    text: string;\n    props?: ProtocolObject;\n}, options?: CommandOptions) => Promise<{\n    messageId: string;\n    conversationId: string;\n    sequence: string;\n    revision: string;\n    status: string;\n    cursor: {\n        incarnation: string;\n        conversationId: string;\n        sequence: string;\n    } | null;\n} | null>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "list",
+                  "kind": "property",
+                  "signatures": [
+                    "list: (beforeSequence?: string) => Promise<import(\"@convohop/core\").ItemPage<{\n    messageId: string;\n    conversationId: string;\n    authorId: string;\n    sequence: string;\n    revision: string;\n    revisionSequence: string;\n    createdAt: string;\n    deleted: boolean;\n    text: string | null;\n    props: Record<string, unknown> | null;\n    editedAt: string | null;\n}>>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "edit",
+                  "kind": "property",
+                  "signatures": [
+                    "edit: (message: ConversationMessage, text: string, options?: CommandOptions) => Promise<{\n    messageId: string;\n    conversationId: string;\n    authorId: string;\n    sequence: string;\n    revision: string;\n    revisionSequence: string;\n    createdAt: string;\n    deleted: boolean;\n    text: string | null;\n    props: Record<string, unknown> | null;\n    editedAt: string | null;\n}>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "delete",
+                  "kind": "property",
+                  "signatures": [
+                    "delete: (message: ConversationMessage, options?: CommandOptions) => Promise<{\n    messageId: string;\n    conversationId: string;\n    authorId: string;\n    sequence: string;\n    revision: string;\n    revisionSequence: string;\n    createdAt: string;\n    deleted: boolean;\n    text: string | null;\n    props: Record<string, unknown> | null;\n    editedAt: string | null;\n}>"
+                  ],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "mute",
+              "kind": "property",
+              "signatures": ["readonly mute: { … }"],
+              "docs": "This user's mute of message push notifications for the conversation. `until` (RFC 3339, in the future) applies\nonly to a mute. Calls still ring a muted member.",
+              "members": [
+                {
+                  "name": "get",
+                  "kind": "property",
+                  "signatures": ["get: () => Promise<ConversationMute>"],
+                  "docs": ""
+                },
+                {
+                  "name": "set",
+                  "kind": "property",
+                  "signatures": [
+                    "set: (input: {\n    muted: boolean;\n    until?: string;\n}, options?: CommandOptions) => Promise<ConversationMute>"
+                  ],
+                  "docs": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ConversationLive",
+          "kind": "class",
+          "signatures": ["class ConversationLive"],
+          "docs": "",
+          "members": [
+            {
+              "name": "conversation",
+              "kind": "property",
+              "signatures": ["readonly conversation: ConversationHandle"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(conversation: ConversationHandle)"],
+              "docs": ""
+            },
+            {
+              "name": "current",
+              "kind": "method",
+              "signatures": ["current(): Promise<LiveSessionHandle | null>"],
+              "docs": ""
+            },
+            {
+              "name": "history",
+              "kind": "method",
+              "signatures": [
+                "history(options?: PageOptions): Promise<{\n    nextCursor: string | null;\n    complete: boolean;\n    partialReason: string | null;\n    refreshRequired: boolean;\n    items: Array<{\n        liveSessionId: string;\n        conversationId: string;\n        creatorId: string;\n        kind: GraphqlTypes.LiveSessionKind;\n        mediaProfile: GraphqlTypes.LiveMediaProfile;\n        state: GraphqlTypes.LiveSessionState;\n        generation: string;\n        revision: string;\n        createdAt: string;\n        expiresAt: string;\n        myParticipation: { … } | null;\n        mediaCutoff: { … } | null;\n    }>;\n}>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "startVoice",
+              "kind": "method",
+              "signatures": ["startVoice(options?: CommandOptions): Promise<LiveStartOperation>"],
+              "docs": ""
+            },
+            {
+              "name": "startVideo",
+              "kind": "method",
+              "signatures": ["startVideo(options?: CommandOptions): Promise<LiveStartOperation>"],
+              "docs": ""
+            },
+            {
+              "name": "startBroadcast",
+              "kind": "method",
+              "signatures": [
+                "startBroadcast(input: {\n    mediaProfile: LiveMediaProfile;\n}, options?: CommandOptions): Promise<LiveStartOperation>"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ConversationMessage",
+          "kind": "type",
+          "signatures": [
+            "type ConversationMessage = NonNullable<OperationPayload<\"communication.getMessage\">[\"result\"]>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "ConversationMute",
+          "kind": "type",
+          "signatures": [
+            "type ConversationMute = OperationPayload<\"communication.conversationMute\">[\"result\"]"
+          ],
+          "docs": "Whether a member muted message push notifications for a conversation, and until when.",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "ConversationStream",
+          "kind": "class",
+          "signatures": ["class ConversationStream"],
+          "docs": "",
+          "members": [
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["readonly client: ConvoHopClient"],
+              "docs": ""
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["readonly conversationId: string"],
+              "docs": ""
+            },
+            {
+              "name": "route",
+              "kind": "property",
+              "signatures": ["readonly route: ProjectRoute"],
+              "docs": ""
+            },
+            {
+              "name": "apply",
+              "kind": "property",
+              "signatures": ["readonly apply: (events: ProtocolObject[]) => Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "onError",
+              "kind": "property",
+              "signatures": ["readonly onError: (error: Error) => void"],
+              "docs": ""
+            },
+            {
+              "name": "onClose",
+              "kind": "property",
+              "signatures": ["readonly onClose?: (() => void) | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(client: ConvoHopClient, conversationId: string, route: ProjectRoute, token: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void, onClose?: (() => void) | undefined)"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "cursor",
+              "kind": "property",
+              "signatures": ["get cursor(): ConversationCursor | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "closed",
+              "kind": "property",
+              "signatures": ["get closed(): boolean"],
+              "docs": ""
+            },
+            {
+              "name": "retire",
+              "kind": "method",
+              "signatures": ["retire(): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "resyncAuthorizedHistory",
+              "kind": "method",
+              "signatures": ["resyncAuthorizedHistory(): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "start",
+              "kind": "method",
+              "signatures": ["start(): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "reconcile",
+              "kind": "method",
+              "signatures": ["reconcile(): Promise<void>"],
+              "docs": ""
+            },
+            {"name": "close", "kind": "method", "signatures": ["close(): void"], "docs": ""}
+          ]
+        },
+        {
+          "name": "ConvoHopClient",
+          "kind": "class",
+          "signatures": ["class ConvoHopClient"],
+          "docs": "",
+          "members": [
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["readonly projectId: string"],
+              "docs": ""
+            },
+            {
+              "name": "principalId",
+              "kind": "property",
+              "signatures": ["readonly principalId: string"],
+              "docs": ""
+            },
+            {
+              "name": "http",
+              "kind": "property",
+              "signatures": ["readonly http: ConvoHopTransport"],
+              "docs": ""
+            },
+            {
+              "name": "storage",
+              "kind": "property",
+              "signatures": ["readonly storage: RecoveryStorage | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(options: ConvoHopClientOptions)"],
+              "docs": ""
+            },
+            {
+              "name": "sessionBinding",
+              "kind": "property",
+              "signatures": ["get sessionBinding(): Readonly<SessionMetadata> | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "sessionRefreshState",
+              "kind": "property",
+              "signatures": ["get sessionRefreshState(): SessionRefreshState"],
+              "docs": ""
+            },
+            {
+              "name": "initialize",
+              "kind": "method",
+              "signatures": ["initialize(): Promise<ProjectRoute>"],
+              "docs": ""
+            },
+            {
+              "name": "refreshSession",
+              "kind": "method",
+              "signatures": ["refreshSession(): Promise<SessionMetadata>"],
+              "docs": ""
+            },
+            {
+              "name": "conversation",
+              "kind": "method",
+              "signatures": ["conversation(id: string): ConversationHandle"],
+              "docs": ""
+            },
+            {
+              "name": "getConversation",
+              "kind": "method",
+              "signatures": ["getConversation(id: string): Promise<Conversation>"],
+              "docs": ""
+            },
+            {
+              "name": "requests",
+              "kind": "property",
+              "signatures": ["readonly requests: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "resolve",
+                  "kind": "property",
+                  "signatures": [
+                    "resolve: (requestId: string) => Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "retry",
+                  "kind": "property",
+                  "signatures": [
+                    "retry: (requestId: string) => Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
+                  ],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "liveSession",
+              "kind": "method",
+              "signatures": ["liveSession(id: string): Promise<LiveSessionHandle>"],
+              "docs": ""
+            },
+            {
+              "name": "liveAlerts",
+              "kind": "property",
+              "signatures": ["readonly liveAlerts: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "list",
+                  "kind": "property",
+                  "signatures": [
+                    "list: (options?: PageOptions) => Promise<OperationPayload<\"communication.liveSessionAlerts\">[\"result\"]>"
+                  ],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "messages",
+              "kind": "method",
+              "signatures": [
+                "messages(id: string, beforeSequence?: string): Promise<ItemPage<ConversationMessage>>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "send",
+              "kind": "method",
+              "signatures": [
+                "send(id: string, text: string, requestId?: string): Promise<SendReceipt>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "edit",
+              "kind": "method",
+              "signatures": [
+                "edit(message: ConversationMessage, text: string, requestId?: string): Promise<ConversationMessage>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "delete",
+              "kind": "method",
+              "signatures": [
+                "delete(message: ConversationMessage, requestId?: string): Promise<ConversationMessage>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "events",
+              "kind": "method",
+              "signatures": [
+                "events(id: string, after?: ConversationCursor): Promise<ItemPage<ProtocolObject> & {\n    nextCursor: ConversationCursor;\n}>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "reportRead",
+              "kind": "method",
+              "signatures": [
+                "reportRead(id: string, membership: Membership, throughSequence: string): Promise<ProtocolObject>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "receipts",
+              "kind": "method",
+              "signatures": ["receipts(id: string): Promise<ItemPage<ProtocolObject>>"],
+              "docs": ""
+            },
+            {
+              "name": "search",
+              "kind": "method",
+              "signatures": [
+                "search(query: string, conversationIds?: string[]): Promise<ItemPage<SearchHit>>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "recoverPending",
+              "kind": "method",
+              "signatures": ["recoverPending(onError: (error: Error) => void): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "watch",
+              "kind": "method",
+              "signatures": [
+                "watch(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "resyncAuthorizedHistory",
+              "kind": "method",
+              "signatures": [
+                "resyncAuthorizedHistory(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ConvoHopClientOptions",
+          "kind": "interface",
+          "signatures": ["interface ConvoHopClientOptions"],
+          "docs": "",
+          "members": [
+            {"name": "baseUrl", "kind": "property", "signatures": ["baseUrl: string"], "docs": ""},
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": ""
+            },
+            {
+              "name": "sessionToken",
+              "kind": "property",
+              "signatures": ["sessionToken: string"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation: string"],
+              "docs": ""
+            },
+            {
+              "name": "principalId",
+              "kind": "property",
+              "signatures": ["principalId: string"],
+              "docs": ""
+            },
+            {
+              "name": "recoveryStorage",
+              "kind": "property",
+              "signatures": ["recoveryStorage?: RecoveryStorage"],
+              "docs": ""
+            },
+            {
+              "name": "fetch",
+              "kind": "property",
+              "signatures": ["fetch?: typeof fetch"],
+              "docs": ""
+            },
+            {
+              "name": "sessionRefresh",
+              "kind": "property",
+              "signatures": ["sessionRefresh?: SessionRefresh"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ConvoHopProblem",
+          "kind": "class",
+          "signatures": ["class ConvoHopProblem extends Error"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "code",
+              "kind": "property",
+              "signatures": ["readonly code: string"],
+              "docs": ""
+            },
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["readonly requestId: string"],
+              "docs": ""
+            },
+            {
+              "name": "outcome",
+              "kind": "property",
+              "signatures": ["readonly outcome: string"],
+              "docs": ""
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["readonly status: number"],
+              "docs": ""
+            },
+            {
+              "name": "retryAfter",
+              "kind": "property",
+              "signatures": ["readonly retryAfter?: number"],
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds.\nThe SDK never waits or resends on its own because of it."
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(code: string, requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {\n    retryAfter?: number;\n})"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ConvoHopTransport",
+          "kind": "class",
+          "signatures": ["class ConvoHopTransport"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "baseUrl",
+              "kind": "property",
+              "signatures": ["readonly baseUrl: string"],
+              "docs": ""
+            },
+            {
+              "name": "durableRecovery",
+              "kind": "property",
+              "signatures": ["readonly durableRecovery: boolean"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation: string"],
+              "docs": ""
+            },
+            {
+              "name": "servingEpoch",
+              "kind": "property",
+              "signatures": ["servingEpoch: string | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(options: ConvoHopTransportOptions)"],
+              "docs": ""
+            },
+            {
+              "name": "initializeRecovery",
+              "kind": "method",
+              "signatures": ["initializeRecovery(): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "recoveryStates",
+              "kind": "property",
+              "signatures": ["get recoveryStates(): readonly RecoveryState[]"],
+              "docs": ""
+            },
+            {
+              "name": "execute",
+              "kind": "method",
+              "signatures": [
+                "execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>, requestId?: string, credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "retry",
+              "kind": "method",
+              "signatures": [
+                "retry(requestId: string): Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ConvoHopTransportOptions",
+          "kind": "interface",
+          "signatures": ["interface ConvoHopTransportOptions"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {"name": "baseUrl", "kind": "property", "signatures": ["baseUrl: string"], "docs": ""},
+            {
+              "name": "credential",
+              "kind": "property",
+              "signatures": ["credential?: string"],
+              "docs": ""
+            },
+            {
+              "name": "namespace",
+              "kind": "property",
+              "signatures": ["namespace: string"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation?: string"],
+              "docs": ""
+            },
+            {
+              "name": "recoveryStorage",
+              "kind": "property",
+              "signatures": ["recoveryStorage?: RecoveryStorage"],
+              "docs": ""
+            },
+            {
+              "name": "asyncRecoveryStorage",
+              "kind": "property",
+              "signatures": ["asyncRecoveryStorage?: AsyncRecoveryStorage"],
+              "docs": ""
+            },
+            {
+              "name": "fetch",
+              "kind": "property",
+              "signatures": ["fetch?: typeof fetch"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "GraphqlTypes",
+          "kind": "namespace",
+          "signatures": ["namespace GraphqlTypes"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "ItemPage",
+          "kind": "interface",
+          "signatures": ["interface ItemPage<T>"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {"name": "items", "kind": "property", "signatures": ["items: T[]"], "docs": ""},
+            {
+              "name": "complete",
+              "kind": "property",
+              "signatures": ["complete: boolean"],
+              "docs": ""
+            },
+            {
+              "name": "refreshRequired",
+              "kind": "property",
+              "signatures": ["refreshRequired: boolean"],
+              "docs": ""
+            },
+            {
+              "name": "nextCursor",
+              "kind": "property",
+              "signatures": ["nextCursor?: unknown"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "LiveConnectOptions",
+          "kind": "interface",
+          "signatures": ["interface LiveConnectOptions extends MediaOptions, CommandOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "iceTransportPolicy",
+              "kind": "property",
+              "signatures": ["iceTransportPolicy?: \"all\" | \"relay\""],
+              "docs": "",
+              "inherited": "MediaOptions"
+            },
+            {
+              "name": "localVideo",
+              "kind": "property",
+              "signatures": ["localVideo?: HTMLVideoElement"],
+              "docs": "",
+              "inherited": "MediaOptions"
+            },
+            {
+              "name": "onTrack",
+              "kind": "property",
+              "signatures": ["onTrack?: (track: RemoteMedia) => void"],
+              "docs": "",
+              "inherited": "MediaOptions"
+            },
+            {
+              "name": "onTrackRemoved",
+              "kind": "property",
+              "signatures": ["onTrackRemoved?: (track: RemoteMedia) => void"],
+              "docs": "",
+              "inherited": "MediaOptions"
+            },
+            {
+              "name": "onDisconnected",
+              "kind": "property",
+              "signatures": ["onDisconnected?: () => void"],
+              "docs": "",
+              "inherited": "MediaOptions"
+            },
+            {
+              "name": "onAudioPlaybackBlocked",
+              "kind": "property",
+              "signatures": ["onAudioPlaybackBlocked?: () => void"],
+              "docs": "",
+              "inherited": "MediaOptions"
+            },
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["requestId?: string"],
+              "docs": "",
+              "inherited": "CommandOptions"
+            }
+          ]
+        },
+        {
+          "name": "LiveConnectionGrant",
+          "kind": "type",
+          "signatures": [
+            "type LiveConnectionGrant = OperationPayload<\"communication.liveSessionCredentials\">[\"result\"]"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "LiveEndOperation",
+          "kind": "class",
+          "signatures": ["class LiveEndOperation extends LiveAction"],
+          "docs": "",
+          "members": [
+            {
+              "name": "receipt",
+              "kind": "property",
+              "signatures": ["readonly receipt: OperationPayload<\"communication.endLiveSession\">"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(client: ConvoHopClient, receipt: OperationPayload<\"communication.endLiveSession\">)"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["readonly client: ConvoHopClient"],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "operationId",
+              "kind": "property",
+              "signatures": ["readonly operationId: string"],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "liveSessionId",
+              "kind": "property",
+              "signatures": ["readonly liveSessionId: string"],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "kind",
+              "kind": "property",
+              "signatures": ["readonly kind: \"START\" | \"END\""],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["readonly requestId: string"],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "get",
+              "kind": "method",
+              "signatures": ["get(): Promise<LiveOperation>"],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "completed",
+              "kind": "method",
+              "signatures": [
+                "completed(options?: LiveWaitOptions): Promise<NonNullable<LiveOperation[\"completion\"]>>"
+              ],
+              "docs": "",
+              "inherited": "LiveAction"
+            }
+          ]
+        },
+        {
+          "name": "LiveOperation",
+          "kind": "type",
+          "signatures": [
+            "type LiveOperation = OperationPayload<\"communication.liveSessionOperation\">[\"result\"]"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "LiveParticipation",
+          "kind": "type",
+          "signatures": [
+            "type LiveParticipation = OperationPayload<\"communication.joinLiveSession\">[\"result\"][\"participation\"]"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "LiveParticipationHandle",
+          "kind": "class",
+          "signatures": ["class LiveParticipationHandle"],
+          "docs": "",
+          "members": [
+            {
+              "name": "live",
+              "kind": "property",
+              "signatures": ["readonly live: LiveSessionHandle"],
+              "docs": ""
+            },
+            {
+              "name": "snapshot",
+              "kind": "property",
+              "signatures": ["readonly snapshot: LiveParticipation"],
+              "docs": ""
+            },
+            {
+              "name": "participationId",
+              "kind": "property",
+              "signatures": ["readonly participationId: string"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(live: LiveSessionHandle, snapshot: LiveParticipation)"],
+              "docs": ""
+            },
+            {
+              "name": "get",
+              "kind": "method",
+              "signatures": ["get(): Promise<LiveParticipation>"],
+              "docs": ""
+            },
+            {
+              "name": "connect",
+              "kind": "method",
+              "signatures": ["connect(options?: LiveConnectOptions): Promise<MediaConnection>"],
+              "docs": ""
+            },
+            {
+              "name": "leave",
+              "kind": "method",
+              "signatures": [
+                "leave(options?: CommandOptions): Promise<{\n    status: string;\n    requestId: string;\n    receiptId: string;\n    committedAt: string;\n    replayed: boolean;\n    result: {\n        liveSessionId: string;\n        participationId: string;\n        mediaCutoff: {\n            state: GraphqlTypes.LiveCutoffState;\n            evidence: GraphqlTypes.LiveCutoffEvidence | null;\n            enforcedAt: string | null;\n            operationId: string | null;\n            scope: { … };\n        };\n    };\n}>"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "LiveSession",
+          "kind": "type",
+          "signatures": [
+            "type LiveSession = OperationPayload<\"communication.liveSession\">[\"result\"]"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "LiveSessionHandle",
+          "kind": "class",
+          "signatures": ["class LiveSessionHandle"],
+          "docs": "",
+          "members": [
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["readonly client: ConvoHopClient"],
+              "docs": ""
+            },
+            {
+              "name": "snapshot",
+              "kind": "property",
+              "signatures": ["readonly snapshot: LiveSession"],
+              "docs": ""
+            },
+            {
+              "name": "liveSessionId",
+              "kind": "property",
+              "signatures": ["readonly liveSessionId: string"],
+              "docs": ""
+            },
+            {
+              "name": "generation",
+              "kind": "property",
+              "signatures": ["readonly generation: string"],
+              "docs": ""
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["readonly conversationId: string"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(client: ConvoHopClient, snapshot: LiveSession)"],
+              "docs": ""
+            },
+            {
+              "name": "get",
+              "kind": "method",
+              "signatures": [
+                "static get(client: ConvoHopClient, liveSessionId: string): Promise<LiveSessionHandle>"
+              ],
+              "docs": "",
+              "static": true
+            },
+            {
+              "name": "get",
+              "kind": "method",
+              "signatures": ["get(): Promise<LiveSession>"],
+              "docs": ""
+            },
+            {
+              "name": "join",
+              "kind": "method",
+              "signatures": ["join(options?: CommandOptions): Promise<LiveParticipationHandle>"],
+              "docs": ""
+            },
+            {
+              "name": "participation",
+              "kind": "method",
+              "signatures": ["participation(): Promise<LiveParticipationHandle | null>"],
+              "docs": ""
+            },
+            {
+              "name": "participants",
+              "kind": "method",
+              "signatures": [
+                "participants(options?: PageOptions): Promise<{\n    nextCursor: string | null;\n    complete: boolean;\n    partialReason: string | null;\n    refreshRequired: boolean;\n    items: Array<{\n        participationId: string;\n        principalId: string;\n        membershipEpoch: string;\n        role: GraphqlTypes.LiveRole;\n        state: GraphqlTypes.LiveParticipationState;\n        reservationExpiresAt: string | null;\n        nativeConnectionId: string | null;\n        permissions: { … };\n        mediaCutoff: { … } | null;\n    }>;\n}>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "alerts",
+              "kind": "property",
+              "signatures": ["readonly alerts: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "send",
+                  "kind": "property",
+                  "signatures": [
+                    "send: (principalIds: string[], options?: CommandOptions) => Promise<{\n    status: string;\n    requestId: string;\n    receiptId: string;\n    committedAt: string;\n    replayed: boolean;\n    result: {\n        liveSessionId: string;\n        created: string;\n        suppressed: string;\n    };\n}>"
+                  ],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "end",
+              "kind": "method",
+              "signatures": ["end(options?: CommandOptions): Promise<LiveEndOperation>"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "LiveStartOperation",
+          "kind": "class",
+          "signatures": ["class LiveStartOperation extends LiveAction"],
+          "docs": "",
+          "members": [
+            {
+              "name": "receipt",
+              "kind": "property",
+              "signatures": [
+                "readonly receipt: OperationPayload<\"communication.startLiveSession\">"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(client: ConvoHopClient, receipt: OperationPayload<\"communication.startLiveSession\">)"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "ready",
+              "kind": "method",
+              "signatures": ["ready(options?: LiveWaitOptions): Promise<LiveSessionHandle>"],
+              "docs": ""
+            },
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["readonly client: ConvoHopClient"],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "operationId",
+              "kind": "property",
+              "signatures": ["readonly operationId: string"],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "liveSessionId",
+              "kind": "property",
+              "signatures": ["readonly liveSessionId: string"],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "kind",
+              "kind": "property",
+              "signatures": ["readonly kind: \"START\" | \"END\""],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["readonly requestId: string"],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "get",
+              "kind": "method",
+              "signatures": ["get(): Promise<LiveOperation>"],
+              "docs": "",
+              "inherited": "LiveAction"
+            },
+            {
+              "name": "completed",
+              "kind": "method",
+              "signatures": [
+                "completed(options?: LiveWaitOptions): Promise<NonNullable<LiveOperation[\"completion\"]>>"
+              ],
+              "docs": "",
+              "inherited": "LiveAction"
+            }
+          ]
+        },
+        {
+          "name": "LiveWaitOptions",
+          "kind": "interface",
+          "signatures": ["interface LiveWaitOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "signal",
+              "kind": "property",
+              "signatures": ["signal?: AbortSignal"],
+              "docs": ""
+            },
+            {
+              "name": "timeoutMs",
+              "kind": "property",
+              "signatures": ["timeoutMs?: number"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "MediaConnection",
+          "kind": "class",
+          "signatures": ["class MediaConnection"],
+          "docs": "",
+          "members": [
+            {
+              "name": "participation",
+              "kind": "property",
+              "signatures": ["readonly participation: LiveParticipationHandle"],
+              "docs": ""
+            },
+            {
+              "name": "options",
+              "kind": "property",
+              "signatures": ["readonly options: MediaOptions"],
+              "docs": ""
+            },
+            {
+              "name": "admissionId",
+              "kind": "property",
+              "signatures": ["admissionId: string | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "nativeConnectionId",
+              "kind": "property",
+              "signatures": ["nativeConnectionId: string | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "reconnect",
+              "kind": "method",
+              "signatures": ["reconnect(): Promise<MediaConnection>"],
+              "docs": ""
+            },
+            {
+              "name": "connected",
+              "kind": "property",
+              "signatures": ["get connected(): boolean"],
+              "docs": ""
+            },
+            {
+              "name": "microphone",
+              "kind": "method",
+              "signatures": ["microphone(enabled: boolean): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "camera",
+              "kind": "method",
+              "signatures": ["camera(enabled: boolean): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "enableAudio",
+              "kind": "method",
+              "signatures": ["enableAudio(): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "stats",
+              "kind": "method",
+              "signatures": ["stats(): Promise<MediaStats>"],
+              "docs": ""
+            },
+            {
+              "name": "disconnect",
+              "kind": "method",
+              "signatures": ["disconnect(): Promise<void>"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "MediaOptions",
+          "kind": "interface",
+          "signatures": ["interface MediaOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "iceTransportPolicy",
+              "kind": "property",
+              "signatures": ["iceTransportPolicy?: \"all\" | \"relay\""],
+              "docs": ""
+            },
+            {
+              "name": "localVideo",
+              "kind": "property",
+              "signatures": ["localVideo?: HTMLVideoElement"],
+              "docs": ""
+            },
+            {
+              "name": "onTrack",
+              "kind": "property",
+              "signatures": ["onTrack?: (track: RemoteMedia) => void"],
+              "docs": ""
+            },
+            {
+              "name": "onTrackRemoved",
+              "kind": "property",
+              "signatures": ["onTrackRemoved?: (track: RemoteMedia) => void"],
+              "docs": ""
+            },
+            {
+              "name": "onDisconnected",
+              "kind": "property",
+              "signatures": ["onDisconnected?: () => void"],
+              "docs": ""
+            },
+            {
+              "name": "onAudioPlaybackBlocked",
+              "kind": "property",
+              "signatures": ["onAudioPlaybackBlocked?: () => void"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "MediaStats",
+          "kind": "interface",
+          "signatures": ["interface MediaStats"],
+          "docs": "",
+          "members": [
+            {
+              "name": "audioTracks",
+              "kind": "property",
+              "signatures": ["audioTracks: number"],
+              "docs": ""
+            },
+            {
+              "name": "videoTracks",
+              "kind": "property",
+              "signatures": ["videoTracks: number"],
+              "docs": ""
+            },
+            {
+              "name": "audioBytesReceived",
+              "kind": "property",
+              "signatures": ["audioBytesReceived: number"],
+              "docs": ""
+            },
+            {
+              "name": "videoBytesReceived",
+              "kind": "property",
+              "signatures": ["videoBytesReceived: number"],
+              "docs": ""
+            },
+            {
+              "name": "framesDecoded",
+              "kind": "property",
+              "signatures": ["framesDecoded: number"],
+              "docs": ""
+            },
+            {
+              "name": "localAudioEnabled",
+              "kind": "property",
+              "signatures": ["localAudioEnabled: boolean"],
+              "docs": ""
+            },
+            {
+              "name": "localVideoEnabled",
+              "kind": "property",
+              "signatures": ["localVideoEnabled: boolean"],
+              "docs": ""
+            },
+            {
+              "name": "tracks",
+              "kind": "property",
+              "signatures": [
+                "tracks: {\n    trackId: string;\n    participantIdentity: string;\n    kind: \"audio\" | \"video\";\n    bytesReceived: number;\n    framesDecoded: number;\n}[]"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "transports",
+              "kind": "property",
+              "signatures": [
+                "transports?: {\n    localCandidateType: string;\n    remoteCandidateType: string;\n    protocol: string;\n    relayProtocol?: string;\n}[]"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "Membership",
+          "kind": "type",
+          "signatures": [
+            "type Membership = NonNullable<OperationPayload<\"communication.members\">[\"result\"]>[\"items\"][number]"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "OperationInput",
+          "kind": "type",
+          "signatures": [
+            "type OperationInput<K extends OperationKey> = OperationTypes[K][\"variables\"] extends {\n    input?: infer I;\n} ? NonNullable<I> : Record<string, never>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "OperationKey",
+          "kind": "type",
+          "signatures": ["type OperationKey = keyof OperationTypes"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "OperationPayload",
+          "kind": "type",
+          "signatures": [
+            "type OperationPayload<K extends OperationKey> = OperationTypes[K][\"result\"][FieldName<K> & keyof OperationTypes[K][\"result\"]]"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "OperationTypes",
+          "kind": "interface",
+          "signatures": ["interface OperationTypes"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "PageOptions",
+          "kind": "interface",
+          "signatures": ["interface PageOptions"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {"name": "cursor", "kind": "property", "signatures": ["cursor?: string"], "docs": ""},
+            {"name": "limit", "kind": "property", "signatures": ["limit?: number"], "docs": ""}
+          ]
+        },
+        {
+          "name": "ProjectRoute",
+          "kind": "interface",
+          "signatures": ["interface ProjectRoute"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation: string"],
+              "docs": ""
+            },
+            {
+              "name": "servingEpoch",
+              "kind": "property",
+              "signatures": ["servingEpoch: string"],
+              "docs": ""
+            },
+            {
+              "name": "communicationBase",
+              "kind": "property",
+              "signatures": ["communicationBase: string"],
+              "docs": ""
+            },
+            {"name": "wssUrl", "kind": "property", "signatures": ["wssUrl: string"], "docs": ""},
+            {
+              "name": "expiresAt",
+              "kind": "property",
+              "signatures": ["expiresAt: string"],
+              "docs": ""
+            },
+            {
+              "name": "signature",
+              "kind": "property",
+              "signatures": ["signature: string"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ProtocolObject",
+          "kind": "type",
+          "signatures": ["type ProtocolObject = Record<string, unknown>"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "RecoveryState",
+          "kind": "interface",
+          "signatures": ["interface RecoveryState"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["requestId: string"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation: string"],
+              "docs": ""
+            },
+            {
+              "name": "payloadFingerprint",
+              "kind": "property",
+              "signatures": ["payloadFingerprint: string"],
+              "docs": ""
+            },
+            {
+              "name": "operation",
+              "kind": "property",
+              "signatures": ["operation: OperationKey"],
+              "docs": ""
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId?: string"],
+              "docs": ""
+            },
+            {
+              "name": "input",
+              "kind": "property",
+              "signatures": ["input: ProtocolObject"],
+              "docs": ""
+            },
+            {
+              "name": "firstSubmittedAt",
+              "kind": "property",
+              "signatures": ["firstSubmittedAt: number"],
+              "docs": ""
+            },
+            {
+              "name": "retryDeadline",
+              "kind": "property",
+              "signatures": ["retryDeadline: number"],
+              "docs": ""
+            },
+            {
+              "name": "attemptCount",
+              "kind": "property",
+              "signatures": ["attemptCount: number"],
+              "docs": ""
+            },
+            {
+              "name": "lastAttemptAt",
+              "kind": "property",
+              "signatures": ["lastAttemptAt: number"],
+              "docs": ""
+            },
+            {
+              "name": "lastAttemptClassification",
+              "kind": "property",
+              "signatures": ["lastAttemptClassification: string"],
+              "docs": ""
+            },
+            {
+              "name": "resolutionState",
+              "kind": "property",
+              "signatures": [
+                "resolutionState: \"pending\" | \"unknown\" | \"committed\" | \"accepted\""
+              ],
+              "docs": ""
+            },
+            {
+              "name": "mediaAdmissionAttempted",
+              "kind": "property",
+              "signatures": ["mediaAdmissionAttempted?: true"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "RecoveryStorage",
+          "kind": "interface",
+          "signatures": ["interface RecoveryStorage"],
+          "docs": "",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "getItem",
+              "kind": "method",
+              "signatures": ["getItem(key: string): string | null"],
+              "docs": ""
+            },
+            {
+              "name": "setItem",
+              "kind": "method",
+              "signatures": ["setItem(key: string, value: string): void"],
+              "docs": ""
+            },
+            {
+              "name": "removeItem",
+              "kind": "method",
+              "signatures": ["removeItem(key: string): void"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "RemoteMedia",
+          "kind": "interface",
+          "signatures": ["interface RemoteMedia"],
+          "docs": "",
+          "members": [
+            {"name": "trackId", "kind": "property", "signatures": ["trackId: string"], "docs": ""},
+            {
+              "name": "participantIdentity",
+              "kind": "property",
+              "signatures": ["participantIdentity: string"],
+              "docs": ""
+            },
+            {
+              "name": "kind",
+              "kind": "property",
+              "signatures": ["kind: \"audio\" | \"video\""],
+              "docs": ""
+            },
+            {
+              "name": "element",
+              "kind": "property",
+              "signatures": ["element: HTMLMediaElement"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "ScopeRequiredProblem",
+          "kind": "class",
+          "signatures": ["class ScopeRequiredProblem extends ConvoHopProblem"],
+          "docs": "`SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable).\nClassify it by `instanceof ConvoHopProblem` and `code`; `scope` is a diagnostic detail.",
+          "origin": "@convohop/core",
+          "members": [
+            {
+              "name": "code",
+              "kind": "property",
+              "signatures": ["readonly code: \"SCOPE_REQUIRED\""],
+              "docs": ""
+            },
+            {
+              "name": "scope",
+              "kind": "property",
+              "signatures": ["readonly scope: string | undefined"],
+              "docs": "The missing scope. The authority names it only in the message, so this is `undefined` when the message does not\nmatch the documented wording. A missing read scope is reported as the read scope even where its manage scope\n(for example `callManage` for `callRead`) would also satisfy the operation."
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {\n    retryAfter?: number;\n})"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["readonly requestId: string"],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "outcome",
+              "kind": "property",
+              "signatures": ["readonly outcome: string"],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["readonly status: number"],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "retryAfter",
+              "kind": "property",
+              "signatures": ["readonly retryAfter?: number"],
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds.\nThe SDK never waits or resends on its own because of it.",
+              "inherited": "ConvoHopProblem"
+            }
+          ]
+        },
+        {
+          "name": "SearchHit",
+          "kind": "type",
+          "signatures": [
+            "type SearchHit = NonNullable<OperationPayload<\"communication.search\">[\"result\"]>[\"items\"][number] & {\n    message: ConversationMessage;\n}"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "SendReceipt",
+          "kind": "type",
+          "signatures": [
+            "type SendReceipt = NonNullable<OperationPayload<\"communication.sendMessage\">[\"result\"]> & {\n    cursor: ConversationCursor;\n}"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "SessionBootstrap",
+          "kind": "type",
+          "signatures": [
+            "type SessionBootstrap = SessionResult & {\n    session: NonNullable<SessionResult[\"session\"]>;\n}"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "SessionMetadata",
+          "kind": "type",
+          "signatures": [
+            "type SessionMetadata = OperationPayload<\"communication.currentSession\">[\"result\"]"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "SessionRefresh",
+          "kind": "type",
+          "signatures": [
+            "type SessionRefresh = (current: Readonly<SessionMetadata>) => Promise<SessionBootstrap>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "SessionRefreshState",
+          "kind": "type",
+          "signatures": [
+            "type SessionRefreshState = \"disabled\" | \"uninitialized\" | \"ready\" | \"refreshing\" | \"blocked\""
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "operationCatalog",
+          "kind": "constant",
+          "signatures": ["const operationCatalog: Record<OperationKey, OperationCatalogEntry>"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseConversation",
+          "kind": "function",
+          "signatures": ["function parseConversation(value: unknown): Conversation"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseCounter",
+          "kind": "function",
+          "signatures": ["function parseCounter(value: unknown): string"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseCursor",
+          "kind": "function",
+          "signatures": ["function parseCursor(value: unknown): ConversationCursor"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseId",
+          "kind": "function",
+          "signatures": ["function parseId(value: unknown): string"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseMembership",
+          "kind": "function",
+          "signatures": ["function parseMembership(value: unknown): Membership"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseMessage",
+          "kind": "function",
+          "signatures": ["function parseMessage(value: unknown): ConversationMessage"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseObject",
+          "kind": "function",
+          "signatures": ["function parseObject(value: unknown): ProtocolObject"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parsePage",
+          "kind": "function",
+          "signatures": [
+            "function parsePage<T>(value: unknown, parse: (value: unknown) => T): ItemPage<T>"
+          ],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseSearchHit",
+          "kind": "function",
+          "signatures": ["function parseSearchHit(value: unknown): SearchHit"],
+          "docs": "",
+          "origin": "@convohop/core"
+        },
+        {
+          "name": "parseString",
+          "kind": "function",
+          "signatures": ["function parseString(value: unknown): string"],
+          "docs": "",
+          "origin": "@convohop/core"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+# ConvoHop SDK documentation
+
+> Reference documentation, quickstarts and tested examples for the ConvoHop SDKs.
+
+Pages are Markdown. Each language has an overview, quickstarts with tested code, a reference for each package and the SDK members that send each API operation. The API operation pages document the GraphQL API that every SDK wraps.
+
+## TypeScript
+
+- [TypeScript SDKs](typescript/index.md): @convohop/server and @convohop/client wrap the ConvoHop API for TypeScript and JavaScript. The server SDK runs in your backend with a secret backend key, and the client SDK runs in your users' apps with a short-lived session for one user.
+- [TypeScript server quickstart](typescript/quickstarts/server.md): Call ConvoHop from your Node.js backend with @convohop/server: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
+- [TypeScript client quickstart](typescript/quickstarts/client.md): Use ConvoHop in your users' browsers with @convohop/client: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads.
+- [TypeScript webhooks quickstart](typescript/quickstarts/webhooks.md): Receive ConvoHop events in your backend with @convohop/server: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
+- [TypeScript push notifications quickstart](typescript/quickstarts/push.md): Send push notifications for ConvoHop messages and calls: @convohop/server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
+- [TypeScript calling quickstart](typescript/quickstarts/calling.md): Add voice and video calls to a conversation with @convohop/client: start a call and ring other members, join the current call, and leave or end it.
+- [TypeScript reference](typescript/reference/index.md): The public API of each TypeScript package, generated from its declarations.
+- [@convohop/server](typescript/reference/server.md): Server SDK for trusted Node.js runtimes: backend-key data-plane calls, management, webhook verification and push requests.
+- [@convohop/client](typescript/reference/client.md): Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.
+- [TypeScript operation coverage](typescript/reference/operations.md): The TypeScript SDK members that send each API operation. 52 of the 76 operations that TypeScript packages can send have a method.
+
+## API operations
+
+- [API operations](operations/index.md): Every operation in the ConvoHop GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it.
+- [communication.capabilities](operations/communication/capabilities.md): Describe the features, limits and API model the authority supports.
+- [communication.route](operations/communication/route.md): Return the signed route: project incarnation, serving epoch and realtime endpoint. Call it before other communication operations and again after WRONG_REGION.
+- [communication.currentSession](operations/communication/currentSession.md): Return the calling user session.
+- [communication.getPrincipal](operations/communication/getPrincipal.md): Read a principal (an application user).
+- [communication.getConversation](operations/communication/getConversation.md): Read a conversation.
+- [communication.members](operations/communication/members.md): List the members of a conversation.
+- [communication.messages](operations/communication/messages.md): List the messages of a conversation, newest first. A backend key reads the full history, or the history visible to the member named by actAsPrincipalId.
+- [communication.getMessage](operations/communication/getMessage.md): Read one message. A backend key reads any message, or reads as the member named by actAsPrincipalId.
+- [communication.events](operations/communication/events.md): Replay committed conversation events after a cursor, in sequence order.
+- [communication.receipts](operations/communication/receipts.md): List the delivery and read receipts of a conversation.
+- [communication.inbox](operations/communication/inbox.md): List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.
+- [communication.search](operations/communication/search.md): Search the messages visible to the calling user. A backend key searches as the member named by actAsPrincipalId, or within scope.conversationIds.
+- [communication.resolveRequest](operations/communication/resolveRequest.md): Look up the stored outcome of an earlier communication mutation by its requestId.
+- [communication.getOperation](operations/communication/getOperation.md): Read the state of a long-running communication operation.
+- [communication.conversationMute](operations/communication/conversationMute.md): Read whether a member has muted message push notifications for a conversation. A backend key must name the member with actAsPrincipalId.
+- [communication.currentLiveSession](operations/communication/currentLiveSession.md): Return the active live session of a conversation, if any.
+- [communication.liveSession](operations/communication/liveSession.md): Read a live session.
+- [communication.liveSessions](operations/communication/liveSessions.md): List the live sessions of a conversation.
+- [communication.liveSessionParticipants](operations/communication/liveSessionParticipants.md): List the participants of a live session.
+- [communication.liveSessionAlerts](operations/communication/liveSessionAlerts.md): List the live session alerts addressed to the calling user.
+- [communication.liveSessionOperation](operations/communication/liveSessionOperation.md): Read the state of a live session start or end operation.
+- [communication.sessionRequestOutcome](operations/communication/sessionRequestOutcome.md): Look up the outcome of an earlier issueSession or renewSession request, including the session it produced.
+- [communication.createPrincipal](operations/communication/createPrincipal.md): Create a principal for an application user.
+- [communication.disablePrincipal](operations/communication/disablePrincipal.md): Disable a principal.
+- [communication.issueSession](operations/communication/issueSession.md): Issue a short-lived user session token for a principal and device.
+- [communication.renewSession](operations/communication/renewSession.md): Renew a user session before it expires.
+- [communication.revokeSession](operations/communication/revokeSession.md): Revoke a user session.
+- [communication.createConversation](operations/communication/createConversation.md): Create a conversation with its initial members.
+- [communication.updateConversation](operations/communication/updateConversation.md): Update the title or properties of a conversation.
+- [communication.addMember](operations/communication/addMember.md): Add a member, or change the role of an active member.
+- [communication.addMembers](operations/communication/addMembers.md): Add several members in one request.
+- [communication.removeMember](operations/communication/removeMember.md): Remove a member from a conversation.
+- [communication.historyGrant](operations/communication/historyGrant.md): Expand the history a member can see to an earlier sequence.
+- [communication.sendMessage](operations/communication/sendMessage.md): Send a message. A backend key sends as its service principal, or as the member named by actAsPrincipalId.
+- [communication.editMessage](operations/communication/editMessage.md): Edit a message.
+- [communication.deleteMessage](operations/communication/deleteMessage.md): Delete a message.
+- [communication.reportReceipt](operations/communication/reportReceipt.md): Report delivery or read progress through a sequence.
+- [communication.typing](operations/communication/typing.md): Send an ephemeral typing signal.
+- [communication.setBroadcastPermission](operations/communication/setBroadcastPermission.md): Allow or deny a member to publish media in live sessions.
+- [communication.setConversationMute](operations/communication/setConversationMute.md): Mute or unmute message push notifications for a member of a conversation, optionally until a time. Calls still ring. A backend key must name the member with actAsPrincipalId.
+- [communication.startLiveSession](operations/communication/startLiveSession.md): Start a live session (a call) in a conversation. Readiness completes asynchronously.
+- [communication.joinLiveSession](operations/communication/joinLiveSession.md): Join a live session.
+- [communication.alertLiveSession](operations/communication/alertLiveSession.md): Alert (ring) conversation members about a live session.
+- [communication.leaveLiveSession](operations/communication/leaveLiveSession.md): Leave a live session.
+- [communication.endLiveSession](operations/communication/endLiveSession.md): End a live session for every participant. Completes asynchronously.
+- [communication.liveSessionCredentials](operations/communication/liveSessionCredentials.md): Obtain a media credential for one connection of the caller's participation.
+- [communication.redeemCredential](operations/communication/redeemCredential.md): Redeem a delivered credential with its delivery permit.
+- [communication.acknowledgeCredential](operations/communication/acknowledgeCredential.md): Acknowledge that a redeemed credential is stored, closing the delivery.
+- [communication.conversationEvents](operations/communication/conversationEvents.md): Subscribe to conversation events in sequence order, resuming after a cursor.
+- [management.capabilities](operations/management/capabilities.md): Describe the management features and limits the authority supports.
+- [management.organizations](operations/management/organizations.md): List the organizations the caller can access.
+- [management.getOrganization](operations/management/getOrganization.md): Read an organization.
+- [management.getDeployment](operations/management/getDeployment.md): Read a deployment.
+- [management.getProject](operations/management/getProject.md): Read a project.
+- [management.deploymentHealth](operations/management/deploymentHealth.md): Read the health of a deployment.
+- [management.deploymentUsage](operations/management/deploymentUsage.md): Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.
+- [management.projectUsage](operations/management/projectUsage.md): Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.
+- [management.organizationUsage](operations/management/organizationUsage.md): Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.
+- [management.webhookEndpoints](operations/management/webhookEndpoints.md): List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.
+- [management.webhookDeliveries](operations/management/webhookDeliveries.md): List recent deliveries of a webhook endpoint.
+- [management.resolveRequest](operations/management/resolveRequest.md): Look up the stored outcome of an earlier management mutation by its requestId.
+- [management.getOperation](operations/management/getOperation.md): Read the state of a long-running management operation.
+- [management.createOrganization](operations/management/createOrganization.md): Create an organization.
+- [management.createDeployment](operations/management/createDeployment.md): Create a deployment in an organization. Completes asynchronously.
+- [management.createProject](operations/management/createProject.md): Create a project in a ready deployment. Completes asynchronously.
+- [management.issueBackendKey](operations/management/issueBackendKey.md): Issue a scoped backend key. The secret is delivered once through a credential delivery.
+- [management.revokeBackendKey](operations/management/revokeBackendKey.md): Revoke a backend key, optionally revoking the sessions it issued.
+- [management.projectPolicy](operations/management/projectPolicy.md): Change the policy of a project.
+- [management.credentialPermit](operations/management/credentialPermit.md): Issue a signed permit that authorizes redeeming one credential delivery.
+- [management.pauseOperation](operations/management/pauseOperation.md): Pause a long-running operation.
+- [management.resumeOperation](operations/management/resumeOperation.md): Resume a paused operation.
+- [management.configureWebhook](operations/management/configureWebhook.md): Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.
+- [management.updateWebhook](operations/management/updateWebhook.md): Change the event types of a webhook endpoint, or enable or disable it.
+- [management.rotateWebhookSecret](operations/management/rotateWebhookSecret.md): Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.
+- [management.disableWebhook](operations/management/disableWebhook.md): Disable a webhook endpoint.
+- [management.replayWebhookDeliveries](operations/management/replayWebhookDeliveries.md): Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.
+
+## Optional
+
+- [Every page in one file](llms-full.txt): all of the pages above.
+- [TypeScript in one file](typescript/llms-full.txt): every TypeScript page.

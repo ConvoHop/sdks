@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ConvoHop SDK public surface",
+  "description": "The public API of one language's documented packages, as the language's extractor prints it. docgen extract adds $schema and stores it as docs/languages/<id>/surface.json. Extractors map their language's declarations onto these kinds. See docs/docs-pipeline.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["language", "packages"],
+  "properties": {
+    "$schema": { "const": "../../../spec/docs/surface.schema.json" },
+    "language": { "type": "string", "maxLength": 32, "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+    "packages": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/package" },
+      "description": "The packages of language.json, in its order."
+    }
+  },
+  "$defs": {
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "symbols"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "symbols": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/symbol" },
+          "description": "Every public top-level declaration, sorted by name in code-unit order."
+        }
+      }
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[^\\n`]+$"
+    },
+    "signatures": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Declarations in the language's syntax, one per overload, without documentation comments."
+    },
+    "docs": {
+      "type": "string",
+      "description": "The documentation comment as Markdown, possibly empty. Renderers escape <, { and } outside code and turn headings into bold paragraphs, so headings such as ## Examples can repeat across symbols."
+    },
+    "deprecated": {
+      "type": "string",
+      "description": "Present when deprecated: the reason or replacement as Markdown, possibly empty. Renderers treat it like docs."
+    },
+    "symbol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "signatures", "docs"],
+      "properties": {
+        "name": { "$ref": "#/$defs/name" },
+        "kind": {
+          "enum": ["class", "struct", "interface", "enum", "type", "function", "constant", "namespace"],
+          "description": "interface includes protocols and traits; type includes aliases and named non-struct types; constant includes exported values."
+        },
+        "signatures": { "$ref": "#/$defs/signatures" },
+        "docs": { "$ref": "#/$defs/docs" },
+        "deprecated": { "$ref": "#/$defs/deprecated" },
+        "origin": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The package that declares the symbol, when another package re-exports it."
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/member" },
+          "description": "Public members: own members in declaration order, then inherited ones, nearest base first."
+        }
+      }
+    },
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "signatures", "docs"],
+      "properties": {
+        "name": { "$ref": "#/$defs/name" },
+        "kind": { "enum": ["constructor", "method", "property", "case", "call", "index"] },
+        "signatures": { "$ref": "#/$defs/signatures" },
+        "docs": { "$ref": "#/$defs/docs" },
+        "deprecated": { "$ref": "#/$defs/deprecated" },
+        "static": { "const": true },
+        "inherited": {
+          "$ref": "#/$defs/name",
+          "description": "The base type that declares an inherited member."
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/member" },
+          "description": "Members of a property whose type is an object literal, such as a group of related methods."
+        }
+      }
+    }
+  }
+}
