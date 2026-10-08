@@ -408,6 +408,10 @@
           "minItems": 1
         },
         "idempotency": { "enum": ["safe", "idempotent", "singleUse", "permitBound", "ephemeral"] },
+        "destructive": {
+          "description": "The mutation deletes, revokes, removes, disables or ends something, or retires a secret. Omit for every other operation.",
+          "const": true
+        },
         "pagination": {
           "type": "object",
           "additionalProperties": false,

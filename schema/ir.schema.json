@@ -454,6 +454,10 @@
           }
         },
         "idempotency": { "enum": ["safe", "idempotent", "singleUse", "permitBound", "ephemeral"] },
+        "destructive": {
+          "description": "Present only on mutations that delete, revoke, remove, disable or end something, or retire a secret. Absent means the operation is not destructive.",
+          "const": true
+        },
         "pagination": {
           "type": "object",
           "additionalProperties": false,

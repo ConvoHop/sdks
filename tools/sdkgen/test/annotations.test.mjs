@@ -259,6 +259,9 @@ const SEMANTIC_CASES = [
     ["/operations/alpha.ping/idempotency", 'mutations cannot be "safe"'],
     ["/operations/alpha.redeem/idempotency", 'mutations authorized by a context-carried permit must be "permitBound"'],
   ]],
+  ["destructive marks only mutations", { annotations: a => { a.operations["alpha.items"].destructive = true; } }, [
+    ["/operations/alpha.items/destructive", "query operations are read-only and cannot be destructive"],
+  ]],
   ["pagination fields and page paths", {
     annotations: a => {
       a.operations["alpha.items"].pagination.limitField = "size";

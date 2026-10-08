@@ -1,0 +1,48 @@
+{
+  "name": "@convohop/mcp",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ConvoHop MCP server. Exposes the management and backend-key operations of the shared schema as tools, generated from the SDK IR. Runs only in trusted Node.js runtimes.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ConvoHop/sdks.git",
+    "directory": "packages/mcp"
+  },
+  "type": "module",
+  "sideEffects": [
+    "./dist/bin.js"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "convohop-mcp": "dist/bin.js"
+  },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "check:package": "publint --strict && attw --pack . --profile esm-only"
+  },
+  "dependencies": {
+    "@convohop/server": "*",
+    "@modelcontextprotocol/server": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^7.0.2"
+  }
+}

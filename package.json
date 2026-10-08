@@ -5,7 +5,9 @@
     "packages/core",
     "packages/client",
     "packages/server",
-    "conformance"
+    "conformance",
+    "packages/cli",
+    "packages/mcp"
   ],
   "scripts": {
     "build": "npm run build --workspaces",

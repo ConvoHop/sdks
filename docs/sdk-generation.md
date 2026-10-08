@@ -16,6 +16,8 @@ flowchart LR
   I --> E3["typescript"]
   I --> E4["doc-snippets"]
   I --> EJ["java"]
+  I --> EM["mcp-tools"]
+  I --> EC["cli-operations"]
   I -.-> E5["future language emitters"]
 ```
 
@@ -63,6 +65,13 @@ Don't edit generated files by hand. Change the inputs and run
 | `typescript` | `packages/core/src/generated/graphql-types.ts`, `packages/core/src/generated/operations.ts` | Operation types and the operation catalog of `@convohop/core` |
 | `doc-snippets` | `docs/snippets/` | One reference snippet per operation, for the documentation site |
 | `java` | `jvm/convohop-server/src/generated/java/`, `jvm/convohop-server-kotlin/src/generated/kotlin/` | Models, the operation catalog, one API class per plane with lazy pages methods for cursor-paginated queries, and a suspending Kotlin wrapper per plane, for the [JVM server SDK](../jvm/README.md) |
+| `mcp-tools` | `packages/mcp/src/generated/tools.ts` | The tool catalog of `@convohop/mcp`: one MCP tool per query and mutation that a server bearer credential can call, with its input schema and annotations |
+| `cli-operations` | `packages/cli/src/generated/operations.ts` | The operation catalog of `@convohop/cli`: the same operations, with their inputs, types, credentials, scopes, idempotency and destructiveness |
+
+Both `mcp-tools` and `cli-operations` leave out subscriptions, client-only and
+deprecated operations, and the operations whose results are credentials, such
+as `communication.issueSession`. The shared rules are in
+[`tools/sdkgen/lib/server-operations.mjs`](../tools/sdkgen/lib/server-operations.mjs).
 
 ## The IR
 
@@ -80,7 +89,7 @@ themselves, so every language sees the same facts.
 | `idempotency`, `pagination` | Retry and paging classes, with the retry policy and budget of each class |
 | `errors` | Error codes with origin, HTTP status and whether they're transient, plus named error sets |
 | `realtime` | The event envelope, channels (subscription, replay query, endpoint, connection parameters, ordering, limits and reconnect policy) and every event type with its subject, payload fields and the operations that emit it |
-| `operations` | Each operation's kind, layer, authorization, arguments, resolved context fields, input and result types, GraphQL document, idempotency class, pagination, realtime behavior, long-running polling and expanded error codes |
+| `operations` | Each operation's kind, layer, authorization, arguments, resolved context fields, input and result types, GraphQL document, idempotency class, whether it's destructive, pagination, realtime behavior, long-running polling and expanded error codes |
 | `types` | Every named scalar, enum, object and input type, with descriptions, deprecations, field types and the planes that define them |
 
 Type references are language-neutral: `{ "kind": "list", "nullable": false, "ofType": ... }`
