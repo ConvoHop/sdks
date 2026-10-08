@@ -5,7 +5,8 @@
     "packages/core",
     "packages/client",
     "packages/server",
-    "conformance"
+    "conformance",
+    "packages/react"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
