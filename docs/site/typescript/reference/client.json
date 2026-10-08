@@ -890,7 +890,7 @@
           "ref": "@convohop/client#ConvoHopClient.typing",
           "anchor": "convohopclienttyping-method",
           "signatures": ["typing(id: string, isTyping: boolean): Promise<boolean>"],
-          "docs": "Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,\nretried or resolved. Check `features.typing` in `capabilities` first."
+          "docs": "Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,\nretried or resolved. Check `features?.typing` in `capabilities` first."
         },
         {
           "name": "search",
@@ -3424,7 +3424,7 @@
           "ref": "@convohop/client#TypingIndicatorOptions.enabled",
           "anchor": "typingindicatoroptionsenabled-property",
           "signatures": ["enabled?: boolean"],
-          "docs": "Whether to send signals. Pass `capabilities().features.typing` to skip projects without typing. Default true."
+          "docs": "Whether to send signals. Pass `capabilities().features?.typing === true` to skip projects without typing.\nDefault true."
         },
         {
           "name": "onError",

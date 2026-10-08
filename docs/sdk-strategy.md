@@ -214,9 +214,9 @@ frames.
    then fails.
 
 Treat `connectToken` as a password. Don't log or store it, and send it only
-to `livekitUrl`. The Web SDK uses its own first-frame admission with the same
-rules. Only the ConvoHop media server accepts either path; a stock LiveKit
-server can't.
+to `livekitUrl`. The Web SDK connects the same way, with `livekit-client`.
+Only the ConvoHop media server enforces these rules; a stock LiveKit server
+can't.
 
 ## Push notifications: bring your own
 

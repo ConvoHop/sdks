@@ -380,7 +380,7 @@ export class ConvoHopClient {
   }
   /**
    * Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,
-   * retried or resolved. Check `features.typing` in {@link capabilities} first.
+   * retried or resolved. Check `features?.typing` in {@link capabilities} first.
    */
   async typing(id: string, isTyping: boolean): Promise<boolean> {
     if (typeof isTyping !== "boolean") throw new TypeError("isTyping must be a boolean");

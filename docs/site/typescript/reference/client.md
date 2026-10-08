@@ -706,7 +706,7 @@ typing(id: string, isTyping: boolean): Promise<boolean>
 ```
 
 Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,
-retried or resolved. Check `features.typing` in `capabilities` first.
+retried or resolved. Check `features?.typing` in `capabilities` first.
 
 #### `ConvoHopClient.search` method
 
@@ -2741,7 +2741,8 @@ How long after the last input the user stops typing, in milliseconds. Default 50
 enabled?: boolean
 ```
 
-Whether to send signals. Pass `capabilities().features.typing` to skip projects without typing. Default true.
+Whether to send signals. Pass `capabilities().features?.typing === true` to skip projects without typing.
+Default true.
 
 #### `TypingIndicatorOptions.onError` property
 

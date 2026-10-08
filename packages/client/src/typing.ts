@@ -7,7 +7,10 @@ export interface TypingIndicatorOptions {
   intervalMs?: number;
   /** How long after the last input the user stops typing, in milliseconds. Default 5000. */
   idleMs?: number;
-  /** Whether to send signals. Pass `capabilities().features.typing` to skip projects without typing. Default true. */
+  /**
+   * Whether to send signals. Pass `capabilities().features?.typing === true` to skip projects without typing.
+   * Default true.
+   */
   enabled?: boolean;
   onError?: (error: Error) => void;
 }

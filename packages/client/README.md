@@ -27,17 +27,17 @@ npm test --workspace @convohop/client
   them from `@convohop/client`, not from `@convohop/core`.
 - **Browsers:** targets the current and previous major versions of Chrome,
   Edge, Firefox and Safari. Calls need WebRTC and use `livekit-client`. CI
-  runs the unit tests on Node.js with fake network and media APIs, and the
-  conversation store and outbox over real HTTP and WebSocket against the
-  [conformance mock](../../spec/conformance/targets.md). That isn't a browser or
-  real WebRTC.
-- **React Native:** intended, but not verified yet. The client uses
-  `fetch`, `WebSocket`, `URL`, `TextEncoder`, `structuredClone`,
-  `AbortSignal.timeout`, `crypto.randomUUID` and `crypto.subtle.digest`, so
-  your app must provide any of these that its JavaScript engine lacks. Metro
+  runs the unit tests on Node.js with fake network and media APIs. It runs
+  the conversation store and outbox over real HTTP and WebSocket against the
+  [conformance mock](../../spec/conformance/targets.md) on Node.js and in
+  Playwright's headless Chromium, Firefox and WebKit, and the push service
+  worker in Chromium. Calls aren't tested over real WebRTC.
+- **React Native:** intended, but not verified yet. Pass a `platform`
+  option with what the JavaScript engine lacks, such as `randomUUID`,
+  `sha256`, a WHATWG-conforming `URL`, `connectivity` and `lifecycle`. Metro
   resolves package `exports` by default from React Native 0.79; on earlier
-  versions, set `resolver.unstable_enablePackageExports = true`. Calls need
-  LiveKit's React Native WebRTC setup.
+  versions, set `resolver.unstable_enablePackageExports = true`. Calls
+  connect through `participation.connectWith` and LiveKit's React Native SDK.
 - **Node.js 22+:** builds and unit tests. Use
   [`@convohop/server`](../server/README.md) for backend code.
 
