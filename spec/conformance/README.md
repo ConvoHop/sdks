@@ -36,6 +36,7 @@ flowchart LR
 | [`../push-payload/`](../push-payload/README.md) | The push payload contract and its [vectors](../push-payload/vectors.json), with their [schema](../push-payload/push-payload.schema.json). Each server SDK's own tests run these vectors, not drivers. |
 | [`conformance/runner.mjs`](../../conformance/runner.mjs) | The runner CLI; its modules are in [`conformance/lib/`](../../conformance/lib). |
 | [`conformance/drivers/ts/`](../../conformance/drivers/ts) | The TypeScript reference driver. |
+| [`conformance/drivers/jvm/`](../../conformance/drivers/jvm) | The driver for the [Java and Kotlin server SDK](../../jvm/README.md). |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |
 | [`conformance/targets/`](../../conformance/targets) | Descriptors for real targets, such as the dev-stack image. |
 | [`conformance/test/`](../../conformance/test) | `node:test` tests for the harness itself. |
@@ -411,6 +412,11 @@ packs a release; `npm run check:release` enforces that.
 The TypeScript reference driver passes all 64 scenarios against the mock,
 with none skipped, including the 14 `webhooks` scenarios and
 `errors.rate-limited.retry-after`.
+
+The JVM driver declares the backend and management roles. It passes 62
+scenarios against the mock and skips the 2 that only use user clients,
+`auth.user-token.invalid` and `realtime.subscribe.invalid-token`. Its
+[workflow](../../.github/workflows/jvm.yml) fails on any other skip.
 
 Passing against the mock shows that the SDK, driver and scenarios agree on
 the public contract. It does not certify a real deployment; for that, run

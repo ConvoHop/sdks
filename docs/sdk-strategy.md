@@ -15,7 +15,7 @@ work, what the packages are called, and how they're versioned and supported.
 
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
-| Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md) |
+| Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md) |
 | Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
@@ -124,7 +124,7 @@ sequenceDiagram
 | Node.js (TypeScript) | Promise-based, ESM | Source available |
 | Python | Synchronous and `asyncio` clients | Planned |
 | .NET (C#) | `async` methods with `CancellationToken` | Planned |
-| Java and Kotlin | Java core, plus Kotlin coroutine extensions | Planned |
+| Java and Kotlin | Java core, plus Kotlin coroutine extensions | Source available |
 | Go | `context.Context` first | Planned |
 
 We don't plan PHP or Ruby SDKs. From any other language you can call the
@@ -174,7 +174,9 @@ types in `@convohop/core` and one reference snippet per operation from
 [`schema/`](../schema). See [SDK generation](sdk-generation.md). The
 [conformance suite](../spec/conformance/README.md) runs its scenarios through
 a TypeScript reference driver against a deterministic mock, and can target a
-real deployment. The generators for other languages are in development.
+real deployment. The [JVM server SDK](../jvm/README.md) adds a Java and
+Kotlin generator and its own conformance driver. Generators for the other
+languages are in development.
 Later, the same IR could also generate a command-line tool and tools for AI
 agents.
 
@@ -386,7 +388,7 @@ release.
 | Node.js | Active LTS and Maintenance LTS releases: Node.js 22 and 24 today. Odd-numbered releases aren't supported. |
 | Python | 3.11 and later |
 | .NET | Targets `netstandard2.0`, for .NET Framework 4.7.2 and later, and the current .NET LTS release (`net10.0` today). Tested on the .NET releases that Microsoft supports. |
-| Java and Kotlin | Java 11 and later, tested on Java LTS releases |
+| Java and Kotlin | Java 11 and later, tested on Java 11, 17, 21 and 25 |
 | Go | The two most recent Go releases, matching Go's own support policy |
 | Web | The current and previous major versions of Chrome, Edge, Firefox and Safari. Calls need WebRTC. |
 | React | 18 and later |
@@ -395,8 +397,9 @@ release.
 | React Native | 0.76 and later, with the New Architecture |
 | Flutter | The current stable release |
 
-Today, CI verifies only the TypeScript packages, on Node.js 22 and 24. Each
-other row becomes a CI requirement when that SDK lands.
+Today, CI verifies the TypeScript packages on Node.js 22 and 24, and the Java
+and Kotlin SDK on Java 11, 17, 21 and 25. Each other row becomes a CI
+requirement when that SDK lands.
 
 ## Releases and distribution
 

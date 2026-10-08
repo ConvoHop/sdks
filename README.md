@@ -38,8 +38,9 @@ planned languages, push notifications, package names, versioning and support.
 | --- | --- | --- | --- |
 | [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, and calls with explicit connect and capture |
 | [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and push payload builders |
+| [Java and Kotlin server](jvm/README.md) | `com.convohop:convohop-server`, `com.convohop:convohop-server-kotlin` | Java 11 or later. Kotlin coroutine extensions are optional. | User identities and sessions, conversations, membership and messages for your backend, generated APIs with paginators for every server operation, backend key issuance, webhook verification, and push payload builders |
 
-Both packages depend on [`@convohop/core`](packages/core/README.md), which
+The TypeScript packages depend on [`@convohop/core`](packages/core/README.md), which
 holds the generated GraphQL types and operations and the shared transport.
 Don't import `@convohop/core` directly: everything you need from it is
 re-exported by `@convohop/client` and `@convohop/server`.
@@ -56,7 +57,7 @@ package registry yet. [Install a release](#install-a-release) or
 
 | Layer | Languages and platforms |
 | --- | --- |
-| Server | Python, .NET, Java and Kotlin, Go |
+| Server | Python, .NET, Go |
 | Client | React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter |
 
 ## How it fits together
@@ -130,6 +131,10 @@ for every pull request. On Node.js 24, it also packs `@convohop/core`,
 The [Conformance workflow](.github/workflows/conformance.yml) runs the
 scenarios on Node.js 24. Neither workflow publishes or deploys anything.
 
+The Java and Kotlin SDK has its own Gradle build and
+[JVM workflow](.github/workflows/jvm.yml). See
+[Build and test](jvm/README.md#build-and-test).
+
 ## API contract
 
 - The Communication API and the Management API have separate origins. Each
@@ -193,6 +198,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
   notifications, package names, versioning and support
 - [Client SDK](packages/client/README.md)
 - [Node.js server SDK](packages/server/README.md)
+- [Java and Kotlin server SDK](jvm/README.md)
 - [Shared core package](packages/core/README.md)
 - [Releasing](RELEASING.md): how releases happen, and how to install and
   verify them

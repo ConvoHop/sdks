@@ -1,0 +1,268 @@
+# Builds and tests the Java and Kotlin server SDK in jvm/: its generated code
+# and generator goldens, the Gradle build (Java 11 bytecode, compiled on JDK
+# 17), the tests on Java 11, 17, 21 and 25, a dry-run publication to a local
+# Maven repository, and the conformance scenarios through the JVM driver.
+# See jvm/README.md.
+name: JVM
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/jvm.yml
+      - conformance/**
+      - jvm/**
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/jvm.yml
+      - conformance/**
+      - jvm/**
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+
+permissions: {}
+
+jobs:
+  build:
+    name: Generate, build and publish locally
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Check the generated code, including the Java and Kotlin APIs
+        run: npm run check:graphql
+      - name: Test the generators against their golden files
+        run: npm run test:sdkgen
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            jvm/**/*.gradle.kts
+            jvm/gradle/libs.versions.toml
+            jvm/gradle/wrapper/gradle-wrapper.properties
+            conformance/drivers/jvm/build.gradle.kts
+      # The test job runs the tests on every supported Java version.
+      - name: Compile, lint, document and package
+        working-directory: jvm
+        run: ./gradlew --no-daemon --console=plain build -x test
+      - name: Publish to a local Maven repository (dry run)
+        working-directory: jvm
+        run: ./gradlew --no-daemon --console=plain publishToMavenLocal -Dmaven.repo.local="$PWD/build/m2"
+      - name: Check the publications and their Java 11 bytecode
+        working-directory: jvm
+        run: |
+          group="$(sed -n 's/^group=//p' gradle.properties)"
+          version="$(sed -n 's/^version=//p' gradle.properties)"
+          python3 - "build/m2/${group//.//}" "$version" <<'EOF'
+          import pathlib, sys, zipfile
+          root, version = pathlib.Path(sys.argv[1]), sys.argv[2]
+          for module in ("convohop-server", "convohop-server-kotlin"):
+              base = root / module / version / f"{module}-{version}"
+              for suffix in (".pom", ".module", ".jar", "-sources.jar", "-javadoc.jar"):
+                  if not pathlib.Path(f"{base}{suffix}").is_file():
+                      sys.exit(f"missing {base}{suffix}")
+              with zipfile.ZipFile(f"{base}.jar") as jar:
+                  classes = [name for name in jar.namelist() if name.endswith(".class")]
+                  newer = [name for name in classes if jar.read(name)[6:8] != b"\x00\x37"]
+              if not classes or newer:
+                  sys.exit(f"{module}: expected Java 11 bytecode (class file major version 55): {newer[:5]}")
+              print(f"{module}: {len(classes)} classes, all Java 11 bytecode")
+          EOF
+      - name: Upload the local Maven repository
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: jvm-maven-local
+          path: jvm/build/m2/
+          if-no-files-found: error
+          retention-days: 14
+
+  test:
+    name: Tests (Java ${{ matrix.java }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        # Java 11 is the minimum; the others are the later LTS releases.
+        java: ["11", "17", "21", "25"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - name: Set up the JDK that runs the tests
+        id: test-jdk
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          set-default: false
+      # Gradle and the compilers run on JDK 17.
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            jvm/**/*.gradle.kts
+            jvm/gradle/libs.versions.toml
+            jvm/gradle/wrapper/gradle-wrapper.properties
+            conformance/drivers/jvm/build.gradle.kts
+      - name: Run the tests
+        working-directory: jvm
+        env:
+          TEST_JAVA: ${{ matrix.java }}
+          TEST_JDK: ${{ steps.test-jdk.outputs.path }}
+        run: >-
+          ./gradlew --no-daemon --console=plain test
+          -PtestJavaVersion="$TEST_JAVA"
+          -Porg.gradle.java.installations.paths="$TEST_JDK"
+      - name: Upload the test reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: jvm-test-reports-java-${{ matrix.java }}
+          path: |
+            jvm/*/build/reports/tests/
+            jvm/*/build/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  conformance:
+    name: JVM driver (mock target)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            jvm/**/*.gradle.kts
+            jvm/gradle/libs.versions.toml
+            jvm/gradle/wrapper/gradle-wrapper.properties
+            conformance/drivers/jvm/build.gradle.kts
+      - name: Build the JVM driver
+        working-directory: jvm
+        run: ./gradlew --no-daemon --console=plain :conformance-driver:installDist
+      - name: Run the conformance scenarios against the mock target
+        # Not --strict: a server SDK declares no user role, so the runner skips
+        # the scenarios that only use user clients. The next step allows only those.
+        run: >-
+          npm run conformance --
+          --driver conformance/drivers/jvm/build/install/conformance-driver/bin/conformance-driver
+          --reports conformance/reports/jvm
+      - name: Fail on any other skip
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync } from "node:fs";
+          const allowed = "it only uses user clients, which the driver under test does not declare";
+          const summary = JSON.parse(readFileSync("conformance/reports/jvm/summary.json", "utf8"));
+          const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
+          const passed = scenarios.filter((scenario) => scenario.status === "passed");
+          const other = scenarios.filter((scenario) => scenario.status !== "passed"
+            && !(scenario.status === "skipped" && scenario.reason === allowed));
+          for (const scenario of other) {
+            console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
+          }
+          console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
+          if (summary.driver.name !== "convohop-jvm" || passed.length === 0 || other.length > 0) process.exit(1);
+          EOF
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-jvm-mock
+          path: conformance/reports/jvm/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # TODO(DEV-1): like the dev-stack job in conformance.yml, this job stays
+  # skipped until the CONVOHOP_DEV_STACK_IMAGE repository variable names the
+  # dev-stack image. Then replace the "Start the dev stack" step with the
+  # image's start, readiness and credential contract, as in conformance.yml.
+  # Fork pull requests are skipped because they cannot pull the image.
+  conformance-dev-stack:
+    name: JVM driver (dev stack)
+    if: vars.CONVOHOP_DEV_STACK_IMAGE != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+      packages: read # pull the dev-stack image from GitHub Packages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            jvm/**/*.gradle.kts
+            jvm/gradle/libs.versions.toml
+            jvm/gradle/wrapper/gradle-wrapper.properties
+            conformance/drivers/jvm/build.gradle.kts
+      - name: Build the JVM driver
+        working-directory: jvm
+        run: ./gradlew --no-daemon --console=plain :conformance-driver:installDist
+      - name: Start the dev stack
+        env:
+          CONVOHOP_DEV_STACK_IMAGE: ${{ vars.CONVOHOP_DEV_STACK_IMAGE }}
+        run: |
+          # TODO(DEV-1): start "$CONVOHOP_DEV_STACK_IMAGE", wait until it is ready and append the
+          # CONVOHOP_DEV_* values named in conformance/targets/dev-stack.json to "$GITHUB_ENV".
+          echo "::error::The dev-stack start step is a placeholder until DEV-1 defines the image contract."
+          exit 1
+      - name: Run the conformance scenarios against the dev stack
+        run: >-
+          npm run conformance --
+          --target conformance/targets/dev-stack.json
+          --driver conformance/drivers/jvm/build/install/conformance-driver/bin/conformance-driver
+          --reports conformance/reports/jvm-dev-stack
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-jvm-dev-stack
+          path: conformance/reports/jvm-dev-stack/
+          if-no-files-found: ignore
+          retention-days: 14

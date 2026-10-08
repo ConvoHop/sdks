@@ -1,0 +1,145 @@
+// Generated from the current unversioned GraphQL schemas. Run npm run generate:graphql.
+package com.convohop.server.model;
+
+import com.convohop.server.internal.Wire;
+import com.convohop.server.internal.WireValue;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * The <code>ProjectUsageRequestInput</code> input type.
+ *
+ * <p>Build instances with {@link #builder()}. Fields without a value are omitted from the request.
+ */
+public final class ProjectUsageRequestInput implements WireValue {
+  private final String projectId;
+  private final @Nullable String from;
+  private final @Nullable String to;
+
+  private ProjectUsageRequestInput(Builder builder) {
+    this.projectId = Wire.present(builder.projectId, "ProjectUsageRequestInput.projectId");
+    this.from = builder.from;
+    this.to = builder.to;
+  }
+
+  /**
+   * A new builder.
+   *
+   * @return an empty builder
+   */
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  /** The <code>projectId</code> field. */
+  public String getProjectId() {
+    return this.projectId;
+  }
+
+  /** The <code>from</code> field. */
+  public @Nullable String getFrom() {
+    return this.from;
+  }
+
+  /** The <code>to</code> field. */
+  public @Nullable String getTo() {
+    return this.to;
+  }
+
+  /** The JSON form of this input; fields without a value are omitted. */
+  @Override
+  public Map<String, @Nullable Object> toJson() {
+    Map<String, @Nullable Object> json = new LinkedHashMap<>();
+    json.put("projectId", Wire.json(this.projectId));
+    if (this.from != null) {
+      json.put("from", Wire.json(this.from));
+    }
+    if (this.to != null) {
+      json.put("to", Wire.json(this.to));
+    }
+    return json;
+  }
+
+  @Override
+  public boolean equals(@Nullable Object other) {
+    if (this == other) {
+      return true;
+    }
+    if (!(other instanceof ProjectUsageRequestInput)) {
+      return false;
+    }
+    ProjectUsageRequestInput that = (ProjectUsageRequestInput) other;
+    return Objects.equals(this.projectId, that.projectId)
+        && Objects.equals(this.from, that.from)
+        && Objects.equals(this.to, that.to);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.projectId, this.from, this.to);
+  }
+
+  @Override
+  public String toString() {
+    return "ProjectUsageRequestInput{projectId=" + this.projectId
+        + ", from=" + this.from
+        + ", to=" + this.to
+        + "}";
+  }
+
+  /** Builds {@link ProjectUsageRequestInput} values. */
+  public static final class Builder {
+    private @Nullable String projectId;
+    private @Nullable String from;
+    private @Nullable String to;
+
+    private Builder() {}
+
+    /**
+     * Sets the <code>projectId</code> field.
+     *
+     * <p>Required.
+     *
+     * @param projectId the value
+     * @return this builder
+     */
+    public Builder projectId(String projectId) {
+      this.projectId = Wire.nonNull(projectId, "projectId");
+      return this;
+    }
+
+    /**
+     * Sets the <code>from</code> field.
+     *
+     * @param from the value, or {@code null} to omit the field
+     * @return this builder
+     */
+    public Builder from(@Nullable String from) {
+      this.from = from;
+      return this;
+    }
+
+    /**
+     * Sets the <code>to</code> field.
+     *
+     * @param to the value, or {@code null} to omit the field
+     * @return this builder
+     */
+    public Builder to(@Nullable String to) {
+      this.to = to;
+      return this;
+    }
+
+    /**
+     * Builds the input.
+     *
+     * @return the input
+     * @throws IllegalStateException if a required field is missing
+     */
+    public ProjectUsageRequestInput build() {
+      return new ProjectUsageRequestInput(this);
+    }
+  }
+}
