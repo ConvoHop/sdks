@@ -37,6 +37,17 @@ npm run check:docs         # generated docs in docs/site match their inputs
 
 None of these commands need service credentials.
 
+The [Java and Kotlin server SDK](jvm/README.md) has its own Gradle build in
+`jvm/`. Build it with JDK 17; the Gradle wrapper downloads Gradle itself:
+
+```sh
+cd jvm
+./gradlew build            # compile for Java 11, check, document and test
+```
+
+[Build and test](jvm/README.md#build-and-test) explains how to run the tests
+on other JDKs and how to run the conformance scenarios with its driver.
+
 ## Repository layout
 
 | Path | Contents |
@@ -44,6 +55,7 @@ None of these commands need service credentials.
 | `packages/core` | Shared core (`@convohop/core`): generated GraphQL types and operations, protocol validation and the isomorphic transport |
 | `packages/client` | Client SDK (`@convohop/client`) for browsers and React Native, with realtime and media |
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
+| `jvm/` | Java and Kotlin server SDK (`com.convohop:convohop-server` and `com.convohop:convohop-server-kotlin`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/jvm/` |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
 | `tools/sdkgen/` | The SDK generator: annotation check, IR builder, emitters and their tests. See [SDK generation](docs/sdk-generation.md) |
 | `tools/docgen/` | The docs pipeline: public API extractors, the docs generator, the example code runner and their tests. See [Docs pipeline](docs/docs-pipeline.md) |
@@ -90,6 +102,8 @@ files from the IR:
 - `packages/core/src/generated/operations.ts`
 - `packages/core/src/generated/graphql-types.ts`
 - `docs/snippets/`
+- `jvm/convohop-server/src/generated/java/` and
+  `jvm/convohop-server-kotlin/src/generated/kotlin/`
 
 ```sh
 npm run generate:graphql   # regenerate after a schema or annotation change
@@ -202,6 +216,8 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   `npm run test:docgen`. Code in the docs is tested too: put it in a
   language's example code and include it by region, as
   [Tested code](docs/docs-pipeline.md#tested-code) describes.
+- The Java and Kotlin SDK's tests use JUnit 5. They live in
+  `jvm/*/src/test/` and run with `./gradlew test` in `jvm/`.
 
 ## SDK design rules
 
