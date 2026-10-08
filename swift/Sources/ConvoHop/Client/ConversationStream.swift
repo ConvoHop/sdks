@@ -19,6 +19,10 @@ public actor ConversationStream {
     public private(set) var cursor: Cursor?
     /// Whether the stream is closed. A closed stream never reopens.
     public private(set) var isClosed = false
+    /// Whether the realtime subscription is open. While it isn't, the stream catches up from history and reconnects
+    /// on its own.
+    public private(set) var isConnected = false
+    private var connectionObservers: [Int: AsyncStream<Bool>.Continuation] = [:]
     private var started = false
     private var paused = false
     private var socket: Socket?
@@ -68,6 +72,22 @@ public actor ConversationStream {
     /// Stops replay and realtime delivery. A batch that `apply` is already handling finishes first.
     public func close() {
         shut()
+    }
+
+    /// ``isConnected`` now and after each change. The sequence ends when the stream closes.
+    public func connectionChanges() -> AsyncStream<Bool> {
+        let (changes, continuation) = AsyncStream.makeStream(of: Bool.self, bufferingPolicy: .bufferingNewest(1))
+        continuation.yield(isConnected)
+        if isClosed {
+            continuation.finish()
+            return changes
+        }
+        let id = nextSerial()
+        connectionObservers[id] = continuation
+        continuation.onTermination = { [weak self] _ in
+            Task { await self?.removeConnectionObserver(id) }
+        }
+        return changes
     }
 
     /// Runs one bounded catch-up round from history now.
@@ -163,7 +183,19 @@ public actor ConversationStream {
         generation += 1
         cancelTimer()
         dropSocket(code: 1000)
+        for observer in connectionObservers.values { observer.finish() }
+        connectionObservers = [:]
         if applying == nil { notifyClosed() }
+    }
+
+    private func setConnected(_ value: Bool) {
+        if isConnected == value { return }
+        isConnected = value
+        for observer in connectionObservers.values { observer.yield(value) }
+    }
+
+    private func removeConnectionObserver(_ id: Int) {
+        connectionObservers[id] = nil
     }
 
     private func notifyClosed() {
@@ -351,6 +383,7 @@ public actor ConversationStream {
     }
 
     private func dropSocket(code: Int) {
+        setConnected(false)
         guard let socket else { return }
         self.socket = nil
         socket.connection.close(code: code)
@@ -389,9 +422,11 @@ public actor ConversationStream {
             if isClosed || paused { return }
             fail(ProtocolViolation("Realtime frames must be text"))
         case .failed:
+            setConnected(false)
             if !isClosed && !paused { onError(unavailable(socket.subscriptionId)) }
         case .closed(let code):
             self.socket = nil
+            setConnected(false)
             socket.reader.cancel()
             if isClosed || paused { return }
             if !Self.channel.terminalCloseCodes.contains(code) {
@@ -426,6 +461,7 @@ public actor ConversationStream {
         case "connection_ack":
             reconnectAttempts = 0
             try subscribe(socket)
+            setConnected(true)
         case "ping":
             send(["type": "pong"], on: socket.connection)
         case "next", "error":
