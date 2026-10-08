@@ -9,6 +9,7 @@ import { EmitterError, listEmittableFiles, renderEmitters } from "../lib/emitter
 import { buildIr } from "../lib/ir.mjs";
 import { formatJson } from "../lib/json.mjs";
 import { codeUnitCompare } from "../lib/naming.mjs";
+import { javaIdentifier, javaPattern, javaString, kotlinIdentifier, kotlinString, renderJava, scalarMapping, serverTypeNames } from "../emitters/java.mjs";
 import { operationTypeNames, scalarTsType } from "../emitters/typescript.mjs";
 import { REPO_ROOT, assertGoldenTree, fixtureSources, repoSources } from "./helpers.mjs";
 
@@ -110,4 +111,143 @@ test("the generated TypeScript type-checks under strict compiler settings", t =>
   }));
   const result = spawnSync(process.execPath, [join(REPO_ROOT, "node_modules/typescript/bin/tsc"), "-p", root], { encoding: "utf8" });
   assert.equal(result.status, 0, `tsc failed:\n${result.stdout}${result.stderr}`);
+});
+
+test("Java and Kotlin literals and names keep schema text from ending a literal or becoming code", () => {
+  assert.equal(javaString('a"b\\c\n\t\u0001\u007f é \u2028 \\u0022'), '"a\\"b\\\\c\\n\\t\\001\\177 \\u00e9 \\u2028 \\\\u0022"');
+  assert.equal(kotlinString('$x "q" \\ \n\u0001'), '"\\$x \\"q\\" \\\\ \\n\\u0001"');
+  assert.deepEqual(["class", "hashCode", "label"].map(javaIdentifier), ["class_", "hashCode_", "label"]);
+  assert.deepEqual(["object", "value"].map(kotlinIdentifier), ["`object`", "value"]);
+});
+
+test("Java scalar patterns are translated only where java.util.regex and JavaScript agree", () => {
+  assert.equal(javaPattern("^[0-9a-f]{8}-[0-9a-f]{4}$"), "^[0-9a-f]{8}-[0-9a-f]{4}\\z", "$ never matches before a final line terminator");
+  assert.equal(javaPattern("^(0|[1-9][0-9]*)$"), "^(0|[1-9][0-9]*)\\z");
+  assert.equal(javaPattern("^\\d+\\.[\\-_a-z]?$"), "^\\d+\\.[\\-_a-z]?\\z");
+  const unsupported = [
+    [".", "."], ["(?:a)", "a (? group"], ["\\s", "the escape \\s"], ["\\", "the escape \\"], ["é", '"é"'], ["[é]", "non-ASCII text"],
+    ["[a&&b]", "& inside a character class"], ["[[a]]", "[ inside a character class"], ["[]a]", "an empty character class"],
+    ["[a", "an unterminated character class"],
+  ];
+  for (const [pattern, detail] of unsupported) {
+    assert.throws(() => javaPattern(pattern),
+      new EmitterError(`java: scalar pattern ${JSON.stringify(pattern)} uses ${detail}, which the Java emitter does not translate`));
+  }
+});
+
+test("Java scalar types follow the representation, and integers are Integer only when both bounds fit 32 bits", () => {
+  const scalar = (representation, constraints) => ({ name: "SampleValue", representation, constraints, builtIn: false });
+  const mapping = (representation, constraints) => {
+    const { java, kotlin, decoder, factory } = scalarMapping(scalar(representation, constraints));
+    assert.equal(decoder, "Scalars.SAMPLE_VALUE");
+    return [java, kotlin, factory];
+  };
+  assert.deepEqual(scalarMapping({ name: "Int", representation: "integer", builtIn: true }), { java: "Integer", kotlin: "Int", decoder: "Wire.INT", factory: null });
+  assert.deepEqual(mapping("integer", { minimum: 1, maximum: 100 }), ["Integer", "Int", "Wire.integer(1L, 100L)"]);
+  assert.deepEqual(mapping("integer", { minimum: 0 }), ["Long", "Long", "Wire.longInteger(0L, null)"]);
+  assert.deepEqual(mapping("integer", { minimum: 0, maximum: 2 ** 31 }), ["Long", "Long", "Wire.longInteger(0L, 2147483648L)"]);
+  assert.deepEqual(mapping("number", { minimum: 0, maximum: 1.5 }), ["Double", "Double", "Wire.number(0.0, 1.5)"]);
+  assert.deepEqual(mapping("boolean", {}), ["Boolean", "Boolean", "Wire.BOOLEAN"]);
+  assert.deepEqual(mapping("string", { pattern: "^[a-z]+$", maximumDecimal: "99", disallowed: ["00"] }),
+    ["String", "String", 'Wire.string("^[a-z]+\\\\z", "99", List.of("00"))']);
+  assert.deepEqual(mapping("object", { maxCanonicalJsonBytes: 4096, requiredStringProperties: ["kind"] }),
+    ["Map<String, @Nullable Object>", "Map<String, Any?>", 'Wire.objectScalar(4096, List.of("kind"))']);
+  assert.throws(() => scalarMapping(scalar("bigint", {})), new EmitterError('java: scalar SampleValue has unsupported representation "bigint"'));
+  assert.throws(() => scalarMapping(scalar("integer", { pattern: "x" })), new EmitterError("java: scalar SampleValue has unsupported integer constraint pattern"));
+  assert.throws(() => scalarMapping({ name: "Upload", builtIn: true }), new EmitterError("java: unsupported built-in scalar Upload"));
+  assert.throws(() => scalarMapping(scalar("integer", { maximum: 2 ** 53 })), new EmitterError("java: constraint 9007199254740992 is not a safe integer"));
+});
+
+test("the Java emitter rejects schema type names that would shadow the names its output uses", () => {
+  const renamed = name => JSON.parse(JSON.stringify(buildIr(fixtureSources())).replaceAll('"Widget"', JSON.stringify(name)));
+  for (const name of ["Wire", "Builder", "BetaApi"]) {
+    assert.throws(() => renderJava(renamed(name)), new EmitterError(`java: type ${name} would shadow a name the generated Java uses; rename it or extend the emitter`));
+  }
+  const withFields = (...names) => {
+    const ir = buildIr(fixtureSources());
+    const widget = ir.types.find(type => type.name === "Widget");
+    widget.fields.push(...names.map(name => ({ ...widget.fields[0], name })));
+    return ir;
+  };
+  assert.throws(() => renderJava(withFields("default", "default_")), new EmitterError("java: Widget.default_ collides with another field's Java name"));
+  assert.throws(() => renderJava(withFields("class")), new EmitterError("java: Widget.class collides with a generated method"));
+
+  const helper = buildIr(fixtureSources());
+  const operation = helper.operations.find(entry => entry.layer === "server");
+  operation.field = "interruptible";
+  assert.throws(() => renderJava(helper),
+    new EmitterError(`java: ${operation.id} would shadow the Kotlin interruptible helper; rename it or extend the emitter`));
+});
+
+test("the Java emitter renders deprecated enum values and input fields, and leaves client-only types out", () => {
+  const base = buildIr(fixtureSources());
+  const ir = structuredClone(base);
+  for (const operation of ir.operations) if (["alpha.items", "alpha.events", "alpha.ping"].includes(operation.id)) operation.layer = "server";
+  const added = [...serverTypeNames(ir)].filter(name => !serverTypeNames(base).has(name));
+  assert.deepEqual(added.sort(codeUnitCompare),
+    ["Box_3dInput", "Event", "EventPage", "EventPayload", "EventsInput", "Fruit", "Item", "ItemPage", "ItemsInput", "PageSize", "PingInput", "SubjectRef"]);
+  assert.ok(!render(fixtureSources()).some(file => file.path.endsWith("/model/Fruit.java")), "client-only types are not generated");
+
+  const files = Object.fromEntries(renderJava(ir).map(file => [basename(file.path), file.contents]));
+  assert.match(files["Fruit.java"], /\n {2}APPLE10\("apple10"\),\n {2}APPLE9\("apple9"\),\n/, "enum values keep schema order and wire values");
+  assert.match(files["Fruit.java"], /\n {3}\* @deprecated Use APPLE\.\n {3}\*\/\n {2}@Deprecated\n {2}ELDER\("ELDER"\);\n/);
+  assert.match(files["ItemsInput.java"], /\* @deprecated Use fruits\.\n {3}\*\/\n {2}@Deprecated\n {2}public @Nullable String getLegacyFilter\(\) \{/);
+  assert.match(files["Scalars.java"], /public static final Wire\.Decoder<Integer> PAGE_SIZE =\n {6}Wire\.integer\(1L, 50L\);/);
+  assert.match(files["AlphaApi.java"], /\n {2}public ItemPage items\(ItemsInput input\) \{/);
+  assert.match(files["AlphaApi.java"], /\n {2}public Boolean ping\(@Nullable PingInput input\) \{/);
+  assert.match(files["AlphaSuspendApi.kt"], /public suspend fun ping\(input: PingInput\? = null\): Boolean =/);
+});
+
+test("the Java emitter adds lazy pages methods to cursor-paginated queries", () => {
+  const ir = buildIr(fixtureSources());
+  for (const operation of ir.operations) if (["alpha.items", "alpha.events"].includes(operation.id)) operation.layer = "server";
+  const files = Object.fromEntries(renderJava(ir).map(file => [basename(file.path), file.contents]));
+  assert.match(files["AlphaApi.java"], new RegExp([
+    String.raw`\n {2}public Iterable<ItemPage> itemsPages\(ItemsInput input\) \{`,
+    String.raw`\n {4}return Pages\.<ItemPage, ItemPage>of\(`,
+    String.raw`\n {8}this\.executor, Operations\.ALPHA_ITEMS, Wire\.nonNull\(input, "input"\)\.toJson\(\), "cursor", Wire\.STRING,`,
+    String.raw`\n {8}Pages\.Order\.OPAQUE, reply -> reply, ItemPage::getComplete, ItemPage::getRefreshRequired,`,
+    String.raw`\n {8}ItemPage::getNextCursor\);\n {2}\}`,
+  ].join("")));
+  assert.match(files["AlphaApi.java"], /"after", Wire\.STRING,\n {8}Pages\.Order\.OPAQUE, reply -> reply, EventPage::getComplete/,
+    "an ordered style compares only decimal cursors");
+  assert.match(files["AlphaApi.java"], /\n {3}\* @throws IllegalArgumentException if the input's <code>cursor<\/code> is not a valid cursor\n/);
+  assert.match(files["AlphaSuspendApi.kt"], /\n {4}public fun itemsPages\(input: ItemsInput\): Flow<ItemPage> =\n {8}pageFlow\(dispatcher, api\.itemsPages\(input\)\)\n/);
+  assert.match(files["AlphaSuspendApi.kt"], /\nimport kotlinx\.coroutines\.flow\.Flow\n/);
+  assert.ok(!files["BetaApi.java"].includes("Pages"), "bounded and unpaginated queries get no pages method");
+
+  const repo = Object.fromEntries(renderJava(buildIr(repoSources())).map(file => [basename(file.path), file.contents]));
+  assert.match(repo["CommunicationApi.java"],
+    /public Iterable<MessagePage> messagesPages\(MessagesRequestInput input\) \{\n.*\n.*"beforeSequence", Scalars\.DECIMAL,\n {8}Pages\.Order\.DESCENDING, MessagesReply::getResult,/,
+    "a descending style with a decimal cursor checks that each next cursor decreases");
+  assert.match(repo["CommunicationApi.java"], /"cursor", Wire\.STRING,\n {8}Pages\.Order\.OPAQUE, MembersReply::getResult,/);
+  assert.ok(!repo["ManagementApi.java"].includes("Pages"));
+});
+
+test("the Java emitter rejects cursor pagination it cannot page", () => {
+  const variant = change => {
+    const ir = buildIr(fixtureSources());
+    const items = ir.operations.find(operation => operation.id === "alpha.items");
+    items.layer = "server";
+    change(ir, items);
+    return ir;
+  };
+  const rejects = (change, message) => assert.throws(() => renderJava(variant(change)), new EmitterError(`java: alpha.items${message}`));
+  rejects((ir, items) => { items.pagination.pagePath = ["a", "b"]; }, ": pagePath a.b is deeper than one field; extend the emitter");
+  rejects((ir, items) => { items.pagination.pagePath = ["items"]; }, ": pagePath field ItemPage.items is not an object field");
+  rejects((ir, items) => { items.pagination.pageType = "Item"; }, ": pagePath reaches ItemPage, not the page type Item");
+  rejects((ir, items) => { items.pagination.cursorField = "limit"; }, ": the cursor input ItemsInput.limit is not a string scalar; extend the emitter");
+  rejects((ir, items) => { items.pagination.cursorField = "box"; }, ": the cursor input ItemsInput.box is not an optional scalar field");
+  rejects((ir, items) => { items.pagination.style = "lookahead"; }, ' names unknown pagination style "lookahead"');
+  rejects(ir => { ir.pagination.find(style => style.name === "cursor").order = "random"; },
+    ': pagination style cursor has order "random"; extend the emitter');
+  rejects(ir => { ir.types.find(type => type.name === "ItemPage").fields.find(field => field.name === "complete").type.nullable = true; },
+    ": ItemPage needs complete: Boolean!, refreshRequired: Boolean! and a string nextCursor");
+  rejects(ir => {
+    const ping = ir.operations.find(operation => operation.id === "alpha.ping");
+    Object.assign(ping, { layer: "server", field: "itemsPages" });
+  }, " and alpha.ping both map to the method itemsPages");
+  assert.throws(() => renderJava(variant(ir => {
+    Object.assign(ir.operations.find(operation => operation.id === "alpha.ping"), { layer: "server", field: "pageFlow" });
+  })), new EmitterError("java: alpha.ping would shadow the Kotlin pageFlow helper; rename it or extend the emitter"));
 });

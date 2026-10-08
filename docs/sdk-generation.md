@@ -15,6 +15,7 @@ flowchart LR
   I --> E2["graphql-operations"]
   I --> E3["typescript"]
   I --> E4["doc-snippets"]
+  I --> EJ["java"]
   I -.-> E5["future language emitters"]
 ```
 
@@ -61,6 +62,7 @@ Don't edit generated files by hand. Change the inputs and run
 | `graphql-operations` | `schema/operations.graphql`, `schema/operations.json` | One GraphQL document per operation, and a JSON catalog of them |
 | `typescript` | `packages/core/src/generated/graphql-types.ts`, `packages/core/src/generated/operations.ts` | Operation types and the operation catalog of `@convohop/core` |
 | `doc-snippets` | `docs/snippets/` | One reference snippet per operation, for the documentation site |
+| `java` | `jvm/convohop-server/src/generated/java/`, `jvm/convohop-server-kotlin/src/generated/kotlin/` | Models, the operation catalog, one API class per plane with lazy pages methods for cursor-paginated queries, and a suspending Kotlin wrapper per plane, for the [JVM server SDK](../jvm/README.md) |
 
 ## The IR
 
@@ -184,6 +186,9 @@ The generator tests are in [`tools/sdkgen/test`](../tools/sdkgen/test) and use
 - Other tests check that the committed generated files in this repository
   match a fresh run, and compile the fixture's generated TypeScript with
   strict `tsc`.
+- The `sdkgen-edge` project of the [JVM build](../jvm/README.md) compiles the
+  fixture's generated Java and Kotlin against the JVM runtime with warnings
+  as errors.
 
 After an intended change to an emitter, refresh the golden files and review
 the diff before you commit it:

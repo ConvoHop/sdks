@@ -66,3 +66,26 @@ updates:
         update-types:
           - minor
           - patch
+
+  - package-ecosystem: gradle
+    directory: /jvm
+    schedule:
+      interval: weekly
+    # JUnit 6 needs Java 17, and the JVM SDK's tests run on Java 11.
+    ignore:
+      - dependency-name: "org.junit:junit-bom"
+        update-types: ["version-update:semver-major"]
+    cooldown:
+      default-days: 7
+    # Gradle has no development dependency type, so test-only updates get
+    # the fix prefix too.
+    commit-message:
+      prefix: fix
+      include: scope
+    groups:
+      gradle:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
