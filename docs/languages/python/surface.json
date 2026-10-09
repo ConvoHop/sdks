@@ -663,7 +663,7 @@
               "signatures": [
                 "async def resume_operation(\n    self,\n    *,\n    operation_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Operation"
               ],
-              "docs": "Resume a paused operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
+              "docs": "Resume a paused or blocked operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
             },
             {
               "name": "create_billing_checkout_session",
@@ -1445,7 +1445,7 @@
               "signatures": [
                 "def resume_operation(\n    self,\n    *,\n    operation_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Operation"
               ],
-              "docs": "Resume a paused operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
+              "docs": "Resume a paused or blocked operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
             },
             {
               "name": "create_billing_checkout_session",

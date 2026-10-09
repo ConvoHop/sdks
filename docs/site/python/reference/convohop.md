@@ -1734,7 +1734,7 @@ async def resume_operation(
 ) -> Operation
 ```
 
-Resume a paused operation.
+Resume a paused or blocked operation.
 
 Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
 
@@ -3828,7 +3828,7 @@ def resume_operation(
 ) -> Operation
 ```
 
-Resume a paused operation.
+Resume a paused or blocked operation.
 
 Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
 

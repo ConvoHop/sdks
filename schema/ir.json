@@ -7069,7 +7069,7 @@
       "kind": "mutation",
       "field": "resumeOperation",
       "operationName": "ManagementResumeOperation",
-      "summary": "Resume a paused operation.",
+      "summary": "Resume a paused or blocked operation.",
       "layer": "server",
       "auth": [{"credential": "portalCredential", "condition": "owner"}],
       "arguments": [
@@ -7110,6 +7110,10 @@
         "sets": ["request", "http", "mutation"],
         "codes": [
           "ADMISSION_LIMIT",
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_GRANT_EXPIRED",
+          "AGENT_GRANT_REVOKED",
+          "AGENT_KEY_LIMIT",
           "AUTHORITY_UNAVAILABLE",
           "FEATURE_UNSUPPORTED",
           "FORBIDDEN",

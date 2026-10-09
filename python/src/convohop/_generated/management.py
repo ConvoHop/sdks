@@ -706,7 +706,7 @@ class ManagementOperations(SyncInvoker):
         expected_revision: str,
         request_id: str | None = None,
     ) -> Operation:
-        """Resume a paused operation.
+        """Resume a paused or blocked operation.
 
         Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
 
@@ -1728,7 +1728,7 @@ class AsyncManagementOperations(AsyncInvoker):
         expected_revision: str,
         request_id: str | None = None,
     ) -> Operation:
-        """Resume a paused operation.
+        """Resume a paused or blocked operation.
 
         Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
 

@@ -20,6 +20,43 @@ test("the repository and fixture annotations cover every operation", () => {
   assert.equal(formatAnnotationReport(check()), "Annotations OK: 16 operations across 2 planes are annotated in schema/annotations.json.");
 });
 
+test("resumeOperation covers paused and blocked operations with the existing owner and retry contract", () => {
+  const { annotations } = repoSources();
+  const { summary, errors: _errors, ...behavior } = annotations.operations["management.resumeOperation"];
+  assert.match(summary, /^Resume a paused or blocked operation\./);
+  assert.deepEqual(behavior, {
+    layer: "server",
+    auth: [{ credential: "portalCredential", condition: "owner" }],
+    idempotency: "idempotent",
+    pagination: { style: "none" },
+    realtime: { mode: "none" },
+  });
+  const { summary: _summary, ...policy } = annotations.idempotency.idempotent;
+  assert.deepEqual(policy, {
+    retry: "sameRequest", resolvable: true, retryBudget: { maxAttempts: 3, windowMs: 60000 },
+  });
+});
+
+test("resumeOperation declares blocked agent-key admission problems with their existing non-retryable statuses", () => {
+  const { annotations } = repoSources();
+  const operation = annotations.operations["management.resumeOperation"];
+  assert.deepEqual(operation.errors, {
+    sets: ["request", "http", "mutation"],
+    codes: [
+      "NOT_FOUND", "REVISION_CONFLICT",
+      "AGENTIC_NOT_CONFIGURED", "AGENT_GRANT_REVOKED", "AGENT_GRANT_EXPIRED", "AGENT_KEY_LIMIT",
+    ],
+  });
+  for (const [code, status] of [
+    ["AGENTIC_NOT_CONFIGURED", 503], ["AGENT_GRANT_REVOKED", 403],
+    ["AGENT_GRANT_EXPIRED", 403], ["AGENT_KEY_LIMIT", 409],
+  ]) {
+    const { summary: _summary, ...definition } = annotations.errorCodes[code];
+    assert.deepEqual(definition, { origin: "server", status, retryable: false }, code);
+    assert.ok(expandedErrorCodes(annotations, operation).includes(code), code);
+  }
+});
+
 test("the failure report lists missing, unknown, invalid and inconsistent entries in that order", () => {
   const result = check({
     annotations: annotations => {

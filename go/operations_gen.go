@@ -962,7 +962,7 @@ func (c *ManagementClient) PauseOperation(ctx context.Context, input PauseOperat
 }
 
 // ResumeOperation calls the management.resumeOperation mutation.
-// Resume a paused operation.
+// Resume a paused or blocked operation.
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.

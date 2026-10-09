@@ -1730,7 +1730,7 @@
       "path": "operations/management/resumeOperation.md",
       "kind": "operation",
       "title": "management.resumeOperation",
-      "description": "Resume a paused operation.",
+      "description": "Resume a paused or blocked operation.",
       "operation": "management.resumeOperation"
     },
     {

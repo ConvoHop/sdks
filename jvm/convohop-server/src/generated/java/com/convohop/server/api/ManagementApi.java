@@ -675,7 +675,7 @@ public final class ManagementApi {
   }
 
   /**
-   * Resume a paused operation.
+   * Resume a paused or blocked operation.
    *
    * <p>Idempotency: <code>idempotent</code>. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
    *
@@ -690,7 +690,7 @@ public final class ManagementApi {
   }
 
   /**
-   * Resume a paused operation.
+   * Resume a paused or blocked operation.
    *
    * <p>Idempotency: <code>idempotent</code>. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
    *

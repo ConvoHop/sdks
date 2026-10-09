@@ -91,7 +91,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.projectPolicy`](management/projectPolicy.md) | mutation | server | Change the policy of a project. |
 | [`management.credentialPermit`](management/credentialPermit.md) | mutation | server | Issue a signed permit that authorizes redeeming one credential delivery. |
 | [`management.pauseOperation`](management/pauseOperation.md) | mutation | server | Pause a long-running operation. |
-| [`management.resumeOperation`](management/resumeOperation.md) | mutation | server | Resume a paused operation. |
+| [`management.resumeOperation`](management/resumeOperation.md) | mutation | server | Resume a paused or blocked operation. |
 | [`management.createBillingCheckoutSession`](management/createBillingCheckoutSession.md) | mutation | server | Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires. |
 | [`management.createBillingPortalSession`](management/createBillingPortalSession.md) | mutation | server | Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires. |
 | [`management.configureWebhook`](management/configureWebhook.md) | mutation | server | Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery. |

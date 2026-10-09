@@ -1799,7 +1799,7 @@
           "signatures": [
             "func (c *ManagementClient) ResumeOperation(ctx context.Context, input ResumeOperationRequestInput, opts ...CallOption) (*ResumeOperationReply, error)"
           ],
-          "docs": "ResumeOperation calls the management.resumeOperation mutation. Resume a paused operation.\n\nIdempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).",
+          "docs": "ResumeOperation calls the management.resumeOperation mutation. Resume a paused or blocked operation.\n\nIdempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).",
           "operations": [
             {
               "id": "management.resumeOperation",

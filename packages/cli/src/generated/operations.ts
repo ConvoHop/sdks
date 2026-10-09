@@ -1305,7 +1305,7 @@ export const cliOperations: Readonly<Record<string, CliOperation>> = {
     "id": "management.resumeOperation",
     "plane": "management",
     "kind": "mutation",
-    "summary": "Resume a paused operation.",
+    "summary": "Resume a paused or blocked operation.",
     "credential": "portalCredential",
     "requires": "portalCredential (condition owner: The caller owns the organization, deployment or project)",
     "idempotency": "idempotent",

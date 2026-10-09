@@ -1254,7 +1254,7 @@ namespace ConvoHop.Api
             return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.PauseOperation, input, requestId, null, cancellationToken);
         }
 
-        /// <summary>Resume a paused operation.</summary>
+        /// <summary>Resume a paused or blocked operation.</summary>
         /// <remarks>
         /// <para>Idempotency: <c>idempotent</c>. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.</para>
         /// <para>Authorization: portalCredential (condition owner).</para>

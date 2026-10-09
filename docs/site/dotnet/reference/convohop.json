@@ -2911,7 +2911,7 @@
           "signatures": [
             "public static readonly OperationDescriptor<ResumeOperationRequestInput, ResumeOperationReply> ResumeOperation;"
           ],
-          "docs": "Resume a paused operation.",
+          "docs": "Resume a paused or blocked operation.",
           "static": true
         },
         {

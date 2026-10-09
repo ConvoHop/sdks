@@ -227,9 +227,11 @@ class ClientTest {
         assertTrue(onMessagesSeen(adaTimeline))
         assertFalse(onMessagesSeen(adaTimeline)) // Nothing new since.
 
-        graceTimeline.receipts.first { ada.principalId in it }
         val message = graceShown.first { items -> items.any { it is TimelineItem.Sent } }
             .filterIsInstance<TimelineItem.Sent>().single().message
+        graceTimeline.receipts.first {
+            seenBy(graceTimeline, message, grace.principalId) == listOf(ada.principalId)
+        }
         assertEquals(listOf(ada.principalId), seenBy(graceTimeline, message, grace.principalId))
     }
 
