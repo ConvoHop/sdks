@@ -1,8 +1,9 @@
 # Builds and tests the Swift client SDK in swift/: its generated code and
 # generator goldens, the SwiftPM build and XCTest tests on macOS and in the iOS
-# Simulator with the oldest and newest supported Xcode, an app-extension-only
-# build of the products a Notification Service Extension links, and the
-# conformance scenarios through the Swift driver. See swift/README.md.
+# Simulator with the oldest and newest supported Xcode, an iOS device build of
+# every product, an app-extension-only build of the products a Notification
+# Service Extension links, and the conformance scenarios through the Swift
+# driver. See swift/README.md.
 name: Swift
 
 on:
@@ -120,6 +121,13 @@ jobs:
           xcodebuild test -quiet -scheme ConvoHop-Package \
             -destination "platform=iOS Simulator,id=$device" \
             -derivedDataPath "$RUNNER_TEMP/DerivedData"
+      # The tests don't link ConvoHopLiveKit, whose CallKit audio glue is iOS-only.
+      - name: Build every product for iOS devices
+        working-directory: swift
+        run: >-
+          xcodebuild build -quiet -scheme ConvoHop-Package
+          -destination generic/platform=iOS
+          -derivedDataPath "$RUNNER_TEMP/DerivedData"
       # A Notification Service Extension links ConvoHopNotificationService, ConvoHop and ConvoHopPush.
       - name: Build the extension products for iOS with app-extension-only APIs
         working-directory: swift
