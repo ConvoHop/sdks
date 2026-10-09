@@ -78,7 +78,8 @@ internal class RecoveryState(
     /**
      * Whether the request will never be sent again at [now]: the authority committed or accepted it, its retry
      * budget is spent, or the authority rejected it with a code that isn't retryable. A spent budget makes even a
-     * `pending` or `unknown` record final, since nothing may resend it.
+     * `pending` or `unknown` record final, since nothing may resend it. A clock set back before the last attempt
+     * refuses a resend only until it catches up, so it spends nothing and leaves the record as it was.
      */
     fun final(now: Long): Boolean = settled || attemptCount >= 3 || now > retryDeadline ||
         (resolutionState == "rejected" && !retryableCode(lastAttemptClassification))

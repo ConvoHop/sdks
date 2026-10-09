@@ -34,6 +34,7 @@ internal class Harness(private val test: TestScope) : AutoCloseable {
         storage: RecoveryStorage? = null,
         refresh: SessionRefresh? = null,
         http: HttpEngine = authority,
+        environment: ConvoHopEnvironment = this.environment,
     ): ConvoHopClient {
         val options = ConvoHopClientOptions(
             baseUrl = BASE_URL,
