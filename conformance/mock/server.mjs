@@ -7,16 +7,35 @@ import { createGraphqlHandler, problemBody } from "./resolvers.mjs";
 import { createRealtime } from "./websocket.mjs";
 
 const MAX_BODY_BYTES = 1 << 20;
-const FAULT_ACTIONS = new Set(["rateLimit", "dropBeforeCommit", "dropAfterCommit"]);
+const FAULT_ACTIONS = new Set(["rateLimit", "dropBeforeCommit", "dropAfterCommit", "httpStatus"]);
+const MAX_FAULT_COUNT = 1000;
 export const MOCK_CAPABILITIES = Object.freeze(["auth.shortSessionTtl", "control.fault", "control.realtimeDrop",
   "control.reset", "control.waitLog", "pagination.serverCappedPages"]);
+
+const positiveSeconds = value => Number.isSafeInteger(value) && value > 0;
+
+/** Why a `POST /fault` body is not a valid fault (spec/conformance/targets.md#faults), or undefined when it is. */
+function faultProblem({ plane, field, action, retryAfterSeconds, status, count }) {
+  if (typeof field !== "string" || !FAULT_ACTIONS.has(action)) return "fault requires field and a known action";
+  if (plane !== undefined && plane !== "communication" && plane !== "management") return "plane must be communication or management";
+  if (count !== undefined && !(Number.isSafeInteger(count) && count >= 1 && count <= MAX_FAULT_COUNT))
+    return `count must be an integer from 1 to ${MAX_FAULT_COUNT}`;
+  if (action === "rateLimit" && !positiveSeconds(retryAfterSeconds)) return "rateLimit requires a positive integer retryAfterSeconds";
+  if (action === "httpStatus" && !(Number.isSafeInteger(status) && status >= 400 && status <= 599))
+    return "httpStatus requires a status from 400 to 599";
+  if (action !== "httpStatus" && status !== undefined) return "only httpStatus takes status";
+  if (retryAfterSeconds !== undefined && (action === "dropBeforeCommit" || action === "dropAfterCommit" || !positiveSeconds(retryAfterSeconds)))
+    return "retryAfterSeconds must be a positive integer for rateLimit or httpStatus";
+  return undefined;
+}
 
 function createFaults() {
   const queues = new Map();
   return {
-    add({ plane = "communication", field, action, retryAfterSeconds }) {
+    add({ plane = "communication", field, action, retryAfterSeconds, status, count = 1 }) {
       const key = `${plane}:${field}`;
-      queues.set(key, [...(queues.get(key) ?? []), { action, retryAfterSeconds }]);
+      const added = Array.from({ length: count }, () => ({ action, retryAfterSeconds, status }));
+      queues.set(key, [...(queues.get(key) ?? []), ...added]);
     },
     take(plane, field) {
       const queue = queues.get(`${plane}:${field}`);
@@ -108,6 +127,12 @@ export async function startMockTarget({ seed, host = "127.0.0.1" } = {}) {
     }
     const result = handle(plane, body, request.headers.authorization);
     if (result.drop) { request.socket.destroy(); return; }
+    // A gateway's own failure, which isn't GraphQL.
+    if (result.text !== undefined) {
+      response.writeHead(result.status, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store", ...result.headers });
+      response.end(result.text);
+      return;
+    }
     send(response, result.status, result.body, result.headers);
   }
 
@@ -119,10 +144,8 @@ export async function startMockTarget({ seed, host = "127.0.0.1" } = {}) {
         domain.reset(); faults.clear(); log.clear(); realtime.closeAll(1012);
         return send(response, 200, { ok: true });
       case "POST /fault": {
-        if (typeof body.field !== "string" || !FAULT_ACTIONS.has(body.action) ||
-            (body.plane !== undefined && body.plane !== "communication" && body.plane !== "management") ||
-            (body.action === "rateLimit" && !(Number.isSafeInteger(body.retryAfterSeconds) && body.retryAfterSeconds > 0)))
-          return send(response, 400, { error: "fault requires field, a known action and retryAfterSeconds for rateLimit" });
+        const problem = faultProblem(body);
+        if (problem) return send(response, 400, { error: problem });
         faults.add(body);
         return send(response, 200, { ok: true });
       }

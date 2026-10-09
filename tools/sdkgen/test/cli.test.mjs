@@ -32,7 +32,7 @@ function editAnnotations(root, edit) {
 test("generate writes every generated file once, and --check then passes", t => {
   const root = copyFixture(t);
   const paths = generatedPaths(root);
-  assert.equal(paths.length, 81);
+  assert.equal(paths.length, 82);
   const first = cli("generate", "--root", root);
   assert.deepEqual(first, { status: 0, out: [...paths.map(path => `wrote ${path}`), SUMMARY].join("\n"), err: "" });
   for (const path of paths) assert.ok(existsSync(join(root, path)), path);

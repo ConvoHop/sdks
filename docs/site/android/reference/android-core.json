@@ -1779,6 +1779,15 @@
           "static": true
         },
         {
+          "name": "RECOVERY_LIMIT",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.RECOVERY_LIMIT:static",
+          "anchor": "errorcodesrecovery_limit-static-property",
+          "signatures": ["public const val RECOVERY_LIMIT: String = \"RECOVERY_LIMIT\""],
+          "docs": "The SDK's recovery store already holds 128 mutation records that are not final, so the new request was not sent. Retry or resolve outstanding requests, then send it again.",
+          "static": true
+        },
+        {
           "name": "RECOVERY_STORAGE_FAILURE",
           "kind": "property",
           "ref": "com.convohop:convohop-android-core#ErrorCodes.RECOVERY_STORAGE_FAILURE:static",

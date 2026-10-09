@@ -18,7 +18,8 @@ export interface DriverError {
   retryAfterMs: number | null; message: string;
 }
 
-export const FEATURES: readonly string[] = ["realtime", "recovery.storage", "retryAfter", "webhooks.verify"];
+export const FEATURES: readonly string[] = ["realtime", "realtime.reconnectPolicy", "recovery.eviction", "recovery.storage", "retryAfter",
+  "webhooks.verify"];
 
 export function driverError(error: unknown): DriverError {
   // The SDK reports transport failures with status 0; the protocol uses null for "no authority HTTP status".

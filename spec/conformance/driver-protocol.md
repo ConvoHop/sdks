@@ -265,6 +265,8 @@ answers it with `UNKNOWN_METHOD`.
 | Feature | The driver |
 | --- | --- |
 | `realtime` | Implements `realtime.subscribe`, `realtime.collect` and `realtime.close` for user clients. |
+| `realtime.reconnectPolicy` | Runs an SDK whose realtime stream follows the shared [retry and reconnect](../recovery/README.md#retry-and-reconnect) rules: it reconnects after network failures, 408, 5xx and `RATE_LIMITED`, and after `WRONG_REGION` once it has routed again; it waits at least the service's retry delay; and it stops and reports `QUOTA_EXCEEDED`, `PLAN_LIMIT_EXCEEDED` and authorization failures. |
+| `recovery.eviction` | Runs an SDK whose [recovery journal](../recovery/README.md#recovery-journal) frees its oldest final records when it is full, and fails closed with `RECOVERY_LIMIT` when none is final. |
 | `recovery.storage` | Honours `storage` in `client.create`. Clients created with the same name share one store, which holds the SDK's persisted recovery state, such as unresolved request ids and realtime cursors. A store outlives `client.close` until `reset`, so that a scenario can close a client and create a new one on the same store to simulate an application restart. |
 | `retryAfter` | Reports the service's retry delay as `sdkError.retryAfterMs`. |
 | `webhooks.verify` | Implements `webhooks.verify`. |

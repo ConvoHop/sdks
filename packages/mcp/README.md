@@ -126,12 +126,17 @@ seconds. It returns the resolution: `committed`, `accepted` or
 `retry_request` knows only the mutations that this process sent: the server
 keeps their recovery records in memory, never on disk. After a restart, the
 read-only `management_resolve_request` and `communication_resolve_request`
-tools still look a request up by its ID. Each plane keeps up to 128 records of
-mutations that it hasn't seen committed or accepted, including rejected ones.
-At that limit, mutations fail without being sent, with "Resolve outstanding
-mutations before creating more". `retry_request` and the `*_resolve_request`
-tools free a record when they report its request committed or accepted;
-rejected records stay until you restart the server.
+tools still look a request up by its ID. Each plane keeps up to 128 records.
+When it is full, a final record makes room, oldest first: one whose mutation
+the authority committed or accepted, or rejected in a way that resending
+can't change, because the problem isn't retryable or the retry budget is
+spent. Records of mutations whose outcome is `unknown`, or that were refused
+with a retryable problem such as `RATE_LIMITED`, stay while `retry_request`
+can still resend them. When 128 such records are held, mutations fail
+without being sent, with code `RECOVERY_LIMIT` and outcome `rejected`. Call
+`retry_request` for the outstanding mutations: a record becomes final when it
+reports them committed, accepted or refused for good. A rejected record also
+becomes final once its 60-second retry budget runs out.
 
 ## Secrets
 

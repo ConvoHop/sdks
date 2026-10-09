@@ -97,6 +97,8 @@ export function analyzeScenario(scenario, { catalog, vectors }) {
           for (const name of operation.required) if (!args.includes(name)) problem(`${step.operation} needs argument ${name}`);
           if (role !== undefined && !operation.roles.includes(role)) problem(`${step.operation} is not available to ${role} clients`);
         }
+        if (step.repeat !== undefined && Object.hasOwn(step.args ?? {}, "requestId"))
+          problem("a repeated invoke must not fix args.requestId, because each call is a new request");
         if (role !== undefined) {
           requirements.operations.add(`${role}:${step.operation}`);
           for (const feature of step.requires ?? []) requirements.features.add(`${role}:${feature}`);
@@ -113,6 +115,7 @@ export function analyzeScenario(scenario, { catalog, vectors }) {
         if (role !== undefined && role !== "user") problem("only user clients subscribe");
         if (subscriptions.has(step.subscription)) problem(`subscription ${step.subscription} is already open`);
         requirements.features.add("user:realtime");
+        for (const feature of step.requires ?? []) requirements.features.add(`user:${feature}`);
         if (step.expect !== undefined) matcher(step.expect.error, "expect.error");
         else subscriptions.set(step.subscription, step.client);
         break;

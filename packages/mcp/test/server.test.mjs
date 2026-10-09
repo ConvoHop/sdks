@@ -220,22 +220,27 @@ test("retry_request resolves an unknown mutation outcome and resends only a requ
     "can look the request up." });
 });
 
-test("a mutation that the transport can't record is reported as rejected without sending it", async t => {
+test("a mutation refused for good makes room for the next, and the transport refuses one it can't record with RECOVERY_LIMIT", async t => {
+  let limited = false;
   const authority = fakeAuthority({
-    CommunicationDisablePrincipal: request => problem(request, "NOT_FOUND", 404, "Unknown principal"),
+    CommunicationDisablePrincipal: request => limited
+      ? problem(request, "RATE_LIMITED", 429, "Request rate exceeded; retry later", { retryAfter: 1 })
+      : problem(request, "NOT_FOUND", 404, "Unknown principal"),
     CommunicationResolveRequest: request => reply(request, { result: resolution(request.variables.input.requestId, "notObservedYet") }),
   });
   const { call } = await connect(t, authority.options);
-  // The transport keeps every mutation it hasn't seen committed or accepted, up to 128.
-  for (let count = 0; count < 128; count += 1) {
-    const rejected = await call("communication_disable_principal", { principalId: randomUUID(), expectedRevision: "1" });
-    assert.equal(rejected.structuredContent.outcome, "rejected");
-  }
+  const disable = () => call("communication_disable_principal", { principalId: randomUUID(), expectedRevision: "1" });
+  // The transport keeps up to 128 records, but a refusal that resending can't change is final and makes room.
+  for (let count = 0; count < 129; count += 1) assert.equal((await disable()).structuredContent.code, "NOT_FOUND");
+  // A rate-limited request may still be resent with its requestId, so its record stays.
+  limited = true;
+  for (let count = 0; count < 128; count += 1) assert.equal((await disable()).structuredContent.code, "RATE_LIMITED");
   const sent = authority.requests.length;
-  const refused = await call("communication_disable_principal", { principalId: randomUUID(), expectedRevision: "1" });
+  const refused = await disable();
   assert.equal(refused.isError, true);
-  assert.deepEqual(refused.structuredContent, { outcome: "rejected", requestId: refused.structuredContent.requestId,
-    message: "Resolve outstanding mutations before creating more" });
+  assert.deepEqual(refused.structuredContent, { code: "RECOVERY_LIMIT", outcome: "rejected",
+    requestId: refused.structuredContent.requestId, status: 409,
+    message: "Recovery storage already holds 128 requests that aren't final; retry or resolve them first" });
   assert.equal(authority.requests.length, sent, "nothing was sent");
   const lookup = await call("communication_resolve_request", { requestId: refused.structuredContent.requestId });
   assert.equal(lookup.structuredContent.result.state, "notObservedYet", "queries still reach the authority");

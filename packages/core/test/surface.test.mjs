@@ -11,8 +11,9 @@ const publicValues = [
   "parseSearchHit", "parseString",
 ];
 const internalValues = [
-  "adoptRecovery", "authenticatedTransport", "beforeSubmitting", "canonical", "currentSession", "eventPage", "jsonClone", "origin", "parseURL", "randomUUID", "route",
-  "sameSession", "sessionExpiry", "sessionMetadata", "timestamp", "validateOutput", "validatePlatform",
+  "adoptRecovery", "authenticatedTransport", "beforeSubmitting", "canonical", "closeProblem", "currentSession", "eventPage",
+  "jsonClone", "origin", "parseURL", "randomUUID", "reconnectAction", "reconnectDelay", "retainRecovery", "retryDelay",
+  "retryableCode", "route", "sameSession", "sessionExpiry", "sessionMetadata", "timestamp", "validateOutput", "validatePlatform",
 ];
 
 test("public core exports are pinned and exclude implementation helpers", () => {

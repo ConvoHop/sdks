@@ -143,6 +143,7 @@ in the iOS Simulator and the conformance scenarios with its driver.
 | `scripts/release/`, `test/release/` | Release scripts and their tests |
 | `spec/conformance/` | Language-neutral conformance scenarios, the driver protocol, target descriptors and webhook vectors, with their JSON Schemas |
 | `spec/push-payload/` | The push payload contract: notification events, the APNs, FCM and Web Push requests built from them, a JSON Schema and shared vectors |
+| `spec/recovery/` | The recovery and reconnect rules that every SDK follows: which recovery journal records may be evicted, and when SDKs retry and reconnect |
 | `spec/docs/` | JSON Schemas for the docs pipeline's inputs and its output in `docs/site` |
 | `conformance/` | The conformance runner, the TypeScript reference driver, the mock target, the harness's tests and the Web client's browser tests. A private npm workspace that is never published |
 | `conformance/drivers/dart/` | The Flutter SDK's conformance driver, a Dart command-line program |
@@ -183,6 +184,7 @@ files from the IR:
 - `schema/operations.json`
 - `packages/core/src/generated/operations.ts`
 - `packages/core/src/generated/graphql-types.ts`
+- `packages/core/src/generated/errors.ts`
 - `docs/snippets/`
 - `jvm/convohop-server/src/generated/java/` and
   `jvm/convohop-server-kotlin/src/generated/kotlin/`

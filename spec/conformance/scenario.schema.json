@@ -47,7 +47,7 @@
     },
     "feature": {
       "description": "Driver features; see spec/conformance/driver-protocol.md#features.",
-      "enum": ["realtime", "recovery.storage", "retryAfter", "webhooks.verify"]
+      "enum": ["realtime", "realtime.reconnectPolicy", "recovery.eviction", "recovery.storage", "retryAfter", "webhooks.verify"]
     },
     "matcher": { "description": "A value pattern; see spec/conformance/README.md#matchers." },
     "errorExpectation": {
@@ -148,6 +148,12 @@
           "uniqueItems": true,
           "items": { "$ref": "#/$defs/feature" }
         },
+        "repeat": {
+          "description": "Runs the operation this many times in sequence, each a new request that must meet expect; save keeps the last result.",
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 1000
+        },
         "expect": {
           "oneOf": [
             { "type": "object", "additionalProperties": false, "required": ["value"], "properties": { "value": { "$ref": "#/$defs/matcher" } } },
@@ -167,6 +173,13 @@
         "client": { "$ref": "#/$defs/handle" },
         "subscription": { "$ref": "#/$defs/handle" },
         "conversationId": { "$ref": "#/$defs/text" },
+        "requires": {
+          "description": "Driver features, beyond realtime, that the driver serving user clients must declare; otherwise the scenario is skipped.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/feature" }
+        },
         "expect": { "$ref": "#/$defs/errorExpectation" }
       }
     },
@@ -227,7 +240,7 @@
       }
     },
     "controlFault": {
-      "description": "Queues a one-shot fault for the next request to a GraphQL root field.",
+      "description": "Queues a fault for each of the next count requests to a GraphQL root field.",
       "type": "object",
       "additionalProperties": false,
       "required": ["do", "field", "action"],
@@ -236,12 +249,26 @@
         "note": { "$ref": "#/$defs/note" },
         "plane": { "enum": ["communication", "management"] },
         "field": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" },
-        "action": { "enum": ["rateLimit", "dropBeforeCommit", "dropAfterCommit"] },
-        "retryAfterSeconds": { "type": "integer", "minimum": 1, "maximum": 3600 }
+        "action": { "enum": ["rateLimit", "dropBeforeCommit", "dropAfterCommit", "httpStatus"] },
+        "retryAfterSeconds": { "type": "integer", "minimum": 1, "maximum": 3600 },
+        "status": { "description": "The HTTP status an httpStatus fault answers with.", "type": "integer", "minimum": 400, "maximum": 599 },
+        "count": { "description": "How many requests in a row the fault applies to; 1 by default.", "type": "integer", "minimum": 1, "maximum": 1000 }
       },
-      "if": { "required": ["action"], "properties": { "action": { "const": "rateLimit" } } },
-      "then": { "required": ["retryAfterSeconds"] },
-      "else": { "not": { "required": ["retryAfterSeconds"] } }
+      "allOf": [
+        {
+          "if": { "required": ["action"], "properties": { "action": { "const": "rateLimit" } } },
+          "then": { "required": ["retryAfterSeconds"] }
+        },
+        {
+          "if": { "required": ["action"], "properties": { "action": { "const": "httpStatus" } } },
+          "then": { "required": ["status"] },
+          "else": { "not": { "required": ["status"] } }
+        },
+        {
+          "if": { "required": ["action"], "properties": { "action": { "enum": ["dropBeforeCommit", "dropAfterCommit"] } } },
+          "then": { "not": { "required": ["retryAfterSeconds"] } }
+        }
+      ]
     },
     "controlRealtimeDrop": {
       "description": "Closes the target's realtime sockets, optionally only those subscribed to one conversation.",

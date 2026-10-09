@@ -11,7 +11,8 @@ import { codegenTypeName, naturalCompare } from "../lib/naming.mjs";
  * @graphql-codegen/cli 7.4.3 and typescript-operations 6.1.7 before those
  * packages were removed; the golden files in tools/sdkgen/test/golden and the
  * strict tsc test now pin the output. operations.ts is the operation catalog
- * the runtime reads. Both are derived from the IR alone.
+ * the runtime reads, and errors.ts the error-code table its retry and
+ * reconnect policy reads. All three are derived from the IR alone.
  */
 export const DEFAULT_DIRECTORY = "packages/core/src/generated";
 
@@ -198,11 +199,34 @@ export function renderOperationCatalog(ir) {
     `export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = ${JSON.stringify(coreOperationCatalog(ir), null, 2)};\n`;
 }
 
+const ERROR_ORIGINS = new Set(["server", "sdk", "both"]);
+
+/** The contents of errors.ts: each error code's origin, status and retryability, in IR order. */
+export function renderErrorCodes(ir) {
+  const entries = (ir.errors?.codes ?? []).map(code => {
+    if (!/^[A-Z][A-Z0-9_]*$/.test(code.name)) throw new EmitterError(`typescript: error code ${JSON.stringify(code.name)} is not SCREAMING_SNAKE_CASE`);
+    if (!ERROR_ORIGINS.has(code.origin)) throw new EmitterError(`typescript: error code ${code.name} has unsupported origin ${JSON.stringify(code.origin)}`);
+    if (code.status !== undefined && !Number.isSafeInteger(code.status)) throw new EmitterError(`typescript: error code ${code.name} has a non-integer status`);
+    if (typeof code.retryable !== "boolean") throw new EmitterError(`typescript: error code ${code.name} has no boolean retryable`);
+    const fields = [`origin: "${code.origin}"`, ...(code.status === undefined ? [] : [`status: ${code.status}`]), `retryable: ${code.retryable}`];
+    return `${docComment(code.summary, 1)}  ${code.name}: { ${fields.join(", ")} },`;
+  });
+  return NOTICE +
+    "/** What the schema says about one error code. */\n" +
+    "export interface ErrorCodeDefinition {\n" +
+    '  /** `server`, `sdk` or `both`. */\n  readonly origin: "server" | "sdk" | "both";\n' +
+    "  /** The HTTP-equivalent status, when the code has one. */\n  readonly status?: number;\n" +
+    "  /** Whether a later attempt with the same requestId may succeed. */\n  readonly retryable: boolean;\n}\n" +
+    "/** Every error code the schema lists, keyed by code. The set is open: handle codes it does not list. */\n" +
+    `export const errorCodes: Readonly<Record<string, ErrorCodeDefinition>> = {\n${entries.join("\n")}\n};\n`;
+}
+
 export default defineEmitter({
   name: "typescript",
-  description: "TypeScript operation types and catalog for @convohop/core",
+  description: "TypeScript operation types, catalog and error codes for @convohop/core",
   emit(ir, { directory = DEFAULT_DIRECTORY } = {}) {
     return [
+      { path: `${directory}/errors.ts`, contents: renderErrorCodes(ir) },
       { path: `${directory}/graphql-types.ts`, contents: renderGeneratedTypes(ir) },
       { path: `${directory}/operations.ts`, contents: renderOperationCatalog(ir) },
     ];

@@ -44,6 +44,15 @@ test("retryAfter comes from extensions.retryAfter, else the Retry-After header, 
   }
 });
 
+test("an error response that isn't JSON, such as a gateway's, keeps its Retry-After", async () => {
+  for (const [status, headers, expected] of [[503, { "retry-after": "7" }, 7], [502, {}, undefined],
+    [503, { "retry-after": "Wed, 21 Oct 2026 07:28:00 GMT" }, undefined]]) {
+    const error = await problem(() => new Response("Service Unavailable", { status, headers: { "content-type": "text/plain", ...headers } }));
+    assert.deepEqual([error.code, error.outcome, error.status, error.retryAfter, Object.hasOwn(error, "retryAfter")],
+      ["INVALID_RESPONSE", "unknown", status, expected, expected !== undefined]);
+  }
+});
+
 test("delays that are not whole seconds, including HTTP-dates, are ignored rather than guessed", async () => {
   const invalid = [-1, 1.5, "1.5", "", " 5", "+5", "0x10", "12345678901", Number.MAX_SAFE_INTEGER + 1, true, null, {}, [5]];
   for (const retryAfter of invalid) {

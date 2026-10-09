@@ -1280,6 +1280,14 @@ public const string RateLimited = "RATE_LIMITED";
 
 A per-second rate limit refused the request before it had any effect. Wait extensions.retryAfter seconds (HTTP Retry-After), then resend the request with the same requestId.
 
+#### `ErrorCodes.RecoveryLimit` static property
+
+```cs
+public const string RecoveryLimit = "RECOVERY_LIMIT";
+```
+
+The SDK's recovery store already holds 128 mutation records that are not final, so the new request was not sent. Retry or resolve outstanding requests, then send it again.
+
 #### `ErrorCodes.RecoveryStorageFailure` static property
 
 ```cs

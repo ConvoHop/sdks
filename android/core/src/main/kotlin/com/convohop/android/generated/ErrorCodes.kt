@@ -189,6 +189,9 @@ public object ErrorCodes {
     /** A per-second rate limit refused the request before it had any effect. Wait extensions.retryAfter seconds (HTTP Retry-After), then resend the request with the same requestId. */
     public const val RATE_LIMITED: String = "RATE_LIMITED"
 
+    /** The SDK's recovery store already holds 128 mutation records that are not final, so the new request was not sent. Retry or resolve outstanding requests, then send it again. */
+    public const val RECOVERY_LIMIT: String = "RECOVERY_LIMIT"
+
     /** Caller-provided recovery storage did not confirm durability. Keep the original request and its outcome. */
     public const val RECOVERY_STORAGE_FAILURE: String = "RECOVERY_STORAGE_FAILURE"
 
@@ -319,6 +322,7 @@ public object ErrorCodes {
             ErrorCodeInfo(PLAN_LIMIT_EXCEEDED, "The plan does not permit the resource or feature. extensions.planLimit names the limit and extensions.limit holds the plan's value. Change the plan or the limit before trying again.", "server", 403, false),
             ErrorCodeInfo(QUOTA_EXCEEDED, "A hard usage quota refused new work until the quota period ends. extensions.meter, extensions.limit and extensions.periodEnd describe the quota, and extensions.retryAfter (HTTP Retry-After) counts the seconds until it resets. Work already in progress continues.", "server", 429, false),
             ErrorCodeInfo(RATE_LIMITED, "A per-second rate limit refused the request before it had any effect. Wait extensions.retryAfter seconds (HTTP Retry-After), then resend the request with the same requestId.", "server", 429, true),
+            ErrorCodeInfo(RECOVERY_LIMIT, "The SDK's recovery store already holds 128 mutation records that are not final, so the new request was not sent. Retry or resolve outstanding requests, then send it again.", "sdk", 409, false),
             ErrorCodeInfo(RECOVERY_STORAGE_FAILURE, "Caller-provided recovery storage did not confirm durability. Keep the original request and its outcome.", "sdk", null, false),
             ErrorCodeInfo(REQUEST_EXPIRED, "The original request is too old to replay.", "server", 409, false),
             ErrorCodeInfo(REQUEST_TOO_LARGE, "The request body exceeds the size limit.", "server", 413, false),

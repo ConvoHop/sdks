@@ -174,7 +174,9 @@ jobs:
       - name: Run the conformance scenarios against the mock target
         # Not --strict: the Dart driver declares only the user role, so the runner skips the
         # scenarios that only use backend or management clients, and the webhook scenarios,
-        # because verifying webhooks belongs to server SDKs. The next step allows only those.
+        # because verifying webhooks belongs to server SDKs. Until the SDK follows
+        # spec/recovery/README.md, it also skips those that need realtime.reconnectPolicy or
+        # recovery.eviction. The next step allows only those.
         run: >-
           npm run conformance --
           --driver conformance/drivers/dart/build/driver/bundle/bin/driver
@@ -187,6 +189,8 @@ jobs:
             "it only uses backend clients, which the driver under test does not declare",
             "it only uses management clients, which the driver under test does not declare",
             "driver convohop-dart does not declare feature webhooks.verify",
+            "driver convohop-dart does not declare feature realtime.reconnectPolicy",
+            "driver convohop-dart does not declare feature recovery.eviction",
           ]);
           const summary = JSON.parse(readFileSync("conformance/reports/dart/summary.json", "utf8"));
           const scenarios = summary.suites.flatMap((suite) => suite.scenarios);

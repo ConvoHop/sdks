@@ -28,9 +28,10 @@ export class ControlClient {
 
   reset() { return this.#expectOk("POST", "/reset", {}); }
 
-  fault({ plane, field, action, retryAfterSeconds }) {
+  fault({ plane, field, action, retryAfterSeconds, status, count }) {
     return this.#expectOk("POST", "/fault", { ...(plane === undefined ? {} : { plane }), field, action,
-      ...(retryAfterSeconds === undefined ? {} : { retryAfterSeconds }) });
+      ...(retryAfterSeconds === undefined ? {} : { retryAfterSeconds }), ...(status === undefined ? {} : { status }),
+      ...(count === undefined ? {} : { count }) });
   }
 
   async realtimeDrop({ conversationId, code, reason }) {

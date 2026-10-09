@@ -525,7 +525,8 @@ test("async retention never drops unresolved records or exceeds its 128-record b
     await assert.rejects(mutate(transport, requestId), { code: "TRANSPORT_UNKNOWN" });
   }
   const next = id();
-  await assert.rejects(mutate(transport, next), /Resolve outstanding mutations/);
+  await assert.rejects(mutate(transport, next), { name: "ConvoHopProblem", code: "RECOVERY_LIMIT", requestId: next,
+    outcome: "rejected", status: 409 });
   assert.equal(mutations, 128);
   assert.equal(transport.recoveryStates.length, 128);
   assert.deepEqual(states(saved).map(state => state.requestId), ids);

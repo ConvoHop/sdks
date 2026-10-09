@@ -966,6 +966,36 @@ test("a scheduled initialization that the authority rejects is reported once and
   assert.equal(setup.client.sessionRefreshState, "uninitialized");
 });
 
+test("a scheduled initialization retries gateway and server errors with backoff", async t => {
+  const time = clock(t), setup = fixture(), errors = [];
+  const outages = [() => new Response("<html>Bad gateway</html>", { status: 502, headers: { "content-type": "text/html" } }),
+    () => Response.json({ message: "Gateway timeout" }, { status: 504 }),
+    () => Response.json({ code: "AUTHORITY_UNAVAILABLE", outcome: "unknown", message: "Fixture failure" }, { status: 500 })];
+  setup.handle = ({ operation }) => operation === "communication.route" && outages.length ? outages.shift()() : undefined;
+  t.after(setup.client.scheduleSessionRefresh({ leadMs: 30000, onError: error => errors.push(error) }));
+  for (const [attempt, offset] of [0, 1000, 3000, 7000].entries()) {
+    if (offset) await time.at(offset - 1);
+    assert.equal(setup.requests.length, attempt);
+    await time.at(offset);
+  }
+  assert.deepEqual(errors.map(error => [error.code, error.status]),
+    [["INVALID_RESPONSE", 502], ["HTTP_FAILURE", 504], ["AUTHORITY_UNAVAILABLE", 500]]);
+  assert.equal(setup.client.sessionRefreshState, "ready");
+});
+
+for (const [code, status] of [["QUOTA_EXCEEDED", 429], ["PLAN_LIMIT_EXCEEDED", 403]]) {
+  test(`a scheduled initialization refused with ${code} is reported once and not retried, whatever its retryAfter`, async t => {
+    const time = clock(t), setup = fixture(), errors = [];
+    setup.handle = () => Response.json({ code, outcome: "rejected", message: "Fixture limit", retryAfter: 60 }, { status });
+    t.after(setup.client.scheduleSessionRefresh({ onError: error => errors.push(error) }));
+    await time.at(0);
+    await time.at(600000);
+    assert.deepEqual(errors.map(error => [error.code, error.status, error.retryAfter]), [[code, status, 60]]);
+    assert.equal(setup.requests.length, 1);
+    assert.equal(setup.client.sessionRefreshState, "uninitialized");
+  });
+}
+
 for (const outcome of ["renewed", "failed"]) {
   test(`disposing a schedule during its renewal suppresses the ${outcome} callback and later renewals`, async t => {
     const time = clock(t), setup = fixture(), refreshed = [], errors = [], gate = deferred();

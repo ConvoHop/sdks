@@ -182,6 +182,9 @@ namespace ConvoHop
         /// <summary>A per-second rate limit refused the request before it had any effect. Wait extensions.retryAfter seconds (HTTP Retry-After), then resend the request with the same requestId.</summary>
         public const string RateLimited = "RATE_LIMITED";
 
+        /// <summary>The SDK's recovery store already holds 128 mutation records that are not final, so the new request was not sent. Retry or resolve outstanding requests, then send it again.</summary>
+        public const string RecoveryLimit = "RECOVERY_LIMIT";
+
         /// <summary>Caller-provided recovery storage did not confirm durability. Keep the original request and its outcome.</summary>
         public const string RecoveryStorageFailure = "RECOVERY_STORAGE_FAILURE";
 

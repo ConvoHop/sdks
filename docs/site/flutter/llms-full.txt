@@ -3611,6 +3611,7 @@ abstract final class ErrorCodes {
   static const String planLimitExceeded;
   static const String quotaExceeded;
   static const String rateLimited;
+  static const String recoveryLimit;
   static const String recoveryStorageFailure;
   static const String requestExpired;
   static const String requestTooLarge;

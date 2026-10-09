@@ -578,6 +578,12 @@
       "status": 429,
       "retryable": true
     },
+    "RECOVERY_LIMIT": {
+      "summary": "The SDK's recovery store already holds 128 mutation records that are not final, so the new request was not sent. Retry or resolve outstanding requests, then send it again.",
+      "origin": "sdk",
+      "status": 409,
+      "retryable": false
+    },
     "RECOVERY_STORAGE_FAILURE": {
       "summary": "Caller-provided recovery storage did not confirm durability. Keep the original request and its outcome.",
       "origin": "sdk",
@@ -746,6 +752,7 @@
         "IDEMPOTENCY_CONFLICT",
         "OUTCOME_UNKNOWN",
         "RESOLUTION_REQUIRED",
+        "RECOVERY_LIMIT",
         "RECOVERY_STORAGE_FAILURE"
       ]
     },
