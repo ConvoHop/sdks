@@ -312,17 +312,19 @@ client gives its app: `{"kind": "fcm", "token": …}` or
 `{"kind": "fcm", "fid": …}`, and `{"kind": "apns", "token": …}` or, for
 PushKit, `{"kind": "apnsVoip", "token": …}`. Your backend sends each FCM
 message to the registration's `token` or `fid`, the matching target of FCM's
-HTTP v1 API. `firebase-admin` sends to a `fid` from 14.1.0 for Node.js and
-7.5.0 for Python.
+HTTP v1 API.
+[Push notifications](../docs/sdk-strategy.md#push-notifications-bring-your-own)
+lists the Firebase Admin SDK versions that send to a `fid`.
 
 Call `register()` at each launch. The same registration can arrive more than
 once, so store registrations idempotently. On Android, `register()` throws a
 `PlatformException` with the code `FIREBASE_UNAVAILABLE` when Firebase isn't
-set up or registration failed, for example while offline. On iOS the registration arrives once APNs registered the
-device, which can be after `register()` returns. Call `registerVoip()` only if
-the app answers calls: iOS terminates an app that receives a VoIP push without
-reporting a call. `received` reports pushes that reach the device while Dart
-runs. On iOS, alert pushes reach the app only while it's in the foreground.
+set up or registration failed, for example while offline. On iOS the
+registration arrives once APNs registered the device, which can be after
+`register()` returns. Call `registerVoip()` only if the app answers calls: iOS
+terminates an app that receives a VoIP push without reporting a call.
+`received` reports pushes that reach the device while Dart runs. On iOS, alert
+pushes reach the app only while it's in the foreground.
 
 Every notification is a `MessageNotification`, `CallNotification` or
 `CallCancelledNotification` with the event's IDs. Check `isFor(client)`
