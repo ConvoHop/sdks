@@ -56,6 +56,18 @@ cd jvm
 [Build and test](jvm/README.md#build-and-test) explains how to run the tests
 on other JDKs and how to run the conformance scenarios with its driver.
 
+The [.NET server SDK](dotnet/README.md) has its own build in `dotnet/`. Build
+it with the .NET 10 SDK that [`global.json`](global.json) selects:
+
+```sh
+dotnet build dotnet/ConvoHop.slnx                   # the library, its tests and the generator goldens
+dotnet test dotnet/test/ConvoHop.Tests -f net10.0   # the tests on .NET 10
+```
+
+[Build and test](dotnet/README.md#build-and-test) explains how to run the
+tests on .NET 8 and 9, how to pack the library and how to run the
+conformance scenarios with its driver.
+
 ## Repository layout
 
 | Path | Contents |
@@ -65,6 +77,7 @@ on other JDKs and how to run the conformance scenarios with its driver.
 | `packages/react` | React hooks (`@convohop/react`) over the client SDK. A private workspace, not in a release yet |
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
 | `jvm/` | Java and Kotlin server SDK (`com.convohop:convohop-server` and `com.convohop:convohop-server-kotlin`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/jvm/` |
+| `dotnet/` | .NET server SDK (`ConvoHop`), its xUnit tests and the projects that compile the C# generator goldens. Its conformance driver is in `conformance/drivers/dotnet/` |
 | `packages/cli` | The `convohop` command-line tool (`@convohop/cli`), built on `@convohop/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
 | `packages/mcp` | An MCP server (`@convohop/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
@@ -115,6 +128,7 @@ files from the IR:
 - `docs/snippets/`
 - `jvm/convohop-server/src/generated/java/` and
   `jvm/convohop-server-kotlin/src/generated/kotlin/`
+- `dotnet/src/ConvoHop/Generated/`
 
 ```sh
 npm run generate:graphql   # regenerate after a schema or annotation change
@@ -240,6 +254,8 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   [Tested code](docs/docs-pipeline.md#tested-code) describes.
 - The Java and Kotlin SDK's tests use JUnit 5. They live in
   `jvm/*/src/test/` and run with `./gradlew test` in `jvm/`.
+- The .NET SDK's tests use xUnit. They live in `dotnet/test/ConvoHop.Tests/`
+  and run with `dotnet test`.
 
 ## SDK design rules
 

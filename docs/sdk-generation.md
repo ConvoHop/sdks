@@ -18,6 +18,7 @@ flowchart LR
   I --> EJ["java"]
   I --> EM["mcp-tools"]
   I --> EC["cli-operations"]
+  I --> ECS["csharp"]
   I -.-> E5["future language emitters"]
 ```
 
@@ -67,6 +68,7 @@ Don't edit generated files by hand. Change the inputs and run
 | `java` | `jvm/convohop-server/src/generated/java/`, `jvm/convohop-server-kotlin/src/generated/kotlin/` | Models, the operation catalog, one API class per plane with lazy pages methods for cursor-paginated queries, and a suspending Kotlin wrapper per plane, for the [JVM server SDK](../jvm/README.md) |
 | `mcp-tools` | `packages/mcp/src/generated/tools.ts` | The tool catalog of `@convohop/mcp`: one MCP tool per query and mutation that a server bearer credential can call, with its input schema and annotations |
 | `cli-operations` | `packages/cli/src/generated/operations.ts` | The operation catalog of `@convohop/cli`: the same operations, with their inputs, types, credentials, scopes, idempotency and destructiveness |
+| `csharp` | `dotnet/src/ConvoHop/Generated/` | Models with a System.Text.Json source-generation context, the operation catalog, the schema metadata that validates responses, and one API class per plane with `IAsyncEnumerable` pages methods for cursor-paginated queries, for the [.NET server SDK](../dotnet/README.md). It covers the server layers and leaves out subscriptions |
 
 Both `mcp-tools` and `cli-operations` leave out subscriptions, client-only and
 deprecated operations, and the operations whose results are credentials, such
@@ -198,6 +200,10 @@ The generator tests are in [`tools/sdkgen/test`](../tools/sdkgen/test) and use
 - The `sdkgen-edge` project of the [JVM build](../jvm/README.md) compiles the
   fixture's generated Java and Kotlin against the JVM runtime with warnings
   as errors.
+- `golden/edge-all-layers` holds the C# emitter's output for every layer of
+  the fixture. The `ConvoHop.SdkgenEdge` and `ConvoHop.SdkgenEdge.AllLayers`
+  projects of the [.NET build](../dotnet/README.md) compile both C# goldens
+  against the .NET runtime with warnings as errors.
 
 After an intended change to an emitter, refresh the golden files and review
 the diff before you commit it:
