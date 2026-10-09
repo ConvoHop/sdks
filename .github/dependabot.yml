@@ -274,6 +274,14 @@ updates:
     directory: /flutter/android
     schedule:
       interval: weekly
+    # Apps resolve at least the plugin's library versions. The README
+    # documents firebase-messaging 25.1.2 (BoM 34.18.0) as the floor, and a
+    # newer androidx.core can need a compileSdk above the plugin's 36. Raise
+    # them by hand, with the README.
+    ignore:
+      - dependency-name: "androidx.core:core"
+      - dependency-name: "com.google.firebase:firebase-installations"
+      - dependency-name: "com.google.firebase:firebase-messaging"
     cooldown:
       default-days: 7
     commit-message:
