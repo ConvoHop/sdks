@@ -21,6 +21,19 @@ class WebSubscription(TypedDict):
     keys: WebSubscriptionKeys
 
 
+# An Android app's registration token, or its Firebase Installation ID (FID) when its manifest sets
+# firebase_messaging_installation_id_enabled.
+class FcmToken(TypedDict):
+    token: str
+
+
+class FcmFid(TypedDict):
+    fid: str
+
+
+FcmTarget = FcmToken | FcmFid
+
+
 # The devices your app registered for a user, from your own database.
 @dataclass(frozen=True)
 class IosDevice:
@@ -30,7 +43,7 @@ class IosDevice:
 
 @dataclass(frozen=True)
 class AndroidDevice:
-    fid: str  # The Firebase Installation ID that FirebaseMessagingService.onRegistered() receives.
+    target: FcmTarget
 
 
 @dataclass(frozen=True)
@@ -44,7 +57,7 @@ Device = IosDevice | AndroidDevice | WebDevice
 # Your push clients: an APNs HTTP/2 client, firebase-admin and pywebpush.
 class PushSenders(Protocol):
     def apns(self, token: str, request: push.ApnsAlertRequest | push.ApnsVoipRequest) -> None: ...
-    def fcm(self, fid: str, request: push.FcmRequest) -> None: ...
+    def fcm(self, target: FcmTarget, request: push.FcmRequest) -> None: ...
     def web_push(self, subscription: WebSubscription, request: push.WebPushRequest) -> None: ...
 
 
@@ -75,9 +88,9 @@ def notify(
                 # apns_alert returns None when a ring was answered or declined.
                 elif alert := push.apns_alert(event, bundle_id=bundle_id, **options):
                     senders.apns(token, alert)
-            case AndroidDevice(fid=fid):
+            case AndroidDevice(target=target):
                 if request := push.fcm(event, **options):
-                    senders.fcm(fid, request)
+                    senders.fcm(target, request)
             case WebDevice(subscription=subscription):
                 if web := push.web_push(event, **options):
                     senders.web_push(subscription, web)
@@ -113,10 +126,10 @@ from firebase_admin import messaging
 
 # firebase-admin takes Android options in its own form: lowercase priority, and ttl in seconds as a number
 # or a timedelta. The request's REST form, such as "HIGH" and "45s", makes it raise ValueError.
-def firebase_message(fid: str, request: push.FcmRequest) -> messaging.Message:
+def firebase_message(target: FcmTarget, request: push.FcmRequest) -> messaging.Message:
     android = request["message"]["android"]
     return messaging.Message(
-        fid=fid,  # firebase-admin deprecates the older token target.
+        **target,  # firebase-admin sends to a fid from 7.5.0, and warns that token is deprecated.
         data=request["message"]["data"],
         android=messaging.AndroidConfig(
             priority=android["priority"].lower(),
@@ -127,8 +140,8 @@ def firebase_message(fid: str, request: push.FcmRequest) -> messaging.Message:
 
 
 # Call firebase_admin.initialize_app() with your service account first.
-def send_fcm(fid: str, request: push.FcmRequest) -> None:
-    messaging.send(firebase_message(fid, request))
+def send_fcm(target: FcmTarget, request: push.FcmRequest) -> None:
+    messaging.send(firebase_message(target, request))
 
 
 # #endregion fcm

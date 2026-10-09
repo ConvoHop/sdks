@@ -3700,9 +3700,9 @@
       "ref": "@convohop/client#PushRegistration",
       "anchor": "pushregistration-type",
       "signatures": [
-        "type PushRegistration = {\n    readonly kind: \"webPush\";\n    readonly subscription: WebPushSubscription;\n} | {\n    readonly kind: \"apns\" | \"apnsVoip\";\n    readonly token: string;\n    readonly environment?: \"development\" | \"production\";\n} | {\n    readonly kind: \"fcm\";\n    readonly token: string;\n}"
+        "type PushRegistration = {\n    readonly kind: \"webPush\";\n    readonly subscription: WebPushSubscription;\n} | {\n    readonly kind: \"apns\" | \"apnsVoip\";\n    readonly token: string;\n    readonly environment?: \"development\" | \"production\";\n} | {\n    readonly kind: \"fcm\";\n    readonly token: string;\n    readonly fid?: never;\n} | {\n    readonly kind: \"fcm\";\n    readonly fid: string;\n    readonly token?: never;\n}"
       ],
-      "docs": "Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend\nendpoint can store registrations from browsers and native apps. ConvoHop never sees them.\n\n- `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.\n- `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.\n- `apnsVoip`: an iOS PushKit token for incoming calls.\n- `fcm`: an Android Firebase Cloud Messaging registration token."
+      "docs": "Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend\nendpoint can store registrations from browsers and native apps. ConvoHop never sees them.\n\n- `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.\n- `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.\n- `apnsVoip`: an iOS PushKit token for incoming calls.\n- `fcm`: an Android app's Firebase Cloud Messaging target, with exactly one of `token` and `fid`. `token` is the\n  registration token, which apps get by default. `fid` is the Firebase Installation ID, which apps get instead when\n  their manifest sets `firebase_messaging_installation_id_enabled`. Send to it with the FCM HTTP v1 target of the\n  same name."
     },
     {
       "name": "ReadReceipt",

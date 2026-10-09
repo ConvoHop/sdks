@@ -14,8 +14,12 @@ import {
 // The devices your app registered for a user, from your own database.
 export type Device =
   | { platform: "ios"; token: string; voipToken?: string } // voipToken: the PushKit token of a CallKit app.
-  | { platform: "android"; token: string }
+  | { platform: "android"; target: FcmTarget }
   | { platform: "web"; subscription: WebSubscription };
+
+// An Android app's registration token, or its Firebase Installation ID (FID) when its manifest sets
+// firebase_messaging_installation_id_enabled.
+export type FcmTarget = { token: string } | { fid: string };
 
 // A browser's PushSubscription.toJSON().
 export interface WebSubscription {
@@ -26,7 +30,7 @@ export interface WebSubscription {
 // Your push clients: an APNs HTTP/2 client, firebase-admin and web-push.
 export interface PushSenders {
   apns(token: string, request: ApnsAlertRequest | ApnsVoipRequest): Promise<void>;
-  fcm(token: string, request: FcmRequest): Promise<void>;
+  fcm(target: FcmTarget, request: FcmRequest): Promise<void>;
   webPush(subscription: WebSubscription, request: WebPushRequest): Promise<void>;
 }
 
@@ -50,7 +54,7 @@ export async function notify(
       }
     } else if (device.platform === "android") {
       const request = push.fcm(event, options);
-      if (request) await senders.fcm(device.token, request);
+      if (request) await senders.fcm(device.target, request);
     } else {
       const request = push.webPush(event, options);
       if (request) await senders.webPush(device.subscription, request);
@@ -82,14 +86,14 @@ export async function sendWebPush(
 // #endregion web-push
 
 // #region fcm
-import { getMessaging, type TokenMessage } from "firebase-admin/messaging";
+import { getMessaging, type Message } from "firebase-admin/messaging";
 
 // firebase-admin takes Android options in its own form: lowercase priority, collapseKey, and ttl in
 // milliseconds. The request's REST form ttl ("45s") makes it throw, and a bare 45 would mean 45 ms.
-export function firebaseMessage(token: string, request: FcmRequest): TokenMessage {
+export function firebaseMessage(target: FcmTarget, request: FcmRequest): Message {
   const { data, android } = request.message;
   return {
-    token,
+    ...target, // firebase-admin sends to a fid from 14.1.0.
     data,
     android: {
       priority: android.priority === "HIGH" ? "high" : "normal",
@@ -100,7 +104,7 @@ export function firebaseMessage(token: string, request: FcmRequest): TokenMessag
 }
 
 // Call initializeApp() from firebase-admin/app with your service account first.
-export async function sendFcm(token: string, request: FcmRequest): Promise<void> {
-  await getMessaging().send(firebaseMessage(token, request));
+export async function sendFcm(target: FcmTarget, request: FcmRequest): Promise<void> {
+  await getMessaging().send(firebaseMessage(target, request));
 }
 // #endregion fcm
