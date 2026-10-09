@@ -476,12 +476,11 @@ needs `recovery.spentBudget` with a user client, until its SDK follows the
 [workflow](../../.github/workflows/android.yml) fails on any other skip.
 
 The Dart driver also declares only the user role and no `webhooks.verify`
-feature. It declares `recovery.eviction` and `realtime.reconnectPolicy`, so
-it passes 40 scenarios against the mock and skips 35: those that use only
-backend or management clients, those that verify webhooks, and the one that
-needs `recovery.spentBudget` with a user client, until its driver declares
-that feature. Its [workflow](../../.github/workflows/flutter.yml) fails on
-any other skip.
+feature. It declares `recovery.eviction`, `recovery.spentBudget` and
+`realtime.reconnectPolicy`, so it passes 41 scenarios against the mock and
+skips 34: those that use only backend or management clients, and those that
+verify webhooks. Its [workflow](../../.github/workflows/flutter.yml) fails
+on any other skip.
 
 The React Native driver declares only the user role and no
 `webhooks.verify` feature. It passes 41 scenarios against the mock and
