@@ -37,6 +37,7 @@ flowchart LR
 | [`conformance/runner.mjs`](../../conformance/runner.mjs) | The runner CLI; its modules are in [`conformance/lib/`](../../conformance/lib). |
 | [`conformance/drivers/ts/`](../../conformance/drivers/ts) | The TypeScript reference driver. |
 | [`conformance/drivers/jvm/`](../../conformance/drivers/jvm) | The driver for the [Java and Kotlin server SDK](../../jvm/README.md). |
+| [`conformance/drivers/dotnet/`](../../conformance/drivers/dotnet) | The driver for the [.NET server SDK](../../dotnet/README.md). |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |
 | [`conformance/targets/`](../../conformance/targets) | Descriptors for real targets, such as the dev-stack image. |
 | [`conformance/test/`](../../conformance/test) | `node:test` tests for the harness itself. |
@@ -417,6 +418,11 @@ The JVM driver declares the backend and management roles. It passes 62
 scenarios against the mock and skips the 2 that only use user clients,
 `auth.user-token.invalid` and `realtime.subscribe.invalid-token`. Its
 [workflow](../../.github/workflows/jvm.yml) fails on any other skip.
+
+The .NET driver declares the backend and management roles too. With both
+the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 62
+scenarios against the mock and skips the same 2. Its
+[workflow](../../.github/workflows/dotnet.yml) fails on any other skip.
 
 Passing against the mock shows that the SDK, driver and scenarios agree on
 the public contract. It does not certify a real deployment; for that, run
