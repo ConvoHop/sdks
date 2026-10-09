@@ -107,11 +107,24 @@ public class CallInfo internal constructor(
 /**
  * Events from [ConvoHopNotifications], on the main thread. Every method has
  * an empty default. A listener added late misses earlier events: read
- * [ConvoHopNotifications.calls] and [ConvoHopNotifications.token] when you add it.
+ * [ConvoHopNotifications.calls] and [ConvoHopNotifications.registration] when you add it.
  */
 public interface ConvoHopNotificationListener {
-    /** A new FCM registration token: send it to your backend. ConvoHop never stores device tokens. */
-    public fun onToken(token: String) {}
+    /**
+     * FCM registered this device, or confirmed its registration: a token, or
+     * an installation ID if your app turned that mode on. Store
+     * [registration] with your backend for the signed-in user; ConvoHop never
+     * stores registrations. The same registration can arrive more than once,
+     * because Firebase's callback and [ConvoHopFirebase.register]'s task both
+     * report it, so store it idempotently.
+     */
+    public fun onRegistered(registration: PushRegistration) {}
+
+    /**
+     * FCM unregistered this device, so pushes to [registration] stop: delete
+     * it from your backend. It can repeat too.
+     */
+    public fun onUnregistered(registration: PushRegistration) {}
 
     /** A new message arrived, after its notification was posted (if [ConvoHopNotificationOptions.showMessages]). */
     public fun onMessage(message: PushNotification.Message) {}

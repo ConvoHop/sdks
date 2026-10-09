@@ -6,7 +6,11 @@ serialization = "1.9.0"
 okhttp = "4.12.0"
 androidx-core = "1.13.1"
 livekit = "2.29.0"
-firebase-messaging = "25.0.1"
+# Apps supply firebase-messaging; :push only compiles against it. 25.1.0 (BoM 34.15.0) added
+# registration by Firebase Installation ID, and 25.1.2 (BoM 34.18.0) fixed re-registering after
+# an FID change and FID_ALREADY_USED, so 25.1.2 is the floor the README documents. Use only APIs
+# that 25.1.2 has.
+firebase-messaging = "25.1.2"
 junit = "4.13.2"
 robolectric = "4.17"
 

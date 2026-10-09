@@ -27,8 +27,12 @@ internal class PushHarness {
     private val events = mutableListOf<String>()
 
     val recorder: ConvoHopNotificationListener = object : ConvoHopNotificationListener {
-        override fun onToken(token: String) {
-            events += "token $token"
+        override fun onRegistered(registration: PushRegistration) {
+            events += "registered ${describe(registration)}"
+        }
+
+        override fun onUnregistered(registration: PushRegistration) {
+            events += "unregistered ${describe(registration)}"
         }
 
         override fun onMessage(message: PushNotification.Message) {
@@ -119,6 +123,12 @@ internal class PushHarness {
         const val INCOMING: String = "test.INCOMING_CALL"
         const val ANSWERED: String = "test.ANSWERED_CALL"
         const val OPEN_CONVERSATION: String = "test.OPEN_CONVERSATION"
+
+        /** A registration in full, as the recorder logs it: `toString` hides the value. */
+        fun describe(registration: PushRegistration): String = when (registration) {
+            is PushRegistration.Token -> "token ${registration.token}"
+            is PushRegistration.InstallationId -> "fid ${registration.fid}"
+        }
     }
 }
 

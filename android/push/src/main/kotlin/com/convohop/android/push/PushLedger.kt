@@ -2,7 +2,7 @@ package com.convohop.android.push
 
 /**
  * Durable storage for a [PushLedger], such as shared preferences. The value
- * holds event and alert identifiers only: never message text or tokens.
+ * holds event and alert identifiers only: never message text or FCM registrations.
  */
 public interface PushLedgerStore {
     public fun load(): String?

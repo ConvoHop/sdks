@@ -14,6 +14,10 @@ internal object Fixtures {
     const val LIVE_SESSION: String = "e5f6a7b8-c9d0-4e1f-8a2b-3c4d5e6f7a8b"
     const val MESSAGE: String = "d9b3f7e5-2c8a-4d1f-8e6b-3a2c1b0f9e8d"
 
+    /** An FCM registration token and a Firebase Installation ID, shaped like Firebase's. */
+    const val TOKEN: String = "eX4mPl3T0k3n:APA91bE7wQ9zR2sV5yB8nM1kL4jH6gF3dS0aP-oI9uY7tR5eW3qZ1xC"
+    const val FID: String = "fT2kq0uLRn6m0Xb8YzA1cD"
+
     /** A distinct valid UUID for each [n]. */
     fun id(n: Int): String = "00000000-0000-4000-8000-" + n.toString().padStart(12, '0')
 

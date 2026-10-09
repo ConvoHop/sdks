@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import com.convohop.android.push.Fixtures.CONVERSATION
+import com.convohop.android.push.Fixtures.FID
 import com.convohop.android.push.Fixtures.LIVE_SESSION
 import com.convohop.android.push.Fixtures.MESSAGE
 import com.convohop.android.push.Fixtures.NOW
 import com.convohop.android.push.Fixtures.RECIPIENT
+import com.convohop.android.push.Fixtures.TOKEN
 import com.convohop.android.push.Fixtures.callData
 import com.convohop.android.push.Fixtures.id
 import com.convohop.android.push.Fixtures.messageData
@@ -23,7 +25,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import java.util.concurrent.atomic.AtomicInteger
 
-/** Message pushes, tokens, listeners and the delivery ledger. */
+/** Message pushes, FCM registrations, listeners and the delivery ledger. */
 @RunWith(RobolectricTestRunner::class)
 internal class MessageNotificationsTest {
     private val push = PushHarness()
@@ -157,32 +159,48 @@ internal class MessageNotificationsTest {
     }
 
     @Test
-    fun reportsTokensToListeners() {
-        assertNull(manager.token)
-        manager.onNewToken("token-1")
-        assertEquals("token-1", manager.token)
-        assertEquals(listOf("token token-1"), push.events())
+    fun reportsRegistrationsToListeners() {
+        assertNull(manager.registration)
+        manager.onNewToken(TOKEN)
+        assertEquals(PushRegistration.Token(TOKEN), manager.registration)
+        assertEquals(listOf("registered token $TOKEN"), push.events())
 
-        val tokens = mutableListOf<String>()
+        val seen = mutableListOf<String>()
         val listener = object : ConvoHopNotificationListener {
-            override fun onToken(token: String) {
-                tokens += token
+            override fun onRegistered(registration: PushRegistration) {
+                seen += "+" + PushHarness.describe(registration)
+            }
+
+            override fun onUnregistered(registration: PushRegistration) {
+                seen += "-" + PushHarness.describe(registration)
             }
         }
-        val registration = manager.addListener(listener)
+        val subscription = manager.addListener(listener)
         manager.addListener(listener)
-        manager.onNewToken("token-2")
-        assertEquals(listOf("token token-2"), push.events())
-        assertEquals(listOf("token-2"), tokens)
+        manager.onRegistered(FID)
+        manager.onUnregistered(FID)
+        assertEquals(listOf("registered fid $FID", "unregistered fid $FID"), push.events())
+        assertEquals(listOf("+fid $FID", "-fid $FID"), seen)
+        assertNull(manager.registration)
 
-        registration.close()
-        manager.onNewToken("token-3")
-        assertEquals(listOf("token token-3"), push.events())
+        subscription.close()
+        manager.onRegistered(FID)
+        assertEquals(listOf("registered fid $FID"), push.events())
         manager.removeListener(push.recorder)
-        manager.onNewToken("token-4")
+        manager.onNewToken(TOKEN)
         assertEquals(emptyList<String>(), push.events())
-        assertEquals(listOf("token-2"), tokens)
-        assertEquals("token-4", manager.token)
+        assertEquals(listOf("+fid $FID", "-fid $FID"), seen)
+        assertEquals(PushRegistration.Token(TOKEN), manager.registration)
+    }
+
+    @Test
+    fun keepsTheCurrentRegistrationWhenAnOldOneEnds() {
+        val old = FID.reversed()
+        manager.onRegistered(FID)
+        manager.onUnregistered(old)
+        // Listeners still hear of it, so your backend deletes it.
+        assertEquals(PushRegistration.InstallationId(FID), manager.registration)
+        assertEquals(listOf("registered fid $FID", "unregistered fid $old"), push.events())
     }
 
     @Test
@@ -191,12 +209,13 @@ internal class MessageNotificationsTest {
         val alert = id(100)
         push.handle(messageData(id(1), title = "Ada", body = "Lunch at noon?"))
         push.handle(callData(id(2), alert, title = "Ada"))
-        manager.onNewToken("fcm-token")
+        manager.onNewToken(TOKEN)
+        manager.onRegistered(FID)
         assertTrue(manager.reject(alert))
         val preferences = push.app.getSharedPreferences("com.convohop.android.push", Context.MODE_PRIVATE)
         val stored = checkNotNull(preferences.getString("ledger", null))
         assertTrue(stored, stored.contains(id(1)) && stored.contains(id(2)) && stored.contains(alert))
-        for (secret in listOf("Ada", "Lunch", "fcm-token", CONVERSATION, RECIPIENT, LIVE_SESSION)) {
+        for (secret in listOf("Ada", "Lunch", TOKEN, FID, CONVERSATION, RECIPIENT, LIVE_SESSION)) {
             assertFalse(secret, stored.contains(secret))
         }
         // A new process reads it back.

@@ -46,9 +46,13 @@ public class ConvoHopNotifications private constructor(context: Context) {
     @Volatile
     public var options: ConvoHopNotificationOptions = ConvoHopNotificationOptions()
 
-    /** The latest FCM token this process saw, held in memory only. */
+    /**
+     * This device's FCM registration as this process last learned it, from
+     * Firebase's callbacks or [ConvoHopFirebase.register]. Held in memory
+     * only; null until then, and after it is unregistered.
+     */
     @Volatile
-    public var token: String? = null
+    public var registration: PushRegistration? = null
         private set
 
     /**
@@ -84,10 +88,45 @@ public class ConvoHopNotifications private constructor(context: Context) {
         listeners.remove(listener)
     }
 
-    /** Records a new FCM registration token and reports it to listeners. Send it to your backend. */
+    /**
+     * Records a new FCM registration token and reports it to listeners as a
+     * [PushRegistration.Token]: store it with your backend.
+     * [ConvoHopFirebase.onNewToken] calls this.
+     */
     public fun onNewToken(token: String) {
-        this.token = token
-        dispatch { it.onToken(token) }
+        registered(PushRegistration.Token(token))
+    }
+
+    /**
+     * Records that FCM registered this device as [installationId] and reports
+     * it to listeners as a [PushRegistration.InstallationId]: store it with
+     * your backend. [ConvoHopFirebase.onRegistered] calls this.
+     */
+    public fun onRegistered(installationId: String) {
+        registered(PushRegistration.InstallationId(installationId))
+    }
+
+    /**
+     * Records that FCM unregistered [installationId], so pushes to it stop,
+     * and reports it to listeners: delete it from your backend.
+     * [ConvoHopFirebase.onUnregistered] calls this.
+     */
+    public fun onUnregistered(installationId: String) {
+        unregistered(PushRegistration.InstallationId(installationId))
+    }
+
+    internal fun registered(registration: PushRegistration) {
+        synchronized(lock) {
+            this.registration = registration
+            dispatch { it.onRegistered(registration) }
+        }
+    }
+
+    internal fun unregistered(registration: PushRegistration) {
+        synchronized(lock) {
+            if (this.registration == registration) this.registration = null
+            dispatch { it.onUnregistered(registration) }
+        }
     }
 
     /** False when the user turned off this app's notifications or hasn't granted `POST_NOTIFICATIONS`. */

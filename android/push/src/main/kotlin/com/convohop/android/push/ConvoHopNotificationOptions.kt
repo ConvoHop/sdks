@@ -63,6 +63,6 @@ public class ConvoHopNotificationOptions {
     /** Fetches message text when a push carries none. */
     public var messageContent: MessageContentProvider? = null
 
-    /** Where delivery state persists; null uses shared preferences. It never holds message text or tokens. */
+    /** Where delivery state persists; null uses shared preferences. It never holds message text or FCM registrations. */
     public var ledgerStore: PushLedgerStore? = null
 }
