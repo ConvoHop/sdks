@@ -751,6 +751,17 @@
           "static": true
         },
         {
+          "name": "BillingCatalogConflict",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.BillingCatalogConflict:static",
+          "anchor": "errorcodesbillingcatalogconflict-static-property",
+          "signatures": [
+            "public const string BillingCatalogConflict = \"BILLING_CATALOG_CONFLICT\";"
+          ],
+          "docs": "The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.",
+          "static": true
+        },
+        {
           "name": "BillingCatalogNotSynced",
           "kind": "property",
           "ref": "ConvoHop#ErrorCodes.BillingCatalogNotSynced:static",

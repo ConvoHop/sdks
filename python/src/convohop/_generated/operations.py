@@ -4346,7 +4346,7 @@ OPERATIONS: Mapping[str, OperationSpec] = {
         item_echo=(),
         pagination=None,
         long_running=None,
-        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "BILLING_CATALOG_NOT_SYNCED", "BILLING_LINK_EXPIRED", "BILLING_NOT_CONFIGURED", "BILLING_PLAN_UNAVAILABLE", "BILLING_PROVIDER_CHANGED", "BILLING_PROVIDER_REJECTED", "BILLING_SUBSCRIPTION_ACTIVE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
+        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "BILLING_CATALOG_CONFLICT", "BILLING_CATALOG_NOT_SYNCED", "BILLING_LINK_EXPIRED", "BILLING_NOT_CONFIGURED", "BILLING_PLAN_UNAVAILABLE", "BILLING_PROVIDER_CHANGED", "BILLING_PROVIDER_REJECTED", "BILLING_SUBSCRIPTION_ACTIVE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
     ),
     "management.createBillingPortalSession": OperationSpec(
         id="management.createBillingPortalSession",
@@ -4391,7 +4391,7 @@ OPERATIONS: Mapping[str, OperationSpec] = {
         item_echo=(),
         pagination=None,
         long_running=None,
-        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "BILLING_CUSTOMER_MISSING", "BILLING_LINK_EXPIRED", "BILLING_NOT_CONFIGURED", "BILLING_PROVIDER_CHANGED", "BILLING_PROVIDER_REJECTED", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
+        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "BILLING_CATALOG_CONFLICT", "BILLING_CATALOG_NOT_SYNCED", "BILLING_CUSTOMER_MISSING", "BILLING_LINK_EXPIRED", "BILLING_NOT_CONFIGURED", "BILLING_PROVIDER_CHANGED", "BILLING_PROVIDER_REJECTED", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
     ),
     "management.configureWebhook": OperationSpec(
         id="management.configureWebhook",
@@ -6459,6 +6459,7 @@ ERRORS: Mapping[str, ErrorSpec] = {
     "ALREADY_CONNECTED": ErrorSpec(summary="The participation already has an active media connection.", origin="server", status=409, retryable=False),
     "ALREADY_EXISTS": ErrorSpec(summary="A resource with the same unique key already exists.", origin="server", status=409, retryable=False),
     "AUTHORITY_UNAVAILABLE": ErrorSpec(summary="The authority is temporarily unavailable. Retry with the same requestId.", origin="both", status=503, retryable=True),
+    "BILLING_CATALOG_CONFLICT": ErrorSpec(summary="The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.", origin="server", status=409, retryable=False),
     "BILLING_CATALOG_NOT_SYNCED": ErrorSpec(summary="The billing provider's catalog does not match the configured price book yet. An operator must sync it.", origin="server", status=409, retryable=False),
     "BILLING_CUSTOMER_MISSING": ErrorSpec(summary="The organization has no billing account yet. Start a checkout first.", origin="server", status=409, retryable=False),
     "BILLING_LINK_EXPIRED": ErrorSpec(summary="The billing link of this request is no longer valid. Send a new request with a new requestId.", origin="server", status=409, retryable=False),

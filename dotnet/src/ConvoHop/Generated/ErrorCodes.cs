@@ -20,6 +20,9 @@ namespace ConvoHop
         /// <summary>The authority is temporarily unavailable. Retry with the same requestId.</summary>
         public const string AuthorityUnavailable = "AUTHORITY_UNAVAILABLE";
 
+        /// <summary>The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.</summary>
+        public const string BillingCatalogConflict = "BILLING_CATALOG_CONFLICT";
+
         /// <summary>The billing provider's catalog does not match the configured price book yet. An operator must sync it.</summary>
         public const string BillingCatalogNotSynced = "BILLING_CATALOG_NOT_SYNCED";
 

@@ -1384,6 +1384,14 @@ public const string AuthorityUnavailable = "AUTHORITY_UNAVAILABLE";
 
 The authority is temporarily unavailable. Retry with the same requestId.
 
+#### `ErrorCodes.BillingCatalogConflict` static property
+
+```cs
+public const string BillingCatalogConflict = "BILLING_CATALOG_CONFLICT";
+```
+
+The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.
+
 #### `ErrorCodes.BillingCatalogNotSynced` static property
 
 ```cs

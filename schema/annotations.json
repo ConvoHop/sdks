@@ -259,6 +259,12 @@
       "status": 503,
       "retryable": true
     },
+    "BILLING_CATALOG_CONFLICT": {
+      "summary": "The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
     "BILLING_CATALOG_NOT_SYNCED": {
       "summary": "The billing provider's catalog does not match the configured price book yet. An operator must sync it.",
       "origin": "server",
@@ -2103,7 +2109,8 @@
           "BILLING_LINK_EXPIRED",
           "BILLING_PROVIDER_CHANGED",
           "BILLING_PROVIDER_REJECTED",
-          "BILLING_CATALOG_NOT_SYNCED"
+          "BILLING_CATALOG_NOT_SYNCED",
+          "BILLING_CATALOG_CONFLICT"
         ]
       }
     },
@@ -2122,7 +2129,9 @@
           "BILLING_CUSTOMER_MISSING",
           "BILLING_LINK_EXPIRED",
           "BILLING_PROVIDER_CHANGED",
-          "BILLING_PROVIDER_REJECTED"
+          "BILLING_PROVIDER_REJECTED",
+          "BILLING_CATALOG_NOT_SYNCED",
+          "BILLING_CATALOG_CONFLICT"
         ]
       }
     },

@@ -37,6 +37,9 @@ const (
 	// The authority is temporarily unavailable. Retry with the same requestId.
 	// HTTP status 503. Retryable. Raised by the server or the SDK.
 	ErrorCodeAuthorityUnavailable ErrorCode = "AUTHORITY_UNAVAILABLE"
+	// The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.
+	// HTTP status 409. Not retryable. Raised by the server.
+	ErrorCodeBillingCatalogConflict ErrorCode = "BILLING_CATALOG_CONFLICT"
 	// The billing provider's catalog does not match the configured price book yet. An operator must sync it.
 	// HTTP status 409. Not retryable. Raised by the server.
 	ErrorCodeBillingCatalogNotSynced ErrorCode = "BILLING_CATALOG_NOT_SYNCED"

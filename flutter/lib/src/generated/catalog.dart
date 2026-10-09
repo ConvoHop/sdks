@@ -2520,6 +2520,9 @@ abstract final class ErrorCodes {
   /// The authority is temporarily unavailable. Retry with the same requestId.
   static const String authorityUnavailable = 'AUTHORITY_UNAVAILABLE';
 
+  /// The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.
+  static const String billingCatalogConflict = 'BILLING_CATALOG_CONFLICT';
+
   /// The billing provider's catalog does not match the configured price book yet. An operator must sync it.
   static const String billingCatalogNotSynced = 'BILLING_CATALOG_NOT_SYNCED';
 
@@ -2755,6 +2758,7 @@ const Map<String, ErrorCodeSpec> errorCodes = <String, ErrorCodeSpec>{
   'ALREADY_CONNECTED': ErrorCodeSpec(code: 'ALREADY_CONNECTED', summary: 'The participation already has an active media connection.', origin: 'server', status: 409, retryable: false),
   'ALREADY_EXISTS': ErrorCodeSpec(code: 'ALREADY_EXISTS', summary: 'A resource with the same unique key already exists.', origin: 'server', status: 409, retryable: false),
   'AUTHORITY_UNAVAILABLE': ErrorCodeSpec(code: 'AUTHORITY_UNAVAILABLE', summary: 'The authority is temporarily unavailable. Retry with the same requestId.', origin: 'both', status: 503, retryable: true),
+  'BILLING_CATALOG_CONFLICT': ErrorCodeSpec(code: 'BILLING_CATALOG_CONFLICT', summary: 'The billing provider\'s catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.', origin: 'server', status: 409, retryable: false),
   'BILLING_CATALOG_NOT_SYNCED': ErrorCodeSpec(code: 'BILLING_CATALOG_NOT_SYNCED', summary: 'The billing provider\'s catalog does not match the configured price book yet. An operator must sync it.', origin: 'server', status: 409, retryable: false),
   'BILLING_CUSTOMER_MISSING': ErrorCodeSpec(code: 'BILLING_CUSTOMER_MISSING', summary: 'The organization has no billing account yet. Start a checkout first.', origin: 'server', status: 409, retryable: false),
   'BILLING_LINK_EXPIRED': ErrorCodeSpec(code: 'BILLING_LINK_EXPIRED', summary: 'The billing link of this request is no longer valid. Send a new request with a new requestId.', origin: 'server', status: 409, retryable: false),

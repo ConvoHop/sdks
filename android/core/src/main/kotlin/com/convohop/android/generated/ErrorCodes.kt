@@ -27,6 +27,9 @@ public object ErrorCodes {
     /** The authority is temporarily unavailable. Retry with the same requestId. */
     public const val AUTHORITY_UNAVAILABLE: String = "AUTHORITY_UNAVAILABLE"
 
+    /** The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it. */
+    public const val BILLING_CATALOG_CONFLICT: String = "BILLING_CATALOG_CONFLICT"
+
     /** The billing provider's catalog does not match the configured price book yet. An operator must sync it. */
     public const val BILLING_CATALOG_NOT_SYNCED: String = "BILLING_CATALOG_NOT_SYNCED"
 
@@ -262,6 +265,7 @@ public object ErrorCodes {
             ErrorCodeInfo(ALREADY_CONNECTED, "The participation already has an active media connection.", "server", 409, false),
             ErrorCodeInfo(ALREADY_EXISTS, "A resource with the same unique key already exists.", "server", 409, false),
             ErrorCodeInfo(AUTHORITY_UNAVAILABLE, "The authority is temporarily unavailable. Retry with the same requestId.", "both", 503, true),
+            ErrorCodeInfo(BILLING_CATALOG_CONFLICT, "The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.", "server", 409, false),
             ErrorCodeInfo(BILLING_CATALOG_NOT_SYNCED, "The billing provider's catalog does not match the configured price book yet. An operator must sync it.", "server", 409, false),
             ErrorCodeInfo(BILLING_CUSTOMER_MISSING, "The organization has no billing account yet. Start a checkout first.", "server", 409, false),
             ErrorCodeInfo(BILLING_LINK_EXPIRED, "The billing link of this request is no longer valid. Send a new request with a new requestId.", "server", 409, false),
