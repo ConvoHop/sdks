@@ -5131,6 +5131,14 @@ UNKNOWN
 
 Sent, but the outcome is uncertain: resolve or retry the same request.
 
+#### `RecoveryState.Resolution.REJECTED` case
+
+```java
+REJECTED
+```
+
+The authority rejected every attempt, so the mutation had no effect. Whether a resend may succeed depends on the last attempt's error code and the retry budget.
+
 #### `RecoveryState.Resolution.COMMITTED` case
 
 ```java

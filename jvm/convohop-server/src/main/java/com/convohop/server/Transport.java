@@ -25,7 +25,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -393,7 +392,7 @@ final class Transport implements OperationExecutor {
       }
       if (state == null) {
         if (this.states.size() >= MAX_RECORDS) {
-          evictSettled();
+          evictFinalRecord(requestId);
         }
         long now = this.clock.getAsLong();
         state = new Record(requestId, this.incarnation, hash, operation.id(), this.projectId, Wire.immutable(input),
@@ -405,21 +404,56 @@ final class Transport implements OperationExecutor {
     return submit(operation, state, permit, retry);
   }
 
-  private void evictSettled() {
-    for (Iterator<Record> records = this.states.values().iterator(); records.hasNext(); ) {
-      Record record = records.next();
-      if ((record.resolution == RecoveryState.Resolution.COMMITTED
-              || record.resolution == RecoveryState.Resolution.ACCEPTED)
-          && !this.active.containsKey(record.requestId)) {
-        records.remove();
-        return;
+  /**
+   * Called under the lock. A full record set forgets the final record attempted longest ago that no mutation is using,
+   * or refuses the new request before it is sent.
+   */
+  private void evictFinalRecord(String requestId) {
+    long now = this.clock.getAsLong();
+    @Nullable Record oldest = null;
+    for (Record record : this.states.values()) {
+      if (this.active.containsKey(record.requestId) || !isFinal(record, now)) {
+        continue;
+      }
+      if (oldest == null || record.lastAttemptAt < oldest.lastAttemptAt) {
+        oldest = record;
       }
     }
-    throw new IllegalStateException("Resolve outstanding mutations before creating more");
+    if (oldest == null) {
+      throw new ConvoHopProblem("RECOVERY_LIMIT", requestId, "rejected", 409,
+          "Recovery storage already holds " + MAX_RECORDS + " requests that aren't final; retry or resolve them first");
+    }
+    this.states.remove(oldest.requestId);
+  }
+
+  /**
+   * Whether nothing more can come of a record's request: the authority committed or accepted it, or rejected every
+   * attempt and won't take another, because the last rejection's code isn't retryable or the retry budget is spent.
+   */
+  private boolean isFinal(Record record, long now) {
+    if (record.resolution != RecoveryState.Resolution.REJECTED) {
+      return record.resolution == RecoveryState.Resolution.COMMITTED
+          || record.resolution == RecoveryState.Resolution.ACCEPTED;
+    }
+    return !isRetryable(record.classification) || record.attemptCount >= MAX_ATTEMPTS || now > record.retryDeadline;
+  }
+
+  /**
+   * Whether a resend may succeed after an error code: yes, unless the schema marks the code not retryable.
+   * {@code WRONG_REGION} may succeed once routed again, and a code newer than the schema may too.
+   */
+  private boolean isRetryable(String code) {
+    return code.equals("WRONG_REGION") || !Boolean.FALSE.equals(this.catalog.retryable(code));
+  }
+
+  /** States in which no attempt may have been applied: never sent, or every attempt rejected. */
+  private static boolean isResendable(RecoveryState.Resolution resolution) {
+    return resolution == RecoveryState.Resolution.PENDING || resolution == RecoveryState.Resolution.REJECTED;
   }
 
   private Reply submit(
       OperationDescriptor<?> operation, Record state, @Nullable Map<String, @Nullable Object> permit, boolean retry) {
+    RecoveryState.Resolution prior;
     synchronized (this.lock) {
       if (!state.incarnation.equals(this.incarnation)) {
         throw incarnationMismatch(state.requestId);
@@ -432,7 +466,8 @@ final class Transport implements OperationExecutor {
       }
       state.attemptCount += 1;
       state.lastAttemptAt = now;
-      if (state.resolution == RecoveryState.Resolution.PENDING) {
+      prior = state.resolution;
+      if (isResendable(prior)) {
         state.resolution = RecoveryState.Resolution.UNKNOWN;
       }
       state.classification = "submitted";
@@ -459,6 +494,14 @@ final class Transport implements OperationExecutor {
         state.classification = error instanceof ConvoHopProblem
             ? ((ConvoHopProblem) error).getCode()
             : "opaqueTransportFailure";
+        // A rejection is the request's outcome only if every attempt was rejected; one that may have been applied
+        // keeps it unknown.
+        if (error instanceof ConvoHopProblem
+            && ((ConvoHopProblem) error).getOutcome().equals("rejected")
+            && isResendable(prior)
+            && state.resolution == RecoveryState.Resolution.UNKNOWN) {
+          state.resolution = RecoveryState.Resolution.REJECTED;
+        }
         try {
           persist(state);
         } catch (ConvoHopProblem storageFailure) {

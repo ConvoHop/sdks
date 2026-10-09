@@ -16,6 +16,11 @@ public final class RecoveryState {
     PENDING("pending"),
     /** Sent, but the outcome is uncertain: resolve or retry the same request. */
     UNKNOWN("unknown"),
+    /**
+     * The authority rejected every attempt, so the mutation had no effect. Whether a resend may succeed depends on the
+     * last attempt's error code and the retry budget.
+     */
+    REJECTED("rejected"),
     /** The authority committed the mutation. */
     COMMITTED("committed"),
     /** The authority accepted the mutation as a long-running operation. */

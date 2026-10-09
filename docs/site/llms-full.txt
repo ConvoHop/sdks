@@ -22360,7 +22360,7 @@ How the last attempt ended: `notSubmitted`, `submitted`, `authorityReceipt`, an 
 public string ResolutionState { get; }
 ```
 
-What is known about the outcome: `pending`, `unknown`, `committed` or `accepted`.
+What is known about the outcome: `pending` (never sent), `unknown`, `rejected` (the authority rejected every attempt), `committed` or `accepted`.
 
 #### `RecoveryState.MediaAdmissionAttempted` property
 
@@ -36263,6 +36263,14 @@ UNKNOWN
 ```
 
 Sent, but the outcome is uncertain: resolve or retry the same request.
+
+#### `RecoveryState.Resolution.REJECTED` case
+
+```java
+REJECTED
+```
+
+The authority rejected every attempt, so the mutation had no effect. Whether a resend may succeed depends on the last attempt's error code and the retry budget.
 
 #### `RecoveryState.Resolution.COMMITTED` case
 
