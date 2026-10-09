@@ -169,7 +169,7 @@ describe("static scenario checks", () => {
         { do: "client.create", client: "b", role: "backend", credential: "${target.credentials.backend}" },
         { do: "invoke", client: "b", operation: "principals.create", args: { externalUserId: "x" }, save: "p", requires: ["retryAfter"] },
         { do: "client.create", client: "u", role: "user", credential: "t", principalId: "${saved.p.principalId}", storage: "s" },
-        { do: "realtime.subscribe", client: "u", subscription: "feed", conversationId: "c" },
+        { do: "realtime.subscribe", client: "u", subscription: "feed", conversationId: "c", requires: ["realtime.reconnectPolicy"] },
         { do: "realtime.collect", subscription: "feed", until: { count: 1 } },
         { do: "client.create", client: "m", role: "management", credential: "${target.credentials.management}" },
         { do: "control.fault", field: "sendMessage", action: "dropAfterCommit" },
@@ -178,7 +178,8 @@ describe("static scenario checks", () => {
     assert.deepEqual(problems, []);
     assert.deepEqual([...requirements.roles], ["backend", "user", "management"]);
     assert.deepEqual([...requirements.operations], ["backend:principals.create"]);
-    assert.deepEqual([...requirements.features].sort(), ["backend:retryAfter", "primary:webhooks.verify", "user:realtime", "user:recovery.storage"]);
+    assert.deepEqual([...requirements.features].sort(), ["backend:retryAfter", "primary:webhooks.verify", "user:realtime",
+      "user:realtime.reconnectPolicy", "user:recovery.storage"]);
     assert.deepEqual([...requirements.capabilities].sort(), ["auth.shortSessionTtl", "control.fault"]);
     assert.deepEqual([...requirements.targetFields].sort(), ["credentials.backend", "credentials.management", "managementActorId", "managementUrl"]);
   });
@@ -200,6 +201,7 @@ describe("static scenario checks", () => {
       { do: "webhooks.verify", vector: "no-such-vector" },
       { do: "invoke", client: "u", operation: "events.list", args: { conversationId: "${env.HOME}" } },
       { do: "invoke", client: "b", operation: "events.list", args: { conversationId: "c" } },
+      { do: "invoke", client: "b", operation: "messages.send", args: { conversationId: "c", text: "t", requestId: "r" }, repeat: 2 },
     ]);
     const expected = [
       /^probe\.case step 1 \(invoke\): client ghost is not open$/,
@@ -219,6 +221,7 @@ describe("static scenario checks", () => {
       /step 12 \(webhooks\.verify\): unknown webhook vector no-such-vector/,
       /step 13 \(invoke\): \$\{env\.HOME\} uses unknown root "env"/,
       /step 14 \(invoke\): events\.list is not available to backend clients$/,
+      /step 15 \(invoke\): a repeated invoke must not fix args\.requestId, because each call is a new request$/,
     ];
     assert.equal(problems.length, expected.length, problems.join("\n"));
     expected.forEach((pattern, index) => assert.match(problems[index], pattern));

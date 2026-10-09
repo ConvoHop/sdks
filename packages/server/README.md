@@ -573,11 +573,18 @@ construct a new client rather than reusing an uninitialized snapshot.
 after durable database commit**. `removeItem` must likewise await a durable
 delete; the transport currently never calls it or deletes the journal.
 Each write merges the client's records into the snapshot it read, request by
-request, and replaces it with at most 128 records. Settled commands are
-pruned first: other clients', then this client's inactive ones, oldest first.
-A write that creates a command fails rather than prune an unresolved one; any
-other write prunes other clients' oldest unresolved commands, so the client's
-own always fit. Records this SDK can't read, such as a newer SDK's, count as
+request, and replaces it with at most 128 records. Over that limit, final
+commands are pruned first: other clients', then this client's inactive ones,
+oldest attempt first. A command is final when the authority committed or
+accepted it, or rejected it in a way that resending can't change: the problem
+isn't retryable, or its three-attempt/60-second retry budget is spent (see
+the [recovery journal rules](../../spec/recovery/README.md#recovery-journal)).
+A write that creates a command fails with `ConvoHopProblem` code
+`RECOVERY_LIMIT`, outcome `rejected` and status 409, before the command is
+sent, rather than prune one that isn't final; any other write prunes other
+clients' oldest commands that aren't final, so the client's own always fit.
+The in-memory journal of a transport without storage keeps the same limit,
+forgetting its oldest final record to make room. Records this SDK can't read, such as a newer SDK's, count as
 unresolved and stay as stored, as do fields it doesn't know. Do not implement
 these methods with fire-and-forget writes or success-shaped error handling.
 

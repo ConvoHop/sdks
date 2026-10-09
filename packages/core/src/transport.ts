@@ -4,6 +4,7 @@ import { operationCatalog, type OperationKey } from "./generated/operations.js";
 import { ConvoHopProblem, authorityProblem, boolean, canonical, fingerprint, jsonClone, origin, timestamp, parseCounter, parseId, parseObject,
   parseString, type AsyncRecoveryStorage, type ProtocolObject, type RecoveryState, type RecoveryStorage } from "./protocol.js";
 import { deadline, randomUUID, validatePlatform, type ConvoHopPlatform } from "./platform.js";
+import { retryableCode, retryDelay } from "./retry.js";
 export interface ConvoHopTransportOptions {
   baseUrl: string; credential?: string; namespace: string; incarnation?: string;
   recoveryStorage?: RecoveryStorage; asyncRecoveryStorage?: AsyncRecoveryStorage; fetch?: typeof fetch;
@@ -11,11 +12,6 @@ export interface ConvoHopTransportOptions {
   platform?: ConvoHopPlatform;
 }
 type SessionProbe = "communication.route" | "communication.currentSession";
-/** Whole-second retry delay from `extensions.retryAfter` or an HTTP `Retry-After` delta; anything else is ignored. */
-function retryDelay(value: unknown): number | undefined {
-  if (typeof value === "string" && /^[0-9]{1,10}$/.test(value)) value = Number(value);
-  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : undefined;
-}
 export interface TransportAuthentication {
   credential: string | undefined; barrier: Promise<void> | undefined; blocked: boolean;
   active: Set<Promise<unknown>>;
@@ -27,10 +23,15 @@ const transportAuthentication = new WeakMap<ConvoHopTransport, TransportAuthenti
 const submissionHooks = new WeakMap<ConvoHopTransport, Map<string, () => void | Promise<void>>>();
 /** Each transport's {@link adoptRecovery}. */
 const recoveryAdoption = new WeakMap<ConvoHopTransport, (requestId: string) => Promise<boolean>>();
+/** Each transport's {@link retainRecovery} callers, each listing the request IDs whose records it still needs. */
+const recoveryRetainers = new WeakMap<ConvoHopTransport, Set<() => Iterable<string>>>();
 /** A journal keeps at most this many records. */
 const journalLimit = 128;
-/** How far each resolution state has seen a request go. Merging records never moves a request back. */
-const progress = { pending: 0, unknown: 1, accepted: 2, committed: 3 } as const;
+/**
+ * How far each resolution state has seen a request go. Merging records never moves a request back, except that of two
+ * records that both saw attempts, the one that saw more decides between `unknown` and `rejected`.
+ */
+const progress = { pending: 0, unknown: 1, rejected: 2, accepted: 3, committed: 4 } as const;
 /** A stored record, and what this SDK reads of it: nothing, for a record it can't read. */
 interface JournalEntry { readonly record: ProtocolObject; readonly state: RecoveryState | undefined }
 /**
@@ -62,7 +63,7 @@ function lastAttempt({ record, state }: JournalEntry): number {
 function parseRecord(v: ProtocolObject): RecoveryState {
   const operation = operationKey(v.operation), resolutionState = v.resolutionState;
   if (operationCatalog[operation].kind !== "mutation" ||
-      (resolutionState !== "pending" && resolutionState !== "unknown" &&
+      (resolutionState !== "pending" && resolutionState !== "unknown" && resolutionState !== "rejected" &&
        resolutionState !== "committed" && resolutionState !== "accepted")) throw new TypeError("Invalid recovery record");
   const projectId = v.projectId === undefined ? undefined : parseId(v.projectId);
   if ((operationCatalog[operation].plane === "communication") !== (projectId !== undefined))
@@ -95,17 +96,43 @@ function settled(state: RecoveryState): boolean {
   return progress[state.resolutionState] >= progress.accepted;
 }
 /**
+ * Whether nothing more can come of a record's request: the authority committed or accepted it, or rejected every
+ * attempt and won't take another, because the last rejection isn't retryable or the retry budget is spent. Only such
+ * records make room in a full journal.
+ */
+function final(state: RecoveryState, now: number): boolean {
+  return settled(state) || (state.resolutionState === "rejected" &&
+    (!retryableCode(state.lastAttemptClassification) || state.attemptCount >= 3 || now > state.retryDeadline));
+}
+/** The refusal to hold one more record while the journal is full of records that aren't final. */
+function recoveryLimit(requestId: string, outcome: string): ConvoHopProblem {
+  return new ConvoHopProblem("RECOVERY_LIMIT", requestId, outcome, 409,
+    `Recovery storage already holds ${journalLimit} requests that aren't final; retry or resolve them first`);
+}
+/** The outcome a problem reports of a recorded request: unknown until an attempt's answer says otherwise. */
+function outcomeOf(state: RecoveryState): string {
+  return state.resolutionState === "pending" ? "unknown" : state.resolutionState;
+}
+/**
  * Adds to `target` what `other`, another client's record of the same request, knows: the earliest budget, the most
  * attempts, the furthest resolution and any native admission. `target` takes `other`'s classification of the last
- * attempt only when `other` has seen further.
+ * attempt only when `other` has seen further. Between `unknown` and `rejected`, the record that has seen further
+ * decides, since a rejection answers only the attempt it ends. Records of attempts made without knowledge of each
+ * other, where neither record has seen both as many attempts and as late an attempt as the other, count one attempt
+ * more, and leave the request `unknown` if either does: the other attempt may yet have been applied.
  */
 function absorb(target: RecoveryState, other: RecoveryState): void {
   const media = (state: RecoveryState) => Number(state.mediaAdmissionAttempted === true);
-  const further = other.attemptCount - target.attemptCount || other.lastAttemptAt - target.lastAttemptAt ||
-    progress[other.resolutionState] - progress[target.resolutionState] || media(other) - media(target);
+  const attempted = (state: RecoveryState) => state.resolutionState === "unknown" || state.resolutionState === "rejected";
+  const both = attempted(target) && attempted(other);
+  const more = other.attemptCount - target.attemptCount, later = other.lastAttemptAt - target.lastAttemptAt;
+  const unaware = both && later !== 0 && Math.sign(more) !== Math.sign(later);
+  let further = more || later || progress[other.resolutionState] - progress[target.resolutionState] || media(other) - media(target);
+  if (unaware && other.resolutionState !== target.resolutionState) further = other.resolutionState === "unknown" ? 1 : -1;
   if (further > 0) target.lastAttemptClassification = other.lastAttemptClassification;
-  if (progress[other.resolutionState] > progress[target.resolutionState]) target.resolutionState = other.resolutionState;
-  target.attemptCount = Math.max(target.attemptCount, other.attemptCount);
+  if (both ? further > 0 : progress[other.resolutionState] > progress[target.resolutionState])
+    target.resolutionState = other.resolutionState;
+  target.attemptCount = Math.max(target.attemptCount, other.attemptCount) + Number(unaware);
   target.lastAttemptAt = Math.max(target.lastAttemptAt, other.lastAttemptAt);
   target.firstSubmittedAt = Math.min(target.firstSubmittedAt, other.firstSubmittedAt);
   target.retryDeadline = Math.min(target.retryDeadline, other.retryDeadline);
@@ -236,21 +263,35 @@ export class ConvoHopTransport {
       }
     }
   }
-  /** Makes room for one more record in memory by forgetting the earliest held settled record no command is using. */
-  #reserve(): void {
+  /**
+   * Makes room for one more record in memory by forgetting the final record attempted longest ago that no command is
+   * using and no caller retains, or refuses the request `requestId`, whose outcome is `outcome`, with RECOVERY_LIMIT.
+   */
+  #reserve(requestId: string, outcome: string): void {
     if (this.#states.size < journalLimit) return;
-    const forgotten = [...this.#states.values()].find(value => settled(value) && !this.#active.has(value.requestId));
-    if (!forgotten) throw new Error("Resolve outstanding mutations before creating more");
+    const retained = this.#retained(), now = Date.now();
+    let forgotten: RecoveryState | undefined;
+    for (const value of this.#states.values())
+      if (final(value, now) && !this.#active.has(value.requestId) && !retained.has(value.requestId) &&
+          (forgotten === undefined || value.lastAttemptAt < forgotten.lastAttemptAt)) forgotten = value;
+    if (!forgotten) throw recoveryLimit(requestId, outcome);
     this.#states.delete(forgotten.requestId);
+  }
+  /** The request IDs whose records {@link retainRecovery} callers still need. */
+  #retained(): Set<string> {
+    const retained = new Set<string>();
+    for (const retainer of recoveryRetainers.get(this) ?? []) for (const requestId of retainer()) retained.add(requestId);
+    return retained;
   }
   /**
    * Merges a stored journal with this transport's records into the journal to save: the stored records in their order,
    * each replaced by this transport's record of the request, which keeps any fields this SDK doesn't know from the
    * stored record of that request, then this transport's other records. Records this transport doesn't hold, including
-   * those this SDK can't read, stay as stored without entering memory. Over the limit, settled records go first, oldest
-   * attempt first and those this transport doesn't hold before its own. Then a write that creates `state` fails, while
-   * any other write drops the oldest unresolved records this transport doesn't hold, counting a record this SDK can't
-   * read as unresolved: its own always fit. A write before `state`'s request was ever sent fails if `state` yielded.
+   * those this SDK can't read, stay as stored without entering memory. Over the limit, final records that no caller
+   * retains go first, oldest attempt first and those this transport doesn't hold before its own. Then a write that
+   * creates `state` fails with RECOVERY_LIMIT, while any other write drops the oldest records this transport doesn't
+   * hold that aren't final, counting a record this SDK can't read as not final: its own always fit. A write before
+   * `state`'s request was ever sent fails if `state` yielded.
    */
   #merge(stored: ReadonlyMap<string, JournalEntry>, state: RecoveryState, unsent?: "creating" | "submitting"): ProtocolObject[] {
     const created = unsent === "creating";
@@ -265,16 +306,17 @@ export class ConvoHopTransport {
     }
     for (const [requestId, held] of this.#states) if (!journal.has(requestId)) journal.set(requestId, { record: { ...held }, state: held });
     if (journal.size > journalLimit) {
-      const done = ({ state: value }: JournalEntry) => value !== undefined && settled(value);
+      const retained = this.#retained(), now = Date.now();
+      const done = ([requestId, { state: value }]: [string, JournalEntry]) =>
+        value !== undefined && final(value, now) && !retained.has(requestId);
       const oldest = [...journal].sort(([, a], [, b]) => lastAttempt(a) - lastAttempt(b));
       const others = oldest.filter(([requestId]) => !this.#states.has(requestId));
-      const dropped = [...others.filter(([, entry]) => done(entry)),
-        ...oldest.filter(([requestId, entry]) =>
-          entry.state !== state && this.#states.has(requestId) && done(entry) && !this.#active.has(requestId)),
-        ...(created ? [] : others.filter(([, entry]) => !done(entry)))].slice(0, journal.size - journalLimit);
+      const dropped = [...others.filter(done),
+        ...oldest.filter(entry => entry[1].state !== state && this.#states.has(entry[0]) && done(entry) && !this.#active.has(entry[0])),
+        ...(created ? [] : others.filter(entry => !done(entry)))].slice(0, journal.size - journalLimit);
       if (journal.size - dropped.length > journalLimit) {
         if (created) this.#states.delete(state.requestId);
-        throw new Error("Resolve outstanding mutations before creating more");
+        throw recoveryLimit(state.requestId, created ? "rejected" : outcomeOf(state));
       }
       for (const [requestId] of dropped) {
         journal.delete(requestId);
@@ -295,7 +337,7 @@ export class ConvoHopTransport {
     this.#learn(stored);
     const saved = stored.get(requestId)?.state;
     if (saved !== undefined && !this.#states.has(requestId)) {
-      this.#reserve();
+      this.#reserve(requestId, outcomeOf(saved));
       this.#states.set(requestId, saved);
     }
   }
@@ -368,7 +410,7 @@ export class ConvoHopTransport {
       if (retry && (!state || ["committed", "accepted"].includes(state.resolutionState) || state.mediaAdmissionAttempted))
         throw new ConvoHopProblem("RESOLUTION_REQUIRED", requestId, "unknown", 409, "The original request is no longer eligible for resend");
       if (!state) {
-        this.#reserve();
+        this.#reserve(requestId, "rejected");
         const now = Date.now();
         state = { requestId, incarnation, payloadFingerprint: hash, operation,
           ...(projectId === undefined ? {} : { projectId }), input: jsonClone(input),
@@ -392,9 +434,10 @@ export class ConvoHopTransport {
     const hook = submissionHooks.get(this)?.get(state.requestId);
     if (hook) await hook();
     // Until its first attempt is stored, nothing of this request has been sent: it still yields to another saved under its ID.
-    const unsent = unsubmitted(state);
+    const unsent = unsubmitted(state), prior = state.resolutionState;
     state.attemptCount += 1; state.lastAttemptAt = now;
-    if (state.resolutionState === "pending") state.resolutionState = "unknown";
+    const attempt = state.attemptCount;
+    if (state.resolutionState === "pending" || state.resolutionState === "rejected") state.resolutionState = "unknown";
     state.lastAttemptClassification = "submitted"; await this.#persist(state, unsent ? "submitting" : undefined);
     if (state.incarnation !== this.incarnation)
       throw new ConvoHopProblem("INCARNATION_MISMATCH", state.requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
@@ -409,6 +452,11 @@ export class ConvoHopTransport {
       outcome = result.status;
     } catch (error) {
       state.lastAttemptClassification = error instanceof ConvoHopProblem ? error.code : "opaqueTransportFailure";
+      // A rejection is the request's outcome only if every attempt was rejected: those known before this one, and any
+      // other client's attempt that the record took in since, which would have changed its count or time.
+      if (error instanceof ConvoHopProblem && error.outcome === "rejected" && (prior === "pending" || prior === "rejected") &&
+          state.resolutionState === "unknown" && state.attemptCount === attempt && state.lastAttemptAt === now)
+        state.resolutionState = "rejected";
       await this.#persist(state); throw error;
     }
     if (state.resolutionState !== "committed") state.resolutionState = outcome;
@@ -482,7 +530,12 @@ export class ConvoHopTransport {
     } finally { timeout.clear(); }
     if (text.length > 1_048_576) throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Authority response exceeds the bound");
     let decoded: unknown;
-    try { decoded = JSON.parse(text); } catch { throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Unrecognized authority response"); }
+    try { decoded = JSON.parse(text); } catch {
+      // A proxy's or gateway's error page isn't JSON, but its Retry-After still bounds the next attempt.
+      const retryAfter = retryDelay(response.headers.get("retry-after"));
+      throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Unrecognized authority response",
+        retryAfter === undefined ? undefined : { retryAfter });
+    }
     try {
       const graphql = parseObject(decoded);
       if (Array.isArray(graphql.errors) && graphql.errors.length) {
@@ -554,4 +607,16 @@ export async function adoptRecovery(transport: ConvoHopTransport, requestId: str
   const adopt = recoveryAdoption.get(transport);
   if (!adopt) throw new Error("Missing transport recovery");
   return adopt(parseId(requestId));
+}
+/**
+ * @internal Keeps the records of the request IDs that `requestIds` lists, each time the transport makes room, from
+ * being forgotten or dropped, though they are final: a caller that may still resend or report a request retains its
+ * record. Returns a function that stops retaining them.
+ */
+export function retainRecovery(transport: ConvoHopTransport, requestIds: () => Iterable<string>): () => void {
+  const retainers = recoveryRetainers.get(transport) ?? new Set<() => Iterable<string>>();
+  recoveryRetainers.set(transport, retainers);
+  const retainer = () => requestIds();
+  retainers.add(retainer);
+  return () => { retainers.delete(retainer); };
 }

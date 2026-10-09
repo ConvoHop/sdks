@@ -148,7 +148,13 @@ change, and unchanged lists keep their identity, so it suits
 `useSyncExternalStore` or any other subscription. New messages, edits and
 deletions are read back from the authority, so the store shows the
 authority's revision, never one it guessed. A dropped realtime connection
-reconnects on its own and catches up from the applied position. If the
+reconnects on its own and catches up from the applied position. It reconnects
+after the failures that the [retry rules](../../spec/recovery/README.md#retry-and-reconnect)
+call retryable, such as network errors, timeouts, `RATE_LIMITED` and most 5xx
+responses, with a backoff that waits at least the `retryAfter` the authority
+asked for, and after `WRONG_REGION` it routes again first. A refusal that
+reconnecting can't change, such as `QUOTA_EXCEEDED`, `PLAN_LIMIT_EXCEEDED` or
+an authorization failure, stops the stream with status `error` instead. If the
 stream closes as `UNAUTHENTICATED` and `sessionRefresh` is configured, the
 store refreshes the session once and follows the conversation again. Status
 `error` with `resyncRequired` means the saved replay position is no longer
@@ -162,6 +168,11 @@ periods, rate limits and lost responses never duplicate a message. It
 waits while the browser is offline (pass `connectivity` on React Native),
 honors `retryAfter`, and recovers an uncertain send with the read-only
 resolution before resending only what the authority never observed.
+Failures that the retry rules call retryable keep the request and retry it,
+`WRONG_REGION` routes again before resending, and a full recovery journal
+(`RECOVERY_LIMIT`) keeps the message queued until a final record makes room.
+A refusal that resending can't change, such as `QUOTA_EXCEEDED` or
+`PLAN_LIMIT_EXCEEDED`, fails the message at once.
 `failed` is final: `resend(requestId)` sends the text again as a new
 message, and `unconfirmed` warns that the old one may have arrived.
 `persist: true` keeps unsent messages, including their text, in the client's
@@ -301,10 +312,18 @@ Clients of one user that share `recoveryStorage`, such as the user's tabs,
 share one journal, `convohop.requests:<projectId>:<principalId>`. Each save
 reads it and merges in that client's records request by request, so tabs
 keep each other's records, and `client.requests.retry(id)` can continue a
-request another tab saved. The journal holds at most 128 records. Settled
-records go first. Creating a request then fails rather than drop another
-tab's unresolved one, while any other save drops another tab's oldest
-unresolved ones, so a tab's own records always fit. Records this SDK can't
+request another tab saved. The journal holds at most 128 records. When it is
+full, final records make room, oldest attempt first. A record is final when
+the authority committed or accepted its request, or rejected it in a way
+that resending can't change: the problem isn't retryable, or the request's
+three-attempt/60-second retry budget is spent. Records of pending and
+`unknown` requests, records of requests rejected with a retryable problem
+such as `RATE_LIMITED`, and records an `Outbox` may still resend stay, since
+the request can still be resent with its ID. When no record is final,
+creating a request fails without sending it, with `ConvoHopProblem` code
+`RECOVERY_LIMIT`, outcome `rejected` and status 409: retry or resolve the
+outstanding requests first. Any other save drops another tab's oldest
+records that aren't final, so a tab's own records always fit. Records this SDK can't
 read, such as a newer SDK's, stay as saved, and so do fields it doesn't know.
 Until its first attempt is saved, a request gives way to another saved under
 the same ID and fails with `IDEMPOTENCY_CONFLICT`. Saves aren't atomic across
@@ -382,8 +401,10 @@ but never earlier than halfway through the remaining lifetime, then again
 after each renewal, until you call the function it returns. A renewal that
 fails while the current session is still verified retries with backoff
 before expiry; any other failure stops the schedule. An initialization that
-failed with a transport error, 429 or 503 is retried, honoring
-`retryAfter`. Every failure reaches `onError`.
+failed in a way the [retry rules](../../spec/recovery/README.md#retry-and-reconnect)
+call retryable, or with `WRONG_REGION`, is retried with backoff, waiting at
+least `retryAfter`. `QUOTA_EXCEEDED`, `PLAN_LIMIT_EXCEEDED` and authorization
+failures aren't retried. Every failure reaches `onError`.
 
 Before replacement, the SDK probes the candidate through generated queries
 at the fixed trusted origin and checks the original session, principal,

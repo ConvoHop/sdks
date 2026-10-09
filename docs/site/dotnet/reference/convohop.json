@@ -1257,6 +1257,15 @@
           "static": true
         },
         {
+          "name": "RecoveryLimit",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.RecoveryLimit:static",
+          "anchor": "errorcodesrecoverylimit-static-property",
+          "signatures": ["public const string RecoveryLimit = \"RECOVERY_LIMIT\";"],
+          "docs": "The SDK's recovery store already holds 128 mutation records that are not final, so the new request was not sent. Retry or resolve outstanding requests, then send it again.",
+          "static": true
+        },
+        {
           "name": "RecoveryStorageFailure",
           "kind": "property",
           "ref": "ConvoHop#ErrorCodes.RecoveryStorageFailure:static",

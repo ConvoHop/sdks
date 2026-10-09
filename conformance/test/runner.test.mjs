@@ -357,6 +357,22 @@ describe("reports", () => {
     for (const secret of ["mock-session.", "mock-backend-key-full"]) assert.ok(!everything.includes(secret), `${secret} leaked`);
   });
 
+  test("a repeated invoke reports which call failed", async () => {
+    const directory = join(work, "repeat-scenarios");
+    await mkdir(directory);
+    await writeFile(join(directory, "probe.json"), JSON.stringify({ suite: "probe", title: "Runner probes", scenarios: [
+      { id: "probe.repeats", title: "Two of three calls are rate limited", covers: ["errors.rateLimited"], steps: [
+        { do: "client.create", client: "backend", role: "backend", credential: "${target.credentials.backend}" },
+        { do: "control.fault", field: "createPrincipal", action: "rateLimit", retryAfterSeconds: 1, count: 2 },
+        { do: "invoke", client: "backend", operation: "principals.create", args: { externalUserId: "probe-${nonce}" }, repeat: 3,
+          expect: { error: { code: "RATE_LIMITED", status: 429 } } }] }] }));
+    const result = await cli(["--scenarios", directory]);
+    assert.equal(result.code, 1, result.output);
+    const [scenario] = results((await assertConsistent(result)).summary);
+    assert.equal(scenario.failure.step, 3);
+    assert.match(scenario.failure.message, /^call 3 of 3: principals\.create succeeded but an error was expected/);
+  });
+
   /** Asserts the reports agree and that none of `secrets` appears in any output or report. */
   async function assertRedacted(result, secrets) {
     const { junit, summary, markdown } = await assertConsistent(result);

@@ -20,11 +20,16 @@ export interface ProjectRoute {
   projectId: string; incarnation: string; servingEpoch: string; communicationBase: string;
   wssUrl: string; expiresAt: string; signature: string;
 }
+/**
+ * A mutation's recovery record. `resolutionState` is how far its request is known to have gone: `pending` before its
+ * first attempt, `unknown` while an attempt's outcome is unknown, `rejected` once the authority has rejected every
+ * attempt, and `committed` or `accepted` once the authority has the request.
+ */
 export interface RecoveryState {
   requestId: string; incarnation: string; payloadFingerprint: string;
   operation: OperationKey; projectId?: string; input: ProtocolObject;
   firstSubmittedAt: number; retryDeadline: number; attemptCount: number; lastAttemptAt: number;
-  lastAttemptClassification: string; resolutionState: "pending" | "unknown" | "committed" | "accepted";
+  lastAttemptClassification: string; resolutionState: "pending" | "unknown" | "rejected" | "committed" | "accepted";
   mediaAdmissionAttempted?: true;
 }
 // Structurally identical to the DOM Storage subset, without requiring DOM lib types.
@@ -43,8 +48,9 @@ export interface PageOptions { cursor?: string; limit?: number }
 export class ConvoHopProblem extends Error {
   /**
    * Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
-   * `RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds.
-   * The SDK never waits or resends on its own because of it.
+   * `RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,
+   * or from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when
+   * `@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first.
    */
   declare readonly retryAfter?: number;
   constructor(readonly code: string, readonly requestId: string, readonly outcome: string,

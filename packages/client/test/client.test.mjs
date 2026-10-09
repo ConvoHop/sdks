@@ -554,13 +554,14 @@ function backlog(conversationId, incarnation, total) {
   } };
   return server;
 }
-function replayFixture(t, total) {
-  const original = globalThis.WebSocket, sockets = [];
+// `failures` are thrown, in order, by the initializations reconnecting runs; `online()` reports that connectivity returned.
+function replayFixture(t, total, { date = false } = {}) {
+  const original = globalThis.WebSocket, sockets = [], listeners = new Set();
   class Socket {
     sent = [];
     constructor(url, protocol) { this.url = url; this.protocol = protocol; sockets.push(this); }
     send(value) { this.sent.push(JSON.parse(value)); }
-    close(code) { this.closedWith = code; this.onclose?.({ code }); }
+    close(code, reason) { this.closedWith = code; this.onclose?.({ code, reason }); }
     subscribe() {
       this.onopen();
       this.onmessage({ data: JSON.stringify({ type: "connection_ack" }) });
@@ -569,14 +570,21 @@ function replayFixture(t, total) {
   }
   globalThis.WebSocket = Socket;
   t.after(() => { globalThis.WebSocket = original; });
-  t.mock.timers.enable({ apis: ["setTimeout"] });
+  t.mock.timers.enable(date ? { apis: ["setTimeout", "Date"], now: Date.now() } : { apis: ["setTimeout"] });
   t.mock.method(Math, "random", () => 0);
   const saved = storage(), projectId = id(), principalId = id(), conversationId = id(), incarnation = id();
   const route = { incarnation, projectId, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" };
   const server = backlog(conversationId, incarnation, total);
-  const client = { projectId, principalId, storage: saved, recoverPending: async () => {}, initialize: async () => route,
+  const platform = { connectivity: { online: true, subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); } } };
+  const client = { projectId, principalId, storage: saved, platform, recoverPending: async () => {},
+    initialize: async () => {
+      setup.initialized++;
+      if (setup.failures.length) throw setup.failures.shift();
+      return route;
+    },
     events: (conversation, after) => server.events(conversation, after) };
-  const setup = { sockets, saved, server, conversationId, incarnation, applied: [], errors: [], gate: undefined, overlapped: false };
+  const setup = { sockets, saved, server, conversationId, incarnation, applied: [], errors: [], gate: undefined, overlapped: false,
+    failures: [], initialized: 0, online: () => { for (const listener of listeners) listener(true); } };
   let active = 0;
   setup.replay = new ConversationStream(client, conversationId, route, "session-fixture", async events => {
     if (active++) setup.overlapped = true;
@@ -662,6 +670,68 @@ test("a reconnect retry with more than one round of missed history continues ins
   assert.equal(sockets.length, 2);
   assert.equal(sockets[1].subscribe().payload.variables.input.after.sequence, "1510");
   assert.deepEqual(errors, []);
+  assert.equal(replay.closed, false);
+});
+
+test("realtime keeps reconnecting through gateway and server errors, doubling its backoff", async t => {
+  const setup = replayFixture(t, 0), { replay, sockets, errors } = setup;
+  await replay.start();
+  sockets[0].subscribe();
+  setup.failures.push(new ConvoHopProblem("INVALID_RESPONSE", id(), "unknown", 502, "Unrecognized authority response"),
+    new ConvoHopProblem("HTTP_FAILURE", id(), "unknown", 504, "Authority rejected the request"),
+    new ConvoHopProblem("HTTP_FAILURE", id(), "unknown", 500, "Authority rejected the request"));
+  sockets[0].close(1006);
+  for (const [attempt, delay] of [1000, 2000, 4000, 8000].entries()) {
+    t.mock.timers.tick(delay - 1); await drain();
+    assert.equal(setup.initialized, attempt);
+    t.mock.timers.tick(1); await drain();
+    assert.equal(setup.initialized, attempt + 1);
+  }
+  assert.deepEqual(errors.map(error => [error.code, error.status]), [["INVALID_RESPONSE", 502], ["HTTP_FAILURE", 504], ["HTTP_FAILURE", 500]]);
+  assert.equal(sockets.length, 2);
+  assert.equal(replay.closed, false);
+});
+
+const quota = { code: "QUOTA_EXCEEDED", outcome: "rejected", status: 429, retryAfter: 60 };
+for (const [name, end, expected] of [
+  ["a quota close", socket => socket.close(4429, "QUOTA_EXCEEDED retryAfter=60 meter=messages"), ["QUOTA_EXCEEDED", 429, 60]],
+  ["a quota error", (socket, subscription) => socket.onmessage({ data: JSON.stringify({ type: "error", id: subscription.id,
+    payload: [{ message: "Fixture quota", extensions: { ...quota, requestId: id() } }] }) }), ["QUOTA_EXCEEDED", 429, 60]],
+  ["a plan-limit close", socket => socket.close(4403, "PLAN_LIMIT_EXCEEDED planLimit=conversations"), ["PLAN_LIMIT_EXCEEDED", 403, undefined]],
+  ["an authorization close", socket => socket.close(4408), ["UNAUTHENTICATED", 401, undefined]],
+]) {
+  test(`${name} stops realtime and reports its problem instead of reconnecting`, async t => {
+    const setup = replayFixture(t, 0), { replay, sockets, errors } = setup;
+    await replay.start();
+    end(sockets[0], sockets[0].subscribe());
+    t.mock.timers.tick(600000); await drain();
+    assert.deepEqual(errors.map(error => [error.code, error.status, error.retryAfter]), [expected]);
+    assert.equal(replay.closed, true);
+    assert.equal(setup.initialized, 0);
+    assert.equal(sockets.length, 1);
+  });
+}
+
+test("a rate-limited close reconnects after its retryAfter even when connectivity returns sooner", async t => {
+  const setup = replayFixture(t, 0, { date: true }), { replay, sockets, errors } = setup;
+  await replay.start();
+  sockets[0].subscribe();
+  sockets[0].close(4429, "RATE_LIMITED retryAfter=30");
+  assert.deepEqual(errors.map(error => [error.code, error.status, error.retryAfter]), [["RATE_LIMITED", 429, 30]]);
+  t.mock.timers.tick(20000); await drain();
+  setup.online(); await drain();
+  t.mock.timers.tick(9999); await drain();
+  assert.equal(setup.initialized, 0);
+  t.mock.timers.tick(1); await drain();
+  assert.equal(setup.initialized, 1);
+  assert.equal(sockets.length, 2);
+  // Without a retryAfter, returning connectivity skips the backoff.
+  sockets[1].subscribe();
+  sockets[1].close(1006);
+  setup.online(); await drain();
+  assert.equal(setup.initialized, 2);
+  assert.equal(sockets.length, 3);
+  assert.equal(errors.length, 1);
   assert.equal(replay.closed, false);
 });
 

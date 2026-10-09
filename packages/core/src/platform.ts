@@ -13,7 +13,7 @@ export interface PlatformWebSocket {
   onopen: Handler<unknown> | null;
   onmessage: Handler<{ readonly data: unknown }> | null;
   onerror: Handler<unknown> | null;
-  onclose: Handler<{ readonly code: number }> | null;
+  onclose: Handler<{ readonly code: number; readonly reason?: string }> | null;
   send(data: string): void;
   close(code?: number, reason?: string): void;
 }

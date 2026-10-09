@@ -2,7 +2,7 @@ import {
   ConvoHopProblem, parseCounter, parseCursor, parseId, parseObject, parseString, type AsyncRecoveryStorage, type Connectivity,
   type ProtocolObject, type RecoveryState, type SendReceipt,
 } from "@convohop/core";
-import { adoptRecovery, beforeSubmitting, jsonClone, randomUUID } from "@convohop/core/internal";
+import { adoptRecovery, beforeSubmitting, jsonClone, randomUUID, reconnectAction, retainRecovery } from "@convohop/core/internal";
 import type { ConvoHopClient } from "./client.js";
 import { abortReason, connectivityOf, lifecycleOf, listen, storageWrites, throwIfAborted } from "./platform.js";
 import { asError, frozen, notify } from "./util.js";
@@ -72,7 +72,7 @@ type Phase = "submit" | "retry" | "resolve";
 type Resolution = Awaited<ReturnType<ConvoHopClient["requests"]["resolve"]>>;
 
 const maxUnsent = 100, maxSent = 100;
-const waiting = new Set(["UNAUTHENTICATED", "SESSION_REFRESH_REQUIRED", "RATE_LIMITED"]);
+const waiting = new Set(["UNAUTHENTICATED", "SESSION_REFRESH_REQUIRED", "RATE_LIMITED", "RECOVERY_LIMIT"]);
 const unrecoverable = new Set(["IDEMPOTENCY_CONFLICT", "INCARNATION_MISMATCH", "CREDENTIAL_REQUIRED"]);
 
 /** Running persistent outboxes of one user each save to their own slot: the base key, then `${base}:1` and up. */
@@ -137,9 +137,12 @@ const closing = new Map<string, Set<Handoff>>();
 /** This context's running persistent outboxes by storage key, told which slot each one claims. */
 const peers = new Map<string, Set<(key: string) => void>>();
 
-/** Whether a definitive rejection may pass: waiting for a session, quota or capacity isn't refusing the message. */
+/**
+ * Whether a definitive rejection may pass. Waiting for a session or for room in the recovery store isn't refusing the
+ * message, and neither is a failure the realtime stream reconnects after. A quota, plan limit or missing scope is.
+ */
 function retryable(problem: ConvoHopProblem): boolean {
-  return waiting.has(problem.code) || problem.status === 0 || problem.status === 408 || problem.status === 429 || problem.status >= 500;
+  return waiting.has(problem.code) || reconnectAction(problem) !== "stop";
 }
 /**
  * Sends messages optimistically and in order per conversation. Offline periods, session refreshes and uncertain
@@ -188,6 +191,10 @@ export class Outbox {
       this.#keys = Array.from({ length: slotCount }, (_, index) => index ? `${base}:${index}` : base);
     }
     try {
+      // A full recovery store frees final records, but never one an unsent entry will retry or resolve.
+      const items = this.#items;
+      this.#unsubscribe.push(retainRecovery(client.http, () => [...items.values()]
+        .filter(item => item.status !== "sent" && item.status !== "failed").map(item => item.requestId)));
       this.#unsubscribe.push(listen(this.#connectivity, online => { if (online) { this.#wake(); this.#rescan(); } }));
       this.#unsubscribe.push(listen(lifecycleOf(client.platform), state => {
         if (state === "active") { this.#pump(); this.#rescan(); }
@@ -375,7 +382,7 @@ export class Outbox {
       // Refused before submission, so nothing was sent.
       item.attempted = false;
       if (problem?.outcome === "rejected" && !retryable(problem)) return this.#fail(item, failure, false);
-      return this.#later(item, failure, problem?.retryAfter);
+      return this.#wait(item, failure, problem);
     }
     if (phase !== "resolve" && problem?.code === "RESOLUTION_REQUIRED") {
       item.exhausted = true;
@@ -388,6 +395,11 @@ export class Outbox {
     // Refusing a request before submitting it says nothing about an earlier attempt's outcome.
     if (phase !== "resolve" && problem?.outcome !== "rejected" && problem?.code !== "SESSION_REFRESH_REQUIRED") item.uncertain = true;
     if (problem?.outcome === "rejected" && !retryable(problem)) return this.#fail(item, failure, item.uncertain);
+    return this.#wait(item, failure, problem);
+  }
+  /** Schedules the entry's next attempt. After `WRONG_REGION` it routes again first, so that attempt has the current route. */
+  async #wait(item: Item, failure: Error, problem: ConvoHopProblem | undefined): Promise<void> {
+    if (problem && reconnectAction(problem) === "reroute") await this.client.initialize().catch(() => undefined);
     this.#later(item, failure, problem?.retryAfter);
   }
   /** Settles an entry the transport can't resend, with a read-only resolution. */

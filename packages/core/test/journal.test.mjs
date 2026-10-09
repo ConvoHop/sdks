@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopTransport } from "@convohop/core";
-import { adoptRecovery, beforeSubmitting } from "@convohop/core/internal";
+import { ConvoHopProblem, ConvoHopTransport } from "@convohop/core";
+import { adoptRecovery, beforeSubmitting, retainRecovery } from "@convohop/core/internal";
 import { reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -25,11 +25,11 @@ function journal(namespace = id()) {
 
 /**
  * A fake authority. It counts every mutation it receives and commits it, unless `mode` is `offline`, which fails
- * before the commit, or `lost`, which loses the response after it. `forget` makes resolution find nothing, as once a
- * commit's evidence has expired.
+ * before the commit, or `lost`, which loses the response after it, or `rejection` is set to a problem's
+ * `{ code, status }`, which rejects it. `forget` makes resolution find nothing, as once a commit's evidence has expired.
  */
 function authority() {
-  const fake = { sends: [], requests: [], committed: new Set(), mode: "online", forget: false,
+  const fake = { sends: [], requests: [], committed: new Set(), mode: "online", forget: false, rejection: undefined,
     sent: requestId => fake.sends.filter(value => value === requestId).length,
     fetch: async (_url, init) => {
       const request = JSON.parse(init.body);
@@ -42,6 +42,8 @@ function authority() {
       const requestId = request.variables.context.requestId;
       fake.sends.push(requestId);
       if (fake.mode === "offline") throw new TypeError("offline");
+      if (fake.rejection)
+        return Response.json({ errors: [{ message: "Refused", extensions: { ...fake.rejection, outcome: "rejected", requestId } }] });
       fake.committed.add(requestId);
       if (fake.mode === "lost") throw new TypeError("response lost");
       return reply(request, { result: results[request.operationName](request.variables) });
@@ -76,6 +78,9 @@ const stored = (lastAttemptAt, resolutionState, requestId = id()) => ({ requestI
   operation: "communication.sendMessage", projectId, input: { conversationId, text: requestId, props: {} },
   firstSubmittedAt: lastAttemptAt, retryDeadline: lastAttemptAt + 60000, attemptCount: 1, lastAttemptAt,
   lastAttemptClassification: "submitted", resolutionState });
+/** The typed refusal of request `requestId` while the journal holds 128 records that aren't final. */
+const recoveryLimit = (requestId, outcome = "rejected") => error => error instanceof ConvoHopProblem &&
+  error.code === "RECOVERY_LIMIT" && error.requestId === requestId && error.outcome === outcome && error.status === 409;
 
 test("synchronous and asynchronous clients sharing a journal keep each other's records", async () => {
   const fake = authority(), shared = journal();
@@ -191,11 +196,127 @@ test("a write that would drop another client's unresolved records doesn't create
   const others = Array.from({ length: 128 }, (_, index) => stored(now - 1000 - index, index % 2 ? "pending" : "unknown"));
   others[0] = { ...others[0], operation: "communication.futureOperation" };
   shared.save(others);
-  const saved = shared.raw();
-  await assert.rejects(send(client, id()), /Resolve outstanding mutations before creating more/);
+  const saved = shared.raw(), refused = id();
+  await assert.rejects(send(client, refused), recoveryLimit(refused));
   assert.equal(shared.raw(), saved);
   assert.deepEqual(fake.requests, []);
   assert.deepEqual(client.recoveryStates, []);
+});
+
+test("a rejection is the request's outcome only when every attempt was rejected", async () => {
+  const fake = authority(), shared = journal(), client = await open(fake, shared, "sync");
+  const [refused, limited, lost] = [id(), id(), id()];
+  fake.rejection = { code: "NOT_FOUND", status: 404 };
+  await assert.rejects(send(client, refused), { code: "NOT_FOUND", outcome: "rejected" });
+  fake.rejection = { code: "RATE_LIMITED", status: 429 };
+  await assert.rejects(send(client, limited), { code: "RATE_LIMITED", outcome: "rejected" });
+  fake.rejection = undefined; fake.mode = "lost";
+  await assert.rejects(send(client, lost), { code: "TRANSPORT_UNKNOWN" });
+  fake.mode = "online"; fake.rejection = { code: "RATE_LIMITED", status: 429 };
+  await assert.rejects(send(client, lost), { code: "RATE_LIMITED" });
+  const summary = transport => Object.fromEntries(transport.recoveryStates.map(state =>
+    [state.requestId, [state.resolutionState, state.lastAttemptClassification, state.attemptCount]]));
+  // The lost attempt may have committed, so the next one's rejection doesn't settle that request.
+  const expected = { [refused]: ["rejected", "NOT_FOUND", 1], [limited]: ["rejected", "RATE_LIMITED", 1],
+    [lost]: ["unknown", "RATE_LIMITED", 2] };
+  assert.deepEqual(summary(client), expected);
+  assert.deepEqual(summary(await open(fake, shared, "async")), expected, "a restarted client reads rejected records");
+  // A rejected request may be sent again under its ID while its budget lasts.
+  fake.rejection = undefined;
+  await send(client, limited);
+  assert.deepEqual([shared.record(limited).resolutionState, shared.record(limited).attemptCount], ["committed", 2]);
+});
+
+test("a full journal frees its oldest final record: settled, or rejected and not to be sent again", async () => {
+  const fake = authority(), shared = journal(), now = Date.now();
+  const at = index => now - 10000 + index;
+  const rejected = (index, lastAttemptClassification, changes = {}) =>
+    ({ ...stored(at(index), "rejected"), lastAttemptClassification, ...changes });
+  const records = [
+    // Oldest, and not final: the app may still send each again under its ID. WRONG_REGION succeeds after routing again.
+    stored(at(0), "unknown"), { ...stored(at(1), "pending"), attemptCount: 0 }, rejected(2, "RATE_LIMITED"), rejected(3, "WRONG_REGION"),
+    // Final: not retryable, out of budget, past the retry deadline, then the oldest committed.
+    rejected(4, "NOT_FOUND"), rejected(5, "RATE_LIMITED", { attemptCount: 3 }), rejected(6, "AUTHORITY_UNAVAILABLE", { retryDeadline: now - 1 }),
+    ...Array.from({ length: 121 }, (_, index) => stored(at(7 + index), "committed")),
+  ];
+  shared.save(records);
+  const client = await open(fake, shared, "sync"), sent = [id(), id(), id(), id()];
+  for (const requestId of sent) await send(client, requestId);
+  const kept = [...records.slice(0, 4), ...records.slice(8)].map(value => value.requestId).concat(sent);
+  assert.deepEqual(shared.records().map(value => value.requestId), kept);
+  assert.deepEqual(held(client), kept);
+});
+
+test("a journal full of records that aren't final refuses new requests until one is", async () => {
+  const fake = authority(), shared = journal(), client = await open(fake, shared, "async");
+  // A rate-limited request may be sent again under its ID, so its record stays.
+  fake.rejection = { code: "RATE_LIMITED", status: 429 };
+  const limited = Array.from({ length: 128 }, () => id());
+  for (const requestId of limited) await assert.rejects(send(client, requestId), { code: "RATE_LIMITED" });
+  fake.rejection = undefined;
+  const saved = shared.raw(), requests = fake.requests.length, refused = id();
+  await assert.rejects(send(client, refused), recoveryLimit(refused));
+  assert.equal(shared.raw(), saved, "nothing is written");
+  assert.equal(fake.requests.length, requests, "nothing is sent");
+  // Sent again under its ID, a request commits, so its record makes room for the next new request.
+  await send(client, limited[5]);
+  const next = id();
+  await send(client, next);
+  assert.deepEqual(held(client), [...limited.slice(0, 5), ...limited.slice(6), next]);
+  assert.deepEqual(shared.records().map(value => value.requestId), held(client));
+});
+
+test("a full journal keeps final records that a caller retains or a command is using", async () => {
+  const fake = authority(), shared = journal(), now = Date.now();
+  const records = Array.from({ length: 126 }, (_, index) => stored(now - 10000 + index, index ? "unknown" : "committed"));
+  shared.save(records);
+  const client = await open(fake, shared, "sync"), refused = id(), resent = id();
+  fake.rejection = { code: "NOT_FOUND", status: 404 };
+  await assert.rejects(send(client, resent), { code: "NOT_FOUND" });
+  fake.rejection = undefined; fake.mode = "lost";
+  await assert.rejects(send(client, id()), { code: "TRANSPORT_UNKNOWN" });
+  const release = retainRecovery(client, () => [records[0].requestId]);
+  // Resent under its ID, the rejected request's record is in use until its attempt counts.
+  let refusal;
+  beforeSubmitting(client, resent, async () => { refusal = await send(client, refused).catch(error => error); });
+  fake.mode = "online";
+  await send(client, resent);
+  assert.ok(recoveryLimit(refused)(refusal), String(refusal));
+  release();
+  const next = id();
+  await send(client, next);
+  assert.equal(held(client).includes(records[0].requestId), false, "released, the oldest final record goes");
+  assert.deepEqual([held(client).includes(resent), held(client).includes(next)], [true, true]);
+});
+
+test("merging another client's record of a request takes in its attempts", async () => {
+  const later = (ours, changes) => ({ ...ours, lastAttemptAt: ours.lastAttemptAt + 1, ...changes });
+  for (const [label, theirs, expected] of [
+    ["this client's own attempt, before its rejection was stored",
+      ours => ({ ...ours, resolutionState: "unknown", lastAttemptClassification: "submitted" }), ["rejected", "NOT_FOUND", 1]],
+    ["a later rejected attempt that knew of this one",
+      ours => later(ours, { attemptCount: 2, lastAttemptClassification: "FORBIDDEN" }), ["rejected", "FORBIDDEN", 2]],
+    ["a later unanswered attempt that knew of this one",
+      ours => later(ours, { attemptCount: 2, resolutionState: "unknown", lastAttemptClassification: "TRANSPORT_UNKNOWN" }),
+      ["unknown", "TRANSPORT_UNKNOWN", 2]],
+    // Neither record saw both as many attempts and as late a one as the other, so one more attempt counts.
+    ["a rejected attempt made unaware of this one",
+      ours => later(ours, { lastAttemptClassification: "FORBIDDEN" }), ["rejected", "FORBIDDEN", 2]],
+    ["an unanswered attempt made unaware of this one, which may have committed",
+      ours => later(ours, { resolutionState: "unknown", lastAttemptClassification: "TRANSPORT_UNKNOWN" }),
+      ["unknown", "TRANSPORT_UNKNOWN", 2]],
+    ["an earlier unanswered attempt, though it saw more of them",
+      ours => ({ ...ours, attemptCount: 2, lastAttemptAt: ours.lastAttemptAt - 1, resolutionState: "unknown",
+        lastAttemptClassification: "TRANSPORT_UNKNOWN" }), ["unknown", "TRANSPORT_UNKNOWN", 3]],
+  ]) {
+    const fake = authority(), shared = journal(), requestId = id(), client = await open(fake, shared, "sync");
+    fake.rejection = { code: "NOT_FOUND", status: 404 };
+    await assert.rejects(send(client, requestId), { code: "NOT_FOUND" });
+    shared.save([theirs(shared.record(requestId))]);
+    assert.equal(await adoptRecovery(client, requestId), true);
+    const merged = client.recoveryStates[0];
+    assert.deepEqual([merged.resolutionState, merged.lastAttemptClassification, merged.attemptCount], expected, label);
+  }
 });
 
 test("over the limit, a client's own write drops its settled records, then the oldest unresolved others", async () => {

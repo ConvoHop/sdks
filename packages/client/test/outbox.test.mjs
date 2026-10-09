@@ -216,6 +216,100 @@ test("a waiting rejection keeps the request and retries it after the authority's
   assert.deepEqual(sendIds(setup), [entry.requestId, entry.requestId]);
 });
 
+test("a quota, plan or operator refusal fails a message at once, while server, timeout and rate failures keep its request", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: Date.parse("2026-10-08T12:00:00Z") });
+  t.mock.method(Math, "random", () => 0);
+  for (const [code, status, extra] of [["QUOTA_EXCEEDED", 429, { retryAfter: 60 }], ["PLAN_LIMIT_EXCEEDED", 403, {}],
+    ["MEMBERSHIP_COUNT_INVALID", 503, {}]]) {
+    const setup = authority(), { outbox: box, errors } = outbox(t, setup.client());
+    setup.onSend = () => problem(code, status, "rejected", extra);
+    box.send(id(), "refused");
+    await until(() => box.entries[0].status === "failed", code);
+    assert.deepEqual(errors.map(error => error.code), [code]);
+    assert.equal(box.entries[0].unconfirmed, undefined);
+    t.mock.timers.tick(600000);
+    for (let index = 0; index < 20; index++) await turn();
+    assert.equal(setup.sends.length, 1, code + " is never sent again");
+  }
+  // A code the schema doesn't list is judged by its status.
+  for (const [code, status] of [["AUTHORITY_UNAVAILABLE", 503], ["HTTP_FAILURE", 408], ["RATE_LIMITED", 429], ["UNLISTED_FAILURE", 502]]) {
+    const setup = authority(), { outbox: box, errors } = outbox(t, setup.client());
+    setup.onSend = () => setup.sends.length === 1 ? problem(code, status, "rejected") : undefined;
+    const entry = box.send(id(), "later");
+    await until(() => box.entries[0].status === "queued" && box.entries[0].error?.code === code, code);
+    t.mock.timers.tick(1000);
+    await until(() => box.entries[0].status === "sent", "the retry after " + code);
+    assert.deepEqual(sendIds(setup), [entry.requestId, entry.requestId]);
+    assert.deepEqual(errors, []);
+  }
+});
+
+test("a message refused for a stale serving epoch routes again and resends its request at the current epoch", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: Date.parse("2026-10-08T12:00:00Z") });
+  t.mock.method(Math, "random", () => 0);
+  const setup = authority(), routes = [];
+  const client = setup.client({ fetch: async (url, options) => {
+    const request = JSON.parse(options.body);
+    if (request.operationName !== "CommunicationRoute") return setup.fetch(url, options);
+    routes.push(setup.sends.length);
+    return reply(request, { result: { projectId: setup.projectId, incarnation: setup.incarnation, servingEpoch: "7",
+      communicationBase: "http://localhost:18080", wssUrl: "ws://localhost:18080/graphql",
+      expiresAt: new Date(Date.now() + 60000).toISOString(), signature: "fixture-route" } });
+  } });
+  const { outbox: box, errors } = outbox(t, client);
+  setup.onSend = () => setup.sends.length === 1 ? problem("WRONG_REGION", 409, "rejected") : undefined;
+  const entry = box.send(id(), "moved");
+  await until(() => box.entries[0].status === "queued" && box.entries[0].error?.code === "WRONG_REGION", "the stale epoch");
+  assert.deepEqual(routes, [1], "the outbox routed again before scheduling the resend");
+  t.mock.timers.tick(1000);
+  await until(() => box.entries[0].status === "sent", "the resend");
+  assert.deepEqual(sendIds(setup), [entry.requestId, entry.requestId]);
+  assert.deepEqual(setup.sends.map(request => request.variables.context.observedServingEpoch), [undefined, "7"]);
+  assert.deepEqual(errors, []);
+});
+
+test("a full recovery store keeps a message queued without reporting it until a final record makes room", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: Date.parse("2026-10-08T12:00:00Z") });
+  const network = connectivity(), setup = authority(), client = setup.client(), conversationId = id();
+  const { outbox: box, errors } = outbox(t, client, { connectivity: network });
+  setup.onSend = () => { throw new Error("connection reset"); };
+  const fillers = Array.from({ length: 128 }, () => id());
+  for (const requestId of fillers)
+    await assert.rejects(client.send(conversationId, "filler", requestId), { code: "TRANSPORT_UNKNOWN" });
+  setup.onSend = undefined;
+  const entry = box.send(conversationId, "waits");
+  await until(() => box.entries[0].error?.code === "RECOVERY_LIMIT", "the full store");
+  assert.equal(box.entries[0].status, "queued");
+  assert.deepEqual(errors, [], "waiting for room isn't a failure");
+  assert.equal(setup.sends.length, 128, "nothing was sent");
+  assert.equal((await client.requests.retry(fillers[5])).state, "committed");
+  network.set(true);
+  await until(() => box.entries[0].status === "sent", "room in the store");
+  const kept = client.http.recoveryStates.map(state => state.requestId);
+  assert.equal(kept.length, 128);
+  assert.ok(kept.includes(entry.requestId) && !kept.includes(fillers[5]), "the committed record made room");
+  assert.deepEqual(sendIds(setup).slice(128), [fillers[5], entry.requestId]);
+});
+
+test("an outbox keeps the record of a message it will still retry, even when a full store needs room", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: Date.parse("2026-10-08T12:00:00Z") });
+  const setup = authority(), client = setup.client(), conversationId = id(), { outbox: box } = outbox(t, client);
+  setup.onSend = () => problem("RATE_LIMITED", 429, "rejected", { retryAfter: 120 });
+  const entry = box.send(conversationId, "held");
+  await until(() => box.entries[0].error?.code === "RATE_LIMITED", "the rate limit");
+  // Past its 60-second retry budget the rejected record is final, but the entry still waits to settle it.
+  t.mock.timers.tick(61000);
+  setup.onSend = () => { throw new Error("connection reset"); };
+  for (let index = 0; index < 127; index++)
+    await assert.rejects(client.send(conversationId, "filler", id()), { code: "TRANSPORT_UNKNOWN" });
+  await assert.rejects(client.send(conversationId, "refused"), { name: "ConvoHopProblem", code: "RECOVERY_LIMIT", outcome: "rejected", status: 409 });
+  assert.ok(client.http.recoveryStates.some(state => state.requestId === entry.requestId));
+  await box.close();
+  setup.onSend = undefined;
+  await client.send(conversationId, "admitted");
+  assert.ok(!client.http.recoveryStates.some(state => state.requestId === entry.requestId), "a closed outbox no longer keeps it");
+});
+
 test("offline messages wait for connectivity, and the outbox holds at most 100 unsent", async t => {
   const network = connectivity(false), setup = authority(), client = setup.client();
   const { outbox: box } = outbox(t, client, { connectivity: network });

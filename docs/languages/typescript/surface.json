@@ -477,7 +477,7 @@
               "name": "retryAfter",
               "kind": "property",
               "signatures": ["readonly retryAfter?: number"],
-              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds.\nThe SDK never waits or resends on its own because of it."
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,\nor from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when\n`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first."
             },
             {
               "name": "constructor",
@@ -1051,7 +1051,9 @@
             {
               "name": "onclose",
               "kind": "property",
-              "signatures": ["onclose: Handler<{\n    readonly code: number;\n}> | null"],
+              "signatures": [
+                "onclose: Handler<{\n    readonly code: number;\n    readonly reason?: string;\n}> | null"
+              ],
               "docs": ""
             },
             {
@@ -1499,7 +1501,7 @@
           "name": "RecoveryState",
           "kind": "interface",
           "signatures": ["interface RecoveryState"],
-          "docs": "",
+          "docs": "A mutation's recovery record. `resolutionState` is how far its request is known to have gone: `pending` before its\nfirst attempt, `unknown` while an attempt's outcome is unknown, `rejected` once the authority has rejected every\nattempt, and `committed` or `accepted` once the authority has the request.",
           "origin": "@convohop/core",
           "members": [
             {
@@ -1572,7 +1574,7 @@
               "name": "resolutionState",
               "kind": "property",
               "signatures": [
-                "resolutionState: \"pending\" | \"unknown\" | \"committed\" | \"accepted\""
+                "resolutionState: \"pending\" | \"unknown\" | \"rejected\" | \"committed\" | \"accepted\""
               ],
               "docs": ""
             },
@@ -1671,7 +1673,7 @@
               "name": "retryAfter",
               "kind": "property",
               "signatures": ["readonly retryAfter?: number"],
-              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds.\nThe SDK never waits or resends on its own because of it.",
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,\nor from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when\n`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first.",
               "inherited": "ConvoHopProblem"
             }
           ]
@@ -3854,7 +3856,7 @@
               "name": "retryAfter",
               "kind": "property",
               "signatures": ["readonly retryAfter?: number"],
-              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds.\nThe SDK never waits or resends on its own because of it."
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,\nor from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when\n`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first."
             },
             {
               "name": "constructor",
@@ -5098,7 +5100,9 @@
             {
               "name": "onclose",
               "kind": "property",
-              "signatures": ["onclose: Handler<{\n    readonly code: number;\n}> | null"],
+              "signatures": [
+                "onclose: Handler<{\n    readonly code: number;\n    readonly reason?: string;\n}> | null"
+              ],
               "docs": ""
             },
             {
@@ -5205,7 +5209,7 @@
           "name": "RecoveryState",
           "kind": "interface",
           "signatures": ["interface RecoveryState"],
-          "docs": "",
+          "docs": "A mutation's recovery record. `resolutionState` is how far its request is known to have gone: `pending` before its\nfirst attempt, `unknown` while an attempt's outcome is unknown, `rejected` once the authority has rejected every\nattempt, and `committed` or `accepted` once the authority has the request.",
           "origin": "@convohop/core",
           "members": [
             {
@@ -5278,7 +5282,7 @@
               "name": "resolutionState",
               "kind": "property",
               "signatures": [
-                "resolutionState: \"pending\" | \"unknown\" | \"committed\" | \"accepted\""
+                "resolutionState: \"pending\" | \"unknown\" | \"rejected\" | \"committed\" | \"accepted\""
               ],
               "docs": ""
             },
@@ -5396,7 +5400,7 @@
               "name": "retryAfter",
               "kind": "property",
               "signatures": ["readonly retryAfter?: number"],
-              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds.\nThe SDK never waits or resends on its own because of it.",
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,\nor from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when\n`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first.",
               "inherited": "ConvoHopProblem"
             }
           ]

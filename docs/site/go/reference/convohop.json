@@ -4113,6 +4113,14 @@
           "docs": "A per-second rate limit refused the request before it had any effect. Wait extensions.retryAfter seconds (HTTP Retry-After), then resend the request with the same requestId. HTTP status 429. Retryable. Raised by the server."
         },
         {
+          "name": "ErrorCodeRecoveryLimit",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go#ErrorCode.ErrorCodeRecoveryLimit",
+          "anchor": "errorcodeerrorcoderecoverylimit-case",
+          "signatures": ["const ErrorCodeRecoveryLimit ErrorCode = \"RECOVERY_LIMIT\""],
+          "docs": "The SDK's recovery store already holds 128 mutation records that are not final, so the new request was not sent. Retry or resolve outstanding requests, then send it again. HTTP status 409. Not retryable. Raised by the SDK."
+        },
+        {
           "name": "ErrorCodeRecoveryStorageFailure",
           "kind": "case",
           "ref": "github.com/ConvoHop/sdks/go#ErrorCode.ErrorCodeRecoveryStorageFailure",

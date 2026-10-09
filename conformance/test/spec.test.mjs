@@ -188,16 +188,30 @@ describe("the operation catalog and scenarios agree with schema/ir.json", () => 
     for (const operation of [channel.replay, channel.endpoint.operation]) assert.ok(catalogued.has(operation), `no operation maps to ${operation}`);
   });
 
-  test("realtime drops end or resume the subscription as the IR's close codes require", () => {
+  // spec/recovery/README.md#retry-and-reconnect: a reason that starts with an error code decides by that code, and any
+  // other close by whether the IR lists its close code as terminal.
+  test("realtime drops end or resume the subscription as the IR's close codes and error codes require", () => {
     const { terminalCloseCodes, baseDelayMs, jitterMs } = channel.reconnect;
-    const kinds = new Set();
+    const subscriptionCodes = irOperations.get(channel.subscription).errors.codes;
+    const codes = new Map(ir.errors.codes.map(code => [code.name, code]));
+    const kinds = new Set(), reasonKinds = new Set();
+    /** Whether a drop with this close code and reason ends the subscription. */
+    const ends = (id, { code, reason = "" }) => {
+      const name = /^([A-Z][A-Z0-9_]+)(?:\s|$)/.exec(reason)?.[1];
+      if (name === undefined) return terminalCloseCodes.includes(code);
+      assert.ok(subscriptionCodes.includes(name), `${id}: the reason "${reason}" names ${name}, which ${channel.subscription} cannot fail with`);
+      const { status = code >= 4000 && code <= 4999 ? code - 4000 : 0, retryable } = codes.get(name);
+      const terminal = !(name === "WRONG_REGION" || (retryable && [0, 408, 429].includes(status)) || (retryable && status >= 500 && status <= 599));
+      reasonKinds.add(terminal);
+      return terminal;
+    };
     for (const { id, steps } of scenarios) {
       const open = new Map(); // subscription handle -> conversationId template
       steps.forEach((step, index) => {
         if (step.do === "realtime.subscribe" && step.expect === undefined) open.set(step.subscription, step.conversationId);
         if (step.do === "realtime.close" || (step.do === "realtime.collect" && expectsEnd(step))) open.delete(step.subscription);
         if (step.do !== "control.realtimeDrop") return;
-        const terminal = terminalCloseCodes.includes(step.code);
+        const terminal = ends(id, step);
         kinds.add(terminal);
         // The drop's effects are observed up to the next drop.
         const next = steps.findIndex((later, at) => at > index && later.do === "control.realtimeDrop");
@@ -205,18 +219,20 @@ describe("the operation catalog and scenarios agree with schema/ir.json", () => 
         const dropped = [...open].filter(([, conversationId]) => step.conversationId === undefined || step.conversationId === conversationId);
         const observations = dropped.map(([handle]) => window.find(later => later.do === "realtime.collect" && later.subscription === handle))
           .filter(Boolean);
-        assert.ok(observations.length > 0, `${id}: no realtime.collect on a dropped subscription follows the drop with ${step.code}`);
+        const close = `${step.code} "${step.reason ?? ""}"`;
+        assert.ok(observations.length > 0, `${id}: no realtime.collect on a dropped subscription follows the drop with ${close}`);
         for (const collect of observations)
-          assert.equal(expectsEnd(collect), terminal, `${id}: the IR ${terminal ? "ends" : "resumes"} subscriptions closed with ${step.code}`);
+          assert.equal(expectsEnd(collect), terminal, `${id}: the IR ${terminal ? "ends" : "resumes"} subscriptions closed with ${close}`);
         if (!terminal) return;
         const conclusion = window.findIndex(later => later.do === "control.waitLog" && later.kind === "subscribe");
-        assert.ok(conclusion !== -1, `${id}: no control.waitLog of subscribe entries shows that ${step.code} is not retried`);
-        assert.ok(window[conclusion].expect !== undefined, `${id}: the control.waitLog after ${step.code} must expect the subscribe entries it finds`);
+        assert.ok(conclusion !== -1, `${id}: no control.waitLog of subscribe entries shows that ${close} is not retried`);
+        assert.ok(window[conclusion].expect !== undefined, `${id}: the control.waitLog after ${close} must expect the subscribe entries it finds`);
         const waited = window.slice(0, conclusion).filter(later => later.do === "sleep").reduce((total, later) => total + later.ms, 0);
         assert.ok(waited > baseDelayMs + jitterMs, `${id} must wait out the first reconnect delay before checking that there is no reconnect`);
       });
     }
     assert.deepEqual(sorted(kinds), [false, true], "scenarios should drop with both terminal and resumable close codes");
+    assert.deepEqual(sorted(reasonKinds), [false, true], "scenarios should drop with reasons that name both retryable and final error codes");
   });
 
   test("scenarios expect only error codes that the IR defines for the operation", t => {

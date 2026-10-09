@@ -86,12 +86,13 @@ const quiet = { subscribe: () => () => undefined };
 
 /**
  * A client with the read path a ConversationStore uses. Each `watch` adds a stream to `streams`; call its `apply` with
- * events to deliver them. `members` overrides or adds methods.
+ * events to deliver them. Its `http` stands in for the transport, which a store's outbox only registers with until it
+ * sends. `members` overrides or adds methods.
  */
 export function stubClient(members = {}) {
   const streams = [];
   return {
-    projectId, principalId: alice, streams,
+    projectId, principalId: alice, streams, http: {},
     platform: { connectivity: { online: true, ...quiet }, lifecycle: { state: "active", ...quiet } },
     async getConversation(conversationId) {
       return { conversationId, title: "Stub", latestSequence: "0",

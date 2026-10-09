@@ -58,7 +58,7 @@ can run every scenario it supports without pretending to support the rest.
 | `auth.shortSessionTtl` | Issues user sessions with the requested lifetime down to 1 second (`requestedTtlMs: "1000"`). | The user-session expiry scenario. |
 | `pagination.serverCappedPages` | Returns at most 3 items per page of message history and of conversation events, whatever limit the client asks for, so that small scenarios span several pages. | The message and event pagination scenarios. |
 | `control.reset` | Implements `POST /reset`. | The runner, before each scenario. |
-| `control.fault` | Implements `POST /fault`. | Rate-limit and recovery scenarios. |
+| `control.fault` | Implements `POST /fault`. | Rate-limit, recovery and realtime reconnect scenarios. |
 | `control.realtimeDrop` | Implements `POST /realtime/drop`. | Realtime reconnect scenarios. |
 | `control.waitLog` | Implements `POST /log/wait`. | Scenarios that observe what the SDK sent, such as reconnects and retries. |
 
@@ -73,7 +73,7 @@ at `<communicationUrl>/__conformance`.
 | Endpoint | Body | Response |
 | --- | --- | --- |
 | `POST /reset` | none | `200 {"ok": true}` after restoring the initial state, clearing queued faults and the log, and closing realtime connections with code 1012. |
-| `POST /fault` | `{"plane"?, "field", "action", "retryAfterSeconds"?}` | `200 {"ok": true}`, or `400` for an invalid fault. |
+| `POST /fault` | `{"plane"?, "field", "action", "retryAfterSeconds"?, "status"?, "count"?}` | `200 {"ok": true}`, or `400` for an invalid fault. |
 | `POST /realtime/drop` | `{"conversationId"?, "code"?, "reason"?}` | `200 {"closed": <number of connections closed>}` |
 | `GET /log` | none | `200 {"entries": [...]}` |
 | `POST /log/wait` | `{"kind", "match"?, "count"?, "timeoutMs"?}` | `200 {"entries": [...]}`, or `408 {"entries": [...], "timedOut": true}` |
@@ -82,15 +82,19 @@ at `<communicationUrl>/__conformance`.
 
 A fault applies once, to the next request for a GraphQL root `field`, such
 as `sendMessage`, on a `plane` (`communication`, the default, or
-`management`). Faults for the same plane and field apply in the order they were queued.
+`management`). `count`, an integer from 1 to 1000 (default 1), queues that
+many copies, so the fault applies to each of the next `count` requests.
+Faults for the same plane and field apply in the order they were queued.
 Only requests that are valid GraphQL, authenticated and for the target
-project consume a fault; other requests fail as they normally would.
+project consume a fault; other requests fail as they normally would. Only
+`httpStatus` takes `status`, and the drops take no `retryAfterSeconds`.
 
 | `action` | Effect on the request |
 | --- | --- |
 | `rateLimit` | Rejected without running. The response is HTTP 429 with a `Retry-After: <retryAfterSeconds>` header and a GraphQL error whose extensions are `{"code": "RATE_LIMITED", "status": 429, "outcome": "rejected", "retryAfter": <retryAfterSeconds>, "requestId": ...}`. `retryAfterSeconds`, a positive integer, is required. |
 | `dropBeforeCommit` | The connection closes without a response, and the request does not take effect. |
 | `dropAfterCommit` | The request takes effect, then the connection closes without a response. |
+| `httpStatus` | Rejected without running, as a proxy or gateway in front of the service would. The response has HTTP status `status`, which is required and from 400 to 599, a `text/plain` body with the status's reason phrase, such as `Bad Gateway`, and `Cache-Control: no-store`. It has a `Retry-After: <retryAfterSeconds>` header when `retryAfterSeconds`, a positive integer, is given. |
 
 The two drops look identical to the SDK: in both cases the outcome is
 unknown until the SDK resolves the request id. The recovery scenarios
@@ -103,7 +107,12 @@ those subscribed to `conversationId`, with close `code` (default 1012) and
 `reason` (default `Service restart`). Scenarios use 1012 to simulate a
 service restart, after which SDKs must reconnect and resume from their
 cursor, and 4401 to end a subscription's authorization, after which SDKs
-must report `UNAUTHENTICATED` and stop without reconnecting.
+must report `UNAUTHENTICATED` and stop without reconnecting. They also
+send the service's reason-coded closes, such as 4429 with
+`RATE_LIMITED retryAfter=4` or `QUOTA_EXCEEDED retryAfter=60 meter=messages`,
+and 4403 with `PLAN_LIMIT_EXCEEDED planLimit=conversations`. SDKs classify
+those by the code in the reason (see
+[realtime closes](../recovery/README.md#realtime-closes)).
 
 ### Log
 
@@ -113,7 +122,7 @@ time) and `kind`:
 
 | `kind` | Fields |
 | --- | --- |
-| `request` | `plane`, `field` (the root field, or `null` if the request could not be parsed), `requestId` (or `null`), `status` (the HTTP status; `0` when the connection was dropped), `code` (the error code, or `null` on success) and `dropped`. |
+| `request` | `plane`, `field` (the root field, or `null` if the request could not be parsed), `requestId` (or `null`), `status` (the HTTP status; `0` when the connection was dropped), `code` (the GraphQL error code, or `null` for a response without one, such as a success, a drop or an `httpStatus` fault) and `dropped`. |
 | `subscribe` | `conversationId`, `principalId`, `after` (the sequence the client asked to resume after, or `null`) and `start` (the sequence after which the service starts sending events). |
 | `close` | `code`, `reason`, `initiator` (`server` or `client`) and `conversationIds` (the conversations the connection was subscribed to). |
 

@@ -291,6 +291,18 @@ export class Engine {
     const { slot } = this.#client(step.client, state);
     const params = { client: step.client, operation: step.operation };
     if (step.args !== undefined) params.args = state.scope.interpolate(step.args);
+    const repeat = step.repeat ?? 1;
+    for (let call = 1; call <= repeat; call += 1) {
+      try {
+        await this.#invokeOnce(step, params, slot, state, call === repeat);
+      } catch (error) {
+        if (repeat > 1 && error instanceof StepFailure) throw new StepFailure(`call ${call} of ${repeat}: ${error.message}`);
+        throw error;
+      }
+    }
+  }
+
+  async #invokeOnce(step, params, slot, state, last) {
     const result = await slot.driver.request("invoke", params, { timeoutMs: REQUEST_TIMEOUT_MS });
     // Learn bearer material before any expectation can echo it into a failure message.
     if (result.ok) collectSecrets(result.value, this.secrets);
@@ -298,12 +310,12 @@ export class Engine {
       if (result.ok) throw new StepFailure(`${step.operation} succeeded but an error was expected; it returned ${show(result.value)}`);
       this.#expect(result.error, step.expect.error, state,
         `${step.operation} failed with ${formatSdkError(result.error)}, which does not match the expected error`);
-      this.#save(step.save, result.error, state);
+      if (last) this.#save(step.save, result.error, state);
       return;
     }
     if (!result.ok) throw new StepFailure(`${step.operation} failed with ${formatSdkError(result.error)}`);
     if (step.expect !== undefined) this.#expect(result.value, step.expect.value, state, `${step.operation} returned an unexpected value`);
-    this.#save(step.save, result.value, state);
+    if (last) this.#save(step.save, result.value, state);
   }
 
   async #subscribe(step, state) {
@@ -366,7 +378,7 @@ export class Engine {
 
   async #fault(step, state) {
     const values = state.scope.interpolate({ plane: step.plane, field: step.field, action: step.action });
-    await this.control.fault({ ...values, retryAfterSeconds: step.retryAfterSeconds });
+    await this.control.fault({ ...values, retryAfterSeconds: step.retryAfterSeconds, status: step.status, count: step.count });
   }
 
   async #drop(step, state) {

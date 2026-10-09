@@ -3364,6 +3364,8 @@ extension ConvoHopErrorCode {
     public static let quotaExceeded = ConvoHopErrorCode(rawValue: "QUOTA_EXCEEDED")
     /// A per-second rate limit refused the request before it had any effect. Wait extensions.retryAfter seconds (HTTP Retry-After), then resend the request with the same requestId.
     public static let rateLimited = ConvoHopErrorCode(rawValue: "RATE_LIMITED")
+    /// The SDK's recovery store already holds 128 mutation records that are not final, so the new request was not sent. Retry or resolve outstanding requests, then send it again.
+    public static let recoveryLimit = ConvoHopErrorCode(rawValue: "RECOVERY_LIMIT")
     /// Caller-provided recovery storage did not confirm durability. Keep the original request and its outcome.
     public static let recoveryStorageFailure = ConvoHopErrorCode(rawValue: "RECOVERY_STORAGE_FAILURE")
     /// The original request is too old to replay.
@@ -3438,6 +3440,7 @@ extension ConvoHopErrorCode {
         "PLAN_LIMIT_EXCEEDED": (status: 403, retryable: false),
         "QUOTA_EXCEEDED": (status: 429, retryable: false),
         "RATE_LIMITED": (status: 429, retryable: true),
+        "RECOVERY_LIMIT": (status: 409, retryable: false),
         "RECOVERY_STORAGE_FAILURE": (status: nil, retryable: false),
         "REQUEST_EXPIRED": (status: 409, retryable: false),
         "REQUEST_TOO_LARGE": (status: 413, retryable: false),

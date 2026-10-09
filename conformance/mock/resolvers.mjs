@@ -3,6 +3,7 @@
 // exact shape the SDKs request; resolvers delegate to the deterministic Domain.
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { STATUS_CODES } from "node:http";
 import { buildSchema, execute, getOperationAST, parse, validate, valueFromASTUntyped } from "graphql";
 import { Problem } from "./domain.mjs";
 
@@ -140,6 +141,10 @@ export function createGraphqlHandler(domain, { routeTarget, faults, log }) {
         throw new Problem("RATE_LIMITED", 429, "Request rate exceeded; retry later",
           { retryAfterSeconds: fault.retryAfterSeconds });
       if (fault?.action === "dropBeforeCommit") return finish({ status: 0, drop: true });
+      if (fault?.action === "httpStatus") {
+        const headers = fault.retryAfterSeconds === undefined ? {} : { "retry-after": String(fault.retryAfterSeconds) };
+        return finish({ status: fault.status, headers, text: STATUS_CODES[fault.status] ?? `HTTP ${fault.status}` });
+      }
       const resolver = fields[plane][field];
       if (!resolver) throw new Problem("FEATURE_UNSUPPORTED", 422, `${field} is not offered by the conformance mock`);
       let value, failure;

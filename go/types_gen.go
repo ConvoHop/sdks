@@ -199,6 +199,9 @@ const (
 	// A per-second rate limit refused the request before it had any effect. Wait extensions.retryAfter seconds (HTTP Retry-After), then resend the request with the same requestId.
 	// HTTP status 429. Retryable. Raised by the server.
 	ErrorCodeRateLimited ErrorCode = "RATE_LIMITED"
+	// The SDK's recovery store already holds 128 mutation records that are not final, so the new request was not sent. Retry or resolve outstanding requests, then send it again.
+	// HTTP status 409. Not retryable. Raised by the SDK.
+	ErrorCodeRecoveryLimit ErrorCode = "RECOVERY_LIMIT"
 	// Caller-provided recovery storage did not confirm durability. Keep the original request and its outcome.
 	// Not retryable. Raised by the SDK.
 	ErrorCodeRecoveryStorageFailure ErrorCode = "RECOVERY_STORAGE_FAILURE"

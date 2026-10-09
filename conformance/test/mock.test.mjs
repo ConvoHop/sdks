@@ -212,6 +212,25 @@ describe("faults", () => {
     const { entries } = await control.waitLog({ kind: "request", match: { dropped: true }, count: 2 });
     assert.deepEqual(entries.map(entry => [entry.requestId, entry.status]), [[before, 0], [afterCommit, 0]]);
   });
+
+  test("an httpStatus fault answers a plain-text gateway error before the commit, and count queues copies", async () => {
+    await control.fault({ field: "createPrincipal", action: "httpStatus", status: 502, count: 2 });
+    await control.fault({ field: "createPrincipal", action: "httpStatus", status: 503, retryAfterSeconds: 4 });
+    const requestId = randomUUID(), input = { externalUserId: `user-${randomUUID()}` };
+    for (const [status, text, retryAfter] of [[502, "Bad Gateway", null], [502, "Bad Gateway", null], [503, "Service Unavailable", "4"]]) {
+      const response = await createPrincipal({ requestId, input });
+      assert.equal(response.status, status);
+      assert.match(response.headers.get("content-type"), /^text\/plain/);
+      assert.equal(response.headers.get("retry-after"), retryAfter);
+      assert.equal(await response.text(), text);
+    }
+    const committed = await createPrincipal({ requestId, input });
+    assert.equal(committed.status, 200);
+    assert.equal((await committed.json()).data.createPrincipal.replayed, false);
+    const { entries } = await control.waitLog({ kind: "request", match: { requestId }, count: 4 });
+    assert.deepEqual(entries.map(({ status, code, dropped }) => [status, code, dropped]),
+      [[502, null, false], [502, null, false], [503, null, false], [200, null, false]]);
+  });
 });
 
 describe("control API", () => {
@@ -221,7 +240,15 @@ describe("control API", () => {
     for (const fault of [{ action: "rateLimit", retryAfterSeconds: 1 }, { field: "createPrincipal", action: "explode" },
       { plane: "media", field: "createPrincipal", action: "dropBeforeCommit" }, { field: "createPrincipal", action: "rateLimit" },
       { field: "createPrincipal", action: "rateLimit", retryAfterSeconds: 0 },
-      { field: "createPrincipal", action: "rateLimit", retryAfterSeconds: 1.5 }])
+      { field: "createPrincipal", action: "rateLimit", retryAfterSeconds: 1.5 },
+      { field: "createPrincipal", action: "rateLimit", retryAfterSeconds: 1, status: 503 },
+      { field: "createPrincipal", action: "dropAfterCommit", retryAfterSeconds: 1 },
+      { field: "createPrincipal", action: "httpStatus" }, { field: "createPrincipal", action: "httpStatus", status: 302 },
+      { field: "createPrincipal", action: "httpStatus", status: 600 },
+      { field: "createPrincipal", action: "httpStatus", status: 503, retryAfterSeconds: 0 },
+      { field: "createPrincipal", action: "dropBeforeCommit", count: 0 },
+      { field: "createPrincipal", action: "dropBeforeCommit", count: 1001 },
+      { field: "createPrincipal", action: "dropBeforeCommit", count: 1.5 }])
       await assert.rejects(control.fault(fault), { name: "ControlError", message: /^control \/fault returned HTTP 400: / });
   });
 

@@ -10,7 +10,7 @@ import { buildIr } from "../lib/ir.mjs";
 import { formatJson } from "../lib/json.mjs";
 import { codeUnitCompare } from "../lib/naming.mjs";
 import { javaIdentifier, javaPattern, javaString, kotlinIdentifier, kotlinString, renderJava, scalarMapping, serverTypeNames } from "../emitters/java.mjs";
-import { coreOperationCatalog, operationTypeNames, scalarTsType } from "../emitters/typescript.mjs";
+import { coreOperationCatalog, operationTypeNames, renderErrorCodes, scalarTsType } from "../emitters/typescript.mjs";
 import { operationCatalog } from "../lib/ir-model.mjs";
 import { REPO_ROOT, assertGoldenTree, fixtureSources, repoSources } from "./helpers.mjs";
 
@@ -76,7 +76,22 @@ test("the core TypeScript catalog adds each operation's idempotency class to the
   assert.ok(Object.values(published).every(entry => !("idempotency" in entry)), "schema/operations.json is unchanged");
 });
 
+test("the TypeScript error-code table keeps each code's origin, status and retryability, and rejects codes it can't render", () => {
+  const ir = buildIr(fixtureSources());
+  const table = renderErrorCodes(ir);
+  assert.match(table, /^  \/\*\* Temporarily unavailable\. \*\/\n  UNAVAILABLE: \{ origin: "server", status: 503, retryable: true \},$/m);
+  assert.match(table, /^  TRANSPORT_UNKNOWN: \{ origin: "sdk", retryable: true \},$/m, "a code without a status omits it");
+  const code = { name: "GOOD", summary: "ok", origin: "both", status: 400, retryable: false };
+  const rejects = (override, message) => assert.throws(() => renderErrorCodes({ errors: { codes: [{ ...code, ...override }] } }),
+    new EmitterError(`typescript: ${message}`));
+  rejects({ name: "bad-name" }, 'error code "bad-name" is not SCREAMING_SNAKE_CASE');
+  rejects({ origin: "client" }, 'error code GOOD has unsupported origin "client"');
+  rejects({ status: 4.5 }, "error code GOOD has a non-integer status");
+  rejects({ retryable: "yes" }, "error code GOOD has no boolean retryable");
+});
+
 const USAGE = `import type * as Generated from "./graphql-types.js";
+import { errorCodes, type ErrorCodeDefinition } from "./errors.js";
 import { operationCatalog, outputShapes, type OperationTypes } from "./operations.js";
 
 type Variables<K extends keyof OperationTypes> = OperationTypes[K]["variables"];
@@ -109,6 +124,10 @@ export const idempotency: string = operationCatalog["beta.widgets"].idempotency;
 export const shape = outputShapes["Fruit"]?.kind;
 // @ts-expect-error unknown operation keys are rejected
 export const unknownOperation = operationCatalog["alpha.missing"];
+export const unavailable: ErrorCodeDefinition | undefined = errorCodes["UNAVAILABLE"];
+export const retryable: boolean | undefined = errorCodes["SOME_FUTURE_CODE"]?.retryable;
+// @ts-expect-error the table is read-only
+errorCodes["UNAVAILABLE"] = { origin: "server", retryable: false };
 `;
 
 test("the generated TypeScript type-checks under strict compiler settings", t => {

@@ -6,8 +6,9 @@ import {
   type PlatformWebSocket, type PlatformWebSocketConstructor,
 } from "@convohop/core";
 import {
-  authenticatedTransport, canonical, currentSession, eventPage, jsonClone, origin, parseURL, randomUUID, route, sameSession,
-  sessionExpiry, sessionMetadata, timestamp, validateOutput, validatePlatform, type TransportAuthentication,
+  authenticatedTransport, canonical, closeProblem, currentSession, eventPage, jsonClone, origin, parseURL, randomUUID,
+  reconnectAction, reconnectDelay, retryableCode, retryDelay, route, sameSession, sessionExpiry, sessionMetadata, timestamp,
+  validateOutput, validatePlatform, type TransportAuthentication,
 } from "@convohop/core/internal";
 import { ConversationHandle, LiveSessionHandle } from "./live.js";
 import { aggregateError, connectivityOf, lifecycleOf, listen } from "./platform.js";
@@ -163,7 +164,7 @@ export class ConvoHopClient {
       if (!binding) {
         this.initialize().then(() => { failures = 0; arm(0); }, error => {
           report(error);
-          if (error instanceof ConvoHopProblem && [0, 429, 503].includes(error.status))
+          if (error instanceof ConvoHopProblem && reconnectAction(error) !== "stop")
             arm(Math.max(1000 * 2 ** Math.min(failures++, 5), (error.retryAfter ?? 0) * 1000));
         });
         return;
@@ -394,7 +395,8 @@ export class ConvoHopClient {
   }
   async recoverPending(onError: (error: Error) => void): Promise<void> {
     await this.http.initializeRecovery();
-    for (const state of this.http.recoveryStates.filter(state => state.resolutionState === "pending" || state.resolutionState === "unknown").slice(0, 16)) {
+    for (const state of this.http.recoveryStates.filter(state => state.resolutionState === "pending" || state.resolutionState === "unknown" ||
+        (state.resolutionState === "rejected" && retryableCode(state.lastAttemptClassification))).slice(0, 16)) {
       const transient = ["submitted", "TRANSPORT_UNKNOWN", "OUTCOME_UNKNOWN", "AUTHORITY_UNAVAILABLE", "RETRY_EXHAUSTED", "ADMISSION_LIMIT", "HTTP_FAILURE", "INVALID_RESPONSE"].includes(state.lastAttemptClassification);
       const now = Date.now();
       const resend = transient && state.attemptCount < 3 && now >= state.lastAttemptAt && now >= state.firstSubmittedAt && now <= state.retryDeadline;
@@ -579,8 +581,9 @@ export class ConversationStream {
           const payload = frame.type === "error" ? { errors: frame.payload } : parseObject(frame.payload);
           if (Array.isArray(payload.errors) && payload.errors.length) {
             const problem = parseObject(payload.errors[0]), extensions = parseObject(problem.extensions);
+            const retryAfter = retryDelay(extensions.retryAfter);
             throw new ConvoHopProblem(parseString(extensions.code), parseId(extensions.requestId), parseString(extensions.outcome),
-              Number(extensions.status), parseString(problem.message));
+              Number(extensions.status), parseString(problem.message), retryAfter === undefined ? undefined : { retryAfter });
           }
           this.#page(parseObject(payload.data).conversationEvents);
         } else if (frame.type === "complete") {
@@ -595,8 +598,10 @@ export class ConversationStream {
     ws.onclose = event => {
       if (this.#socket !== ws) return;
       this.#socket = undefined;
-      if (!this.#closed && !this.#paused && ![4400, 4401, 4403, 4408, 4409].includes(event.code)) this.#retry();
-      else if (!this.#closed && !this.#paused) this.#fail(new ConvoHopProblem("UNAUTHENTICATED", subscriptionId, "rejected", 401, "Realtime authorization ended; obtain a current session"));
+      if (this.#closed || this.#paused) return;
+      // A close reason that names an error code reports it, such as `QUOTA_EXCEEDED retryAfter=60 meter=messages`.
+      const problem = closeProblem(event.code, typeof event.reason === "string" ? event.reason : "", subscriptionId);
+      if (problem) this.#fail(problem); else this.#retry();
     };
   }
   #page(value: unknown): void {
@@ -619,9 +624,10 @@ export class ConversationStream {
     });
     this.#working = work;
   }
-  #retry(): void {
+  /** Reconnects after backoff, and never sooner than `retryAfter` seconds, even when connectivity or the foreground returns. */
+  #retry(retryAfter?: number): void {
     if (this.#closed || this.#paused || this.#timer) return;
-    const delay = Math.min(1000 * 2 ** Math.min(this.#reconnectAttempts++, 4), 10000) + Math.floor(Math.random() * 500);
+    const delay = reconnectDelay(this.#reconnectAttempts++, retryAfter), holdUntil = Date.now() + (retryAfter ?? 0) * 1000;
     const reconnect = () => {
       clearTimeout(timer);
       if (this.#timer !== timer) return;
@@ -638,7 +644,7 @@ export class ConversationStream {
         .catch(error => { if (current()) this.#fail(error); });
     };
     const timer = setTimeout(reconnect, delay);
-    this.#timer = timer; this.#wakeReconnect = reconnect;
+    this.#timer = timer; this.#wakeReconnect = () => { if (Date.now() >= holdUntil) reconnect(); };
   }
   // Managed catch-up keeps each round bounded and paces the next one instead of failing at the work limit.
   #proceed(more: boolean): void {
@@ -661,10 +667,11 @@ export class ConversationStream {
       this.onError(error instanceof Error ? error : new Error("Realtime reconciliation failed"));
       return;
     }
-    if (error instanceof ConvoHopProblem && ([0, 429, 503].includes(error.status) || error.code === "WRONG_REGION")) {
+    // Network, timeout, rate-limit and server failures reconnect; WRONG_REGION does too, since reconnecting routes again.
+    if (error instanceof ConvoHopProblem && reconnectAction(error) !== "stop") {
       const socket = this.#socket; this.#socket = undefined;
       socket?.close(4000, "Retrying authoritative connection");
-      this.onError(error); this.#retry(); return;
+      this.onError(error); this.#retry(error.retryAfter); return;
     }
     this.close();
     this.onError(error instanceof Error ? error : new Error("Realtime reconciliation failed"));

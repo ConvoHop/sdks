@@ -34,6 +34,7 @@ flowchart LR
 | [`targets.md`](targets.md) | Target descriptors, capabilities and the optional control API, with the [descriptor schema](target.schema.json). |
 | [`webhook-signatures.md`](webhook-signatures.md) | The webhook signature scheme and its [vectors](vectors/webhooks.json), with their [schema](webhook-vectors.schema.json). |
 | [`../push-payload/`](../push-payload/README.md) | The push payload contract and its [vectors](../push-payload/vectors.json), with their [schema](../push-payload/push-payload.schema.json). Each server SDK's own tests run these vectors, not drivers. |
+| [`../recovery/`](../recovery/README.md) | The recovery journal and the retry and reconnect rules that every SDK follows, which the scenarios that need the `recovery.eviction` and `realtime.reconnectPolicy` features check. |
 | [`conformance/runner.mjs`](../../conformance/runner.mjs) | The runner CLI; its modules are in [`conformance/lib/`](../../conformance/lib). |
 | [`conformance/drivers/ts/`](../../conformance/drivers/ts) | The TypeScript reference driver. |
 | [`conformance/drivers/jvm/`](../../conformance/drivers/jvm) | The driver for the [Java and Kotlin server SDK](../../jvm/README.md). |
@@ -55,20 +56,20 @@ several areas.
 | Area | `covers` tags | Scenarios | Examples |
 | --- | --- | ---: | --- |
 | User tokens | `auth.userToken` | 13 | Accepted, invalid, wrong project, non-member, user token used as a backend key |
-| Backend keys | `auth.backendKey` | 10 | Accepted, invalid, wrong project, expired |
+| Backend keys | `auth.backendKey` | 12 | Accepted, invalid, wrong project, expired |
 | Scopes | `auth.scopes` | 10 | A key without `membershipManage` gets `SCOPE_REQUIRED`, a management-issued scoped key, plane separation |
 | Expiry | `auth.expiry` | 2 | Expired backend key; a short-lived user session that expires mid-scenario |
-| CRUD | `crud` | 4 | Conversations, memberships and the message lifecycle, read back by other principals |
+| CRUD | `crud` | 5 | Conversations, memberships and the message lifecycle, read back by other principals |
 | Pagination | `pagination` | 3 | Member limit and cursor, newest-first message history, events after a cursor |
-| Errors | `errors`, `errors.rateLimited` | 17, 3 | Revision conflicts, not found, invalid input, edits by members who are neither author nor moderator, `RATE_LIMITED` with retry-after |
-| Idempotency | `idempotency` | 10 | Same-id replay from the same or a new client, payload conflicts, replay after a rate limit |
-| Unknown outcomes | `recovery` | 5 | Drops before and after commit, resolving a request id, recovery state across a restart |
+| Errors | `errors`, `errors.rateLimited` | 21, 5 | Revision conflicts, not found, invalid input, edits by members who are neither author nor moderator, `RATE_LIMITED` with retry-after, `RECOVERY_LIMIT`, realtime closes for `QUOTA_EXCEEDED` and `PLAN_LIMIT_EXCEEDED` |
+| Idempotency | `idempotency` | 13 | Same-id replay from the same or a new client, payload conflicts, replay after a rate limit, same-id retry from a full recovery journal |
+| Recovery | `recovery` | 9 | Drops before and after commit, resolving a request id, recovery state across a restart, a full recovery journal that evicts final records or fails closed |
 | Webhook signatures | `webhooks.signature` | 14 | Valid, wrong secret, expired and future timestamps, multiple secrets, rotation |
-| Realtime | `realtime.ordering`, `realtime.reconnect`, `realtime.resume` | 6, 2, 2 | Replay then live, subscriber agreement, server restart, revoked authorization, stored cursors |
+| Realtime | `realtime.ordering`, `realtime.reconnect`, `realtime.resume` | 6, 7, 2 | Replay then live, subscriber agreement, server restart, revoked authorization, stored cursors, reconnecting after gateway errors and rate limits, stopping on quota and plan limits |
 
-The suites are `auth` (14 scenarios), `crud` (3), `pagination` (3), `errors`
-(9), `idempotency` (6), `recovery` (5), `realtime` (9) and `webhooks` (14),
-for 63 in total. Run `npm run conformance -- --list` to print every
+The suites are `auth` (14 scenarios), `crud` (4), `pagination` (3), `errors`
+(9), `idempotency` (6), `recovery` (9), `realtime` (14) and `webhooks` (14),
+for 73 in total. Run `npm run conformance -- --list` to print every
 scenario with its tags and title.
 
 Live sessions and native media are not covered. The client obtains a live
@@ -124,12 +125,12 @@ runner ignores.
 | --- | --- | --- |
 | `client.create` | `client`, `role`, `credential`, optional `principalId`, `projectId`, `incarnation`, `actorId`, `baseUrl`, `storage` | Creates an SDK client in the driver that serves `role` (`user`, `backend` or `management`). User clients need `principalId`. `storage` names a driver-side recovery store that clients can share, including across a simulated restart. |
 | `client.close` | `client` | Closes the client and any subscriptions it owns. |
-| `invoke` | `client`, `operation`, optional `args`, `requires`, `expect`, `save` | Runs a [catalog operation](#operations). Without `expect` the step only requires success. `expect` is `{"value": matcher}` or `{"error": matcher}`. `requires` lists driver [features](driver-protocol.md#features) the step needs. |
-| `realtime.subscribe` | `client`, `subscription`, `conversationId`, optional `expect` | Opens the SDK's conversation event stream for a user client. With `expect.error` the subscription must fail with a matching error. |
+| `invoke` | `client`, `operation`, optional `args`, `requires`, `repeat`, `expect`, `save` | Runs a [catalog operation](#operations). Without `expect` the step only requires success. `expect` is `{"value": matcher}` or `{"error": matcher}`. `requires` lists driver [features](driver-protocol.md#features) the step needs. `repeat`, from 2 to 1000, runs the operation that many times in a row, each call a new request that must meet `expect`; `save` keeps the last result. |
+| `realtime.subscribe` | `client`, `subscription`, `conversationId`, optional `requires`, `expect` | Opens the SDK's conversation event stream for a user client. With `expect.error` the subscription must fail with a matching error. `requires` lists driver features, beyond `realtime`, that the stream needs, such as `realtime.reconnectPolicy`. |
 | `realtime.collect` | `subscription`, optional `until`, `timeoutMs`, `settleMs`, `expect`, `save` | Waits until `until` holds (`count` events, an event at or past `sequence`, and, with `closed: true`, a permanently ended stream), the stream ends, or `timeoutMs` (default 10 000, at most 60 000) elapses. `settleMs` then keeps collecting so late extras are caught. The result is `{events, errors, closed, timedOut}`. |
 | `realtime.close` | `subscription` | Stops the subscription. |
 | `webhooks.verify` | `vector` | Verifies a [webhook vector](webhook-signatures.md) offline. The result must equal the vector's `expected`. |
-| `control.fault` | `field`, `action`, optional `plane`, `retryAfterSeconds` | Queues a one-shot fault for the next request to a GraphQL root field: `rateLimit` (requires `retryAfterSeconds`), `dropBeforeCommit` or `dropAfterCommit`. |
+| `control.fault` | `field`, `action`, optional `plane`, `retryAfterSeconds`, `status`, `count` | Queues a [fault](targets.md#faults) for each of the next `count` (default 1) requests to a GraphQL root field: `rateLimit` (requires `retryAfterSeconds`), `dropBeforeCommit`, `dropAfterCommit` or `httpStatus` (requires `status`, from 400 to 599, and takes an optional `retryAfterSeconds`). |
 | `control.realtimeDrop` | optional `conversationId`, `code`, `reason`, `expect` | Closes the target's realtime sockets, optionally only those subscribed to one conversation. `expect.closed` matches the number closed. |
 | `control.waitLog` | `kind`, optional `match`, `count`, `timeoutMs`, `expect`, `save` | Waits for `count` (default 1) target log entries of `kind` (`request`, `subscribe` or `close`) whose fields equal `match`. `expect` matches the entries. |
 | `sleep` | `ms` (at most 10 000) | Waits, for example to honour a retry-after delay. |
@@ -248,9 +249,13 @@ against the IR, so `npm test` fails when they drift apart:
   the channel's replay and endpoint operations.
 - After each `control.realtimeDrop`, and before the next one, the first
   `realtime.collect` on each dropped subscription expects the subscription
-  to have ended exactly when the IR lists the close code as terminal.
-  Scenarios drop with both kinds of code.
-- After a terminal close code, the scenario checks the `subscribe` log with
+  to have ended exactly when the
+  [realtime close rules](../recovery/README.md#realtime-closes) end it. A
+  reason that starts with an error code decides by that code, which must be
+  one the channel's subscription can fail with. Any other close decides by
+  whether the IR lists its close code as terminal. Scenarios drop with both
+  kinds of close code, and with reasons that name both kinds of error code.
+- After a close that ends the subscription, the scenario checks the `subscribe` log with
   a `control.waitLog` that has an `expect`, and sleeps longer than the first
   reconnect delay (`baseDelayMs` plus `jitterMs`) before that check, so a
   reconnect would have been logged.
@@ -295,12 +300,16 @@ with exit code 2:
   `incarnation`.
 - Each operation exists in the catalog, its arguments are known and
   required ones are present, and the client's role may call it.
+- A repeated `invoke` doesn't fix `args.requestId`, because each call is a
+  new request.
 - Only user clients subscribe, webhook vectors exist, and matchers are well
   formed.
 
 The checks also derive what each scenario needs: roles, `role:operation`
 pairs, driver features (`storage` needs `recovery.storage`, subscribing needs
-`realtime`, `webhooks.verify` needs `webhooks.verify`), target capabilities
+`realtime`, `webhooks.verify` needs `webhooks.verify`, and an `invoke` or
+`realtime.subscribe` step needs what its `requires` lists, for its client's
+role), target capabilities
 (each `control.*` step needs its own, plus `requires.capabilities`) and
 target fields (each `${target.*}` reference, and `managementUrl` and
 `managementActorId` for management clients that do not set `baseUrl` and
@@ -432,44 +441,53 @@ tests also run a few scenarios through it.
 
 ### Current results
 
-The TypeScript reference driver passes all 64 scenarios against the mock,
-with none skipped, including the 14 `webhooks` scenarios and
-`errors.rate-limited.retry-after`.
+The TypeScript reference driver passes all 73 scenarios against the mock,
+with none skipped, including the 14 `webhooks` scenarios,
+`errors.rate-limited.retry-after` and the 9 that need `recovery.eviction` or
+`realtime.reconnectPolicy`.
 
-The JVM driver declares the backend and management roles. It passes 62
-scenarios against the mock and skips the 2 that only use user clients,
-`auth.user-token.invalid` and `realtime.subscribe.invalid-token`. Its
+The JVM driver declares the backend and management roles. It passes 69
+scenarios against the mock and skips 4: the 2 that only use user clients,
+`auth.user-token.invalid` and `realtime.subscribe.invalid-token`, and the 2
+that need `recovery.eviction` with a backend client,
+`recovery.eviction.final-records.backend` and
+`recovery.eviction.fail-closed.backend`, until its SDK follows the
+[recovery journal](../recovery/README.md#recovery-journal) rules. Its
 [workflow](../../.github/workflows/jvm.yml) fails on any other skip.
 
 The .NET driver declares the backend and management roles too. With both
-the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 62
-scenarios against the mock and skips the same 2. Its
+the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 69
+scenarios against the mock and skips the same 4. Its
 [workflow](../../.github/workflows/dotnet.yml) fails on any other skip.
 
 The Go driver also declares the backend and management roles. It passes the
-same 62 scenarios against the mock and skips the same 2. Its
+same 69 scenarios against the mock and skips the same 4. Its
 [workflow](../../.github/workflows/go.yml) fails on any other skip.
 
 The Android driver declares only the user role and no `webhooks.verify`
-feature. It passes 33 scenarios against the mock and skips 31: those that
-use only backend or management clients, and those that verify webhooks. Its
+feature. It passes 33 scenarios against the mock and skips 40: those that
+use only backend or management clients, those that verify webhooks, and the
+7 that need `recovery.eviction` or `realtime.reconnectPolicy` with a user
+client, until its SDK follows the [recovery and reconnect
+rules](../recovery/README.md). Its
 [workflow](../../.github/workflows/android.yml) fails on any other skip.
 
 The Dart driver also declares only the user role and no `webhooks.verify`
 feature. It passes the same 33 scenarios against the mock and skips the
-same 31. Its [workflow](../../.github/workflows/flutter.yml) fails on any
+same 40. Its [workflow](../../.github/workflows/flutter.yml) fails on any
 other skip.
 
 The React Native driver declares only the user role and no
-`webhooks.verify` feature. It passes 33 scenarios against the mock and
-skips 31: those that use only backend or management clients, and those that
-verify webhooks. Its [workflow](../../.github/workflows/react-native.yml)
+`webhooks.verify` feature. It passes 40 scenarios against the mock and
+skips 33: those that use only backend or management clients, and those that
+verify webhooks. It inherits the TypeScript client's recovery and reconnect
+behaviour, so it declares `recovery.eviction` and `realtime.reconnectPolicy`. Its [workflow](../../.github/workflows/react-native.yml)
 fails on any other skip. It runs on Node.js, not Hermes, with a fake of the
 native platform module.
 
 The Swift driver also declares only the user role and no `webhooks.verify`
 feature. It passes the same 33 scenarios against the mock and skips the
-same 31. On Linux it doesn't declare `realtime`, because Ubuntu's libcurl
+same 40. On Linux it doesn't declare `realtime`, because Ubuntu's libcurl
 has no WebSocket support. There it passes 24 scenarios and also skips the 9
 realtime ones. Its [workflow](../../.github/workflows/swift.yml) fails on
 any other skip.
@@ -490,7 +508,9 @@ the suite against a real target.
    mock does not check. Authentication comes first, so only a command that
    must fail with `UNAUTHENTICATED` may precede it.
 4. Pin observable public behaviour only. Do not pin internal event type
-   names, timings or a particular SDK's retry strategy. Expect only error
+   names, timings or a particular SDK's retry strategy, beyond what the
+   [recovery and reconnect rules](../recovery/README.md) require of every
+   SDK. Expect only error
    codes that the IR lists for the operation (see
    [Alignment with the IR](#alignment-with-the-ir)).
 5. Run `npm run test:conformance` for the static and IR checks, then
