@@ -135,6 +135,25 @@ updates:
           - minor
           - patch
 
+  # The Go SDK (go/). It has no dependencies; this entry covers any it gains.
+  # Go has no development dependency type, so every update gets the fix prefix.
+  - package-ecosystem: gomod
+    directory: /go
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: fix
+      include: scope
+    groups:
+      gomod:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
   # The Android SDK's own Gradle build (android/), including its wrapper.
   - package-ecosystem: gradle
     directory: /android
