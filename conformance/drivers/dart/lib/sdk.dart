@@ -19,6 +19,7 @@ const features = <String>[
   'realtime',
   'realtime.reconnectPolicy',
   'recovery.eviction',
+  'recovery.spentBudget',
   'recovery.storage',
   'retryAfter',
 ];

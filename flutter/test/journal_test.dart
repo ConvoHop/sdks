@@ -50,7 +50,8 @@ Map<String, Object?> _stored(
 /// A fake authority. It commits each message send it receives, unless
 /// [rejection] is set, which rejects it, or [lost] is, which loses the
 /// response after the commit. A send whose ID [holds] lists waits for that
-/// gate first.
+/// gate first. It answers each resolve, which [sends] doesn't count, with
+/// `notObservedYet`.
 final class _Authority {
   final List<String> sends = <String>[];
   final Map<String, Completer<void>> holds = <String, Completer<void>>{};
@@ -60,6 +61,9 @@ final class _Authority {
   late final http.Client client = mockGraphQL((request, body) async {
     final variables = body['variables'] as Map<String, Object?>;
     final id = (variables['context'] as Map<String, Object?>)['requestId'] as String;
+    if (body['operationName'] == 'CommunicationResolveRequest') {
+      return jsonResponse(okFor('CommunicationResolveRequest', id, variables['input']! as Map<String, Object?>));
+    }
     sends.add(id);
     await holds[id]?.future;
     final rejection = this.rejection;
@@ -226,9 +230,15 @@ void main() {
       }
       authority.rejection = null;
       await expectLater(_send(transport, _id(500)), throwsA(_recoveryLimit(_id(500))));
-      // Past the first records' deadlines, they can't be resent, so the oldest
-      // of them makes room.
+      // Past its retry deadline, the first record can't be resent, so it makes
+      // room.
       now = fixedClock() + 60002;
+      final sends = authority.sends.length;
+      await expectLater(
+        _send(transport, limited.first),
+        throwsA(_problem('RESOLUTION_REQUIRED', outcome: 'unknown').having((problem) => problem.status, 'status', 409)),
+      );
+      expect(authority.sends, hasLength(sends), reason: 'nothing is sent');
       await _send(transport, _id(501));
       expect(_held(transport), [...limited.sublist(1), _id(501)]);
       expect(_saved(storage), _held(transport));
@@ -299,6 +309,95 @@ void main() {
       release();
       await expectLater(_send(transport, _id(204)), throwsA(_problem('TRANSPORT_UNKNOWN')));
       expect(_held(transport), [_id(1), ...within, ...sent, _id(204)]);
+      expect(_saved(storage), _held(transport));
+      transport.close();
+    });
+
+    test('a request whose retry budget is spent is never sent again, so a full journal frees its record', () async {
+      final authority = _Authority(), storage = MemoryRecoveryStorage();
+      final transport = authority.transport(storage);
+      final spent = _id(1);
+      int sent() => authority.sends.where((id) => id == spent).length;
+      TypeMatcher<ConvoHopProblem> failure(String code, String outcome) =>
+          _problem(code, outcome: outcome).having((problem) => problem.requestId, 'requestId', spent);
+      authority.lost = true;
+      for (var attempt = 0; attempt < 3; attempt++) {
+        await expectLater(_send(transport, spent), throwsA(failure('TRANSPORT_UNKNOWN', 'unknown')));
+      }
+      authority.lost = false;
+      // Neither a send nor a retry sends it again.
+      final refused = failure('RESOLUTION_REQUIRED', 'unknown').having((problem) => problem.status, 'status', 409);
+      await expectLater(_send(transport, spent), throwsA(refused));
+      await expectLater(transport.retry(spent), throwsA(refused));
+      expect(sent(), 3, reason: "the spent request isn't sent again");
+      authority.rejection = (code: 'RATE_LIMITED', status: 429);
+      final limited = [for (var index = 2; index <= 128; index++) _id(index)];
+      for (final id in limited) {
+        await expectLater(_send(transport, id), throwsA(_problem('RATE_LIMITED', outcome: 'rejected')));
+      }
+      authority.rejection = null;
+      // Its outcome is unknown, but its record is final, so it makes room.
+      final next = _id(500);
+      await _send(transport, next);
+      expect(_held(transport), [...limited, next]);
+      expect(_saved(storage), _held(transport));
+
+      // Forgotten, the request can still be resolved, but not retried.
+      final resolved = await transport.execute(Operations.communicationResolveRequest, projectId, <String, Object?>{
+        'requestId': spent,
+      });
+      expect(resolved.result!.state, 'notObservedYet');
+      await expectLater(
+        transport.retry(spent),
+        throwsA(isA<StateError>().having((error) => error.message, 'message', contains('No recovery record exists'))),
+      );
+      // Sent again under its ID, it is a new record with a new budget. The
+      // authority deduplicates by request ID.
+      await _send(transport, spent);
+      expect(sent(), 4);
+      expect(_held(transport), [...limited, spent]);
+      expect(_saved(storage), _held(transport));
+      transport.close();
+    });
+
+    test('a clock set back spends no budget, and the record stays until the clock passes its last attempt', () async {
+      final authority = _Authority(), storage = MemoryRecoveryStorage(), start = fixedClock();
+      var now = start;
+      // Last attempted 30 s ahead of this clock. Every other record may be
+      // sent again, so none is final.
+      final ahead = _id(1);
+      final limited = [for (var index = 2; index <= 128; index++) _id(index)];
+      storage.setItem(
+        _key,
+        jsonEncode(<Map<String, Object?>>[
+          _stored(ahead, start + 30000, 'unknown'),
+          for (final (index, id) in limited.indexed)
+            _stored(id, start - 10000 + index, 'rejected', classification: 'RATE_LIMITED'),
+        ]),
+      );
+      final saved = storage.items[_key];
+      final transport = authority.transport(storage, clock: () => now);
+      await expectLater(
+        _send(transport, ahead),
+        throwsA(
+          _problem('RESOLUTION_REQUIRED', outcome: 'unknown')
+              .having((problem) => problem.requestId, 'requestId', ahead)
+              .having((problem) => problem.status, 'status', 409),
+        ),
+      );
+      expect(transport.recoveryStates.first.attemptCount, 1, reason: 'the refusal spends no attempt');
+      expect(storage.items[_key], saved, reason: 'nothing is written');
+      expect(authority.sends, isEmpty);
+      // Nor is the record final meanwhile, so it doesn't make room.
+      await expectLater(_send(transport, _id(500)), throwsA(_recoveryLimit(_id(500))));
+
+      // Past its last attempt, it is sent again under its ID, commits and
+      // makes room.
+      now = start + 30001;
+      await _send(transport, ahead);
+      await _send(transport, _id(501));
+      expect(authority.sends, [ahead, _id(501)]);
+      expect(_held(transport), [...limited, _id(501)]);
       expect(_saved(storage), _held(transport));
       transport.close();
     });
