@@ -91,3 +91,4 @@ query ManagementGetProject($context: RequestContextInput!, $input: GetProjectReq
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_project`](../../python/reference/convohop.md#convohopmanagementget_project-method), [`AsyncConvoHopManagement.get_project`](../../python/reference/convohop.md#asyncconvohopmanagementget_project-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.GetProjectAsync`](../../dotnet/reference/api.md#managementapigetprojectasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.getProject`](../../jvm/reference/server.md#managementapigetproject-method), [`ManagementSuspendApi.getProject`](../../jvm/reference/server-kotlin.md#managementsuspendapigetproject-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.GetProject`](../../go/reference/convohop.md#managementclientgetproject-method) |

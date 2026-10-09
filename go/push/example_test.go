@@ -67,7 +67,7 @@ func ExampleFCM() {
 		fmt.Println("Nothing to send: the ring has ended.")
 		return
 	}
-	// Add the target, such as the registration token, before you send it.
+	// Add the target, message.token or message.fid, before you send it.
 	android := request.Message.Android
 	fmt.Println(android.Priority, android.TTL, android.CollapseKey)
 	fmt.Println(request.Message.Data["convohop"])

@@ -55,6 +55,18 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [com.convohop:convohop-server-kotlin](jvm/reference/server-kotlin.md): Kotlin coroutine extensions for the Java server SDK: suspending APIs, page flows and interruptible blocking calls.
 - [Java and Kotlin operation coverage](jvm/reference/operations.md): The Java and Kotlin SDK members that send each API operation. 65 of the 65 operations that Java and Kotlin packages can send have a method.
 
+## Go
+
+- [Go SDK](go/index.md): github.com/ConvoHop/sdks/go wraps the ConvoHop API for Go backends. It runs only in your backend, with a secret backend key, verifies the webhooks that ConvoHop sends, and builds push requests from notification events.
+- [Go server quickstart](go/quickstarts/server.md): Call ConvoHop from your Go backend with github.com/ConvoHop/sdks/go: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
+- [Go webhooks quickstart](go/quickstarts/webhooks.md): Receive ConvoHop events in your Go backend with the webhooks package: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
+- [Go push notifications quickstart](go/quickstarts/push.md): Send push notifications for ConvoHop messages and calls: the push package turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and clients.
+- [Go reference](go/reference/index.md): The public API of each Go package, generated from its declarations.
+- [github.com/ConvoHop/sdks/go](go/reference/convohop.md): Server SDK for trusted Go backends: backend-key data-plane calls and operator management calls, with typed problems, request retries and recovery storage.
+- [github.com/ConvoHop/sdks/go/webhooks](go/reference/webhooks.md): Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.
+- [github.com/ConvoHop/sdks/go/push](go/reference/push.md): Builds APNs, FCM and Web Push requests from ConvoHop push notification events.
+- [Go operation coverage](go/reference/operations.md): The Go SDK members that send each API operation. 65 of the 65 operations that Go packages can send have a method.
+
 ## API operations
 
 - [API operations](operations/index.md): Every operation in the ConvoHop GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it.
@@ -142,3 +154,4 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [Python in one file](python/llms-full.txt): every Python page.
 - [.NET in one file](dotnet/llms-full.txt): every .NET page.
 - [Java and Kotlin in one file](jvm/llms-full.txt): every Java and Kotlin page.
+- [Go in one file](go/llms-full.txt): every Go page.

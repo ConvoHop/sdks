@@ -84,3 +84,4 @@ query ManagementOrganizations($context: RequestContextInput!) {
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.organizations`](../../python/reference/convohop.md#convohopmanagementorganizations-method), [`AsyncConvoHopManagement.organizations`](../../python/reference/convohop.md#asyncconvohopmanagementorganizations-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.OrganizationsAsync`](../../dotnet/reference/api.md#managementapiorganizationsasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.organizations`](../../jvm/reference/server.md#managementapiorganizations-method), [`ManagementSuspendApi.organizations`](../../jvm/reference/server-kotlin.md#managementsuspendapiorganizations-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.Organizations`](../../go/reference/convohop.md#managementclientorganizations-method) |

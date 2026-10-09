@@ -82,3 +82,4 @@ mutation CommunicationAcknowledgeCredential($context: RequestContextInput!, $inp
 | [Python](../../python/reference/operations.md) | Not wrapped by a method |
 | [.NET](../../dotnet/reference/operations.md) | [`CommunicationApi.AcknowledgeCredentialAsync`](../../dotnet/reference/api.md#communicationapiacknowledgecredentialasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.acknowledgeCredential`](../../jvm/reference/server.md#communicationapiacknowledgecredential-method), [`CommunicationSuspendApi.acknowledgeCredential`](../../jvm/reference/server-kotlin.md#communicationsuspendapiacknowledgecredential-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.AcknowledgeCredential`](../../go/reference/convohop.md#projectclientacknowledgecredential-method) |

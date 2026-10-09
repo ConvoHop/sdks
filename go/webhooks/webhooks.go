@@ -14,8 +14,13 @@
 //		return
 //	}
 //	delivery, err := webhooks.Verify(body, r.Header, secrets)
-//	if err != nil {
+//	var failure *webhooks.Error
+//	if errors.As(err, &failure) && failure.Code != webhooks.CodeInvalidSecret {
 //		http.Error(w, "invalid delivery", http.StatusBadRequest)
+//		return
+//	} else if err != nil {
+//		// INVALID_SECRET or an invalid option: fix your configuration.
+//		http.Error(w, "webhook verification failed", http.StatusInternalServerError)
 //		return
 //	}
 //	w.WriteHeader(http.StatusNoContent)

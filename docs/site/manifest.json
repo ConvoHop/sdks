@@ -225,6 +225,53 @@
         {"topic": "webhooks", "path": "jvm/quickstarts/webhooks.md"},
         {"topic": "push", "path": "jvm/quickstarts/push.md"}
       ]
+    },
+    {
+      "id": "go",
+      "name": "Go",
+      "status": "preview",
+      "codeFence": "go",
+      "home": "go/index.md",
+      "reference": "go/reference/index.md",
+      "coverage": "go/reference/operations.md",
+      "llmsFull": "go/llms-full.txt",
+      "packages": [
+        {
+          "name": "github.com/ConvoHop/sdks/go",
+          "slug": "convohop",
+          "layer": "server",
+          "summary": "Server SDK for trusted Go backends: backend-key data-plane calls and operator management calls, with typed problems, request retries and recovery storage.",
+          "runtime": "Go 1.26 or later",
+          "source": "go",
+          "reference": "go/reference/convohop.md",
+          "data": "go/reference/convohop.json"
+        },
+        {
+          "name": "github.com/ConvoHop/sdks/go/webhooks",
+          "slug": "webhooks",
+          "layer": "server",
+          "summary": "Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.",
+          "runtime": "Go 1.26 or later",
+          "source": "go/webhooks",
+          "reference": "go/reference/webhooks.md",
+          "data": "go/reference/webhooks.json"
+        },
+        {
+          "name": "github.com/ConvoHop/sdks/go/push",
+          "slug": "push",
+          "layer": "server",
+          "summary": "Builds APNs, FCM and Web Push requests from ConvoHop push notification events.",
+          "runtime": "Go 1.26 or later",
+          "source": "go/push",
+          "reference": "go/reference/push.md",
+          "data": "go/reference/push.json"
+        }
+      ],
+      "quickstarts": [
+        {"topic": "server", "path": "go/quickstarts/server.md"},
+        {"topic": "webhooks", "path": "go/quickstarts/webhooks.md"},
+        {"topic": "push", "path": "go/quickstarts/push.md"}
+      ]
     }
   ],
   "operations": {"index": "operations/index.md", "data": "operations/index.json"},
@@ -535,6 +582,75 @@
       "title": "Java and Kotlin operation coverage",
       "description": "The Java and Kotlin SDK members that send each API operation. 65 of the 65 operations that Java and Kotlin packages can send have a method.",
       "language": "jvm"
+    },
+    {
+      "path": "go/index.md",
+      "kind": "language",
+      "title": "Go SDK",
+      "description": "github.com/ConvoHop/sdks/go wraps the ConvoHop API for Go backends. It runs only in your backend, with a secret backend key, verifies the webhooks that ConvoHop sends, and builds push requests from notification events.",
+      "language": "go"
+    },
+    {
+      "path": "go/quickstarts/server.md",
+      "kind": "quickstart",
+      "title": "Go server quickstart",
+      "description": "Call ConvoHop from your Go backend with github.com/ConvoHop/sdks/go: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.",
+      "language": "go",
+      "topic": "server"
+    },
+    {
+      "path": "go/quickstarts/webhooks.md",
+      "kind": "quickstart",
+      "title": "Go webhooks quickstart",
+      "description": "Receive ConvoHop events in your Go backend with the webhooks package: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
+      "language": "go",
+      "topic": "webhooks"
+    },
+    {
+      "path": "go/quickstarts/push.md",
+      "kind": "quickstart",
+      "title": "Go push notifications quickstart",
+      "description": "Send push notifications for ConvoHop messages and calls: the push package turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and clients.",
+      "language": "go",
+      "topic": "push"
+    },
+    {
+      "path": "go/reference/index.md",
+      "kind": "reference-index",
+      "title": "Go reference",
+      "description": "The public API of each Go package, generated from its declarations.",
+      "language": "go"
+    },
+    {
+      "path": "go/reference/convohop.md",
+      "kind": "reference",
+      "title": "github.com/ConvoHop/sdks/go",
+      "description": "Server SDK for trusted Go backends: backend-key data-plane calls and operator management calls, with typed problems, request retries and recovery storage.",
+      "language": "go",
+      "package": "github.com/ConvoHop/sdks/go"
+    },
+    {
+      "path": "go/reference/webhooks.md",
+      "kind": "reference",
+      "title": "github.com/ConvoHop/sdks/go/webhooks",
+      "description": "Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.",
+      "language": "go",
+      "package": "github.com/ConvoHop/sdks/go/webhooks"
+    },
+    {
+      "path": "go/reference/push.md",
+      "kind": "reference",
+      "title": "github.com/ConvoHop/sdks/go/push",
+      "description": "Builds APNs, FCM and Web Push requests from ConvoHop push notification events.",
+      "language": "go",
+      "package": "github.com/ConvoHop/sdks/go/push"
+    },
+    {
+      "path": "go/reference/operations.md",
+      "kind": "coverage",
+      "title": "Go operation coverage",
+      "description": "The Go SDK members that send each API operation. 65 of the 65 operations that Go packages can send have a method.",
+      "language": "go"
     },
     {
       "path": "operations/index.md",

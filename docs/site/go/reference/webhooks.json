@@ -1,0 +1,761 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "go",
+  "package": "github.com/ConvoHop/sdks/go/webhooks",
+  "layer": "server",
+  "page": "webhooks.md",
+  "symbols": [
+    {
+      "name": "Delivery",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#Delivery",
+      "anchor": "delivery-struct",
+      "signatures": ["type Delivery struct {\n\tSignature\n\tEvent Event\n}"],
+      "docs": "Delivery is a verified delivery and its event.",
+      "members": [
+        {
+          "name": "Signature",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Delivery.Signature",
+          "anchor": "deliverysignature-property",
+          "signatures": ["Signature"],
+          "docs": ""
+        },
+        {
+          "name": "Event",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Delivery.Event",
+          "anchor": "deliveryevent-property",
+          "signatures": ["Event Event"],
+          "docs": ""
+        },
+        {
+          "name": "WebhookID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Delivery.WebhookID",
+          "anchor": "deliverywebhookid-property",
+          "signatures": ["WebhookID string"],
+          "docs": "WebhookID is the delivery's webhook-id. It stays the same when a delivery is retried; use it to discard duplicates.",
+          "inherited": "Signature"
+        },
+        {
+          "name": "Timestamp",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Delivery.Timestamp",
+          "anchor": "deliverytimestamp-property",
+          "signatures": ["Timestamp int64"],
+          "docs": "Timestamp is the delivery's webhook-timestamp, in Unix seconds.",
+          "inherited": "Signature"
+        }
+      ]
+    },
+    {
+      "name": "Error",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#Error",
+      "anchor": "error-struct",
+      "signatures": ["type Error struct {\n\tCode    Code\n\tMessage string\n}"],
+      "docs": "Error is a delivery that failed verification. Its message never contains secrets, signatures or the body.",
+      "members": [
+        {
+          "name": "Code",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Error.Code",
+          "anchor": "errorcode-property",
+          "signatures": ["Code Code"],
+          "docs": "Code is why the delivery failed."
+        },
+        {
+          "name": "Message",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Error.Message",
+          "anchor": "errormessage-property",
+          "signatures": ["Message string"],
+          "docs": "Message is a human-readable diagnostic."
+        },
+        {
+          "name": "Error",
+          "kind": "method",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Error.Error",
+          "anchor": "errorerror-method",
+          "signatures": ["func (e *Error) Error() string"],
+          "docs": ""
+        },
+        {
+          "name": "Is",
+          "kind": "method",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Error.Is",
+          "anchor": "erroris-method",
+          "signatures": ["func (e *Error) Is(target error) bool"],
+          "docs": "Is reports whether target is the error's `Code`."
+        }
+      ]
+    },
+    {
+      "name": "Event",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#Event",
+      "anchor": "event-struct",
+      "signatures": [
+        "type Event struct {\n\tEventID      string\n\tEventType    string\n\tOccurredAt   string\n\tProjectID    string\n\tSubjectRef   SubjectRef\n\tKnown        bool\n\tNotification *Notification\n}"
+      ],
+      "docs": "Event is a verified delivery's metadata-only event envelope.",
+      "members": [
+        {
+          "name": "EventID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Event.EventID",
+          "anchor": "eventeventid-property",
+          "signatures": ["EventID string"],
+          "docs": ""
+        },
+        {
+          "name": "EventType",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Event.EventType",
+          "anchor": "eventeventtype-property",
+          "signatures": ["EventType string"],
+          "docs": ""
+        },
+        {
+          "name": "OccurredAt",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Event.OccurredAt",
+          "anchor": "eventoccurredat-property",
+          "signatures": ["OccurredAt string"],
+          "docs": "OccurredAt is when the event happened (RFC 3339)."
+        },
+        {
+          "name": "ProjectID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Event.ProjectID",
+          "anchor": "eventprojectid-property",
+          "signatures": ["ProjectID string"],
+          "docs": ""
+        },
+        {
+          "name": "SubjectRef",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Event.SubjectRef",
+          "anchor": "eventsubjectref-property",
+          "signatures": ["SubjectRef SubjectRef"],
+          "docs": "SubjectRef names the resource the event is about."
+        },
+        {
+          "name": "Known",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Event.Known",
+          "anchor": "eventknown-property",
+          "signatures": ["Known bool"],
+          "docs": "Known reports whether this SDK knows the event type. Acknowledge an event it doesn't know, including a notification event that doesn't match the push payload contract."
+        },
+        {
+          "name": "Notification",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Event.Notification",
+          "anchor": "eventnotification-property",
+          "signatures": ["Notification *Notification"],
+          "docs": "Notification is the event's fields when it is a known notification event, and nil otherwise."
+        }
+      ]
+    },
+    {
+      "name": "Notification",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification",
+      "anchor": "notification-struct",
+      "signatures": [
+        "type Notification struct {\n\tEventID        string     `json:\"eventId\"`\n\tEventType      string     `json:\"eventType\"`\n\tOccurredAt     string     `json:\"occurredAt\"`\n\tProjectID      string     `json:\"projectId\"`\n\tSubjectRef     SubjectRef `json:\"subjectRef\"`\n\tRecipientID    string     `json:\"recipientId\"`\n\tConversationID string     `json:\"conversationId\"`\n\tSenderID       string     `json:\"senderId\"`\n\tConnected      bool       `json:\"connected\"`\n\tMessageID      string     `json:\"messageId,omitempty\"`\n\tPreview        *Preview   `json:\"preview,omitempty\"`\n\tLiveSessionID  string     `json:\"liveSessionId,omitempty\"`\n\tAlertID        string     `json:\"alertId,omitempty\"`\n\tExpiresAt      string     `json:\"expiresAt,omitempty\"`\n\tMediaProfile   string     `json:\"mediaProfile,omitempty\"`\n\tReason         string     `json:\"reason,omitempty\"`\n}"
+      ],
+      "docs": "Notification is a per-recipient notification event: a message for the recipient, an incoming call, or a call that stopped ringing for the recipient. It is the input of the push package's builders. The contract is spec/push-payload in the SDK repository.",
+      "members": [
+        {
+          "name": "EventID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.EventID",
+          "anchor": "notificationeventid-property",
+          "signatures": ["EventID string `json:\"eventId\"`"],
+          "docs": ""
+        },
+        {
+          "name": "EventType",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.EventType",
+          "anchor": "notificationeventtype-property",
+          "signatures": ["EventType string `json:\"eventType\"`"],
+          "docs": "EventType is EventNotificationMessage, EventNotificationCall or EventNotificationCallCancelled."
+        },
+        {
+          "name": "OccurredAt",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.OccurredAt",
+          "anchor": "notificationoccurredat-property",
+          "signatures": ["OccurredAt string `json:\"occurredAt\"`"],
+          "docs": "OccurredAt is when the message was sent, the ring started or the ring stopped (RFC 3339)."
+        },
+        {
+          "name": "ProjectID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.ProjectID",
+          "anchor": "notificationprojectid-property",
+          "signatures": ["ProjectID string `json:\"projectId\"`"],
+          "docs": ""
+        },
+        {
+          "name": "SubjectRef",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.SubjectRef",
+          "anchor": "notificationsubjectref-property",
+          "signatures": ["SubjectRef SubjectRef `json:\"subjectRef\"`"],
+          "docs": ""
+        },
+        {
+          "name": "RecipientID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.RecipientID",
+          "anchor": "notificationrecipientid-property",
+          "signatures": ["RecipientID string `json:\"recipientId\"`"],
+          "docs": "RecipientID is the principal to notify. Each recipient gets its own event."
+        },
+        {
+          "name": "ConversationID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.ConversationID",
+          "anchor": "notificationconversationid-property",
+          "signatures": ["ConversationID string `json:\"conversationId\"`"],
+          "docs": ""
+        },
+        {
+          "name": "SenderID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.SenderID",
+          "anchor": "notificationsenderid-property",
+          "signatures": ["SenderID string `json:\"senderId\"`"],
+          "docs": "SenderID is the principal who sent the message or started the ringing."
+        },
+        {
+          "name": "Connected",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.Connected",
+          "anchor": "notificationconnected-property",
+          "signatures": ["Connected bool `json:\"connected\"`"],
+          "docs": "Connected reports whether the recipient had an active realtime connection when the event was produced. It is a hint for your sending policy: it isn't per device, and it can change before you send. The push builders ignore it."
+        },
+        {
+          "name": "MessageID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.MessageID",
+          "anchor": "notificationmessageid-property",
+          "signatures": ["MessageID string `json:\"messageId,omitempty\"`"],
+          "docs": "MessageID names the message of a message event."
+        },
+        {
+          "name": "Preview",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.Preview",
+          "anchor": "notificationpreview-property",
+          "signatures": ["Preview *Preview `json:\"preview,omitempty\"`"],
+          "docs": "Preview is the start of a message event's text, present only when the project opts in to previews and the message has text."
+        },
+        {
+          "name": "LiveSessionID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.LiveSessionID",
+          "anchor": "notificationlivesessionid-property",
+          "signatures": ["LiveSessionID string `json:\"liveSessionId,omitempty\"`"],
+          "docs": "LiveSessionID names the call of a call or cancellation event."
+        },
+        {
+          "name": "AlertID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.AlertID",
+          "anchor": "notificationalertid-property",
+          "signatures": ["AlertID string `json:\"alertId,omitempty\"`"],
+          "docs": "AlertID names the ring. A later ring of the same call has a new AlertID; a cancellation carries the stopped ring's."
+        },
+        {
+          "name": "ExpiresAt",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.ExpiresAt",
+          "anchor": "notificationexpiresat-property",
+          "signatures": ["ExpiresAt string `json:\"expiresAt,omitempty\"`"],
+          "docs": "ExpiresAt is when the ring stops if nobody answers (RFC 3339). A cancellation carries the stopped ring's original deadline."
+        },
+        {
+          "name": "MediaProfile",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.MediaProfile",
+          "anchor": "notificationmediaprofile-property",
+          "signatures": ["MediaProfile string `json:\"mediaProfile,omitempty\"`"],
+          "docs": "MediaProfile is the call's media profile, such as MediaProfileAudioOnly."
+        },
+        {
+          "name": "Reason",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.Reason",
+          "anchor": "notificationreason-property",
+          "signatures": ["Reason string `json:\"reason,omitempty\"`"],
+          "docs": "Reason is why a cancellation's ring stopped, such as ReasonEnded."
+        },
+        {
+          "name": "Validate",
+          "kind": "method",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Notification.Validate",
+          "anchor": "notificationvalidate-method",
+          "signatures": ["func (n *Notification) Validate() error"],
+          "docs": "Validate checks n against the push payload contract. It returns an error that names the first invalid field without its value. It ignores the fields the contract doesn't define for n's event type."
+        }
+      ]
+    },
+    {
+      "name": "Preview",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#Preview",
+      "anchor": "preview-struct",
+      "signatures": [
+        "type Preview struct {\n\tText      string `json:\"text\"`\n\tTruncated bool   `json:\"truncated\"`\n}"
+      ],
+      "docs": "Preview is the start of a message's text.",
+      "members": [
+        {
+          "name": "Text",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Preview.Text",
+          "anchor": "previewtext-property",
+          "signatures": ["Text string `json:\"text\"`"],
+          "docs": "Text is 1 to 512 Unicode code points."
+        },
+        {
+          "name": "Truncated",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Preview.Truncated",
+          "anchor": "previewtruncated-property",
+          "signatures": ["Truncated bool `json:\"truncated\"`"],
+          "docs": "Truncated reports whether the message text continues after Text."
+        }
+      ]
+    },
+    {
+      "name": "Signature",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#Signature",
+      "anchor": "signature-struct",
+      "signatures": ["type Signature struct {\n\tWebhookID string\n\tTimestamp int64\n}"],
+      "docs": "Signature is a verified delivery's identity.",
+      "members": [
+        {
+          "name": "WebhookID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Signature.WebhookID",
+          "anchor": "signaturewebhookid-property",
+          "signatures": ["WebhookID string"],
+          "docs": "WebhookID is the delivery's webhook-id. It stays the same when a delivery is retried; use it to discard duplicates."
+        },
+        {
+          "name": "Timestamp",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Signature.Timestamp",
+          "anchor": "signaturetimestamp-property",
+          "signatures": ["Timestamp int64"],
+          "docs": "Timestamp is the delivery's webhook-timestamp, in Unix seconds."
+        }
+      ]
+    },
+    {
+      "name": "SubjectRef",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#SubjectRef",
+      "anchor": "subjectref-struct",
+      "signatures": [
+        "type SubjectRef struct {\n\tID   string `json:\"id\"`\n\tKind string `json:\"kind\"`\n}"
+      ],
+      "docs": "SubjectRef names a resource.",
+      "members": [
+        {
+          "name": "ID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#SubjectRef.ID",
+          "anchor": "subjectrefid-property",
+          "signatures": ["ID string `json:\"id\"`"],
+          "docs": ""
+        },
+        {
+          "name": "Kind",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#SubjectRef.Kind",
+          "anchor": "subjectrefkind-property",
+          "signatures": ["Kind string `json:\"kind\"`"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "Code",
+      "kind": "enum",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#Code",
+      "anchor": "code-enum",
+      "signatures": ["type Code string"],
+      "docs": "Code is why a delivery failed verification. Code implements error so that errors.Is(err, CodeTimestampExpired) matches an `*Error` with that code.\n\nVerification failure codes. Checks run in the order listed and stop at the first failure.",
+      "members": [
+        {
+          "name": "CodeInvalidSecret",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.CodeInvalidSecret",
+          "anchor": "codecodeinvalidsecret-case",
+          "signatures": ["const CodeInvalidSecret Code = \"INVALID_SECRET\""],
+          "docs": "CodeInvalidSecret means no secret is given, or one is not whsec\\_ followed by padded standard Base64 of 24 to 64 bytes. It is your configuration, not the sender."
+        },
+        {
+          "name": "CodeMissingHeader",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.CodeMissingHeader",
+          "anchor": "codecodemissingheader-case",
+          "signatures": ["const CodeMissingHeader Code = \"MISSING_HEADER\""],
+          "docs": "CodeMissingHeader means webhook-id, webhook-timestamp or webhook-signature is absent or empty."
+        },
+        {
+          "name": "CodeInvalidHeader",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.CodeInvalidHeader",
+          "anchor": "codecodeinvalidheader-case",
+          "signatures": ["const CodeInvalidHeader Code = \"INVALID_HEADER\""],
+          "docs": "CodeInvalidHeader means one of those headers is repeated."
+        },
+        {
+          "name": "CodeInvalidTimestamp",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.CodeInvalidTimestamp",
+          "anchor": "codecodeinvalidtimestamp-case",
+          "signatures": ["const CodeInvalidTimestamp Code = \"INVALID_TIMESTAMP\""],
+          "docs": "CodeInvalidTimestamp means webhook-timestamp is not 1 to 15 ASCII digits (integer Unix seconds)."
+        },
+        {
+          "name": "CodeTimestampExpired",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.CodeTimestampExpired",
+          "anchor": "codecodetimestampexpired-case",
+          "signatures": ["const CodeTimestampExpired Code = \"TIMESTAMP_EXPIRED\""],
+          "docs": "CodeTimestampExpired means the timestamp is more than the tolerance before now."
+        },
+        {
+          "name": "CodeTimestampFuture",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.CodeTimestampFuture",
+          "anchor": "codecodetimestampfuture-case",
+          "signatures": ["const CodeTimestampFuture Code = \"TIMESTAMP_FUTURE\""],
+          "docs": "CodeTimestampFuture means the timestamp is more than the tolerance after now."
+        },
+        {
+          "name": "CodeBodyTooLarge",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.CodeBodyTooLarge",
+          "anchor": "codecodebodytoolarge-case",
+          "signatures": ["const CodeBodyTooLarge Code = \"BODY_TOO_LARGE\""],
+          "docs": "CodeBodyTooLarge means the body exceeds 4096 bytes."
+        },
+        {
+          "name": "CodeTooManySignatures",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.CodeTooManySignatures",
+          "anchor": "codecodetoomanysignatures-case",
+          "signatures": ["const CodeTooManySignatures Code = \"TOO_MANY_SIGNATURES\""],
+          "docs": "CodeTooManySignatures means webhook-signature has more than 8 entries."
+        },
+        {
+          "name": "CodeNoMatchingSignature",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.CodeNoMatchingSignature",
+          "anchor": "codecodenomatchingsignature-case",
+          "signatures": ["const CodeNoMatchingSignature Code = \"NO_MATCHING_SIGNATURE\""],
+          "docs": "CodeNoMatchingSignature means no v1 signature matches any secret."
+        },
+        {
+          "name": "CodeInvalidBody",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.CodeInvalidBody",
+          "anchor": "codecodeinvalidbody-case",
+          "signatures": ["const CodeInvalidBody Code = \"INVALID_BODY\""],
+          "docs": "CodeInvalidBody means the signed body is not a UTF-8 JSON event envelope. Only `Verify` reports it."
+        },
+        {
+          "name": "Error",
+          "kind": "method",
+          "ref": "github.com/ConvoHop/sdks/go/webhooks#Code.Error",
+          "anchor": "codeerror-method",
+          "signatures": ["func (c Code) Error() string"],
+          "docs": "Error returns the code as an error message."
+        }
+      ]
+    },
+    {
+      "name": "Option",
+      "kind": "type",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#Option",
+      "anchor": "option-type",
+      "signatures": ["type Option func(*settings)"],
+      "docs": "Option configures verification."
+    },
+    {
+      "name": "Verify",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#Verify",
+      "anchor": "verify-function",
+      "signatures": [
+        "func Verify(body []byte, header http.Header, secrets []string, options ...Option) (Delivery, error)"
+      ],
+      "docs": "Verify verifies a delivery's signature and timestamp, then parses its event. Pass the body exactly as received and the request's headers. The delivery is valid when any v1 signature matches any of secrets, the endpoint's whsec\\_ secrets: the current one and, during a rotation, the other. A failed delivery returns an `*Error`; an invalid option returns another error."
+    },
+    {
+      "name": "VerifySignature",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#VerifySignature",
+      "anchor": "verifysignature-function",
+      "signatures": [
+        "func VerifySignature(body []byte, header http.Header, secrets []string, options ...Option) (Signature, error)"
+      ],
+      "docs": "VerifySignature verifies only a delivery's signature and timestamp, for bodies you parse yourself. It fails like `Verify`, except that it never reports `CodeInvalidBody`."
+    },
+    {
+      "name": "WithClock",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#WithClock",
+      "anchor": "withclock-function",
+      "signatures": ["func WithClock(now func() time.Time) Option"],
+      "docs": "WithClock replaces time.Now. Use it in tests."
+    },
+    {
+      "name": "WithTolerance",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#WithTolerance",
+      "anchor": "withtolerance-function",
+      "signatures": ["func WithTolerance(tolerance time.Duration) Option"],
+      "docs": "WithTolerance sets the allowed distance between a delivery's webhook-timestamp and now, inclusive. It must be a non-negative whole number of seconds. The default is `DefaultTolerance`."
+    },
+    {
+      "name": "DefaultTolerance",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#DefaultTolerance",
+      "anchor": "defaulttolerance-constant",
+      "signatures": ["const DefaultTolerance = 5 * time.Minute"],
+      "docs": "DefaultTolerance is the default allowed distance between a delivery's webhook-timestamp and the verifier's clock."
+    },
+    {
+      "name": "EventConversationCreated",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventConversationCreated",
+      "anchor": "eventconversationcreated-constant",
+      "signatures": ["const EventConversationCreated = \"conversation.created\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventConversationUpdated",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventConversationUpdated",
+      "anchor": "eventconversationupdated-constant",
+      "signatures": ["const EventConversationUpdated = \"conversation.updated\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventLiveAlerted",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventLiveAlerted",
+      "anchor": "eventlivealerted-constant",
+      "signatures": ["const EventLiveAlerted = \"live.alerted\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventLiveConnected",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventLiveConnected",
+      "anchor": "eventliveconnected-constant",
+      "signatures": ["const EventLiveConnected = \"live.connected\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventLiveEnded",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventLiveEnded",
+      "anchor": "eventliveended-constant",
+      "signatures": ["const EventLiveEnded = \"live.ended\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventLiveParticipationChanged",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventLiveParticipationChanged",
+      "anchor": "eventliveparticipationchanged-constant",
+      "signatures": ["const EventLiveParticipationChanged = \"live.participationChanged\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventLiveReady",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventLiveReady",
+      "anchor": "eventliveready-constant",
+      "signatures": ["const EventLiveReady = \"live.ready\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventLiveStarted",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventLiveStarted",
+      "anchor": "eventlivestarted-constant",
+      "signatures": ["const EventLiveStarted = \"live.started\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventMemberAdded",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventMemberAdded",
+      "anchor": "eventmemberadded-constant",
+      "signatures": ["const EventMemberAdded = \"member.added\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventMemberBroadcastPermissionChanged",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventMemberBroadcastPermissionChanged",
+      "anchor": "eventmemberbroadcastpermissionchanged-constant",
+      "signatures": [
+        "const EventMemberBroadcastPermissionChanged = \"member.broadcastPermissionChanged\""
+      ],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventMemberHistoryExpanded",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventMemberHistoryExpanded",
+      "anchor": "eventmemberhistoryexpanded-constant",
+      "signatures": ["const EventMemberHistoryExpanded = \"member.historyExpanded\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventMemberRemoved",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventMemberRemoved",
+      "anchor": "eventmemberremoved-constant",
+      "signatures": ["const EventMemberRemoved = \"member.removed\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventMemberRoleChanged",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventMemberRoleChanged",
+      "anchor": "eventmemberrolechanged-constant",
+      "signatures": ["const EventMemberRoleChanged = \"member.roleChanged\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventMessageCreated",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventMessageCreated",
+      "anchor": "eventmessagecreated-constant",
+      "signatures": ["const EventMessageCreated = \"message.created\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventMessageDeleted",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventMessageDeleted",
+      "anchor": "eventmessagedeleted-constant",
+      "signatures": ["const EventMessageDeleted = \"message.deleted\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventMessageEdited",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventMessageEdited",
+      "anchor": "eventmessageedited-constant",
+      "signatures": ["const EventMessageEdited = \"message.edited\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventNotificationCall",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventNotificationCall",
+      "anchor": "eventnotificationcall-constant",
+      "signatures": ["const EventNotificationCall = \"notification.call\""],
+      "docs": "EventNotificationCall is an incoming call: one ring for the recipient.\n\nEvent types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventNotificationCallCancelled",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventNotificationCallCancelled",
+      "anchor": "eventnotificationcallcancelled-constant",
+      "signatures": ["const EventNotificationCallCancelled = \"notification.callCancelled\""],
+      "docs": "EventNotificationCallCancelled is a ring that stopped for the recipient. Only recipients of the ring's notification.call get it.\n\nEvent types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventNotificationMessage",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventNotificationMessage",
+      "anchor": "eventnotificationmessage-constant",
+      "signatures": ["const EventNotificationMessage = \"notification.message\""],
+      "docs": "EventNotificationMessage is a message for the recipient.\n\nEvent types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventReceiptReported",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventReceiptReported",
+      "anchor": "eventreceiptreported-constant",
+      "signatures": ["const EventReceiptReported = \"receipt.reported\""],
+      "docs": "Event types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "EventWebhookEndpointDisabled",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#EventWebhookEndpointDisabled",
+      "anchor": "eventwebhookendpointdisabled-constant",
+      "signatures": ["const EventWebhookEndpointDisabled = \"webhook.endpointDisabled\""],
+      "docs": "EventWebhookEndpointDisabled means one of the project's other webhook endpoints was disabled after repeated failures. SubjectRef.ID names it, and SubjectRef.Kind is \"webhookEndpoint\".\n\nEvent types the authority sends. Notification events follow the push payload contract; the others are resource events."
+    },
+    {
+      "name": "MediaProfileAudioOnly",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#MediaProfileAudioOnly",
+      "anchor": "mediaprofileaudioonly-constant",
+      "signatures": ["const MediaProfileAudioOnly = \"AUDIO_ONLY\""],
+      "docs": "Call media profiles, in `Notification`.MediaProfile. Accept profiles you don't know."
+    },
+    {
+      "name": "MediaProfileAudioVideo",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#MediaProfileAudioVideo",
+      "anchor": "mediaprofileaudiovideo-constant",
+      "signatures": ["const MediaProfileAudioVideo = \"AUDIO_VIDEO\""],
+      "docs": "Call media profiles, in `Notification`.MediaProfile. Accept profiles you don't know."
+    },
+    {
+      "name": "ReasonAnswered",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#ReasonAnswered",
+      "anchor": "reasonanswered-constant",
+      "signatures": ["const ReasonAnswered = \"answered\""],
+      "docs": "ReasonAnswered means the recipient answered, on any device.\n\nWhy a ring stopped, in `Notification`.Reason. Treat a reason you don't know as \"stop ringing\", without a missed-call alert."
+    },
+    {
+      "name": "ReasonDeclined",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#ReasonDeclined",
+      "anchor": "reasondeclined-constant",
+      "signatures": ["const ReasonDeclined = \"declined\""],
+      "docs": "ReasonDeclined means the recipient declined, on any device.\n\nWhy a ring stopped, in `Notification`.Reason. Treat a reason you don't know as \"stop ringing\", without a missed-call alert."
+    },
+    {
+      "name": "ReasonEnded",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#ReasonEnded",
+      "anchor": "reasonended-constant",
+      "signatures": ["const ReasonEnded = \"ended\""],
+      "docs": "ReasonEnded means the call ended or stopped ringing before the recipient answered: a missed call.\n\nWhy a ring stopped, in `Notification`.Reason. Treat a reason you don't know as \"stop ringing\", without a missed-call alert."
+    },
+    {
+      "name": "ReasonExpired",
+      "kind": "constant",
+      "ref": "github.com/ConvoHop/sdks/go/webhooks#ReasonExpired",
+      "anchor": "reasonexpired-constant",
+      "signatures": ["const ReasonExpired = \"expired\""],
+      "docs": "ReasonExpired means nobody answered by ExpiresAt: a missed call.\n\nWhy a ring stopped, in `Notification`.Reason. Treat a reason you don't know as \"stop ringing\", without a missed-call alert."
+    }
+  ]
+}

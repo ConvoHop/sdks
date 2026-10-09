@@ -1,7 +1,8 @@
 # Builds and tests the Go server SDK in go/: its generated code and generator
 # goldens, a dry run of fetching the module from a release tag, gofmt, go vet
-# and the race-enabled tests on the two latest Go releases, and the
-# conformance scenarios through the Go driver. See go/README.md.
+# and the race-enabled tests on the two latest Go releases, the conformance
+# scenarios through the Go driver, and the Go docs' API surface and tested
+# examples (see docs/docs-pipeline.md). See go/README.md.
 name: Go
 
 on:
@@ -10,18 +11,22 @@ on:
     paths:
       - .github/workflows/go.yml
       - conformance/**
+      - docs/languages/go/**
       - go/**
       - schema/**
       - spec/**
+      - tools/docgen/**
       - tools/sdkgen/**
   pull_request:
     branches: [main]
     paths:
       - .github/workflows/go.yml
       - conformance/**
+      - docs/languages/go/**
       - go/**
       - schema/**
       - spec/**
+      - tools/docgen/**
       - tools/sdkgen/**
 
 permissions: {}
@@ -108,7 +113,7 @@ jobs:
           cache: false
       - name: Check formatting
         run: |
-          unformatted="$(gofmt -l go conformance/drivers/go)"
+          unformatted="$(gofmt -l go conformance/drivers/go docs/languages/go/examples tools/docgen/extractors/go)"
           if [ -n "$unformatted" ]; then
             echo "::error::gofmt would reformat these files:"
             echo "$unformatted"
@@ -116,23 +121,62 @@ jobs:
           fi
       - name: Check that go.mod is tidy
         run: |
-          for module in go conformance/drivers/go; do
+          for module in go conformance/drivers/go docs/languages/go/examples tools/docgen/extractors/go; do
             (cd "$module" && go mod tidy -diff)
           done
       - name: Vet
         run: |
-          for module in go conformance/drivers/go; do
+          for module in go conformance/drivers/go docs/languages/go/examples tools/docgen/extractors/go; do
             (cd "$module" && go vet ./...)
           done
       - name: Run the tests with the race detector
         # The SDK tests read the shared vectors in spec/; fail rather than skip
-        # when they are missing.
+        # when they are missing. The docs job runs the docs modules' tests.
         env:
           CONVOHOP_REQUIRE_SPEC: "1"
         run: |
           for module in go conformance/drivers/go; do
             (cd "$module" && go test -race ./...)
           done
+
+  # Checks the Go docs as docs/docs-pipeline.md describes: the extractor's
+  # tests, that docs/languages/go/surface.json matches the SDK's source, and
+  # the examples the quickstarts include, which run against the conformance
+  # mock. The Docs workflow checks the generated pages.
+  docs:
+    name: Docs (Go ${{ matrix.go }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        # The surface must not depend on the Go release.
+        go: [oldstable, stable]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      # The examples' tests start the conformance mock, which imports graphql.
+      - run: npm ci --no-audit --no-fund
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: ${{ matrix.go }}
+          check-latest: true
+          cache: false
+      - name: Test the Go extractor
+        run: go test -C tools/docgen/extractors/go -race ./...
+      - name: Check that the Go surface matches the SDK
+        run: node tools/docgen/cli.mjs extract --check go
+      - name: Run the Go examples with the race detector
+        env:
+          GOFLAGS: -race
+        run: node tools/docgen/cli.mjs test go
 
   conformance:
     name: Go driver (mock target)
