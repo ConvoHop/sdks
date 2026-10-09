@@ -35,13 +35,11 @@ final class ReadReceiptReporterTests: XCTestCase {
         let beforeDebounce = await h.http.count("communication.reportReceipt")
         XCTAssertEqual(beforeDebounce, 0)
         h.clock.advance(by: 1)
-        try await eventually { await h.http.count("communication.reportReceipt") == 1 }
+        // The stub records a request before the reporter handles its reply, so wait for the reporter.
+        try await eventually { await reporter.confirmedThrough == "3" }
 
-        let requests = await h.http.requests("communication.reportReceipt")
-        let request = try XCTUnwrap(requests.first)
-        XCTAssertEqual(request.input?["throughSequence"]?.stringValue, "3")
-        let confirmed = await reporter.confirmedThrough
-        XCTAssertEqual(confirmed, "3")
+        let reported = await h.http.requests("communication.reportReceipt").compactMap { $0.input?["throughSequence"]?.stringValue }
+        XCTAssertEqual(reported, ["3"])
     }
 
     func testOlderSequencesDoNotMoveTheReceiptBackward() async throws {
@@ -76,15 +74,18 @@ final class ReadReceiptReporterTests: XCTestCase {
         await reporter.update(membership: Self.membership())
 
         try await reporter.markRead(through: "8")
-        try await eventually { await h.http.count("communication.reportReceipt") == 1 }
-        let firstError = await reporter.lastError
-        XCTAssertNotNil(firstError)
+        try await eventually("the first failure") { await reporter.lastError != nil }
+        try await eventually("the backoff") { h.clock.pendingSleeps == 1 }
+        let firstCount = await h.http.count("communication.reportReceipt")
+        XCTAssertEqual(firstCount, 1)
         h.clock.advance(by: 2_000)
-        try await eventually { await h.http.count("communication.reportReceipt") == 2 }
-        let confirmed = await reporter.confirmedThrough
-        let lastError = await reporter.lastError
-        XCTAssertEqual(confirmed, "8")
-        XCTAssertNil(lastError)
+        try await eventually("the confirmed retry") {
+            let confirmed = await reporter.confirmedThrough
+            let lastError = await reporter.lastError
+            return confirmed == "8" && lastError == nil
+        }
+        let count = await h.http.count("communication.reportReceipt")
+        XCTAssertEqual(count, 2)
     }
 
     func testRevisionConflictRefreshesMembershipOnce() async throws {
@@ -110,10 +111,10 @@ final class ReadReceiptReporterTests: XCTestCase {
         await reporter.update(membership: Self.membership())
 
         try await reporter.markRead(through: "9")
-        try await eventually { await h.http.count("communication.reportReceipt") == 2 }
+        try await eventually { await reporter.confirmedThrough == "9" }
+        let reportCount = await h.http.count("communication.reportReceipt")
         let refreshCount = await h.http.count("communication.getConversation")
-        let confirmed = await reporter.confirmedThrough
+        XCTAssertEqual(reportCount, 2)
         XCTAssertEqual(refreshCount, 1)
-        XCTAssertEqual(confirmed, "9")
     }
 }

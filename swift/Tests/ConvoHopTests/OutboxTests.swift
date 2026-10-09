@@ -55,17 +55,20 @@ final class OutboxTests: XCTestCase {
         try await outbox.start()
         _ = try await outbox.enqueue("retry", to: TestIDs.conversation, props: ["n": 1])
 
+        // The stub records a request before the outbox handles its reply and schedules the retry, so wait for the
+        // retry timer before advancing the clock.
         try await eventually { await h.http.count("communication.sendMessage") == 1 }
+        try await eventually { h.clock.pendingSleeps == 1 }
         h.clock.advanceToNextDeadline()
         try await eventually { await h.http.count("communication.sendMessage") == 2 }
+        try await eventually { h.clock.pendingSleeps == 1 }
         h.clock.advanceToNextDeadline()
-        try await eventually { await h.http.count("communication.sendMessage") == 3 }
+        try await eventually { try await outbox.items().first?.state == .sent }
 
         let requests = await h.http.requests("communication.sendMessage")
+        XCTAssertEqual(requests.count, 3)
         XCTAssertEqual(Set(requests.map(\.requestId)).count, 1)
         XCTAssertEqual(Set(requests.map { $0.input?["text"]?.stringValue ?? "" }), ["retry"])
-        let finalState = try await outbox.items().first?.state
-        XCTAssertEqual(finalState, .sent)
     }
 
     func testUncertainOutcomeIsResolvedInsteadOfDuplicated() async throws {
@@ -91,11 +94,11 @@ final class OutboxTests: XCTestCase {
         try await eventually { await h.http.count("communication.sendMessage") == 3 }
         try await eventually { h.clock.pendingSleeps == 1 }
         h.clock.advanceToNextDeadline()
-        try await eventually { await h.http.count("communication.resolveRequest") == 1 }
+        try await eventually { try await outbox.items().first?.state == .sent }
         let sendCount = await h.http.count("communication.sendMessage")
-        let state = try await outbox.items().first?.state
+        let resolveCount = await h.http.count("communication.resolveRequest")
         XCTAssertEqual(sendCount, 3)
-        XCTAssertEqual(state, .sent)
+        XCTAssertEqual(resolveCount, 1)
     }
 
     func testPermanentFailureCanBeResentOrDiscarded() async throws {

@@ -109,6 +109,8 @@ actor StubHTTP: ConvoHopHTTPClient {
         return try await handler(recorded)
     }
 
+    /// The requests for `key`, recorded when they arrive and before their replies. To assert what a reply changed, wait
+    /// for that change, not for this count.
     func requests(_ key: String) -> [RecordedRequest] {
         let name = Catalog.descriptor(key).operationName
         return requests.filter { $0.operationName == name }
