@@ -10,10 +10,12 @@
       "covers": ["recovery"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "invoke", "client": "alice", "operation": "requests.resolve", "args": { "requestId": "${uuid.neverSent}" },
           "expect": { "value": { "state": "notObservedYet", "requestId": "${uuid.neverSent}", "receipt": null } } }
       ]
@@ -24,6 +26,7 @@
       "covers": ["recovery", "errors"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
           "args": { "input": { "title": "Lost replies ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
@@ -31,6 +34,7 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "control.fault", "field": "sendMessage", "action": "dropAfterCommit" },
         { "do": "invoke", "client": "alice", "operation": "messages.send",
           "args": { "conversationId": "${saved.conversation.conversationId}", "text": "did it land?", "requestId": "${uuid.send}" },
@@ -51,6 +55,7 @@
       "covers": ["recovery", "idempotency"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
           "args": { "input": { "title": "Lost requests ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
@@ -58,6 +63,7 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "control.fault", "field": "sendMessage", "action": "dropBeforeCommit" },
         { "do": "invoke", "client": "alice", "operation": "messages.send",
           "args": { "conversationId": "${saved.conversation.conversationId}", "text": "second time lucky", "requestId": "${uuid.send}" },
@@ -81,6 +87,7 @@
       "covers": ["recovery", "idempotency"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
           "args": { "input": { "title": "Committed ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
@@ -88,6 +95,7 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "control.fault", "field": "sendMessage", "action": "dropAfterCommit" },
         { "do": "invoke", "client": "alice", "operation": "messages.send",
           "args": { "conversationId": "${saved.conversation.conversationId}", "text": "only once", "requestId": "${uuid.send}" },
@@ -107,6 +115,7 @@
       "covers": ["recovery", "idempotency"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
           "args": { "input": { "title": "Restarts ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
@@ -115,6 +124,7 @@
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice1", "role": "user", "credential": "${saved.aliceSession.sessionToken}",
           "principalId": "${saved.alice.principalId}", "storage": "aliceDevice" },
+        { "do": "invoke", "client": "alice1", "operation": "route.initialize" },
         { "do": "control.fault", "field": "sendMessage", "action": "dropBeforeCommit" },
         { "do": "invoke", "client": "alice1", "operation": "messages.send",
           "args": { "conversationId": "${saved.conversation.conversationId}", "text": "sent before the crash", "requestId": "${uuid.send}" },
@@ -122,6 +132,7 @@
         { "do": "client.close", "client": "alice1" },
         { "do": "client.create", "client": "alice2", "role": "user", "credential": "${saved.aliceSession.sessionToken}",
           "principalId": "${saved.alice.principalId}", "storage": "aliceDevice" },
+        { "do": "invoke", "client": "alice2", "operation": "route.initialize" },
         { "do": "invoke", "client": "alice2", "operation": "requests.retry", "args": { "requestId": "${uuid.send}" },
           "expect": { "value": { "state": "committed", "requestId": "${uuid.send}" } } },
         { "do": "invoke", "client": "alice2", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },

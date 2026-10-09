@@ -11,6 +11,7 @@
       "covers": ["pagination"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "carol-${nonce}" }, "save": "carol" },
@@ -43,6 +44,7 @@
       "requires": { "capabilities": ["pagination.serverCappedPages"] },
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
           "args": { "input": { "title": "History ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
@@ -50,6 +52,7 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "one" }, "save": "m1" },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "two" }, "save": "m2" },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "three" }, "save": "m3" },
@@ -79,6 +82,7 @@
       "requires": { "capabilities": ["pagination.serverCappedPages"] },
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
           "args": { "input": { "title": "Events ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
@@ -86,6 +90,7 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "one" }, "save": "m1" },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "two" }, "save": "m2" },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "three" }, "save": "m3" },

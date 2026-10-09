@@ -26,6 +26,7 @@ export class Problem extends Error {
 const iso = (time = Date.now()) => new Date(time).toISOString();
 const invalid = message => new Problem("INVALID_REQUEST", 400, message);
 const notFound = what => new Problem("NOT_FOUND", 404, `${what} not found`);
+const unauthenticated = () => new Problem("UNAUTHENTICATED", 401, "A current credential is required");
 
 export function canonical(value) {
   if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
@@ -78,7 +79,7 @@ export class Domain {
 
   authenticate(plane, authorization) {
     const token = /^Bearer (\S+)$/.exec(authorization ?? "")?.[1];
-    const rejected = new Problem("UNAUTHENTICATED", 401, "A current credential is required");
+    const rejected = unauthenticated();
     if (token === undefined) throw rejected;
     if (plane === "management") {
       if (token !== this.credentials.management) throw rejected;
@@ -95,10 +96,11 @@ export class Domain {
     throw rejected;
   }
 
+  // A credential authenticates only in its own project, so another project cannot tell it from an unknown one.
   checkContext(plane, context) {
     if (plane !== "communication") return;
     if (!context.projectId) throw invalid("Communication requests require an explicit project");
-    if (context.projectId !== this.projectId) throw new Problem("FORBIDDEN", 403, "Credential is not valid for this project");
+    if (context.projectId !== this.projectId) throw unauthenticated();
     if (context.incarnation != null && context.incarnation !== this.incarnation)
       throw new Problem("INCARNATION_MISMATCH", 409, "Project incarnation changed; explicit recovery required");
   }
@@ -335,9 +337,10 @@ export class Domain {
     });
   }
 
+  // A tombstone keeps the message's identity and revisions but no content.
   deleteMessage(actor, input) {
     return this.#revise(actor, input, "message.deleted", message => {
-      message.deleted = true; message.text = ""; message.props = {};
+      message.deleted = true; message.text = null; message.props = null;
     });
   }
 
@@ -445,7 +448,9 @@ export class Domain {
     const expiry = Date.parse(expiresAt);
     if (!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(expiresAt) || !(expiry > Date.now()))
       throw invalid("expiresAt must be a future UTC millisecond timestamp");
+    // The key is minted when the queued operation runs and its reference arrives with credential delivery, so the
+    // receipt names the project.
     return { accepted: { operation: { operationId: this.nextId(), owner: "management", href: "/graphql", state: "requested" },
-      resourceRef: { kind: "backendKey", id: this.nextId() } } };
+      resourceRef: { kind: "project", id: projectId } } };
   }
 }
