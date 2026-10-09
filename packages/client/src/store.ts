@@ -185,7 +185,10 @@ export class ConversationStore {
   markRead(): Promise<boolean> { return this.#reportOnce("read"); }
   /** Reports delivery through the newest loaded message. Resolves whether a report was needed. */
   markDelivered(): Promise<boolean> { return this.#reportOnce("delivered"); }
-  /** Stops following the conversation. A store the app didn't give an outbox also closes its own. */
+  /**
+   * Stops following the conversation. A store the app didn't give an outbox also closes its own; await
+   * `store.outbox.close()` to know when that outbox has stopped writing.
+   */
   close(): void {
     if (this.#status === "closed") return;
     this.#generation++;

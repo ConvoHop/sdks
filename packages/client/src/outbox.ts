@@ -162,6 +162,8 @@ export class Outbox {
   #entries: readonly OutboxEntry[] | undefined;
   #timer: ReturnType<typeof setTimeout> | undefined;
   #closed = false;
+  /** What {@link Outbox.close} returns, once it's called. */
+  #closing: Promise<void> | undefined;
   /** Where this outbox saves; none until claimed, after it's released, or when every slot is taken. */
   #slot: Slot | undefined;
   /** Whether the slot's saved entries have loaded; saves wait until they have. */
@@ -258,24 +260,35 @@ export class Outbox {
    * Stops sending. Persisted entries stay saved, and the client keeps its recovery state. Once its sends and saves
    * settle, a persistent outbox of the user created meanwhile in this JavaScript context continues with its saved
    * entries; otherwise another running one, or the next to start, takes them over.
+   *
+   * Resolves once the outbox has stopped writing: what it was loading, taking over, sending and saving has settled,
+   * and its storage is passed on or released. A send in flight is waited for until it finishes or times out. So on
+   * sign-out, wait for it before clearing the storage. It never rejects; failures go to `onError`. Every call returns
+   * the same promise.
    */
-  close(): void {
-    if (this.#closed) return;
+  close(): Promise<void> {
+    if (this.#closing) return this.#closing;
     this.#closed = true;
+    let closed!: () => void;
+    this.#closing = new Promise<void>(resolve => { closed = resolve; });
     for (const unsubscribe of this.#unsubscribe.splice(0)) {
       try { unsubscribe(); } catch (error) { this.#report(error); }
     }
     for (const watch of this.#watching.values()) watch.abort();
     if (this.#timer !== undefined) clearTimeout(this.#timer);
     this.#timer = undefined;
-    const base = this.#base;
-    if (base === undefined) return;
-    const handoffs = closing.get(base) ?? new Set<Handoff>(), handoff: Handoff = { done: Promise.resolve(), ended: false };
-    handoff.done = this.#release(handoff).catch((error: unknown) => this.#report(error)).finally(() => {
-      handoffs.delete(handoff);
-      if (!handoffs.size && closing.get(base) === handoffs) closing.delete(base);
-    });
-    closing.set(base, handoffs.add(handoff));
+    const base = this.#base, handoff: Handoff = { done: Promise.resolve(), ended: false };
+    handoff.done = this.#release(handoff).catch((error: unknown) => this.#report(error));
+    if (base !== undefined) {
+      const handoffs = closing.get(base) ?? new Set<Handoff>();
+      handoff.done = handoff.done.finally(() => {
+        handoffs.delete(handoff);
+        if (!handoffs.size && closing.get(base) === handoffs) closing.delete(base);
+      });
+      closing.set(base, handoffs.add(handoff));
+    }
+    void handoff.done.then(closed);
+    return this.#closing;
   }
   #enqueue(conversationId: string, text: string, props: ProtocolObject): OutboxEntry {
     if (this.#closed) throw new Error("The outbox is closed");

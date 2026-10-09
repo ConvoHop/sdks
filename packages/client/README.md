@@ -135,7 +135,7 @@ const typing = new TypingIndicator(client, conversationId,
   { enabled: (await client.capabilities()).features?.typing === true });
 draft.addEventListener("input", () => typing.input());
 
-unsubscribe(); typing.dispose(); store.close(); outbox.close(); // Teardown.
+unsubscribe(); typing.dispose(); store.close(); await outbox.close(); // Teardown.
 ```
 
 `ConversationStore` keeps one conversation's messages (oldest first), each
@@ -166,6 +166,10 @@ message, and `unconfirmed` warns that the old one may have arrived.
 submitted are recovered, never sent as new. It is off by default. Each tab's
 outbox saves separately, coordinated through Web Locks, and when a tab
 closes or reloads, another tab's outbox takes over what it left unsent.
+`close()` resolves once the outbox and the sends it started have stopped
+writing, so on sign-out, await it before clearing that storage. Requests
+still running elsewhere on the client save their recovery records when they
+settle, so wait for those too.
 
 `TypingIndicator` sends throttled, ephemeral `typing` signals (at most one
 per `intervalMs`, stopping after `idleMs`). Signals are never retried, and
