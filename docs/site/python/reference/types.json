@@ -76,6 +76,26 @@
       "docs": ""
     },
     {
+      "name": "BillingCheckoutSession",
+      "kind": "class",
+      "ref": "convohop.types#BillingCheckoutSession",
+      "anchor": "billingcheckoutsession-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass BillingCheckoutSession:\n    org_id: str\n    plan_id: str\n    url: str\n    expires_at: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "BillingPortalSession",
+      "kind": "class",
+      "ref": "convohop.types#BillingPortalSession",
+      "anchor": "billingportalsession-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass BillingPortalSession:\n    org_id: str\n    url: str\n    expires_at: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
       "name": "BroadcastPermissionChanged",
       "kind": "class",
       "ref": "convohop.types#BroadcastPermissionChanged",
@@ -182,6 +202,46 @@
       "anchor": "conversationmutereply-class",
       "signatures": [
         "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ConversationMuteReply:\n    status: str\n    request_id: str\n    server_time: str\n    result: ConversationMute\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateBillingCheckoutSessionReply",
+      "kind": "class",
+      "ref": "convohop.types#CreateBillingCheckoutSessionReply",
+      "anchor": "createbillingcheckoutsessionreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateBillingCheckoutSessionReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: BillingCheckoutSession | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateBillingCheckoutSessionRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#CreateBillingCheckoutSessionRequestInput",
+      "anchor": "createbillingcheckoutsessionrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateBillingCheckoutSessionRequestInput:\n    org_id: str\n    plan_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateBillingPortalSessionReply",
+      "kind": "class",
+      "ref": "convohop.types#CreateBillingPortalSessionReply",
+      "anchor": "createbillingportalsessionreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateBillingPortalSessionReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: BillingPortalSession | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateBillingPortalSessionRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#CreateBillingPortalSessionRequestInput",
+      "anchor": "createbillingportalsessionrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateBillingPortalSessionRequestInput:\n    org_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
       ],
       "docs": ""
     },
@@ -1226,6 +1286,36 @@
       "docs": ""
     },
     {
+      "name": "OrganizationBilling",
+      "kind": "class",
+      "ref": "convohop.types#OrganizationBilling",
+      "anchor": "organizationbilling-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationBilling:\n    org_id: str\n    plan_id: str | None\n    standing: str | None\n    grace_until: str | None\n    subscription_status: str | None\n    current_period_end: str | None\n    cancel_at_period_end: bool\n    catalog_version: str\n    configured: bool\n    billed: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "OrganizationBillingReply",
+      "kind": "class",
+      "ref": "convohop.types#OrganizationBillingReply",
+      "anchor": "organizationbillingreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationBillingReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OrganizationBilling | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "OrganizationBillingRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#OrganizationBillingRequestInput",
+      "anchor": "organizationbillingrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationBillingRequestInput:\n    org_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
       "name": "OrganizationPage",
       "kind": "class",
       "ref": "convohop.types#OrganizationPage",
@@ -1521,7 +1611,7 @@
       "ref": "convohop.types#RetainedResult",
       "anchor": "retainedresult-class",
       "signatures": [
-        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RetainedResult:\n    broadcast_permission_changed: BroadcastPermissionChanged | None\n    conversation: Conversation | None\n    conversation_member_batch: ConversationMemberBatch | None\n    conversation_mute: ConversationMute | None\n    credential_delivery_receipt: CredentialDeliveryReceipt | None\n    delivery_ack: DeliveryAck | None\n    live_alert_batch: LiveAlertBatch | None\n    live_credential_issuance: LiveCredentialIssuance | None\n    live_session_end_requested: LiveSessionEndRequested | None\n    live_session_joined: LiveSessionJoined | None\n    live_session_left: LiveSessionLeft | None\n    live_session_started: LiveSessionStarted | None\n    member: Member | None\n    message: Message | None\n    message_ack: MessageAck | None\n    organization: Organization | None\n    principal: Principal | None\n    read_receipt: ReadReceipt | None\n    session_bootstrap: SessionBootstrap | None\n    session_revocation: SessionRevocation | None\n    signed_proof: dict[str, Any] | None\n    def to_dict(self) -> dict[str, Any]: ..."
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RetainedResult:\n    billing_checkout_session: BillingCheckoutSession | None\n    billing_portal_session: BillingPortalSession | None\n    broadcast_permission_changed: BroadcastPermissionChanged | None\n    conversation: Conversation | None\n    conversation_member_batch: ConversationMemberBatch | None\n    conversation_mute: ConversationMute | None\n    credential_delivery_receipt: CredentialDeliveryReceipt | None\n    delivery_ack: DeliveryAck | None\n    live_alert_batch: LiveAlertBatch | None\n    live_credential_issuance: LiveCredentialIssuance | None\n    live_session_end_requested: LiveSessionEndRequested | None\n    live_session_joined: LiveSessionJoined | None\n    live_session_left: LiveSessionLeft | None\n    live_session_started: LiveSessionStarted | None\n    member: Member | None\n    message: Message | None\n    message_ack: MessageAck | None\n    organization: Organization | None\n    principal: Principal | None\n    read_receipt: ReadReceipt | None\n    session_bootstrap: SessionBootstrap | None\n    session_revocation: SessionRevocation | None\n    signed_proof: dict[str, Any] | None\n    def to_dict(self) -> dict[str, Any]: ..."
       ],
       "docs": "Exactly one typed field contains the retained, currently authorized receipt result."
     },

@@ -3,6 +3,19 @@ type ActorRef {
 	objectId: String!
 }
 
+type BillingCheckoutSession {
+	orgId: UUID!
+	planId: String!
+	url: String!
+	expiresAt: String!
+}
+
+type BillingPortalSession {
+	orgId: UUID!
+	url: String!
+	expiresAt: String
+}
+
 type BroadcastPermissionChanged {
 	member: Member!
 	mediaCutoff: LiveMediaCutoff
@@ -73,6 +86,39 @@ type ConversationMute {
 	principalId: UUID!
 	muted: Boolean!
 	until: String
+}
+
+type CreateBillingCheckoutSessionReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: BillingCheckoutSession
+}
+
+input CreateBillingCheckoutSessionRequestInput {
+	orgId: UUID!
+	planId: String!
+}
+
+type CreateBillingPortalSessionReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: BillingPortalSession
+}
+
+input CreateBillingPortalSessionRequestInput {
+	orgId: UUID!
 }
 
 type CreateDeploymentReply {
@@ -778,6 +824,8 @@ type Mutation {
 	credentialPermit(context: RequestContextInput!, input: CredentialPermitRequestInput!): CredentialPermitReply!
 	pauseOperation(context: RequestContextInput!, input: PauseOperationRequestInput!): PauseOperationReply!
 	resumeOperation(context: RequestContextInput!, input: ResumeOperationRequestInput!): ResumeOperationReply!
+	createBillingCheckoutSession(context: RequestContextInput!, input: CreateBillingCheckoutSessionRequestInput!): CreateBillingCheckoutSessionReply!
+	createBillingPortalSession(context: RequestContextInput!, input: CreateBillingPortalSessionRequestInput!): CreateBillingPortalSessionReply!
 	configureWebhook(context: RequestContextInput!, input: ConfigureWebhookRequestInput!): ConfigureWebhookReply!
 	updateWebhook(context: RequestContextInput!, input: UpdateWebhookRequestInput!): UpdateWebhookReply!
 	rotateWebhookSecret(context: RequestContextInput!, input: RotateWebhookSecretRequestInput!): RotateWebhookSecretReply!
@@ -835,6 +883,35 @@ type Organization {
 	name: String!
 	status: String!
 	revision: Decimal!
+}
+
+type OrganizationBilling {
+	orgId: UUID!
+	planId: String
+	standing: String
+	graceUntil: String
+	subscriptionStatus: String
+	currentPeriodEnd: String
+	cancelAtPeriodEnd: Boolean!
+	catalogVersion: String!
+	configured: Boolean!
+	billed: Boolean!
+}
+
+type OrganizationBillingReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OrganizationBilling
+}
+
+input OrganizationBillingRequestInput {
+	orgId: UUID!
 }
 
 type OrganizationPage {
@@ -1014,6 +1091,7 @@ type Query {
 	deploymentUsage(context: RequestContextInput!, input: DeploymentUsageRequestInput!): DeploymentUsageReply!
 	projectUsage(context: RequestContextInput!, input: ProjectUsageRequestInput!): ProjectUsageReply!
 	organizationUsage(context: RequestContextInput!, input: OrganizationUsageRequestInput!): OrganizationUsageReply!
+	organizationBilling(context: RequestContextInput!, input: OrganizationBillingRequestInput!): OrganizationBillingReply!
 	webhookEndpoints(context: RequestContextInput!, input: WebhookEndpointsRequestInput!): WebhookEndpointsReply!
 	webhookDeliveries(context: RequestContextInput!, input: WebhookDeliveriesRequestInput!): WebhookDeliveriesReply!
 	resolveRequest(context: RequestContextInput!, input: ResolveRequestRequestInput!): ResolveRequestReply!
@@ -1174,6 +1252,8 @@ input ResumeOperationRequestInput {
 Exactly one typed field contains the retained, currently authorized receipt result.
 """
 type RetainedResult {
+	billingCheckoutSession: BillingCheckoutSession
+	billingPortalSession: BillingPortalSession
 	broadcastPermissionChanged: BroadcastPermissionChanged
 	conversation: Conversation
 	conversationMemberBatch: ConversationMemberBatch

@@ -373,7 +373,7 @@
       "path": "typescript/reference/operations.md",
       "kind": "coverage",
       "title": "TypeScript operation coverage",
-      "description": "The TypeScript SDK members that send each API operation. 53 of the 76 operations that TypeScript packages can send have a method.",
+      "description": "The TypeScript SDK members that send each API operation. 53 of the 79 operations that TypeScript packages can send have a method.",
       "language": "typescript"
     },
     {
@@ -450,7 +450,7 @@
       "path": "python/reference/operations.md",
       "kind": "coverage",
       "title": "Python operation coverage",
-      "description": "The Python SDK members that send each API operation. 63 of the 65 operations that Python packages can send have a method.",
+      "description": "The Python SDK members that send each API operation. 63 of the 68 operations that Python packages can send have a method.",
       "language": "python"
     },
     {
@@ -519,7 +519,7 @@
       "path": "dotnet/reference/operations.md",
       "kind": "coverage",
       "title": ".NET operation coverage",
-      "description": "The .NET SDK members that send each API operation. 65 of the 65 operations that .NET packages can send have a method.",
+      "description": "The .NET SDK members that send each API operation. 65 of the 68 operations that .NET packages can send have a method.",
       "language": "dotnet"
     },
     {
@@ -580,7 +580,7 @@
       "path": "jvm/reference/operations.md",
       "kind": "coverage",
       "title": "Java and Kotlin operation coverage",
-      "description": "The Java and Kotlin SDK members that send each API operation. 65 of the 65 operations that Java and Kotlin packages can send have a method.",
+      "description": "The Java and Kotlin SDK members that send each API operation. 65 of the 68 operations that Java and Kotlin packages can send have a method.",
       "language": "jvm"
     },
     {
@@ -649,7 +649,7 @@
       "path": "go/reference/operations.md",
       "kind": "coverage",
       "title": "Go operation coverage",
-      "description": "The Go SDK members that send each API operation. 65 of the 65 operations that Go packages can send have a method.",
+      "description": "The Go SDK members that send each API operation. 65 of the 68 operations that Go packages can send have a method.",
       "language": "go"
     },
     {
@@ -1065,6 +1065,13 @@
       "operation": "management.organizationUsage"
     },
     {
+      "path": "operations/management/organizationBilling.md",
+      "kind": "operation",
+      "title": "management.organizationBilling",
+      "description": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.",
+      "operation": "management.organizationBilling"
+    },
+    {
       "path": "operations/management/webhookEndpoints.md",
       "kind": "operation",
       "title": "management.webhookEndpoints",
@@ -1154,6 +1161,20 @@
       "title": "management.resumeOperation",
       "description": "Resume a paused operation.",
       "operation": "management.resumeOperation"
+    },
+    {
+      "path": "operations/management/createBillingCheckoutSession.md",
+      "kind": "operation",
+      "title": "management.createBillingCheckoutSession",
+      "description": "Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.",
+      "operation": "management.createBillingCheckoutSession"
+    },
+    {
+      "path": "operations/management/createBillingPortalSession.md",
+      "kind": "operation",
+      "title": "management.createBillingPortalSession",
+      "description": "Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.",
+      "operation": "management.createBillingPortalSession"
     },
     {
       "path": "operations/management/configureWebhook.md",

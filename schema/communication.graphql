@@ -67,6 +67,19 @@ type AlertLiveSessionPayload {
 	result: LiveAlertBatch!
 }
 
+type BillingCheckoutSession {
+	orgId: UUID!
+	planId: String!
+	url: String!
+	expiresAt: String!
+}
+
+type BillingPortalSession {
+	orgId: UUID!
+	url: String!
+	expiresAt: String
+}
+
 type BroadcastPermissionChanged {
 	member: Member!
 	mediaCutoff: LiveMediaCutoff
@@ -1103,6 +1116,19 @@ type Organization {
 	revision: Decimal!
 }
 
+type OrganizationBilling {
+	orgId: UUID!
+	planId: String
+	standing: String
+	graceUntil: String
+	subscriptionStatus: String
+	currentPeriodEnd: String
+	cancelAtPeriodEnd: Boolean!
+	catalogVersion: String!
+	configured: Boolean!
+	billed: Boolean!
+}
+
 type OrganizationPage {
 	items: [Organization!]!
 	complete: Boolean!
@@ -1421,6 +1447,8 @@ type ResourceRef {
 Exactly one typed field contains the retained, currently authorized receipt result.
 """
 type RetainedResult {
+	billingCheckoutSession: BillingCheckoutSession
+	billingPortalSession: BillingPortalSession
 	broadcastPermissionChanged: BroadcastPermissionChanged
 	conversation: Conversation
 	conversationMemberBatch: ConversationMemberBatch

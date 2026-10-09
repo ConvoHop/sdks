@@ -45,7 +45,9 @@ export interface CliOperation {
 export const withheldOperations: Readonly<Record<string, string>> = {
   "communication.issueSession": "returns a user session token",
   "communication.renewSession": "returns a user session token",
-  "management.credentialPermit": "returns a credential delivery permit"
+  "management.credentialPermit": "returns a credential delivery permit",
+  "management.createBillingCheckoutSession": "returns a hosted billing link that grants access to whoever holds it",
+  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it"
 };
 /** The scopes a backend key can grant, by wire name, with what each allows. */
 export const cliScopes: Readonly<Record<string, string>> = {
@@ -315,6 +317,10 @@ export const cliTypes: Readonly<Record<string, CliType>> = {
       {"name": "beforeSequence", "type": "Decimal", "required": false},
       {"name": "actAsPrincipalId", "type": "UUID", "required": false}
     ]
+  },
+  "OrganizationBillingRequestInput": {
+    "kind": "input",
+    "fields": [{"name": "orgId", "type": "UUID!", "required": true}]
   },
   "OrganizationUsageRequestInput": {
     "kind": "input",
@@ -1053,6 +1059,19 @@ export const cliOperations: Readonly<Record<string, CliOperation>> = {
     "resolvable": false,
     "destructive": false,
     "input": "OrganizationUsageRequestInput"
+  },
+  "management.organizationBilling": {
+    "id": "management.organizationBilling",
+    "plane": "management",
+    "kind": "query",
+    "summary": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.",
+    "credential": "portalCredential",
+    "requires": "portalCredential (condition owner: The caller owns the organization, deployment or project)",
+    "idempotency": "safe",
+    "retry": "repeat",
+    "resolvable": false,
+    "destructive": false,
+    "input": "OrganizationBillingRequestInput"
   },
   "management.webhookEndpoints": {
     "id": "management.webhookEndpoints",

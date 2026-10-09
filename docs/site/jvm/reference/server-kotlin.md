@@ -578,6 +578,14 @@ Suspending `ManagementApi.organizationUsage`.
 
 Sends [`management.organizationUsage`](../../operations/management/organizationUsage.md).
 
+#### `ManagementSuspendApi.organizationBilling` method
+
+```java
+public suspend fun organizationBilling(input: OrganizationBillingRequestInput): OrganizationBillingReply
+```
+
+Suspending `ManagementApi.organizationBilling`.
+
 #### `ManagementSuspendApi.webhookEndpoints` method
 
 ```java
@@ -707,6 +715,22 @@ public suspend fun resumeOperation(input: ResumeOperationRequestInput, requestId
 Suspending `ManagementApi.resumeOperation`.
 
 Sends [`management.resumeOperation`](../../operations/management/resumeOperation.md).
+
+#### `ManagementSuspendApi.createBillingCheckoutSession` method
+
+```java
+public suspend fun createBillingCheckoutSession(input: CreateBillingCheckoutSessionRequestInput, requestId: String? = null): CreateBillingCheckoutSessionReply
+```
+
+Suspending `ManagementApi.createBillingCheckoutSession`.
+
+#### `ManagementSuspendApi.createBillingPortalSession` method
+
+```java
+public suspend fun createBillingPortalSession(input: CreateBillingPortalSessionRequestInput, requestId: String? = null): CreateBillingPortalSessionReply
+```
+
+Suspending `ManagementApi.createBillingPortalSession`.
 
 #### `ManagementSuspendApi.configureWebhook` method
 

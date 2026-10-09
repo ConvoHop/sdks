@@ -920,6 +920,22 @@ namespace ConvoHop.Api
             return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.OrganizationUsage, input, null, null, cancellationToken);
         }
 
+        /// <summary>Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>safe</c>. Read-only. Repeat freely; each attempt may use a new requestId.</para>
+        /// <para>Authorization: portalCredential (condition owner).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="cancellationToken">Stops waiting.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.OrganizationBillingReply> OrganizationBillingAsync(global::ConvoHop.Models.OrganizationBillingRequestInput input, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.OrganizationBilling, input, null, null, cancellationToken);
+        }
+
         /// <summary>List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.</summary>
         /// <remarks>
         /// <para>Idempotency: <c>safe</c>. Read-only. Repeat freely; each attempt may use a new requestId.</para>
@@ -1136,6 +1152,40 @@ namespace ConvoHop.Api
         {
             if (input is null) throw new global::System.ArgumentNullException(nameof(input));
             return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.ResumeOperation, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>singleUse</c>. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.</para>
+        /// <para>Authorization: portalCredential (condition owner).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.CreateBillingCheckoutSessionReply> CreateBillingCheckoutSessionAsync(global::ConvoHop.Models.CreateBillingCheckoutSessionRequestInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.CreateBillingCheckoutSession, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>singleUse</c>. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.</para>
+        /// <para>Authorization: portalCredential (condition owner).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.CreateBillingPortalSessionReply> CreateBillingPortalSessionAsync(global::ConvoHop.Models.CreateBillingPortalSessionRequestInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.CreateBillingPortalSession, input, requestId, null, cancellationToken);
         }
 
         /// <summary>Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.</summary>

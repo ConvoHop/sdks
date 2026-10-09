@@ -69,6 +69,65 @@ public data class AlertLiveSessionPayload(
     }
 }
 
+public data class BillingCheckoutSession(
+    public val orgId: String,
+    public val planId: String,
+    public val url: String,
+    public val expiresAt: String,
+) {
+    /** The JSON form, with every field and explicit nulls. */
+    public fun toJson(): JsonObject =
+        JsonObject(
+            linkedMapOf<String, JsonElement>(
+                "orgId" to Scalars.encodeUUID(this.orgId),
+                "planId" to JsonPrimitive(this.planId),
+                "url" to JsonPrimitive(this.url),
+                "expiresAt" to JsonPrimitive(this.expiresAt),
+            ),
+        )
+
+    public companion object {
+        /** Decodes [element], throwing [ShapeException] when it does not match BillingCheckoutSession. Unknown fields are ignored. */
+        public fun fromJson(element: JsonElement, path: String = "BillingCheckoutSession"): BillingCheckoutSession {
+            val obj = element.asObject(path)
+            return BillingCheckoutSession(
+                orgId = Scalars.decodeUUID(obj.field("orgId", path), "${path}.orgId"),
+                planId = obj.field("planId", path).asString("${path}.planId"),
+                url = obj.field("url", path).asString("${path}.url"),
+                expiresAt = obj.field("expiresAt", path).asString("${path}.expiresAt"),
+            )
+        }
+    }
+}
+
+public data class BillingPortalSession(
+    public val orgId: String,
+    public val url: String,
+    public val expiresAt: String? = null,
+) {
+    /** The JSON form, with every field and explicit nulls. */
+    public fun toJson(): JsonObject =
+        JsonObject(
+            linkedMapOf<String, JsonElement>(
+                "orgId" to Scalars.encodeUUID(this.orgId),
+                "url" to JsonPrimitive(this.url),
+                "expiresAt" to (this.expiresAt?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+            ),
+        )
+
+    public companion object {
+        /** Decodes [element], throwing [ShapeException] when it does not match BillingPortalSession. Unknown fields are ignored. */
+        public fun fromJson(element: JsonElement, path: String = "BillingPortalSession"): BillingPortalSession {
+            val obj = element.asObject(path)
+            return BillingPortalSession(
+                orgId = Scalars.decodeUUID(obj.field("orgId", path), "${path}.orgId"),
+                url = obj.field("url", path).asString("${path}.url"),
+                expiresAt = obj.field("expiresAt", path).decodeNullable("${path}.expiresAt") { v0, p0 -> v0.asString(p0) },
+            )
+        }
+    }
+}
+
 public data class BroadcastPermissionChanged(
     public val member: Member,
     public val mediaCutoff: LiveMediaCutoff? = null,
@@ -3076,6 +3135,8 @@ public data class ResourceRef(
 
 /** Exactly one typed field contains the retained, currently authorized receipt result. */
 public data class RetainedResult(
+    public val billingCheckoutSession: BillingCheckoutSession? = null,
+    public val billingPortalSession: BillingPortalSession? = null,
     public val broadcastPermissionChanged: BroadcastPermissionChanged? = null,
     public val conversation: Conversation? = null,
     public val conversationMemberBatch: ConversationMemberBatch? = null,
@@ -3102,6 +3163,8 @@ public data class RetainedResult(
     public fun toJson(): JsonObject =
         JsonObject(
             linkedMapOf<String, JsonElement>(
+                "billingCheckoutSession" to (this.billingCheckoutSession?.let { v0 -> v0.toJson() } ?: JsonNull),
+                "billingPortalSession" to (this.billingPortalSession?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "broadcastPermissionChanged" to (this.broadcastPermissionChanged?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "conversation" to (this.conversation?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "conversationMemberBatch" to (this.conversationMemberBatch?.let { v0 -> v0.toJson() } ?: JsonNull),
@@ -3131,6 +3194,8 @@ public data class RetainedResult(
         public fun fromJson(element: JsonElement, path: String = "RetainedResult"): RetainedResult {
             val obj = element.asObject(path)
             return RetainedResult(
+                billingCheckoutSession = obj.field("billingCheckoutSession", path).decodeNullable("${path}.billingCheckoutSession") { v0, p0 -> BillingCheckoutSession.fromJson(v0, p0) },
+                billingPortalSession = obj.field("billingPortalSession", path).decodeNullable("${path}.billingPortalSession") { v0, p0 -> BillingPortalSession.fromJson(v0, p0) },
                 broadcastPermissionChanged = obj.field("broadcastPermissionChanged", path).decodeNullable("${path}.broadcastPermissionChanged") { v0, p0 -> BroadcastPermissionChanged.fromJson(v0, p0) },
                 conversation = obj.field("conversation", path).decodeNullable("${path}.conversation") { v0, p0 -> Conversation.fromJson(v0, p0) },
                 conversationMemberBatch = obj.field("conversationMemberBatch", path).decodeNullable("${path}.conversationMemberBatch") { v0, p0 -> ConversationMemberBatch.fromJson(v0, p0) },
@@ -3159,6 +3224,8 @@ public data class RetainedResult(
     /** Redacts credentials so logs and crash reports never carry them. */
     override fun toString(): String =
         "RetainedResult(" +
+        "billingCheckoutSession=${this.billingCheckoutSession}, " +
+        "billingPortalSession=${this.billingPortalSession}, " +
         "broadcastPermissionChanged=${this.broadcastPermissionChanged}, " +
         "conversation=${this.conversation}, " +
         "conversationMemberBatch=${this.conversationMemberBatch}, " +

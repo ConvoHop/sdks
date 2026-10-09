@@ -110,6 +110,18 @@
           ]
         },
         {
+          "name": "BillingCheckoutSession",
+          "kind": "type",
+          "signatures": ["public final class BillingCheckoutSession"],
+          "docs": "The `BillingCheckoutSession` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "BillingPortalSession",
+          "kind": "type",
+          "signatures": ["public final class BillingPortalSession"],
+          "docs": "The `BillingPortalSession` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
           "name": "BroadcastPermissionChanged",
           "kind": "type",
           "signatures": ["public final class BroadcastPermissionChanged"],
@@ -577,6 +589,30 @@
               "docs": "How long to wait before resending the same request, when the authority sent a delay (for example with `RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds. The SDK never waits or resends on its own because of it.\n\nReturns: the delay in whole seconds, or null"
             }
           ]
+        },
+        {
+          "name": "CreateBillingCheckoutSessionReply",
+          "kind": "type",
+          "signatures": ["public final class CreateBillingCheckoutSessionReply"],
+          "docs": "The `CreateBillingCheckoutSessionReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "CreateBillingCheckoutSessionRequestInput",
+          "kind": "type",
+          "signatures": ["public final class CreateBillingCheckoutSessionRequestInput"],
+          "docs": "The `CreateBillingCheckoutSessionRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "CreateBillingPortalSessionReply",
+          "kind": "type",
+          "signatures": ["public final class CreateBillingPortalSessionReply"],
+          "docs": "The `CreateBillingPortalSessionReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "CreateBillingPortalSessionRequestInput",
+          "kind": "type",
+          "signatures": ["public final class CreateBillingPortalSessionRequestInput"],
+          "docs": "The `CreateBillingPortalSessionRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
         },
         {
           "name": "CreateConversationReply",
@@ -1418,6 +1454,14 @@
               "docs": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
             },
             {
+              "name": "organizationBilling",
+              "kind": "method",
+              "signatures": [
+                "public OrganizationBillingReply organizationBilling(OrganizationBillingRequestInput input)"
+              ],
+              "docs": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
               "name": "webhookEndpoints",
               "kind": "method",
               "signatures": [
@@ -1529,6 +1573,24 @@
                 "public ResumeOperationReply resumeOperation(ResumeOperationRequestInput input, @Nullable String requestId)"
               ],
               "docs": "Resume a paused operation.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "createBillingCheckoutSession",
+              "kind": "method",
+              "signatures": [
+                "public CreateBillingCheckoutSessionReply createBillingCheckoutSession(CreateBillingCheckoutSessionRequestInput input)",
+                "public CreateBillingCheckoutSessionReply createBillingCheckoutSession(CreateBillingCheckoutSessionRequestInput input, @Nullable String requestId)"
+              ],
+              "docs": "Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.\n\nIdempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "createBillingPortalSession",
+              "kind": "method",
+              "signatures": [
+                "public CreateBillingPortalSessionReply createBillingPortalSession(CreateBillingPortalSessionRequestInput input)",
+                "public CreateBillingPortalSessionReply createBillingPortalSession(CreateBillingPortalSessionRequestInput input, @Nullable String requestId)"
+              ],
+              "docs": "Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.\n\nIdempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
             },
             {
               "name": "configureWebhook",
@@ -1778,6 +1840,24 @@
           "kind": "type",
           "signatures": ["public final class Organization"],
           "docs": "The `Organization` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "OrganizationBilling",
+          "kind": "type",
+          "signatures": ["public final class OrganizationBilling"],
+          "docs": "The `OrganizationBilling` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "OrganizationBillingReply",
+          "kind": "type",
+          "signatures": ["public final class OrganizationBillingReply"],
+          "docs": "The `OrganizationBillingReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "OrganizationBillingRequestInput",
+          "kind": "type",
+          "signatures": ["public final class OrganizationBillingRequestInput"],
+          "docs": "The `OrganizationBillingRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
         },
         {
           "name": "OrganizationPage",
@@ -4242,6 +4322,14 @@
               "docs": "Suspending `ManagementApi.organizationUsage`."
             },
             {
+              "name": "organizationBilling",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun organizationBilling(input: OrganizationBillingRequestInput): OrganizationBillingReply"
+              ],
+              "docs": "Suspending `ManagementApi.organizationBilling`."
+            },
+            {
               "name": "webhookEndpoints",
               "kind": "method",
               "signatures": [
@@ -4344,6 +4432,22 @@
                 "public suspend fun resumeOperation(input: ResumeOperationRequestInput, requestId: String? = null): ResumeOperationReply"
               ],
               "docs": "Suspending `ManagementApi.resumeOperation`."
+            },
+            {
+              "name": "createBillingCheckoutSession",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun createBillingCheckoutSession(input: CreateBillingCheckoutSessionRequestInput, requestId: String? = null): CreateBillingCheckoutSessionReply"
+              ],
+              "docs": "Suspending `ManagementApi.createBillingCheckoutSession`."
+            },
+            {
+              "name": "createBillingPortalSession",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun createBillingPortalSession(input: CreateBillingPortalSessionRequestInput, requestId: String? = null): CreateBillingPortalSessionReply"
+              ],
+              "docs": "Suspending `ManagementApi.createBillingPortalSession`."
             },
             {
               "name": "configureWebhook",

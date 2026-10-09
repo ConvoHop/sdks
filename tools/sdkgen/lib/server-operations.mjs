@@ -15,6 +15,8 @@ export const CREDENTIAL_OPERATIONS = Object.freeze({
   "communication.issueSession": "returns a user session token",
   "communication.renewSession": "returns a user session token",
   "management.credentialPermit": "returns a credential delivery permit",
+  "management.createBillingCheckoutSession": "returns a hosted billing link that grants access to whoever holds it",
+  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it",
 });
 
 export const oneLine = text => text.replace(/\s+/g, " ").trim();

@@ -1846,6 +1846,18 @@ Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new reques
 
 Sends [`management.organizationUsage`](../operations/management/organizationUsage.md).
 
+#### `AsyncConvoHopManagement.organization_billing` method
+
+```python
+async def organization_billing(self, *, org_id: str) -> OrganizationBilling
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
 #### `AsyncConvoHopManagement.webhook_endpoints` method
 
 ```python
@@ -2147,6 +2159,49 @@ Parameters:
 - `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 Sends [`management.resumeOperation`](../operations/management/resumeOperation.md).
+
+#### `AsyncConvoHopManagement.create_billing_checkout_session` method
+
+```python
+async def create_billing_checkout_session(
+    self,
+    *,
+    org_id: str,
+    plan_id: str,
+    request_id: str | None = None,
+) -> BillingCheckoutSession
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `AsyncConvoHopManagement.create_billing_portal_session` method
+
+```python
+async def create_billing_portal_session(
+    self,
+    *,
+    org_id: str,
+    request_id: str | None = None,
+) -> BillingPortalSession
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 #### `AsyncConvoHopManagement.configure_webhook` method
 
@@ -3568,6 +3623,18 @@ Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new reques
 
 Sends [`management.organizationUsage`](../operations/management/organizationUsage.md).
 
+#### `ConvoHopManagement.organization_billing` method
+
+```python
+def organization_billing(self, *, org_id: str) -> OrganizationBilling
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
 #### `ConvoHopManagement.webhook_endpoints` method
 
 ```python
@@ -3869,6 +3936,49 @@ Parameters:
 - `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 Sends [`management.resumeOperation`](../operations/management/resumeOperation.md).
+
+#### `ConvoHopManagement.create_billing_checkout_session` method
+
+```python
+def create_billing_checkout_session(
+    self,
+    *,
+    org_id: str,
+    plan_id: str,
+    request_id: str | None = None,
+) -> BillingCheckoutSession
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `ConvoHopManagement.create_billing_portal_session` method
+
+```python
+def create_billing_portal_session(
+    self,
+    *,
+    org_id: str,
+    request_id: str | None = None,
+) -> BillingPortalSession
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 #### `ConvoHopManagement.configure_webhook` method
 
@@ -6395,6 +6505,29 @@ class AlertLiveSessionPayload:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `BillingCheckoutSession` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class BillingCheckoutSession:
+    org_id: str
+    plan_id: str
+    url: str
+    expires_at: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `BillingPortalSession` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class BillingPortalSession:
+    org_id: str
+    url: str
+    expires_at: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `BroadcastPermissionChanged` class
 
 ```python
@@ -6535,6 +6668,59 @@ class ConversationMuteReply:
     request_id: str
     server_time: str
     result: ConversationMute
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingCheckoutSessionReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingCheckoutSessionReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: BillingCheckoutSession | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingCheckoutSessionRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingCheckoutSessionRequestInput:
+    org_id: str
+    plan_id: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingPortalSessionReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingPortalSessionReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: BillingPortalSession | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingPortalSessionRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingPortalSessionRequestInput:
+    org_id: str
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
@@ -7937,6 +8123,50 @@ class Organization:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `OrganizationBilling` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBilling:
+    org_id: str
+    plan_id: str | None
+    standing: str | None
+    grace_until: str | None
+    subscription_status: str | None
+    current_period_end: str | None
+    cancel_at_period_end: bool
+    catalog_version: str
+    configured: bool
+    billed: bool
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `OrganizationBillingReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBillingReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: OrganizationBilling | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `OrganizationBillingRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBillingRequestInput:
+    org_id: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `OrganizationPage` class
 
 ```python
@@ -8353,6 +8583,8 @@ class ResumeOperationRequestInput:
 ```python
 @dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
 class RetainedResult:
+    billing_checkout_session: BillingCheckoutSession | None
+    billing_portal_session: BillingPortalSession | None
     broadcast_permission_changed: BroadcastPermissionChanged | None
     conversation: Conversation | None
     conversation_member_batch: ConversationMemberBatch | None
@@ -9038,7 +9270,7 @@ LiveSessionState: TypeAlias = Literal[
 
 # Python operation coverage
 
-The Python SDK members that send each API operation. 63 of the 65 operations that Python packages can send have a method.
+The Python SDK members that send each API operation. 63 of the 68 operations that Python packages can send have a method.
 
 ## Communication
 
@@ -9100,6 +9332,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](../operations/management/deploymentUsage.md) | server | [`ConvoHopManagement.deployment_usage`](reference/convohop.md#convohopmanagementdeployment_usage-method), [`AsyncConvoHopManagement.deployment_usage`](reference/convohop.md#asyncconvohopmanagementdeployment_usage-method) |
 | [`management.projectUsage`](../operations/management/projectUsage.md) | server | [`ConvoHopManagement.project_usage`](reference/convohop.md#convohopmanagementproject_usage-method), [`AsyncConvoHopManagement.project_usage`](reference/convohop.md#asyncconvohopmanagementproject_usage-method) |
 | [`management.organizationUsage`](../operations/management/organizationUsage.md) | server | [`ConvoHopManagement.organization_usage`](reference/convohop.md#convohopmanagementorganization_usage-method), [`AsyncConvoHopManagement.organization_usage`](reference/convohop.md#asyncconvohopmanagementorganization_usage-method) |
+| [`management.organizationBilling`](../operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](../operations/management/webhookEndpoints.md) | server | [`ConvoHopManagement.webhook_endpoints`](reference/convohop.md#convohopmanagementwebhook_endpoints-method), [`AsyncConvoHopManagement.webhook_endpoints`](reference/convohop.md#asyncconvohopmanagementwebhook_endpoints-method) |
 | [`management.webhookDeliveries`](../operations/management/webhookDeliveries.md) | server | [`ConvoHopManagement.webhook_deliveries`](reference/convohop.md#convohopmanagementwebhook_deliveries-method), [`AsyncConvoHopManagement.webhook_deliveries`](reference/convohop.md#asyncconvohopmanagementwebhook_deliveries-method) |
 | [`management.resolveRequest`](../operations/management/resolveRequest.md) | server | [`ConvoHopManagement.resolve_request`](reference/convohop.md#convohopmanagementresolve_request-method), [`ConvoHopManagement.retry_request`](reference/convohop.md#convohopmanagementretry_request-method), [`AsyncConvoHopManagement.resolve_request`](reference/convohop.md#asyncconvohopmanagementresolve_request-method), [`AsyncConvoHopManagement.retry_request`](reference/convohop.md#asyncconvohopmanagementretry_request-method) |
@@ -9113,6 +9346,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](../operations/management/credentialPermit.md) | server | [`ConvoHopManagement.credential_permit`](reference/convohop.md#convohopmanagementcredential_permit-method), [`AsyncConvoHopManagement.credential_permit`](reference/convohop.md#asyncconvohopmanagementcredential_permit-method) |
 | [`management.pauseOperation`](../operations/management/pauseOperation.md) | server | [`ConvoHopManagement.pause_operation`](reference/convohop.md#convohopmanagementpause_operation-method), [`AsyncConvoHopManagement.pause_operation`](reference/convohop.md#asyncconvohopmanagementpause_operation-method) |
 | [`management.resumeOperation`](../operations/management/resumeOperation.md) | server | [`ConvoHopManagement.resume_operation`](reference/convohop.md#convohopmanagementresume_operation-method), [`AsyncConvoHopManagement.resume_operation`](reference/convohop.md#asyncconvohopmanagementresume_operation-method) |
+| [`management.createBillingCheckoutSession`](../operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](../operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](../operations/management/configureWebhook.md) | server | [`ConvoHopManagement.configure_webhook`](reference/convohop.md#convohopmanagementconfigure_webhook-method), [`AsyncConvoHopManagement.configure_webhook`](reference/convohop.md#asyncconvohopmanagementconfigure_webhook-method) |
 | [`management.updateWebhook`](../operations/management/updateWebhook.md) | server | [`ConvoHopManagement.update_webhook`](reference/convohop.md#convohopmanagementupdate_webhook-method), [`AsyncConvoHopManagement.update_webhook`](reference/convohop.md#asyncconvohopmanagementupdate_webhook-method) |
 | [`management.rotateWebhookSecret`](../operations/management/rotateWebhookSecret.md) | server | [`ConvoHopManagement.rotate_webhook_secret`](reference/convohop.md#convohopmanagementrotate_webhook_secret-method), [`AsyncConvoHopManagement.rotate_webhook_secret`](reference/convohop.md#asyncconvohopmanagementrotate_webhook_secret-method) |

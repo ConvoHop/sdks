@@ -1028,6 +1028,42 @@ namespace ConvoHop.Models
         public string ConsentRef { get; set; }
     }
 
+    /// <summary>The CreateBillingCheckoutSessionRequestInput input.</summary>
+    public sealed class CreateBillingCheckoutSessionRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="orgId">The <c>orgId</c> field.</param>
+        /// <param name="planId">The <c>planId</c> field.</param>
+        public CreateBillingCheckoutSessionRequestInput(string orgId, string planId)
+        {
+            this.OrgId = orgId;
+            this.PlanId = planId;
+        }
+
+        /// <summary>The <c>orgId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("orgId")]
+        public string OrgId { get; set; }
+
+        /// <summary>The <c>planId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("planId")]
+        public string PlanId { get; set; }
+    }
+
+    /// <summary>The CreateBillingPortalSessionRequestInput input.</summary>
+    public sealed class CreateBillingPortalSessionRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="orgId">The <c>orgId</c> field.</param>
+        public CreateBillingPortalSessionRequestInput(string orgId)
+        {
+            this.OrgId = orgId;
+        }
+
+        /// <summary>The <c>orgId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("orgId")]
+        public string OrgId { get; set; }
+    }
+
     /// <summary>The CreateDeploymentRequestInput input.</summary>
     public sealed class CreateDeploymentRequestInput
     {
@@ -1293,6 +1329,21 @@ namespace ConvoHop.Models
         /// <summary>The <c>expiresAt</c> field.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
         public string ExpiresAt { get; set; }
+    }
+
+    /// <summary>The OrganizationBillingRequestInput input.</summary>
+    public sealed class OrganizationBillingRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="orgId">The <c>orgId</c> field.</param>
+        public OrganizationBillingRequestInput(string orgId)
+        {
+            this.OrgId = orgId;
+        }
+
+        /// <summary>The <c>orgId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("orgId")]
+        public string OrgId { get; set; }
     }
 
     /// <summary>The OrganizationUsageRequestInput input.</summary>

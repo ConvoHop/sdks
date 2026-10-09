@@ -702,6 +702,17 @@ func (c *ManagementClient) OrganizationUsage(ctx context.Context, input Organiza
 	return out, err
 }
 
+// OrganizationBilling calls the management.organizationBilling query.
+// Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+//
+// Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId.
+// Authorized by portalCredential (condition: owner).
+func (c *ManagementClient) OrganizationBilling(ctx context.Context, input OrganizationBillingRequestInput, opts ...CallOption) (*OrganizationBillingReply, error) {
+	var out *OrganizationBillingReply
+	err := c.t.call(ctx, "management.organizationBilling", input, nil, &out, opts)
+	return out, err
+}
+
 // WebhookEndpoints calls the management.webhookEndpoints query.
 // List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.
 //
@@ -858,6 +869,30 @@ func (c *ManagementClient) PauseOperation(ctx context.Context, input PauseOperat
 func (c *ManagementClient) ResumeOperation(ctx context.Context, input ResumeOperationRequestInput, opts ...CallOption) (*ResumeOperationReply, error) {
 	var out *ResumeOperationReply
 	err := c.t.call(ctx, "management.resumeOperation", input, nil, &out, opts)
+	return out, err
+}
+
+// CreateBillingCheckoutSession calls the management.createBillingCheckoutSession mutation.
+// Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+//
+// Idempotency: singleUse. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+// Retry budget: 3 attempts within 60 seconds.
+// Authorized by portalCredential (condition: owner).
+func (c *ManagementClient) CreateBillingCheckoutSession(ctx context.Context, input CreateBillingCheckoutSessionRequestInput, opts ...CallOption) (*CreateBillingCheckoutSessionReply, error) {
+	var out *CreateBillingCheckoutSessionReply
+	err := c.t.call(ctx, "management.createBillingCheckoutSession", input, nil, &out, opts)
+	return out, err
+}
+
+// CreateBillingPortalSession calls the management.createBillingPortalSession mutation.
+// Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+//
+// Idempotency: singleUse. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+// Retry budget: 3 attempts within 60 seconds.
+// Authorized by portalCredential (condition: owner).
+func (c *ManagementClient) CreateBillingPortalSession(ctx context.Context, input CreateBillingPortalSessionRequestInput, opts ...CallOption) (*CreateBillingPortalSessionReply, error) {
+	var out *CreateBillingPortalSessionReply
+	err := c.t.call(ctx, "management.createBillingPortalSession", input, nil, &out, opts)
 	return out, err
 }
 

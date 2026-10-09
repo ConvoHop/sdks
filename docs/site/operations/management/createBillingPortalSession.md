@@ -1,0 +1,86 @@
+# `management.createBillingPortalSession`
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+- **Operation:** `management.createBillingPortalSession`, a mutation sent as `ManagementCreateBillingPortalSession`.
+- **Layer:** server (server SDKs).
+- **Authorization:** `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+- **Idempotency:** `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+**Context** (`context: RequestContextInput!`)
+
+| Field | Type | Use |
+| --- | --- | --- |
+| `requestId` | `UUID!` | required |
+| `projectId` | `UUID` | forbidden |
+| `incarnation` | `UUID` | optional |
+| `observedServingEpoch` | `Decimal` | optional |
+| `credentialDeliveryPermit` | `SignedProof` | forbidden |
+
+**Input** (`input: CreateBillingPortalSessionRequestInput!`)
+
+| Field | Type |
+| --- | --- |
+| `orgId` | `UUID!` |
+
+**Result** (`CreateBillingPortalSessionReply!`)
+
+| Field | Type |
+| --- | --- |
+| `status` | `String!` |
+| `requestId` | `UUID!` |
+| `serverTime` | `String` |
+| `receiptId` | `UUID` |
+| `committedAt` | `String` |
+| `replayed` | `Boolean` |
+| `operation` | `OperationRef` |
+| `resourceRef` | `ResourceRef` |
+| `result` | `BillingPortalSession` |
+
+**Errors**
+
+- Returned by the authority: `BILLING_CATALOG_CONFLICT`, `BILLING_CATALOG_NOT_SYNCED`, `BILLING_CUSTOMER_MISSING`, `BILLING_LINK_EXPIRED`, `BILLING_NOT_CONFIGURED`, `BILLING_PROVIDER_CHANGED`, `BILLING_PROVIDER_REJECTED`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`.
+- Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `IDEMPOTENCY_CONFLICT`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
+- Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RECOVERY_STORAGE_FAILURE`, `RESOLUTION_REQUIRED`, `TRANSPORT_UNKNOWN`.
+- Transient, so a retry with the same `requestId` and input may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `OUTCOME_UNKNOWN`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.
+- Error sets: `request`, `http`, `mutation`.
+
+**GraphQL**
+
+```graphql
+mutation ManagementCreateBillingPortalSession($context: RequestContextInput!, $input: CreateBillingPortalSessionRequestInput!) {
+  createBillingPortalSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      url
+      expiresAt
+    }
+  }
+}
+```
+
+## SDK members
+
+| Language | Members |
+| --- | --- |
+| [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | Not wrapped by a method |
+| [.NET](../../dotnet/reference/operations.md) | Not wrapped by a method |
+| [Java and Kotlin](../../jvm/reference/operations.md) | Not wrapped by a method |
+| [Go](../../go/reference/operations.md) | Not wrapped by a method |

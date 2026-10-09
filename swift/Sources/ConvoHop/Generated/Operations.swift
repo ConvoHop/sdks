@@ -920,6 +920,17 @@ enum GraphQLCatalog {
                       id
                     }
                     result {
+                      billingCheckoutSession {
+                        orgId
+                        planId
+                        url
+                        expiresAt
+                      }
+                      billingPortalSession {
+                        orgId
+                        url
+                        expiresAt
+                      }
                       broadcastPermissionChanged {
                         member {
                           conversationId
@@ -2437,6 +2448,17 @@ enum GraphQLCatalog {
             GraphQLOutputField(name: "replayed", type: "Boolean!"),
             GraphQLOutputField(name: "result", type: "LiveAlertBatch!"),
         ]),
+        "BillingCheckoutSession": .object([
+            GraphQLOutputField(name: "orgId", type: "UUID!"),
+            GraphQLOutputField(name: "planId", type: "String!"),
+            GraphQLOutputField(name: "url", type: "String!"),
+            GraphQLOutputField(name: "expiresAt", type: "String!"),
+        ]),
+        "BillingPortalSession": .object([
+            GraphQLOutputField(name: "orgId", type: "UUID!"),
+            GraphQLOutputField(name: "url", type: "String!"),
+            GraphQLOutputField(name: "expiresAt", type: "String"),
+        ]),
         "Boolean": .scalar(GraphQLScalarShape(representation: .boolean, pattern: nil, maximumDecimal: nil, disallowed: [])),
         "BroadcastPermissionChanged": .object([
             GraphQLOutputField(name: "member", type: "Member!"),
@@ -3102,6 +3124,8 @@ enum GraphQLCatalog {
             GraphQLOutputField(name: "id", type: "String!"),
         ]),
         "RetainedResult": .object([
+            GraphQLOutputField(name: "billingCheckoutSession", type: "BillingCheckoutSession"),
+            GraphQLOutputField(name: "billingPortalSession", type: "BillingPortalSession"),
             GraphQLOutputField(name: "broadcastPermissionChanged", type: "BroadcastPermissionChanged"),
             GraphQLOutputField(name: "conversation", type: "Conversation"),
             GraphQLOutputField(name: "conversationMemberBatch", type: "ConversationMemberBatch"),

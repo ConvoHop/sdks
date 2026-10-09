@@ -11,6 +11,8 @@ import com.convohop.server.model.AlertLiveSessionPayload;
 import com.convohop.server.model.CapabilitiesReply;
 import com.convohop.server.model.ConfigureWebhookReply;
 import com.convohop.server.model.ConversationMuteReply;
+import com.convohop.server.model.CreateBillingCheckoutSessionReply;
+import com.convohop.server.model.CreateBillingPortalSessionReply;
 import com.convohop.server.model.CreateConversationReply;
 import com.convohop.server.model.CreateDeploymentReply;
 import com.convohop.server.model.CreateOrganizationReply;
@@ -42,6 +44,7 @@ import com.convohop.server.model.LiveSessionPageReply;
 import com.convohop.server.model.LiveSessionReply;
 import com.convohop.server.model.MembersReply;
 import com.convohop.server.model.MessagesReply;
+import com.convohop.server.model.OrganizationBillingReply;
 import com.convohop.server.model.OrganizationUsageReply;
 import com.convohop.server.model.OrganizationsReply;
 import com.convohop.server.model.PauseOperationReply;
@@ -631,6 +634,17 @@ public final class Operations {
               + "          id\n"
               + "        }\n"
               + "        result {\n"
+              + "          billingCheckoutSession {\n"
+              + "            orgId\n"
+              + "            planId\n"
+              + "            url\n"
+              + "            expiresAt\n"
+              + "          }\n"
+              + "          billingPortalSession {\n"
+              + "            orgId\n"
+              + "            url\n"
+              + "            expiresAt\n"
+              + "          }\n"
               + "          broadcastPermissionChanged {\n"
               + "            member {\n"
               + "              conversationId\n"
@@ -2849,6 +2863,56 @@ public final class Operations {
               + "}")
           .build();
 
+  /** <code>management.organizationBilling</code>: Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription. */
+  public static final OperationDescriptor<OrganizationBillingReply> MANAGEMENT_ORGANIZATION_BILLING =
+      OperationDescriptor.builder("management.organizationBilling", Wire.required(OrganizationBillingReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.QUERY)
+          .field("organizationBilling")
+          .operationName("ManagementOrganizationBilling")
+          .resultType("OrganizationBillingReply!")
+          .inputFields(List.of("orgId"))
+          .idempotency("safe", OperationDescriptor.Retry.REPEAT, false, 0, 0L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "query ManagementOrganizationBilling($context: RequestContextInput!, $input: OrganizationBillingRequestInput!) {\n"
+              + "  organizationBilling(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      orgId\n"
+              + "      planId\n"
+              + "      standing\n"
+              + "      graceUntil\n"
+              + "      subscriptionStatus\n"
+              + "      currentPeriodEnd\n"
+              + "      cancelAtPeriodEnd\n"
+              + "      catalogVersion\n"
+              + "      configured\n"
+              + "      billed\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
   /** <code>management.webhookEndpoints</code>: List the webhook endpoints of a project with their status, signing-secret rotation and delivery health. */
   public static final OperationDescriptor<WebhookEndpointsReply> MANAGEMENT_WEBHOOK_ENDPOINTS =
       OperationDescriptor.builder("management.webhookEndpoints", Wire.required(WebhookEndpointsReply::decode))
@@ -3028,6 +3092,17 @@ public final class Operations {
               + "          id\n"
               + "        }\n"
               + "        result {\n"
+              + "          billingCheckoutSession {\n"
+              + "            orgId\n"
+              + "            planId\n"
+              + "            url\n"
+              + "            expiresAt\n"
+              + "          }\n"
+              + "          billingPortalSession {\n"
+              + "            orgId\n"
+              + "            url\n"
+              + "            expiresAt\n"
+              + "          }\n"
               + "          broadcastPermissionChanged {\n"
               + "            member {\n"
               + "              conversationId\n"
@@ -4149,6 +4224,93 @@ public final class Operations {
               + "}")
           .build();
 
+  /** <code>management.createBillingCheckoutSession</code>: Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires. */
+  public static final OperationDescriptor<CreateBillingCheckoutSessionReply> MANAGEMENT_CREATE_BILLING_CHECKOUT_SESSION =
+      OperationDescriptor.builder("management.createBillingCheckoutSession", Wire.required(CreateBillingCheckoutSessionReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("createBillingCheckoutSession")
+          .operationName("ManagementCreateBillingCheckoutSession")
+          .resultType("CreateBillingCheckoutSessionReply!")
+          .inputFields(List.of("orgId", "planId"))
+          .idempotency("singleUse", OperationDescriptor.Retry.SAME_REQUEST, true, 3, 60000L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "mutation ManagementCreateBillingCheckoutSession($context: RequestContextInput!, $input: CreateBillingCheckoutSessionRequestInput!) {\n"
+              + "  createBillingCheckoutSession(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      orgId\n"
+              + "      planId\n"
+              + "      url\n"
+              + "      expiresAt\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.createBillingPortalSession</code>: Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires. */
+  public static final OperationDescriptor<CreateBillingPortalSessionReply> MANAGEMENT_CREATE_BILLING_PORTAL_SESSION =
+      OperationDescriptor.builder("management.createBillingPortalSession", Wire.required(CreateBillingPortalSessionReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("createBillingPortalSession")
+          .operationName("ManagementCreateBillingPortalSession")
+          .resultType("CreateBillingPortalSessionReply!")
+          .inputFields(List.of("orgId"))
+          .idempotency("singleUse", OperationDescriptor.Retry.SAME_REQUEST, true, 3, 60000L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "mutation ManagementCreateBillingPortalSession($context: RequestContextInput!, $input: CreateBillingPortalSessionRequestInput!) {\n"
+              + "  createBillingPortalSession(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      orgId\n"
+              + "      url\n"
+              + "      expiresAt\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
   /** <code>management.configureWebhook</code>: Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery. */
   public static final OperationDescriptor<ConfigureWebhookReply> MANAGEMENT_CONFIGURE_WEBHOOK =
       OperationDescriptor.builder("management.configureWebhook", Wire.required(ConfigureWebhookReply::decode))
@@ -4662,6 +4824,7 @@ public final class Operations {
           MANAGEMENT_DEPLOYMENT_USAGE,
           MANAGEMENT_PROJECT_USAGE,
           MANAGEMENT_ORGANIZATION_USAGE,
+          MANAGEMENT_ORGANIZATION_BILLING,
           MANAGEMENT_WEBHOOK_ENDPOINTS,
           MANAGEMENT_WEBHOOK_DELIVERIES,
           MANAGEMENT_RESOLVE_REQUEST,
@@ -4675,6 +4838,8 @@ public final class Operations {
           MANAGEMENT_CREDENTIAL_PERMIT,
           MANAGEMENT_PAUSE_OPERATION,
           MANAGEMENT_RESUME_OPERATION,
+          MANAGEMENT_CREATE_BILLING_CHECKOUT_SESSION,
+          MANAGEMENT_CREATE_BILLING_PORTAL_SESSION,
           MANAGEMENT_CONFIGURE_WEBHOOK,
           MANAGEMENT_UPDATE_WEBHOOK,
           MANAGEMENT_ROTATE_WEBHOOK_SECRET,

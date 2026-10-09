@@ -1,6 +1,6 @@
 # Java and Kotlin operation coverage
 
-The Java and Kotlin SDK members that send each API operation. 65 of the 65 operations that Java and Kotlin packages can send have a method.
+The Java and Kotlin SDK members that send each API operation. 65 of the 68 operations that Java and Kotlin packages can send have a method.
 
 ## Communication
 
@@ -62,6 +62,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](../../operations/management/deploymentUsage.md) | server | [`ManagementApi.deploymentUsage`](server.md#managementapideploymentusage-method), [`ManagementSuspendApi.deploymentUsage`](server-kotlin.md#managementsuspendapideploymentusage-method) |
 | [`management.projectUsage`](../../operations/management/projectUsage.md) | server | [`ManagementApi.projectUsage`](server.md#managementapiprojectusage-method), [`ManagementSuspendApi.projectUsage`](server-kotlin.md#managementsuspendapiprojectusage-method) |
 | [`management.organizationUsage`](../../operations/management/organizationUsage.md) | server | [`ManagementApi.organizationUsage`](server.md#managementapiorganizationusage-method), [`ManagementSuspendApi.organizationUsage`](server-kotlin.md#managementsuspendapiorganizationusage-method) |
+| [`management.organizationBilling`](../../operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](../../operations/management/webhookEndpoints.md) | server | [`ManagementApi.webhookEndpoints`](server.md#managementapiwebhookendpoints-method), [`ManagementSuspendApi.webhookEndpoints`](server-kotlin.md#managementsuspendapiwebhookendpoints-method) |
 | [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md) | server | [`ManagementApi.webhookDeliveries`](server.md#managementapiwebhookdeliveries-method), [`ManagementSuspendApi.webhookDeliveries`](server-kotlin.md#managementsuspendapiwebhookdeliveries-method) |
 | [`management.resolveRequest`](../../operations/management/resolveRequest.md) | server | [`Requests.resolve`](server.md#requestsresolve-method), [`Requests.retry`](server.md#requestsretry-method), [`ManagementApi.resolveRequest`](server.md#managementapiresolverequest-method), [`ManagementSuspendApi.resolveRequest`](server-kotlin.md#managementsuspendapiresolverequest-method) |
@@ -75,6 +76,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](../../operations/management/credentialPermit.md) | server | [`ManagementApi.credentialPermit`](server.md#managementapicredentialpermit-method), [`ManagementSuspendApi.credentialPermit`](server-kotlin.md#managementsuspendapicredentialpermit-method) |
 | [`management.pauseOperation`](../../operations/management/pauseOperation.md) | server | [`ManagementApi.pauseOperation`](server.md#managementapipauseoperation-method), [`ManagementSuspendApi.pauseOperation`](server-kotlin.md#managementsuspendapipauseoperation-method) |
 | [`management.resumeOperation`](../../operations/management/resumeOperation.md) | server | [`ManagementApi.resumeOperation`](server.md#managementapiresumeoperation-method), [`ManagementSuspendApi.resumeOperation`](server-kotlin.md#managementsuspendapiresumeoperation-method) |
+| [`management.createBillingCheckoutSession`](../../operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](../../operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](../../operations/management/configureWebhook.md) | server | [`ManagementApi.configureWebhook`](server.md#managementapiconfigurewebhook-method), [`ManagementSuspendApi.configureWebhook`](server-kotlin.md#managementsuspendapiconfigurewebhook-method) |
 | [`management.updateWebhook`](../../operations/management/updateWebhook.md) | server | [`ManagementApi.updateWebhook`](server.md#managementapiupdatewebhook-method), [`ManagementSuspendApi.updateWebhook`](server-kotlin.md#managementsuspendapiupdatewebhook-method) |
 | [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md) | server | [`ManagementApi.rotateWebhookSecret`](server.md#managementapirotatewebhooksecret-method), [`ManagementSuspendApi.rotateWebhookSecret`](server-kotlin.md#managementsuspendapirotatewebhooksecret-method) |

@@ -494,6 +494,17 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
           id
         }
         result {
+          billingCheckoutSession {
+            orgId
+            planId
+            url
+            expiresAt
+          }
+          billingPortalSession {
+            orgId
+            url
+            expiresAt
+          }
           broadcastPermissionChanged {
             member {
               conversationId
@@ -2309,6 +2320,39 @@ query ManagementOrganizationUsage($context: RequestContextInput!, $input: Organi
   }
 }
 
+query ManagementOrganizationBilling($context: RequestContextInput!, $input: OrganizationBillingRequestInput!) {
+  organizationBilling(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      planId
+      standing
+      graceUntil
+      subscriptionStatus
+      currentPeriodEnd
+      cancelAtPeriodEnd
+      catalogVersion
+      configured
+      billed
+    }
+  }
+}
+
 query ManagementWebhookEndpoints($context: RequestContextInput!, $input: WebhookEndpointsRequestInput!) {
   webhookEndpoints(context: $context, input: $input) {
     status
@@ -2438,6 +2482,17 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
           id
         }
         result {
+          billingCheckoutSession {
+            orgId
+            planId
+            url
+            expiresAt
+          }
+          billingPortalSession {
+            orgId
+            url
+            expiresAt
+          }
           broadcastPermissionChanged {
             member {
               conversationId
@@ -3384,6 +3439,59 @@ mutation ManagementResumeOperation($context: RequestContextInput!, $input: Resum
         messagePreview
       }
       blockedReason
+    }
+  }
+}
+
+mutation ManagementCreateBillingCheckoutSession($context: RequestContextInput!, $input: CreateBillingCheckoutSessionRequestInput!) {
+  createBillingCheckoutSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      planId
+      url
+      expiresAt
+    }
+  }
+}
+
+mutation ManagementCreateBillingPortalSession($context: RequestContextInput!, $input: CreateBillingPortalSessionRequestInput!) {
+  createBillingPortalSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      url
+      expiresAt
     }
   }
 }

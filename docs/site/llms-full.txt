@@ -24,7 +24,7 @@ Reference documentation, quickstarts and tested examples for the ConvoHop SDKs.
 
 ## API operations
 
-The [operation reference](operations/index.md) documents each of the 76 GraphQL operations and the SDK members that send it.
+The [operation reference](operations/index.md) documents each of the 79 GraphQL operations and the SDK members that send it.
 
 ## For LLMs and agents
 
@@ -9042,7 +9042,7 @@ Sends [`communication.typing`](operations/communication/typing.md).
 
 # TypeScript operation coverage
 
-The TypeScript SDK members that send each API operation. 53 of the 76 operations that TypeScript packages can send have a method.
+The TypeScript SDK members that send each API operation. 53 of the 79 operations that TypeScript packages can send have a method.
 
 ## Communication
 
@@ -9115,6 +9115,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](operations/management/deploymentUsage.md) | server | Not wrapped by a method |
 | [`management.projectUsage`](operations/management/projectUsage.md) | server | Not wrapped by a method |
 | [`management.organizationUsage`](operations/management/organizationUsage.md) | server | Not wrapped by a method |
+| [`management.organizationBilling`](operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](operations/management/webhookEndpoints.md) | server | Not wrapped by a method |
 | [`management.webhookDeliveries`](operations/management/webhookDeliveries.md) | server | Not wrapped by a method |
 | [`management.resolveRequest`](operations/management/resolveRequest.md) | server | Not wrapped by a method |
@@ -9128,6 +9129,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](operations/management/credentialPermit.md) | server | [`ConvoHopManagementClient.deliveryPermit`](typescript/reference/server.md#convohopmanagementclientdeliverypermit-method) |
 | [`management.pauseOperation`](operations/management/pauseOperation.md) | server | Not wrapped by a method |
 | [`management.resumeOperation`](operations/management/resumeOperation.md) | server | Not wrapped by a method |
+| [`management.createBillingCheckoutSession`](operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](operations/management/configureWebhook.md) | server | Not wrapped by a method |
 | [`management.updateWebhook`](operations/management/updateWebhook.md) | server | Not wrapped by a method |
 | [`management.rotateWebhookSecret`](operations/management/rotateWebhookSecret.md) | server | Not wrapped by a method |
@@ -10982,6 +10985,18 @@ Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new reques
 
 Sends [`management.organizationUsage`](operations/management/organizationUsage.md).
 
+#### `AsyncConvoHopManagement.organization_billing` method
+
+```python
+async def organization_billing(self, *, org_id: str) -> OrganizationBilling
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
 #### `AsyncConvoHopManagement.webhook_endpoints` method
 
 ```python
@@ -11283,6 +11298,49 @@ Parameters:
 - `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 Sends [`management.resumeOperation`](operations/management/resumeOperation.md).
+
+#### `AsyncConvoHopManagement.create_billing_checkout_session` method
+
+```python
+async def create_billing_checkout_session(
+    self,
+    *,
+    org_id: str,
+    plan_id: str,
+    request_id: str | None = None,
+) -> BillingCheckoutSession
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `AsyncConvoHopManagement.create_billing_portal_session` method
+
+```python
+async def create_billing_portal_session(
+    self,
+    *,
+    org_id: str,
+    request_id: str | None = None,
+) -> BillingPortalSession
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 #### `AsyncConvoHopManagement.configure_webhook` method
 
@@ -12704,6 +12762,18 @@ Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new reques
 
 Sends [`management.organizationUsage`](operations/management/organizationUsage.md).
 
+#### `ConvoHopManagement.organization_billing` method
+
+```python
+def organization_billing(self, *, org_id: str) -> OrganizationBilling
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
 #### `ConvoHopManagement.webhook_endpoints` method
 
 ```python
@@ -13005,6 +13075,49 @@ Parameters:
 - `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 Sends [`management.resumeOperation`](operations/management/resumeOperation.md).
+
+#### `ConvoHopManagement.create_billing_checkout_session` method
+
+```python
+def create_billing_checkout_session(
+    self,
+    *,
+    org_id: str,
+    plan_id: str,
+    request_id: str | None = None,
+) -> BillingCheckoutSession
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `ConvoHopManagement.create_billing_portal_session` method
+
+```python
+def create_billing_portal_session(
+    self,
+    *,
+    org_id: str,
+    request_id: str | None = None,
+) -> BillingPortalSession
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 #### `ConvoHopManagement.configure_webhook` method
 
@@ -15531,6 +15644,29 @@ class AlertLiveSessionPayload:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `BillingCheckoutSession` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class BillingCheckoutSession:
+    org_id: str
+    plan_id: str
+    url: str
+    expires_at: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `BillingPortalSession` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class BillingPortalSession:
+    org_id: str
+    url: str
+    expires_at: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `BroadcastPermissionChanged` class
 
 ```python
@@ -15671,6 +15807,59 @@ class ConversationMuteReply:
     request_id: str
     server_time: str
     result: ConversationMute
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingCheckoutSessionReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingCheckoutSessionReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: BillingCheckoutSession | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingCheckoutSessionRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingCheckoutSessionRequestInput:
+    org_id: str
+    plan_id: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingPortalSessionReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingPortalSessionReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: BillingPortalSession | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingPortalSessionRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingPortalSessionRequestInput:
+    org_id: str
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
@@ -17073,6 +17262,50 @@ class Organization:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `OrganizationBilling` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBilling:
+    org_id: str
+    plan_id: str | None
+    standing: str | None
+    grace_until: str | None
+    subscription_status: str | None
+    current_period_end: str | None
+    cancel_at_period_end: bool
+    catalog_version: str
+    configured: bool
+    billed: bool
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `OrganizationBillingReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBillingReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: OrganizationBilling | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `OrganizationBillingRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBillingRequestInput:
+    org_id: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `OrganizationPage` class
 
 ```python
@@ -17489,6 +17722,8 @@ class ResumeOperationRequestInput:
 ```python
 @dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
 class RetainedResult:
+    billing_checkout_session: BillingCheckoutSession | None
+    billing_portal_session: BillingPortalSession | None
     broadcast_permission_changed: BroadcastPermissionChanged | None
     conversation: Conversation | None
     conversation_member_batch: ConversationMemberBatch | None
@@ -18174,7 +18409,7 @@ LiveSessionState: TypeAlias = Literal[
 
 # Python operation coverage
 
-The Python SDK members that send each API operation. 63 of the 65 operations that Python packages can send have a method.
+The Python SDK members that send each API operation. 63 of the 68 operations that Python packages can send have a method.
 
 ## Communication
 
@@ -18236,6 +18471,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](operations/management/deploymentUsage.md) | server | [`ConvoHopManagement.deployment_usage`](python/reference/convohop.md#convohopmanagementdeployment_usage-method), [`AsyncConvoHopManagement.deployment_usage`](python/reference/convohop.md#asyncconvohopmanagementdeployment_usage-method) |
 | [`management.projectUsage`](operations/management/projectUsage.md) | server | [`ConvoHopManagement.project_usage`](python/reference/convohop.md#convohopmanagementproject_usage-method), [`AsyncConvoHopManagement.project_usage`](python/reference/convohop.md#asyncconvohopmanagementproject_usage-method) |
 | [`management.organizationUsage`](operations/management/organizationUsage.md) | server | [`ConvoHopManagement.organization_usage`](python/reference/convohop.md#convohopmanagementorganization_usage-method), [`AsyncConvoHopManagement.organization_usage`](python/reference/convohop.md#asyncconvohopmanagementorganization_usage-method) |
+| [`management.organizationBilling`](operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](operations/management/webhookEndpoints.md) | server | [`ConvoHopManagement.webhook_endpoints`](python/reference/convohop.md#convohopmanagementwebhook_endpoints-method), [`AsyncConvoHopManagement.webhook_endpoints`](python/reference/convohop.md#asyncconvohopmanagementwebhook_endpoints-method) |
 | [`management.webhookDeliveries`](operations/management/webhookDeliveries.md) | server | [`ConvoHopManagement.webhook_deliveries`](python/reference/convohop.md#convohopmanagementwebhook_deliveries-method), [`AsyncConvoHopManagement.webhook_deliveries`](python/reference/convohop.md#asyncconvohopmanagementwebhook_deliveries-method) |
 | [`management.resolveRequest`](operations/management/resolveRequest.md) | server | [`ConvoHopManagement.resolve_request`](python/reference/convohop.md#convohopmanagementresolve_request-method), [`ConvoHopManagement.retry_request`](python/reference/convohop.md#convohopmanagementretry_request-method), [`AsyncConvoHopManagement.resolve_request`](python/reference/convohop.md#asyncconvohopmanagementresolve_request-method), [`AsyncConvoHopManagement.retry_request`](python/reference/convohop.md#asyncconvohopmanagementretry_request-method) |
@@ -18249,6 +18485,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](operations/management/credentialPermit.md) | server | [`ConvoHopManagement.credential_permit`](python/reference/convohop.md#convohopmanagementcredential_permit-method), [`AsyncConvoHopManagement.credential_permit`](python/reference/convohop.md#asyncconvohopmanagementcredential_permit-method) |
 | [`management.pauseOperation`](operations/management/pauseOperation.md) | server | [`ConvoHopManagement.pause_operation`](python/reference/convohop.md#convohopmanagementpause_operation-method), [`AsyncConvoHopManagement.pause_operation`](python/reference/convohop.md#asyncconvohopmanagementpause_operation-method) |
 | [`management.resumeOperation`](operations/management/resumeOperation.md) | server | [`ConvoHopManagement.resume_operation`](python/reference/convohop.md#convohopmanagementresume_operation-method), [`AsyncConvoHopManagement.resume_operation`](python/reference/convohop.md#asyncconvohopmanagementresume_operation-method) |
+| [`management.createBillingCheckoutSession`](operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](operations/management/configureWebhook.md) | server | [`ConvoHopManagement.configure_webhook`](python/reference/convohop.md#convohopmanagementconfigure_webhook-method), [`AsyncConvoHopManagement.configure_webhook`](python/reference/convohop.md#asyncconvohopmanagementconfigure_webhook-method) |
 | [`management.updateWebhook`](operations/management/updateWebhook.md) | server | [`ConvoHopManagement.update_webhook`](python/reference/convohop.md#convohopmanagementupdate_webhook-method), [`AsyncConvoHopManagement.update_webhook`](python/reference/convohop.md#asyncconvohopmanagementupdate_webhook-method) |
 | [`management.rotateWebhookSecret`](operations/management/rotateWebhookSecret.md) | server | [`ConvoHopManagement.rotate_webhook_secret`](python/reference/convohop.md#convohopmanagementrotate_webhook_secret-method), [`AsyncConvoHopManagement.rotate_webhook_secret`](python/reference/convohop.md#asyncconvohopmanagementrotate_webhook_secret-method) |
@@ -19640,6 +19878,86 @@ public const string AuthorityUnavailable = "AUTHORITY_UNAVAILABLE";
 ```
 
 The authority is temporarily unavailable. Retry with the same requestId.
+
+#### `ErrorCodes.BillingCatalogConflict` static property
+
+```cs
+public const string BillingCatalogConflict = "BILLING_CATALOG_CONFLICT";
+```
+
+The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.
+
+#### `ErrorCodes.BillingCatalogNotSynced` static property
+
+```cs
+public const string BillingCatalogNotSynced = "BILLING_CATALOG_NOT_SYNCED";
+```
+
+The billing provider's catalog does not match the configured price book yet. An operator must sync it.
+
+#### `ErrorCodes.BillingCustomerMissing` static property
+
+```cs
+public const string BillingCustomerMissing = "BILLING_CUSTOMER_MISSING";
+```
+
+The organization has no billing account yet. Start a checkout first.
+
+#### `ErrorCodes.BillingLinkExpired` static property
+
+```cs
+public const string BillingLinkExpired = "BILLING_LINK_EXPIRED";
+```
+
+The billing link of this request is no longer valid. Send a new request with a new requestId.
+
+#### `ErrorCodes.BillingNotConfigured` static property
+
+```cs
+public const string BillingNotConfigured = "BILLING_NOT_CONFIGURED";
+```
+
+Billing is not configured in this environment.
+
+#### `ErrorCodes.BillingPlanUnavailable` static property
+
+```cs
+public const string BillingPlanUnavailable = "BILLING_PLAN_UNAVAILABLE";
+```
+
+The plan is not offered for self-service checkout.
+
+#### `ErrorCodes.BillingProviderChanged` static property
+
+```cs
+public const string BillingProviderChanged = "BILLING_PROVIDER_CHANGED";
+```
+
+The organization's billing account belongs to a different billing provider.
+
+#### `ErrorCodes.BillingProviderRejected` static property
+
+```cs
+public const string BillingProviderRejected = "BILLING_PROVIDER_REJECTED";
+```
+
+The billing provider refused the request.
+
+#### `ErrorCodes.BillingSubscriptionActive` static property
+
+```cs
+public const string BillingSubscriptionActive = "BILLING_SUBSCRIPTION_ACTIVE";
+```
+
+The organization already has a subscription. Change it in the billing portal.
+
+#### `ErrorCodes.BillingSuspended` static property
+
+```cs
+public const string BillingSuspended = "BILLING_SUSPENDED";
+```
+
+The organization is suspended for an unpaid balance. Update its payment method in the billing portal.
 
 #### `ErrorCodes.CredentialDeliveryExpired` static property
 
@@ -21085,6 +21403,14 @@ public static readonly OperationDescriptor<OrganizationUsageRequestInput, Organi
 
 Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.
 
+#### `Operations.Management.OrganizationBilling` static property
+
+```cs
+public static readonly OperationDescriptor<OrganizationBillingRequestInput, OrganizationBillingReply> OrganizationBilling;
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
 #### `Operations.Management.WebhookEndpoints` static property
 
 ```cs
@@ -21188,6 +21514,22 @@ public static readonly OperationDescriptor<ResumeOperationRequestInput, ResumeOp
 ```
 
 Resume a paused operation.
+
+#### `Operations.Management.CreateBillingCheckoutSession` static property
+
+```cs
+public static readonly OperationDescriptor<CreateBillingCheckoutSessionRequestInput, CreateBillingCheckoutSessionReply> CreateBillingCheckoutSession;
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+#### `Operations.Management.CreateBillingPortalSession` static property
+
+```cs
+public static readonly OperationDescriptor<CreateBillingPortalSessionRequestInput, CreateBillingPortalSessionReply> CreateBillingPortalSession;
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
 
 #### `Operations.Management.ConfigureWebhook` static property
 
@@ -25983,6 +26325,30 @@ Authorization: portalCredential (condition owner).
 
 Sends [`management.organizationUsage`](operations/management/organizationUsage.md).
 
+#### `ManagementApi.OrganizationBillingAsync` method
+
+```cs
+public Task<OrganizationBillingReply> OrganizationBillingAsync(OrganizationBillingRequestInput input, CancellationToken cancellationToken = default);
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Parameters:
+
+- `input`: The operation input.
+- `cancellationToken`: Stops waiting.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: portalCredential (condition owner).
+
 #### `ManagementApi.WebhookEndpointsAsync` method
 
 ```cs
@@ -26332,6 +26698,56 @@ Authorization: portalCredential (condition owner).
 
 Sends [`management.resumeOperation`](operations/management/resumeOperation.md).
 
+#### `ManagementApi.CreateBillingCheckoutSessionAsync` method
+
+```cs
+public Task<CreateBillingCheckoutSessionReply> CreateBillingCheckoutSessionAsync(CreateBillingCheckoutSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Authorization: portalCredential (condition owner).
+
+#### `ManagementApi.CreateBillingPortalSessionAsync` method
+
+```cs
+public Task<CreateBillingPortalSessionReply> CreateBillingPortalSessionAsync(CreateBillingPortalSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Authorization: portalCredential (condition owner).
+
 #### `ManagementApi.ConfigureWebhookAsync` method
 
 ```cs
@@ -26622,6 +27038,35 @@ public sealed class AlertLiveSessionPayload
 
 The AlertLiveSessionPayload result.
 
+### `BillingCheckoutSession` class
+
+```cs
+public sealed class BillingCheckoutSession
+{
+    public BillingCheckoutSession();
+    public string OrgId { get; init; }
+    public string PlanId { get; init; }
+    public string Url { get; init; }
+    public string ExpiresAt { get; init; }
+}
+```
+
+The BillingCheckoutSession result.
+
+### `BillingPortalSession` class
+
+```cs
+public sealed class BillingPortalSession
+{
+    public BillingPortalSession();
+    public string OrgId { get; init; }
+    public string Url { get; init; }
+    public string? ExpiresAt { get; init; }
+}
+```
+
+The BillingPortalSession result.
+
 ### `BroadcastPermissionChanged` class
 
 ```cs
@@ -26797,6 +27242,71 @@ public sealed class ConversationMuteReply
 ```
 
 The ConversationMuteReply result.
+
+### `CreateBillingCheckoutSessionReply` class
+
+```cs
+public sealed class CreateBillingCheckoutSessionReply
+{
+    public CreateBillingCheckoutSessionReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public BillingCheckoutSession? Result { get; init; }
+}
+```
+
+The CreateBillingCheckoutSessionReply result.
+
+### `CreateBillingCheckoutSessionRequestInput` class
+
+```cs
+public sealed class CreateBillingCheckoutSessionRequestInput
+{
+    public CreateBillingCheckoutSessionRequestInput(string orgId, string planId);
+    public string OrgId { get; set; }
+    public string PlanId { get; set; }
+}
+```
+
+The CreateBillingCheckoutSessionRequestInput input.
+
+### `CreateBillingPortalSessionReply` class
+
+```cs
+public sealed class CreateBillingPortalSessionReply
+{
+    public CreateBillingPortalSessionReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public BillingPortalSession? Result { get; init; }
+}
+```
+
+The CreateBillingPortalSessionReply result.
+
+### `CreateBillingPortalSessionRequestInput` class
+
+```cs
+public sealed class CreateBillingPortalSessionRequestInput
+{
+    public CreateBillingPortalSessionRequestInput(string orgId);
+    public string OrgId { get; set; }
+}
+```
+
+The CreateBillingPortalSessionRequestInput input.
 
 ### `CreateConversationReply` class
 
@@ -28528,6 +29038,59 @@ public sealed class Organization
 
 The Organization result.
 
+### `OrganizationBilling` class
+
+```cs
+public sealed class OrganizationBilling
+{
+    public OrganizationBilling();
+    public string OrgId { get; init; }
+    public string? PlanId { get; init; }
+    public string? Standing { get; init; }
+    public string? GraceUntil { get; init; }
+    public string? SubscriptionStatus { get; init; }
+    public string? CurrentPeriodEnd { get; init; }
+    public bool CancelAtPeriodEnd { get; init; }
+    public string CatalogVersion { get; init; }
+    public bool Configured { get; init; }
+    public bool Billed { get; init; }
+}
+```
+
+The OrganizationBilling result.
+
+### `OrganizationBillingReply` class
+
+```cs
+public sealed class OrganizationBillingReply
+{
+    public OrganizationBillingReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public OrganizationBilling? Result { get; init; }
+}
+```
+
+The OrganizationBillingReply result.
+
+### `OrganizationBillingRequestInput` class
+
+```cs
+public sealed class OrganizationBillingRequestInput
+{
+    public OrganizationBillingRequestInput(string orgId);
+    public string OrgId { get; set; }
+}
+```
+
+The OrganizationBillingRequestInput input.
+
 ### `OrganizationPage` class
 
 ```cs
@@ -29064,6 +29627,8 @@ The ResumeOperationRequestInput input.
 public sealed class RetainedResult
 {
     public RetainedResult();
+    public BillingCheckoutSession? BillingCheckoutSession { get; init; }
+    public BillingPortalSession? BillingPortalSession { get; init; }
     public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }
     public Conversation? Conversation { get; init; }
     public ConversationMemberBatch? ConversationMemberBatch { get; init; }
@@ -29899,7 +30464,7 @@ The LiveSessionState enum.
 
 # .NET operation coverage
 
-The .NET SDK members that send each API operation. 65 of the 65 operations that .NET packages can send have a method.
+The .NET SDK members that send each API operation. 65 of the 68 operations that .NET packages can send have a method.
 
 ## Communication
 
@@ -29961,6 +30526,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](operations/management/deploymentUsage.md) | server | [`ManagementApi.DeploymentUsageAsync`](dotnet/reference/api.md#managementapideploymentusageasync-method) |
 | [`management.projectUsage`](operations/management/projectUsage.md) | server | [`ManagementApi.ProjectUsageAsync`](dotnet/reference/api.md#managementapiprojectusageasync-method) |
 | [`management.organizationUsage`](operations/management/organizationUsage.md) | server | [`ManagementApi.OrganizationUsageAsync`](dotnet/reference/api.md#managementapiorganizationusageasync-method) |
+| [`management.organizationBilling`](operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](operations/management/webhookEndpoints.md) | server | [`ManagementApi.WebhookEndpointsAsync`](dotnet/reference/api.md#managementapiwebhookendpointsasync-method) |
 | [`management.webhookDeliveries`](operations/management/webhookDeliveries.md) | server | [`ManagementApi.WebhookDeliveriesAsync`](dotnet/reference/api.md#managementapiwebhookdeliveriesasync-method) |
 | [`management.resolveRequest`](operations/management/resolveRequest.md) | server | [`ConvoHopTransport.RetryAsync`](dotnet/reference/convohop.md#convohoptransportretryasync-method), [`ManagementApi.ResolveRequestAsync`](dotnet/reference/api.md#managementapiresolverequestasync-method) |
@@ -29974,6 +30540,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](operations/management/credentialPermit.md) | server | [`ConvoHopManagementClient.GetDeliveryPermitAsync`](dotnet/reference/convohop.md#convohopmanagementclientgetdeliverypermitasync-method), [`ManagementApi.CredentialPermitAsync`](dotnet/reference/api.md#managementapicredentialpermitasync-method) |
 | [`management.pauseOperation`](operations/management/pauseOperation.md) | server | [`ManagementApi.PauseOperationAsync`](dotnet/reference/api.md#managementapipauseoperationasync-method) |
 | [`management.resumeOperation`](operations/management/resumeOperation.md) | server | [`ManagementApi.ResumeOperationAsync`](dotnet/reference/api.md#managementapiresumeoperationasync-method) |
+| [`management.createBillingCheckoutSession`](operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](operations/management/configureWebhook.md) | server | [`ManagementApi.ConfigureWebhookAsync`](dotnet/reference/api.md#managementapiconfigurewebhookasync-method) |
 | [`management.updateWebhook`](operations/management/updateWebhook.md) | server | [`ManagementApi.UpdateWebhookAsync`](dotnet/reference/api.md#managementapiupdatewebhookasync-method) |
 | [`management.rotateWebhookSecret`](operations/management/rotateWebhookSecret.md) | server | [`ManagementApi.RotateWebhookSecretAsync`](dotnet/reference/api.md#managementapirotatewebhooksecretasync-method) |
@@ -31983,6 +32551,26 @@ Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is
 
 Sends [`management.organizationUsage`](operations/management/organizationUsage.md).
 
+#### `ManagementApi.organizationBilling` method
+
+```java
+public OrganizationBillingReply organizationBilling(OrganizationBillingRequestInput input)
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
 #### `ManagementApi.webhookEndpoints` method
 
 ```java
@@ -32286,6 +32874,50 @@ Returns: the authority result
 Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.resumeOperation`](operations/management/resumeOperation.md).
+
+#### `ManagementApi.createBillingCheckoutSession` method
+
+```java
+public CreateBillingCheckoutSessionReply createBillingCheckoutSession(CreateBillingCheckoutSessionRequestInput input)
+public CreateBillingCheckoutSessionReply createBillingCheckoutSession(CreateBillingCheckoutSessionRequestInput input, @Nullable String requestId)
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.createBillingPortalSession` method
+
+```java
+public CreateBillingPortalSessionReply createBillingPortalSession(CreateBillingPortalSessionRequestInput input)
+public CreateBillingPortalSessionReply createBillingPortalSession(CreateBillingPortalSessionRequestInput input, @Nullable String requestId)
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.configureWebhook` method
 
@@ -35823,6 +36455,26 @@ The `AlertLiveSessionPayload` result type.
 
 Package: `com.convohop.server.model`.
 
+### `BillingCheckoutSession` type
+
+```java
+public final class BillingCheckoutSession
+```
+
+The `BillingCheckoutSession` result type.
+
+Package: `com.convohop.server.model`.
+
+### `BillingPortalSession` type
+
+```java
+public final class BillingPortalSession
+```
+
+The `BillingPortalSession` result type.
+
+Package: `com.convohop.server.model`.
+
 ### `BroadcastPermissionChanged` type
 
 ```java
@@ -35936,6 +36588,50 @@ public final class ConversationMuteReply
 ```
 
 The `ConversationMuteReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `CreateBillingCheckoutSessionReply` type
+
+```java
+public final class CreateBillingCheckoutSessionReply
+```
+
+The `CreateBillingCheckoutSessionReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `CreateBillingCheckoutSessionRequestInput` type
+
+```java
+public final class CreateBillingCheckoutSessionRequestInput
+```
+
+The `CreateBillingCheckoutSessionRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
+### `CreateBillingPortalSessionReply` type
+
+```java
+public final class CreateBillingPortalSessionReply
+```
+
+The `CreateBillingPortalSessionReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `CreateBillingPortalSessionRequestInput` type
+
+```java
+public final class CreateBillingPortalSessionRequestInput
+```
+
+The `CreateBillingPortalSessionRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
 
 Package: `com.convohop.server.model`.
 
@@ -37050,6 +37746,38 @@ public final class Organization
 ```
 
 The `Organization` result type.
+
+Package: `com.convohop.server.model`.
+
+### `OrganizationBilling` type
+
+```java
+public final class OrganizationBilling
+```
+
+The `OrganizationBilling` result type.
+
+Package: `com.convohop.server.model`.
+
+### `OrganizationBillingReply` type
+
+```java
+public final class OrganizationBillingReply
+```
+
+The `OrganizationBillingReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `OrganizationBillingRequestInput` type
+
+```java
+public final class OrganizationBillingRequestInput
+```
+
+The `OrganizationBillingRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
 
 Package: `com.convohop.server.model`.
 
@@ -38401,6 +39129,14 @@ Suspending `ManagementApi.organizationUsage`.
 
 Sends [`management.organizationUsage`](operations/management/organizationUsage.md).
 
+#### `ManagementSuspendApi.organizationBilling` method
+
+```java
+public suspend fun organizationBilling(input: OrganizationBillingRequestInput): OrganizationBillingReply
+```
+
+Suspending `ManagementApi.organizationBilling`.
+
 #### `ManagementSuspendApi.webhookEndpoints` method
 
 ```java
@@ -38531,6 +39267,22 @@ Suspending `ManagementApi.resumeOperation`.
 
 Sends [`management.resumeOperation`](operations/management/resumeOperation.md).
 
+#### `ManagementSuspendApi.createBillingCheckoutSession` method
+
+```java
+public suspend fun createBillingCheckoutSession(input: CreateBillingCheckoutSessionRequestInput, requestId: String? = null): CreateBillingCheckoutSessionReply
+```
+
+Suspending `ManagementApi.createBillingCheckoutSession`.
+
+#### `ManagementSuspendApi.createBillingPortalSession` method
+
+```java
+public suspend fun createBillingPortalSession(input: CreateBillingPortalSessionRequestInput, requestId: String? = null): CreateBillingPortalSessionReply
+```
+
+Suspending `ManagementApi.createBillingPortalSession`.
+
 #### `ManagementSuspendApi.configureWebhook` method
 
 ```java
@@ -38613,7 +39365,7 @@ Package: `com.convohop.server.kotlin`.
 
 # Java and Kotlin operation coverage
 
-The Java and Kotlin SDK members that send each API operation. 65 of the 65 operations that Java and Kotlin packages can send have a method.
+The Java and Kotlin SDK members that send each API operation. 65 of the 68 operations that Java and Kotlin packages can send have a method.
 
 ## Communication
 
@@ -38675,6 +39427,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](operations/management/deploymentUsage.md) | server | [`ManagementApi.deploymentUsage`](jvm/reference/server.md#managementapideploymentusage-method), [`ManagementSuspendApi.deploymentUsage`](jvm/reference/server-kotlin.md#managementsuspendapideploymentusage-method) |
 | [`management.projectUsage`](operations/management/projectUsage.md) | server | [`ManagementApi.projectUsage`](jvm/reference/server.md#managementapiprojectusage-method), [`ManagementSuspendApi.projectUsage`](jvm/reference/server-kotlin.md#managementsuspendapiprojectusage-method) |
 | [`management.organizationUsage`](operations/management/organizationUsage.md) | server | [`ManagementApi.organizationUsage`](jvm/reference/server.md#managementapiorganizationusage-method), [`ManagementSuspendApi.organizationUsage`](jvm/reference/server-kotlin.md#managementsuspendapiorganizationusage-method) |
+| [`management.organizationBilling`](operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](operations/management/webhookEndpoints.md) | server | [`ManagementApi.webhookEndpoints`](jvm/reference/server.md#managementapiwebhookendpoints-method), [`ManagementSuspendApi.webhookEndpoints`](jvm/reference/server-kotlin.md#managementsuspendapiwebhookendpoints-method) |
 | [`management.webhookDeliveries`](operations/management/webhookDeliveries.md) | server | [`ManagementApi.webhookDeliveries`](jvm/reference/server.md#managementapiwebhookdeliveries-method), [`ManagementSuspendApi.webhookDeliveries`](jvm/reference/server-kotlin.md#managementsuspendapiwebhookdeliveries-method) |
 | [`management.resolveRequest`](operations/management/resolveRequest.md) | server | [`Requests.resolve`](jvm/reference/server.md#requestsresolve-method), [`Requests.retry`](jvm/reference/server.md#requestsretry-method), [`ManagementApi.resolveRequest`](jvm/reference/server.md#managementapiresolverequest-method), [`ManagementSuspendApi.resolveRequest`](jvm/reference/server-kotlin.md#managementsuspendapiresolverequest-method) |
@@ -38688,6 +39441,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](operations/management/credentialPermit.md) | server | [`ManagementApi.credentialPermit`](jvm/reference/server.md#managementapicredentialpermit-method), [`ManagementSuspendApi.credentialPermit`](jvm/reference/server-kotlin.md#managementsuspendapicredentialpermit-method) |
 | [`management.pauseOperation`](operations/management/pauseOperation.md) | server | [`ManagementApi.pauseOperation`](jvm/reference/server.md#managementapipauseoperation-method), [`ManagementSuspendApi.pauseOperation`](jvm/reference/server-kotlin.md#managementsuspendapipauseoperation-method) |
 | [`management.resumeOperation`](operations/management/resumeOperation.md) | server | [`ManagementApi.resumeOperation`](jvm/reference/server.md#managementapiresumeoperation-method), [`ManagementSuspendApi.resumeOperation`](jvm/reference/server-kotlin.md#managementsuspendapiresumeoperation-method) |
+| [`management.createBillingCheckoutSession`](operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](operations/management/configureWebhook.md) | server | [`ManagementApi.configureWebhook`](jvm/reference/server.md#managementapiconfigurewebhook-method), [`ManagementSuspendApi.configureWebhook`](jvm/reference/server-kotlin.md#managementsuspendapiconfigurewebhook-method) |
 | [`management.updateWebhook`](operations/management/updateWebhook.md) | server | [`ManagementApi.updateWebhook`](jvm/reference/server.md#managementapiupdatewebhook-method), [`ManagementSuspendApi.updateWebhook`](jvm/reference/server-kotlin.md#managementsuspendapiupdatewebhook-method) |
 | [`management.rotateWebhookSecret`](operations/management/rotateWebhookSecret.md) | server | [`ManagementApi.rotateWebhookSecret`](jvm/reference/server.md#managementapirotatewebhooksecret-method), [`ManagementSuspendApi.rotateWebhookSecret`](jvm/reference/server-kotlin.md#managementsuspendapirotatewebhooksecret-method) |
@@ -39484,6 +40239,31 @@ type AlertLiveSessionPayload struct {
 
 AlertLiveSessionPayload is the GraphQL object AlertLiveSessionPayload.
 
+### `BillingCheckoutSession` struct
+
+```go
+type BillingCheckoutSession struct {
+	OrgID     UUID   `json:"orgId"`
+	PlanID    string `json:"planId"`
+	URL       string `json:"url"`
+	ExpiresAt string `json:"expiresAt"`
+}
+```
+
+BillingCheckoutSession is the GraphQL object BillingCheckoutSession.
+
+### `BillingPortalSession` struct
+
+```go
+type BillingPortalSession struct {
+	OrgID     UUID    `json:"orgId"`
+	URL       string  `json:"url"`
+	ExpiresAt *string `json:"expiresAt"`
+}
+```
+
+BillingPortalSession is the GraphQL object BillingPortalSession.
+
 ### `BroadcastPermissionChanged` struct
 
 ```go
@@ -39637,6 +40417,63 @@ type ConversationMuteReply struct {
 ```
 
 ConversationMuteReply is the GraphQL object ConversationMuteReply.
+
+### `CreateBillingCheckoutSessionReply` struct
+
+```go
+type CreateBillingCheckoutSessionReply struct {
+	Status      string                  `json:"status"`
+	RequestID   UUID                    `json:"requestId"`
+	ServerTime  *string                 `json:"serverTime"`
+	ReceiptID   *UUID                   `json:"receiptId"`
+	CommittedAt *string                 `json:"committedAt"`
+	Replayed    *bool                   `json:"replayed"`
+	Operation   *OperationRef           `json:"operation"`
+	ResourceRef *ResourceRef            `json:"resourceRef"`
+	Result      *BillingCheckoutSession `json:"result"`
+}
+```
+
+CreateBillingCheckoutSessionReply is the GraphQL object CreateBillingCheckoutSessionReply.
+
+### `CreateBillingCheckoutSessionRequestInput` struct
+
+```go
+type CreateBillingCheckoutSessionRequestInput struct {
+	OrgID  UUID   `json:"orgId"`
+	PlanID string `json:"planId"`
+}
+```
+
+CreateBillingCheckoutSessionRequestInput is the GraphQL input CreateBillingCheckoutSessionRequestInput.
+
+### `CreateBillingPortalSessionReply` struct
+
+```go
+type CreateBillingPortalSessionReply struct {
+	Status      string                `json:"status"`
+	RequestID   UUID                  `json:"requestId"`
+	ServerTime  *string               `json:"serverTime"`
+	ReceiptID   *UUID                 `json:"receiptId"`
+	CommittedAt *string               `json:"committedAt"`
+	Replayed    *bool                 `json:"replayed"`
+	Operation   *OperationRef         `json:"operation"`
+	ResourceRef *ResourceRef          `json:"resourceRef"`
+	Result      *BillingPortalSession `json:"result"`
+}
+```
+
+CreateBillingPortalSessionReply is the GraphQL object CreateBillingPortalSessionReply.
+
+### `CreateBillingPortalSessionRequestInput` struct
+
+```go
+type CreateBillingPortalSessionRequestInput struct {
+	OrgID UUID `json:"orgId"`
+}
+```
+
+CreateBillingPortalSessionRequestInput is the GraphQL input CreateBillingPortalSessionRequestInput.
 
 ### `CreateConversationReply` struct
 
@@ -41025,6 +41862,16 @@ Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestI
 
 Sends [`management.organizationUsage`](operations/management/organizationUsage.md).
 
+#### `ManagementClient.OrganizationBilling` method
+
+```go
+func (c *ManagementClient) OrganizationBilling(ctx context.Context, input OrganizationBillingRequestInput, opts ...CallOption) (*OrganizationBillingReply, error)
+```
+
+OrganizationBilling calls the management.organizationBilling query. Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner).
+
 #### `ManagementClient.WebhookEndpoints` method
 
 ```go
@@ -41180,6 +42027,26 @@ ResumeOperation calls the management.resumeOperation mutation. Resume a paused o
 Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).
 
 Sends [`management.resumeOperation`](operations/management/resumeOperation.md).
+
+#### `ManagementClient.CreateBillingCheckoutSession` method
+
+```go
+func (c *ManagementClient) CreateBillingCheckoutSession(ctx context.Context, input CreateBillingCheckoutSessionRequestInput, opts ...CallOption) (*CreateBillingCheckoutSessionReply, error)
+```
+
+CreateBillingCheckoutSession calls the management.createBillingCheckoutSession mutation. Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Idempotency: singleUse. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).
+
+#### `ManagementClient.CreateBillingPortalSession` method
+
+```go
+func (c *ManagementClient) CreateBillingPortalSession(ctx context.Context, input CreateBillingPortalSessionRequestInput, opts ...CallOption) (*CreateBillingPortalSessionReply, error)
+```
+
+CreateBillingPortalSession calls the management.createBillingPortalSession mutation. Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Idempotency: singleUse. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).
 
 #### `ManagementClient.ConfigureWebhook` method
 
@@ -41573,6 +42440,53 @@ type Organization struct {
 ```
 
 Organization is the GraphQL object Organization.
+
+### `OrganizationBilling` struct
+
+```go
+type OrganizationBilling struct {
+	OrgID              UUID    `json:"orgId"`
+	PlanID             *string `json:"planId"`
+	Standing           *string `json:"standing"`
+	GraceUntil         *string `json:"graceUntil"`
+	SubscriptionStatus *string `json:"subscriptionStatus"`
+	CurrentPeriodEnd   *string `json:"currentPeriodEnd"`
+	CancelAtPeriodEnd  bool    `json:"cancelAtPeriodEnd"`
+	CatalogVersion     string  `json:"catalogVersion"`
+	Configured         bool    `json:"configured"`
+	Billed             bool    `json:"billed"`
+}
+```
+
+OrganizationBilling is the GraphQL object OrganizationBilling.
+
+### `OrganizationBillingReply` struct
+
+```go
+type OrganizationBillingReply struct {
+	Status      string               `json:"status"`
+	RequestID   UUID                 `json:"requestId"`
+	ServerTime  *string              `json:"serverTime"`
+	ReceiptID   *UUID                `json:"receiptId"`
+	CommittedAt *string              `json:"committedAt"`
+	Replayed    *bool                `json:"replayed"`
+	Operation   *OperationRef        `json:"operation"`
+	ResourceRef *ResourceRef         `json:"resourceRef"`
+	Result      *OrganizationBilling `json:"result"`
+}
+```
+
+OrganizationBillingReply is the GraphQL object OrganizationBillingReply.
+
+### `OrganizationBillingRequestInput` struct
+
+```go
+type OrganizationBillingRequestInput struct {
+	OrgID UUID `json:"orgId"`
+}
+```
+
+OrganizationBillingRequestInput is the GraphQL input OrganizationBillingRequestInput.
 
 ### `OrganizationPage` struct
 
@@ -42868,6 +43782,8 @@ ResumeOperationRequestInput is the GraphQL input ResumeOperationRequestInput.
 
 ```go
 type RetainedResult struct {
+	BillingCheckoutSession     *BillingCheckoutSession     `json:"billingCheckoutSession"`
+	BillingPortalSession       *BillingPortalSession       `json:"billingPortalSession"`
 	BroadcastPermissionChanged *BroadcastPermissionChanged `json:"broadcastPermissionChanged"`
 	Conversation               *Conversation               `json:"conversation"`
 	ConversationMemberBatch    *ConversationMemberBatch    `json:"conversationMemberBatch"`
@@ -43541,6 +44457,86 @@ const ErrorCodeAuthorityUnavailable ErrorCode = "AUTHORITY_UNAVAILABLE"
 ```
 
 The authority is temporarily unavailable. Retry with the same requestId. HTTP status 503. Retryable. Raised by the server or the SDK.
+
+#### `ErrorCode.ErrorCodeBillingCatalogConflict` case
+
+```go
+const ErrorCodeBillingCatalogConflict ErrorCode = "BILLING_CATALOG_CONFLICT"
+```
+
+The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingCatalogNotSynced` case
+
+```go
+const ErrorCodeBillingCatalogNotSynced ErrorCode = "BILLING_CATALOG_NOT_SYNCED"
+```
+
+The billing provider's catalog does not match the configured price book yet. An operator must sync it. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingCustomerMissing` case
+
+```go
+const ErrorCodeBillingCustomerMissing ErrorCode = "BILLING_CUSTOMER_MISSING"
+```
+
+The organization has no billing account yet. Start a checkout first. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingLinkExpired` case
+
+```go
+const ErrorCodeBillingLinkExpired ErrorCode = "BILLING_LINK_EXPIRED"
+```
+
+The billing link of this request is no longer valid. Send a new request with a new requestId. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingNotConfigured` case
+
+```go
+const ErrorCodeBillingNotConfigured ErrorCode = "BILLING_NOT_CONFIGURED"
+```
+
+Billing is not configured in this environment. HTTP status 503. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingPlanUnavailable` case
+
+```go
+const ErrorCodeBillingPlanUnavailable ErrorCode = "BILLING_PLAN_UNAVAILABLE"
+```
+
+The plan is not offered for self-service checkout. HTTP status 400. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingProviderChanged` case
+
+```go
+const ErrorCodeBillingProviderChanged ErrorCode = "BILLING_PROVIDER_CHANGED"
+```
+
+The organization's billing account belongs to a different billing provider. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingProviderRejected` case
+
+```go
+const ErrorCodeBillingProviderRejected ErrorCode = "BILLING_PROVIDER_REJECTED"
+```
+
+The billing provider refused the request. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingSubscriptionActive` case
+
+```go
+const ErrorCodeBillingSubscriptionActive ErrorCode = "BILLING_SUBSCRIPTION_ACTIVE"
+```
+
+The organization already has a subscription. Change it in the billing portal. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingSuspended` case
+
+```go
+const ErrorCodeBillingSuspended ErrorCode = "BILLING_SUSPENDED"
+```
+
+The organization is suspended for an unpaid balance. Update its payment method in the billing portal. HTTP status 402. Not retryable. Raised by the server.
 
 #### `ErrorCode.ErrorCodeCredentialDeliveryExpired` case
 
@@ -45617,7 +46613,7 @@ WithoutPreview stops a message event's preview from becoming the body when there
 
 # Go operation coverage
 
-The Go SDK members that send each API operation. 65 of the 65 operations that Go packages can send have a method.
+The Go SDK members that send each API operation. 65 of the 68 operations that Go packages can send have a method.
 
 ## Communication
 
@@ -45679,6 +46675,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](operations/management/deploymentUsage.md) | server | [`ManagementClient.DeploymentUsage`](go/reference/convohop.md#managementclientdeploymentusage-method) |
 | [`management.projectUsage`](operations/management/projectUsage.md) | server | [`ManagementClient.ProjectUsage`](go/reference/convohop.md#managementclientprojectusage-method) |
 | [`management.organizationUsage`](operations/management/organizationUsage.md) | server | [`ManagementClient.OrganizationUsage`](go/reference/convohop.md#managementclientorganizationusage-method) |
+| [`management.organizationBilling`](operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](operations/management/webhookEndpoints.md) | server | [`ManagementClient.WebhookEndpoints`](go/reference/convohop.md#managementclientwebhookendpoints-method) |
 | [`management.webhookDeliveries`](operations/management/webhookDeliveries.md) | server | [`ManagementClient.WebhookDeliveries`](go/reference/convohop.md#managementclientwebhookdeliveries-method) |
 | [`management.resolveRequest`](operations/management/resolveRequest.md) | server | [`ManagementClient.ResolveRequest`](go/reference/convohop.md#managementclientresolverequest-method), [`ManagementClient.Retry`](go/reference/convohop.md#managementclientretry-method) |
@@ -45692,6 +46689,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](operations/management/credentialPermit.md) | server | [`ManagementClient.CredentialPermit`](go/reference/convohop.md#managementclientcredentialpermit-method) |
 | [`management.pauseOperation`](operations/management/pauseOperation.md) | server | [`ManagementClient.PauseOperation`](go/reference/convohop.md#managementclientpauseoperation-method) |
 | [`management.resumeOperation`](operations/management/resumeOperation.md) | server | [`ManagementClient.ResumeOperation`](go/reference/convohop.md#managementclientresumeoperation-method) |
+| [`management.createBillingCheckoutSession`](operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](operations/management/configureWebhook.md) | server | [`ManagementClient.ConfigureWebhook`](go/reference/convohop.md#managementclientconfigurewebhook-method) |
 | [`management.updateWebhook`](operations/management/updateWebhook.md) | server | [`ManagementClient.UpdateWebhook`](go/reference/convohop.md#managementclientupdatewebhook-method) |
 | [`management.rotateWebhookSecret`](operations/management/rotateWebhookSecret.md) | server | [`ManagementClient.RotateWebhookSecret`](go/reference/convohop.md#managementclientrotatewebhooksecret-method) |
@@ -45773,6 +46772,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](operations/management/deploymentUsage.md) | query | server | Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days. |
 | [`management.projectUsage`](operations/management/projectUsage.md) | query | server | Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days. |
 | [`management.organizationUsage`](operations/management/organizationUsage.md) | query | server | Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days. |
+| [`management.organizationBilling`](operations/management/organizationBilling.md) | query | server | Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription. |
 | [`management.webhookEndpoints`](operations/management/webhookEndpoints.md) | query | server | List the webhook endpoints of a project with their status, signing-secret rotation and delivery health. |
 | [`management.webhookDeliveries`](operations/management/webhookDeliveries.md) | query | server | List recent deliveries of a webhook endpoint. |
 | [`management.resolveRequest`](operations/management/resolveRequest.md) | query | server | Look up the stored outcome of an earlier management mutation by its requestId. |
@@ -45786,6 +46786,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](operations/management/credentialPermit.md) | mutation | server | Issue a signed permit that authorizes redeeming one credential delivery. |
 | [`management.pauseOperation`](operations/management/pauseOperation.md) | mutation | server | Pause a long-running operation. |
 | [`management.resumeOperation`](operations/management/resumeOperation.md) | mutation | server | Resume a paused operation. |
+| [`management.createBillingCheckoutSession`](operations/management/createBillingCheckoutSession.md) | mutation | server | Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires. |
+| [`management.createBillingPortalSession`](operations/management/createBillingPortalSession.md) | mutation | server | Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires. |
 | [`management.configureWebhook`](operations/management/configureWebhook.md) | mutation | server | Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery. |
 | [`management.updateWebhook`](operations/management/updateWebhook.md) | mutation | server | Change the event types of a webhook endpoint, or enable or disable it. |
 | [`management.rotateWebhookSecret`](operations/management/rotateWebhookSecret.md) | mutation | server | Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery. |
@@ -47076,6 +48078,17 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
           id
         }
         result {
+          billingCheckoutSession {
+            orgId
+            planId
+            url
+            expiresAt
+          }
+          billingPortalSession {
+            orgId
+            url
+            expiresAt
+          }
           broadcastPermissionChanged {
             member {
               conversationId
@@ -51681,6 +52694,100 @@ query ManagementOrganizationUsage($context: RequestContextInput!, $input: Organi
 | [Java and Kotlin](jvm/reference/operations.md) | [`ManagementApi.organizationUsage`](jvm/reference/server.md#managementapiorganizationusage-method), [`ManagementSuspendApi.organizationUsage`](jvm/reference/server-kotlin.md#managementsuspendapiorganizationusage-method) |
 | [Go](go/reference/operations.md) | [`ManagementClient.OrganizationUsage`](go/reference/convohop.md#managementclientorganizationusage-method) |
 
+# `management.organizationBilling`
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+- **Operation:** `management.organizationBilling`, a query sent as `ManagementOrganizationBilling`.
+- **Layer:** server (server SDKs).
+- **Authorization:** `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+- **Idempotency:** `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+**Context** (`context: RequestContextInput!`)
+
+| Field | Type | Use |
+| --- | --- | --- |
+| `requestId` | `UUID!` | required |
+| `projectId` | `UUID` | forbidden |
+| `incarnation` | `UUID` | optional |
+| `observedServingEpoch` | `Decimal` | optional |
+| `credentialDeliveryPermit` | `SignedProof` | forbidden |
+
+**Input** (`input: OrganizationBillingRequestInput!`)
+
+| Field | Type |
+| --- | --- |
+| `orgId` | `UUID!` |
+
+**Result** (`OrganizationBillingReply!`)
+
+| Field | Type |
+| --- | --- |
+| `status` | `String!` |
+| `requestId` | `UUID!` |
+| `serverTime` | `String` |
+| `receiptId` | `UUID` |
+| `committedAt` | `String` |
+| `replayed` | `Boolean` |
+| `operation` | `OperationRef` |
+| `resourceRef` | `ResourceRef` |
+| `result` | `OrganizationBilling` |
+
+**Errors**
+
+- Returned by the authority: `BILLING_NOT_CONFIGURED`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`.
+- Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
+- Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `TRANSPORT_UNKNOWN`.
+- Transient, so repeating the request may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.
+- Error sets: `request`, `http`.
+
+**GraphQL**
+
+```graphql
+query ManagementOrganizationBilling($context: RequestContextInput!, $input: OrganizationBillingRequestInput!) {
+  organizationBilling(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      planId
+      standing
+      graceUntil
+      subscriptionStatus
+      currentPeriodEnd
+      cancelAtPeriodEnd
+      catalogVersion
+      configured
+      billed
+    }
+  }
+}
+```
+
+## SDK members
+
+| Language | Members |
+| --- | --- |
+| [TypeScript](typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](python/reference/operations.md) | Not wrapped by a method |
+| [.NET](dotnet/reference/operations.md) | Not wrapped by a method |
+| [Java and Kotlin](jvm/reference/operations.md) | Not wrapped by a method |
+| [Go](go/reference/operations.md) | Not wrapped by a method |
+
 # `management.webhookEndpoints`
 
 List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.
@@ -51985,6 +53092,17 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
           id
         }
         result {
+          billingCheckoutSession {
+            orgId
+            planId
+            url
+            expiresAt
+          }
+          billingPortalSession {
+            orgId
+            url
+            expiresAt
+          }
           broadcastPermissionChanged {
             member {
               conversationId
@@ -52527,7 +53645,7 @@ Create a deployment in an organization. Completes asynchronously.
 
 **Errors**
 
-- Returned by the authority: `ALREADY_EXISTS`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`.
+- Returned by the authority: `ALREADY_EXISTS`, `BILLING_SUSPENDED`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`.
 - Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `IDEMPOTENCY_CONFLICT`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
 - Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RECOVERY_STORAGE_FAILURE`, `RESOLUTION_REQUIRED`, `TRANSPORT_UNKNOWN`.
 - Transient, so a retry with the same `requestId` and input may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `OUTCOME_UNKNOWN`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.
@@ -52668,7 +53786,7 @@ Create a project in a ready deployment. Completes asynchronously.
 
 **Errors**
 
-- Returned by the authority: `ALREADY_EXISTS`, `DEPLOYMENT_NOT_READY`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `PLAN_LIMIT_EXCEEDED`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`.
+- Returned by the authority: `ALREADY_EXISTS`, `BILLING_SUSPENDED`, `DEPLOYMENT_NOT_READY`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `PLAN_LIMIT_EXCEEDED`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`.
 - Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `IDEMPOTENCY_CONFLICT`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
 - Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RECOVERY_STORAGE_FAILURE`, `RESOLUTION_REQUIRED`, `TRANSPORT_UNKNOWN`.
 - Transient, so a retry with the same `requestId` and input may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `OUTCOME_UNKNOWN`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.
@@ -53580,6 +54698,182 @@ mutation ManagementResumeOperation($context: RequestContextInput!, $input: Resum
 | [.NET](dotnet/reference/operations.md) | [`ManagementApi.ResumeOperationAsync`](dotnet/reference/api.md#managementapiresumeoperationasync-method) |
 | [Java and Kotlin](jvm/reference/operations.md) | [`ManagementApi.resumeOperation`](jvm/reference/server.md#managementapiresumeoperation-method), [`ManagementSuspendApi.resumeOperation`](jvm/reference/server-kotlin.md#managementsuspendapiresumeoperation-method) |
 | [Go](go/reference/operations.md) | [`ManagementClient.ResumeOperation`](go/reference/convohop.md#managementclientresumeoperation-method) |
+
+# `management.createBillingCheckoutSession`
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+- **Operation:** `management.createBillingCheckoutSession`, a mutation sent as `ManagementCreateBillingCheckoutSession`.
+- **Layer:** server (server SDKs).
+- **Authorization:** `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+- **Idempotency:** `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+**Context** (`context: RequestContextInput!`)
+
+| Field | Type | Use |
+| --- | --- | --- |
+| `requestId` | `UUID!` | required |
+| `projectId` | `UUID` | forbidden |
+| `incarnation` | `UUID` | optional |
+| `observedServingEpoch` | `Decimal` | optional |
+| `credentialDeliveryPermit` | `SignedProof` | forbidden |
+
+**Input** (`input: CreateBillingCheckoutSessionRequestInput!`)
+
+| Field | Type |
+| --- | --- |
+| `orgId` | `UUID!` |
+| `planId` | `String!` |
+
+**Result** (`CreateBillingCheckoutSessionReply!`)
+
+| Field | Type |
+| --- | --- |
+| `status` | `String!` |
+| `requestId` | `UUID!` |
+| `serverTime` | `String` |
+| `receiptId` | `UUID` |
+| `committedAt` | `String` |
+| `replayed` | `Boolean` |
+| `operation` | `OperationRef` |
+| `resourceRef` | `ResourceRef` |
+| `result` | `BillingCheckoutSession` |
+
+**Errors**
+
+- Returned by the authority: `BILLING_CATALOG_CONFLICT`, `BILLING_CATALOG_NOT_SYNCED`, `BILLING_LINK_EXPIRED`, `BILLING_NOT_CONFIGURED`, `BILLING_PLAN_UNAVAILABLE`, `BILLING_PROVIDER_CHANGED`, `BILLING_PROVIDER_REJECTED`, `BILLING_SUBSCRIPTION_ACTIVE`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`.
+- Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `IDEMPOTENCY_CONFLICT`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
+- Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RECOVERY_STORAGE_FAILURE`, `RESOLUTION_REQUIRED`, `TRANSPORT_UNKNOWN`.
+- Transient, so a retry with the same `requestId` and input may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `OUTCOME_UNKNOWN`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.
+- Error sets: `request`, `http`, `mutation`.
+
+**GraphQL**
+
+```graphql
+mutation ManagementCreateBillingCheckoutSession($context: RequestContextInput!, $input: CreateBillingCheckoutSessionRequestInput!) {
+  createBillingCheckoutSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      planId
+      url
+      expiresAt
+    }
+  }
+}
+```
+
+## SDK members
+
+| Language | Members |
+| --- | --- |
+| [TypeScript](typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](python/reference/operations.md) | Not wrapped by a method |
+| [.NET](dotnet/reference/operations.md) | Not wrapped by a method |
+| [Java and Kotlin](jvm/reference/operations.md) | Not wrapped by a method |
+| [Go](go/reference/operations.md) | Not wrapped by a method |
+
+# `management.createBillingPortalSession`
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+- **Operation:** `management.createBillingPortalSession`, a mutation sent as `ManagementCreateBillingPortalSession`.
+- **Layer:** server (server SDKs).
+- **Authorization:** `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+- **Idempotency:** `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+**Context** (`context: RequestContextInput!`)
+
+| Field | Type | Use |
+| --- | --- | --- |
+| `requestId` | `UUID!` | required |
+| `projectId` | `UUID` | forbidden |
+| `incarnation` | `UUID` | optional |
+| `observedServingEpoch` | `Decimal` | optional |
+| `credentialDeliveryPermit` | `SignedProof` | forbidden |
+
+**Input** (`input: CreateBillingPortalSessionRequestInput!`)
+
+| Field | Type |
+| --- | --- |
+| `orgId` | `UUID!` |
+
+**Result** (`CreateBillingPortalSessionReply!`)
+
+| Field | Type |
+| --- | --- |
+| `status` | `String!` |
+| `requestId` | `UUID!` |
+| `serverTime` | `String` |
+| `receiptId` | `UUID` |
+| `committedAt` | `String` |
+| `replayed` | `Boolean` |
+| `operation` | `OperationRef` |
+| `resourceRef` | `ResourceRef` |
+| `result` | `BillingPortalSession` |
+
+**Errors**
+
+- Returned by the authority: `BILLING_CATALOG_CONFLICT`, `BILLING_CATALOG_NOT_SYNCED`, `BILLING_CUSTOMER_MISSING`, `BILLING_LINK_EXPIRED`, `BILLING_NOT_CONFIGURED`, `BILLING_PROVIDER_CHANGED`, `BILLING_PROVIDER_REJECTED`, `FEATURE_UNSUPPORTED`, `FORBIDDEN`, `GRAPHQL_INVALID_REQUEST`, `GRAPHQL_QUERY_LIMIT`, `GRAPHQL_RESPONSE_LIMIT`, `NOT_FOUND`, `OUTCOME_UNKNOWN`, `REQUEST_TOO_LARGE`, `RESPONSE_TOO_LARGE`, `RETRY_EXHAUSTED`.
+- Returned by the authority or raised by SDKs: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `IDEMPOTENCY_CONFLICT`, `INVALID_REQUEST`, `UNAUTHENTICATED`.
+- Raised by SDKs: `GRAPHQL_ERROR`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `RECOVERY_STORAGE_FAILURE`, `RESOLUTION_REQUIRED`, `TRANSPORT_UNKNOWN`.
+- Transient, so a retry with the same `requestId` and input may succeed: `ADMISSION_LIMIT`, `AUTHORITY_UNAVAILABLE`, `HTTP_FAILURE`, `INVALID_RESPONSE`, `OUTCOME_UNKNOWN`, `RETRY_EXHAUSTED`, `TRANSPORT_UNKNOWN`.
+- Error sets: `request`, `http`, `mutation`.
+
+**GraphQL**
+
+```graphql
+mutation ManagementCreateBillingPortalSession($context: RequestContextInput!, $input: CreateBillingPortalSessionRequestInput!) {
+  createBillingPortalSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      url
+      expiresAt
+    }
+  }
+}
+```
+
+## SDK members
+
+| Language | Members |
+| --- | --- |
+| [TypeScript](typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](python/reference/operations.md) | Not wrapped by a method |
+| [.NET](dotnet/reference/operations.md) | Not wrapped by a method |
+| [Java and Kotlin](jvm/reference/operations.md) | Not wrapped by a method |
+| [Go](go/reference/operations.md) | Not wrapped by a method |
 
 # `management.configureWebhook`
 

@@ -147,6 +147,35 @@ public sealed class AlertLiveSessionPayload
 
 The AlertLiveSessionPayload result.
 
+### `BillingCheckoutSession` class
+
+```cs
+public sealed class BillingCheckoutSession
+{
+    public BillingCheckoutSession();
+    public string OrgId { get; init; }
+    public string PlanId { get; init; }
+    public string Url { get; init; }
+    public string ExpiresAt { get; init; }
+}
+```
+
+The BillingCheckoutSession result.
+
+### `BillingPortalSession` class
+
+```cs
+public sealed class BillingPortalSession
+{
+    public BillingPortalSession();
+    public string OrgId { get; init; }
+    public string Url { get; init; }
+    public string? ExpiresAt { get; init; }
+}
+```
+
+The BillingPortalSession result.
+
 ### `BroadcastPermissionChanged` class
 
 ```cs
@@ -322,6 +351,71 @@ public sealed class ConversationMuteReply
 ```
 
 The ConversationMuteReply result.
+
+### `CreateBillingCheckoutSessionReply` class
+
+```cs
+public sealed class CreateBillingCheckoutSessionReply
+{
+    public CreateBillingCheckoutSessionReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public BillingCheckoutSession? Result { get; init; }
+}
+```
+
+The CreateBillingCheckoutSessionReply result.
+
+### `CreateBillingCheckoutSessionRequestInput` class
+
+```cs
+public sealed class CreateBillingCheckoutSessionRequestInput
+{
+    public CreateBillingCheckoutSessionRequestInput(string orgId, string planId);
+    public string OrgId { get; set; }
+    public string PlanId { get; set; }
+}
+```
+
+The CreateBillingCheckoutSessionRequestInput input.
+
+### `CreateBillingPortalSessionReply` class
+
+```cs
+public sealed class CreateBillingPortalSessionReply
+{
+    public CreateBillingPortalSessionReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public BillingPortalSession? Result { get; init; }
+}
+```
+
+The CreateBillingPortalSessionReply result.
+
+### `CreateBillingPortalSessionRequestInput` class
+
+```cs
+public sealed class CreateBillingPortalSessionRequestInput
+{
+    public CreateBillingPortalSessionRequestInput(string orgId);
+    public string OrgId { get; set; }
+}
+```
+
+The CreateBillingPortalSessionRequestInput input.
 
 ### `CreateConversationReply` class
 
@@ -2053,6 +2147,59 @@ public sealed class Organization
 
 The Organization result.
 
+### `OrganizationBilling` class
+
+```cs
+public sealed class OrganizationBilling
+{
+    public OrganizationBilling();
+    public string OrgId { get; init; }
+    public string? PlanId { get; init; }
+    public string? Standing { get; init; }
+    public string? GraceUntil { get; init; }
+    public string? SubscriptionStatus { get; init; }
+    public string? CurrentPeriodEnd { get; init; }
+    public bool CancelAtPeriodEnd { get; init; }
+    public string CatalogVersion { get; init; }
+    public bool Configured { get; init; }
+    public bool Billed { get; init; }
+}
+```
+
+The OrganizationBilling result.
+
+### `OrganizationBillingReply` class
+
+```cs
+public sealed class OrganizationBillingReply
+{
+    public OrganizationBillingReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public OrganizationBilling? Result { get; init; }
+}
+```
+
+The OrganizationBillingReply result.
+
+### `OrganizationBillingRequestInput` class
+
+```cs
+public sealed class OrganizationBillingRequestInput
+{
+    public OrganizationBillingRequestInput(string orgId);
+    public string OrgId { get; set; }
+}
+```
+
+The OrganizationBillingRequestInput input.
+
 ### `OrganizationPage` class
 
 ```cs
@@ -2589,6 +2736,8 @@ The ResumeOperationRequestInput input.
 public sealed class RetainedResult
 {
     public RetainedResult();
+    public BillingCheckoutSession? BillingCheckoutSession { get; init; }
+    public BillingPortalSession? BillingPortalSession { get; init; }
     public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }
     public Conversation? Conversation { get; init; }
     public ConversationMemberBatch? ConversationMemberBatch { get; init; }

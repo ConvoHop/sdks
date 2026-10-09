@@ -1384,6 +1384,86 @@ public const string AuthorityUnavailable = "AUTHORITY_UNAVAILABLE";
 
 The authority is temporarily unavailable. Retry with the same requestId.
 
+#### `ErrorCodes.BillingCatalogConflict` static property
+
+```cs
+public const string BillingCatalogConflict = "BILLING_CATALOG_CONFLICT";
+```
+
+The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.
+
+#### `ErrorCodes.BillingCatalogNotSynced` static property
+
+```cs
+public const string BillingCatalogNotSynced = "BILLING_CATALOG_NOT_SYNCED";
+```
+
+The billing provider's catalog does not match the configured price book yet. An operator must sync it.
+
+#### `ErrorCodes.BillingCustomerMissing` static property
+
+```cs
+public const string BillingCustomerMissing = "BILLING_CUSTOMER_MISSING";
+```
+
+The organization has no billing account yet. Start a checkout first.
+
+#### `ErrorCodes.BillingLinkExpired` static property
+
+```cs
+public const string BillingLinkExpired = "BILLING_LINK_EXPIRED";
+```
+
+The billing link of this request is no longer valid. Send a new request with a new requestId.
+
+#### `ErrorCodes.BillingNotConfigured` static property
+
+```cs
+public const string BillingNotConfigured = "BILLING_NOT_CONFIGURED";
+```
+
+Billing is not configured in this environment.
+
+#### `ErrorCodes.BillingPlanUnavailable` static property
+
+```cs
+public const string BillingPlanUnavailable = "BILLING_PLAN_UNAVAILABLE";
+```
+
+The plan is not offered for self-service checkout.
+
+#### `ErrorCodes.BillingProviderChanged` static property
+
+```cs
+public const string BillingProviderChanged = "BILLING_PROVIDER_CHANGED";
+```
+
+The organization's billing account belongs to a different billing provider.
+
+#### `ErrorCodes.BillingProviderRejected` static property
+
+```cs
+public const string BillingProviderRejected = "BILLING_PROVIDER_REJECTED";
+```
+
+The billing provider refused the request.
+
+#### `ErrorCodes.BillingSubscriptionActive` static property
+
+```cs
+public const string BillingSubscriptionActive = "BILLING_SUBSCRIPTION_ACTIVE";
+```
+
+The organization already has a subscription. Change it in the billing portal.
+
+#### `ErrorCodes.BillingSuspended` static property
+
+```cs
+public const string BillingSuspended = "BILLING_SUSPENDED";
+```
+
+The organization is suspended for an unpaid balance. Update its payment method in the billing portal.
+
 #### `ErrorCodes.CredentialDeliveryExpired` static property
 
 ```cs
@@ -2828,6 +2908,14 @@ public static readonly OperationDescriptor<OrganizationUsageRequestInput, Organi
 
 Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.
 
+#### `Operations.Management.OrganizationBilling` static property
+
+```cs
+public static readonly OperationDescriptor<OrganizationBillingRequestInput, OrganizationBillingReply> OrganizationBilling;
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
 #### `Operations.Management.WebhookEndpoints` static property
 
 ```cs
@@ -2931,6 +3019,22 @@ public static readonly OperationDescriptor<ResumeOperationRequestInput, ResumeOp
 ```
 
 Resume a paused operation.
+
+#### `Operations.Management.CreateBillingCheckoutSession` static property
+
+```cs
+public static readonly OperationDescriptor<CreateBillingCheckoutSessionRequestInput, CreateBillingCheckoutSessionReply> CreateBillingCheckoutSession;
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+#### `Operations.Management.CreateBillingPortalSession` static property
+
+```cs
+public static readonly OperationDescriptor<CreateBillingPortalSessionRequestInput, CreateBillingPortalSessionReply> CreateBillingPortalSession;
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
 
 #### `Operations.Management.ConfigureWebhook` static property
 
@@ -7726,6 +7830,30 @@ Authorization: portalCredential (condition owner).
 
 Sends [`management.organizationUsage`](../operations/management/organizationUsage.md).
 
+#### `ManagementApi.OrganizationBillingAsync` method
+
+```cs
+public Task<OrganizationBillingReply> OrganizationBillingAsync(OrganizationBillingRequestInput input, CancellationToken cancellationToken = default);
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Parameters:
+
+- `input`: The operation input.
+- `cancellationToken`: Stops waiting.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: portalCredential (condition owner).
+
 #### `ManagementApi.WebhookEndpointsAsync` method
 
 ```cs
@@ -8075,6 +8203,56 @@ Authorization: portalCredential (condition owner).
 
 Sends [`management.resumeOperation`](../operations/management/resumeOperation.md).
 
+#### `ManagementApi.CreateBillingCheckoutSessionAsync` method
+
+```cs
+public Task<CreateBillingCheckoutSessionReply> CreateBillingCheckoutSessionAsync(CreateBillingCheckoutSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Authorization: portalCredential (condition owner).
+
+#### `ManagementApi.CreateBillingPortalSessionAsync` method
+
+```cs
+public Task<CreateBillingPortalSessionReply> CreateBillingPortalSessionAsync(CreateBillingPortalSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Authorization: portalCredential (condition owner).
+
 #### `ManagementApi.ConfigureWebhookAsync` method
 
 ```cs
@@ -8365,6 +8543,35 @@ public sealed class AlertLiveSessionPayload
 
 The AlertLiveSessionPayload result.
 
+### `BillingCheckoutSession` class
+
+```cs
+public sealed class BillingCheckoutSession
+{
+    public BillingCheckoutSession();
+    public string OrgId { get; init; }
+    public string PlanId { get; init; }
+    public string Url { get; init; }
+    public string ExpiresAt { get; init; }
+}
+```
+
+The BillingCheckoutSession result.
+
+### `BillingPortalSession` class
+
+```cs
+public sealed class BillingPortalSession
+{
+    public BillingPortalSession();
+    public string OrgId { get; init; }
+    public string Url { get; init; }
+    public string? ExpiresAt { get; init; }
+}
+```
+
+The BillingPortalSession result.
+
 ### `BroadcastPermissionChanged` class
 
 ```cs
@@ -8540,6 +8747,71 @@ public sealed class ConversationMuteReply
 ```
 
 The ConversationMuteReply result.
+
+### `CreateBillingCheckoutSessionReply` class
+
+```cs
+public sealed class CreateBillingCheckoutSessionReply
+{
+    public CreateBillingCheckoutSessionReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public BillingCheckoutSession? Result { get; init; }
+}
+```
+
+The CreateBillingCheckoutSessionReply result.
+
+### `CreateBillingCheckoutSessionRequestInput` class
+
+```cs
+public sealed class CreateBillingCheckoutSessionRequestInput
+{
+    public CreateBillingCheckoutSessionRequestInput(string orgId, string planId);
+    public string OrgId { get; set; }
+    public string PlanId { get; set; }
+}
+```
+
+The CreateBillingCheckoutSessionRequestInput input.
+
+### `CreateBillingPortalSessionReply` class
+
+```cs
+public sealed class CreateBillingPortalSessionReply
+{
+    public CreateBillingPortalSessionReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public BillingPortalSession? Result { get; init; }
+}
+```
+
+The CreateBillingPortalSessionReply result.
+
+### `CreateBillingPortalSessionRequestInput` class
+
+```cs
+public sealed class CreateBillingPortalSessionRequestInput
+{
+    public CreateBillingPortalSessionRequestInput(string orgId);
+    public string OrgId { get; set; }
+}
+```
+
+The CreateBillingPortalSessionRequestInput input.
 
 ### `CreateConversationReply` class
 
@@ -10271,6 +10543,59 @@ public sealed class Organization
 
 The Organization result.
 
+### `OrganizationBilling` class
+
+```cs
+public sealed class OrganizationBilling
+{
+    public OrganizationBilling();
+    public string OrgId { get; init; }
+    public string? PlanId { get; init; }
+    public string? Standing { get; init; }
+    public string? GraceUntil { get; init; }
+    public string? SubscriptionStatus { get; init; }
+    public string? CurrentPeriodEnd { get; init; }
+    public bool CancelAtPeriodEnd { get; init; }
+    public string CatalogVersion { get; init; }
+    public bool Configured { get; init; }
+    public bool Billed { get; init; }
+}
+```
+
+The OrganizationBilling result.
+
+### `OrganizationBillingReply` class
+
+```cs
+public sealed class OrganizationBillingReply
+{
+    public OrganizationBillingReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public OrganizationBilling? Result { get; init; }
+}
+```
+
+The OrganizationBillingReply result.
+
+### `OrganizationBillingRequestInput` class
+
+```cs
+public sealed class OrganizationBillingRequestInput
+{
+    public OrganizationBillingRequestInput(string orgId);
+    public string OrgId { get; set; }
+}
+```
+
+The OrganizationBillingRequestInput input.
+
 ### `OrganizationPage` class
 
 ```cs
@@ -10807,6 +11132,8 @@ The ResumeOperationRequestInput input.
 public sealed class RetainedResult
 {
     public RetainedResult();
+    public BillingCheckoutSession? BillingCheckoutSession { get; init; }
+    public BillingPortalSession? BillingPortalSession { get; init; }
     public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }
     public Conversation? Conversation { get; init; }
     public ConversationMemberBatch? ConversationMemberBatch { get; init; }
@@ -11642,7 +11969,7 @@ The LiveSessionState enum.
 
 # .NET operation coverage
 
-The .NET SDK members that send each API operation. 65 of the 65 operations that .NET packages can send have a method.
+The .NET SDK members that send each API operation. 65 of the 68 operations that .NET packages can send have a method.
 
 ## Communication
 
@@ -11704,6 +12031,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](../operations/management/deploymentUsage.md) | server | [`ManagementApi.DeploymentUsageAsync`](reference/api.md#managementapideploymentusageasync-method) |
 | [`management.projectUsage`](../operations/management/projectUsage.md) | server | [`ManagementApi.ProjectUsageAsync`](reference/api.md#managementapiprojectusageasync-method) |
 | [`management.organizationUsage`](../operations/management/organizationUsage.md) | server | [`ManagementApi.OrganizationUsageAsync`](reference/api.md#managementapiorganizationusageasync-method) |
+| [`management.organizationBilling`](../operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](../operations/management/webhookEndpoints.md) | server | [`ManagementApi.WebhookEndpointsAsync`](reference/api.md#managementapiwebhookendpointsasync-method) |
 | [`management.webhookDeliveries`](../operations/management/webhookDeliveries.md) | server | [`ManagementApi.WebhookDeliveriesAsync`](reference/api.md#managementapiwebhookdeliveriesasync-method) |
 | [`management.resolveRequest`](../operations/management/resolveRequest.md) | server | [`ConvoHopTransport.RetryAsync`](reference/convohop.md#convohoptransportretryasync-method), [`ManagementApi.ResolveRequestAsync`](reference/api.md#managementapiresolverequestasync-method) |
@@ -11717,6 +12045,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](../operations/management/credentialPermit.md) | server | [`ConvoHopManagementClient.GetDeliveryPermitAsync`](reference/convohop.md#convohopmanagementclientgetdeliverypermitasync-method), [`ManagementApi.CredentialPermitAsync`](reference/api.md#managementapicredentialpermitasync-method) |
 | [`management.pauseOperation`](../operations/management/pauseOperation.md) | server | [`ManagementApi.PauseOperationAsync`](reference/api.md#managementapipauseoperationasync-method) |
 | [`management.resumeOperation`](../operations/management/resumeOperation.md) | server | [`ManagementApi.ResumeOperationAsync`](reference/api.md#managementapiresumeoperationasync-method) |
+| [`management.createBillingCheckoutSession`](../operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](../operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](../operations/management/configureWebhook.md) | server | [`ManagementApi.ConfigureWebhookAsync`](reference/api.md#managementapiconfigurewebhookasync-method) |
 | [`management.updateWebhook`](../operations/management/updateWebhook.md) | server | [`ManagementApi.UpdateWebhookAsync`](reference/api.md#managementapiupdatewebhookasync-method) |
 | [`management.rotateWebhookSecret`](../operations/management/rotateWebhookSecret.md) | server | [`ManagementApi.RotateWebhookSecretAsync`](reference/api.md#managementapirotatewebhooksecretasync-method) |

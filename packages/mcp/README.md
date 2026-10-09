@@ -77,8 +77,10 @@ No tool runs:
 
 - subscriptions, client-only and deprecated operations;
 - operations whose results are credentials (`withheldOperations`):
-  `communication.issueSession`, `communication.renewSession` and
-  `management.credentialPermit`;
+  `communication.issueSession`, `communication.renewSession`,
+  `management.credentialPermit`, and the hosted billing links of
+  `management.createBillingCheckoutSession` and
+  `management.createBillingPortalSession`;
 - operations that a delivery permit authorizes instead of a bearer
   credential, such as `communication.redeemCredential`.
 

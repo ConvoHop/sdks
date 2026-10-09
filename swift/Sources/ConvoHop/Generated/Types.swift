@@ -103,6 +103,41 @@ public struct AlertLiveSessionPayload: Codable, Hashable, Sendable {
     }
 }
 
+public struct BillingCheckoutSession: Codable, Hashable, Sendable {
+    public var orgId: String
+    public var planId: String
+    public var url: String
+    public var expiresAt: String
+
+    public init(
+        orgId: String,
+        planId: String,
+        url: String,
+        expiresAt: String
+    ) {
+        self.orgId = orgId
+        self.planId = planId
+        self.url = url
+        self.expiresAt = expiresAt
+    }
+}
+
+public struct BillingPortalSession: Codable, Hashable, Sendable {
+    public var orgId: String
+    public var url: String
+    public var expiresAt: String?
+
+    public init(
+        orgId: String,
+        url: String,
+        expiresAt: String? = nil
+    ) {
+        self.orgId = orgId
+        self.url = url
+        self.expiresAt = expiresAt
+    }
+}
+
 public struct BroadcastPermissionChanged: Codable, Hashable, Sendable {
     public var member: Member
     public var mediaCutoff: LiveMediaCutoff?
@@ -2596,6 +2631,8 @@ public struct ResourceRef: Codable, Hashable, Sendable {
 
 /// Exactly one typed field contains the retained, currently authorized receipt result.
 public struct RetainedResult: Codable, Hashable, Sendable {
+    public var billingCheckoutSession: BillingCheckoutSession?
+    public var billingPortalSession: BillingPortalSession?
     public var broadcastPermissionChanged: BroadcastPermissionChanged?
     public var conversation: Conversation?
     public var conversationMemberBatch: ConversationMemberBatch?
@@ -2619,6 +2656,8 @@ public struct RetainedResult: Codable, Hashable, Sendable {
     public var signedProof: JSONObject?
 
     public init(
+        billingCheckoutSession: BillingCheckoutSession? = nil,
+        billingPortalSession: BillingPortalSession? = nil,
         broadcastPermissionChanged: BroadcastPermissionChanged? = nil,
         conversation: Conversation? = nil,
         conversationMemberBatch: ConversationMemberBatch? = nil,
@@ -2641,6 +2680,8 @@ public struct RetainedResult: Codable, Hashable, Sendable {
         sessionRevocation: SessionRevocation? = nil,
         signedProof: JSONObject? = nil
     ) {
+        self.billingCheckoutSession = billingCheckoutSession
+        self.billingPortalSession = billingPortalSession
         self.broadcastPermissionChanged = broadcastPermissionChanged
         self.conversation = conversation
         self.conversationMemberBatch = conversationMemberBatch

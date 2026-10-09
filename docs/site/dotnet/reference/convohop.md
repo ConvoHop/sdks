@@ -848,6 +848,86 @@ public const string AuthorityUnavailable = "AUTHORITY_UNAVAILABLE";
 
 The authority is temporarily unavailable. Retry with the same requestId.
 
+#### `ErrorCodes.BillingCatalogConflict` static property
+
+```cs
+public const string BillingCatalogConflict = "BILLING_CATALOG_CONFLICT";
+```
+
+The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.
+
+#### `ErrorCodes.BillingCatalogNotSynced` static property
+
+```cs
+public const string BillingCatalogNotSynced = "BILLING_CATALOG_NOT_SYNCED";
+```
+
+The billing provider's catalog does not match the configured price book yet. An operator must sync it.
+
+#### `ErrorCodes.BillingCustomerMissing` static property
+
+```cs
+public const string BillingCustomerMissing = "BILLING_CUSTOMER_MISSING";
+```
+
+The organization has no billing account yet. Start a checkout first.
+
+#### `ErrorCodes.BillingLinkExpired` static property
+
+```cs
+public const string BillingLinkExpired = "BILLING_LINK_EXPIRED";
+```
+
+The billing link of this request is no longer valid. Send a new request with a new requestId.
+
+#### `ErrorCodes.BillingNotConfigured` static property
+
+```cs
+public const string BillingNotConfigured = "BILLING_NOT_CONFIGURED";
+```
+
+Billing is not configured in this environment.
+
+#### `ErrorCodes.BillingPlanUnavailable` static property
+
+```cs
+public const string BillingPlanUnavailable = "BILLING_PLAN_UNAVAILABLE";
+```
+
+The plan is not offered for self-service checkout.
+
+#### `ErrorCodes.BillingProviderChanged` static property
+
+```cs
+public const string BillingProviderChanged = "BILLING_PROVIDER_CHANGED";
+```
+
+The organization's billing account belongs to a different billing provider.
+
+#### `ErrorCodes.BillingProviderRejected` static property
+
+```cs
+public const string BillingProviderRejected = "BILLING_PROVIDER_REJECTED";
+```
+
+The billing provider refused the request.
+
+#### `ErrorCodes.BillingSubscriptionActive` static property
+
+```cs
+public const string BillingSubscriptionActive = "BILLING_SUBSCRIPTION_ACTIVE";
+```
+
+The organization already has a subscription. Change it in the billing portal.
+
+#### `ErrorCodes.BillingSuspended` static property
+
+```cs
+public const string BillingSuspended = "BILLING_SUSPENDED";
+```
+
+The organization is suspended for an unpaid balance. Update its payment method in the billing portal.
+
 #### `ErrorCodes.CredentialDeliveryExpired` static property
 
 ```cs
@@ -2292,6 +2372,14 @@ public static readonly OperationDescriptor<OrganizationUsageRequestInput, Organi
 
 Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.
 
+#### `Operations.Management.OrganizationBilling` static property
+
+```cs
+public static readonly OperationDescriptor<OrganizationBillingRequestInput, OrganizationBillingReply> OrganizationBilling;
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
 #### `Operations.Management.WebhookEndpoints` static property
 
 ```cs
@@ -2395,6 +2483,22 @@ public static readonly OperationDescriptor<ResumeOperationRequestInput, ResumeOp
 ```
 
 Resume a paused operation.
+
+#### `Operations.Management.CreateBillingCheckoutSession` static property
+
+```cs
+public static readonly OperationDescriptor<CreateBillingCheckoutSessionRequestInput, CreateBillingCheckoutSessionReply> CreateBillingCheckoutSession;
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+#### `Operations.Management.CreateBillingPortalSession` static property
+
+```cs
+public static readonly OperationDescriptor<CreateBillingPortalSessionRequestInput, CreateBillingPortalSessionReply> CreateBillingPortalSession;
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
 
 #### `Operations.Management.ConfigureWebhook` static property
 

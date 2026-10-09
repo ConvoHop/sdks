@@ -1,6 +1,6 @@
 # TypeScript operation coverage
 
-The TypeScript SDK members that send each API operation. 53 of the 76 operations that TypeScript packages can send have a method.
+The TypeScript SDK members that send each API operation. 53 of the 79 operations that TypeScript packages can send have a method.
 
 ## Communication
 
@@ -73,6 +73,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](../../operations/management/deploymentUsage.md) | server | Not wrapped by a method |
 | [`management.projectUsage`](../../operations/management/projectUsage.md) | server | Not wrapped by a method |
 | [`management.organizationUsage`](../../operations/management/organizationUsage.md) | server | Not wrapped by a method |
+| [`management.organizationBilling`](../../operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](../../operations/management/webhookEndpoints.md) | server | Not wrapped by a method |
 | [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md) | server | Not wrapped by a method |
 | [`management.resolveRequest`](../../operations/management/resolveRequest.md) | server | Not wrapped by a method |
@@ -86,6 +87,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](../../operations/management/credentialPermit.md) | server | [`ConvoHopManagementClient.deliveryPermit`](server.md#convohopmanagementclientdeliverypermit-method) |
 | [`management.pauseOperation`](../../operations/management/pauseOperation.md) | server | Not wrapped by a method |
 | [`management.resumeOperation`](../../operations/management/resumeOperation.md) | server | Not wrapped by a method |
+| [`management.createBillingCheckoutSession`](../../operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](../../operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](../../operations/management/configureWebhook.md) | server | Not wrapped by a method |
 | [`management.updateWebhook`](../../operations/management/updateWebhook.md) | server | Not wrapped by a method |
 | [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md) | server | Not wrapped by a method |

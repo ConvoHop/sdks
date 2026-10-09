@@ -129,6 +129,31 @@ type AlertLiveSessionPayload struct {
 
 AlertLiveSessionPayload is the GraphQL object AlertLiveSessionPayload.
 
+### `BillingCheckoutSession` struct
+
+```go
+type BillingCheckoutSession struct {
+	OrgID     UUID   `json:"orgId"`
+	PlanID    string `json:"planId"`
+	URL       string `json:"url"`
+	ExpiresAt string `json:"expiresAt"`
+}
+```
+
+BillingCheckoutSession is the GraphQL object BillingCheckoutSession.
+
+### `BillingPortalSession` struct
+
+```go
+type BillingPortalSession struct {
+	OrgID     UUID    `json:"orgId"`
+	URL       string  `json:"url"`
+	ExpiresAt *string `json:"expiresAt"`
+}
+```
+
+BillingPortalSession is the GraphQL object BillingPortalSession.
+
 ### `BroadcastPermissionChanged` struct
 
 ```go
@@ -282,6 +307,63 @@ type ConversationMuteReply struct {
 ```
 
 ConversationMuteReply is the GraphQL object ConversationMuteReply.
+
+### `CreateBillingCheckoutSessionReply` struct
+
+```go
+type CreateBillingCheckoutSessionReply struct {
+	Status      string                  `json:"status"`
+	RequestID   UUID                    `json:"requestId"`
+	ServerTime  *string                 `json:"serverTime"`
+	ReceiptID   *UUID                   `json:"receiptId"`
+	CommittedAt *string                 `json:"committedAt"`
+	Replayed    *bool                   `json:"replayed"`
+	Operation   *OperationRef           `json:"operation"`
+	ResourceRef *ResourceRef            `json:"resourceRef"`
+	Result      *BillingCheckoutSession `json:"result"`
+}
+```
+
+CreateBillingCheckoutSessionReply is the GraphQL object CreateBillingCheckoutSessionReply.
+
+### `CreateBillingCheckoutSessionRequestInput` struct
+
+```go
+type CreateBillingCheckoutSessionRequestInput struct {
+	OrgID  UUID   `json:"orgId"`
+	PlanID string `json:"planId"`
+}
+```
+
+CreateBillingCheckoutSessionRequestInput is the GraphQL input CreateBillingCheckoutSessionRequestInput.
+
+### `CreateBillingPortalSessionReply` struct
+
+```go
+type CreateBillingPortalSessionReply struct {
+	Status      string                `json:"status"`
+	RequestID   UUID                  `json:"requestId"`
+	ServerTime  *string               `json:"serverTime"`
+	ReceiptID   *UUID                 `json:"receiptId"`
+	CommittedAt *string               `json:"committedAt"`
+	Replayed    *bool                 `json:"replayed"`
+	Operation   *OperationRef         `json:"operation"`
+	ResourceRef *ResourceRef          `json:"resourceRef"`
+	Result      *BillingPortalSession `json:"result"`
+}
+```
+
+CreateBillingPortalSessionReply is the GraphQL object CreateBillingPortalSessionReply.
+
+### `CreateBillingPortalSessionRequestInput` struct
+
+```go
+type CreateBillingPortalSessionRequestInput struct {
+	OrgID UUID `json:"orgId"`
+}
+```
+
+CreateBillingPortalSessionRequestInput is the GraphQL input CreateBillingPortalSessionRequestInput.
 
 ### `CreateConversationReply` struct
 
@@ -1670,6 +1752,16 @@ Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestI
 
 Sends [`management.organizationUsage`](../../operations/management/organizationUsage.md).
 
+#### `ManagementClient.OrganizationBilling` method
+
+```go
+func (c *ManagementClient) OrganizationBilling(ctx context.Context, input OrganizationBillingRequestInput, opts ...CallOption) (*OrganizationBillingReply, error)
+```
+
+OrganizationBilling calls the management.organizationBilling query. Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner).
+
 #### `ManagementClient.WebhookEndpoints` method
 
 ```go
@@ -1825,6 +1917,26 @@ ResumeOperation calls the management.resumeOperation mutation. Resume a paused o
 Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).
 
 Sends [`management.resumeOperation`](../../operations/management/resumeOperation.md).
+
+#### `ManagementClient.CreateBillingCheckoutSession` method
+
+```go
+func (c *ManagementClient) CreateBillingCheckoutSession(ctx context.Context, input CreateBillingCheckoutSessionRequestInput, opts ...CallOption) (*CreateBillingCheckoutSessionReply, error)
+```
+
+CreateBillingCheckoutSession calls the management.createBillingCheckoutSession mutation. Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Idempotency: singleUse. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).
+
+#### `ManagementClient.CreateBillingPortalSession` method
+
+```go
+func (c *ManagementClient) CreateBillingPortalSession(ctx context.Context, input CreateBillingPortalSessionRequestInput, opts ...CallOption) (*CreateBillingPortalSessionReply, error)
+```
+
+CreateBillingPortalSession calls the management.createBillingPortalSession mutation. Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Idempotency: singleUse. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).
 
 #### `ManagementClient.ConfigureWebhook` method
 
@@ -2218,6 +2330,53 @@ type Organization struct {
 ```
 
 Organization is the GraphQL object Organization.
+
+### `OrganizationBilling` struct
+
+```go
+type OrganizationBilling struct {
+	OrgID              UUID    `json:"orgId"`
+	PlanID             *string `json:"planId"`
+	Standing           *string `json:"standing"`
+	GraceUntil         *string `json:"graceUntil"`
+	SubscriptionStatus *string `json:"subscriptionStatus"`
+	CurrentPeriodEnd   *string `json:"currentPeriodEnd"`
+	CancelAtPeriodEnd  bool    `json:"cancelAtPeriodEnd"`
+	CatalogVersion     string  `json:"catalogVersion"`
+	Configured         bool    `json:"configured"`
+	Billed             bool    `json:"billed"`
+}
+```
+
+OrganizationBilling is the GraphQL object OrganizationBilling.
+
+### `OrganizationBillingReply` struct
+
+```go
+type OrganizationBillingReply struct {
+	Status      string               `json:"status"`
+	RequestID   UUID                 `json:"requestId"`
+	ServerTime  *string              `json:"serverTime"`
+	ReceiptID   *UUID                `json:"receiptId"`
+	CommittedAt *string              `json:"committedAt"`
+	Replayed    *bool                `json:"replayed"`
+	Operation   *OperationRef        `json:"operation"`
+	ResourceRef *ResourceRef         `json:"resourceRef"`
+	Result      *OrganizationBilling `json:"result"`
+}
+```
+
+OrganizationBillingReply is the GraphQL object OrganizationBillingReply.
+
+### `OrganizationBillingRequestInput` struct
+
+```go
+type OrganizationBillingRequestInput struct {
+	OrgID UUID `json:"orgId"`
+}
+```
+
+OrganizationBillingRequestInput is the GraphQL input OrganizationBillingRequestInput.
 
 ### `OrganizationPage` struct
 
@@ -3513,6 +3672,8 @@ ResumeOperationRequestInput is the GraphQL input ResumeOperationRequestInput.
 
 ```go
 type RetainedResult struct {
+	BillingCheckoutSession     *BillingCheckoutSession     `json:"billingCheckoutSession"`
+	BillingPortalSession       *BillingPortalSession       `json:"billingPortalSession"`
 	BroadcastPermissionChanged *BroadcastPermissionChanged `json:"broadcastPermissionChanged"`
 	Conversation               *Conversation               `json:"conversation"`
 	ConversationMemberBatch    *ConversationMemberBatch    `json:"conversationMemberBatch"`
@@ -4186,6 +4347,86 @@ const ErrorCodeAuthorityUnavailable ErrorCode = "AUTHORITY_UNAVAILABLE"
 ```
 
 The authority is temporarily unavailable. Retry with the same requestId. HTTP status 503. Retryable. Raised by the server or the SDK.
+
+#### `ErrorCode.ErrorCodeBillingCatalogConflict` case
+
+```go
+const ErrorCodeBillingCatalogConflict ErrorCode = "BILLING_CATALOG_CONFLICT"
+```
+
+The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingCatalogNotSynced` case
+
+```go
+const ErrorCodeBillingCatalogNotSynced ErrorCode = "BILLING_CATALOG_NOT_SYNCED"
+```
+
+The billing provider's catalog does not match the configured price book yet. An operator must sync it. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingCustomerMissing` case
+
+```go
+const ErrorCodeBillingCustomerMissing ErrorCode = "BILLING_CUSTOMER_MISSING"
+```
+
+The organization has no billing account yet. Start a checkout first. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingLinkExpired` case
+
+```go
+const ErrorCodeBillingLinkExpired ErrorCode = "BILLING_LINK_EXPIRED"
+```
+
+The billing link of this request is no longer valid. Send a new request with a new requestId. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingNotConfigured` case
+
+```go
+const ErrorCodeBillingNotConfigured ErrorCode = "BILLING_NOT_CONFIGURED"
+```
+
+Billing is not configured in this environment. HTTP status 503. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingPlanUnavailable` case
+
+```go
+const ErrorCodeBillingPlanUnavailable ErrorCode = "BILLING_PLAN_UNAVAILABLE"
+```
+
+The plan is not offered for self-service checkout. HTTP status 400. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingProviderChanged` case
+
+```go
+const ErrorCodeBillingProviderChanged ErrorCode = "BILLING_PROVIDER_CHANGED"
+```
+
+The organization's billing account belongs to a different billing provider. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingProviderRejected` case
+
+```go
+const ErrorCodeBillingProviderRejected ErrorCode = "BILLING_PROVIDER_REJECTED"
+```
+
+The billing provider refused the request. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingSubscriptionActive` case
+
+```go
+const ErrorCodeBillingSubscriptionActive ErrorCode = "BILLING_SUBSCRIPTION_ACTIVE"
+```
+
+The organization already has a subscription. Change it in the billing portal. HTTP status 409. Not retryable. Raised by the server.
+
+#### `ErrorCode.ErrorCodeBillingSuspended` case
+
+```go
+const ErrorCodeBillingSuspended ErrorCode = "BILLING_SUSPENDED"
+```
+
+The organization is suspended for an unpaid balance. Update its payment method in the billing portal. HTTP status 402. Not retryable. Raised by the server.
 
 #### `ErrorCode.ErrorCodeCredentialDeliveryExpired` case
 

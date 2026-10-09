@@ -19,6 +19,8 @@ __all__ = [
     "AddMembersPayload",
     "AlertLiveSessionInput",
     "AlertLiveSessionPayload",
+    "BillingCheckoutSession",
+    "BillingPortalSession",
     "BroadcastPermissionChanged",
     "Capabilities",
     "CapabilitiesReply",
@@ -121,6 +123,7 @@ __all__ = [
     "OperationResult",
     "OperationStep",
     "Organization",
+    "OrganizationBilling",
     "OrganizationPage",
     "OrganizationUsage",
     "PolicyChangeInput",
@@ -169,6 +172,10 @@ __all__ = [
     "WebhookEndpointPage",
     "ConfigureWebhookReply",
     "ConfigureWebhookRequestInput",
+    "CreateBillingCheckoutSessionReply",
+    "CreateBillingCheckoutSessionRequestInput",
+    "CreateBillingPortalSessionReply",
+    "CreateBillingPortalSessionRequestInput",
     "CreateDeploymentReply",
     "CreateDeploymentRequestInput",
     "CreateOrganizationReply",
@@ -191,6 +198,8 @@ __all__ = [
     "GetProjectRequestInput",
     "IssueBackendKeyReply",
     "IssueBackendKeyRequestInput",
+    "OrganizationBillingReply",
+    "OrganizationBillingRequestInput",
     "OrganizationUsageReply",
     "OrganizationUsageRequestInput",
     "OrganizationsReply",
@@ -387,6 +396,55 @@ class AlertLiveSessionPayload:
             "committedAt": self.committed_at,
             "replayed": self.replayed,
             "result": self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class BillingCheckoutSession:
+    org_id: str
+    plan_id: str
+    url: str
+    expires_at: str
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> BillingCheckoutSession:
+        return cls(
+            org_id=data["orgId"],
+            plan_id=data["planId"],
+            url=data["url"],
+            expires_at=data["expiresAt"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "orgId": self.org_id,
+            "planId": self.plan_id,
+            "url": self.url,
+            "expiresAt": self.expires_at,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class BillingPortalSession:
+    org_id: str
+    url: str
+    expires_at: str | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> BillingPortalSession:
+        return cls(
+            org_id=data["orgId"],
+            url=data["url"],
+            expires_at=data["expiresAt"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "orgId": self.org_id,
+            "url": self.url,
+            "expiresAt": self.expires_at,
         }
 
 
@@ -3065,6 +3123,50 @@ class Organization:
 
 
 @_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBilling:
+    org_id: str
+    plan_id: str | None
+    standing: str | None
+    grace_until: str | None
+    subscription_status: str | None
+    current_period_end: str | None
+    cancel_at_period_end: bool
+    catalog_version: str
+    configured: bool
+    billed: bool
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> OrganizationBilling:
+        return cls(
+            org_id=data["orgId"],
+            plan_id=data["planId"],
+            standing=data["standing"],
+            grace_until=data["graceUntil"],
+            subscription_status=data["subscriptionStatus"],
+            current_period_end=data["currentPeriodEnd"],
+            cancel_at_period_end=data["cancelAtPeriodEnd"],
+            catalog_version=data["catalogVersion"],
+            configured=data["configured"],
+            billed=data["billed"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "orgId": self.org_id,
+            "planId": self.plan_id,
+            "standing": self.standing,
+            "graceUntil": self.grace_until,
+            "subscriptionStatus": self.subscription_status,
+            "currentPeriodEnd": self.current_period_end,
+            "cancelAtPeriodEnd": self.cancel_at_period_end,
+            "catalogVersion": self.catalog_version,
+            "configured": self.configured,
+            "billed": self.billed,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
 class OrganizationPage:
     items: tuple[Organization, ...]
     complete: bool
@@ -3560,6 +3662,8 @@ class ResourceRef:
 class RetainedResult:
     """Exactly one typed field contains the retained, currently authorized receipt result."""
 
+    billing_checkout_session: BillingCheckoutSession | None
+    billing_portal_session: BillingPortalSession | None
     broadcast_permission_changed: BroadcastPermissionChanged | None
     conversation: Conversation | None
     conversation_member_batch: ConversationMemberBatch | None
@@ -3585,6 +3689,8 @@ class RetainedResult:
     @classmethod
     def _from_wire(cls, data: Mapping[str, Any]) -> RetainedResult:
         return cls(
+            billing_checkout_session=None if data["billingCheckoutSession"] is None else BillingCheckoutSession._from_wire(data["billingCheckoutSession"]),
+            billing_portal_session=None if data["billingPortalSession"] is None else BillingPortalSession._from_wire(data["billingPortalSession"]),
             broadcast_permission_changed=None if data["broadcastPermissionChanged"] is None else BroadcastPermissionChanged._from_wire(data["broadcastPermissionChanged"]),
             conversation=None if data["conversation"] is None else Conversation._from_wire(data["conversation"]),
             conversation_member_batch=None if data["conversationMemberBatch"] is None else ConversationMemberBatch._from_wire(data["conversationMemberBatch"]),
@@ -3611,6 +3717,8 @@ class RetainedResult:
     def to_dict(self) -> dict[str, Any]:
         """The wire form, keyed by GraphQL field name."""
         return {
+            "billingCheckoutSession": None if self.billing_checkout_session is None else self.billing_checkout_session.to_dict(),
+            "billingPortalSession": None if self.billing_portal_session is None else self.billing_portal_session.to_dict(),
             "broadcastPermissionChanged": None if self.broadcast_permission_changed is None else self.broadcast_permission_changed.to_dict(),
             "conversation": None if self.conversation is None else self.conversation.to_dict(),
             "conversationMemberBatch": None if self.conversation_member_batch is None else self.conversation_member_batch.to_dict(),
@@ -4538,6 +4646,114 @@ class ConfigureWebhookRequestInput:
 
 
 @_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingCheckoutSessionReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: BillingCheckoutSession | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> CreateBillingCheckoutSessionReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else BillingCheckoutSession._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingCheckoutSessionRequestInput:
+    org_id: str
+    plan_id: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "orgId": self.org_id,
+            "planId": self.plan_id,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingPortalSessionReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: BillingPortalSession | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> CreateBillingPortalSessionReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else BillingPortalSession._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingPortalSessionRequestInput:
+    org_id: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "orgId": self.org_id,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
 class CreateDeploymentReply:
     status: str
     request_id: str
@@ -5152,6 +5368,59 @@ class IssueBackendKeyRequestInput:
             "name": self.name,
             "scopes": self.scopes,
             "expiresAt": self.expires_at,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBillingReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: OrganizationBilling | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> OrganizationBillingReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else OrganizationBilling._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBillingRequestInput:
+    org_id: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "orgId": self.org_id,
         }
         return data
 

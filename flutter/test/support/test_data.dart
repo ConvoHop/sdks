@@ -89,6 +89,8 @@ Map<String, Object?> messageAck({String sequence = '1'}) => <String, Object?>{
 
 // Every field of a retained result; the authority sets exactly one.
 const _retainedResultFields = <String>[
+  'billingCheckoutSession',
+  'billingPortalSession',
   'broadcastPermissionChanged',
   'conversation',
   'conversationMemberBatch',

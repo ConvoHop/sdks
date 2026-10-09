@@ -59,6 +59,7 @@ export interface OperationTypes {
   "management.deploymentUsage": { variables: Generated.ManagementDeploymentUsageQueryVariables; result: Generated.ManagementDeploymentUsageQuery };
   "management.projectUsage": { variables: Generated.ManagementProjectUsageQueryVariables; result: Generated.ManagementProjectUsageQuery };
   "management.organizationUsage": { variables: Generated.ManagementOrganizationUsageQueryVariables; result: Generated.ManagementOrganizationUsageQuery };
+  "management.organizationBilling": { variables: Generated.ManagementOrganizationBillingQueryVariables; result: Generated.ManagementOrganizationBillingQuery };
   "management.webhookEndpoints": { variables: Generated.ManagementWebhookEndpointsQueryVariables; result: Generated.ManagementWebhookEndpointsQuery };
   "management.webhookDeliveries": { variables: Generated.ManagementWebhookDeliveriesQueryVariables; result: Generated.ManagementWebhookDeliveriesQuery };
   "management.resolveRequest": { variables: Generated.ManagementResolveRequestQueryVariables; result: Generated.ManagementResolveRequestQuery };
@@ -72,6 +73,8 @@ export interface OperationTypes {
   "management.credentialPermit": { variables: Generated.ManagementCredentialPermitMutationVariables; result: Generated.ManagementCredentialPermitMutation };
   "management.pauseOperation": { variables: Generated.ManagementPauseOperationMutationVariables; result: Generated.ManagementPauseOperationMutation };
   "management.resumeOperation": { variables: Generated.ManagementResumeOperationMutationVariables; result: Generated.ManagementResumeOperationMutation };
+  "management.createBillingCheckoutSession": { variables: Generated.ManagementCreateBillingCheckoutSessionMutationVariables; result: Generated.ManagementCreateBillingCheckoutSessionMutation };
+  "management.createBillingPortalSession": { variables: Generated.ManagementCreateBillingPortalSessionMutationVariables; result: Generated.ManagementCreateBillingPortalSessionMutation };
   "management.configureWebhook": { variables: Generated.ManagementConfigureWebhookMutationVariables; result: Generated.ManagementConfigureWebhookMutation };
   "management.updateWebhook": { variables: Generated.ManagementUpdateWebhookMutationVariables; result: Generated.ManagementUpdateWebhookMutation };
   "management.rotateWebhookSecret": { variables: Generated.ManagementRotateWebhookSecretMutationVariables; result: Generated.ManagementRotateWebhookSecretMutation };
@@ -143,6 +146,23 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "committedAt": "String!",
       "replayed": "Boolean!",
       "result": "LiveAlertBatch!"
+    }
+  },
+  "BillingCheckoutSession": {
+    "kind": "object",
+    "fields": {
+      "orgId": "UUID!",
+      "planId": "String!",
+      "url": "String!",
+      "expiresAt": "String!"
+    }
+  },
+  "BillingPortalSession": {
+    "kind": "object",
+    "fields": {
+      "orgId": "UUID!",
+      "url": "String!",
+      "expiresAt": "String"
     }
   },
   "BroadcastPermissionChanged": {
@@ -1180,6 +1200,21 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "revision": "Decimal!"
     }
   },
+  "OrganizationBilling": {
+    "kind": "object",
+    "fields": {
+      "orgId": "UUID!",
+      "planId": "String",
+      "standing": "String",
+      "graceUntil": "String",
+      "subscriptionStatus": "String",
+      "currentPeriodEnd": "String",
+      "cancelAtPeriodEnd": "Boolean!",
+      "catalogVersion": "String!",
+      "configured": "Boolean!",
+      "billed": "Boolean!"
+    }
+  },
   "OrganizationPage": {
     "kind": "object",
     "fields": {
@@ -1423,6 +1458,8 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
   "RetainedResult": {
     "kind": "object",
     "fields": {
+      "billingCheckoutSession": "BillingCheckoutSession",
+      "billingPortalSession": "BillingPortalSession",
       "broadcastPermissionChanged": "BroadcastPermissionChanged",
       "conversation": "Conversation",
       "conversationMemberBatch": "ConversationMemberBatch",
@@ -1740,6 +1777,34 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "result": "OperationResult"
     }
   },
+  "CreateBillingCheckoutSessionReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "BillingCheckoutSession"
+    }
+  },
+  "CreateBillingPortalSessionReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "BillingPortalSession"
+    }
+  },
   "CreateDeploymentReply": {
     "kind": "object",
     "fields": {
@@ -1892,6 +1957,20 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "operation": "OperationRef",
       "resourceRef": "ResourceRef",
       "result": "OperationResult"
+    }
+  },
+  "OrganizationBillingReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "OrganizationBilling"
     }
   },
   "OrganizationUsageReply": {
@@ -2225,7 +2304,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
     "idempotency": "safe",
     "field": "resolveRequest",
     "operationName": "CommunicationResolveRequest",
-    "query": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+    "query": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
     "resultType": "ResolveRequestReply!",
     "inputFields": [
       "requestId"
@@ -2837,6 +2916,18 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
       "to"
     ]
   },
+  "management.organizationBilling": {
+    "plane": "management",
+    "kind": "query",
+    "idempotency": "safe",
+    "field": "organizationBilling",
+    "operationName": "ManagementOrganizationBilling",
+    "query": "query ManagementOrganizationBilling($context: RequestContextInput!, $input: OrganizationBillingRequestInput!) {\n  organizationBilling(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      planId\n      standing\n      graceUntil\n      subscriptionStatus\n      currentPeriodEnd\n      cancelAtPeriodEnd\n      catalogVersion\n      configured\n      billed\n    }\n  }\n}",
+    "resultType": "OrganizationBillingReply!",
+    "inputFields": [
+      "orgId"
+    ]
+  },
   "management.webhookEndpoints": {
     "plane": "management",
     "kind": "query",
@@ -2868,7 +2959,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
     "idempotency": "safe",
     "field": "resolveRequest",
     "operationName": "ManagementResolveRequest",
-    "query": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+    "query": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
     "resultType": "ResolveRequestReply!",
     "inputFields": [
       "requestId"
@@ -3012,6 +3103,31 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
     "inputFields": [
       "operationId",
       "expectedRevision"
+    ]
+  },
+  "management.createBillingCheckoutSession": {
+    "plane": "management",
+    "kind": "mutation",
+    "idempotency": "singleUse",
+    "field": "createBillingCheckoutSession",
+    "operationName": "ManagementCreateBillingCheckoutSession",
+    "query": "mutation ManagementCreateBillingCheckoutSession($context: RequestContextInput!, $input: CreateBillingCheckoutSessionRequestInput!) {\n  createBillingCheckoutSession(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      planId\n      url\n      expiresAt\n    }\n  }\n}",
+    "resultType": "CreateBillingCheckoutSessionReply!",
+    "inputFields": [
+      "orgId",
+      "planId"
+    ]
+  },
+  "management.createBillingPortalSession": {
+    "plane": "management",
+    "kind": "mutation",
+    "idempotency": "singleUse",
+    "field": "createBillingPortalSession",
+    "operationName": "ManagementCreateBillingPortalSession",
+    "query": "mutation ManagementCreateBillingPortalSession($context: RequestContextInput!, $input: CreateBillingPortalSessionRequestInput!) {\n  createBillingPortalSession(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      url\n      expiresAt\n    }\n  }\n}",
+    "resultType": "CreateBillingPortalSessionReply!",
+    "inputFields": [
+      "orgId"
     ]
   },
   "management.configureWebhook": {

@@ -78,6 +78,22 @@
           "docs": "AlertLiveSessionPayload is the GraphQL object AlertLiveSessionPayload."
         },
         {
+          "name": "BillingCheckoutSession",
+          "kind": "struct",
+          "signatures": [
+            "type BillingCheckoutSession struct {\n\tOrgID     UUID   `json:\"orgId\"`\n\tPlanID    string `json:\"planId\"`\n\tURL       string `json:\"url\"`\n\tExpiresAt string `json:\"expiresAt\"`\n}"
+          ],
+          "docs": "BillingCheckoutSession is the GraphQL object BillingCheckoutSession."
+        },
+        {
+          "name": "BillingPortalSession",
+          "kind": "struct",
+          "signatures": [
+            "type BillingPortalSession struct {\n\tOrgID     UUID    `json:\"orgId\"`\n\tURL       string  `json:\"url\"`\n\tExpiresAt *string `json:\"expiresAt\"`\n}"
+          ],
+          "docs": "BillingPortalSession is the GraphQL object BillingPortalSession."
+        },
+        {
           "name": "BroadcastPermissionChanged",
           "kind": "struct",
           "signatures": [
@@ -170,6 +186,38 @@
             "type ConversationMuteReply struct {\n\tStatus     string           `json:\"status\"`\n\tRequestID  UUID             `json:\"requestId\"`\n\tServerTime string           `json:\"serverTime\"`\n\tResult     ConversationMute `json:\"result\"`\n}"
           ],
           "docs": "ConversationMuteReply is the GraphQL object ConversationMuteReply."
+        },
+        {
+          "name": "CreateBillingCheckoutSessionReply",
+          "kind": "struct",
+          "signatures": [
+            "type CreateBillingCheckoutSessionReply struct {\n\tStatus      string                  `json:\"status\"`\n\tRequestID   UUID                    `json:\"requestId\"`\n\tServerTime  *string                 `json:\"serverTime\"`\n\tReceiptID   *UUID                   `json:\"receiptId\"`\n\tCommittedAt *string                 `json:\"committedAt\"`\n\tReplayed    *bool                   `json:\"replayed\"`\n\tOperation   *OperationRef           `json:\"operation\"`\n\tResourceRef *ResourceRef            `json:\"resourceRef\"`\n\tResult      *BillingCheckoutSession `json:\"result\"`\n}"
+          ],
+          "docs": "CreateBillingCheckoutSessionReply is the GraphQL object CreateBillingCheckoutSessionReply."
+        },
+        {
+          "name": "CreateBillingCheckoutSessionRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type CreateBillingCheckoutSessionRequestInput struct {\n\tOrgID  UUID   `json:\"orgId\"`\n\tPlanID string `json:\"planId\"`\n}"
+          ],
+          "docs": "CreateBillingCheckoutSessionRequestInput is the GraphQL input CreateBillingCheckoutSessionRequestInput."
+        },
+        {
+          "name": "CreateBillingPortalSessionReply",
+          "kind": "struct",
+          "signatures": [
+            "type CreateBillingPortalSessionReply struct {\n\tStatus      string                `json:\"status\"`\n\tRequestID   UUID                  `json:\"requestId\"`\n\tServerTime  *string               `json:\"serverTime\"`\n\tReceiptID   *UUID                 `json:\"receiptId\"`\n\tCommittedAt *string               `json:\"committedAt\"`\n\tReplayed    *bool                 `json:\"replayed\"`\n\tOperation   *OperationRef         `json:\"operation\"`\n\tResourceRef *ResourceRef          `json:\"resourceRef\"`\n\tResult      *BillingPortalSession `json:\"result\"`\n}"
+          ],
+          "docs": "CreateBillingPortalSessionReply is the GraphQL object CreateBillingPortalSessionReply."
+        },
+        {
+          "name": "CreateBillingPortalSessionRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type CreateBillingPortalSessionRequestInput struct {\n\tOrgID UUID `json:\"orgId\"`\n}"
+          ],
+          "docs": "CreateBillingPortalSessionRequestInput is the GraphQL input CreateBillingPortalSessionRequestInput."
         },
         {
           "name": "CreateConversationReply",
@@ -504,6 +552,84 @@
                 "const ErrorCodeAuthorityUnavailable ErrorCode = \"AUTHORITY_UNAVAILABLE\""
               ],
               "docs": "The authority is temporarily unavailable. Retry with the same requestId. HTTP status 503. Retryable. Raised by the server or the SDK."
+            },
+            {
+              "name": "ErrorCodeBillingCatalogConflict",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeBillingCatalogConflict ErrorCode = \"BILLING_CATALOG_CONFLICT\""
+              ],
+              "docs": "The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeBillingCatalogNotSynced",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeBillingCatalogNotSynced ErrorCode = \"BILLING_CATALOG_NOT_SYNCED\""
+              ],
+              "docs": "The billing provider's catalog does not match the configured price book yet. An operator must sync it. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeBillingCustomerMissing",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeBillingCustomerMissing ErrorCode = \"BILLING_CUSTOMER_MISSING\""
+              ],
+              "docs": "The organization has no billing account yet. Start a checkout first. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeBillingLinkExpired",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeBillingLinkExpired ErrorCode = \"BILLING_LINK_EXPIRED\""
+              ],
+              "docs": "The billing link of this request is no longer valid. Send a new request with a new requestId. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeBillingNotConfigured",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeBillingNotConfigured ErrorCode = \"BILLING_NOT_CONFIGURED\""
+              ],
+              "docs": "Billing is not configured in this environment. HTTP status 503. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeBillingPlanUnavailable",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeBillingPlanUnavailable ErrorCode = \"BILLING_PLAN_UNAVAILABLE\""
+              ],
+              "docs": "The plan is not offered for self-service checkout. HTTP status 400. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeBillingProviderChanged",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeBillingProviderChanged ErrorCode = \"BILLING_PROVIDER_CHANGED\""
+              ],
+              "docs": "The organization's billing account belongs to a different billing provider. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeBillingProviderRejected",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeBillingProviderRejected ErrorCode = \"BILLING_PROVIDER_REJECTED\""
+              ],
+              "docs": "The billing provider refused the request. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeBillingSubscriptionActive",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeBillingSubscriptionActive ErrorCode = \"BILLING_SUBSCRIPTION_ACTIVE\""
+              ],
+              "docs": "The organization already has a subscription. Change it in the billing portal. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeBillingSuspended",
+              "kind": "case",
+              "signatures": ["const ErrorCodeBillingSuspended ErrorCode = \"BILLING_SUSPENDED\""],
+              "docs": "The organization is suspended for an unpaid balance. Update its payment method in the billing portal. HTTP status 402. Not retryable. Raised by the server."
             },
             {
               "name": "ErrorCodeCredentialDeliveryExpired",
@@ -1576,6 +1702,14 @@
               "docs": "OrganizationUsage calls the management.organizationUsage query. Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nIdempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner)."
             },
             {
+              "name": "OrganizationBilling",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) OrganizationBilling(ctx context.Context, input OrganizationBillingRequestInput, opts ...CallOption) (*OrganizationBillingReply, error)"
+              ],
+              "docs": "OrganizationBilling calls the management.organizationBilling query. Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.\n\nIdempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner)."
+            },
+            {
               "name": "WebhookEndpoints",
               "kind": "method",
               "signatures": [
@@ -1678,6 +1812,22 @@
                 "func (c *ManagementClient) ResumeOperation(ctx context.Context, input ResumeOperationRequestInput, opts ...CallOption) (*ResumeOperationReply, error)"
               ],
               "docs": "ResumeOperation calls the management.resumeOperation mutation. Resume a paused operation.\n\nIdempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner)."
+            },
+            {
+              "name": "CreateBillingCheckoutSession",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) CreateBillingCheckoutSession(ctx context.Context, input CreateBillingCheckoutSessionRequestInput, opts ...CallOption) (*CreateBillingCheckoutSessionReply, error)"
+              ],
+              "docs": "CreateBillingCheckoutSession calls the management.createBillingCheckoutSession mutation. Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.\n\nIdempotency: singleUse. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner)."
+            },
+            {
+              "name": "CreateBillingPortalSession",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) CreateBillingPortalSession(ctx context.Context, input CreateBillingPortalSessionRequestInput, opts ...CallOption) (*CreateBillingPortalSessionReply, error)"
+              ],
+              "docs": "CreateBillingPortalSession calls the management.createBillingPortalSession mutation. Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.\n\nIdempotency: singleUse. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner)."
             },
             {
               "name": "ConfigureWebhook",
@@ -1952,6 +2102,30 @@
             "type Organization struct {\n\tOrgID    UUID    `json:\"orgId\"`\n\tName     string  `json:\"name\"`\n\tStatus   string  `json:\"status\"`\n\tRevision Decimal `json:\"revision\"`\n}"
           ],
           "docs": "Organization is the GraphQL object Organization."
+        },
+        {
+          "name": "OrganizationBilling",
+          "kind": "struct",
+          "signatures": [
+            "type OrganizationBilling struct {\n\tOrgID              UUID    `json:\"orgId\"`\n\tPlanID             *string `json:\"planId\"`\n\tStanding           *string `json:\"standing\"`\n\tGraceUntil         *string `json:\"graceUntil\"`\n\tSubscriptionStatus *string `json:\"subscriptionStatus\"`\n\tCurrentPeriodEnd   *string `json:\"currentPeriodEnd\"`\n\tCancelAtPeriodEnd  bool    `json:\"cancelAtPeriodEnd\"`\n\tCatalogVersion     string  `json:\"catalogVersion\"`\n\tConfigured         bool    `json:\"configured\"`\n\tBilled             bool    `json:\"billed\"`\n}"
+          ],
+          "docs": "OrganizationBilling is the GraphQL object OrganizationBilling."
+        },
+        {
+          "name": "OrganizationBillingReply",
+          "kind": "struct",
+          "signatures": [
+            "type OrganizationBillingReply struct {\n\tStatus      string               `json:\"status\"`\n\tRequestID   UUID                 `json:\"requestId\"`\n\tServerTime  *string              `json:\"serverTime\"`\n\tReceiptID   *UUID                `json:\"receiptId\"`\n\tCommittedAt *string              `json:\"committedAt\"`\n\tReplayed    *bool                `json:\"replayed\"`\n\tOperation   *OperationRef        `json:\"operation\"`\n\tResourceRef *ResourceRef         `json:\"resourceRef\"`\n\tResult      *OrganizationBilling `json:\"result\"`\n}"
+          ],
+          "docs": "OrganizationBillingReply is the GraphQL object OrganizationBillingReply."
+        },
+        {
+          "name": "OrganizationBillingRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type OrganizationBillingRequestInput struct {\n\tOrgID UUID `json:\"orgId\"`\n}"
+          ],
+          "docs": "OrganizationBillingRequestInput is the GraphQL input OrganizationBillingRequestInput."
         },
         {
           "name": "OrganizationPage",
@@ -2853,7 +3027,7 @@
           "name": "RetainedResult",
           "kind": "struct",
           "signatures": [
-            "type RetainedResult struct {\n\tBroadcastPermissionChanged *BroadcastPermissionChanged `json:\"broadcastPermissionChanged\"`\n\tConversation               *Conversation               `json:\"conversation\"`\n\tConversationMemberBatch    *ConversationMemberBatch    `json:\"conversationMemberBatch\"`\n\tConversationMute           *ConversationMute           `json:\"conversationMute\"`\n\tCredentialDeliveryReceipt  *CredentialDeliveryReceipt  `json:\"credentialDeliveryReceipt\"`\n\tDeliveryAck                *DeliveryAck                `json:\"deliveryAck\"`\n\tLiveAlertBatch             *LiveAlertBatch             `json:\"liveAlertBatch\"`\n\tLiveCredentialIssuance     *LiveCredentialIssuance     `json:\"liveCredentialIssuance\"`\n\tLiveSessionEndRequested    *LiveSessionEndRequested    `json:\"liveSessionEndRequested\"`\n\tLiveSessionJoined          *LiveSessionJoined          `json:\"liveSessionJoined\"`\n\tLiveSessionLeft            *LiveSessionLeft            `json:\"liveSessionLeft\"`\n\tLiveSessionStarted         *LiveSessionStarted         `json:\"liveSessionStarted\"`\n\tMember                     *Member                     `json:\"member\"`\n\tMessage                    *Message                    `json:\"message\"`\n\tMessageAck                 *MessageAck                 `json:\"messageAck\"`\n\tOrganization               *Organization               `json:\"organization\"`\n\tPrincipal                  *Principal                  `json:\"principal\"`\n\tReadReceipt                *ReadReceipt                `json:\"readReceipt\"`\n\tSessionBootstrap           *SessionBootstrap           `json:\"sessionBootstrap\"`\n\tSessionRevocation          *SessionRevocation          `json:\"sessionRevocation\"`\n\tSignedProof                SignedProof                 `json:\"signedProof\"`\n}"
+            "type RetainedResult struct {\n\tBillingCheckoutSession     *BillingCheckoutSession     `json:\"billingCheckoutSession\"`\n\tBillingPortalSession       *BillingPortalSession       `json:\"billingPortalSession\"`\n\tBroadcastPermissionChanged *BroadcastPermissionChanged `json:\"broadcastPermissionChanged\"`\n\tConversation               *Conversation               `json:\"conversation\"`\n\tConversationMemberBatch    *ConversationMemberBatch    `json:\"conversationMemberBatch\"`\n\tConversationMute           *ConversationMute           `json:\"conversationMute\"`\n\tCredentialDeliveryReceipt  *CredentialDeliveryReceipt  `json:\"credentialDeliveryReceipt\"`\n\tDeliveryAck                *DeliveryAck                `json:\"deliveryAck\"`\n\tLiveAlertBatch             *LiveAlertBatch             `json:\"liveAlertBatch\"`\n\tLiveCredentialIssuance     *LiveCredentialIssuance     `json:\"liveCredentialIssuance\"`\n\tLiveSessionEndRequested    *LiveSessionEndRequested    `json:\"liveSessionEndRequested\"`\n\tLiveSessionJoined          *LiveSessionJoined          `json:\"liveSessionJoined\"`\n\tLiveSessionLeft            *LiveSessionLeft            `json:\"liveSessionLeft\"`\n\tLiveSessionStarted         *LiveSessionStarted         `json:\"liveSessionStarted\"`\n\tMember                     *Member                     `json:\"member\"`\n\tMessage                    *Message                    `json:\"message\"`\n\tMessageAck                 *MessageAck                 `json:\"messageAck\"`\n\tOrganization               *Organization               `json:\"organization\"`\n\tPrincipal                  *Principal                  `json:\"principal\"`\n\tReadReceipt                *ReadReceipt                `json:\"readReceipt\"`\n\tSessionBootstrap           *SessionBootstrap           `json:\"sessionBootstrap\"`\n\tSessionRevocation          *SessionRevocation          `json:\"sessionRevocation\"`\n\tSignedProof                SignedProof                 `json:\"signedProof\"`\n}"
           ],
           "docs": "RetainedResult is the GraphQL object RetainedResult. Exactly one typed field contains the retained, currently authorized receipt result."
         },

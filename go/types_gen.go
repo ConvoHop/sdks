@@ -37,6 +37,36 @@ const (
 	// The authority is temporarily unavailable. Retry with the same requestId.
 	// HTTP status 503. Retryable. Raised by the server or the SDK.
 	ErrorCodeAuthorityUnavailable ErrorCode = "AUTHORITY_UNAVAILABLE"
+	// The billing provider's catalog conflicts with the configured price book, for example a duplicated or unsafe object. An operator must resolve it.
+	// HTTP status 409. Not retryable. Raised by the server.
+	ErrorCodeBillingCatalogConflict ErrorCode = "BILLING_CATALOG_CONFLICT"
+	// The billing provider's catalog does not match the configured price book yet. An operator must sync it.
+	// HTTP status 409. Not retryable. Raised by the server.
+	ErrorCodeBillingCatalogNotSynced ErrorCode = "BILLING_CATALOG_NOT_SYNCED"
+	// The organization has no billing account yet. Start a checkout first.
+	// HTTP status 409. Not retryable. Raised by the server.
+	ErrorCodeBillingCustomerMissing ErrorCode = "BILLING_CUSTOMER_MISSING"
+	// The billing link of this request is no longer valid. Send a new request with a new requestId.
+	// HTTP status 409. Not retryable. Raised by the server.
+	ErrorCodeBillingLinkExpired ErrorCode = "BILLING_LINK_EXPIRED"
+	// Billing is not configured in this environment.
+	// HTTP status 503. Not retryable. Raised by the server.
+	ErrorCodeBillingNotConfigured ErrorCode = "BILLING_NOT_CONFIGURED"
+	// The plan is not offered for self-service checkout.
+	// HTTP status 400. Not retryable. Raised by the server.
+	ErrorCodeBillingPlanUnavailable ErrorCode = "BILLING_PLAN_UNAVAILABLE"
+	// The organization's billing account belongs to a different billing provider.
+	// HTTP status 409. Not retryable. Raised by the server.
+	ErrorCodeBillingProviderChanged ErrorCode = "BILLING_PROVIDER_CHANGED"
+	// The billing provider refused the request.
+	// HTTP status 409. Not retryable. Raised by the server.
+	ErrorCodeBillingProviderRejected ErrorCode = "BILLING_PROVIDER_REJECTED"
+	// The organization already has a subscription. Change it in the billing portal.
+	// HTTP status 409. Not retryable. Raised by the server.
+	ErrorCodeBillingSubscriptionActive ErrorCode = "BILLING_SUBSCRIPTION_ACTIVE"
+	// The organization is suspended for an unpaid balance. Update its payment method in the billing portal.
+	// HTTP status 402. Not retryable. Raised by the server.
+	ErrorCodeBillingSuspended ErrorCode = "BILLING_SUSPENDED"
 	// The credential delivery expired or can no longer be redeemed.
 	// HTTP status 409. Not retryable. Raised by the server.
 	ErrorCodeCredentialDeliveryExpired ErrorCode = "CREDENTIAL_DELIVERY_EXPIRED"
@@ -327,6 +357,21 @@ type AlertLiveSessionPayload struct {
 	Result      LiveAlertBatch `json:"result"`
 }
 
+// BillingCheckoutSession is the GraphQL object BillingCheckoutSession.
+type BillingCheckoutSession struct {
+	OrgID     UUID   `json:"orgId"`
+	PlanID    string `json:"planId"`
+	URL       string `json:"url"`
+	ExpiresAt string `json:"expiresAt"`
+}
+
+// BillingPortalSession is the GraphQL object BillingPortalSession.
+type BillingPortalSession struct {
+	OrgID     UUID    `json:"orgId"`
+	URL       string  `json:"url"`
+	ExpiresAt *string `json:"expiresAt"`
+}
+
 // BroadcastPermissionChanged is the GraphQL object BroadcastPermissionChanged.
 type BroadcastPermissionChanged struct {
 	Member      Member           `json:"member"`
@@ -424,6 +469,43 @@ type ConversationMuteReply struct {
 	RequestID  UUID             `json:"requestId"`
 	ServerTime string           `json:"serverTime"`
 	Result     ConversationMute `json:"result"`
+}
+
+// CreateBillingCheckoutSessionReply is the GraphQL object CreateBillingCheckoutSessionReply.
+type CreateBillingCheckoutSessionReply struct {
+	Status      string                  `json:"status"`
+	RequestID   UUID                    `json:"requestId"`
+	ServerTime  *string                 `json:"serverTime"`
+	ReceiptID   *UUID                   `json:"receiptId"`
+	CommittedAt *string                 `json:"committedAt"`
+	Replayed    *bool                   `json:"replayed"`
+	Operation   *OperationRef           `json:"operation"`
+	ResourceRef *ResourceRef            `json:"resourceRef"`
+	Result      *BillingCheckoutSession `json:"result"`
+}
+
+// CreateBillingCheckoutSessionRequestInput is the GraphQL input CreateBillingCheckoutSessionRequestInput.
+type CreateBillingCheckoutSessionRequestInput struct {
+	OrgID  UUID   `json:"orgId"`
+	PlanID string `json:"planId"`
+}
+
+// CreateBillingPortalSessionReply is the GraphQL object CreateBillingPortalSessionReply.
+type CreateBillingPortalSessionReply struct {
+	Status      string                `json:"status"`
+	RequestID   UUID                  `json:"requestId"`
+	ServerTime  *string               `json:"serverTime"`
+	ReceiptID   *UUID                 `json:"receiptId"`
+	CommittedAt *string               `json:"committedAt"`
+	Replayed    *bool                 `json:"replayed"`
+	Operation   *OperationRef         `json:"operation"`
+	ResourceRef *ResourceRef          `json:"resourceRef"`
+	Result      *BillingPortalSession `json:"result"`
+}
+
+// CreateBillingPortalSessionRequestInput is the GraphQL input CreateBillingPortalSessionRequestInput.
+type CreateBillingPortalSessionRequestInput struct {
+	OrgID UUID `json:"orgId"`
 }
 
 // CreateConversationReply is the GraphQL object CreateConversationReply.
@@ -1544,6 +1626,38 @@ type Organization struct {
 	Revision Decimal `json:"revision"`
 }
 
+// OrganizationBilling is the GraphQL object OrganizationBilling.
+type OrganizationBilling struct {
+	OrgID              UUID    `json:"orgId"`
+	PlanID             *string `json:"planId"`
+	Standing           *string `json:"standing"`
+	GraceUntil         *string `json:"graceUntil"`
+	SubscriptionStatus *string `json:"subscriptionStatus"`
+	CurrentPeriodEnd   *string `json:"currentPeriodEnd"`
+	CancelAtPeriodEnd  bool    `json:"cancelAtPeriodEnd"`
+	CatalogVersion     string  `json:"catalogVersion"`
+	Configured         bool    `json:"configured"`
+	Billed             bool    `json:"billed"`
+}
+
+// OrganizationBillingReply is the GraphQL object OrganizationBillingReply.
+type OrganizationBillingReply struct {
+	Status      string               `json:"status"`
+	RequestID   UUID                 `json:"requestId"`
+	ServerTime  *string              `json:"serverTime"`
+	ReceiptID   *UUID                `json:"receiptId"`
+	CommittedAt *string              `json:"committedAt"`
+	Replayed    *bool                `json:"replayed"`
+	Operation   *OperationRef        `json:"operation"`
+	ResourceRef *ResourceRef         `json:"resourceRef"`
+	Result      *OrganizationBilling `json:"result"`
+}
+
+// OrganizationBillingRequestInput is the GraphQL input OrganizationBillingRequestInput.
+type OrganizationBillingRequestInput struct {
+	OrgID UUID `json:"orgId"`
+}
+
 // OrganizationPage is the GraphQL object OrganizationPage.
 type OrganizationPage struct {
 	Items           []Organization `json:"items"`
@@ -1860,6 +1974,8 @@ type ResumeOperationRequestInput struct {
 // RetainedResult is the GraphQL object RetainedResult.
 // Exactly one typed field contains the retained, currently authorized receipt result.
 type RetainedResult struct {
+	BillingCheckoutSession     *BillingCheckoutSession     `json:"billingCheckoutSession"`
+	BillingPortalSession       *BillingPortalSession       `json:"billingPortalSession"`
 	BroadcastPermissionChanged *BroadcastPermissionChanged `json:"broadcastPermissionChanged"`
 	Conversation               *Conversation               `json:"conversation"`
 	ConversationMemberBatch    *ConversationMemberBatch    `json:"conversationMemberBatch"`

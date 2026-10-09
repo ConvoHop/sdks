@@ -53,7 +53,9 @@ export const operationMetaKey = "com.convohop/operation";
 export const withheldOperations: Readonly<Record<string, string>> = {
   "communication.issueSession": "returns a user session token",
   "communication.renewSession": "returns a user session token",
-  "management.credentialPermit": "returns a credential delivery permit"
+  "management.credentialPermit": "returns a credential delivery permit",
+  "management.createBillingCheckoutSession": "returns a hosted billing link that grants access to whoever holds it",
+  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it"
 };
 export const mcpTools: readonly McpToolDefinition[] = [
   {
@@ -1862,6 +1864,40 @@ export const mcpTools: readonly McpToolDefinition[] = [
     },
     "operation": {
       "id": "management.organizationUsage",
+      "plane": "management",
+      "kind": "query",
+      "credential": "portalCredential",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "destructive": false,
+      "pagination": {"style": "none"}
+    }
+  },
+  {
+    "name": "management_organization_billing",
+    "title": "Management: organization billing",
+    "description": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.\n\nOperation management.organizationBilling (query).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nRead-only and safe to repeat.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "orgId": {
+          "type": "string",
+          "description": "Canonical lowercase UUID. The nil UUID is rejected.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "not": {"enum": ["00000000-0000-0000-0000-000000000000"]}
+        }
+      },
+      "required": ["orgId"],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "operation": {
+      "id": "management.organizationBilling",
       "plane": "management",
       "kind": "query",
       "credential": "portalCredential",
