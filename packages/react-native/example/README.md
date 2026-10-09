@@ -6,12 +6,6 @@ offline-safe sends, typing and read receipts, receives push notifications,
 and makes and answers calls through CallKit or Android's Telecom framework.
 License: [Apache-2.0](../LICENSE).
 
-> [!IMPORTANT]
-> The `android/` project is here; the `ios/` project and the package's iOS
-> modules aren't yet, so the app doesn't run on iOS. The
-> [design](../../../docs/react-native.md#status) says what has been
-> verified.
-
 Type-check it from the repository root:
 
 ```sh
@@ -68,6 +62,51 @@ describes. From the repository root:
   port with `adb reverse tcp:PORT tcp:PORT`, and use
   `http://127.0.0.1:PORT` for the ConvoHop `baseUrl` your backend returns,
   and for `BACKEND_URL`. Only debug builds allow plain HTTP.
+
+## iOS
+
+You need Xcode with an iOS simulator, and Ruby with Bundler, as React
+Native's [environment setup](https://reactnative.dev/docs/set-up-your-environment)
+describes. CI builds the app with Xcode 26.6. From the repository root:
+
+1. Build the SDK packages: `npm ci`, then `npm run build`.
+2. In `packages/react-native/example/`, run `npm ci`, then
+   `bundle install` to install CocoaPods.
+3. In `ios/`, run `bundle exec pod install`. The pods take the
+   [Swift SDK](../../../swift/README.md) from this repository's `swift/`.
+   To build with another checkout of it, set `CONVOHOP_SWIFT_PACKAGE` to
+   that checkout's `swift/` directory. Resolving the Swift package also
+   downloads about 190 MB of LiveKit's Swift SDK, which the app doesn't
+   link.
+4. Set your backend's URL in [`src/config.ts`](src/config.ts). Run
+   `npm start`, and in another terminal, `npm run ios`.
+
+- **Configuration.** [`AppDelegate.swift`](ios/ConvoHopExample/AppDelegate.swift)
+  configures the push and call modules before React Native starts, and
+  forwards the APNs token. A scene delegate shows React Native, because
+  apps built with the iOS 27 SDK must use scenes.
+  [`Localizable.strings`](ios/ConvoHopExample/en.lproj/Localizable.strings)
+  has the text of alerts that arrive without any.
+- **On a device.** Choose your team in Xcode, and change the bundle ID,
+  `com.convohop.example`, to one of yours. Push needs the Push
+  Notifications capability, which the entitlements already have, and an
+  APNs key for your backend. Debug builds register their tokens for APNs's
+  development environment and Release builds for production; change that
+  in `AppDelegate.swift` if you sign differently.
+- **No message text.** The app has no Notification Service Extension or
+  App Group, so in the background, message pushes show "New message"
+  unless the project sends previews. The Swift SDK
+  [shows how to add one](../../../swift/README.md#message-text-in-a-notification-service-extension).
+- **The simulator.** On the iOS 27 simulator, the PushKit token arrives
+  but the APNs token never does, so `registerForPush` times out. Send the
+  app the `payload` of a `push.apnsAlert()` request with
+  `xcrun simctl push`. CallKit has no call UI there and ends calls within
+  seconds, so answer and join calls on a device.
+- **A backend on your computer.** The simulator shares your computer's
+  network, so use `http://127.0.0.1:PORT` for the ConvoHop `baseUrl` your
+  backend returns, and for `BACKEND_URL`. The client accepts plain HTTP
+  only for a loopback address, which App Transport Security allows through
+  `NSAllowsLocalNetworking` in `Info.plist`.
 
 ## Your backend
 
@@ -156,10 +195,11 @@ with the [push payload builders](../../server/README.md#push-payloads):
   still current.
 - **No author names.** Messages carry the author's principal ID. Look up
   names in your own user directory.
-- **Verified on an Android emulator only.** The app ran once, by hand, on
-  an Android 15 emulator without Firebase, with pushes passed to
-  `handleRemoteMessage`. It hasn't run on a physical device, with FCM, with
-  real media or on iOS, and nobody has checked how Android's Telecom audio
-  routes and LiveKit's audio session interact. The
-  [design](../../../docs/react-native.md#testing) lists what that run
-  verified.
+- **Verified on an emulator and a simulator only.** The app ran once, by
+  hand, on an Android 15 emulator without Firebase, with pushes passed to
+  `handleRemoteMessage`, and once on an iOS 27 simulator, with pushes sent
+  by `xcrun simctl push`. It hasn't run on a physical device, with pushes
+  delivered by FCM or APNs, or with real media. Nobody has answered a call
+  on iOS, or checked how Android's Telecom audio routes and LiveKit's audio
+  session interact. The [design](../../../docs/react-native.md#testing)
+  lists what those runs verified.

@@ -1,0 +1,4 @@
+/* ConvoHop alerts that arrive without text show these. */
+"CONVOHOP_MESSAGE" = "New message";
+"CONVOHOP_CALL" = "Incoming call";
+"CONVOHOP_MISSED_CALL" = "Missed call";

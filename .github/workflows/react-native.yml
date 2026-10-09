@@ -1,12 +1,13 @@
 # Checks what SDK CI doesn't for the React Native SDK in packages/react-native:
 # the example app's type check, the shared conformance scenarios through the
-# React Native driver (conformance/drivers/react-native), and the Android
+# React Native driver (conformance/drivers/react-native), and the native
 # modules. The driver runs the SDK in Node.js with React Native's globals and
 # stand-ins for its native modules. The Android job runs the modules' JVM
 # tests and builds the example app's debug APK against the Android SDK in
-# android/. SDK CI runs the package's unit and Codegen tests on Node.js 22 and
-# 24 as part of npm test. No job runs Hermes or starts a simulator or
-# emulator. See docs/react-native.md#testing.
+# android/. The iOS job builds the example app for the iOS simulator against
+# the Swift SDK in swift/. SDK CI runs the package's unit and Codegen tests on
+# Node.js 22 and 24 as part of npm test. No job runs Hermes or starts a
+# simulator or emulator. See docs/react-native.md#testing.
 name: React Native
 
 on:
@@ -22,6 +23,7 @@ on:
       - packages/react/**
       - packages/react-native/**
       - spec/**
+      - swift/**
   pull_request:
     branches: [main]
     paths:
@@ -34,6 +36,7 @@ on:
       - packages/react/**
       - packages/react-native/**
       - spec/**
+      - swift/**
 
 permissions: {}
 
@@ -117,6 +120,56 @@ jobs:
             packages/react-native/example/android/app/build/reports/
           if-no-files-found: ignore
           retention-days: 14
+
+  ios:
+    name: Example app (iOS simulator build)
+    runs-on: macos-26
+    timeout-minutes: 60
+    permissions:
+      contents: read # check out the repository
+    env:
+      # The newest Xcode release on GitHub-hosted runners, as in swift.yml.
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            packages/react-native/example/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      # The example isn't a workspace: React Native and the packages with native
+      # code install in its own node_modules, where autolinking and Codegen look.
+      - name: Install the example app's dependencies
+        working-directory: packages/react-native/example
+        run: npm ci --no-audit --no-fund
+      # The example's .bundle/config installs the gems in its vendor/bundle.
+      - name: Install CocoaPods from the example app's Gemfile
+        working-directory: packages/react-native/example
+        run: bundle install
+      - name: Show the toolchain
+        working-directory: packages/react-native/example
+        run: |
+          xcodebuild -version
+          echo "CocoaPods $(bundle exec pod --version)"
+      # The podspec adds the Swift SDK in swift/ as a local Swift package.
+      - name: Install the pods
+        working-directory: packages/react-native/example/ios
+        run: bundle exec pod install
+      # A debug build loads its JavaScript from Metro, so this builds the native
+      # code only, for the arm64 simulators that run on Apple silicon.
+      - name: Build the example app for the iOS simulator
+        working-directory: packages/react-native/example/ios
+        run: >-
+          xcodebuild build -quiet
+          -workspace ConvoHopExample.xcworkspace -scheme ConvoHopExample
+          -configuration Debug -destination "generic/platform=iOS Simulator"
+          -derivedDataPath "$RUNNER_TEMP/DerivedData"
+          ARCHS=arm64 ONLY_ACTIVE_ARCH=YES
 
   conformance:
     name: React Native driver (mock target)
