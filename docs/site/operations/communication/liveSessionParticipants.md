@@ -102,3 +102,4 @@ query CommunicationLiveSessionParticipants($context: RequestContextInput!, $inpu
 | [Swift](../../swift/reference/operations.md) | [`LiveSessionHandle.participants`](../../swift/reference/convohop.md#livesessionhandleparticipants-method) |
 | [Android](../../android/reference/operations.md) | [`LiveSessionHandle.participants`](../../android/reference/android-core.md#livesessionhandleparticipants-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`LiveSessionHandle.participants`](../../flutter/reference/convohop.md#livesessionhandleparticipants-method), [`CommunicationOperations.liveSessionParticipants`](../../flutter/reference/convohop.md#communicationoperationslivesessionparticipants-method) |
+| [React Native](../../react-native/reference/operations.md) | [`LiveSessionHandle.participants`](../../react-native/reference/client.md#livesessionhandleparticipants-method) |

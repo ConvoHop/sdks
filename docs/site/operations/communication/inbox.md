@@ -113,3 +113,4 @@ query CommunicationInbox($context: RequestContextInput!, $input: InboxRequestInp
 | [Swift](../../swift/reference/operations.md) | [`ConvoHopClient.inbox`](../../swift/reference/convohop.md#convohopclientinbox-method) |
 | [Android](../../android/reference/operations.md) | [`ConvoHopClient.inbox`](../../android/reference/android-core.md#convohopclientinbox-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`ConvoHopClient.inbox`](../../flutter/reference/convohop.md#convohopclientinbox-method), [`CommunicationOperations.inbox`](../../flutter/reference/convohop.md#communicationoperationsinbox-method) |
+| [React Native](../../react-native/reference/operations.md) | [`ConvoHopClient.inbox`](../../react-native/reference/client.md#convohopclientinbox-method) |

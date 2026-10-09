@@ -1,0 +1,150 @@
+{
+  "$schema": "../../../spec/docs/operation-map.schema.json",
+  "operations": {
+    "communication.capabilities": ["@convohop/client#ConvoHopClient.capabilities"],
+    "communication.route": [
+      "@convohop/client#ConvoHopClient.initialize",
+      "@convohop/client#ConvoHopClient.refreshSession",
+      "@convohop/client#ConvoHopClient.scheduleSessionRefresh",
+      "@convohop/react#useSessionRefresh"
+    ],
+    "communication.currentSession": [
+      "@convohop/client#ConvoHopClient.initialize",
+      "@convohop/client#ConvoHopClient.refreshSession",
+      "@convohop/client#ConvoHopClient.scheduleSessionRefresh",
+      "@convohop/react#useSessionRefresh"
+    ],
+    "communication.getConversation": [
+      "@convohop/client#ConvoHopClient.getConversation",
+      "@convohop/client#ConversationHandle.get",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync"
+    ],
+    "communication.members": ["@convohop/client#ConvoHopClient.members"],
+    "communication.messages": [
+      "@convohop/client#ConvoHopClient.messages",
+      "@convohop/client#ConversationHandle.messages.list",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/client#ConversationStore.loadOlder",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync",
+      "@convohop/react#ConversationView.loadOlder"
+    ],
+    "communication.getMessage": [
+      "@convohop/client#ConvoHopClient.getMessage",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync"
+    ],
+    "communication.events": [
+      "@convohop/client#ConvoHopClient.events",
+      "@convohop/client#ConvoHopClient.watch",
+      "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync"
+    ],
+    "communication.receipts": [
+      "@convohop/client#ConvoHopClient.receipts",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync"
+    ],
+    "communication.inbox": ["@convohop/client#ConvoHopClient.inbox"],
+    "communication.search": ["@convohop/client#ConvoHopClient.search"],
+    "communication.resolveRequest": [
+      "@convohop/client#ConvoHopClient.requests.resolve",
+      "@convohop/client#ConvoHopClient.requests.retry",
+      "@convohop/client#ConvoHopClient.recoverPending",
+      "@convohop/client#Outbox.send",
+      "@convohop/client#Outbox.resend",
+      "@convohop/client#Outbox.flush",
+      "@convohop/client#ConversationStore.send",
+      "@convohop/react#ConversationView.send"
+    ],
+    "communication.conversationMute": ["@convohop/client#ConversationHandle.mute.get"],
+    "communication.currentLiveSession": [
+      "@convohop/client#ConversationLive.current",
+      "@convohop/react#useLiveSession",
+      "@convohop/react#LiveSessionView.refresh"
+    ],
+    "communication.liveSession": [
+      "@convohop/client#ConvoHopClient.liveSession",
+      "@convohop/client#LiveSessionHandle.get:static",
+      "@convohop/client#LiveSessionHandle.get",
+      "@convohop/client#LiveSessionHandle.participation",
+      "@convohop/client#LiveStartOperation.ready",
+      "@convohop/client#LiveParticipationHandle.get",
+      "@convohop/react-native#watchRingingCalls"
+    ],
+    "communication.liveSessions": ["@convohop/client#ConversationLive.history"],
+    "communication.liveSessionParticipants": ["@convohop/client#LiveSessionHandle.participants"],
+    "communication.liveSessionAlerts": ["@convohop/client#ConvoHopClient.liveAlerts.list", "@convohop/react-native#watchRingingCalls"],
+    "communication.liveSessionOperation": [
+      "@convohop/client#LiveStartOperation.get",
+      "@convohop/client#LiveStartOperation.completed",
+      "@convohop/client#LiveStartOperation.ready",
+      "@convohop/client#LiveEndOperation.get",
+      "@convohop/client#LiveEndOperation.completed"
+    ],
+    "communication.sendMessage": [
+      "@convohop/client#ConvoHopClient.send",
+      "@convohop/client#ConversationHandle.messages.send",
+      "@convohop/client#Outbox.send",
+      "@convohop/client#Outbox.resend",
+      "@convohop/client#Outbox.flush",
+      "@convohop/client#ConversationStore.send",
+      "@convohop/react#ConversationView.send"
+    ],
+    "communication.editMessage": ["@convohop/client#ConvoHopClient.edit", "@convohop/client#ConversationHandle.messages.edit"],
+    "communication.deleteMessage": ["@convohop/client#ConvoHopClient.delete", "@convohop/client#ConversationHandle.messages.delete"],
+    "communication.reportReceipt": [
+      "@convohop/client#ConvoHopClient.reportRead",
+      "@convohop/client#ConvoHopClient.reportDelivered",
+      "@convohop/client#ConversationStore.markRead",
+      "@convohop/client#ConversationStore.markDelivered",
+      "@convohop/react#ConversationView.markRead",
+      "@convohop/react#ConversationView.markDelivered"
+    ],
+    "communication.typing": [
+      "@convohop/client#ConvoHopClient.typing",
+      "@convohop/client#TypingIndicator.input",
+      "@convohop/client#TypingIndicator.stop",
+      "@convohop/client#TypingIndicator.dispose",
+      "@convohop/react#useTyping",
+      "@convohop/react#TypingControls.input",
+      "@convohop/react#TypingControls.stop"
+    ],
+    "communication.setConversationMute": ["@convohop/client#ConversationHandle.mute.set"],
+    "communication.startLiveSession": [
+      "@convohop/client#ConversationLive.startVoice",
+      "@convohop/client#ConversationLive.startVideo",
+      "@convohop/client#ConversationLive.startBroadcast"
+    ],
+    "communication.joinLiveSession": ["@convohop/client#LiveSessionHandle.join"],
+    "communication.alertLiveSession": ["@convohop/client#LiveSessionHandle.alerts.send"],
+    "communication.leaveLiveSession": ["@convohop/client#LiveParticipationHandle.leave"],
+    "communication.endLiveSession": ["@convohop/client#LiveSessionHandle.end"],
+    "communication.liveSessionCredentials": ["@convohop/client#LiveParticipationHandle.connectWith"],
+    "communication.conversationEvents": [
+      "@convohop/client#ConvoHopClient.watch",
+      "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync"
+    ]
+  }
+}

@@ -110,3 +110,4 @@ query CommunicationSearch($context: RequestContextInput!, $input: SearchRequestI
 | [Swift](../../swift/reference/operations.md) | [`ConvoHopClient.search`](../../swift/reference/convohop.md#convohopclientsearch-method) |
 | [Android](../../android/reference/operations.md) | [`ConvoHopClient.search`](../../android/reference/android-core.md#convohopclientsearch-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`ConvoHopClient.search`](../../flutter/reference/convohop.md#convohopclientsearch-method), [`CommunicationOperations.search`](../../flutter/reference/convohop.md#communicationoperationssearch-method) |
+| [React Native](../../react-native/reference/operations.md) | [`ConvoHopClient.search`](../../react-native/reference/client.md#convohopclientsearch-method) |

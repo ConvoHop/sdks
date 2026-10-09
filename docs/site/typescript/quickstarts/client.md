@@ -4,7 +4,7 @@ Use ConvoHop in your users' browsers with `@convohop/client`: connect with the s
 
 ## Before you start
 
-Your backend signs the user in and returns a session, as the [server quickstart](server.md#sign-in-a-user) shows. `@convohop/client` never holds a backend key. It targets the current and previous major versions of Chrome, Edge, Firefox and Safari. React Native isn't verified yet. `@convohop/react` needs React 18 or later.
+Your backend signs the user in and returns a session, as the [server quickstart](server.md#sign-in-a-user) shows. `@convohop/client` never holds a backend key. It targets the current and previous major versions of Chrome, Edge, Firefox and Safari. For React Native, follow the [React Native client quickstart](../../react-native/quickstarts/client.md). `@convohop/react` needs React 18 or later.
 
 ## Connect
 

@@ -1,0 +1,147 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "react-native",
+  "package": "@convohop/react-native/media",
+  "layer": "client",
+  "page": "media.md",
+  "symbols": [
+    {
+      "name": "MediaSetupOptions",
+      "kind": "interface",
+      "ref": "@convohop/react-native/media#MediaSetupOptions",
+      "anchor": "mediasetupoptions-interface",
+      "signatures": ["interface MediaSetupOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "callKit",
+          "kind": "property",
+          "ref": "@convohop/react-native/media#MediaSetupOptions.callKit",
+          "anchor": "mediasetupoptionscallkit-property",
+          "signatures": ["callKit?: boolean"],
+          "docs": "iOS: CallKit owns the audio session. Set it when calls go through CallKit, as incoming calls rung by\n`@convohop/react-native` do: LiveKit then leaves the session to CallKit, and the SDK tells WebRTC each time CallKit\nactivates or deactivates it. Start every call with CallKit, including outgoing calls with `startOutgoingCall`,\nor it has no audio. Ignored on Android. Default `false`."
+        }
+      ]
+    },
+    {
+      "name": "RoomConnection",
+      "kind": "interface",
+      "ref": "@convohop/react-native/media#RoomConnection",
+      "anchor": "roomconnection-interface",
+      "signatures": ["interface RoomConnection extends LiveConnection"],
+      "docs": "A room connection admitted for one participation.",
+      "members": [
+        {
+          "name": "room",
+          "kind": "property",
+          "ref": "@convohop/react-native/media#RoomConnection.room",
+          "anchor": "roomconnectionroom-property",
+          "signatures": ["readonly room: Room"],
+          "docs": ""
+        },
+        {
+          "name": "nativeConnectionId",
+          "kind": "property",
+          "ref": "@convohop/react-native/media#RoomConnection.nativeConnectionId",
+          "anchor": "roomconnectionnativeconnectionid-property",
+          "signatures": ["readonly nativeConnectionId: string"],
+          "docs": "The participation's `nativeConnectionId`: the participant SID the media server assigned at admission."
+        },
+        {
+          "name": "resuming",
+          "kind": "property",
+          "ref": "@convohop/react-native/media#RoomConnection.resuming",
+          "anchor": "roomconnectionresuming-property",
+          "signatures": ["readonly resuming: boolean"],
+          "docs": "LiveKit is resuming this connection after a network interruption."
+        },
+        {
+          "name": "connected",
+          "kind": "property",
+          "ref": "@convohop/react-native/media#RoomConnection.connected",
+          "anchor": "roomconnectionconnected-property",
+          "signatures": ["readonly connected: boolean"],
+          "docs": "",
+          "inherited": "LiveConnection"
+        },
+        {
+          "name": "disconnect",
+          "kind": "method",
+          "ref": "@convohop/react-native/media#RoomConnection.disconnect",
+          "anchor": "roomconnectiondisconnect-method",
+          "signatures": ["disconnect(): Promise<void>"],
+          "docs": "",
+          "inherited": "LiveConnection"
+        }
+      ]
+    },
+    {
+      "name": "RoomConnectorOptions",
+      "kind": "interface",
+      "ref": "@convohop/react-native/media#RoomConnectorOptions",
+      "anchor": "roomconnectoroptions-interface",
+      "signatures": ["interface RoomConnectorOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "iceTransportPolicy",
+          "kind": "property",
+          "ref": "@convohop/react-native/media#RoomConnectorOptions.iceTransportPolicy",
+          "anchor": "roomconnectoroptionsicetransportpolicy-property",
+          "signatures": ["iceTransportPolicy?: \"all\" | \"relay\""],
+          "docs": "`relay` sends media only through TURN. Default `all`."
+        },
+        {
+          "name": "onResuming",
+          "kind": "property",
+          "ref": "@convohop/react-native/media#RoomConnectorOptions.onResuming",
+          "anchor": "roomconnectoroptionsonresuming-property",
+          "signatures": ["onResuming?: () => void"],
+          "docs": "LiveKit lost the connection and is resuming it with the current or a server-refreshed token."
+        },
+        {
+          "name": "onResumed",
+          "kind": "property",
+          "ref": "@convohop/react-native/media#RoomConnectorOptions.onResumed",
+          "anchor": "roomconnectoroptionsonresumed-property",
+          "signatures": ["onResumed?: () => void"],
+          "docs": "LiveKit resumed the same connection."
+        },
+        {
+          "name": "onDisconnected",
+          "kind": "property",
+          "ref": "@convohop/react-native/media#RoomConnectorOptions.onDisconnected",
+          "anchor": "roomconnectoroptionsondisconnected-property",
+          "signatures": ["onDisconnected?: () => void"],
+          "docs": "The connection ended without `disconnect()`: the network failed past resuming, the server removed this\nparticipant, or LiveKit reconnected as a new participant, which this participation's admission doesn't cover.\nConnect again with `participation.connectWith`, which obtains fresh credentials."
+        }
+      ]
+    },
+    {
+      "name": "createRoom",
+      "kind": "function",
+      "ref": "@convohop/react-native/media#createRoom",
+      "anchor": "createroom-function",
+      "signatures": ["function createRoom(): Room"],
+      "docs": "A LiveKit room with ConvoHop's media policy, the same as the Web SDK's: one peer connection per direction, no\nsimulcast, adaptive stream or dynacast, and VP8 video at up to 320x240, 15 frames per second and 350 kbit/s."
+    },
+    {
+      "name": "createRoomConnector",
+      "kind": "function",
+      "ref": "@convohop/react-native/media#createRoomConnector",
+      "anchor": "createroomconnector-function",
+      "signatures": [
+        "function createRoomConnector(room: Room, options?: RoomConnectorOptions): LiveConnector<RoomConnection>"
+      ],
+      "docs": "A connector for `participation.connectWith` that connects `room` once with each admitted attempt's single-use token,\nthe way the Web SDK connects. Pass a disconnected room, such as one from `createRoom`, and reuse it to connect\nagain. Connecting doesn't capture the microphone or camera: publish them with `room.localParticipant` after it\nresolves. The media server enforces what the participation may publish."
+    },
+    {
+      "name": "setupMedia",
+      "kind": "function",
+      "ref": "@convohop/react-native/media#setupMedia",
+      "anchor": "setupmedia-function",
+      "signatures": ["function setupMedia(options?: MediaSetupOptions): void"],
+      "docs": "Prepares LiveKit's React Native SDK. Call it once at the top of `index.js`, before anything uses LiveKit. It\ninstalls a secure `crypto.getRandomValues` and `crypto.randomUUID` where the runtime lacks them, then LiveKit's\nglobals."
+    }
+  ]
+}

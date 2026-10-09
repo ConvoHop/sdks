@@ -156,3 +156,4 @@ query CommunicationGetOperation($context: RequestContextInput!, $input: GetOpera
 | [Swift](../../swift/reference/operations.md) | Not wrapped by a method |
 | [Android](../../android/reference/operations.md) | Not wrapped by a method |
 | [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.getOperation`](../../flutter/reference/convohop.md#communicationoperationsgetoperation-method) |
+| [React Native](../../react-native/reference/operations.md) | Not wrapped by a method |

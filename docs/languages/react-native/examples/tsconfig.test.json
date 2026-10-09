@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2024"],
+    "types": ["react-native", "node"]
+  },
+  "include": ["test/**/*.ts"]
+}

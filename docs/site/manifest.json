@@ -51,7 +51,7 @@
           "slug": "client",
           "layer": "client",
           "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.",
-          "runtime": "Current browsers. React Native isn't verified yet.",
+          "runtime": "Current browsers. For React Native, see the React Native docs.",
           "source": "packages/client",
           "reference": "typescript/reference/client.md",
           "data": "typescript/reference/client.json"
@@ -71,7 +71,7 @@
           "slug": "react",
           "layer": "client",
           "summary": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.",
-          "runtime": "React 18 or later in current browsers. React Native isn't verified yet.",
+          "runtime": "React 18 or later in current browsers. For React Native, see the React Native docs.",
           "source": "packages/react",
           "reference": "typescript/reference/react.md",
           "data": "typescript/reference/react.json"
@@ -442,6 +442,63 @@
         {"topic": "client", "path": "flutter/quickstarts/client.md"},
         {"topic": "push", "path": "flutter/quickstarts/push.md"},
         {"topic": "calling", "path": "flutter/quickstarts/calling.md"}
+      ]
+    },
+    {
+      "id": "react-native",
+      "name": "React Native",
+      "status": "preview",
+      "codeFence": "ts",
+      "home": "react-native/index.md",
+      "reference": "react-native/reference/index.md",
+      "coverage": "react-native/reference/operations.md",
+      "llmsFull": "react-native/llms-full.txt",
+      "packages": [
+        {
+          "name": "@convohop/react-native",
+          "slug": "react-native",
+          "layer": "client",
+          "summary": "React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom.",
+          "runtime": "React Native 0.76 or later with the New Architecture: Android 7.0 or later, and iOS 15.1 or later with React Native 0.84 or later.",
+          "source": "packages/react-native",
+          "reference": "react-native/reference/react-native.md",
+          "data": "react-native/reference/react-native.json"
+        },
+        {
+          "name": "@convohop/react-native/media",
+          "slug": "media",
+          "layer": "client",
+          "summary": "Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @convohop/react-native.",
+          "runtime": "As @convohop/react-native, with @livekit/react-native 3, @livekit/react-native-webrtc 144.2 or later and livekit-client 2.22.3 or later.",
+          "source": "packages/react-native",
+          "reference": "react-native/reference/media.md",
+          "data": "react-native/reference/media.json"
+        },
+        {
+          "name": "@convohop/client",
+          "slug": "client",
+          "layer": "client",
+          "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @convohop/react-native.",
+          "runtime": "React Native 0.76 or later, with the platform from @convohop/react-native.",
+          "source": "packages/client",
+          "reference": "react-native/reference/client.md",
+          "data": "react-native/reference/client.json"
+        },
+        {
+          "name": "@convohop/react",
+          "slug": "react",
+          "layer": "client",
+          "summary": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @convohop/react-native/media: useMediaConnection needs a browser.",
+          "runtime": "React 18 or later, in React Native 0.76 or later.",
+          "source": "packages/react",
+          "reference": "react-native/reference/react.md",
+          "data": "react-native/reference/react.json"
+        }
+      ],
+      "quickstarts": [
+        {"topic": "client", "path": "react-native/quickstarts/client.md"},
+        {"topic": "push", "path": "react-native/quickstarts/push.md"},
+        {"topic": "calling", "path": "react-native/quickstarts/calling.md"}
       ]
     }
   ],
@@ -1053,6 +1110,83 @@
       "title": "Flutter operation coverage",
       "description": "The Flutter SDK members that send each API operation. 35 of the 35 operations that Flutter packages can send have a method.",
       "language": "flutter"
+    },
+    {
+      "path": "react-native/index.md",
+      "kind": "language",
+      "title": "React Native SDK",
+      "description": "@convohop/react-native runs the ConvoHop client SDK, @convohop/client, in React Native apps on Android and iOS. The client runs one signed-in user's session in your app: conversations and their realtime events, a local conversation store, an offline outbox with optimistic sends, read receipts, typing and calls. The package adds what React Native needs around it: the platform that the client runs on in Hermes, push registration and notifications through APNs, PushKit and FCM, calls in CallKit and Android's Telecom, and call media through LiveKit's React Native SDK.",
+      "language": "react-native"
+    },
+    {
+      "path": "react-native/quickstarts/client.md",
+      "kind": "quickstart",
+      "title": "React Native client quickstart",
+      "description": "Use ConvoHop in your users' React Native apps with @convohop/client and @convohop/react-native: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and the app's restarts. @convohop/react offers the same as React hooks.",
+      "language": "react-native",
+      "topic": "client"
+    },
+    {
+      "path": "react-native/quickstarts/push.md",
+      "kind": "quickstart",
+      "title": "React Native push notifications quickstart",
+      "description": "Show ConvoHop's push notifications in your React Native app with @convohop/react-native: register the device with APNs or FCM, open the conversation that a notification is about, and show message text whether or not the project sends message previews.",
+      "language": "react-native",
+      "topic": "push"
+    },
+    {
+      "path": "react-native/quickstarts/calling.md",
+      "kind": "quickstart",
+      "title": "React Native calling quickstart",
+      "description": "Add voice and video calls to a conversation with @convohop/react-native: start a call and ring other members, join it with LiveKit's React Native SDK, answer incoming calls from CallKit or Android's Telecom, and leave or end a call.",
+      "language": "react-native",
+      "topic": "calling"
+    },
+    {
+      "path": "react-native/reference/index.md",
+      "kind": "reference-index",
+      "title": "React Native reference",
+      "description": "The public API of each React Native package, generated from its declarations.",
+      "language": "react-native"
+    },
+    {
+      "path": "react-native/reference/react-native.md",
+      "kind": "reference",
+      "title": "@convohop/react-native",
+      "description": "React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom.",
+      "language": "react-native",
+      "package": "@convohop/react-native"
+    },
+    {
+      "path": "react-native/reference/media.md",
+      "kind": "reference",
+      "title": "@convohop/react-native/media",
+      "description": "Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @convohop/react-native.",
+      "language": "react-native",
+      "package": "@convohop/react-native/media"
+    },
+    {
+      "path": "react-native/reference/client.md",
+      "kind": "reference",
+      "title": "@convohop/client",
+      "description": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @convohop/react-native.",
+      "language": "react-native",
+      "package": "@convohop/client"
+    },
+    {
+      "path": "react-native/reference/react.md",
+      "kind": "reference",
+      "title": "@convohop/react",
+      "description": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @convohop/react-native/media: useMediaConnection needs a browser.",
+      "language": "react-native",
+      "package": "@convohop/react"
+    },
+    {
+      "path": "react-native/reference/operations.md",
+      "kind": "coverage",
+      "title": "React Native operation coverage",
+      "description": "The React Native SDK members that send each API operation. 32 of the 35 operations that React Native packages can send have a method.",
+      "language": "react-native"
     },
     {
       "path": "operations/index.md",

@@ -2,7 +2,7 @@
 
 React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.
 
-**Layer:** Client. **Runtime:** React 18 or later in current browsers. React Native isn't verified yet. **Source:** `packages/react`.
+**Layer:** Client. **Runtime:** React 18 or later in current browsers. For React Native, see the React Native docs. **Source:** `packages/react`.
 
 ## Interfaces
 

@@ -1,0 +1,873 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "react-native",
+  "package": "@convohop/react-native",
+  "layer": "client",
+  "page": "react-native.md",
+  "symbols": [
+    {
+      "name": "AbortSignalLike",
+      "kind": "interface",
+      "ref": "@convohop/react-native#AbortSignalLike",
+      "anchor": "abortsignallike-interface",
+      "signatures": ["interface AbortSignalLike"],
+      "docs": "The part of an `AbortSignal` this package uses, such as one from React Native's `AbortController`.",
+      "members": [
+        {
+          "name": "aborted",
+          "kind": "property",
+          "ref": "@convohop/react-native#AbortSignalLike.aborted",
+          "anchor": "abortsignallikeaborted-property",
+          "signatures": ["readonly aborted: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "reason",
+          "kind": "property",
+          "ref": "@convohop/react-native#AbortSignalLike.reason",
+          "anchor": "abortsignallikereason-property",
+          "signatures": ["readonly reason?: unknown"],
+          "docs": ""
+        },
+        {
+          "name": "addEventListener",
+          "kind": "method",
+          "ref": "@convohop/react-native#AbortSignalLike.addEventListener",
+          "anchor": "abortsignallikeaddeventlistener-method",
+          "signatures": ["addEventListener(type: \"abort\", listener: () => void): void"],
+          "docs": ""
+        },
+        {
+          "name": "removeEventListener",
+          "kind": "method",
+          "ref": "@convohop/react-native#AbortSignalLike.removeEventListener",
+          "anchor": "abortsignallikeremoveeventlistener-method",
+          "signatures": ["removeEventListener(type: \"abort\", listener: () => void): void"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "Call",
+      "kind": "interface",
+      "ref": "@convohop/react-native#Call",
+      "anchor": "call-interface",
+      "signatures": ["interface Call"],
+      "docs": "A call the system knows about: CallKit on iOS, Telecom on Android.",
+      "members": [
+        {
+          "name": "id",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.id",
+          "anchor": "callid-property",
+          "signatures": ["readonly id: string"],
+          "docs": "The CallKit call UUID on iOS, the ring's `alertId` on Android."
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.alertId",
+          "anchor": "callalertid-property",
+          "signatures": ["readonly alertId?: string"],
+          "docs": "The ring that started an incoming call."
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.liveSessionId",
+          "anchor": "calllivesessionid-property",
+          "signatures": ["readonly liveSessionId: string"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.conversationId",
+          "anchor": "callconversationid-property",
+          "signatures": ["readonly conversationId?: string"],
+          "docs": ""
+        },
+        {
+          "name": "outgoing",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.outgoing",
+          "anchor": "calloutgoing-property",
+          "signatures": ["readonly outgoing: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "hasVideo",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.hasVideo",
+          "anchor": "callhasvideo-property",
+          "signatures": ["readonly hasVideo: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "mediaProfile",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.mediaProfile",
+          "anchor": "callmediaprofile-property",
+          "signatures": ["readonly mediaProfile?: string"],
+          "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a later profile."
+        },
+        {
+          "name": "callerName",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.callerName",
+          "anchor": "callcallername-property",
+          "signatures": ["readonly callerName?: string"],
+          "docs": ""
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.expiresAt",
+          "anchor": "callexpiresat-property",
+          "signatures": ["readonly expiresAt?: number"],
+          "docs": "When an unanswered ring stops, in milliseconds since the epoch."
+        },
+        {
+          "name": "state",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.state",
+          "anchor": "callstate-property",
+          "signatures": ["readonly state: CallState"],
+          "docs": ""
+        },
+        {
+          "name": "muted",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.muted",
+          "anchor": "callmuted-property",
+          "signatures": ["readonly muted: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "endReason",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.endReason",
+          "anchor": "callendreason-property",
+          "signatures": ["readonly endReason?: CallEndReason"],
+          "docs": "Set once `state` is `ended`."
+        },
+        {
+          "name": "serverReason",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.serverReason",
+          "anchor": "callserverreason-property",
+          "signatures": ["readonly serverReason?: string"],
+          "docs": "The server's reason for stopping the ring, such as `answered`, when the server stopped it."
+        },
+        {
+          "name": "audioRoute",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.audioRoute",
+          "anchor": "callaudioroute-property",
+          "signatures": ["readonly audioRoute?: AudioRoute"],
+          "docs": "Android: the current audio route."
+        },
+        {
+          "name": "availableAudioRoutes",
+          "kind": "property",
+          "ref": "@convohop/react-native#Call.availableAudioRoutes",
+          "anchor": "callavailableaudioroutes-property",
+          "signatures": ["readonly availableAudioRoutes: readonly AudioRoute[]"],
+          "docs": "Android: the routes `setAudioRoute` accepts."
+        }
+      ]
+    },
+    {
+      "name": "CallEvent",
+      "kind": "interface",
+      "ref": "@convohop/react-native#CallEvent",
+      "anchor": "callevent-interface",
+      "signatures": ["interface CallEvent"],
+      "docs": "",
+      "members": [
+        {
+          "name": "type",
+          "kind": "property",
+          "ref": "@convohop/react-native#CallEvent.type",
+          "anchor": "calleventtype-property",
+          "signatures": ["readonly type: CallEventType"],
+          "docs": ""
+        },
+        {
+          "name": "call",
+          "kind": "property",
+          "ref": "@convohop/react-native#CallEvent.call",
+          "anchor": "calleventcall-property",
+          "signatures": ["readonly call: Call"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "CallUpdate",
+      "kind": "interface",
+      "ref": "@convohop/react-native#CallUpdate",
+      "anchor": "callupdate-interface",
+      "signatures": ["interface CallUpdate"],
+      "docs": "",
+      "members": [
+        {
+          "name": "callerName",
+          "kind": "property",
+          "ref": "@convohop/react-native#CallUpdate.callerName",
+          "anchor": "callupdatecallername-property",
+          "signatures": ["callerName?: string"],
+          "docs": ""
+        },
+        {
+          "name": "hasVideo",
+          "kind": "property",
+          "ref": "@convohop/react-native#CallUpdate.hasVideo",
+          "anchor": "callupdatehasvideo-property",
+          "signatures": ["hasVideo?: boolean"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "NetInfoSource",
+      "kind": "interface",
+      "ref": "@convohop/react-native#NetInfoSource",
+      "anchor": "netinfosource-interface",
+      "signatures": ["interface NetInfoSource"],
+      "docs": "The part of `@react-native-community/netinfo` the platform uses. Pass its default export.",
+      "members": [
+        {
+          "name": "addEventListener",
+          "kind": "method",
+          "ref": "@convohop/react-native#NetInfoSource.addEventListener",
+          "anchor": "netinfosourceaddeventlistener-method",
+          "signatures": [
+            "addEventListener(listener: (state: {\n    readonly isConnected: boolean | null;\n}) => void): () => void"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "NotificationResponse",
+      "kind": "interface",
+      "ref": "@convohop/react-native#NotificationResponse",
+      "anchor": "notificationresponse-interface",
+      "signatures": ["interface NotificationResponse"],
+      "docs": "A ConvoHop push the app received while running (`received`) or that the user opened (`opened`).",
+      "members": [
+        {
+          "name": "action",
+          "kind": "property",
+          "ref": "@convohop/react-native#NotificationResponse.action",
+          "anchor": "notificationresponseaction-property",
+          "signatures": ["readonly action: \"received\" | \"opened\""],
+          "docs": ""
+        },
+        {
+          "name": "notification",
+          "kind": "property",
+          "ref": "@convohop/react-native#NotificationResponse.notification",
+          "anchor": "notificationresponsenotification-property",
+          "signatures": ["readonly notification: PushNotification"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "OutgoingCallRequest",
+      "kind": "interface",
+      "ref": "@convohop/react-native#OutgoingCallRequest",
+      "anchor": "outgoingcallrequest-interface",
+      "signatures": ["interface OutgoingCallRequest"],
+      "docs": "",
+      "members": [
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "@convohop/react-native#OutgoingCallRequest.liveSessionId",
+          "anchor": "outgoingcallrequestlivesessionid-property",
+          "signatures": ["liveSessionId: string"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/react-native#OutgoingCallRequest.conversationId",
+          "anchor": "outgoingcallrequestconversationid-property",
+          "signatures": ["conversationId: string"],
+          "docs": ""
+        },
+        {
+          "name": "handle",
+          "kind": "property",
+          "ref": "@convohop/react-native#OutgoingCallRequest.handle",
+          "anchor": "outgoingcallrequesthandle-property",
+          "signatures": ["handle: string"],
+          "docs": "What the system shows and puts in its call history to identify the other side, such as a user name."
+        },
+        {
+          "name": "displayName",
+          "kind": "property",
+          "ref": "@convohop/react-native#OutgoingCallRequest.displayName",
+          "anchor": "outgoingcallrequestdisplayname-property",
+          "signatures": ["displayName?: string"],
+          "docs": ""
+        },
+        {
+          "name": "hasVideo",
+          "kind": "property",
+          "ref": "@convohop/react-native#OutgoingCallRequest.hasVideo",
+          "anchor": "outgoingcallrequesthasvideo-property",
+          "signatures": ["hasVideo?: boolean"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PlatformOptions",
+      "kind": "interface",
+      "ref": "@convohop/react-native#PlatformOptions",
+      "anchor": "platformoptions-interface",
+      "signatures": ["interface PlatformOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "netInfo",
+          "kind": "property",
+          "ref": "@convohop/react-native#PlatformOptions.netInfo",
+          "anchor": "platformoptionsnetinfo-property",
+          "signatures": ["netInfo?: NetInfoSource"],
+          "docs": "`@react-native-community/netinfo`'s default export. The outbox then waits while the device is offline, and\nthe client resumes as soon as it is back. Without it, the platform always reports online."
+        }
+      ]
+    },
+    {
+      "name": "PushPermissionRequest",
+      "kind": "interface",
+      "ref": "@convohop/react-native#PushPermissionRequest",
+      "anchor": "pushpermissionrequest-interface",
+      "signatures": ["interface PushPermissionRequest"],
+      "docs": "iOS presentation options to request. Android ignores them and requests `POST_NOTIFICATIONS` on Android 13+.",
+      "members": [
+        {
+          "name": "alert",
+          "kind": "property",
+          "ref": "@convohop/react-native#PushPermissionRequest.alert",
+          "anchor": "pushpermissionrequestalert-property",
+          "signatures": ["alert?: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "badge",
+          "kind": "property",
+          "ref": "@convohop/react-native#PushPermissionRequest.badge",
+          "anchor": "pushpermissionrequestbadge-property",
+          "signatures": ["badge?: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "sound",
+          "kind": "property",
+          "ref": "@convohop/react-native#PushPermissionRequest.sound",
+          "anchor": "pushpermissionrequestsound-property",
+          "signatures": ["sound?: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "provisional",
+          "kind": "property",
+          "ref": "@convohop/react-native#PushPermissionRequest.provisional",
+          "anchor": "pushpermissionrequestprovisional-property",
+          "signatures": ["provisional?: boolean"],
+          "docs": "iOS 12+: deliver quietly without asking. The user can promote or turn off notifications later."
+        }
+      ]
+    },
+    {
+      "name": "PushRecipient",
+      "kind": "interface",
+      "ref": "@convohop/react-native#PushRecipient",
+      "anchor": "pushrecipient-interface",
+      "signatures": ["interface PushRecipient"],
+      "docs": "The user whose ConvoHop pushes this device accepts: the signed-in user.",
+      "members": [
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "@convohop/react-native#PushRecipient.projectId",
+          "anchor": "pushrecipientprojectid-property",
+          "signatures": ["readonly projectId: string"],
+          "docs": "The client's `projectId`."
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "@convohop/react-native#PushRecipient.recipientId",
+          "anchor": "pushrecipientrecipientid-property",
+          "signatures": ["readonly recipientId: string"],
+          "docs": "The user's principal ID: the client's `principalId`."
+        }
+      ]
+    },
+    {
+      "name": "ReactNativePlatform",
+      "kind": "interface",
+      "ref": "@convohop/react-native#ReactNativePlatform",
+      "anchor": "reactnativeplatform-interface",
+      "signatures": ["interface ReactNativePlatform extends ConvoHopPlatform"],
+      "docs": "A `ConvoHopPlatform` for React Native: pass it as `ConvoHopClient`'s `platform` option.",
+      "members": [
+        {
+          "name": "randomUUID",
+          "kind": "property",
+          "ref": "@convohop/react-native#ReactNativePlatform.randomUUID",
+          "anchor": "reactnativeplatformrandomuuid-property",
+          "signatures": ["readonly randomUUID: () => string"],
+          "docs": "Version 4 UUIDs from the platform's secure generator."
+        },
+        {
+          "name": "sha256",
+          "kind": "property",
+          "ref": "@convohop/react-native#ReactNativePlatform.sha256",
+          "anchor": "reactnativeplatformsha256-property",
+          "signatures": ["readonly sha256: (data: Uint8Array) => Promise<Uint8Array>"],
+          "docs": ""
+        },
+        {
+          "name": "URL",
+          "kind": "property",
+          "ref": "@convohop/react-native#ReactNativePlatform.URL",
+          "anchor": "reactnativeplatformurl-property",
+          "signatures": ["readonly URL: PlatformURLConstructor"],
+          "docs": "A WHATWG URL constructor. Hosts must be ASCII: write internationalized domain names in Punycode."
+        },
+        {
+          "name": "connectivity",
+          "kind": "property",
+          "ref": "@convohop/react-native#ReactNativePlatform.connectivity",
+          "anchor": "reactnativeplatformconnectivity-property",
+          "signatures": ["readonly connectivity: Connectivity"],
+          "docs": "NetInfo's `isConnected`. Unknown counts as online."
+        },
+        {
+          "name": "lifecycle",
+          "kind": "property",
+          "ref": "@convohop/react-native#ReactNativePlatform.lifecycle",
+          "anchor": "reactnativeplatformlifecycle-property",
+          "signatures": ["readonly lifecycle: Lifecycle"],
+          "docs": "`AppState`: `background` is background, and every other state, including iOS's `inactive`, is active."
+        },
+        {
+          "name": "dispose",
+          "kind": "method",
+          "ref": "@convohop/react-native#ReactNativePlatform.dispose",
+          "anchor": "reactnativeplatformdispose-method",
+          "signatures": ["dispose(): void"],
+          "docs": "Removes the platform's AppState and NetInfo listeners. Its state stops changing."
+        },
+        {
+          "name": "WebSocket",
+          "kind": "property",
+          "ref": "@convohop/react-native#ReactNativePlatform.WebSocket",
+          "anchor": "reactnativeplatformwebsocket-property",
+          "signatures": ["WebSocket?: PlatformWebSocketConstructor"],
+          "docs": "Opens the realtime connection. Default: the global `WebSocket`.",
+          "inherited": "ConvoHopPlatform"
+        }
+      ]
+    },
+    {
+      "name": "RegisterForPushOptions",
+      "kind": "interface",
+      "ref": "@convohop/react-native#RegisterForPushOptions",
+      "anchor": "registerforpushoptions-interface",
+      "signatures": ["interface RegisterForPushOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "register",
+          "kind": "property",
+          "ref": "@convohop/react-native#RegisterForPushOptions.register",
+          "anchor": "registerforpushoptionsregister-property",
+          "signatures": ["register: (registration: NativePushRegistration) => Promise<void> | void"],
+          "docs": "Stores the registration with your backend, for the signed-in user, so it can send pushes to this device. Called\nonce for each registration this sees: the current ones, then each new one. On iOS that is the APNs token and, when\nthe app receives calls, the PushKit token. On Android it is the FCM registration token or FID, which change when\nthe app's data is cleared or Firebase replaces them. A registration your backend fails to store is offered again\nif the platform reports it again."
+        },
+        {
+          "name": "unregister",
+          "kind": "property",
+          "ref": "@convohop/react-native#RegisterForPushOptions.unregister",
+          "anchor": "registerforpushoptionsunregister-property",
+          "signatures": [
+            "unregister?: (registration: NativePushRegistration) => Promise<void> | void"
+          ],
+          "docs": "Deletes a registration from your backend when Android reports that FCM unregistered it, so pushes to it stop:\nafter `unregisterFromPush`, or when Firebase unregisters the FID itself. The same report can arrive more than\nonce. If FCM registers that token or FID again, `register` gets it again. iOS never calls it."
+        },
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/react-native#RegisterForPushOptions.onError",
+          "anchor": "registerforpushoptionsonerror-property",
+          "signatures": ["onError?: (error: unknown) => void"],
+          "docs": "Receives the errors that don't reject `registerForPush`: failures after it resolved, and PushKit failures. By\ndefault they go to React Native's error handler."
+        },
+        {
+          "name": "timeoutMs",
+          "kind": "property",
+          "ref": "@convohop/react-native#RegisterForPushOptions.timeoutMs",
+          "anchor": "registerforpushoptionstimeoutms-property",
+          "signatures": ["timeoutMs?: number"],
+          "docs": "How long to wait for the APNs token or the FCM registration to be stored, in milliseconds. Default 30000."
+        },
+        {
+          "name": "signal",
+          "kind": "property",
+          "ref": "@convohop/react-native#RegisterForPushOptions.signal",
+          "anchor": "registerforpushoptionssignal-property",
+          "signatures": ["signal?: AbortSignalLike"],
+          "docs": "Stops registering when it aborts, as the function `registerForPush` resolves does. If that hasn't resolved yet,\nit rejects with the signal's `reason`. Use it to sign out, or to clean up an effect, without waiting for the\nplatform or your backend."
+        }
+      ]
+    },
+    {
+      "name": "WatchRingingOptions",
+      "kind": "interface",
+      "ref": "@convohop/react-native#WatchRingingOptions",
+      "anchor": "watchringingoptions-interface",
+      "signatures": ["interface WatchRingingOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "intervalMs",
+          "kind": "property",
+          "ref": "@convohop/react-native#WatchRingingOptions.intervalMs",
+          "anchor": "watchringingoptionsintervalms-property",
+          "signatures": ["intervalMs?: number"],
+          "docs": "How often to check while an incoming call rings, in milliseconds: 1000 to 60000. Defaults to 3000."
+        },
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/react-native#WatchRingingOptions.onError",
+          "anchor": "watchringingoptionsonerror-property",
+          "signatures": ["onError?: (error: unknown) => void"],
+          "docs": "Receives errors from checking, until watching stops; checking continues. By default React Native's error handler reports them."
+        }
+      ]
+    },
+    {
+      "name": "AudioRoute",
+      "kind": "type",
+      "ref": "@convohop/react-native#AudioRoute",
+      "anchor": "audioroute-type",
+      "signatures": [
+        "type AudioRoute = \"earpiece\" | \"speaker\" | \"bluetooth\" | \"wiredHeadset\" | \"streaming\" | \"unknown\""
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CallEndReason",
+      "kind": "type",
+      "ref": "@convohop/react-native#CallEndReason",
+      "anchor": "callendreason-type",
+      "signatures": [
+        "type CallEndReason = \"rejected\" | \"hungUp\" | \"answeredElsewhere\" | \"declinedElsewhere\" | \"missed\" | \"expired\" | \"stopped\" | \"failed\""
+      ],
+      "docs": "Why a call ended:\n- `rejected`: the user declined it here.\n- `hungUp`: the user or the app ended it here.\n- `answeredElsewhere`, `declinedElsewhere`: another of the user's devices handled the ring.\n- `missed`: the caller stopped calling before anyone answered.\n- `expired`: the ring timed out.\n- `stopped`: the server stopped the ring for another reason; see `Call.serverReason`.\n- `failed`: the system couldn't place or keep the call."
+    },
+    {
+      "name": "CallEventType",
+      "kind": "type",
+      "ref": "@convohop/react-native#CallEventType",
+      "anchor": "calleventtype-type",
+      "signatures": [
+        "type CallEventType = \"incoming\" | \"outgoing\" | \"answered\" | \"ended\" | \"changed\""
+      ],
+      "docs": "`answered` means the user answered a ringing call in the system UI or with `answerCall`."
+    },
+    {
+      "name": "CallState",
+      "kind": "type",
+      "ref": "@convohop/react-native#CallState",
+      "anchor": "callstate-type",
+      "signatures": [
+        "type CallState = \"ringing\" | \"connecting\" | \"active\" | \"held\" | \"ended\""
+      ],
+      "docs": "- `ringing`: an incoming call is ringing.\n- `connecting`: the user answered, or started an outgoing call, and the app is joining its media.\n- `active`: the app reported the call connected.\n- `held`: the system or the user put the call on hold.\n- `ended`: see `Call.endReason`."
+    },
+    {
+      "name": "NativePushRegistration",
+      "kind": "type",
+      "ref": "@convohop/react-native#NativePushRegistration",
+      "anchor": "nativepushregistration-type",
+      "signatures": [
+        "type NativePushRegistration = Exclude<PushRegistration, {\n    readonly kind: \"webPush\";\n}>"
+      ],
+      "docs": "A push registration from a native app: an APNs or PushKit token on iOS. On Android, an FCM registration token, or\nthe Firebase installation ID (FID) when the app registers with FCM by FID. Your backend sends FCM messages to\nwhichever it got."
+    },
+    {
+      "name": "PushPermission",
+      "kind": "type",
+      "ref": "@convohop/react-native#PushPermission",
+      "anchor": "pushpermission-type",
+      "signatures": [
+        "type PushPermission = \"granted\" | \"provisional\" | \"denied\" | \"undetermined\""
+      ],
+      "docs": "Whether the app may show notifications. `provisional` is iOS's quiet delivery to Notification Center."
+    },
+    {
+      "name": "RemoteMessageResult",
+      "kind": "type",
+      "ref": "@convohop/react-native#RemoteMessageResult",
+      "anchor": "remotemessageresult-type",
+      "signatures": [
+        "type RemoteMessageResult = \"notConvoHop\" | \"invalid\" | \"ignored\" | \"message\" | \"ringing\" | \"stopped\" | \"missed\""
+      ],
+      "docs": "What the native handler did with an Android data message:\n- `notConvoHop`: the message isn't a ConvoHop push. Handle it yourself.\n- `invalid`: it is a ConvoHop push that doesn't match the push payload contract. It was dropped.\n- `ignored`: a duplicate, or a ring for a call that already stopped.\n- `message`: it showed a message notification.\n- `ringing`: it started ringing an incoming call.\n- `stopped`: it stopped a ring that was answered or declined, on any device.\n- `missed`: it stopped a ring nobody answered and showed a missed call."
+    },
+    {
+      "name": "RingingClient",
+      "kind": "type",
+      "ref": "@convohop/react-native#RingingClient",
+      "anchor": "ringingclient-type",
+      "signatures": ["type RingingClient = Pick<ConvoHopClient, \"liveAlerts\" | \"liveSession\">"],
+      "docs": "The client methods `watchRingingCalls` uses."
+    },
+    {
+      "name": "answerCall",
+      "kind": "function",
+      "ref": "@convohop/react-native#answerCall",
+      "anchor": "answercall-function",
+      "signatures": ["function answerCall(callId: string): Promise<void>"],
+      "docs": "Answers a ringing call, as if the user answered it in the system UI. Its `answered` event follows."
+    },
+    {
+      "name": "canUseFullScreenIntent",
+      "kind": "function",
+      "ref": "@convohop/react-native#canUseFullScreenIntent",
+      "anchor": "canusefullscreenintent-function",
+      "signatures": ["function canUseFullScreenIntent(): Promise<boolean>"],
+      "docs": "Whether incoming calls can ring full screen over the lock screen. Android 14 and later grant this only to calling\nand alarm apps, and users can revoke it; without it, a call rings as a heads-up notification. iOS resolves `true`."
+    },
+    {
+      "name": "createPlatform",
+      "kind": "function",
+      "ref": "@convohop/react-native#createPlatform",
+      "anchor": "createplatform-function",
+      "signatures": ["function createPlatform(options?: PlatformOptions): ReactNativePlatform"],
+      "docs": "Creates the React Native platform for `@convohop/client`. It listens to `AppState`, and to NetInfo when you pass\nit, from creation until `ReactNativePlatform.dispose`. Create one for the app and share it between clients."
+    },
+    {
+      "name": "endCall",
+      "kind": "function",
+      "ref": "@convohop/react-native#endCall",
+      "anchor": "endcall-function",
+      "signatures": ["function endCall(callId: string): Promise<void>"],
+      "docs": "Declines a ringing call, or hangs up any other. Leave the live session too, if you joined it."
+    },
+    {
+      "name": "forgetCall",
+      "kind": "function",
+      "ref": "@convohop/react-native#forgetCall",
+      "anchor": "forgetcall-function",
+      "signatures": ["function forgetCall(callId: string): Promise<boolean>"],
+      "docs": "Drops an ended call from `getCalls`. Resolves `false` for a call that hasn't ended."
+    },
+    {
+      "name": "getCalls",
+      "kind": "function",
+      "ref": "@convohop/react-native#getCalls",
+      "anchor": "getcalls-function",
+      "signatures": ["function getCalls(): Promise<Call[]>"],
+      "docs": "The current calls, and ended calls the system still remembers, for up to a minute or until `forgetCall`."
+    },
+    {
+      "name": "getPushPermission",
+      "kind": "function",
+      "ref": "@convohop/react-native#getPushPermission",
+      "anchor": "getpushpermission-function",
+      "signatures": ["function getPushPermission(): Promise<PushPermission>"],
+      "docs": "The current notification permission."
+    },
+    {
+      "name": "getPushRegistrations",
+      "kind": "function",
+      "ref": "@convohop/react-native#getPushRegistrations",
+      "anchor": "getpushregistrations-function",
+      "signatures": ["function getPushRegistrations(): Promise<NativePushRegistration[]>"],
+      "docs": "The push registrations this process has seen: the APNs and PushKit tokens on iOS, the FCM token or FID on Android."
+    },
+    {
+      "name": "handleRemoteMessage",
+      "kind": "function",
+      "ref": "@convohop/react-native#handleRemoteMessage",
+      "anchor": "handleremotemessage-function",
+      "signatures": [
+        "function handleRemoteMessage(data: Readonly<Record<string, string>>): Promise<RemoteMessageResult>"
+      ],
+      "docs": "Android: hands an FCM data message to the native ConvoHop handler, which shows message notifications and rings\ncalls. Use it when another library, such as React Native Firebase, owns your `FirebaseMessagingService`. Without\none, the ConvoHop service receives pushes itself and you don't need this."
+    },
+    {
+      "name": "onCallEvent",
+      "kind": "function",
+      "ref": "@convohop/react-native#onCallEvent",
+      "anchor": "oncallevent-function",
+      "signatures": ["function onCallEvent(listener: (event: CallEvent) => void): () => void"],
+      "docs": "Calls `listener` for each change to a call. Returns a function that stops listening."
+    },
+    {
+      "name": "onNotification",
+      "kind": "function",
+      "ref": "@convohop/react-native#onNotification",
+      "anchor": "onnotification-function",
+      "signatures": [
+        "function onNotification(listener: (response: NotificationResponse) => void): () => void"
+      ],
+      "docs": "Calls `listener` for each ConvoHop push the app receives while running and each one the user opens. The native\nmodules present pushes and ring calls themselves; use this to update your UI or navigate."
+    },
+    {
+      "name": "openFullScreenIntentSettings",
+      "kind": "function",
+      "ref": "@convohop/react-native#openFullScreenIntentSettings",
+      "anchor": "openfullscreenintentsettings-function",
+      "signatures": ["function openFullScreenIntentSettings(): Promise<void>"],
+      "docs": "Android 14 and later: opens the setting that lets this app ring full screen."
+    },
+    {
+      "name": "registerForPush",
+      "kind": "function",
+      "ref": "@convohop/react-native#registerForPush",
+      "anchor": "registerforpush-function",
+      "signatures": [
+        "function registerForPush(options: RegisterForPushOptions): Promise<() => void>"
+      ],
+      "docs": "Registers this device for ConvoHop pushes. It starts the platform's registration and passes each registration to\nyour `register` callback, which stores it with your backend. It resolves once the APNs token (iOS) or the FCM\nregistration (Android) is stored, and keeps passing new registrations until you call the function it resolves or\nabort `signal`. It rejects when the platform can't register, `register` fails for that registration, `timeoutMs`\npasses first, or `signal` aborts first.\n\nCall it after sign-in on every launch, after `setPushRecipient`: registrations change, and your backend should keep\nthe latest for each user. The same registration arrives again on later launches, so store it idempotently. On\nsign-out, abort `signal` or call the function it resolves, then `unregisterFromPush` on Android. Android follows\nyour app's FCM mode: it registers by FID when the app manifest sets `firebase_messaging_installation_id_enabled`,\nand by registration token otherwise; see the README. Tokens and FIDs address this device for your push provider.\nDon't log them."
+    },
+    {
+      "name": "reportConnected",
+      "kind": "function",
+      "ref": "@convohop/react-native#reportConnected",
+      "anchor": "reportconnected-function",
+      "signatures": ["function reportConnected(callId: string): Promise<void>"],
+      "docs": "Tells the system the call's media connected. The call becomes `active`."
+    },
+    {
+      "name": "reportConnecting",
+      "kind": "function",
+      "ref": "@convohop/react-native#reportConnecting",
+      "anchor": "reportconnecting-function",
+      "signatures": ["function reportConnecting(callId: string): Promise<void>"],
+      "docs": "Tells the system the app is joining the call's media."
+    },
+    {
+      "name": "requestPushPermission",
+      "kind": "function",
+      "ref": "@convohop/react-native#requestPushPermission",
+      "anchor": "requestpushpermission-function",
+      "signatures": [
+        "function requestPushPermission(request?: PushPermissionRequest): Promise<PushPermission>"
+      ],
+      "docs": "Asks the user for notification permission, unless they already decided, and resolves the result. By default it\nasks for alerts, badges and sounds."
+    },
+    {
+      "name": "setAudioRoute",
+      "kind": "function",
+      "ref": "@convohop/react-native#setAudioRoute",
+      "anchor": "setaudioroute-function",
+      "signatures": [
+        "function setAudioRoute(callId: string, route: Exclude<AudioRoute, \"unknown\">): Promise<void>"
+      ],
+      "docs": "Android: routes the call's audio to one of its `availableAudioRoutes`. On iOS, show the system route picker."
+    },
+    {
+      "name": "setHeld",
+      "kind": "function",
+      "ref": "@convohop/react-native#setHeld",
+      "anchor": "setheld-function",
+      "signatures": ["function setHeld(callId: string, held: boolean): Promise<void>"],
+      "docs": ""
+    },
+    {
+      "name": "setMuted",
+      "kind": "function",
+      "ref": "@convohop/react-native#setMuted",
+      "anchor": "setmuted-function",
+      "signatures": ["function setMuted(callId: string, muted: boolean): Promise<void>"],
+      "docs": "Mutes or unmutes the call in the system UI. Mute your LiveKit microphone track from its `changed` event."
+    },
+    {
+      "name": "setPushRecipient",
+      "kind": "function",
+      "ref": "@convohop/react-native#setPushRecipient",
+      "anchor": "setpushrecipient-function",
+      "signatures": ["function setPushRecipient(recipient: PushRecipient | null): Promise<void>"],
+      "docs": "Sets the user whose ConvoHop pushes this device shows and rings, or `null` for nobody. Call it with the client's\n`projectId` and `principalId` after sign-in, before `registerForPush`, and with `null` when sign-out starts. The\ndevice keeps the two IDs, never a credential, so the filter also applies to a push that starts the app before\nJavaScript runs.\n\nThe native handlers drop every ConvoHop push for anyone else, and `onNotification` and `takeInitialNotification`\nnever see it. Until the first call, and after `null`, they drop every ConvoHop push, so a registration your backend\nfailed to delete reaches nobody. iOS still reports a dropped VoIP push to CallKit, which ends it at once. On iOS, a\nmessage push that arrives while the app isn't in the foreground is shown by iOS itself: see the README."
+    },
+    {
+      "name": "startOutgoingCall",
+      "kind": "function",
+      "ref": "@convohop/react-native#startOutgoingCall",
+      "anchor": "startoutgoingcall-function",
+      "signatures": ["function startOutgoingCall(request: OutgoingCallRequest): Promise<string>"],
+      "docs": "iOS: reports an outgoing call to CallKit, which then owns its audio session, and resolves the call's ID. Then join\nthe live session and report progress with `reportConnecting` and `reportConnected`. On Android, join\nwithout the system call UI."
+    },
+    {
+      "name": "stopRinging",
+      "kind": "function",
+      "ref": "@convohop/react-native#stopRinging",
+      "anchor": "stopringing-function",
+      "signatures": ["function stopRinging(callId: string, serverReason: string): Promise<void>"],
+      "docs": "Stops a ring the server stopped, such as one answered on another device, when your app learns of it before the\ncancellation push arrives. `serverReason` is the server's reason, such as `answered`, `declined` or `ended`. It\nleaves a call that isn't ringing unchanged, such as one the user just answered on this device."
+    },
+    {
+      "name": "subscribeAnsweredCalls",
+      "kind": "function",
+      "ref": "@convohop/react-native#subscribeAnsweredCalls",
+      "anchor": "subscribeansweredcalls-function",
+      "signatures": ["function subscribeAnsweredCalls(listener: (call: Call) => void): () => void"],
+      "docs": "Calls `listener` once for each incoming call the user answered: in the system UI, from a notification, or with\n`answerCall`. It first replays answered calls that are still current, so a call answered on the lock screen\nbefore JavaScript started isn't lost. Join each call's live session from the listener, and skip calls you already\njoined. Returns a function that stops listening."
+    },
+    {
+      "name": "takeInitialNotification",
+      "kind": "function",
+      "ref": "@convohop/react-native#takeInitialNotification",
+      "anchor": "takeinitialnotification-function",
+      "signatures": ["function takeInitialNotification(): Promise<NotificationResponse | null>"],
+      "docs": "The ConvoHop notification the user opened to launch the app. Resolves it once, then `null`."
+    },
+    {
+      "name": "unregisterFromPush",
+      "kind": "function",
+      "ref": "@convohop/react-native#unregisterFromPush",
+      "anchor": "unregisterfrompush-function",
+      "signatures": ["function unregisterFromPush(): Promise<NativePushRegistration | null>"],
+      "docs": "Android: unregisters this device from FCM, for example when the user signs out. In your app's FCM mode it deletes\nthe registration token or unregisters the FID, so pushes to it stop, and resolves the registration this process\nknew, or `null`: delete it from your backend. Stop `registerForPush` first; while it runs, its `unregister` callback\ngets the registration too. With FCM auto-init on, Firebase registers the device again when the app next starts.\n\niOS rejects: Apple advises against unregistering from APNs, and an app's APNs and PushKit tokens don't change\nbetween users. Delete them from your backend instead."
+    },
+    {
+      "name": "updateCall",
+      "kind": "function",
+      "ref": "@convohop/react-native#updateCall",
+      "anchor": "updatecall-function",
+      "signatures": ["function updateCall(callId: string, update: CallUpdate): Promise<void>"],
+      "docs": "Updates what the system shows for a call."
+    },
+    {
+      "name": "watchRingingCalls",
+      "kind": "function",
+      "ref": "@convohop/react-native#watchRingingCalls",
+      "anchor": "watchringingcalls-function",
+      "signatures": [
+        "function watchRingingCalls(client: RingingClient, options?: WatchRingingOptions): () => void"
+      ],
+      "docs": "Stops incoming calls that ring here after the server stopped their ring: another of the user's devices answered,\nthe caller hung up, or the ring expired. iOS gets no VoIP push for a stopped ring, because iOS would make the app\nreport it to CallKit as a new call, so an app that rings through CallKit has to stop the ring itself. On Android a\ncancellation arrives as a data message; watching also covers one that arrives late.\n\nWhile an incoming call rings, it lists the user's live alerts every `intervalMs`. A ring whose alert is missing from\ntwo complete listings in a row stops with the server reason `ended` if its live session ended, `answered` if the user\nhas an unfinished participation in it, `expired` after its `expiresAt` and `stopped` otherwise. A ring stops with\n`expired` at its `expiresAt` at the latest. Start watching after sign-in; returns a function that stops watching,\nwhich you call before the client's session ends. Once stopped, it starts no request and calls `onError` no more: a\nrequest already in flight finishes, and its result is ignored.",
+      "operations": [
+        {"id": "communication.liveSession", "page": "../../operations/communication/liveSession.md"},
+        {
+          "id": "communication.liveSessionAlerts",
+          "page": "../../operations/communication/liveSessionAlerts.md"
+        }
+      ]
+    }
+  ]
+}

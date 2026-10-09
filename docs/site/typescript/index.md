@@ -31,9 +31,9 @@ Every TypeScript sample in these docs is a region of a file in [the examples pac
 | Package | Layer | Runtime | Summary |
 | --- | --- | --- | --- |
 | [`@convohop/server`](reference/server.md) | Server | Node.js 22 or later | Server SDK for trusted Node.js runtimes: backend-key data-plane calls, management, webhook verification and push requests. |
-| [`@convohop/client`](reference/client.md) | Client | Current browsers. React Native isn't verified yet. | Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. |
+| [`@convohop/client`](reference/client.md) | Client | Current browsers. For React Native, see the React Native docs. | Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. |
 | [`@convohop/client/push`](reference/client-push.md) | Client | Current browsers and their service workers. No dependencies. | Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK. |
-| [`@convohop/react`](reference/react.md) | Client | React 18 or later in current browsers. React Native isn't verified yet. | React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media. |
+| [`@convohop/react`](reference/react.md) | Client | React 18 or later in current browsers. For React Native, see the React Native docs. | React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media. |
 
 ## Quickstarts
 
