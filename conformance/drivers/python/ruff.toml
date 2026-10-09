@@ -1,0 +1,3 @@
+# The driver follows the Python SDK's lint rules; its own modules are first-party and the SDK is third-party.
+extend = "../../../python/pyproject.toml"
+src = ["."]

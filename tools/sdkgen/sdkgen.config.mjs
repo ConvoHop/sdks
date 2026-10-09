@@ -4,6 +4,7 @@ import graphqlOperations from "./emitters/graphql-operations.mjs";
 import ir from "./emitters/ir.mjs";
 import java from "./emitters/java.mjs";
 import mcpTools from "./emitters/mcp-tools.mjs";
+import python from "./emitters/python.mjs";
 import typescript from "./emitters/typescript.mjs";
 
 /**
@@ -11,9 +12,10 @@ import typescript from "./emitters/typescript.mjs";
  * keyed by emitter name. Register new language emitters here.
  */
 export default {
-  emitters: [ir, graphqlOperations, typescript, docSnippets, java, mcpTools, cliOperations],
+  emitters: [ir, graphqlOperations, typescript, docSnippets, java, mcpTools, cliOperations, python],
   options: {
     typescript: { directory: "packages/core/src/generated" },
     java: { directory: "jvm/convohop-server/src/generated/java", kotlinDirectory: "jvm/convohop-server-kotlin/src/generated/kotlin" },
+    python: { directory: "python/src/convohop/_generated" },
   },
 };

@@ -1,0 +1,339 @@
+# Builds and tests the Python server SDK in python/: its generated code and
+# generator goldens, ruff and mypy, the tests on Python 3.11, 3.12, 3.13 and
+# 3.14, a dry-run build of the sdist and wheel checked with twine, and the
+# conformance scenarios through the Python driver with the sync and the async
+# clients. Nothing is uploaded to a package registry. See python/README.md.
+name: Python
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/python.yml
+      - conformance/**
+      - python/**
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/python.yml
+      - conformance/**
+      - python/**
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+
+permissions: {}
+
+env:
+  # Every job runs the interpreter from actions/setup-python, never one that uv downloads.
+  UV_PYTHON_DOWNLOADS: never
+
+jobs:
+  build:
+    name: Generate, lint, type-check and package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Check the generated code, including the Python API
+        run: npm run check:graphql
+      - name: Test the generators against their golden files
+        run: npm run test:sdkgen
+      - id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          # The newest uv whose checksum this pinned release of setup-uv carries.
+          version: latest-known
+          cache-dependency-glob: python/uv.lock
+      - name: Install the locked development environment
+        working-directory: python
+        env:
+          PYTHON_PATH: ${{ steps.python.outputs.python-path }}
+        run: uv sync --locked --python "$PYTHON_PATH"
+      - name: Lint and check the formatting
+        working-directory: python
+        run: |
+          .venv/bin/ruff check --output-format github src tests ../conformance/drivers/python
+          .venv/bin/ruff format --check src tests ../conformance/drivers/python
+      # The test job runs the tests on every supported Python version; type
+      # checking for the oldest and the newest covers the version-gated stubs.
+      - name: Type-check the SDK, its tests and the driver for Python 3.11 and 3.14
+        working-directory: python
+        run: |
+          for version in 3.11 3.14; do
+            .venv/bin/mypy --python-version "$version"
+            .venv/bin/mypy --python-version "$version" ../conformance/drivers/python
+          done
+      - name: Type-check the generator golden files
+        working-directory: python
+        # One run each: both trees contain a package named _generated.
+        run: |
+          .venv/bin/mypy ../tools/sdkgen/test/golden/python/src/convohop/_generated
+          .venv/bin/mypy ../tools/sdkgen/test/golden/edge/python/src/convohop/_generated
+      - name: Build the sdist and wheel (dry run)
+        working-directory: python
+        run: |
+          .venv/bin/python -m build
+          .venv/bin/twine check --strict dist/*
+      - name: Check the package contents and metadata
+        working-directory: python
+        run: |
+          .venv/bin/python - <<'EOF'
+          import pathlib, sys, tarfile, zipfile
+          from email.parser import Parser
+          dist = pathlib.Path("dist")
+          wheels, sdists = sorted(dist.glob("*.whl")), sorted(dist.glob("*.tar.gz"))
+          if len(wheels) != 1 or len(sdists) != 1 or not wheels[0].name.endswith("-py3-none-any.whl"):
+              sys.exit(f"expected one pure-Python wheel and one sdist: {sorted(p.name for p in dist.iterdir())}")
+          sources = {
+              path.relative_to("src").as_posix()
+              for path in pathlib.Path("src/convohop").rglob("*")
+              if path.is_file() and "__pycache__" not in path.parts
+          }
+          with zipfile.ZipFile(wheels[0]) as wheel:
+              names = set(wheel.namelist())
+              info = next(name.split("/")[0] for name in names if name.endswith(".dist-info/METADATA"))
+              metadata = Parser().parsestr(wheel.read(f"{info}/METADATA").decode())
+          packaged = {name for name in names if not name.startswith(f"{info}/")}
+          if packaged != sources or "convohop/py.typed" not in packaged:
+              sys.exit(f"wheel differs from src/: missing {sorted(sources - packaged)}, extra {sorted(packaged - sources)}")
+          missing = {f"{info}/licenses/LICENSE", f"{info}/licenses/NOTICE"} - names
+          if missing:
+              sys.exit(f"wheel is missing {sorted(missing)}")
+          for key, value in {"Name": "convohop", "Requires-Python": ">=3.11", "License-Expression": "Apache-2.0"}.items():
+              if metadata[key] != value:
+                  sys.exit(f"wheel metadata {key} is {metadata[key]!r}, expected {value!r}")
+          if "Private :: Do Not Upload" not in metadata.get_all("Classifier", []):
+              sys.exit("keep the Private :: Do Not Upload classifier until registry publishing is approved")
+          requires = metadata.get_all("Requires-Dist", [])
+          if len(requires) != 1 or not requires[0].startswith("httpx"):
+              sys.exit(f"the only runtime dependency should be httpx: {requires}")
+          with tarfile.open(sdists[0]) as sdist:
+              files = {pathlib.PurePosixPath(*pathlib.PurePosixPath(m.name).parts[1:]) for m in sdist.getmembers() if m.isfile()}
+          # Hatchling also ships the .gitignore it applied, so builds from the sdist select the same files.
+          extra = {path for path in files if path.parts[0] not in {"src", ".gitignore", "README.md", "LICENSE", "NOTICE", "pyproject.toml", "PKG-INFO"}}
+          missing = {pathlib.PurePosixPath("src", source) for source in sources} - files
+          if extra or missing:
+              sys.exit(f"sdist has extra {sorted(map(str, extra))} and is missing {sorted(map(str, missing))}")
+          print(f"{wheels[0].name}: {len(packaged)} files; {sdists[0].name}: {len(files)} files")
+          EOF
+      - name: Install the wheel into a clean environment and type-check against it
+        working-directory: python
+        env:
+          PYTHON_PATH: ${{ steps.python.outputs.python-path }}
+        run: |
+          uv venv --python "$PYTHON_PATH" "$RUNNER_TEMP/wheel"
+          uv pip install --python "$RUNNER_TEMP/wheel/bin/python" dist/*.whl
+          mypy="$PWD/.venv/bin/mypy"
+          cd "$RUNNER_TEMP"
+          wheel/bin/python - <<'EOF'
+          import importlib.metadata, pathlib, sys
+          import convohop
+          from convohop import AsyncConvoHop, AsyncConvoHopManagement, ConvoHop, ConvoHopManagement, push, webhooks
+          package = pathlib.Path(convohop.__file__).parent
+          if "site-packages" not in package.parts or not (package / "py.typed").is_file():
+              sys.exit(f"expected the installed, typed package; imported {package}")
+          if importlib.metadata.version("convohop") != convohop.__version__:
+              sys.exit("the distribution and package versions differ")
+          print(f"convohop {convohop.__version__} from {package}")
+          EOF
+          # PEP 561: mypy reads the installed package's annotations through py.typed.
+          "$mypy" --strict --cache-dir /dev/null --python-executable wheel/bin/python \
+            -c 'from convohop import AsyncConvoHop, ConvoHop, push, webhooks'
+      - name: Upload the sdist and wheel
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: python-dist
+          path: python/dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  test:
+    name: Tests (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read # check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        # Python 3.11 is the minimum; the others are the later releases.
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: latest-known
+          cache-dependency-glob: python/uv.lock
+      - name: Install the locked development environment
+        working-directory: python
+        env:
+          PYTHON_PATH: ${{ steps.python.outputs.python-path }}
+        run: uv sync --locked --python "$PYTHON_PATH"
+      - name: Run the tests
+        working-directory: python
+        run: .venv/bin/pytest
+
+  conformance:
+    name: Python driver (mock target)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: latest-known
+          cache-dependency-glob: python/uv.lock
+      - name: Install the SDK for the driver
+        working-directory: python
+        env:
+          PYTHON_PATH: ${{ steps.python.outputs.python-path }}
+        run: uv sync --locked --no-dev --python "$PYTHON_PATH"
+      - name: Run the conformance scenarios with the sync clients
+        id: sync
+        # Not --strict: a server SDK declares no user role, so the runner skips
+        # the scenarios that only use user clients. A later step allows only those.
+        run: >-
+          npm run conformance --
+          --driver "python/.venv/bin/python conformance/drivers/python/driver.py"
+          --reports conformance/reports/python
+      - name: Run the conformance scenarios with the async clients
+        # Also after a failed sync run, so both reports are available.
+        if: ${{ !cancelled() && steps.sync.outcome != 'skipped' }}
+        run: >-
+          node conformance/runner.mjs
+          --driver "python/.venv/bin/python conformance/drivers/python/driver.py --api async"
+          --reports conformance/reports/python-async
+      - name: Fail on any other skip
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync } from "node:fs";
+          const allowed = "it only uses user clients, which the driver under test does not declare";
+          let failed = false;
+          for (const [directory, name] of [["python", "convohop-python"], ["python-async", "convohop-python-async"]]) {
+            const summary = JSON.parse(readFileSync(`conformance/reports/${directory}/summary.json`, "utf8"));
+            const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
+            const passed = scenarios.filter((scenario) => scenario.status === "passed");
+            const other = scenarios.filter((scenario) => scenario.status !== "passed"
+              && !(scenario.status === "skipped" && scenario.reason === allowed));
+            for (const scenario of other) {
+              console.log(`::error::${name} ${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
+            }
+            console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
+            if (summary.driver.name !== name || passed.length === 0 || other.length > 0) failed = true;
+          }
+          if (failed) process.exit(1);
+          EOF
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-python-mock
+          path: |
+            conformance/reports/python/
+            conformance/reports/python-async/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # TODO(DEV-1): like the dev-stack job in conformance.yml, this job stays
+  # skipped until the CONVOHOP_DEV_STACK_IMAGE repository variable names the
+  # dev-stack image. Then replace the "Start the dev stack" step with the
+  # image's start, readiness and credential contract, as in conformance.yml.
+  # Fork pull requests are skipped because they cannot pull the image.
+  conformance-dev-stack:
+    name: Python driver (dev stack)
+    if: vars.CONVOHOP_DEV_STACK_IMAGE != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+      packages: read # pull the dev-stack image from GitHub Packages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: latest-known
+          cache-dependency-glob: python/uv.lock
+      - name: Install the SDK for the driver
+        working-directory: python
+        env:
+          PYTHON_PATH: ${{ steps.python.outputs.python-path }}
+        run: uv sync --locked --no-dev --python "$PYTHON_PATH"
+      - name: Start the dev stack
+        env:
+          CONVOHOP_DEV_STACK_IMAGE: ${{ vars.CONVOHOP_DEV_STACK_IMAGE }}
+        run: |
+          # TODO(DEV-1): start "$CONVOHOP_DEV_STACK_IMAGE", wait until it is ready and append the
+          # CONVOHOP_DEV_* values named in conformance/targets/dev-stack.json to "$GITHUB_ENV".
+          echo "::error::The dev-stack start step is a placeholder until DEV-1 defines the image contract."
+          exit 1
+      - name: Run the conformance scenarios against the dev stack with the sync clients
+        id: sync
+        run: >-
+          npm run conformance --
+          --target conformance/targets/dev-stack.json
+          --driver "python/.venv/bin/python conformance/drivers/python/driver.py"
+          --reports conformance/reports/python-dev-stack
+      - name: Run the conformance scenarios against the dev stack with the async clients
+        # Also after a failed sync run, so both reports are available.
+        if: ${{ !cancelled() && steps.sync.outcome != 'skipped' }}
+        run: >-
+          node conformance/runner.mjs
+          --target conformance/targets/dev-stack.json
+          --driver "python/.venv/bin/python conformance/drivers/python/driver.py --api async"
+          --reports conformance/reports/python-async-dev-stack
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-python-dev-stack
+          path: |
+            conformance/reports/python-dev-stack/
+            conformance/reports/python-async-dev-stack/
+          if-no-files-found: ignore
+          retention-days: 14
