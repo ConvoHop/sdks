@@ -490,12 +490,13 @@
             if !hidden.isEmpty { try? await store?.remove(messageIds: hidden, in: conversationId) }
         }
 
-        /// A deleted message as ConvoHop shows it, when only the deletion's revision is known.
+        /// A deleted message as the server returns it, without text or properties, when only the deletion's revision is
+        /// known.
         private func tombstone(_ messageId: String, _ want: Wanted) -> Message? {
             guard var message = message(messageId) else { return nil }
             message.deleted = true
-            message.text = ""
-            message.props = [:]
+            message.text = nil
+            message.props = nil
             message.revision = want.revision
             if let sequence = want.revisionSequence, ProtocolChecks.isCanonicalDecimal(sequence) {
                 message.revisionSequence = sequence
