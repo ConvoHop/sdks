@@ -560,7 +560,9 @@ const recovery = server.http.recoveryStates;
 
 `getItem` returns the complete committed JSON snapshot, or `null` only when
 the journal is absent. Read/parse failures reject initialization, never load
-an empty fallback. The constructor does not start asynchronous I/O.
+an empty fallback. Every write and `retry` read the snapshot again first; a
+read/parse failure there raises `RECOVERY_STORAGE_FAILURE` and writes
+nothing. The constructor does not start asynchronous I/O.
 `await http.initializeRecovery()` explicitly restores once; `execute`,
 `retry` and project `initialize` automatically await the same restore.
 Synchronous `http.recoveryStates` throws until restoration succeeds.
@@ -570,9 +572,14 @@ construct a new client rather than reusing an uninitialized snapshot.
 `setItem` must atomically replace the complete snapshot and resolve **only
 after durable database commit**. `removeItem` must likewise await a durable
 delete; the transport currently never calls it or deletes the journal.
-Retention replaces snapshots with at most 128 records, pruning only settled
-inactive commands, never unresolved ones. Do not implement these methods
-with fire-and-forget writes or success-shaped error handling.
+Each write merges the client's records into the snapshot it read, request by
+request, and replaces it with at most 128 records. Settled commands are
+pruned first: other clients', then this client's inactive ones, oldest first.
+A write that creates a command fails rather than prune an unresolved one; any
+other write prunes other clients' oldest unresolved commands, so the client's
+own always fit. Records this SDK can't read, such as a newer SDK's, count as
+unresolved and stay as stored, as do fields it doesn't know. Do not implement
+these methods with fire-and-forget writes or success-shaped error handling.
 
 The SDK awaits pending-intent and submitted-attempt writes before sending a
 mutation, and awaits receipt/resolution writes before returning success.
@@ -600,18 +607,25 @@ backend principal: a stable project-scoped SDK journal does not prove an
 unchanged service actor. Qualify resolution of an old unknown request under
 the refreshed key against the real authority, not only a unit transport.
 
-Snapshot writes are serialized **within one transport only**. The
-application must coordinate exclusive, fenced ownership of each journal key
-across its whole restore/read-modify-write lifetime, including all outstanding
-requests and persistence. Acquire ownership before initialization, reject
-stale owners in SQL, and discard the client before releasing ownership.
-Construct a fresh client from the current journal for the next owner.
-Locking each `setItem` alone, an unconditional transactional upsert, or a
-last-write-wins store can still lose another client's pending commands.
-One small app-service instance can have overlapping deployments/processes;
-it does not guarantee a single writer. The SDK supplies no distributed lock,
-snapshot merge, SQL schema or migration. Browser `ConvoHopClient` recovery/cursor
-storage remains synchronous, including existing `sessionStorage` usage.
+Snapshot writes are serialized **within one transport only**. Because each
+write merges into the snapshot it read, clients sharing a journal key keep
+each other's records, and `retry` continues a command another client saved.
+Until its first attempt is saved, a command gives way to another saved under
+the same `requestId` and fails with `IDEMPOTENCY_CONFLICT`. The read and the
+write are separate calls, though: when two clients' writes overlap, one can
+drop the other's latest change until that client writes again, or for good
+if it stops first. To rule that out, the application must coordinate
+exclusive, fenced ownership of each journal key across its whole
+restore/read-modify-write lifetime, including all outstanding requests and
+persistence. Acquire ownership before initialization, reject stale owners in
+SQL, and discard the client before releasing ownership. Construct a fresh
+client from the current journal for the next owner. Locking each `setItem`
+alone, an unconditional transactional upsert, or a last-write-wins store can
+still lose another client's pending commands. One small app-service instance
+can have overlapping deployments/processes; it does not guarantee a single
+writer. The SDK supplies no distributed lock, SQL schema or migration.
+Browser `ConvoHopClient` recovery/cursor storage remains synchronous,
+including existing `sessionStorage` usage.
 
 Build/test from the root npm workspace:
 

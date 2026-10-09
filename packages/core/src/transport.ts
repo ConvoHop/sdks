@@ -25,6 +25,99 @@ export interface TransportAuthentication {
 const transportAuthentication = new WeakMap<ConvoHopTransport, TransportAuthentication>();
 /** Each transport's {@link beforeSubmitting} hooks by request ID. */
 const submissionHooks = new WeakMap<ConvoHopTransport, Map<string, () => void | Promise<void>>>();
+/** Each transport's {@link adoptRecovery}. */
+const recoveryAdoption = new WeakMap<ConvoHopTransport, (requestId: string) => Promise<boolean>>();
+/** A journal keeps at most this many records. */
+const journalLimit = 128;
+/** How far each resolution state has seen a request go. Merging records never moves a request back. */
+const progress = { pending: 0, unknown: 1, accepted: 2, committed: 3 } as const;
+/** A stored record, and what this SDK reads of it: nothing, for a record it can't read. */
+interface JournalEntry { readonly record: ProtocolObject; readonly state: RecoveryState | undefined }
+/**
+ * Parses a stored journal. A record this SDK can't read, such as a newer SDK's record of an operation this one doesn't
+ * know, is kept as stored and never used to resend. A journal that isn't a list of at most {@link journalLimit}
+ * records with distinct request IDs is rejected rather than dropped.
+ */
+function parseJournal(saved: string | null | undefined): Map<string, JournalEntry> {
+  const journal = new Map<string, JournalEntry>();
+  if (!saved) return journal;
+  const values: unknown = JSON.parse(saved);
+  if (!Array.isArray(values) || values.length > journalLimit) throw new TypeError("Invalid mutation recovery storage");
+  for (const item of values) {
+    const record = parseObject(item), requestId = parseId(record.requestId);
+    if (journal.has(requestId)) throw new TypeError("Duplicate mutation recovery identity");
+    let state: RecoveryState | undefined;
+    try { state = parseRecord(record); }
+    catch (error) { if (!(error instanceof TypeError)) throw error; }
+    journal.set(requestId, { record, state });
+  }
+  return journal;
+}
+/** When a stored record's request was last attempted: 0 for a record this SDK can't read that has no time it can. */
+function lastAttempt({ record, state }: JournalEntry): number {
+  const at = state?.lastAttemptAt ?? record.lastAttemptAt;
+  return typeof at === "number" && Number.isSafeInteger(at) && at >= 0 ? at : 0;
+}
+/** Reads a stored record, failing on anything this SDK can't read. */
+function parseRecord(v: ProtocolObject): RecoveryState {
+  const operation = operationKey(v.operation), resolutionState = v.resolutionState;
+  if (operationCatalog[operation].kind !== "mutation" ||
+      (resolutionState !== "pending" && resolutionState !== "unknown" &&
+       resolutionState !== "committed" && resolutionState !== "accepted")) throw new TypeError("Invalid recovery record");
+  const projectId = v.projectId === undefined ? undefined : parseId(v.projectId);
+  if ((operationCatalog[operation].plane === "communication") !== (projectId !== undefined))
+    throw new TypeError("Invalid recovery project scope");
+  for (const key of ["firstSubmittedAt", "retryDeadline", "attemptCount", "lastAttemptAt"]) {
+    if (typeof v[key] !== "number" || !Number.isSafeInteger(v[key]) || v[key] < 0) throw new TypeError("Invalid recovery clock or count");
+  }
+  if (v.mediaAdmissionAttempted !== undefined && v.mediaAdmissionAttempted !== true)
+    throw new TypeError("Invalid native admission marker");
+  // All fields are checked before this stored record can authorize a resend.
+  return {
+    requestId: parseId(v.requestId), incarnation: parseString(v.incarnation), payloadFingerprint: parseString(v.payloadFingerprint),
+    operation, ...(projectId === undefined ? {} : { projectId }), input: parseObject(v.input),
+    firstSubmittedAt: Number(v.firstSubmittedAt), retryDeadline: Number(v.retryDeadline), attemptCount: Number(v.attemptCount),
+    lastAttemptAt: Number(v.lastAttemptAt), lastAttemptClassification: parseString(v.lastAttemptClassification),
+    resolutionState,
+    ...(v.mediaAdmissionAttempted === true ? { mediaAdmissionAttempted: true } : {}),
+  };
+}
+/** Whether two records are of one request: the same operation, project, input and incarnation. */
+function sameRequest(a: RecoveryState, b: RecoveryState): boolean {
+  return a.payloadFingerprint === b.payloadFingerprint && a.incarnation === b.incarnation && a.operation === b.operation &&
+    a.projectId === b.projectId && canonical(a.input) === canonical(b.input);
+}
+/** Whether a record says only that its request was created, so nothing of it can have been sent. */
+function unsubmitted(state: RecoveryState): boolean {
+  return state.attemptCount === 0 && state.resolutionState === "pending";
+}
+function settled(state: RecoveryState): boolean {
+  return progress[state.resolutionState] >= progress.accepted;
+}
+/**
+ * Adds to `target` what `other`, another client's record of the same request, knows: the earliest budget, the most
+ * attempts, the furthest resolution and any native admission. `target` takes `other`'s classification of the last
+ * attempt only when `other` has seen further.
+ */
+function absorb(target: RecoveryState, other: RecoveryState): void {
+  const media = (state: RecoveryState) => Number(state.mediaAdmissionAttempted === true);
+  const further = other.attemptCount - target.attemptCount || other.lastAttemptAt - target.lastAttemptAt ||
+    progress[other.resolutionState] - progress[target.resolutionState] || media(other) - media(target);
+  if (further > 0) target.lastAttemptClassification = other.lastAttemptClassification;
+  if (progress[other.resolutionState] > progress[target.resolutionState]) target.resolutionState = other.resolutionState;
+  target.attemptCount = Math.max(target.attemptCount, other.attemptCount);
+  target.lastAttemptAt = Math.max(target.lastAttemptAt, other.lastAttemptAt);
+  target.firstSubmittedAt = Math.min(target.firstSubmittedAt, other.firstSubmittedAt);
+  target.retryDeadline = Math.min(target.retryDeadline, other.retryDeadline);
+  if (other.mediaAdmissionAttempted === true) target.mediaAdmissionAttempted = true;
+}
+/** The failure of an asynchronous journal read or write. The request keeps the outcome already known of it. */
+function storageFailure(requestId: string, state: RecoveryState | undefined, cause: unknown, read = false): ConvoHopProblem {
+  return new ConvoHopProblem("RECOVERY_STORAGE_FAILURE", requestId,
+    state === undefined || state.resolutionState === "pending" ? "unknown" : state.resolutionState, 0,
+    read ? "Recovery storage could not be read; retain the original request and its outcome"
+      : "Recovery storage did not confirm durability; retain the original request and its outcome", { cause });
+}
 export class ConvoHopTransport {
   readonly baseUrl: string;
   readonly durableRecovery: boolean;
@@ -55,55 +148,34 @@ export class ConvoHopTransport {
     this.#storage = options.recoveryStorage; this.#asyncStorage = options.asyncRecoveryStorage;
     this.durableRecovery = this.#storage !== undefined || this.#asyncStorage !== undefined;
     this.#storageKey = "convohop.requests:" + options.namespace;
+    recoveryAdoption.set(this, async requestId => {
+      await this.initializeRecovery();
+      await this.#refresh(requestId);
+      return this.#states.has(requestId);
+    });
     if (this.#asyncStorage === undefined) {
-      this.#restore(this.#storage?.getItem(this.#storageKey));
+      this.#restore(parseJournal(this.#storage?.getItem(this.#storageKey)));
       this.#recoveryInitialized = true;
     }
   }
   initializeRecovery(): Promise<void> {
     const storage = this.#asyncStorage;
     if (storage === undefined) return Promise.resolve();
-    this.#initialization ??= Promise.resolve().then(() => storage.getItem(this.#storageKey)).then(saved => {
-      if (saved !== null && (typeof saved !== "string" || saved.length === 0))
-        throw new TypeError("Invalid asynchronous mutation recovery storage");
-      this.#restore(saved);
+    this.#initialization ??= Promise.resolve().then(() => this.#load(storage)).then(journal => {
+      this.#restore(journal);
       this.#recoveryInitialized = true;
     });
     return this.#initialization;
   }
-  #restore(saved: string | null | undefined): void {
-    if (saved) {
-      const values: unknown = JSON.parse(saved);
-      if (!Array.isArray(values) || values.length > 128) throw new TypeError("Invalid mutation recovery storage");
-      const restored = new Map<string, RecoveryState>();
-      for (const item of values) {
-        const v = parseObject(item);
-        const operation = operationKey(v.operation), resolutionState = v.resolutionState;
-        if (operationCatalog[operation].kind !== "mutation" ||
-            (resolutionState !== "pending" && resolutionState !== "unknown" &&
-             resolutionState !== "committed" && resolutionState !== "accepted")) throw new TypeError("Invalid recovery record");
-        const projectId = v.projectId === undefined ? undefined : parseId(v.projectId);
-        if ((operationCatalog[operation].plane === "communication") !== (projectId !== undefined))
-          throw new TypeError("Invalid recovery project scope");
-        for (const key of ["firstSubmittedAt", "retryDeadline", "attemptCount", "lastAttemptAt"]) {
-          if (typeof v[key] !== "number" || !Number.isSafeInteger(v[key]) || v[key] < 0) throw new TypeError("Invalid recovery clock or count");
-        }
-        if (v.mediaAdmissionAttempted !== undefined && v.mediaAdmissionAttempted !== true)
-          throw new TypeError("Invalid native admission marker");
-        // All fields are checked before this stored record can authorize a resend.
-        const state: RecoveryState = {
-          requestId: parseId(v.requestId), incarnation: parseString(v.incarnation), payloadFingerprint: parseString(v.payloadFingerprint),
-          operation, ...(projectId === undefined ? {} : { projectId }), input: parseObject(v.input),
-          firstSubmittedAt: Number(v.firstSubmittedAt), retryDeadline: Number(v.retryDeadline), attemptCount: Number(v.attemptCount),
-          lastAttemptAt: Number(v.lastAttemptAt), lastAttemptClassification: parseString(v.lastAttemptClassification),
-          resolutionState,
-          ...(v.mediaAdmissionAttempted === true ? { mediaAdmissionAttempted: true } : {}),
-        };
-        if (restored.has(state.requestId)) throw new TypeError("Duplicate mutation recovery identity");
-        restored.set(state.requestId, state);
-      }
-      for (const [requestId, state] of restored) this.#states.set(requestId, state);
-    }
+  #restore(journal: ReadonlyMap<string, JournalEntry>): void {
+    for (const [requestId, { state }] of journal) if (state !== undefined) this.#states.set(requestId, state);
+  }
+  /** Reads the journal from asynchronous storage. */
+  async #load(storage: AsyncRecoveryStorage): Promise<Map<string, JournalEntry>> {
+    const saved = await storage.getItem(this.#storageKey);
+    if (saved !== null && (typeof saved !== "string" || saved.length === 0))
+      throw new TypeError("Invalid asynchronous mutation recovery storage");
+    return parseJournal(saved);
   }
   get recoveryStates(): readonly RecoveryState[] {
     if (!this.#recoveryInitialized) throw new Error("Await initializeRecovery() before inspecting asynchronous recovery state");
@@ -121,23 +193,111 @@ export class ConvoHopTransport {
     state.mediaAdmissionAttempted = true;
     return this.#persist(state);
   }
-  #persist(state: RecoveryState): void | Promise<void> {
-    const storage = this.#asyncStorage;
-    if (storage !== undefined) {
-      const snapshot = JSON.stringify([...this.#states.values()]);
+  /**
+   * Saves `state` with this transport's other records, merged into the stored journal so that clients sharing its key,
+   * such as a user's tabs, keep each other's records. `unsent` marks a write made before `state`'s request was ever
+   * sent: the write that creates it, or the one that counts its first attempt. Such a write fails, writing nothing,
+   * rather than replace another request saved under the same ID; the creating write also fails rather than drop
+   * another client's unresolved records.
+   */
+  #persist(state: RecoveryState, unsent?: "creating" | "submitting"): void | Promise<void> {
+    const asyncStorage = this.#asyncStorage;
+    if (asyncStorage !== undefined) {
       const write = async () => {
-        try { await storage.setItem(this.#storageKey, snapshot); }
-        catch (cause) {
-          throw new ConvoHopProblem("RECOVERY_STORAGE_FAILURE", state.requestId,
-            state.resolutionState === "pending" ? "unknown" : state.resolutionState, 0,
-            "Recovery storage did not confirm durability; retain the original request and its outcome", { cause });
-        }
+        let stored: Map<string, JournalEntry>;
+        try { stored = await this.#load(asyncStorage); }
+        catch (cause) { throw storageFailure(state.requestId, state, cause, true); }
+        const journal = JSON.stringify(this.#merge(stored, state, unsent));
+        try { await asyncStorage.setItem(this.#storageKey, journal); }
+        catch (cause) { throw storageFailure(state.requestId, state, cause); }
       };
-      // A failed snapshot rejects its caller; a later complete snapshot may repair it.
+      // A failed write rejects its caller; a later complete one may repair it.
       this.#writes = this.#writes ? this.#writes.then(write, write) : write();
       return this.#writes;
     }
-    this.#storage?.setItem(this.#storageKey, JSON.stringify([...this.#states.values()]));
+    const storage = this.#storage;
+    if (storage !== undefined)
+      storage.setItem(this.#storageKey, JSON.stringify(this.#merge(parseJournal(storage.getItem(this.#storageKey)), state, unsent)));
+  }
+  /**
+   * Takes in what a stored journal knows of the requests this transport holds. A record of another request saved under
+   * the same ID replaces this transport's record only while nothing of this transport's request can have been sent:
+   * while the record is unsubmitted, or is `unsent`, whose first attempt is being counted. So does a record this SDK
+   * can't read, which may be of another request, though this transport can't hold it.
+   */
+  #learn(stored: ReadonlyMap<string, JournalEntry>, unsent?: RecoveryState): void {
+    for (const [requestId, { state: saved }] of stored) {
+      const held = this.#states.get(requestId);
+      if (held === undefined) continue;
+      if (saved !== undefined && sameRequest(held, saved)) absorb(held, saved);
+      else if (held === unsent || unsubmitted(held)) {
+        if (saved === undefined) this.#states.delete(requestId);
+        else this.#states.set(requestId, saved);
+      }
+    }
+  }
+  /** Makes room for one more record in memory by forgetting the earliest held settled record no command is using. */
+  #reserve(): void {
+    if (this.#states.size < journalLimit) return;
+    const forgotten = [...this.#states.values()].find(value => settled(value) && !this.#active.has(value.requestId));
+    if (!forgotten) throw new Error("Resolve outstanding mutations before creating more");
+    this.#states.delete(forgotten.requestId);
+  }
+  /**
+   * Merges a stored journal with this transport's records into the journal to save: the stored records in their order,
+   * each replaced by this transport's record of the request, which keeps any fields this SDK doesn't know from the
+   * stored record of that request, then this transport's other records. Records this transport doesn't hold, including
+   * those this SDK can't read, stay as stored without entering memory. Over the limit, settled records go first, oldest
+   * attempt first and those this transport doesn't hold before its own. Then a write that creates `state` fails, while
+   * any other write drops the oldest unresolved records this transport doesn't hold, counting a record this SDK can't
+   * read as unresolved: its own always fit. A write before `state`'s request was ever sent fails if `state` yielded.
+   */
+  #merge(stored: ReadonlyMap<string, JournalEntry>, state: RecoveryState, unsent?: "creating" | "submitting"): ProtocolObject[] {
+    const created = unsent === "creating";
+    this.#learn(stored, unsent === undefined ? undefined : state);
+    if (unsent !== undefined && this.#states.get(state.requestId) !== state)
+      throw new ConvoHopProblem("IDEMPOTENCY_CONFLICT", state.requestId, "unknown", 409, "Preserve the original request and payload");
+    const journal = new Map<string, JournalEntry>();
+    for (const [requestId, entry] of stored) {
+      const held = this.#states.get(requestId);
+      journal.set(requestId, held === undefined ? entry : { state: held,
+        record: entry.state !== undefined && sameRequest(held, entry.state) ? { ...entry.record, ...held } : { ...held } });
+    }
+    for (const [requestId, held] of this.#states) if (!journal.has(requestId)) journal.set(requestId, { record: { ...held }, state: held });
+    if (journal.size > journalLimit) {
+      const done = ({ state: value }: JournalEntry) => value !== undefined && settled(value);
+      const oldest = [...journal].sort(([, a], [, b]) => lastAttempt(a) - lastAttempt(b));
+      const others = oldest.filter(([requestId]) => !this.#states.has(requestId));
+      const dropped = [...others.filter(([, entry]) => done(entry)),
+        ...oldest.filter(([requestId, entry]) =>
+          entry.state !== state && this.#states.has(requestId) && done(entry) && !this.#active.has(requestId)),
+        ...(created ? [] : others.filter(([, entry]) => !done(entry)))].slice(0, journal.size - journalLimit);
+      if (journal.size - dropped.length > journalLimit) {
+        if (created) this.#states.delete(state.requestId);
+        throw new Error("Resolve outstanding mutations before creating more");
+      }
+      for (const [requestId] of dropped) {
+        journal.delete(requestId);
+        this.#states.delete(requestId);
+      }
+    }
+    return [...journal.values()].map(({ record }) => record);
+  }
+  /** Takes in the stored journal and, when this transport holds no record of `requestId`, the stored one. Never writes. */
+  async #refresh(requestId: string): Promise<void> {
+    let stored: Map<string, JournalEntry>;
+    const asyncStorage = this.#asyncStorage, storage = this.#storage;
+    if (asyncStorage !== undefined) {
+      try { stored = await this.#load(asyncStorage); }
+      catch (cause) { throw storageFailure(requestId, this.#states.get(requestId), cause, true); }
+    } else if (storage !== undefined) stored = parseJournal(storage.getItem(this.#storageKey));
+    else return;
+    this.#learn(stored);
+    const saved = stored.get(requestId)?.state;
+    if (saved !== undefined && !this.#states.has(requestId)) {
+      this.#reserve();
+      this.#states.set(requestId, saved);
+    }
   }
   async execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>,
     requestId: string = randomUUID(this.#platform), credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>> {
@@ -208,19 +368,14 @@ export class ConvoHopTransport {
       if (retry && (!state || ["committed", "accepted"].includes(state.resolutionState) || state.mediaAdmissionAttempted))
         throw new ConvoHopProblem("RESOLUTION_REQUIRED", requestId, "unknown", 409, "The original request is no longer eligible for resend");
       if (!state) {
-        if (this.#states.size >= 128) {
-          const settled = [...this.#states.values()].find(value =>
-            ["committed", "accepted"].includes(value.resolutionState) && !this.#active.has(value.requestId));
-          if (!settled) throw new Error("Resolve outstanding mutations before creating more");
-          this.#states.delete(settled.requestId);
-        }
+        this.#reserve();
         const now = Date.now();
         state = { requestId, incarnation, payloadFingerprint: hash, operation,
           ...(projectId === undefined ? {} : { projectId }), input: jsonClone(input),
           firstSubmittedAt: now, retryDeadline: now + 60000,
           attemptCount: 0, lastAttemptAt: now, lastAttemptClassification: "notSubmitted", resolutionState: "pending" };
         this.#states.set(requestId, state);
-        await this.#persist(state);
+        await this.#persist(state, "creating");
       }
       return this.#submit(state, credential, credentialDeliveryPermit, retry);
     })();
@@ -236,9 +391,11 @@ export class ConvoHopTransport {
       throw new ConvoHopProblem("RESOLUTION_REQUIRED", state.requestId, "unknown", 409, "Retry budget expired or clock changed; resolve this request read-only");
     const hook = submissionHooks.get(this)?.get(state.requestId);
     if (hook) await hook();
+    // Until its first attempt is stored, nothing of this request has been sent: it still yields to another saved under its ID.
+    const unsent = unsubmitted(state);
     state.attemptCount += 1; state.lastAttemptAt = now;
     if (state.resolutionState === "pending") state.resolutionState = "unknown";
-    state.lastAttemptClassification = "submitted"; await this.#persist(state);
+    state.lastAttemptClassification = "submitted"; await this.#persist(state, unsent ? "submitting" : undefined);
     if (state.incarnation !== this.incarnation)
       throw new ConvoHopProblem("INCARNATION_MISMATCH", state.requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
     const submittingAt = Date.now();
@@ -263,6 +420,8 @@ export class ConvoHopTransport {
   }
   async #retry(requestId: string, credential: string | undefined): Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>> {
     await this.initializeRecovery();
+    // Another client sharing the journal may have saved this request or learned more of it.
+    await this.#refresh(requestId);
     const state = this.#states.get(requestId);
     if (!state) throw new Error("No recovery record exists; do not invent a replacement identity");
     if (state.incarnation !== this.incarnation) throw new ConvoHopProblem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
@@ -385,4 +544,14 @@ export function beforeSubmitting(transport: ConvoHopTransport, requestId: string
   submissionHooks.set(transport, hooks);
   hooks.set(key, hook);
   return () => { if (hooks.get(key) === hook) hooks.delete(key); };
+}
+/**
+ * @internal Looks in storage for a recovery record of `requestId` that this transport doesn't hold, such as one saved
+ * by another tab sharing the journal, and takes it over, so the request is recovered rather than resolved as lost.
+ * Resolves to whether the transport now holds a record of `requestId`.
+ */
+export async function adoptRecovery(transport: ConvoHopTransport, requestId: string): Promise<boolean> {
+  const adopt = recoveryAdoption.get(transport);
+  if (!adopt) throw new Error("Missing transport recovery");
+  return adopt(parseId(requestId));
 }
