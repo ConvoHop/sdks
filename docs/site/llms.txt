@@ -30,6 +30,18 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [convohop.types](python/reference/types.md): Generated request and response models of the ConvoHop GraphQL API, as frozen dataclasses.
 - [Python operation coverage](python/reference/operations.md): The Python SDK members that send each API operation. 63 of the 65 operations that Python packages can send have a method.
 
+## .NET
+
+- [.NET SDK](dotnet/index.md): The ConvoHop package wraps the ConvoHop API for .NET backends. It runs on your servers with a secret backend key, verifies the webhooks that ConvoHop sends, and builds push requests from notification events.
+- [.NET server quickstart](dotnet/quickstarts/server.md): Call ConvoHop from your .NET backend with the ConvoHop package: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
+- [.NET webhooks quickstart](dotnet/quickstarts/webhooks.md): Receive ConvoHop events in your .NET backend: verify each signed delivery with Webhooks.Verify, acknowledge it quickly, and handle its event in a queue worker.
+- [.NET push notifications quickstart](dotnet/quickstarts/push.md): Send push notifications for ConvoHop messages and calls: PushPayloads turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
+- [.NET reference](dotnet/reference/index.md): The public API of each .NET package, generated from its declarations.
+- [ConvoHop](dotnet/reference/convohop.md): Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders.
+- [ConvoHop.Api](dotnet/reference/api.md): Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones.
+- [ConvoHop.Models](dotnet/reference/models.md): Generated input and result models of the ConvoHop GraphQL API.
+- [.NET operation coverage](dotnet/reference/operations.md): The .NET SDK members that send each API operation. 65 of the 65 operations that .NET packages can send have a method.
+
 ## Java and Kotlin
 
 - [Java and Kotlin SDKs](jvm/index.md): com.convohop:convohop-server wraps the ConvoHop API for Java backends, and com.convohop:convohop-server-kotlin adds coroutine extensions to it. Both run only in your backend, with a secret backend key. Never put them, or the key, in an Android app or any other client.
@@ -126,4 +138,5 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [Every page in one file](llms-full.txt): all of the pages above.
 - [TypeScript in one file](typescript/llms-full.txt): every TypeScript page.
 - [Python in one file](python/llms-full.txt): every Python page.
+- [.NET in one file](dotnet/llms-full.txt): every .NET page.
 - [Java and Kotlin in one file](jvm/llms-full.txt): every Java and Kotlin page.

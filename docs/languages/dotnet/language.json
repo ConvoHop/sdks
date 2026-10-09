@@ -1,0 +1,46 @@
+{
+  "$schema": "../../../spec/docs/language.schema.json",
+  "id": "dotnet",
+  "name": ".NET",
+  "order": 30,
+  "status": "preview",
+  "codeFence": "cs",
+  "regionComment": "",
+  "testedFences": ["cs", "csharp", "c#"],
+  "snippetRoots": ["examples/src"],
+  "packages": [
+    {
+      "name": "ConvoHop",
+      "slug": "convohop",
+      "layer": "server",
+      "summary": "Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders.",
+      "runtime": ".NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
+      "source": "dotnet/src/ConvoHop"
+    },
+    {
+      "name": "ConvoHop.Api",
+      "slug": "api",
+      "layer": "server",
+      "summary": "Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones.",
+      "runtime": ".NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
+      "source": "dotnet/src/ConvoHop"
+    },
+    {
+      "name": "ConvoHop.Models",
+      "slug": "models",
+      "layer": "server",
+      "summary": "Generated input and result models of the ConvoHop GraphQL API.",
+      "runtime": ".NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
+      "source": "dotnet/src/ConvoHop"
+    }
+  ],
+  "quickstarts": ["server", "webhooks", "push"],
+  "operations": "operations.json",
+  "extract": {
+    "command": ["node", "tools/docgen/extractors/dotnet.mjs", "docs/languages/dotnet/language.json"]
+  },
+  "test": {
+    "install": ["dotnet", "restore", "docs/languages/dotnet/examples/ConvoHop.Docs.Examples.csproj", "--locked-mode"],
+    "command": ["dotnet", "test", "docs/languages/dotnet/examples/ConvoHop.Docs.Examples.csproj", "--no-restore", "-maxcpucount:2"]
+  }
+}

@@ -89,4 +89,5 @@ query ManagementGetDeployment($context: RequestContextInput!, $input: GetDeploym
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_deployment`](../../python/reference/convohop.md#convohopmanagementget_deployment-method), [`AsyncConvoHopManagement.get_deployment`](../../python/reference/convohop.md#asyncconvohopmanagementget_deployment-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.GetDeploymentAsync`](../../dotnet/reference/api.md#managementapigetdeploymentasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.getDeployment`](../../jvm/reference/server.md#managementapigetdeployment-method), [`ManagementSuspendApi.getDeployment`](../../jvm/reference/server-kotlin.md#managementsuspendapigetdeployment-method) |

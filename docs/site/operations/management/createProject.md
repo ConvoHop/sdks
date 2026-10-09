@@ -135,4 +135,5 @@ mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateP
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.createProject`](../../typescript/reference/server.md#convohopmanagementclientcreateproject-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.create_project`](../../python/reference/convohop.md#convohopmanagementcreate_project-method), [`AsyncConvoHopManagement.create_project`](../../python/reference/convohop.md#asyncconvohopmanagementcreate_project-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ConvoHopManagementClient.CreateProjectAsync`](../../dotnet/reference/convohop.md#convohopmanagementclientcreateprojectasync-method), [`ManagementApi.CreateProjectAsync`](../../dotnet/reference/api.md#managementapicreateprojectasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.createProject`](../../jvm/reference/server.md#managementapicreateproject-method), [`ManagementSuspendApi.createProject`](../../jvm/reference/server-kotlin.md#managementsuspendapicreateproject-method) |

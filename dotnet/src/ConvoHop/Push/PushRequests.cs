@@ -192,9 +192,11 @@ namespace ConvoHop
     }
 
     /// <summary>
-    /// An FCM data message without a target. For the FCM HTTP v1 REST <c>messages:send</c>, add <c>token</c> to
-    /// <see cref="MessageJson"/>. Firebase Admin SDKs take <see cref="Data"/> and the <see cref="Android"/> values in their own
-    /// form, such as a <c>TimeSpan</c> TTL.
+    /// An FCM data message without a target. For the FCM HTTP v1 REST <c>messages:send</c>, add <c>token</c> or <c>fid</c> to
+    /// <see cref="MessageJson"/>: the device's registration token by default, or its Firebase Installation ID (FID) when the
+    /// app's manifest sets <c>firebase_messaging_installation_id_enabled</c>. Firebase Admin SDKs take <see cref="Data"/> and
+    /// the <see cref="Android"/> values in their own form, such as a <c>TimeSpan</c> TTL. The .NET one, FirebaseAdmin, sends
+    /// to a FID from 3.6.0.
     /// </summary>
     public sealed class FcmRequest
     {
@@ -219,7 +221,7 @@ namespace ConvoHop
         /// <summary>The <c>convohop</c> metadata, with the title and body.</summary>
         public PushData Metadata { get; }
 
-        /// <summary>The REST message as compact JSON, without a target. <c>data</c> is at most 4096 UTF-8 bytes as JSON.</summary>
+        /// <summary>The REST message as compact JSON, without a target: add <c>token</c> or <c>fid</c>. <c>data</c> is at most 4096 UTF-8 bytes as JSON.</summary>
         public string MessageJson { get; }
 
         internal string DataJson { get; }

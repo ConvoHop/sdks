@@ -1,0 +1,2071 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "dotnet",
+  "package": "ConvoHop.Models",
+  "layer": "server",
+  "page": "models.md",
+  "symbols": [
+    {
+      "name": "AcknowledgeCredentialReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AcknowledgeCredentialReply",
+      "anchor": "acknowledgecredentialreply-class",
+      "signatures": [
+        "public sealed class AcknowledgeCredentialReply\n{\n    public AcknowledgeCredentialReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public DeliveryAck? Result { get; init; }\n}"
+      ],
+      "docs": "The AcknowledgeCredentialReply result."
+    },
+    {
+      "name": "AcknowledgeCredentialRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AcknowledgeCredentialRequestInput",
+      "anchor": "acknowledgecredentialrequestinput-class",
+      "signatures": [
+        "public sealed class AcknowledgeCredentialRequestInput\n{\n    public AcknowledgeCredentialRequestInput(string deliveryId);\n    public string DeliveryId { get; set; }\n}"
+      ],
+      "docs": "The AcknowledgeCredentialRequestInput input."
+    },
+    {
+      "name": "ActorRef",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ActorRef",
+      "anchor": "actorref-class",
+      "signatures": [
+        "public sealed class ActorRef\n{\n    public ActorRef();\n    public string TenantId { get; init; }\n    public string ObjectId { get; init; }\n}"
+      ],
+      "docs": "The ActorRef result."
+    },
+    {
+      "name": "AddMemberReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AddMemberReply",
+      "anchor": "addmemberreply-class",
+      "signatures": [
+        "public sealed class AddMemberReply\n{\n    public AddMemberReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Member? Result { get; init; }\n}"
+      ],
+      "docs": "The AddMemberReply result."
+    },
+    {
+      "name": "AddMemberRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AddMemberRequestInput",
+      "anchor": "addmemberrequestinput-class",
+      "signatures": [
+        "public sealed class AddMemberRequestInput\n{\n    public AddMemberRequestInput(string conversationId, string principalId, string role, string expectedRevision);\n    public string ConversationId { get; set; }\n    public string PrincipalId { get; set; }\n    public string Role { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The AddMemberRequestInput input."
+    },
+    {
+      "name": "AddMembersInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AddMembersInput",
+      "anchor": "addmembersinput-class",
+      "signatures": [
+        "public sealed class AddMembersInput\n{\n    public AddMembersInput(string conversationId, IReadOnlyList<MemberBatchEntryInput> members);\n    public string ConversationId { get; set; }\n    public IReadOnlyList<MemberBatchEntryInput> Members { get; set; }\n}"
+      ],
+      "docs": "The AddMembersInput input."
+    },
+    {
+      "name": "AddMembersPayload",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AddMembersPayload",
+      "anchor": "addmemberspayload-class",
+      "signatures": [
+        "public sealed class AddMembersPayload\n{\n    public AddMembersPayload();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ReceiptId { get; init; }\n    public string CommittedAt { get; init; }\n    public bool Replayed { get; init; }\n    public ConversationMemberBatch Result { get; init; }\n}"
+      ],
+      "docs": "The AddMembersPayload result."
+    },
+    {
+      "name": "AlertLiveSessionInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AlertLiveSessionInput",
+      "anchor": "alertlivesessioninput-class",
+      "signatures": [
+        "public sealed class AlertLiveSessionInput\n{\n    public AlertLiveSessionInput(string liveSessionId, string expectedGeneration, IReadOnlyList<string> principalIds);\n    public string LiveSessionId { get; set; }\n    public string ExpectedGeneration { get; set; }\n    public IReadOnlyList<string> PrincipalIds { get; set; }\n}"
+      ],
+      "docs": "The AlertLiveSessionInput input."
+    },
+    {
+      "name": "AlertLiveSessionPayload",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AlertLiveSessionPayload",
+      "anchor": "alertlivesessionpayload-class",
+      "signatures": [
+        "public sealed class AlertLiveSessionPayload\n{\n    public AlertLiveSessionPayload();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ReceiptId { get; init; }\n    public string CommittedAt { get; init; }\n    public bool Replayed { get; init; }\n    public LiveAlertBatch Result { get; init; }\n}"
+      ],
+      "docs": "The AlertLiveSessionPayload result."
+    },
+    {
+      "name": "BroadcastPermissionChanged",
+      "kind": "class",
+      "ref": "ConvoHop.Models#BroadcastPermissionChanged",
+      "anchor": "broadcastpermissionchanged-class",
+      "signatures": [
+        "public sealed class BroadcastPermissionChanged\n{\n    public BroadcastPermissionChanged();\n    public Member Member { get; init; }\n    public LiveMediaCutoff? MediaCutoff { get; init; }\n}"
+      ],
+      "docs": "The BroadcastPermissionChanged result."
+    },
+    {
+      "name": "Capabilities",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Capabilities",
+      "anchor": "capabilities-class",
+      "signatures": [
+        "public sealed class Capabilities\n{\n    public Capabilities();\n    public string ServerRelease { get; init; }\n    public string CapabilityRevision { get; init; }\n    public string LimitsRevision { get; init; }\n    public Features? Features { get; init; }\n    public IReadOnlyList<LimitEntry> Limits { get; init; }\n    public string Environment { get; init; }\n    public bool ProductionQualified { get; init; }\n    public MediaPolicy? MediaPolicy { get; init; }\n    public string? GeoControlAuthorityId { get; init; }\n    public IReadOnlyList<string> Offerings { get; init; }\n    public IReadOnlyList<string> Geos { get; init; }\n    public IReadOnlyList<string> InstallationProfiles { get; init; }\n    public string? PortalIdentity { get; init; }\n}"
+      ],
+      "docs": "The Capabilities result."
+    },
+    {
+      "name": "CapabilitiesReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CapabilitiesReply",
+      "anchor": "capabilitiesreply-class",
+      "signatures": [
+        "public sealed class CapabilitiesReply\n{\n    public CapabilitiesReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Capabilities? Result { get; init; }\n}"
+      ],
+      "docs": "The CapabilitiesReply result."
+    },
+    {
+      "name": "ConfigureWebhookReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ConfigureWebhookReply",
+      "anchor": "configurewebhookreply-class",
+      "signatures": [
+        "public sealed class ConfigureWebhookReply\n{\n    public ConfigureWebhookReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OperationResult? Result { get; init; }\n}"
+      ],
+      "docs": "The ConfigureWebhookReply result."
+    },
+    {
+      "name": "ConfigureWebhookRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ConfigureWebhookRequestInput",
+      "anchor": "configurewebhookrequestinput-class",
+      "signatures": [
+        "public sealed class ConfigureWebhookRequestInput\n{\n    public ConfigureWebhookRequestInput(string projectId, string url, IReadOnlyList<string> eventTypes, string consentRef);\n    public string ProjectId { get; set; }\n    public string Url { get; set; }\n    public IReadOnlyList<string> EventTypes { get; set; }\n    public string ConsentRef { get; set; }\n}"
+      ],
+      "docs": "The ConfigureWebhookRequestInput input."
+    },
+    {
+      "name": "Conversation",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Conversation",
+      "anchor": "conversation-class",
+      "signatures": [
+        "public sealed class Conversation\n{\n    public Conversation();\n    public string ConversationId { get; init; }\n    public string Revision { get; init; }\n    public string Title { get; init; }\n    public JsonElement? Props { get; init; }\n    public string LatestSequence { get; init; }\n    public Member? Membership { get; init; }\n}"
+      ],
+      "docs": "The Conversation result."
+    },
+    {
+      "name": "ConversationLiveInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ConversationLiveInput",
+      "anchor": "conversationliveinput-class",
+      "signatures": [
+        "public sealed class ConversationLiveInput\n{\n    public ConversationLiveInput(string conversationId);\n    public string ConversationId { get; set; }\n}"
+      ],
+      "docs": "The ConversationLiveInput input."
+    },
+    {
+      "name": "ConversationMemberBatch",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ConversationMemberBatch",
+      "anchor": "conversationmemberbatch-class",
+      "signatures": [
+        "public sealed class ConversationMemberBatch\n{\n    public ConversationMemberBatch();\n    public IReadOnlyList<Member> Items { get; init; }\n}"
+      ],
+      "docs": "The ConversationMemberBatch result."
+    },
+    {
+      "name": "ConversationMute",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ConversationMute",
+      "anchor": "conversationmute-class",
+      "signatures": [
+        "public sealed class ConversationMute\n{\n    public ConversationMute();\n    public string ConversationId { get; init; }\n    public string PrincipalId { get; init; }\n    public bool Muted { get; init; }\n    public string? Until { get; init; }\n}"
+      ],
+      "docs": "The ConversationMute result."
+    },
+    {
+      "name": "ConversationMuteInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ConversationMuteInput",
+      "anchor": "conversationmuteinput-class",
+      "signatures": [
+        "public sealed class ConversationMuteInput\n{\n    public ConversationMuteInput(string conversationId);\n    public string ConversationId { get; set; }\n    public string? ActAsPrincipalId { get; set; }\n}"
+      ],
+      "docs": "The ConversationMuteInput input."
+    },
+    {
+      "name": "ConversationMuteReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ConversationMuteReply",
+      "anchor": "conversationmutereply-class",
+      "signatures": [
+        "public sealed class ConversationMuteReply\n{\n    public ConversationMuteReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ServerTime { get; init; }\n    public ConversationMute Result { get; init; }\n}"
+      ],
+      "docs": "The ConversationMuteReply result."
+    },
+    {
+      "name": "CreateConversationReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateConversationReply",
+      "anchor": "createconversationreply-class",
+      "signatures": [
+        "public sealed class CreateConversationReply\n{\n    public CreateConversationReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Conversation? Result { get; init; }\n}"
+      ],
+      "docs": "The CreateConversationReply result."
+    },
+    {
+      "name": "CreateConversationRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateConversationRequestInput",
+      "anchor": "createconversationrequestinput-class",
+      "signatures": [
+        "public sealed class CreateConversationRequestInput\n{\n    public CreateConversationRequestInput(string title, JsonElement props, IReadOnlyList<MemberInputInput> members);\n    public string Title { get; set; }\n    public JsonElement Props { get; set; }\n    public IReadOnlyList<MemberInputInput> Members { get; set; }\n}"
+      ],
+      "docs": "The CreateConversationRequestInput input."
+    },
+    {
+      "name": "CreateDeploymentReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateDeploymentReply",
+      "anchor": "createdeploymentreply-class",
+      "signatures": [
+        "public sealed class CreateDeploymentReply\n{\n    public CreateDeploymentReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OperationResult? Result { get; init; }\n}"
+      ],
+      "docs": "The CreateDeploymentReply result."
+    },
+    {
+      "name": "CreateDeploymentRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateDeploymentRequestInput",
+      "anchor": "createdeploymentrequestinput-class",
+      "signatures": [
+        "public sealed class CreateDeploymentRequestInput\n{\n    public CreateDeploymentRequestInput(string orgId, string offering, string geoId, string installationProfileId, string consentRef);\n    public string OrgId { get; set; }\n    public string Offering { get; set; }\n    public string GeoId { get; set; }\n    public string InstallationProfileId { get; set; }\n    public string ConsentRef { get; set; }\n}"
+      ],
+      "docs": "The CreateDeploymentRequestInput input."
+    },
+    {
+      "name": "CreateOrganizationReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateOrganizationReply",
+      "anchor": "createorganizationreply-class",
+      "signatures": [
+        "public sealed class CreateOrganizationReply\n{\n    public CreateOrganizationReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Organization? Result { get; init; }\n}"
+      ],
+      "docs": "The CreateOrganizationReply result."
+    },
+    {
+      "name": "CreateOrganizationRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateOrganizationRequestInput",
+      "anchor": "createorganizationrequestinput-class",
+      "signatures": [
+        "public sealed class CreateOrganizationRequestInput\n{\n    public CreateOrganizationRequestInput(string name, string termsRef);\n    public string Name { get; set; }\n    public string TermsRef { get; set; }\n}"
+      ],
+      "docs": "The CreateOrganizationRequestInput input."
+    },
+    {
+      "name": "CreatePrincipalReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreatePrincipalReply",
+      "anchor": "createprincipalreply-class",
+      "signatures": [
+        "public sealed class CreatePrincipalReply\n{\n    public CreatePrincipalReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Principal? Result { get; init; }\n}"
+      ],
+      "docs": "The CreatePrincipalReply result."
+    },
+    {
+      "name": "CreatePrincipalRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreatePrincipalRequestInput",
+      "anchor": "createprincipalrequestinput-class",
+      "signatures": [
+        "public sealed class CreatePrincipalRequestInput\n{\n    public CreatePrincipalRequestInput(string externalUserId);\n    public string ExternalUserId { get; set; }\n}"
+      ],
+      "docs": "The CreatePrincipalRequestInput input."
+    },
+    {
+      "name": "CreateProjectReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateProjectReply",
+      "anchor": "createprojectreply-class",
+      "signatures": [
+        "public sealed class CreateProjectReply\n{\n    public CreateProjectReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OperationResult? Result { get; init; }\n}"
+      ],
+      "docs": "The CreateProjectReply result."
+    },
+    {
+      "name": "CreateProjectRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateProjectRequestInput",
+      "anchor": "createprojectrequestinput-class",
+      "signatures": [
+        "public sealed class CreateProjectRequestInput\n{\n    public CreateProjectRequestInput(string deploymentId, string name, string environment, string backendPrincipalName);\n    public string DeploymentId { get; set; }\n    public string Name { get; set; }\n    public string Environment { get; set; }\n    public string BackendPrincipalName { get; set; }\n}"
+      ],
+      "docs": "The CreateProjectRequestInput input."
+    },
+    {
+      "name": "CredentialCapsule",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CredentialCapsule",
+      "anchor": "credentialcapsule-class",
+      "signatures": [
+        "public sealed class CredentialCapsule\n{\n    public CredentialCapsule();\n    public string Kind { get; init; }\n    public string? KeyId { get; init; }\n    public string? BackendPrincipalId { get; init; }\n    public string? BackendKey { get; init; }\n    public string? ExpiresAt { get; init; }\n    public string? EndpointId { get; init; }\n    public string? SecretVersion { get; init; }\n    public string? Secret { get; init; }\n}"
+      ],
+      "docs": "The CredentialCapsule result."
+    },
+    {
+      "name": "CredentialDelivery",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CredentialDelivery",
+      "anchor": "credentialdelivery-class",
+      "signatures": [
+        "public sealed class CredentialDelivery\n{\n    public CredentialDelivery();\n    public string DeliveryId { get; init; }\n    public string Kind { get; init; }\n    public string ProjectId { get; init; }\n    public string InstallationId { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public string ExpiresAt { get; init; }\n    public string PayloadDigest { get; init; }\n    public ActorRef? RecipientActorRef { get; init; }\n}"
+      ],
+      "docs": "The CredentialDelivery result."
+    },
+    {
+      "name": "CredentialDeliveryReceipt",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CredentialDeliveryReceipt",
+      "anchor": "credentialdeliveryreceipt-class",
+      "signatures": [
+        "public sealed class CredentialDeliveryReceipt\n{\n    public CredentialDeliveryReceipt();\n    public string DeliveryId { get; init; }\n}"
+      ],
+      "docs": "The CredentialDeliveryReceipt result."
+    },
+    {
+      "name": "CredentialPermitReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CredentialPermitReply",
+      "anchor": "credentialpermitreply-class",
+      "signatures": [
+        "public sealed class CredentialPermitReply\n{\n    public CredentialPermitReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public JsonElement? Result { get; init; }\n}"
+      ],
+      "docs": "The CredentialPermitReply result."
+    },
+    {
+      "name": "CredentialPermitRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CredentialPermitRequestInput",
+      "anchor": "credentialpermitrequestinput-class",
+      "signatures": [
+        "public sealed class CredentialPermitRequestInput\n{\n    public CredentialPermitRequestInput(string projectId, string deliveryId, string redemptionRequestId);\n    public string ProjectId { get; set; }\n    public string DeliveryId { get; set; }\n    public string RedemptionRequestId { get; set; }\n}"
+      ],
+      "docs": "The CredentialPermitRequestInput input."
+    },
+    {
+      "name": "CurrentLiveSessionReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CurrentLiveSessionReply",
+      "anchor": "currentlivesessionreply-class",
+      "signatures": [
+        "public sealed class CurrentLiveSessionReply\n{\n    public CurrentLiveSessionReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ServerTime { get; init; }\n    public LiveSession? Result { get; init; }\n}"
+      ],
+      "docs": "The CurrentLiveSessionReply result."
+    },
+    {
+      "name": "Cursor",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Cursor",
+      "anchor": "cursor-class",
+      "signatures": [
+        "public sealed class Cursor\n{\n    public Cursor();\n    public string Incarnation { get; init; }\n    public string ConversationId { get; init; }\n    public string Sequence { get; init; }\n}"
+      ],
+      "docs": "The Cursor result."
+    },
+    {
+      "name": "CutoffScope",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CutoffScope",
+      "anchor": "cutoffscope-class",
+      "signatures": [
+        "public sealed class CutoffScope\n{\n    public CutoffScope();\n    public string Kind { get; init; }\n    public string? PrincipalId { get; init; }\n    public string? SessionId { get; init; }\n    public string? DeviceId { get; init; }\n    public string? CallId { get; init; }\n}"
+      ],
+      "docs": "The CutoffScope result."
+    },
+    {
+      "name": "DeleteMessageReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DeleteMessageReply",
+      "anchor": "deletemessagereply-class",
+      "signatures": [
+        "public sealed class DeleteMessageReply\n{\n    public DeleteMessageReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Message? Result { get; init; }\n}"
+      ],
+      "docs": "The DeleteMessageReply result."
+    },
+    {
+      "name": "DeleteMessageRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DeleteMessageRequestInput",
+      "anchor": "deletemessagerequestinput-class",
+      "signatures": [
+        "public sealed class DeleteMessageRequestInput\n{\n    public DeleteMessageRequestInput(string conversationId, string messageId, string expectedRevision);\n    public string ConversationId { get; set; }\n    public string MessageId { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The DeleteMessageRequestInput input."
+    },
+    {
+      "name": "DeliveryAck",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DeliveryAck",
+      "anchor": "deliveryack-class",
+      "signatures": [
+        "public sealed class DeliveryAck\n{\n    public DeliveryAck();\n    public string DeliveryId { get; init; }\n    public bool Acknowledged { get; init; }\n}"
+      ],
+      "docs": "The DeliveryAck result."
+    },
+    {
+      "name": "Deployment",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Deployment",
+      "anchor": "deployment-class",
+      "signatures": [
+        "public sealed class Deployment\n{\n    public Deployment();\n    public string DeploymentId { get; init; }\n    public string OrgId { get; init; }\n    public string Offering { get; init; }\n    public string GeoId { get; init; }\n    public string InstallationId { get; init; }\n    public string ResourceOwner { get; init; }\n    public IReadOnlyList<string> ApprovedRegions { get; init; }\n    public string Readiness { get; init; }\n    public string Revision { get; init; }\n    public string ConsentRef { get; init; }\n    public string Environment { get; init; }\n}"
+      ],
+      "docs": "The Deployment result."
+    },
+    {
+      "name": "DeploymentHealth",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DeploymentHealth",
+      "anchor": "deploymenthealth-class",
+      "signatures": [
+        "public sealed class DeploymentHealth\n{\n    public DeploymentHealth();\n    public string DeploymentId { get; init; }\n    public string Readiness { get; init; }\n    public string ObservedAt { get; init; }\n    public IReadOnlyList<ServiceObservation> Services { get; init; }\n}"
+      ],
+      "docs": "The DeploymentHealth result."
+    },
+    {
+      "name": "DeploymentHealthReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DeploymentHealthReply",
+      "anchor": "deploymenthealthreply-class",
+      "signatures": [
+        "public sealed class DeploymentHealthReply\n{\n    public DeploymentHealthReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public DeploymentHealth? Result { get; init; }\n}"
+      ],
+      "docs": "The DeploymentHealthReply result."
+    },
+    {
+      "name": "DeploymentHealthRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DeploymentHealthRequestInput",
+      "anchor": "deploymenthealthrequestinput-class",
+      "signatures": [
+        "public sealed class DeploymentHealthRequestInput\n{\n    public DeploymentHealthRequestInput(string deploymentId);\n    public string DeploymentId { get; set; }\n}"
+      ],
+      "docs": "The DeploymentHealthRequestInput input."
+    },
+    {
+      "name": "DeploymentUsage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DeploymentUsage",
+      "anchor": "deploymentusage-class",
+      "signatures": [
+        "public sealed class DeploymentUsage\n{\n    public DeploymentUsage();\n    public string DeploymentId { get; init; }\n    public string Source { get; init; }\n    public string ObservedAt { get; init; }\n    public bool Complete { get; init; }\n    public string Reason { get; init; }\n    public string From { get; init; }\n    public string To { get; init; }\n    public IReadOnlyList<UsageMeter> Meters { get; init; }\n    public string? AggregatedThrough { get; init; }\n}"
+      ],
+      "docs": "The DeploymentUsage result."
+    },
+    {
+      "name": "DeploymentUsageReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DeploymentUsageReply",
+      "anchor": "deploymentusagereply-class",
+      "signatures": [
+        "public sealed class DeploymentUsageReply\n{\n    public DeploymentUsageReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public DeploymentUsage? Result { get; init; }\n}"
+      ],
+      "docs": "The DeploymentUsageReply result."
+    },
+    {
+      "name": "DeploymentUsageRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DeploymentUsageRequestInput",
+      "anchor": "deploymentusagerequestinput-class",
+      "signatures": [
+        "public sealed class DeploymentUsageRequestInput\n{\n    public DeploymentUsageRequestInput(string deploymentId);\n    public string DeploymentId { get; set; }\n    public string? From { get; set; }\n    public string? To { get; set; }\n}"
+      ],
+      "docs": "The DeploymentUsageRequestInput input."
+    },
+    {
+      "name": "DisablePrincipalReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DisablePrincipalReply",
+      "anchor": "disableprincipalreply-class",
+      "signatures": [
+        "public sealed class DisablePrincipalReply\n{\n    public DisablePrincipalReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Principal? Result { get; init; }\n}"
+      ],
+      "docs": "The DisablePrincipalReply result."
+    },
+    {
+      "name": "DisablePrincipalRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DisablePrincipalRequestInput",
+      "anchor": "disableprincipalrequestinput-class",
+      "signatures": [
+        "public sealed class DisablePrincipalRequestInput\n{\n    public DisablePrincipalRequestInput(string principalId, string expectedRevision);\n    public string PrincipalId { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The DisablePrincipalRequestInput input."
+    },
+    {
+      "name": "DisableWebhookReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DisableWebhookReply",
+      "anchor": "disablewebhookreply-class",
+      "signatures": [
+        "public sealed class DisableWebhookReply\n{\n    public DisableWebhookReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OperationResult? Result { get; init; }\n}"
+      ],
+      "docs": "The DisableWebhookReply result."
+    },
+    {
+      "name": "DisableWebhookRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#DisableWebhookRequestInput",
+      "anchor": "disablewebhookrequestinput-class",
+      "signatures": [
+        "public sealed class DisableWebhookRequestInput\n{\n    public DisableWebhookRequestInput(string projectId, string endpointId, string expectedRevision);\n    public string ProjectId { get; set; }\n    public string EndpointId { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The DisableWebhookRequestInput input."
+    },
+    {
+      "name": "EditMessageReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#EditMessageReply",
+      "anchor": "editmessagereply-class",
+      "signatures": [
+        "public sealed class EditMessageReply\n{\n    public EditMessageReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Message? Result { get; init; }\n}"
+      ],
+      "docs": "The EditMessageReply result."
+    },
+    {
+      "name": "EditMessageRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#EditMessageRequestInput",
+      "anchor": "editmessagerequestinput-class",
+      "signatures": [
+        "public sealed class EditMessageRequestInput\n{\n    public EditMessageRequestInput(string conversationId, string messageId, string expectedRevision);\n    public string ConversationId { get; set; }\n    public string MessageId { get; set; }\n    public string ExpectedRevision { get; set; }\n    public string? Text { get; set; }\n    public JsonElement? Props { get; set; }\n}"
+      ],
+      "docs": "The EditMessageRequestInput input."
+    },
+    {
+      "name": "EndLiveSessionInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#EndLiveSessionInput",
+      "anchor": "endlivesessioninput-class",
+      "signatures": [
+        "public sealed class EndLiveSessionInput\n{\n    public EndLiveSessionInput(string liveSessionId, string expectedGeneration, string expectedRevision);\n    public string LiveSessionId { get; set; }\n    public string ExpectedGeneration { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The EndLiveSessionInput input."
+    },
+    {
+      "name": "EndLiveSessionPayload",
+      "kind": "class",
+      "ref": "ConvoHop.Models#EndLiveSessionPayload",
+      "anchor": "endlivesessionpayload-class",
+      "signatures": [
+        "public sealed class EndLiveSessionPayload\n{\n    public EndLiveSessionPayload();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ReceiptId { get; init; }\n    public string CommittedAt { get; init; }\n    public bool Replayed { get; init; }\n    public OperationRef Operation { get; init; }\n    public LiveSessionEndRequested Result { get; init; }\n}"
+      ],
+      "docs": "The EndLiveSessionPayload result."
+    },
+    {
+      "name": "Features",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Features",
+      "anchor": "features-class",
+      "signatures": [
+        "public sealed class Features\n{\n    public Features();\n    public bool Chat { get; init; }\n    public bool Inbox { get; init; }\n    public bool LexicalSearch { get; init; }\n    public bool Typing { get; init; }\n    public bool Webhooks { get; init; }\n    public bool LiveSessions { get; init; }\n    public bool LiveBroadcast { get; init; }\n}"
+      ],
+      "docs": "The Features result."
+    },
+    {
+      "name": "GetConversationReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetConversationReply",
+      "anchor": "getconversationreply-class",
+      "signatures": [
+        "public sealed class GetConversationReply\n{\n    public GetConversationReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Conversation? Result { get; init; }\n}"
+      ],
+      "docs": "The GetConversationReply result."
+    },
+    {
+      "name": "GetConversationRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetConversationRequestInput",
+      "anchor": "getconversationrequestinput-class",
+      "signatures": [
+        "public sealed class GetConversationRequestInput\n{\n    public GetConversationRequestInput(string conversationId);\n    public string ConversationId { get; set; }\n}"
+      ],
+      "docs": "The GetConversationRequestInput input."
+    },
+    {
+      "name": "GetDeploymentReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetDeploymentReply",
+      "anchor": "getdeploymentreply-class",
+      "signatures": [
+        "public sealed class GetDeploymentReply\n{\n    public GetDeploymentReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Deployment? Result { get; init; }\n}"
+      ],
+      "docs": "The GetDeploymentReply result."
+    },
+    {
+      "name": "GetDeploymentRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetDeploymentRequestInput",
+      "anchor": "getdeploymentrequestinput-class",
+      "signatures": [
+        "public sealed class GetDeploymentRequestInput\n{\n    public GetDeploymentRequestInput(string deploymentId);\n    public string DeploymentId { get; set; }\n}"
+      ],
+      "docs": "The GetDeploymentRequestInput input."
+    },
+    {
+      "name": "GetMessageReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetMessageReply",
+      "anchor": "getmessagereply-class",
+      "signatures": [
+        "public sealed class GetMessageReply\n{\n    public GetMessageReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Message? Result { get; init; }\n}"
+      ],
+      "docs": "The GetMessageReply result."
+    },
+    {
+      "name": "GetMessageRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetMessageRequestInput",
+      "anchor": "getmessagerequestinput-class",
+      "signatures": [
+        "public sealed class GetMessageRequestInput\n{\n    public GetMessageRequestInput(string conversationId, string messageId);\n    public string ConversationId { get; set; }\n    public string MessageId { get; set; }\n    public string? ActAsPrincipalId { get; set; }\n}"
+      ],
+      "docs": "The GetMessageRequestInput input."
+    },
+    {
+      "name": "GetOperationReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetOperationReply",
+      "anchor": "getoperationreply-class",
+      "signatures": [
+        "public sealed class GetOperationReply\n{\n    public GetOperationReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Operation? Result { get; init; }\n}"
+      ],
+      "docs": "The GetOperationReply result."
+    },
+    {
+      "name": "GetOperationRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetOperationRequestInput",
+      "anchor": "getoperationrequestinput-class",
+      "signatures": [
+        "public sealed class GetOperationRequestInput\n{\n    public GetOperationRequestInput(string operationId);\n    public string OperationId { get; set; }\n}"
+      ],
+      "docs": "The GetOperationRequestInput input."
+    },
+    {
+      "name": "GetOrganizationReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetOrganizationReply",
+      "anchor": "getorganizationreply-class",
+      "signatures": [
+        "public sealed class GetOrganizationReply\n{\n    public GetOrganizationReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Organization? Result { get; init; }\n}"
+      ],
+      "docs": "The GetOrganizationReply result."
+    },
+    {
+      "name": "GetOrganizationRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetOrganizationRequestInput",
+      "anchor": "getorganizationrequestinput-class",
+      "signatures": [
+        "public sealed class GetOrganizationRequestInput\n{\n    public GetOrganizationRequestInput(string orgId);\n    public string OrgId { get; set; }\n}"
+      ],
+      "docs": "The GetOrganizationRequestInput input."
+    },
+    {
+      "name": "GetPrincipalReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetPrincipalReply",
+      "anchor": "getprincipalreply-class",
+      "signatures": [
+        "public sealed class GetPrincipalReply\n{\n    public GetPrincipalReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Principal? Result { get; init; }\n}"
+      ],
+      "docs": "The GetPrincipalReply result."
+    },
+    {
+      "name": "GetPrincipalRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetPrincipalRequestInput",
+      "anchor": "getprincipalrequestinput-class",
+      "signatures": [
+        "public sealed class GetPrincipalRequestInput\n{\n    public GetPrincipalRequestInput(string principalId);\n    public string PrincipalId { get; set; }\n}"
+      ],
+      "docs": "The GetPrincipalRequestInput input."
+    },
+    {
+      "name": "GetProjectReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetProjectReply",
+      "anchor": "getprojectreply-class",
+      "signatures": [
+        "public sealed class GetProjectReply\n{\n    public GetProjectReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Project? Result { get; init; }\n}"
+      ],
+      "docs": "The GetProjectReply result."
+    },
+    {
+      "name": "GetProjectRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#GetProjectRequestInput",
+      "anchor": "getprojectrequestinput-class",
+      "signatures": [
+        "public sealed class GetProjectRequestInput\n{\n    public GetProjectRequestInput(string projectId);\n    public string ProjectId { get; set; }\n}"
+      ],
+      "docs": "The GetProjectRequestInput input."
+    },
+    {
+      "name": "HistoryGrantReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#HistoryGrantReply",
+      "anchor": "historygrantreply-class",
+      "signatures": [
+        "public sealed class HistoryGrantReply\n{\n    public HistoryGrantReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Member? Result { get; init; }\n}"
+      ],
+      "docs": "The HistoryGrantReply result."
+    },
+    {
+      "name": "HistoryGrantRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#HistoryGrantRequestInput",
+      "anchor": "historygrantrequestinput-class",
+      "signatures": [
+        "public sealed class HistoryGrantRequestInput\n{\n    public HistoryGrantRequestInput(string conversationId, string principalId, string membershipEpoch, string expectedRevision, string fromSequence);\n    public string ConversationId { get; set; }\n    public string PrincipalId { get; set; }\n    public string MembershipEpoch { get; set; }\n    public string ExpectedRevision { get; set; }\n    public string FromSequence { get; set; }\n}"
+      ],
+      "docs": "The HistoryGrantRequestInput input."
+    },
+    {
+      "name": "InboxItem",
+      "kind": "class",
+      "ref": "ConvoHop.Models#InboxItem",
+      "anchor": "inboxitem-class",
+      "signatures": [
+        "public sealed class InboxItem\n{\n    public InboxItem();\n    public string ConversationId { get; init; }\n    public string Title { get; init; }\n    public string? ActivityAt { get; init; }\n    public string VisibilityEpoch { get; init; }\n    public Message? LatestVisibleMessage { get; init; }\n    public bool HasUnread { get; init; }\n}"
+      ],
+      "docs": "The InboxItem result."
+    },
+    {
+      "name": "InboxPage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#InboxPage",
+      "anchor": "inboxpage-class",
+      "signatures": [
+        "public sealed class InboxPage\n{\n    public InboxPage();\n    public IReadOnlyList<InboxItem> Items { get; init; }\n    public bool Complete { get; init; }\n    public bool RefreshRequired { get; init; }\n    public string? NextCursor { get; init; }\n    public string? PartialReason { get; init; }\n}"
+      ],
+      "docs": "The InboxPage result."
+    },
+    {
+      "name": "InboxReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#InboxReply",
+      "anchor": "inboxreply-class",
+      "signatures": [
+        "public sealed class InboxReply\n{\n    public InboxReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public InboxPage? Result { get; init; }\n}"
+      ],
+      "docs": "The InboxReply result."
+    },
+    {
+      "name": "InboxRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#InboxRequestInput",
+      "anchor": "inboxrequestinput-class",
+      "signatures": [
+        "public sealed class InboxRequestInput\n{\n    public InboxRequestInput(int limit);\n    public int Limit { get; set; }\n    public string? Cursor { get; set; }\n    public string? ActAsPrincipalId { get; set; }\n}"
+      ],
+      "docs": "The InboxRequestInput input."
+    },
+    {
+      "name": "IssueBackendKeyReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#IssueBackendKeyReply",
+      "anchor": "issuebackendkeyreply-class",
+      "signatures": [
+        "public sealed class IssueBackendKeyReply\n{\n    public IssueBackendKeyReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OperationResult? Result { get; init; }\n}"
+      ],
+      "docs": "The IssueBackendKeyReply result."
+    },
+    {
+      "name": "IssueBackendKeyRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#IssueBackendKeyRequestInput",
+      "anchor": "issuebackendkeyrequestinput-class",
+      "signatures": [
+        "public sealed class IssueBackendKeyRequestInput\n{\n    public IssueBackendKeyRequestInput(string projectId, string name, IReadOnlyList<string> scopes, string expiresAt);\n    public string ProjectId { get; set; }\n    public string Name { get; set; }\n    public IReadOnlyList<string> Scopes { get; set; }\n    public string ExpiresAt { get; set; }\n}"
+      ],
+      "docs": "The IssueBackendKeyRequestInput input."
+    },
+    {
+      "name": "IssueSessionReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#IssueSessionReply",
+      "anchor": "issuesessionreply-class",
+      "signatures": [
+        "public sealed class IssueSessionReply\n{\n    public IssueSessionReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public SessionBootstrap? Result { get; init; }\n}"
+      ],
+      "docs": "The IssueSessionReply result."
+    },
+    {
+      "name": "IssueSessionRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#IssueSessionRequestInput",
+      "anchor": "issuesessionrequestinput-class",
+      "signatures": [
+        "public sealed class IssueSessionRequestInput\n{\n    public IssueSessionRequestInput(string principalId, string deviceId, string requestedTtlMs);\n    public string PrincipalId { get; set; }\n    public string DeviceId { get; set; }\n    public string RequestedTtlMs { get; set; }\n}"
+      ],
+      "docs": "The IssueSessionRequestInput input."
+    },
+    {
+      "name": "Limit",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Limit",
+      "anchor": "limit-class",
+      "signatures": [
+        "public sealed class Limit\n{\n    public Limit();\n    public string? Maximum { get; init; }\n    public string? Unit { get; init; }\n    public string? Scope { get; init; }\n    public string? Milliseconds { get; init; }\n    public string? PolicyId { get; init; }\n    public string? Revision { get; init; }\n}"
+      ],
+      "docs": "The Limit result."
+    },
+    {
+      "name": "LimitEntry",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LimitEntry",
+      "anchor": "limitentry-class",
+      "signatures": [
+        "public sealed class LimitEntry\n{\n    public LimitEntry();\n    public string Key { get; init; }\n    public Limit Value { get; init; }\n}"
+      ],
+      "docs": "The LimitEntry result."
+    },
+    {
+      "name": "LiveAlertBatch",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveAlertBatch",
+      "anchor": "livealertbatch-class",
+      "signatures": [
+        "public sealed class LiveAlertBatch\n{\n    public LiveAlertBatch();\n    public string LiveSessionId { get; init; }\n    public string Created { get; init; }\n    public string Suppressed { get; init; }\n}"
+      ],
+      "docs": "The LiveAlertBatch result."
+    },
+    {
+      "name": "LiveCredentialIssuance",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveCredentialIssuance",
+      "anchor": "livecredentialissuance-class",
+      "signatures": [
+        "public sealed class LiveCredentialIssuance\n{\n    public LiveCredentialIssuance();\n    public string LiveSessionId { get; init; }\n    public string ParticipationId { get; init; }\n    public string Generation { get; init; }\n    public string LeaseId { get; init; }\n    public string GrantOrdinal { get; init; }\n    public string AdmissionExpiresAt { get; init; }\n    public string LeaseExpiresAt { get; init; }\n}"
+      ],
+      "docs": "The LiveCredentialIssuance result."
+    },
+    {
+      "name": "LiveCutoffScope",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveCutoffScope",
+      "anchor": "livecutoffscope-class",
+      "signatures": [
+        "public sealed class LiveCutoffScope\n{\n    public LiveCutoffScope();\n    public LiveCutoffScopeKind Kind { get; init; }\n    public string LiveSessionId { get; init; }\n    public string Generation { get; init; }\n    public string? ParticipationId { get; init; }\n}"
+      ],
+      "docs": "The LiveCutoffScope result."
+    },
+    {
+      "name": "LiveMediaCutoff",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveMediaCutoff",
+      "anchor": "livemediacutoff-class",
+      "signatures": [
+        "public sealed class LiveMediaCutoff\n{\n    public LiveMediaCutoff();\n    public LiveCutoffState State { get; init; }\n    public LiveCutoffScope Scope { get; init; }\n    public LiveCutoffEvidence? Evidence { get; init; }\n    public string? EnforcedAt { get; init; }\n    public string? OperationId { get; init; }\n}"
+      ],
+      "docs": "The LiveMediaCutoff result."
+    },
+    {
+      "name": "LiveMediaPermissions",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveMediaPermissions",
+      "anchor": "livemediapermissions-class",
+      "signatures": [
+        "public sealed class LiveMediaPermissions\n{\n    public LiveMediaPermissions();\n    public bool Microphone { get; init; }\n    public bool Camera { get; init; }\n    public bool Subscribe { get; init; }\n}"
+      ],
+      "docs": "The LiveMediaPermissions result."
+    },
+    {
+      "name": "LiveOperationFailure",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveOperationFailure",
+      "anchor": "liveoperationfailure-class",
+      "signatures": [
+        "public sealed class LiveOperationFailure\n{\n    public LiveOperationFailure();\n    public LiveErrorCode Code { get; init; }\n    public string Message { get; init; }\n}"
+      ],
+      "docs": "The LiveOperationFailure result."
+    },
+    {
+      "name": "LiveParticipantPage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveParticipantPage",
+      "anchor": "liveparticipantpage-class",
+      "signatures": [
+        "public sealed class LiveParticipantPage\n{\n    public LiveParticipantPage();\n    public IReadOnlyList<LiveParticipation> Items { get; init; }\n    public string? NextCursor { get; init; }\n    public bool Complete { get; init; }\n    public string? PartialReason { get; init; }\n    public bool RefreshRequired { get; init; }\n}"
+      ],
+      "docs": "The LiveParticipantPage result."
+    },
+    {
+      "name": "LiveParticipantPageReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveParticipantPageReply",
+      "anchor": "liveparticipantpagereply-class",
+      "signatures": [
+        "public sealed class LiveParticipantPageReply\n{\n    public LiveParticipantPageReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ServerTime { get; init; }\n    public LiveParticipantPage Result { get; init; }\n}"
+      ],
+      "docs": "The LiveParticipantPageReply result."
+    },
+    {
+      "name": "LiveParticipantsInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveParticipantsInput",
+      "anchor": "liveparticipantsinput-class",
+      "signatures": [
+        "public sealed class LiveParticipantsInput\n{\n    public LiveParticipantsInput(string liveSessionId);\n    public string LiveSessionId { get; set; }\n    public int? Limit { get; set; }\n    public string? Cursor { get; set; }\n}"
+      ],
+      "docs": "The LiveParticipantsInput input."
+    },
+    {
+      "name": "LiveParticipation",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveParticipation",
+      "anchor": "liveparticipation-class",
+      "signatures": [
+        "public sealed class LiveParticipation\n{\n    public LiveParticipation();\n    public string ParticipationId { get; init; }\n    public string PrincipalId { get; init; }\n    public string MembershipEpoch { get; init; }\n    public LiveRole Role { get; init; }\n    public LiveParticipationState State { get; init; }\n    public LiveMediaPermissions Permissions { get; init; }\n    public string? ReservationExpiresAt { get; init; }\n    public string? NativeConnectionId { get; init; }\n    public LiveMediaCutoff? MediaCutoff { get; init; }\n}"
+      ],
+      "docs": "The LiveParticipation result."
+    },
+    {
+      "name": "LiveSession",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSession",
+      "anchor": "livesession-class",
+      "signatures": [
+        "public sealed class LiveSession\n{\n    public LiveSession();\n    public string LiveSessionId { get; init; }\n    public string ConversationId { get; init; }\n    public string CreatorId { get; init; }\n    public LiveSessionKind Kind { get; init; }\n    public LiveMediaProfile MediaProfile { get; init; }\n    public LiveSessionState State { get; init; }\n    public string Generation { get; init; }\n    public string Revision { get; init; }\n    public string CreatedAt { get; init; }\n    public string ExpiresAt { get; init; }\n    public LiveParticipation? MyParticipation { get; init; }\n    public LiveMediaCutoff? MediaCutoff { get; init; }\n}"
+      ],
+      "docs": "The LiveSession result."
+    },
+    {
+      "name": "LiveSessionEndRequested",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionEndRequested",
+      "anchor": "livesessionendrequested-class",
+      "signatures": [
+        "public sealed class LiveSessionEndRequested\n{\n    public LiveSessionEndRequested();\n    public string LiveSessionId { get; init; }\n    public string OperationId { get; init; }\n    public LiveMediaCutoff MediaCutoff { get; init; }\n}"
+      ],
+      "docs": "The LiveSessionEndRequested result."
+    },
+    {
+      "name": "LiveSessionInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionInput",
+      "anchor": "livesessioninput-class",
+      "signatures": [
+        "public sealed class LiveSessionInput\n{\n    public LiveSessionInput(string liveSessionId);\n    public string LiveSessionId { get; set; }\n}"
+      ],
+      "docs": "The LiveSessionInput input."
+    },
+    {
+      "name": "LiveSessionJoined",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionJoined",
+      "anchor": "livesessionjoined-class",
+      "signatures": [
+        "public sealed class LiveSessionJoined\n{\n    public LiveSessionJoined();\n    public string LiveSessionId { get; init; }\n    public string Generation { get; init; }\n    public LiveParticipation Participation { get; init; }\n}"
+      ],
+      "docs": "The LiveSessionJoined result."
+    },
+    {
+      "name": "LiveSessionLeft",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionLeft",
+      "anchor": "livesessionleft-class",
+      "signatures": [
+        "public sealed class LiveSessionLeft\n{\n    public LiveSessionLeft();\n    public string LiveSessionId { get; init; }\n    public string ParticipationId { get; init; }\n    public LiveMediaCutoff MediaCutoff { get; init; }\n}"
+      ],
+      "docs": "The LiveSessionLeft result."
+    },
+    {
+      "name": "LiveSessionOperation",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionOperation",
+      "anchor": "livesessionoperation-class",
+      "signatures": [
+        "public sealed class LiveSessionOperation\n{\n    public LiveSessionOperation();\n    public string OperationId { get; init; }\n    public string RequestId { get; init; }\n    public string LiveSessionId { get; init; }\n    public LiveOperationKind Kind { get; init; }\n    public LiveOperationState State { get; init; }\n    public string Revision { get; init; }\n    public string RequestedAt { get; init; }\n    public string? CompletedAt { get; init; }\n    public LiveSessionOperationCompletion? Completion { get; init; }\n    public LiveOperationFailure? Failure { get; init; }\n}"
+      ],
+      "docs": "The LiveSessionOperation result."
+    },
+    {
+      "name": "LiveSessionOperationCompletion",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionOperationCompletion",
+      "anchor": "livesessionoperationcompletion-class",
+      "signatures": [
+        "public sealed class LiveSessionOperationCompletion\n{\n    public LiveSessionOperationCompletion();\n    public string LiveSessionId { get; init; }\n    public string Generation { get; init; }\n    public LiveSessionState State { get; init; }\n    public string Revision { get; init; }\n    public string CompletedAt { get; init; }\n    public LiveMediaCutoff? MediaCutoff { get; init; }\n}"
+      ],
+      "docs": "The LiveSessionOperationCompletion result."
+    },
+    {
+      "name": "LiveSessionOperationInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionOperationInput",
+      "anchor": "livesessionoperationinput-class",
+      "signatures": [
+        "public sealed class LiveSessionOperationInput\n{\n    public LiveSessionOperationInput(string operationId);\n    public string OperationId { get; set; }\n}"
+      ],
+      "docs": "The LiveSessionOperationInput input."
+    },
+    {
+      "name": "LiveSessionOperationReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionOperationReply",
+      "anchor": "livesessionoperationreply-class",
+      "signatures": [
+        "public sealed class LiveSessionOperationReply\n{\n    public LiveSessionOperationReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ServerTime { get; init; }\n    public LiveSessionOperation Result { get; init; }\n}"
+      ],
+      "docs": "The LiveSessionOperationReply result."
+    },
+    {
+      "name": "LiveSessionPage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionPage",
+      "anchor": "livesessionpage-class",
+      "signatures": [
+        "public sealed class LiveSessionPage\n{\n    public LiveSessionPage();\n    public IReadOnlyList<LiveSession> Items { get; init; }\n    public string? NextCursor { get; init; }\n    public bool Complete { get; init; }\n    public string? PartialReason { get; init; }\n    public bool RefreshRequired { get; init; }\n}"
+      ],
+      "docs": "The LiveSessionPage result."
+    },
+    {
+      "name": "LiveSessionPageReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionPageReply",
+      "anchor": "livesessionpagereply-class",
+      "signatures": [
+        "public sealed class LiveSessionPageReply\n{\n    public LiveSessionPageReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ServerTime { get; init; }\n    public LiveSessionPage Result { get; init; }\n}"
+      ],
+      "docs": "The LiveSessionPageReply result."
+    },
+    {
+      "name": "LiveSessionReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionReply",
+      "anchor": "livesessionreply-class",
+      "signatures": [
+        "public sealed class LiveSessionReply\n{\n    public LiveSessionReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ServerTime { get; init; }\n    public LiveSession Result { get; init; }\n}"
+      ],
+      "docs": "The LiveSessionReply result."
+    },
+    {
+      "name": "LiveSessionStarted",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionStarted",
+      "anchor": "livesessionstarted-class",
+      "signatures": [
+        "public sealed class LiveSessionStarted\n{\n    public LiveSessionStarted();\n    public string LiveSessionId { get; init; }\n    public string ConversationId { get; init; }\n    public LiveSessionKind Kind { get; init; }\n    public LiveMediaProfile MediaProfile { get; init; }\n    public string OperationId { get; init; }\n}"
+      ],
+      "docs": "The LiveSessionStarted result."
+    },
+    {
+      "name": "LiveSessionsInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#LiveSessionsInput",
+      "anchor": "livesessionsinput-class",
+      "signatures": [
+        "public sealed class LiveSessionsInput\n{\n    public LiveSessionsInput(string conversationId);\n    public string ConversationId { get; set; }\n    public int? Limit { get; set; }\n    public string? Cursor { get; set; }\n}"
+      ],
+      "docs": "The LiveSessionsInput input."
+    },
+    {
+      "name": "MediaCutoff",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MediaCutoff",
+      "anchor": "mediacutoff-class",
+      "signatures": [
+        "public sealed class MediaCutoff\n{\n    public MediaCutoff();\n    public string State { get; init; }\n    public CutoffScope? Scope { get; init; }\n}"
+      ],
+      "docs": "The MediaCutoff result."
+    },
+    {
+      "name": "MediaPolicy",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MediaPolicy",
+      "anchor": "mediapolicy-class",
+      "signatures": [
+        "public sealed class MediaPolicy\n{\n    public MediaPolicy();\n    public string LeasePolicyId { get; init; }\n    public string MaxLeaseMs { get; init; }\n    public string RenewAttemptMs { get; init; }\n    public string PreludeMaxBytes { get; init; }\n    public string PreludeTimeoutMs { get; init; }\n    public string ClockProfileId { get; init; }\n}"
+      ],
+      "docs": "The MediaPolicy result."
+    },
+    {
+      "name": "Member",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Member",
+      "anchor": "member-class",
+      "signatures": [
+        "public sealed class Member\n{\n    public Member();\n    public string ConversationId { get; init; }\n    public string PrincipalId { get; init; }\n    public string Role { get; init; }\n    public string Status { get; init; }\n    public string MembershipEpoch { get; init; }\n    public string VisibilityEpoch { get; init; }\n    public string Revision { get; init; }\n    public string VisibleFromSequence { get; init; }\n    public bool CanStartBroadcast { get; init; }\n}"
+      ],
+      "docs": "The Member result."
+    },
+    {
+      "name": "MemberBatchEntryInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MemberBatchEntryInput",
+      "anchor": "memberbatchentryinput-class",
+      "signatures": [
+        "public sealed class MemberBatchEntryInput\n{\n    public MemberBatchEntryInput(string principalId, string role, string expectedRevision);\n    public string PrincipalId { get; set; }\n    public string Role { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The MemberBatchEntryInput input."
+    },
+    {
+      "name": "MemberInputInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MemberInputInput",
+      "anchor": "memberinputinput-class",
+      "signatures": [
+        "public sealed class MemberInputInput\n{\n    public MemberInputInput(string principalId, string role);\n    public string PrincipalId { get; set; }\n    public string Role { get; set; }\n}"
+      ],
+      "docs": "The MemberInputInput input."
+    },
+    {
+      "name": "MemberPage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MemberPage",
+      "anchor": "memberpage-class",
+      "signatures": [
+        "public sealed class MemberPage\n{\n    public MemberPage();\n    public IReadOnlyList<Member> Items { get; init; }\n    public bool Complete { get; init; }\n    public bool RefreshRequired { get; init; }\n    public string? NextCursor { get; init; }\n}"
+      ],
+      "docs": "The MemberPage result."
+    },
+    {
+      "name": "MembersReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MembersReply",
+      "anchor": "membersreply-class",
+      "signatures": [
+        "public sealed class MembersReply\n{\n    public MembersReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public MemberPage? Result { get; init; }\n}"
+      ],
+      "docs": "The MembersReply result."
+    },
+    {
+      "name": "MembersRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MembersRequestInput",
+      "anchor": "membersrequestinput-class",
+      "signatures": [
+        "public sealed class MembersRequestInput\n{\n    public MembersRequestInput(string conversationId, int limit);\n    public string ConversationId { get; set; }\n    public int Limit { get; set; }\n    public string? Cursor { get; set; }\n}"
+      ],
+      "docs": "The MembersRequestInput input."
+    },
+    {
+      "name": "Message",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Message",
+      "anchor": "message-class",
+      "signatures": [
+        "public sealed class Message\n{\n    public Message();\n    public string MessageId { get; init; }\n    public string ConversationId { get; init; }\n    public string AuthorId { get; init; }\n    public string Sequence { get; init; }\n    public string Revision { get; init; }\n    public string RevisionSequence { get; init; }\n    public string CreatedAt { get; init; }\n    public bool Deleted { get; init; }\n    public string? Text { get; init; }\n    public JsonElement? Props { get; init; }\n    public string? EditedAt { get; init; }\n}"
+      ],
+      "docs": "The Message result."
+    },
+    {
+      "name": "MessageAck",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MessageAck",
+      "anchor": "messageack-class",
+      "signatures": [
+        "public sealed class MessageAck\n{\n    public MessageAck();\n    public string MessageId { get; init; }\n    public string ConversationId { get; init; }\n    public string Sequence { get; init; }\n    public string Revision { get; init; }\n    public string Status { get; init; }\n    public Cursor? Cursor { get; init; }\n}"
+      ],
+      "docs": "The MessageAck result."
+    },
+    {
+      "name": "MessagePage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MessagePage",
+      "anchor": "messagepage-class",
+      "signatures": [
+        "public sealed class MessagePage\n{\n    public MessagePage();\n    public IReadOnlyList<Message> Items { get; init; }\n    public bool Complete { get; init; }\n    public bool RefreshRequired { get; init; }\n    public string? NextCursor { get; init; }\n}"
+      ],
+      "docs": "The MessagePage result."
+    },
+    {
+      "name": "MessagesReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MessagesReply",
+      "anchor": "messagesreply-class",
+      "signatures": [
+        "public sealed class MessagesReply\n{\n    public MessagesReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public MessagePage? Result { get; init; }\n}"
+      ],
+      "docs": "The MessagesReply result."
+    },
+    {
+      "name": "MessagesRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#MessagesRequestInput",
+      "anchor": "messagesrequestinput-class",
+      "signatures": [
+        "public sealed class MessagesRequestInput\n{\n    public MessagesRequestInput(string conversationId, int limit);\n    public string ConversationId { get; set; }\n    public int Limit { get; set; }\n    public string? BeforeSequence { get; set; }\n    public string? ActAsPrincipalId { get; set; }\n}"
+      ],
+      "docs": "The MessagesRequestInput input."
+    },
+    {
+      "name": "Operation",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Operation",
+      "anchor": "operation-class",
+      "signatures": [
+        "public sealed class Operation\n{\n    public Operation();\n    public string OperationId { get; init; }\n    public string Kind { get; init; }\n    public ResourceRef? TargetRef { get; init; }\n    public string State { get; init; }\n    public string Revision { get; init; }\n    public string RequestedAt { get; init; }\n    public string UpdatedAt { get; init; }\n    public IReadOnlyList<OperationStep> Steps { get; init; }\n    public OperationResult? Result { get; init; }\n    public string? BlockedReason { get; init; }\n}"
+      ],
+      "docs": "The Operation result."
+    },
+    {
+      "name": "OperationRef",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OperationRef",
+      "anchor": "operationref-class",
+      "signatures": [
+        "public sealed class OperationRef\n{\n    public OperationRef();\n    public string OperationId { get; init; }\n    public string Owner { get; init; }\n    public string Href { get; init; }\n    public string State { get; init; }\n}"
+      ],
+      "docs": "The OperationRef result."
+    },
+    {
+      "name": "OperationResult",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OperationResult",
+      "anchor": "operationresult-class",
+      "signatures": [
+        "public sealed class OperationResult\n{\n    public OperationResult();\n    public string? ProjectId { get; init; }\n    public string? Incarnation { get; init; }\n    public string? Status { get; init; }\n    public string? Backend { get; init; }\n    public string? Environment { get; init; }\n    public string? PolicyRevision { get; init; }\n    public string? ExpiresAt { get; init; }\n    public string? Kind { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public CredentialDelivery? Delivery { get; init; }\n    public string? KeyId { get; init; }\n    public string? EndpointId { get; init; }\n    public bool? Enabled { get; init; }\n    public LiveSessionOperationCompletion? LiveSessionCompletion { get; init; }\n    public int? ReplayedDeliveries { get; init; }\n    public int? SkippedDeliveries { get; init; }\n    public bool? MessagePreview { get; init; }\n}"
+      ],
+      "docs": "The OperationResult result."
+    },
+    {
+      "name": "OperationStep",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OperationStep",
+      "anchor": "operationstep-class",
+      "signatures": [
+        "public sealed class OperationStep\n{\n    public OperationStep();\n    public string StepId { get; init; }\n    public string State { get; init; }\n}"
+      ],
+      "docs": "The OperationStep result."
+    },
+    {
+      "name": "Organization",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Organization",
+      "anchor": "organization-class",
+      "signatures": [
+        "public sealed class Organization\n{\n    public Organization();\n    public string OrgId { get; init; }\n    public string Name { get; init; }\n    public string Status { get; init; }\n    public string Revision { get; init; }\n}"
+      ],
+      "docs": "The Organization result."
+    },
+    {
+      "name": "OrganizationPage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationPage",
+      "anchor": "organizationpage-class",
+      "signatures": [
+        "public sealed class OrganizationPage\n{\n    public OrganizationPage();\n    public IReadOnlyList<Organization> Items { get; init; }\n    public bool Complete { get; init; }\n    public bool RefreshRequired { get; init; }\n    public string? NextCursor { get; init; }\n}"
+      ],
+      "docs": "The OrganizationPage result."
+    },
+    {
+      "name": "OrganizationUsage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationUsage",
+      "anchor": "organizationusage-class",
+      "signatures": [
+        "public sealed class OrganizationUsage\n{\n    public OrganizationUsage();\n    public string OrgId { get; init; }\n    public string Source { get; init; }\n    public string ObservedAt { get; init; }\n    public bool Complete { get; init; }\n    public string Reason { get; init; }\n    public string From { get; init; }\n    public string To { get; init; }\n    public IReadOnlyList<UsageMeter> Meters { get; init; }\n    public string? AggregatedThrough { get; init; }\n}"
+      ],
+      "docs": "The OrganizationUsage result."
+    },
+    {
+      "name": "OrganizationUsageReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationUsageReply",
+      "anchor": "organizationusagereply-class",
+      "signatures": [
+        "public sealed class OrganizationUsageReply\n{\n    public OrganizationUsageReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OrganizationUsage? Result { get; init; }\n}"
+      ],
+      "docs": "The OrganizationUsageReply result."
+    },
+    {
+      "name": "OrganizationUsageRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationUsageRequestInput",
+      "anchor": "organizationusagerequestinput-class",
+      "signatures": [
+        "public sealed class OrganizationUsageRequestInput\n{\n    public OrganizationUsageRequestInput(string orgId);\n    public string OrgId { get; set; }\n    public string? From { get; set; }\n    public string? To { get; set; }\n}"
+      ],
+      "docs": "The OrganizationUsageRequestInput input."
+    },
+    {
+      "name": "OrganizationsReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationsReply",
+      "anchor": "organizationsreply-class",
+      "signatures": [
+        "public sealed class OrganizationsReply\n{\n    public OrganizationsReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OrganizationPage? Result { get; init; }\n}"
+      ],
+      "docs": "The OrganizationsReply result."
+    },
+    {
+      "name": "PauseOperationReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#PauseOperationReply",
+      "anchor": "pauseoperationreply-class",
+      "signatures": [
+        "public sealed class PauseOperationReply\n{\n    public PauseOperationReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Operation? Result { get; init; }\n}"
+      ],
+      "docs": "The PauseOperationReply result."
+    },
+    {
+      "name": "PauseOperationRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#PauseOperationRequestInput",
+      "anchor": "pauseoperationrequestinput-class",
+      "signatures": [
+        "public sealed class PauseOperationRequestInput\n{\n    public PauseOperationRequestInput(string operationId, string expectedRevision);\n    public string OperationId { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The PauseOperationRequestInput input."
+    },
+    {
+      "name": "PolicyChangeInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#PolicyChangeInput",
+      "anchor": "policychangeinput-class",
+      "signatures": [
+        "public sealed class PolicyChangeInput\n{\n    public PolicyChangeInput(string kind);\n    public string Kind { get; set; }\n    public string? Reason { get; set; }\n    public string? HoldId { get; set; }\n}"
+      ],
+      "docs": "The PolicyChangeInput input."
+    },
+    {
+      "name": "Principal",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Principal",
+      "anchor": "principal-class",
+      "signatures": [
+        "public sealed class Principal\n{\n    public Principal();\n    public string PrincipalId { get; init; }\n    public string ExternalUserId { get; init; }\n    public string Status { get; init; }\n    public string Revision { get; init; }\n}"
+      ],
+      "docs": "The Principal result."
+    },
+    {
+      "name": "Project",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Project",
+      "anchor": "project-class",
+      "signatures": [
+        "public sealed class Project\n{\n    public Project();\n    public string ProjectId { get; init; }\n    public string DeploymentId { get; init; }\n    public string Name { get; init; }\n    public string Environment { get; init; }\n    public string Incarnation { get; init; }\n    public string ServingRegion { get; init; }\n    public string ServingEpoch { get; init; }\n    public string Status { get; init; }\n    public string Revision { get; init; }\n    public string PolicyRevision { get; init; }\n    public bool MessagePreview { get; init; }\n}"
+      ],
+      "docs": "The Project result."
+    },
+    {
+      "name": "ProjectPolicyReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ProjectPolicyReply",
+      "anchor": "projectpolicyreply-class",
+      "signatures": [
+        "public sealed class ProjectPolicyReply\n{\n    public ProjectPolicyReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OperationResult? Result { get; init; }\n}"
+      ],
+      "docs": "The ProjectPolicyReply result."
+    },
+    {
+      "name": "ProjectPolicyRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ProjectPolicyRequestInput",
+      "anchor": "projectpolicyrequestinput-class",
+      "signatures": [
+        "public sealed class ProjectPolicyRequestInput\n{\n    public ProjectPolicyRequestInput(string projectId, string expectedRevision, PolicyChangeInput change);\n    public string ProjectId { get; set; }\n    public string ExpectedRevision { get; set; }\n    public PolicyChangeInput Change { get; set; }\n}"
+      ],
+      "docs": "The ProjectPolicyRequestInput input."
+    },
+    {
+      "name": "ProjectUsage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ProjectUsage",
+      "anchor": "projectusage-class",
+      "signatures": [
+        "public sealed class ProjectUsage\n{\n    public ProjectUsage();\n    public string ProjectId { get; init; }\n    public string Source { get; init; }\n    public string ObservedAt { get; init; }\n    public bool Complete { get; init; }\n    public string Reason { get; init; }\n    public string From { get; init; }\n    public string To { get; init; }\n    public IReadOnlyList<UsageMeter> Meters { get; init; }\n    public string? AggregatedThrough { get; init; }\n}"
+      ],
+      "docs": "The ProjectUsage result."
+    },
+    {
+      "name": "ProjectUsageReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ProjectUsageReply",
+      "anchor": "projectusagereply-class",
+      "signatures": [
+        "public sealed class ProjectUsageReply\n{\n    public ProjectUsageReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public ProjectUsage? Result { get; init; }\n}"
+      ],
+      "docs": "The ProjectUsageReply result."
+    },
+    {
+      "name": "ProjectUsageRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ProjectUsageRequestInput",
+      "anchor": "projectusagerequestinput-class",
+      "signatures": [
+        "public sealed class ProjectUsageRequestInput\n{\n    public ProjectUsageRequestInput(string projectId);\n    public string ProjectId { get; set; }\n    public string? From { get; set; }\n    public string? To { get; set; }\n}"
+      ],
+      "docs": "The ProjectUsageRequestInput input."
+    },
+    {
+      "name": "ReadReceipt",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ReadReceipt",
+      "anchor": "readreceipt-class",
+      "signatures": [
+        "public sealed class ReadReceipt\n{\n    public ReadReceipt();\n    public string PrincipalId { get; init; }\n    public string MembershipEpoch { get; init; }\n    public string VisibilityEpoch { get; init; }\n    public string? DeliveredThroughSequence { get; init; }\n    public string? ReadThroughSequence { get; init; }\n    public string? UpdatedAt { get; init; }\n}"
+      ],
+      "docs": "The ReadReceipt result."
+    },
+    {
+      "name": "RedeemCredentialReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RedeemCredentialReply",
+      "anchor": "redeemcredentialreply-class",
+      "signatures": [
+        "public sealed class RedeemCredentialReply\n{\n    public RedeemCredentialReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public CredentialCapsule? Result { get; init; }\n}"
+      ],
+      "docs": "The RedeemCredentialReply result."
+    },
+    {
+      "name": "RedeemCredentialRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RedeemCredentialRequestInput",
+      "anchor": "redeemcredentialrequestinput-class",
+      "signatures": [
+        "public sealed class RedeemCredentialRequestInput\n{\n    public RedeemCredentialRequestInput(string deliveryId);\n    public string DeliveryId { get; set; }\n}"
+      ],
+      "docs": "The RedeemCredentialRequestInput input."
+    },
+    {
+      "name": "RemoveMemberReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RemoveMemberReply",
+      "anchor": "removememberreply-class",
+      "signatures": [
+        "public sealed class RemoveMemberReply\n{\n    public RemoveMemberReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Member? Result { get; init; }\n}"
+      ],
+      "docs": "The RemoveMemberReply result."
+    },
+    {
+      "name": "RemoveMemberRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RemoveMemberRequestInput",
+      "anchor": "removememberrequestinput-class",
+      "signatures": [
+        "public sealed class RemoveMemberRequestInput\n{\n    public RemoveMemberRequestInput(string conversationId, string principalId, string expectedRevision);\n    public string ConversationId { get; set; }\n    public string PrincipalId { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The RemoveMemberRequestInput input."
+    },
+    {
+      "name": "RenewSessionReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RenewSessionReply",
+      "anchor": "renewsessionreply-class",
+      "signatures": [
+        "public sealed class RenewSessionReply\n{\n    public RenewSessionReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public SessionBootstrap? Result { get; init; }\n}"
+      ],
+      "docs": "The RenewSessionReply result."
+    },
+    {
+      "name": "RenewSessionRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RenewSessionRequestInput",
+      "anchor": "renewsessionrequestinput-class",
+      "signatures": [
+        "public sealed class RenewSessionRequestInput\n{\n    public RenewSessionRequestInput(string sessionId, string principalId, string deviceId, string expectedRevision, string requestedTtlMs);\n    public string SessionId { get; set; }\n    public string PrincipalId { get; set; }\n    public string DeviceId { get; set; }\n    public string ExpectedRevision { get; set; }\n    public string RequestedTtlMs { get; set; }\n}"
+      ],
+      "docs": "The RenewSessionRequestInput input."
+    },
+    {
+      "name": "ReplayWebhookDeliveriesReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ReplayWebhookDeliveriesReply",
+      "anchor": "replaywebhookdeliveriesreply-class",
+      "signatures": [
+        "public sealed class ReplayWebhookDeliveriesReply\n{\n    public ReplayWebhookDeliveriesReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OperationResult? Result { get; init; }\n}"
+      ],
+      "docs": "The ReplayWebhookDeliveriesReply result."
+    },
+    {
+      "name": "ReplayWebhookDeliveriesRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ReplayWebhookDeliveriesRequestInput",
+      "anchor": "replaywebhookdeliveriesrequestinput-class",
+      "signatures": [
+        "public sealed class ReplayWebhookDeliveriesRequestInput\n{\n    public ReplayWebhookDeliveriesRequestInput(string projectId, string endpointId);\n    public string ProjectId { get; set; }\n    public string EndpointId { get; set; }\n    public string? EffectId { get; set; }\n    public string? Since { get; set; }\n    public string? Until { get; set; }\n}"
+      ],
+      "docs": "The ReplayWebhookDeliveriesRequestInput input."
+    },
+    {
+      "name": "RequestResolution",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RequestResolution",
+      "anchor": "requestresolution-class",
+      "signatures": [
+        "public sealed class RequestResolution\n{\n    public RequestResolution();\n    public string State { get; init; }\n    public string RequestId { get; init; }\n    public string CheckedAt { get; init; }\n    public bool ResultWithheld { get; init; }\n    public ResolvedReceipt? Receipt { get; init; }\n}"
+      ],
+      "docs": "The RequestResolution result."
+    },
+    {
+      "name": "ResolveRequestReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ResolveRequestReply",
+      "anchor": "resolverequestreply-class",
+      "signatures": [
+        "public sealed class ResolveRequestReply\n{\n    public ResolveRequestReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public RequestResolution? Result { get; init; }\n}"
+      ],
+      "docs": "The ResolveRequestReply result."
+    },
+    {
+      "name": "ResolveRequestRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ResolveRequestRequestInput",
+      "anchor": "resolverequestrequestinput-class",
+      "signatures": [
+        "public sealed class ResolveRequestRequestInput\n{\n    public ResolveRequestRequestInput(string requestId);\n    public string RequestId { get; set; }\n}"
+      ],
+      "docs": "The ResolveRequestRequestInput input."
+    },
+    {
+      "name": "ResolvedReceipt",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ResolvedReceipt",
+      "anchor": "resolvedreceipt-class",
+      "signatures": [
+        "public sealed class ResolvedReceipt\n{\n    public ResolvedReceipt();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public RetainedResult? Result { get; init; }\n}"
+      ],
+      "docs": "The ResolvedReceipt result."
+    },
+    {
+      "name": "ResourceRef",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ResourceRef",
+      "anchor": "resourceref-class",
+      "signatures": [
+        "public sealed class ResourceRef\n{\n    public ResourceRef();\n    public string Kind { get; init; }\n    public string Id { get; init; }\n}"
+      ],
+      "docs": "The ResourceRef result."
+    },
+    {
+      "name": "ResumeOperationReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ResumeOperationReply",
+      "anchor": "resumeoperationreply-class",
+      "signatures": [
+        "public sealed class ResumeOperationReply\n{\n    public ResumeOperationReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Operation? Result { get; init; }\n}"
+      ],
+      "docs": "The ResumeOperationReply result."
+    },
+    {
+      "name": "ResumeOperationRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ResumeOperationRequestInput",
+      "anchor": "resumeoperationrequestinput-class",
+      "signatures": [
+        "public sealed class ResumeOperationRequestInput\n{\n    public ResumeOperationRequestInput(string operationId, string expectedRevision);\n    public string OperationId { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The ResumeOperationRequestInput input."
+    },
+    {
+      "name": "RetainedResult",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RetainedResult",
+      "anchor": "retainedresult-class",
+      "signatures": [
+        "public sealed class RetainedResult\n{\n    public RetainedResult();\n    public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }\n    public Conversation? Conversation { get; init; }\n    public ConversationMemberBatch? ConversationMemberBatch { get; init; }\n    public ConversationMute? ConversationMute { get; init; }\n    public CredentialDeliveryReceipt? CredentialDeliveryReceipt { get; init; }\n    public DeliveryAck? DeliveryAck { get; init; }\n    public LiveAlertBatch? LiveAlertBatch { get; init; }\n    public LiveCredentialIssuance? LiveCredentialIssuance { get; init; }\n    public LiveSessionEndRequested? LiveSessionEndRequested { get; init; }\n    public LiveSessionJoined? LiveSessionJoined { get; init; }\n    public LiveSessionLeft? LiveSessionLeft { get; init; }\n    public LiveSessionStarted? LiveSessionStarted { get; init; }\n    public Member? Member { get; init; }\n    public Message? Message { get; init; }\n    public MessageAck? MessageAck { get; init; }\n    public Organization? Organization { get; init; }\n    public Principal? Principal { get; init; }\n    public ReadReceipt? ReadReceipt { get; init; }\n    public SessionBootstrap? SessionBootstrap { get; init; }\n    public SessionRevocation? SessionRevocation { get; init; }\n    public JsonElement? SignedProof { get; init; }\n}"
+      ],
+      "docs": "Exactly one typed field contains the retained, currently authorized receipt result."
+    },
+    {
+      "name": "RevokeBackendKeyReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RevokeBackendKeyReply",
+      "anchor": "revokebackendkeyreply-class",
+      "signatures": [
+        "public sealed class RevokeBackendKeyReply\n{\n    public RevokeBackendKeyReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OperationResult? Result { get; init; }\n}"
+      ],
+      "docs": "The RevokeBackendKeyReply result."
+    },
+    {
+      "name": "RevokeBackendKeyRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RevokeBackendKeyRequestInput",
+      "anchor": "revokebackendkeyrequestinput-class",
+      "signatures": [
+        "public sealed class RevokeBackendKeyRequestInput\n{\n    public RevokeBackendKeyRequestInput(string projectId, string keyId, string expectedRevision, bool revokeIssuedSessions);\n    public string ProjectId { get; set; }\n    public string KeyId { get; set; }\n    public string ExpectedRevision { get; set; }\n    public bool RevokeIssuedSessions { get; set; }\n}"
+      ],
+      "docs": "The RevokeBackendKeyRequestInput input."
+    },
+    {
+      "name": "RevokeSessionReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RevokeSessionReply",
+      "anchor": "revokesessionreply-class",
+      "signatures": [
+        "public sealed class RevokeSessionReply\n{\n    public RevokeSessionReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public SessionRevocation? Result { get; init; }\n}"
+      ],
+      "docs": "The RevokeSessionReply result."
+    },
+    {
+      "name": "RevokeSessionRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RevokeSessionRequestInput",
+      "anchor": "revokesessionrequestinput-class",
+      "signatures": [
+        "public sealed class RevokeSessionRequestInput\n{\n    public RevokeSessionRequestInput(string sessionId, string expectedRevision);\n    public string SessionId { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The RevokeSessionRequestInput input."
+    },
+    {
+      "name": "RotateWebhookSecretReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RotateWebhookSecretReply",
+      "anchor": "rotatewebhooksecretreply-class",
+      "signatures": [
+        "public sealed class RotateWebhookSecretReply\n{\n    public RotateWebhookSecretReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OperationResult? Result { get; init; }\n}"
+      ],
+      "docs": "The RotateWebhookSecretReply result."
+    },
+    {
+      "name": "RotateWebhookSecretRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RotateWebhookSecretRequestInput",
+      "anchor": "rotatewebhooksecretrequestinput-class",
+      "signatures": [
+        "public sealed class RotateWebhookSecretRequestInput\n{\n    public RotateWebhookSecretRequestInput(string projectId, string endpointId, string expectedRevision);\n    public string ProjectId { get; set; }\n    public string EndpointId { get; set; }\n    public string ExpectedRevision { get; set; }\n}"
+      ],
+      "docs": "The RotateWebhookSecretRequestInput input."
+    },
+    {
+      "name": "RouteReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RouteReply",
+      "anchor": "routereply-class",
+      "signatures": [
+        "public sealed class RouteReply\n{\n    public RouteReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public JsonElement? Result { get; init; }\n}"
+      ],
+      "docs": "The RouteReply result."
+    },
+    {
+      "name": "SearchHit",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SearchHit",
+      "anchor": "searchhit-class",
+      "signatures": [
+        "public sealed class SearchHit\n{\n    public SearchHit();\n    public string ConversationId { get; init; }\n    public Message? Message { get; init; }\n}"
+      ],
+      "docs": "The SearchHit result."
+    },
+    {
+      "name": "SearchPage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SearchPage",
+      "anchor": "searchpage-class",
+      "signatures": [
+        "public sealed class SearchPage\n{\n    public SearchPage();\n    public IReadOnlyList<SearchHit> Items { get; init; }\n    public bool Complete { get; init; }\n    public bool RefreshRequired { get; init; }\n    public string? NextCursor { get; init; }\n}"
+      ],
+      "docs": "The SearchPage result."
+    },
+    {
+      "name": "SearchReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SearchReply",
+      "anchor": "searchreply-class",
+      "signatures": [
+        "public sealed class SearchReply\n{\n    public SearchReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public SearchPage? Result { get; init; }\n}"
+      ],
+      "docs": "The SearchReply result."
+    },
+    {
+      "name": "SearchRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SearchRequestInput",
+      "anchor": "searchrequestinput-class",
+      "signatures": [
+        "public sealed class SearchRequestInput\n{\n    public SearchRequestInput(string query, int pageSize);\n    public string Query { get; set; }\n    public int PageSize { get; set; }\n    public SearchScopeInput? Scope { get; set; }\n    public string? Cursor { get; set; }\n    public string? ActAsPrincipalId { get; set; }\n}"
+      ],
+      "docs": "The SearchRequestInput input."
+    },
+    {
+      "name": "SearchScopeInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SearchScopeInput",
+      "anchor": "searchscopeinput-class",
+      "signatures": [
+        "public sealed class SearchScopeInput\n{\n    public SearchScopeInput(IReadOnlyList<string> conversationIds);\n    public IReadOnlyList<string> ConversationIds { get; set; }\n}"
+      ],
+      "docs": "The SearchScopeInput input."
+    },
+    {
+      "name": "SendMessageReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SendMessageReply",
+      "anchor": "sendmessagereply-class",
+      "signatures": [
+        "public sealed class SendMessageReply\n{\n    public SendMessageReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public MessageAck? Result { get; init; }\n}"
+      ],
+      "docs": "The SendMessageReply result."
+    },
+    {
+      "name": "SendMessageRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SendMessageRequestInput",
+      "anchor": "sendmessagerequestinput-class",
+      "signatures": [
+        "public sealed class SendMessageRequestInput\n{\n    public SendMessageRequestInput(string conversationId, string text, JsonElement props);\n    public string ConversationId { get; set; }\n    public string Text { get; set; }\n    public JsonElement Props { get; set; }\n    public string? ActAsPrincipalId { get; set; }\n}"
+      ],
+      "docs": "The SendMessageRequestInput input."
+    },
+    {
+      "name": "ServiceDetails",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ServiceDetails",
+      "anchor": "servicedetails-class",
+      "signatures": [
+        "public sealed class ServiceDetails\n{\n    public ServiceDetails();\n    public string Status { get; init; }\n}"
+      ],
+      "docs": "The ServiceDetails result."
+    },
+    {
+      "name": "ServiceObservation",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ServiceObservation",
+      "anchor": "serviceobservation-class",
+      "signatures": [
+        "public sealed class ServiceObservation\n{\n    public ServiceObservation();\n    public string Role { get; init; }\n    public string ObservedAt { get; init; }\n    public ServiceDetails? Details { get; init; }\n}"
+      ],
+      "docs": "The ServiceObservation result."
+    },
+    {
+      "name": "Session",
+      "kind": "class",
+      "ref": "ConvoHop.Models#Session",
+      "anchor": "session-class",
+      "signatures": [
+        "public sealed class Session\n{\n    public Session();\n    public string SessionId { get; init; }\n    public string PrincipalId { get; init; }\n    public string DeviceId { get; init; }\n    public string Incarnation { get; init; }\n    public string SessionRevision { get; init; }\n    public string ExpiresAt { get; init; }\n    public string Status { get; init; }\n}"
+      ],
+      "docs": "The Session result."
+    },
+    {
+      "name": "SessionBootstrap",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SessionBootstrap",
+      "anchor": "sessionbootstrap-class",
+      "signatures": [
+        "public sealed class SessionBootstrap\n{\n    public SessionBootstrap();\n    public Session? Session { get; init; }\n    public string TokenExpiresAt { get; init; }\n    public string SessionToken { get; init; }\n}"
+      ],
+      "docs": "The SessionBootstrap result."
+    },
+    {
+      "name": "SessionRequestOutcome",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SessionRequestOutcome",
+      "anchor": "sessionrequestoutcome-class",
+      "signatures": [
+        "public sealed class SessionRequestOutcome\n{\n    public SessionRequestOutcome();\n    public string State { get; init; }\n    public string RequestId { get; init; }\n    public string CheckedAt { get; init; }\n    public string? Operation { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public Session? OriginalSession { get; init; }\n    public Session? CurrentSession { get; init; }\n    public string? CurrentState { get; init; }\n}"
+      ],
+      "docs": "The SessionRequestOutcome result."
+    },
+    {
+      "name": "SessionRequestOutcomeReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SessionRequestOutcomeReply",
+      "anchor": "sessionrequestoutcomereply-class",
+      "signatures": [
+        "public sealed class SessionRequestOutcomeReply\n{\n    public SessionRequestOutcomeReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ServerTime { get; init; }\n    public SessionRequestOutcome Result { get; init; }\n}"
+      ],
+      "docs": "The SessionRequestOutcomeReply result."
+    },
+    {
+      "name": "SessionRequestOutcomeRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SessionRequestOutcomeRequestInput",
+      "anchor": "sessionrequestoutcomerequestinput-class",
+      "signatures": [
+        "public sealed class SessionRequestOutcomeRequestInput\n{\n    public SessionRequestOutcomeRequestInput(string requestId);\n    public string RequestId { get; set; }\n}"
+      ],
+      "docs": "The SessionRequestOutcomeRequestInput input."
+    },
+    {
+      "name": "SessionRevocation",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SessionRevocation",
+      "anchor": "sessionrevocation-class",
+      "signatures": [
+        "public sealed class SessionRevocation\n{\n    public SessionRevocation();\n    public string SessionId { get; init; }\n    public string Status { get; init; }\n    public MediaCutoff? MediaCutoff { get; init; }\n}"
+      ],
+      "docs": "The SessionRevocation result."
+    },
+    {
+      "name": "SetBroadcastPermissionInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SetBroadcastPermissionInput",
+      "anchor": "setbroadcastpermissioninput-class",
+      "signatures": [
+        "public sealed class SetBroadcastPermissionInput\n{\n    public SetBroadcastPermissionInput(string conversationId, string principalId, bool allowed, string expectedMembershipRevision);\n    public string ConversationId { get; set; }\n    public string PrincipalId { get; set; }\n    public bool Allowed { get; set; }\n    public string ExpectedMembershipRevision { get; set; }\n}"
+      ],
+      "docs": "The SetBroadcastPermissionInput input."
+    },
+    {
+      "name": "SetBroadcastPermissionPayload",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SetBroadcastPermissionPayload",
+      "anchor": "setbroadcastpermissionpayload-class",
+      "signatures": [
+        "public sealed class SetBroadcastPermissionPayload\n{\n    public SetBroadcastPermissionPayload();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ReceiptId { get; init; }\n    public string CommittedAt { get; init; }\n    public bool Replayed { get; init; }\n    public BroadcastPermissionChanged Result { get; init; }\n}"
+      ],
+      "docs": "The SetBroadcastPermissionPayload result."
+    },
+    {
+      "name": "SetConversationMuteInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SetConversationMuteInput",
+      "anchor": "setconversationmuteinput-class",
+      "signatures": [
+        "public sealed class SetConversationMuteInput\n{\n    public SetConversationMuteInput(string conversationId, bool muted);\n    public string ConversationId { get; set; }\n    public bool Muted { get; set; }\n    public string? Until { get; set; }\n    public string? ActAsPrincipalId { get; set; }\n}"
+      ],
+      "docs": "The SetConversationMuteInput input."
+    },
+    {
+      "name": "SetConversationMutePayload",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SetConversationMutePayload",
+      "anchor": "setconversationmutepayload-class",
+      "signatures": [
+        "public sealed class SetConversationMutePayload\n{\n    public SetConversationMutePayload();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ReceiptId { get; init; }\n    public string CommittedAt { get; init; }\n    public bool Replayed { get; init; }\n    public ConversationMute Result { get; init; }\n}"
+      ],
+      "docs": "The SetConversationMutePayload result."
+    },
+    {
+      "name": "UpdateConversationReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#UpdateConversationReply",
+      "anchor": "updateconversationreply-class",
+      "signatures": [
+        "public sealed class UpdateConversationReply\n{\n    public UpdateConversationReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public Conversation? Result { get; init; }\n}"
+      ],
+      "docs": "The UpdateConversationReply result."
+    },
+    {
+      "name": "UpdateConversationRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#UpdateConversationRequestInput",
+      "anchor": "updateconversationrequestinput-class",
+      "signatures": [
+        "public sealed class UpdateConversationRequestInput\n{\n    public UpdateConversationRequestInput(string conversationId, string expectedRevision);\n    public string ConversationId { get; set; }\n    public string ExpectedRevision { get; set; }\n    public string? Title { get; set; }\n    public JsonElement? Props { get; set; }\n}"
+      ],
+      "docs": "The UpdateConversationRequestInput input."
+    },
+    {
+      "name": "UpdateWebhookReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#UpdateWebhookReply",
+      "anchor": "updatewebhookreply-class",
+      "signatures": [
+        "public sealed class UpdateWebhookReply\n{\n    public UpdateWebhookReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OperationResult? Result { get; init; }\n}"
+      ],
+      "docs": "The UpdateWebhookReply result."
+    },
+    {
+      "name": "UpdateWebhookRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#UpdateWebhookRequestInput",
+      "anchor": "updatewebhookrequestinput-class",
+      "signatures": [
+        "public sealed class UpdateWebhookRequestInput\n{\n    public UpdateWebhookRequestInput(string projectId, string endpointId, string expectedRevision, IReadOnlyList<string> eventTypes, bool enabled);\n    public string ProjectId { get; set; }\n    public string EndpointId { get; set; }\n    public string ExpectedRevision { get; set; }\n    public IReadOnlyList<string> EventTypes { get; set; }\n    public bool Enabled { get; set; }\n}"
+      ],
+      "docs": "The UpdateWebhookRequestInput input."
+    },
+    {
+      "name": "UsageMeter",
+      "kind": "class",
+      "ref": "ConvoHop.Models#UsageMeter",
+      "anchor": "usagemeter-class",
+      "signatures": [
+        "public sealed class UsageMeter\n{\n    public UsageMeter();\n    public string Meter { get; init; }\n    public string Unit { get; init; }\n    public string Quantity { get; init; }\n    public bool Emitted { get; init; }\n}"
+      ],
+      "docs": "The UsageMeter result."
+    },
+    {
+      "name": "WebhookDeliveriesReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#WebhookDeliveriesReply",
+      "anchor": "webhookdeliveriesreply-class",
+      "signatures": [
+        "public sealed class WebhookDeliveriesReply\n{\n    public WebhookDeliveriesReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public WebhookDeliveryPage? Result { get; init; }\n}"
+      ],
+      "docs": "The WebhookDeliveriesReply result."
+    },
+    {
+      "name": "WebhookDeliveriesRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#WebhookDeliveriesRequestInput",
+      "anchor": "webhookdeliveriesrequestinput-class",
+      "signatures": [
+        "public sealed class WebhookDeliveriesRequestInput\n{\n    public WebhookDeliveriesRequestInput(string projectId, string endpointId);\n    public string ProjectId { get; set; }\n    public string EndpointId { get; set; }\n}"
+      ],
+      "docs": "The WebhookDeliveriesRequestInput input."
+    },
+    {
+      "name": "WebhookDelivery",
+      "kind": "class",
+      "ref": "ConvoHop.Models#WebhookDelivery",
+      "anchor": "webhookdelivery-class",
+      "signatures": [
+        "public sealed class WebhookDelivery\n{\n    public WebhookDelivery();\n    public string EffectId { get; init; }\n    public string EventId { get; init; }\n    public string State { get; init; }\n    public string Attempts { get; init; }\n    public string? LastOutcome { get; init; }\n    public string NextAttemptAt { get; init; }\n    public string? EventType { get; init; }\n    public string? CreatedAt { get; init; }\n    public string? ReplayedAt { get; init; }\n    public string? LastAttemptAt { get; init; }\n    public int? LastHttpStatus { get; init; }\n    public int? LastLatencyMs { get; init; }\n    public string? LastErrorCode { get; init; }\n}"
+      ],
+      "docs": "The WebhookDelivery result."
+    },
+    {
+      "name": "WebhookDeliveryPage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#WebhookDeliveryPage",
+      "anchor": "webhookdeliverypage-class",
+      "signatures": [
+        "public sealed class WebhookDeliveryPage\n{\n    public WebhookDeliveryPage();\n    public IReadOnlyList<WebhookDelivery> Items { get; init; }\n    public bool Complete { get; init; }\n    public bool RefreshRequired { get; init; }\n    public string? NextCursor { get; init; }\n    public string? ObservedAt { get; init; }\n    public string? PartialReason { get; init; }\n    public string? SourceRevision { get; init; }\n}"
+      ],
+      "docs": "The WebhookDeliveryPage result."
+    },
+    {
+      "name": "WebhookEndpoint",
+      "kind": "class",
+      "ref": "ConvoHop.Models#WebhookEndpoint",
+      "anchor": "webhookendpoint-class",
+      "signatures": [
+        "public sealed class WebhookEndpoint\n{\n    public WebhookEndpoint();\n    public string EndpointId { get; init; }\n    public string Url { get; init; }\n    public IReadOnlyList<string> EventTypes { get; init; }\n    public bool Enabled { get; init; }\n    public string Status { get; init; }\n    public string? DisabledReason { get; init; }\n    public string Revision { get; init; }\n    public string SecretVersion { get; init; }\n    public bool RotationPending { get; init; }\n    public string? RotationOverlapUntil { get; init; }\n    public int ConsecutiveFailures { get; init; }\n    public string? FailingSince { get; init; }\n    public string? LastSuccessAt { get; init; }\n    public string? LastFailureAt { get; init; }\n}"
+      ],
+      "docs": "The WebhookEndpoint result."
+    },
+    {
+      "name": "WebhookEndpointPage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#WebhookEndpointPage",
+      "anchor": "webhookendpointpage-class",
+      "signatures": [
+        "public sealed class WebhookEndpointPage\n{\n    public WebhookEndpointPage();\n    public IReadOnlyList<WebhookEndpoint> Items { get; init; }\n    public bool Complete { get; init; }\n    public bool RefreshRequired { get; init; }\n    public string? NextCursor { get; init; }\n    public string? ObservedAt { get; init; }\n    public string? PartialReason { get; init; }\n}"
+      ],
+      "docs": "The WebhookEndpointPage result."
+    },
+    {
+      "name": "WebhookEndpointsReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#WebhookEndpointsReply",
+      "anchor": "webhookendpointsreply-class",
+      "signatures": [
+        "public sealed class WebhookEndpointsReply\n{\n    public WebhookEndpointsReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public WebhookEndpointPage? Result { get; init; }\n}"
+      ],
+      "docs": "The WebhookEndpointsReply result."
+    },
+    {
+      "name": "WebhookEndpointsRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#WebhookEndpointsRequestInput",
+      "anchor": "webhookendpointsrequestinput-class",
+      "signatures": [
+        "public sealed class WebhookEndpointsRequestInput\n{\n    public WebhookEndpointsRequestInput(string projectId);\n    public string ProjectId { get; set; }\n}"
+      ],
+      "docs": "The WebhookEndpointsRequestInput input."
+    },
+    {
+      "name": "LiveCutoffEvidence",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveCutoffEvidence",
+      "anchor": "livecutoffevidence-enum",
+      "signatures": [
+        "public enum LiveCutoffEvidence\n{\n    NativeFence = 0,\n    MonotonicBootRetirement = 1,\n    NoGrantsIssued = 2,\n}"
+      ],
+      "docs": "The LiveCutoffEvidence enum."
+    },
+    {
+      "name": "LiveCutoffScopeKind",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveCutoffScopeKind",
+      "anchor": "livecutoffscopekind-enum",
+      "signatures": [
+        "public enum LiveCutoffScopeKind\n{\n    Participation = 0,\n    Generation = 1,\n}"
+      ],
+      "docs": "The LiveCutoffScopeKind enum."
+    },
+    {
+      "name": "LiveCutoffState",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveCutoffState",
+      "anchor": "livecutoffstate-enum",
+      "signatures": [
+        "public enum LiveCutoffState\n{\n    Pending = 0,\n    Enforced = 1,\n    Unknown = 2,\n}"
+      ],
+      "docs": "The LiveCutoffState enum."
+    },
+    {
+      "name": "LiveErrorCode",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveErrorCode",
+      "anchor": "liveerrorcode-enum",
+      "signatures": [
+        "public enum LiveErrorCode\n{\n    LiveSessionExists = 0,\n    LiveSessionClosed = 1,\n    LiveSessionInterrupted = 2,\n    LiveSessionCapacity = 3,\n    LiveAlertLimit = 4,\n    JoinedElsewhere = 5,\n    ParticipationDraining = 6,\n    ParticipationMismatch = 7,\n    GenerationConflict = 8,\n    MediaNotReady = 9,\n    CredentialRefreshRequired = 10,\n    LiveStartCancelled = 11,\n    LivePreparationFailed = 12,\n}"
+      ],
+      "docs": "The LiveErrorCode enum."
+    },
+    {
+      "name": "LiveMediaProfile",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveMediaProfile",
+      "anchor": "livemediaprofile-enum",
+      "signatures": ["public enum LiveMediaProfile\n{\n    AudioOnly = 0,\n    AudioVideo = 1,\n}"],
+      "docs": "The LiveMediaProfile enum."
+    },
+    {
+      "name": "LiveOperationKind",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveOperationKind",
+      "anchor": "liveoperationkind-enum",
+      "signatures": ["public enum LiveOperationKind\n{\n    Start = 0,\n    End = 1,\n}"],
+      "docs": "The LiveOperationKind enum."
+    },
+    {
+      "name": "LiveOperationState",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveOperationState",
+      "anchor": "liveoperationstate-enum",
+      "signatures": [
+        "public enum LiveOperationState\n{\n    Running = 0,\n    Completed = 1,\n    Failed = 2,\n}"
+      ],
+      "docs": "The LiveOperationState enum."
+    },
+    {
+      "name": "LiveParticipationState",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveParticipationState",
+      "anchor": "liveparticipationstate-enum",
+      "signatures": [
+        "public enum LiveParticipationState\n{\n    Joined = 0,\n    Connecting = 1,\n    Connected = 2,\n    Disconnected = 3,\n    Leaving = 4,\n    Left = 5,\n}"
+      ],
+      "docs": "The LiveParticipationState enum."
+    },
+    {
+      "name": "LiveRole",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveRole",
+      "anchor": "liverole-enum",
+      "signatures": ["public enum LiveRole\n{\n    Publisher = 0,\n    Viewer = 1,\n}"],
+      "docs": "The LiveRole enum."
+    },
+    {
+      "name": "LiveSessionKind",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveSessionKind",
+      "anchor": "livesessionkind-enum",
+      "signatures": ["public enum LiveSessionKind\n{\n    Interactive = 0,\n    Broadcast = 1,\n}"],
+      "docs": "The LiveSessionKind enum."
+    },
+    {
+      "name": "LiveSessionState",
+      "kind": "enum",
+      "ref": "ConvoHop.Models#LiveSessionState",
+      "anchor": "livesessionstate-enum",
+      "signatures": [
+        "public enum LiveSessionState\n{\n    Preparing = 0,\n    Ready = 1,\n    Active = 2,\n    Draining = 3,\n    Ended = 4,\n    Failed = 5,\n}"
+      ],
+      "docs": "The LiveSessionState enum."
+    }
+  ]
+}

@@ -101,4 +101,5 @@ mutation CommunicationUpdateConversation($context: RequestContextInput!, $input:
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.update`](../../typescript/reference/server.md#serverconversationupdate-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.update_conversation`](../../python/reference/convohop.md#convohopupdate_conversation-method), [`AsyncConvoHop.update_conversation`](../../python/reference/convohop.md#asyncconvohopupdate_conversation-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerConversation.UpdateAsync`](../../dotnet/reference/convohop.md#serverconversationupdateasync-method), [`CommunicationApi.UpdateConversationAsync`](../../dotnet/reference/api.md#communicationapiupdateconversationasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.updateConversation`](../../jvm/reference/server.md#communicationapiupdateconversation-method), [`CommunicationSuspendApi.updateConversation`](../../jvm/reference/server-kotlin.md#communicationsuspendapiupdateconversation-method) |
