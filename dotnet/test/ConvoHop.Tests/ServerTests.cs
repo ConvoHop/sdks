@@ -659,6 +659,59 @@ namespace ConvoHop.Tests
             });
         }
 
+        [Fact]
+        public async Task AnUnknownReplayOnlyRequestIsNeverLookedUpAndSettlesOnlyByAnExplicitResend()
+        {
+            string requestId = Fixtures.NewId();
+            const string expiresAt = "2026-12-01T00:00:00.000Z";
+            bool lose = true;
+            var authority = new FakeAuthority(request =>
+            {
+                if (lose)
+                {
+                    lose = false;
+                    return LoseResponse(request);
+                }
+
+                return Fixtures.Reply(request, new JsonObject
+                {
+                    ["replayed"] = true,
+                    ["result"] = Fixtures.Full("AgentKey", new JsonObject
+                    {
+                        ["operationId"] = Fixtures.NewId(),
+                        ["state"] = "pending",
+                        ["scopes"] = new JsonArray("messageRead"),
+                        ["expiresAt"] = expiresAt,
+                    }),
+                });
+            });
+            ConvoHopManagementClient client = Management(ManagementAuthority, Fixtures.NewId(), "fixture-agent-verifier", authority);
+            var input = new IssueAgentKeyRequestInput(new[] { "messageRead" }) { ExpiresAt = expiresAt };
+            Assert.Equal("replayOnly", Operations.Management.IssueAgentKey.Idempotency);
+
+            ConvoHopException lost = await Assert.ThrowsAsync<ConvoHopException>(() => client.Management.IssueAgentKeyAsync(input, requestId));
+            Assert.Equal("TRANSPORT_UNKNOWN", lost.Code);
+            ConvoHopException refused = await Assert.ThrowsAsync<ConvoHopException>(() => client.Transport.RetryAsync(requestId));
+            Assert.Equal<(string, string, string, int)>(("INVALID_REQUEST", requestId, "unknown", 400),
+                (refused.Code, refused.RequestId, refused.Outcome, refused.Status));
+            Assert.Equal("The operation's requests cannot be looked up; send the same request ID and payload again explicitly", refused.Message);
+            Assert.Equal(new[] { "ManagementIssueAgentKey" }, authority.Requests.Select(request => request.OperationName));
+
+            var changed = new IssueAgentKeyRequestInput(new[] { "callRead" }) { ExpiresAt = expiresAt };
+            ConvoHopException conflict = await Assert.ThrowsAsync<ConvoHopException>(() => client.Management.IssueAgentKeyAsync(changed, requestId));
+            Assert.Equal("IDEMPOTENCY_CONFLICT", conflict.Code);
+            IssueAgentKeyReply settled = await client.Management.IssueAgentKeyAsync(input, requestId);
+            Assert.Equal("committed", settled.Status);
+            Assert.Equal("pending", settled.Result!.State);
+            IReadOnlyList<AuthorityRequest> requests = authority.Requests;
+            Assert.Equal(new[] { "ManagementIssueAgentKey", "ManagementIssueAgentKey" }, requests.Select(request => request.OperationName));
+            Assert.All(requests, request =>
+            {
+                Assert.Equal(requestId, request.RequestId);
+                Js.Equal(requests[0].Input, request.Input);
+            });
+        }
+
         private static ProjectServerClient Server(string baseUrl, string projectId, string incarnation, string backendKey,
             FakeAuthority authority, IRecoveryStorage? storage = null) =>
             new ProjectServerClient(new ProjectServerClientOptions
