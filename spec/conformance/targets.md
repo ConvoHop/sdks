@@ -185,13 +185,53 @@ comes from an environment variable:
 | `CONVOHOP_DEV_MANAGEMENT_TOKEN` | `credentials.management` |
 | `CONVOHOP_DEV_CONTROL_URL` | `control` |
 
-The image does not exist yet (`TODO(DEV-1)` in the descriptor). The
-`dev-stack` job in the
-[Conformance workflow](../../.github/workflows/conformance.yml) is wired but
-runs only when the repository variable
-`CONVOHOP_DEV_STACK_IMAGE` is set, and never for pull requests from forks.
-Its "Start the dev stack" step is a placeholder that fails until DEV-1
-defines how to start the image, wait for it and obtain these values. That
-step must then append the variables to `$GITHUB_ENV`; the job already runs
-the suite with `--target conformance/targets/dev-stack.json` and uploads the
-reports. Add capabilities to the descriptor as the image gains them.
+The image is `ghcr.io/convohop/dev-stack`, which the private ConvoHop
+platform repository publishes. `:main` follows that repository's main branch
+and `:<commit SHA>` pins one build. The image is development-only and
+linux/arm64 only. It is private, so a workflow pulls it with its
+`GITHUB_TOKEN` only after the package grants the repository read access.
+Every listener is on the container's loopback, so on a Linux host:
+
+```sh
+docker run --detach --name convohop-dev-stack --network host ghcr.io/convohop/dev-stack:main
+docker exec convohop-dev-stack convohop-dev-stack wait --timeout 900
+export $(docker exec convohop-dev-stack cat /run/convohop/dev-stack/seed.env)
+npm run conformance -- --target conformance/targets/dev-stack.json
+```
+
+On macOS, Docker's host network is its VM's, so run the suite in a container
+started with `--network container:convohop-dev-stack`. `seed.env` has one
+`NAME=value` line for every variable above except `CONVOHOP_DEV_CONTROL_URL`.
+The image has no control API, so the descriptor offers no capabilities and
+the scenarios that need one skip. The stack generates its keys and tokens
+when the container starts, and they die with it.
+
+In CI, [`conformance/dev-stack.mjs`](../../conformance/dev-stack.mjs) runs
+those steps; it needs only Node.js and the Docker CLI.
+`node conformance/dev-stack.mjs start` pulls the image named by
+`CONVOHOP_DEV_STACK_IMAGE`. For a `ghcr.io` image, and no other registry, it
+logs in with the job's `GITHUB_TOKEN` on stdin first and logs out after the
+pull. Then it starts the container, waits up to 15 minutes until the stack is
+ready, and appends to `$GITHUB_ENV` only the `seed.env` variables that the
+descriptor reads. Before it exports anything, it masks the descriptor's
+credentials and any value whose name has a `KEY`, `TOKEN`, `SECRET` or
+`PASSWORD` segment, and it prints variable names, never values. It exports
+nothing from a `seed.env` with a malformed line, a repeated variable or a
+value outside `A-Z a-z 0-9 _ . : / -`. `node conformance/dev-stack.mjs logs`
+prints the container's state and the last 40 lines that the stack's
+supervisor wrote, never the platform's own logs, because this repository's
+CI logs are public. It never fails, so it suits an `if: failure()` step.
+
+Four jobs run the suite this way on an `ubuntu-24.04-arm` runner and upload
+the reports: `dev-stack` in the
+[Conformance workflow](../../.github/workflows/conformance.yml), through the
+TypeScript reference driver, and `conformance-dev-stack` in the
+[JVM](../../.github/workflows/jvm.yml),
+[Python](../../.github/workflows/python.yml) (with the sync and the async
+clients) and [.NET](../../.github/workflows/dotnet.yml) (with the `net10.0`
+build) workflows. They run only when the repository variable
+`CONVOHOP_DEV_STACK_IMAGE` names the image, and never for pull requests from
+forks. A new dev-stack job uses the same two commands: grant the job
+`packages: read`, pass `CONVOHOP_DEV_STACK_IMAGE` and `GITHUB_TOKEN` to
+`start`, and run `logs` in an `if: failure()` step. Add capabilities to the
+descriptor as the image gains them.

@@ -39,16 +39,17 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  # TODO(DEV-1): the dev-stack container image for SDK CI does not exist yet.
-  # This job stays skipped until the CONVOHOP_DEV_STACK_IMAGE repository
-  # variable names that image. Then replace the "Start the dev stack" step with
-  # the image's start, readiness and credential contract;
-  # conformance/targets/dev-stack.json lists the variables it must export.
-  # Fork pull requests are skipped because they cannot pull the image.
+  # Runs the suite against the ConvoHop dev stack: the private, development-only
+  # linux/arm64 image that runs the whole platform in one container (see
+  # spec/conformance/targets.md). conformance/dev-stack.mjs starts the stack and
+  # shows why it stopped; every dev-stack job, here and in the SDK workflows,
+  # uses it. The job runs only when the CONVOHOP_DEV_STACK_IMAGE repository
+  # variable names the image, and never for pull requests from forks, which
+  # cannot pull it.
   dev-stack:
     name: TypeScript reference driver (dev stack)
     if: vars.CONVOHOP_DEV_STACK_IMAGE != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
     permissions:
       contents: read # check out the repository
@@ -65,13 +66,16 @@ jobs:
       - name: Start the dev stack
         env:
           CONVOHOP_DEV_STACK_IMAGE: ${{ vars.CONVOHOP_DEV_STACK_IMAGE }}
-        run: |
-          # TODO(DEV-1): start "$CONVOHOP_DEV_STACK_IMAGE", wait until it is ready and append the
-          # CONVOHOP_DEV_* values named in conformance/targets/dev-stack.json to "$GITHUB_ENV".
-          echo "::error::The dev-stack start step is a placeholder until DEV-1 defines the image contract."
-          exit 1
+          GITHUB_TOKEN: ${{ github.token }}
+        # Pulls the image with the job's token, waits until the stack is ready and exports
+        # the seed.env values that conformance/targets/dev-stack.json reads, masking its credentials.
+        run: node conformance/dev-stack.mjs start
       - name: Run the conformance scenarios against the dev stack
         run: npm run conformance -- --target conformance/targets/dev-stack.json
+      - name: Show why the dev stack stopped
+        if: failure()
+        # This repository's logs are public, so it prints only the stack supervisor's lines, not the platform's logs.
+        run: node conformance/dev-stack.mjs logs
       - name: Upload JUnit and summary reports
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
