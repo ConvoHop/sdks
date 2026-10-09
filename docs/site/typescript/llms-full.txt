@@ -517,7 +517,9 @@ export async function sendFcm(target: FcmTarget, request: FcmRequest): Promise<v
 }
 ```
 
-Each Android device has the target that its app registered: a registration token by default, or a Firebase Installation ID (FID) when the app's manifest sets `firebase_messaging_installation_id_enabled`. The app gets the token in `FirebaseMessagingService.onNewToken()`, or the FID in `onRegistered()`. The flag applies to the whole app: with it, `FirebaseMessaging.getToken()` throws for every library in the app. `firebase-admin` sends to a FID from version 14.1.0. That version also marks `TokenMessage` deprecated, and still sends to a token.
+Each Android device has the target that its app registered: a registration token by default, or a Firebase Installation ID (FID) when the app's manifest sets `firebase_messaging_installation_id_enabled`. The app gets the token in `FirebaseMessagingService.onNewToken()`, or the FID in `onRegistered()`. firebase-messaging 25.1.0 deprecates `getToken()`, `deleteToken()` and `onNewToken()` in favor of `register()`, `unregister()` and `onRegistered()`. Both sets work: the deprecated methods without the flag, and the new ones with it. The token stays the default because the flag applies to the whole app: with it, `FirebaseMessaging.getToken()` fails for every library in the app. For FID mode, use firebase-messaging 25.1.2 or later (Firebase Android BoM 34.18.0 or later): 25.1.1 fixed re-registration when the FID changes, and 25.1.2 fixed a `FID_ALREADY_USED` registration error.
+
+`firebase-admin` sends to a FID from version 14.1.0. That version also marks `TokenMessage` deprecated, and still sends to a token.
 
 FCM requests carry Android options only. Send to Apple devices with the APNs requests.
 
@@ -3354,7 +3356,7 @@ type FcmRequest = { … }
 message: { … }
 ```
 
-An FCM HTTP v1 REST `messages:send` message without a target: add `token`. `convohop` is `PushData` as JSON.
+An FCM HTTP v1 REST `messages:send` message without a target: add `token` or `fid`. `convohop` is `PushData` as JSON.
 Firebase Admin SDKs take `android` in their own form, such as `firebase-admin`'s `ttl` in milliseconds.
 
 ##### `FcmRequest.message.data` property
@@ -4407,7 +4409,8 @@ Reports delivery through the newest loaded message. Resolves whether a report wa
 close(): void
 ```
 
-Stops following the conversation. A store the app didn't give an outbox also closes its own.
+Stops following the conversation. A store the app didn't give an outbox also closes its own; await
+`store.outbox.close()` to know when that outbox has stopped writing.
 
 ### `ConversationStream` class
 
@@ -5424,12 +5427,17 @@ Waits for saved entries to load first.
 #### `Outbox.close` method
 
 ```ts
-close(): void
+close(): Promise<void>
 ```
 
 Stops sending. Persisted entries stay saved, and the client keeps its recovery state. Once its sends and saves
 settle, a persistent outbox of the user created meanwhile in this JavaScript context continues with its saved
 entries; otherwise another running one, or the next to start, takes them over.
+
+Resolves once the outbox has stopped writing: what it was loading, taking over, sending and saving has settled,
+and its storage is passed on or released. A send in flight is waited for until it finishes or times out. So on
+sign-out, wait for it before clearing the storage. It never rejects; failures go to `onError`. Every call returns
+the same promise.
 
 ### `ScopeRequiredProblem` class
 

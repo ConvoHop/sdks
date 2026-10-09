@@ -42,7 +42,7 @@ root.render(
     <App />
   </ConvoHopProvider>,
 );
-// On sign-out: unmount, then outbox.close().
+// On sign-out: unmount, then await outbox.close() before clearing storage.
 ```
 
 The provider doesn't own the client or the outbox; close the outbox yourself.

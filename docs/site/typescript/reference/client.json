@@ -389,7 +389,7 @@
           "ref": "@convohop/client#ConversationStore.close",
           "anchor": "conversationstoreclose-method",
           "signatures": ["close(): void"],
-          "docs": "Stops following the conversation. A store the app didn't give an outbox also closes its own."
+          "docs": "Stops following the conversation. A store the app didn't give an outbox also closes its own; await\n`store.outbox.close()` to know when that outbox has stopped writing."
         }
       ]
     },
@@ -1791,8 +1791,8 @@
           "kind": "method",
           "ref": "@convohop/client#Outbox.close",
           "anchor": "outboxclose-method",
-          "signatures": ["close(): void"],
-          "docs": "Stops sending. Persisted entries stay saved, and the client keeps its recovery state. Once its sends and saves\nsettle, a persistent outbox of the user created meanwhile in this JavaScript context continues with its saved\nentries; otherwise another running one, or the next to start, takes them over."
+          "signatures": ["close(): Promise<void>"],
+          "docs": "Stops sending. Persisted entries stay saved, and the client keeps its recovery state. Once its sends and saves\nsettle, a persistent outbox of the user created meanwhile in this JavaScript context continues with its saved\nentries; otherwise another running one, or the next to start, takes them over.\n\nResolves once the outbox has stopped writing: what it was loading, taking over, sending and saving has settled,\nand its storage is passed on or released. A send in flight is waited for until it finishes or times out. So on\nsign-out, wait for it before clearing the storage. It never rejects; failures go to `onError`. Every call returns\nthe same promise."
         }
       ]
     },
