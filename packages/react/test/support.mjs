@@ -1,6 +1,6 @@
 // Shared fixtures for the hook tests. Hooks render with react-test-renderer, which needs no DOM, like React Native,
 // in StrictMode, so every effect mounts, unmounts and mounts again. Importing this module fails any test during which
-// React logs an error, such as an update outside act() or an uncached snapshot.
+// React logs an error, such as an update outside act() or an uncached snapshot, outside loggedErrors().
 import assert from "node:assert/strict";
 import { afterEach } from "node:test";
 import { StrictMode, createElement } from "react";
@@ -9,19 +9,27 @@ import { ConvoHopProvider } from "../dist/index.js";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-let logged = [];
+let logged = [], expected;
 const consoleError = console.error;
 console.error = (...args) => {
   // react-test-renderer 19 reports its own deprecation on every create().
   if (typeof args[0] === "string" && args[0].startsWith("react-test-renderer is deprecated")) return;
-  logged.push(args.map(String).join(" "));
-  consoleError(...args);
+  (expected ?? logged).push(args.map(String).join(" "));
+  if (!expected) consoleError(...args);
 };
 afterEach(() => {
   const errors = logged;
   logged = [];
   assert.deepEqual(errors, [], "React logged errors");
 });
+
+/** Runs `work` and returns the errors React logged meanwhile, such as errors an error boundary caught. */
+export async function loggedErrors(work) {
+  const seen = expected = [];
+  try { await work(); }
+  finally { expected = undefined; }
+  return seen;
+}
 
 export const projectId = "0b0c5f8e-2f43-4c6c-9a51-6f2f8f3f6a01";
 export const alice = "4f6f8f0e-8a8b-4b0c-9d4e-0d6c2f1b7a11";

@@ -83,8 +83,9 @@ messages" view across conversations.
 `useTyping` sends throttled typing signals. Pass
 `capabilities().features?.typing === true` as `enabled` to skip projects
 without typing; unmounting signals that typing stopped. `useSessionRefresh()` renews
-the session before it expires while it's mounted; the client needs
-`sessionRefresh`.
+the session before it expires while it's mounted. The client needs
+`sessionRefresh`; without it, the hook throws `SESSION_REFRESH_REQUIRED` to
+the nearest error boundary.
 
 ## Calls
 

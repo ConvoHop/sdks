@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { ConvoHopClient } from "@convohop/client";
-import { reply } from "../../../test/graphql-fixtures.mjs";
+import { event, reply } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
 const id = () => crypto.randomUUID();
@@ -23,8 +23,8 @@ function source(key, initial) {
 function sockets() {
   const opened = [];
   class Socket {
-    constructor(url, protocol) { this.url = url; this.protocol = protocol; opened.push(this); }
-    send() {}
+    constructor(url, protocol) { this.url = url; this.protocol = protocol; this.sent = []; opened.push(this); }
+    send(frame) { this.sent.push(JSON.parse(frame)); }
     close(code) { this.closedWith = code; }
   }
   return { Socket, opened };
@@ -97,6 +97,34 @@ test("a replay opens platform.WebSocket and keeps its cursor in asynchronous sto
   const bare = replay();
   await assert.rejects(bare.client.watch(bare.conversationId, async () => {}, () => {}),
     { name: "TypeError", message: "This runtime has no WebSocket; pass platform.WebSocket" });
+});
+
+test("a replay whose cursor can't be saved closes instead of following on without a resume position", async t => {
+  const { Socket, opened } = sockets();
+  const refused = asyncStorage({ onWrite: () => { throw new Error("storage full"); } });
+  const first = replay({ platform: { WebSocket: Socket }, asyncRecoveryStorage: refused });
+  await assert.rejects(first.client.watch(first.conversationId, async () => {}, () => {}), { message: "storage full" });
+  assert.equal(opened.length, 0, "a replay that can't save its first cursor never subscribes");
+
+  let full = false;
+  const saved = asyncStorage({ onWrite: () => { if (full) throw new Error("storage full"); } });
+  const setup = replay({ platform: { WebSocket: Socket }, asyncRecoveryStorage: saved }), errors = [];
+  const stream = await setup.client.watch(setup.conversationId, async () => {}, error => errors.push(error));
+  t.after(() => stream.close());
+  const [socket] = opened;
+  socket.onopen();
+  socket.onmessage({ data: JSON.stringify({ type: "connection_ack" }) });
+  const subscription = socket.sent.find(frame => frame.type === "subscribe");
+  full = true;
+  const nextCursor = { incarnation: setup.incarnation, conversationId: setup.conversationId, sequence: "2" };
+  socket.onmessage({ data: JSON.stringify({ type: "next", id: subscription.id, payload: { data: { conversationEvents: {
+    items: [event(setup.conversationId, "2")], nextCursor, complete: true, refreshRequired: false,
+  } } } }) });
+  await until(() => errors.length > 0, "the failed save");
+  assert.deepEqual(errors.map(error => error.message), ["storage full"]);
+  assert.equal(stream.closed, true);
+  assert.equal(socket.closedWith, 1000);
+  assert.equal(JSON.parse(saved.values.get(setup.key)).sequence, "1", "storage keeps the last saved cursor");
 });
 
 test("coming online or to the foreground reconnects a waiting replay at once", async t => {

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { useSessionRefresh, useTyping } from "../dist/index.js";
-import { conversationA, conversationB, flush, renderHook, stubClient } from "./support.mjs";
+import { ConvoHopClient } from "@convohop/client";
+import { Component, StrictMode, createElement } from "react";
+import { act, create } from "react-test-renderer";
+import { ConvoHopProvider, useSessionRefresh, useTyping } from "../dist/index.js";
+import { alice, conversationA, conversationB, flush, loggedErrors, projectId, renderHook, stubClient } from "./support.mjs";
 
 function typingClient(fail) {
   const signals = [];
@@ -120,5 +123,26 @@ describe("useSessionRefresh", () => {
     const { unmount } = await renderHook(() => useSessionRefresh({ enabled: false }), { client });
     assert.equal(schedules.length, 0);
     await unmount();
+  });
+
+  test("throws to the nearest error boundary when the client has no sessionRefresh", async () => {
+    const client = new ConvoHopClient({ projectId, principalId: alice, incarnation: crypto.randomUUID(),
+      sessionToken: "fixture-session", baseUrl: "http://localhost:18080" });
+    const caught = [];
+    class Boundary extends Component {
+      constructor(props) { super(props); this.state = { failed: false }; }
+      static getDerivedStateFromError() { return { failed: true }; }
+      componentDidCatch(error) { caught.push(error); }
+      render() { return this.state.failed ? null : this.props.children; }
+    }
+    function Renewing() { useSessionRefresh(); return null; }
+    const tree = createElement(StrictMode, null,
+      createElement(ConvoHopProvider, { client }, createElement(Boundary, null, createElement(Renewing))));
+    let renderer;
+    const logged = await loggedErrors(() => act(async () => { renderer = create(tree, { unstable_isConcurrent: true }); }));
+    assert.notEqual(caught.length, 0);
+    for (const error of caught) assert.equal(error.code, "SESSION_REFRESH_REQUIRED");
+    assert.ok(logged.length > 0 && logged.every(line => line.includes("error boundary you provided, Boundary")), logged.join("\n"));
+    await act(async () => { renderer.unmount(); });
   });
 });

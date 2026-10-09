@@ -133,7 +133,10 @@ export interface SessionRefreshOptions {
   onError?: ((error: Error) => void) | undefined;
 }
 
-/** Renews the provider client's session before it expires while the component is mounted. Needs `sessionRefresh`. */
+/**
+ * Renews the provider client's session before it expires while the component is mounted. Needs `sessionRefresh`;
+ * without it, throws `SESSION_REFRESH_REQUIRED` to the nearest error boundary.
+ */
 export function useSessionRefresh(options: SessionRefreshOptions = {}): void {
   const client = useConvoHopClient();
   const latest = useLatest(options);
