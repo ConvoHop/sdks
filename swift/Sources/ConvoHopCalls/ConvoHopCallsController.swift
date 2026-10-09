@@ -5,7 +5,7 @@ import ConvoHopPush
 import Foundation
 import PushKit
 
-/// How ``ConvoHopCalls`` sets up CallKit and filters rings.
+/// How ``ConvoHopCalls`` sets up CallKit.
 public struct ConvoHopCallsConfiguration: Sendable {
     public var supportsVideo: Bool
     public var supportsHolding: Bool
@@ -16,11 +16,8 @@ public struct ConvoHopCallsConfiguration: Sendable {
     public var ringtoneSound: String?
     /// A 40 × 40 pt template image, in PNG data, for the in-call button that opens your app.
     public var iconTemplateImageData: Data?
-    /// Ring only for this project. `nil` accepts any.
-    public var expectedProjectId: String?
-    /// Ring only for this user. `nil` accepts any. Set it at sign-in and clear it at sign-out.
-    public var expectedRecipientId: String?
-    /// The App Group suite your Notification Service Extension shares, or `nil` for the app's own defaults.
+    /// The App Group suite your Notification Service Extension shares, or `nil` for the app's own defaults. It stores
+    /// the ledger and ``ConvoHopCalls/recipient``.
     public var ledgerSuiteName: String?
     /// The caller name CallKit shows. Defaults to the push `title`, which the server sends only when the project
     /// opts in to previews.
@@ -34,8 +31,6 @@ public struct ConvoHopCallsConfiguration: Sendable {
         includesCallsInRecents: Bool = true,
         ringtoneSound: String? = nil,
         iconTemplateImageData: Data? = nil,
-        expectedProjectId: String? = nil,
-        expectedRecipientId: String? = nil,
         ledgerSuiteName: String? = nil,
         callerName: @escaping @Sendable (ConvoHopNotification) -> String? = { $0.title }
     ) {
@@ -46,8 +41,6 @@ public struct ConvoHopCallsConfiguration: Sendable {
         self.includesCallsInRecents = includesCallsInRecents
         self.ringtoneSound = ringtoneSound
         self.iconTemplateImageData = iconTemplateImageData
-        self.expectedProjectId = expectedProjectId
-        self.expectedRecipientId = expectedRecipientId
         self.ledgerSuiteName = ledgerSuiteName
         self.callerName = callerName
     }
@@ -96,7 +89,7 @@ extension ConvoHopCallsDelegate {
 ///
 /// Call ``start(configuration:delegate:)`` in `application(_:didFinishLaunchingWithOptions:)`: iOS can launch your
 /// app for a VoIP push, and terminates an app that doesn't report each one to CallKit. This class reports every VoIP
-/// push. A push it doesn't ring for is reported and ended at once.
+/// push. A push it doesn't ring for, such as one for someone other than ``recipient``, is reported and ended at once.
 ///
 /// Answered and declined rings get no push. When realtime or `ConvoHopClient.ringStopReason(_:)` shows that a ringing
 /// call stopped, call ``end(_:reason:)`` with the reason.
@@ -110,15 +103,17 @@ public final class ConvoHopCalls: NSObject {
     public private(set) var ledger = ConvoHopNotificationLedger()
     /// The PushKit VoIP token, once iOS issued one.
     public private(set) var voipToken: Data?
-    /// Ring only for this project. `nil` accepts any.
-    public var expectedProjectId: String? {
-        get { configuration.expectedProjectId }
-        set { configuration.expectedProjectId = newValue }
-    }
-    /// Ring only for this user. `nil` accepts any.
-    public var expectedRecipientId: String? {
-        get { configuration.expectedRecipientId }
-        set { configuration.expectedRecipientId = newValue }
+    /// Whose calls ring. ``ConvoHopPushRecipient/any`` until you set one.
+    ///
+    /// Set `.only(projectId:recipientId:)` at sign-in and ``ConvoHopPushRecipient/nobody`` at sign-out. It's
+    /// stored in the ledger's suite, so it holds when iOS relaunches your app for a VoIP push, and a Notification
+    /// Service Extension on the same suite hides the text of other users' pushes.
+    public var recipient: ConvoHopPushRecipient {
+        get { ledger.recipient }
+        set {
+            ledger.recipient = newValue
+            recipientSetHere = newValue
+        }
     }
 
     /// The calls, oldest first. An ended call stays for a minute.
@@ -131,6 +126,8 @@ public final class ConvoHopCalls: NSObject {
     private let callController = CXCallController()
     private var pushRegistry: PKPushRegistry?
     private var observations: [WeakObservation] = []
+    /// The recipient this process set, which moves to a ledger on another suite.
+    private var recipientSetHere: ConvoHopPushRecipient?
 
     override private init() {
         super.init()
@@ -140,6 +137,7 @@ public final class ConvoHopCalls: NSObject {
     public func start(configuration: ConvoHopCallsConfiguration = ConvoHopCallsConfiguration(), delegate: ConvoHopCallsDelegate?) {
         if provider == nil || configuration.ledgerSuiteName != self.configuration.ledgerSuiteName {
             ledger = ConvoHopNotificationLedger(suiteName: configuration.ledgerSuiteName)
+            if let recipientSetHere { ledger.recipient = recipientSetHere }
         }
         self.configuration = configuration
         self.delegate = delegate
@@ -292,10 +290,8 @@ public final class ConvoHopCalls: NSObject {
     private func receive(_ notification: ConvoHopNotification?, pushKitCompletion completion: CompletionBox?) {
         let configuration = configuration
         let effects = book.receive(
-            notification, voip: completion != nil,
-            filter: CallBook.Filter(
-                projectId: configuration.expectedProjectId, recipientId: configuration.expectedRecipientId),
-            ledger: ledger, now: Date(), callerName: configuration.callerName)
+            notification, voip: completion != nil, recipient: ledger.recipient, ledger: ledger, now: Date(),
+            callerName: configuration.callerName)
         if case .callCancelled(let alert, _) = notification?.kind { removeDelivered(alertId: alert.alertId) }
         var reported = false
         for effect in effects {

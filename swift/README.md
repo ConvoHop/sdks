@@ -27,9 +27,9 @@ License: [Apache-2.0](LICENSE).
 | --- | --- | --- |
 | `ConvoHop` | Sessions, conversations, messages, realtime replay, recovery, the local cache and outbox, calls, and push routing. It re-exports `ConvoHopPush`. | iOS, macOS |
 | `ConvoHopLiveKit` | Call media with the LiveKit Swift SDK, and CallKit audio session handling | iOS, macOS (CallKit audio: iOS) |
-| `ConvoHopPush` | Push payload parsing, deduplication and the ring ledger. Foundation only and safe in app extensions. | iOS, macOS |
+| `ConvoHopPush` | Push payload parsing, deduplication, the ring ledger and the push recipient. Foundation only and safe in app extensions. | iOS, macOS |
 | `ConvoHopCalls` | PushKit VoIP pushes to CallKit for incoming calls, and CallKit for outgoing calls | iOS |
-| `ConvoHopNotificationService` | A Notification Service Extension helper that shows message text when the push has none | iOS, macOS |
+| `ConvoHopNotificationService` | A Notification Service Extension helper that shows message text when the push has none, and hides the text of other users' pushes | iOS, macOS |
 
 ## Install from source
 
@@ -340,10 +340,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate, ConvoHopCallsDelegate 
 }
 ```
 
-- Set `ConvoHopCalls.shared.expectedProjectId` and `expectedRecipientId` at
-  sign-in, and clear them at sign-out, so a stale token rings for nobody.
-  iOS requires every VoIP push to be reported to CallKit, so a push that
-  doesn't ring is reported and ended at once.
+- Set `ConvoHopCalls.shared.recipient` to
+  `.only(projectId: client.projectId, recipientId: client.principalId)` at
+  sign-in, and to `.nobody` at sign-out: your backend can still hold the
+  device's VoIP token. Until you set it, every call rings. It's stored in the
+  ledger's App Group suite, so it holds when iOS relaunches your app for a
+  VoIP push, and your Notification Service Extension reads it. iOS requires
+  every VoIP push to be reported to CallKit, so a push that doesn't ring is
+  reported and ended at once.
 - A ring answered or declined on another device gets no push. While a call
   rings, check `client.ringStopReason(alert)` when the conversation's stream
   delivers `live.participationChanged` or `live.ended`, and call
@@ -393,6 +397,13 @@ Delivery is at least once and unordered. For pushes your app processes in the
 background, pass a `ConvoHopNotificationLedger` to `handleNotification(_:ledger:)`
 to get `nil` for an event you already handled. Route taps without one.
 
+The ledger also stores whose pushes the device shows. Set its `recipient` to
+`.only(projectId: client.projectId, recipientId: client.principalId)` at
+sign-in. At sign-out, set it to `.nobody` and call `removeAll()`, which keeps
+the recipient. With `ConvoHopCalls`, set `ConvoHopCalls.shared.recipient`,
+which stores it in the same ledger. Until you set one, the recipient is
+`.any`.
+
 Add `CONVOHOP_MESSAGE`, `CONVOHOP_CALL` and `CONVOHOP_MISSED_CALL` to your
 app's `Localizable.strings`: alerts without text show them.
 
@@ -435,6 +446,14 @@ session token to disk. Share the ledger's App Group suite with
 `ConvoHopCallsConfiguration.ledgerSuiteName`: a missed-call push reaches the
 extension, and the ledger stops a late VoIP push for the same ring from
 ringing.
+
+With a ledger, the extension hides the text of a push for anyone but the
+ledger's `recipient`, such as one that arrives after sign-out. The push shows
+no title, and the `CONVOHOP_MESSAGE`, `CONVOHOP_CALL` or `CONVOHOP_MISSED_CALL`
+string as its body, from the extension's `Localizable.strings` or else the
+app's. The extension fetches nothing for it. It also hides the text of a
+ConvoHop push it can't read, unless the recipient is `.any`. iOS shows every
+alert push, so an extension can only hide its text.
 
 ## Errors
 

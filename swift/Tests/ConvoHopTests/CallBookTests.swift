@@ -40,14 +40,14 @@ final class CallBookTests: XCTestCase {
         ])
     }
 
-    private var filter: CallBook.Filter { .init(projectId: TestIDs.project, recipientId: TestIDs.principal) }
+    private let recipient = ConvoHopPushRecipient.only(projectId: TestIDs.project, recipientId: TestIDs.principal)
 
     func testIncomingCallRingsDeduplicatesAndRereportsForVoIP() throws {
         var book = CallBook()
         let ledger = ledger()
         let notification = try call()
         let now = Date(timeIntervalSince1970: 1)
-        let effects = book.receive(notification, voip: false, filter: filter, ledger: ledger, now: now) { _ in "Grace" }
+        let effects = book.receive(notification, voip: false, recipient: recipient, ledger: ledger, now: now) { _ in "Grace" }
         guard case .ring(let ringing) = effects.first else { return XCTFail("Expected ring") }
         XCTAssertEqual(effects.count, 1)
         XCTAssertEqual(ringing.uuid, notification.callAlert?.uuid)
@@ -58,8 +58,8 @@ final class CallBookTests: XCTestCase {
         XCTAssertTrue(ringing.hasVideo)
         XCTAssertEqual(book[ringing.uuid]?.state, .ringing)
         XCTAssertTrue(ledger.contains(eventId: notification.eventId))
-        XCTAssertTrue(book.receive(notification, voip: false, filter: filter, ledger: ledger, now: now) { _ in nil }.isEmpty)
-        XCTAssertEqual(book.receive(notification, voip: true, filter: filter, ledger: ledger, now: now) { _ in nil }, [.rereport(ringing.uuid)])
+        XCTAssertTrue(book.receive(notification, voip: false, recipient: recipient, ledger: ledger, now: now) { _ in nil }.isEmpty)
+        XCTAssertEqual(book.receive(notification, voip: true, recipient: recipient, ledger: ledger, now: now) { _ in nil }, [.rereport(ringing.uuid)])
     }
 
     func testFiltersMessagesStoppedAndExpiredRings() throws {
@@ -67,23 +67,52 @@ final class CallBookTests: XCTestCase {
         let ledger = ledger()
         let fallback = UUID()
         XCTAssertEqual(
-            book.receive(nil, voip: true, filter: filter, ledger: ledger, now: Date(), callerName: { _ in nil }, makeUUID: { fallback }),
+            book.receive(nil, voip: true, recipient: recipient, ledger: ledger, now: Date(), callerName: { _ in nil }, makeUUID: { fallback }),
             [.reportEnded(fallback, .failed)]
         )
-        XCTAssertTrue(book.receive(try message(), voip: false, filter: filter, ledger: ledger, now: Date()) { _ in nil }.isEmpty)
-        XCTAssertEqual(book.receive(try message(), voip: true, filter: filter, ledger: ledger, now: Date(), callerName: { _ in nil }, makeUUID: { fallback }), [.reportEnded(fallback, .failed)])
+        XCTAssertTrue(book.receive(try message(), voip: false, recipient: recipient, ledger: ledger, now: Date()) { _ in nil }.isEmpty)
+        XCTAssertEqual(book.receive(try message(), voip: true, recipient: recipient, ledger: ledger, now: Date(), callerName: { _ in nil }, makeUUID: { fallback }), [.reportEnded(fallback, .failed)])
         let other = try call(projectId: TestIDs.otherProject)
-        XCTAssertEqual(book.receive(other, voip: true, filter: filter, ledger: ledger, now: Date(), callerName: { _ in nil }, makeUUID: { fallback }), [.reportEnded(fallback, .failed)])
+        XCTAssertEqual(book.receive(other, voip: true, recipient: recipient, ledger: ledger, now: Date(), callerName: { _ in nil }, makeUUID: { fallback }), [.reportEnded(fallback, .failed)])
 
         let stopped = try call()
         let stoppedAlert = try XCTUnwrap(stopped.callAlert)
         ledger.markStopped(stoppedAlert, reason: .answered)
-        XCTAssertTrue(book.receive(stopped, voip: false, filter: filter, ledger: ledger, now: Date(timeIntervalSince1970: 1)) { _ in nil }.isEmpty)
-        XCTAssertEqual(book.receive(stopped, voip: true, filter: filter, ledger: ledger, now: Date(timeIntervalSince1970: 1)) { _ in nil }, [.reportEnded(stoppedAlert.uuid, .answered)])
+        XCTAssertTrue(book.receive(stopped, voip: false, recipient: recipient, ledger: ledger, now: Date(timeIntervalSince1970: 1)) { _ in nil }.isEmpty)
+        XCTAssertEqual(book.receive(stopped, voip: true, recipient: recipient, ledger: ledger, now: Date(timeIntervalSince1970: 1)) { _ in nil }, [.reportEnded(stoppedAlert.uuid, .answered)])
 
         let expired = try call(expiresAt: "2000-01-01T00:00:00Z")
         let expiredAlert = try XCTUnwrap(expired.callAlert)
-        XCTAssertEqual(book.receive(expired, voip: true, filter: filter, ledger: ledger, now: Date()) { _ in nil }, [.reportEnded(expiredAlert.uuid, .expired)])
+        XCTAssertEqual(book.receive(expired, voip: true, recipient: recipient, ledger: ledger, now: Date()) { _ in nil }, [.reportEnded(expiredAlert.uuid, .expired)])
+    }
+
+    func testRingsOnlyForTheRecipient() throws {
+        var book = CallBook()
+        let ledger = ledger()
+        let now = Date(timeIntervalSince1970: 1)
+        let fallback = UUID()
+        let forOther = try call(recipientId: TestIDs.otherPrincipal)
+        XCTAssertEqual(
+            book.receive(forOther, voip: true, recipient: recipient, ledger: ledger, now: now, callerName: { _ in nil }, makeUUID: { fallback }),
+            [.reportEnded(fallback, .failed)]
+        )
+        XCTAssertTrue(book.receive(forOther, voip: false, recipient: recipient, ledger: ledger, now: now) { _ in nil }.isEmpty)
+        XCTAssertFalse(ledger.contains(eventId: forOther.eventId))
+
+        let signedOut = try call()
+        let signedOutAlert = try XCTUnwrap(signedOut.callAlert)
+        XCTAssertEqual(
+            book.receive(signedOut, voip: true, recipient: .nobody, ledger: ledger, now: now, callerName: { _ in nil }, makeUUID: { fallback }),
+            [.reportEnded(fallback, .failed)]
+        )
+        let cancelled = try cancellation(alertId: signedOutAlert.alertId)
+        XCTAssertTrue(book.receive(cancelled, voip: false, recipient: .nobody, ledger: ledger, now: now) { _ in nil }.isEmpty)
+        XCTAssertNil(ledger.stopReason(alertId: signedOutAlert.alertId))
+        XCTAssertTrue(book.calls.isEmpty)
+
+        let effects = book.receive(forOther, voip: false, recipient: .any, ledger: ledger, now: now, callerName: { _ in nil })
+        guard case .ring(let ringing)? = effects.first else { return XCTFail("Expected .any to ring") }
+        XCTAssertEqual(ringing.uuid, forOther.callAlert?.uuid)
     }
 
     func testCancellationStopsRingingAndRecordsReason() throws {
@@ -91,8 +120,8 @@ final class CallBookTests: XCTestCase {
         let ledger = ledger()
         let incoming = try call()
         let alert = try XCTUnwrap(incoming.callAlert)
-        _ = book.receive(incoming, voip: false, filter: filter, ledger: ledger, now: Date(timeIntervalSince1970: 1)) { _ in nil }
-        let effects = book.receive(try cancellation(alertId: alert.alertId, reason: "ended"), voip: true, filter: filter, ledger: ledger, now: Date()) { _ in nil }
+        _ = book.receive(incoming, voip: false, recipient: recipient, ledger: ledger, now: Date(timeIntervalSince1970: 1)) { _ in nil }
+        let effects = book.receive(try cancellation(alertId: alert.alertId, reason: "ended"), voip: true, recipient: recipient, ledger: ledger, now: Date()) { _ in nil }
         guard case .ended(let ended) = effects.first else { return XCTFail("Expected ended effect") }
         XCTAssertEqual(ended.uuid, alert.uuid)
         XCTAssertEqual(ended.state, .ended(.ended))
@@ -106,7 +135,7 @@ final class CallBookTests: XCTestCase {
         let ledger = ledger()
         let incoming = try call(mediaProfile: "AUDIO_ONLY")
         let alert = try XCTUnwrap(incoming.callAlert)
-        _ = book.receive(incoming, voip: false, filter: filter, ledger: ledger, now: Date(timeIntervalSince1970: 1)) { _ in "Ada" }
+        _ = book.receive(incoming, voip: false, recipient: recipient, ledger: ledger, now: Date(timeIntervalSince1970: 1)) { _ in "Ada" }
         let answered = try XCTUnwrap(book.answer(alert.uuid, ledger: ledger))
         XCTAssertEqual(answered.state, .answered)
         XCTAssertEqual(ledger.stopReason(alertId: alert.alertId), .answered)

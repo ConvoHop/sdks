@@ -6,10 +6,12 @@ import Foundation
 /// before its ring. Record each event once, and drop a ring the ledger reports as stopped.
 ///
 /// Pass the same App Group suite in your app and its Notification Service Extension to share one ledger. Two processes
-/// writing at the same moment can drop an entry, so treat the ledger as best effort. Call ``removeAll()`` at sign-out.
+/// writing at the same moment can drop an entry, so treat the ledger as best effort. At sign-out, set ``recipient`` to
+/// ``ConvoHopPushRecipient/nobody`` and call ``removeAll()``.
 public final class ConvoHopNotificationLedger: @unchecked Sendable {
     private static let eventsKey = "com.convohop.notificationLedger.events"
     private static let stoppedKey = "com.convohop.notificationLedger.stoppedRings"
+    private static let recipientKey = "com.convohop.notificationLedger.recipient"
     /// A stopped ring is remembered this long after its deadline, to absorb clock skew.
     private static let retention: TimeInterval = 86_400
 
@@ -70,7 +72,35 @@ public final class ConvoHopNotificationLedger: @unchecked Sendable {
         alert.expiresAt <= now || stopReason(alertId: alert.alertId) != nil
     }
 
-    /// Forgets every event and ring.
+    /// Whose pushes this device rings for and shows. ``ConvoHopPushRecipient/any`` until you set one.
+    ///
+    /// It's stored in the ledger's suite, so a Notification Service Extension that shares the suite, and your app
+    /// after a relaunch, see it. A stored value this version can't read counts as ``ConvoHopPushRecipient/nobody``.
+    public var recipient: ConvoHopPushRecipient {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            guard let stored = defaults.object(forKey: Self.recipientKey) else { return .any }
+            guard let fields = stored as? [String: String], let projectId = fields["projectId"],
+                let recipientId = fields["recipientId"]
+            else { return .nobody }
+            return .only(projectId: projectId, recipientId: recipientId)
+        }
+        set {
+            lock.lock()
+            defer { lock.unlock() }
+            switch newValue {
+            case .any:
+                defaults.removeObject(forKey: Self.recipientKey)
+            case .only(let projectId, let recipientId):
+                defaults.set(["projectId": projectId, "recipientId": recipientId], forKey: Self.recipientKey)
+            case .nobody:
+                defaults.set("nobody", forKey: Self.recipientKey)
+            }
+        }
+    }
+
+    /// Forgets every event and ring. It keeps ``recipient``.
     public func removeAll() {
         lock.lock()
         defer { lock.unlock() }

@@ -270,6 +270,38 @@ final class NotificationLedgerTests: XCTestCase {
         ledger.markStopped(fresh, reason: .declined)
         XCTAssertNil(ledger.stopReason(alertId: old.alertId))
     }
+
+    func testRecipientDefaultsToAnyPersistsAndSurvivesRemoveAll() throws {
+        let suite = "com.convohop.tests.\(uuid())"
+        addTeardownBlock { UserDefaults.standard.removePersistentDomain(forName: suite) }
+        let ledger = ConvoHopNotificationLedger(suiteName: suite)
+        let signedIn = ConvoHopPushRecipient.only(projectId: TestIDs.project, recipientId: TestIDs.principal)
+        XCTAssertEqual(ledger.recipient, .any)
+        ledger.recipient = signedIn
+        XCTAssertEqual(ConvoHopNotificationLedger(suiteName: suite).recipient, signedIn)
+        ledger.recipient = .nobody
+        XCTAssertTrue(ledger.record(try message()))
+        ledger.removeAll()
+        XCTAssertEqual(ConvoHopNotificationLedger(suiteName: suite).recipient, .nobody)
+        ledger.recipient = .any
+        XCTAssertEqual(ConvoHopNotificationLedger(suiteName: suite).recipient, .any)
+        XCTAssertEqual(ConvoHopNotificationLedger(suiteName: "com.convohop.tests.\(uuid())").recipient, .any)
+
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defaults.set(["projectId": TestIDs.project], forKey: "com.convohop.notificationLedger.recipient")
+        XCTAssertEqual(ledger.recipient, .nobody)
+        defaults.set("someone", forKey: "com.convohop.notificationLedger.recipient")
+        XCTAssertEqual(ledger.recipient, .nobody)
+    }
+
+    func testRecipientAcceptsOnlyItsProjectAndUser() throws {
+        let notification = try message()
+        XCTAssertTrue(ConvoHopPushRecipient.any.accepts(notification))
+        XCTAssertTrue(ConvoHopPushRecipient.only(projectId: TestIDs.project, recipientId: TestIDs.principal).accepts(notification))
+        XCTAssertFalse(ConvoHopPushRecipient.only(projectId: TestIDs.otherProject, recipientId: TestIDs.principal).accepts(notification))
+        XCTAssertFalse(ConvoHopPushRecipient.only(projectId: TestIDs.project, recipientId: TestIDs.otherPrincipal).accepts(notification))
+        XCTAssertFalse(ConvoHopPushRecipient.nobody.accepts(notification))
+    }
 }
 
 #if canImport(UserNotifications)

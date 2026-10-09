@@ -94,22 +94,6 @@ package struct CallBook {
         case ended(ConvoHopCall)
     }
 
-    /// The project and user calls must be for. `nil` accepts any.
-    package struct Filter {
-        package var projectId: String?
-        package var recipientId: String?
-
-        package init(projectId: String?, recipientId: String?) {
-            self.projectId = projectId
-            self.recipientId = recipientId
-        }
-
-        func accepts(_ notification: ConvoHopNotification) -> Bool {
-            (projectId.map { $0 == notification.projectId } ?? true)
-                && (recipientId.map { $0 == notification.recipientId } ?? true)
-        }
-    }
-
     /// Calls in the order they started.
     package private(set) var calls: [ConvoHopCall] = []
 
@@ -119,14 +103,16 @@ package struct CallBook {
         calls.first { $0.uuid == uuid }
     }
 
-    /// Decides what a push, or a notification your app received, does.
+    /// Decides what a push, or a notification your app received, does. Only pushes `recipient` accepts ring or stop
+    /// rings.
     ///
     /// A VoIP push (`voip`) always yields a report: iOS terminates an app that doesn't report one.
     package mutating func receive(
-        _ notification: ConvoHopNotification?, voip: Bool, filter: Filter, ledger: ConvoHopNotificationLedger,
-        now: Date, callerName: (ConvoHopNotification) -> String?, makeUUID: () -> UUID = UUID.init
+        _ notification: ConvoHopNotification?, voip: Bool, recipient: ConvoHopPushRecipient,
+        ledger: ConvoHopNotificationLedger, now: Date, callerName: (ConvoHopNotification) -> String?,
+        makeUUID: () -> UUID = UUID.init
     ) -> [Effect] {
-        guard let notification, filter.accepts(notification) else {
+        guard let notification, recipient.accepts(notification) else {
             return voip ? [.reportEnded(makeUUID(), .failed)] : []
         }
         switch notification.kind {
