@@ -128,8 +128,14 @@ val renewal = client.refreshAutomatically { error ->
   the `SessionBootstrap` your backend received from ConvoHop. Parse a JSON
   body with `SessionBootstrap.fromJson(Json.parseToJsonElement(body))`. The
   hook runs on the client's dispatcher, so move blocking work off it.
-- `refreshAutomatically` renews 5 minutes to 30 seconds before the session
-  expires and retries failures with backoff. `refreshSession()` renews now.
+- `refreshAutomatically` initializes the client first if needed, renews 5
+  minutes to 30 seconds before the session expires and retries failed
+  renewals with backoff. An initialization that failed in a way the
+  [retry rules](../spec/recovery/README.md#retry-and-reconnect) call
+  retryable, or with `WRONG_REGION`, is tried again with backoff, never
+  sooner than its `retryAfter`. Any other failure, such as `QUOTA_EXCEEDED`,
+  `PLAN_LIMIT_EXCEEDED` or an authorization failure, stops the schedule.
+  Every failure reaches `onError`. `refreshSession()` renews now.
   Concurrent renewals share one request.
 - `client.sessionRefreshState` is `DISABLED`, `UNINITIALIZED`, `READY`,
   `REFRESHING` or `BLOCKED`. `BLOCKED` means the renewal couldn't be
@@ -189,6 +195,18 @@ first. `outbox.discard(requestId)` removes a message unless it's
 `SENDING`. Losing the network holds the outbox; coming back delivers it
 and reconnects every timeline.
 
+A refusal that resending can't change, such as `QUOTA_EXCEEDED`,
+`PLAN_LIMIT_EXCEEDED` or `SCOPE_REQUIRED`, fails the message at once. The
+outbox keeps the message and tries again with backoff after an unknown
+outcome and after the failures that the [retry
+rules](../spec/recovery/README.md#retry-and-reconnect) call retryable, such
+as network errors, timeouts, `RATE_LIMITED` and most 5xx responses. It
+never resends sooner than the `retryAfter` the authority asked for, even
+when the device comes back online. After `WRONG_REGION` the client routes
+again first. When recovery storage is full (`RECOVERY_LIMIT`, see [Reconnect
+and resume](#reconnect-and-resume)), the message stays `QUEUED` until a
+record makes room. Every failure also goes to the store's error callback.
+
 The outbox marks a message `SENDING` only once recovery storage holds its
 request. If the app is killed mid-send, the next start resends it under
 the same request ID within the same three attempts and 60 seconds, then
@@ -225,24 +243,55 @@ val members = client.members(conversationId)
 ## Reconnect and resume
 
 Timelines reconnect on their own: after a dropped connection they catch up
-over HTTP from the last applied event and subscribe again. While the
-session renews they pause, and they resume on the renewed session. When the
-network comes back, `ConvoHopStore` skips the reconnect wait; without a
-store, call `client.reconnectNow()`.
+over HTTP from the last applied event and subscribe again. They reconnect
+after the failures that the [retry
+rules](../spec/recovery/README.md#retry-and-reconnect) call retryable, such
+as network errors, timeouts, `RATE_LIMITED` and most 5xx responses, with a
+backoff that waits at least the `retryAfter` the authority asked for. After
+`WRONG_REGION` they route again first. While the session renews they pause,
+and they resume on the renewed session. When the network comes back,
+`ConvoHopStore` skips the reconnect backoff; without a store, call
+`client.reconnectNow()`. Neither skips a `retryAfter` wait.
+
+A problem that reconnecting can't change, such as `NOT_FOUND`, `FORBIDDEN`,
+`QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, or a response that breaks the
+protocol, stops the timeline: its `replay` becomes `CLOSED`, and the error
+goes to the store's error callback. Open a new timeline to try again. A
+session problem stops it too when the client has no `SessionRefresh` to
+renew the session.
 
 Without the store, `client.watch(conversationId, apply, onError)` replays a
 conversation's events from the cursor in recovery storage, then follows it
 live. Batches reach `apply` in order, and the cursor advances only after
-`apply` returns. When the authority requires a resynchronization, or the
-session no longer authorizes the replay, the replay closes and reports the
-error; the SDK never resets a cursor on its own. Call
+`apply` returns. A dropped connection reconnects by the same rules as a
+timeline's, and any other problem, such as a close that names
+`QUOTA_EXCEEDED`, closes the replay and goes to `onError`. When the
+authority requires a resynchronization, or the session no longer authorizes
+the replay, the replay closes and reports the error; the SDK never resets a
+cursor on its own. Call
 `client.resyncAuthorizedHistory(conversationId, apply, onError)` to replay
 the authorized history from the start.
 
 At startup, `client.recoverPending(onError)` settles up to 16 stored
-requests whose outcome is unknown. It resends one under its original
-request ID when budget remains, and otherwise looks up its outcome without
-sending it again. `client.requests` lists and resolves the records.
+requests that may still come to something: those whose outcome is pending
+or unknown, and those rejected with a retryable problem. It resends one
+under its original request ID when its last attempt failed transiently,
+such as with a lost connection, and budget remains. Otherwise it looks up
+its outcome without sending it again. `client.requests` lists and resolves
+the records.
+
+Recovery storage holds at most 128 records. When it's full, a new request
+makes room by evicting the final record attempted longest ago. A record is
+final when the authority committed or accepted its request, when the
+request's three-attempt/60-second retry budget is spent, or when the
+authority rejected it with a problem that isn't retryable (see the
+[recovery journal rules](../spec/recovery/README.md#recovery-journal)).
+Records stay while a call in progress uses them, while the outbox may still
+send their message, and while the app holds a live session or participation
+handle that may still end, leave or connect with them. With no record to
+evict, the new request fails before it's sent, with `ConvoHopProblem` code
+`RECOVERY_LIMIT`, outcome `rejected` and status 409: resend or resolve the
+outstanding requests first.
 
 ## Typing and receipts
 

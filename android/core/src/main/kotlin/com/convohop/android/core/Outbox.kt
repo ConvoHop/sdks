@@ -52,6 +52,16 @@ private val HOLD_CODES = setOf("SESSION_REFRESH_REQUIRED", "SESSION_EXPIRED", "I
  * the hold outlasts the budget (three attempts, or 60 seconds from the
  * first), the message is resolved read-only; one the authority never applied
  * becomes [PendingState.FAILED].
+ *
+ * A refusal that a retry can't change, such as `QUOTA_EXCEEDED`,
+ * `PLAN_LIMIT_EXCEEDED` or `SCOPE_REQUIRED`, fails the message at once and
+ * goes to the error callback. Other failures wait and try again with backoff,
+ * never sooner than the authority's `retryAfter`, not even on [drain]: an
+ * unknown outcome, a network failure, a 408, 429 or 5xx with a retryable
+ * code, and `RECOVERY_LIMIT`, after which the message stays queued until the
+ * recovery journal has room. After `WRONG_REGION` the client routes again
+ * first. The outbox keeps the recovery records of the messages it may still
+ * resend or resolve from being evicted.
  */
 public class Outbox internal constructor(
     private val client: ConvoHopClient,
@@ -62,12 +72,15 @@ public class Outbox internal constructor(
 ) {
     private enum class Step { NEXT, WAIT, HOLD }
 
+    /** A message's backoff timer, and the earliest time and the delay that the authority's `retryAfter` allows. */
+    private class Wait(val job: Job, val holdUntil: Long, val holdMillis: Long)
+
     private val mutex = Mutex()
     private val entries = MutableStateFlow<List<PendingMessage>>(emptyList())
     private val loaded = CompletableDeferred<Unit>()
     private val wakeups = Channel<Unit>(Channel.CONFLATED)
     private val forced = AtomicBoolean(false)
-    private val waiting = ConcurrentHashMap<String, Job>()
+    private val waiting = ConcurrentHashMap<String, Wait>()
     private val failures = HashMap<String, Int>()
     private var lastSweep: Long? = null
 
@@ -78,6 +91,11 @@ public class Outbox internal constructor(
     public val pending: StateFlow<List<PendingMessage>> = entries.asStateFlow()
 
     init {
+        // A full recovery journal evicts final records, but never one of a message this outbox may resend or resolve.
+        val release = client.http.retainRecovery {
+            entries.value.filter { it.state != PendingState.SENT && it.state != PendingState.FAILED }.map { it.requestId }
+        }
+        scope.coroutineContext[Job]?.invokeOnCompletion { release() }
         scope.launch {
             try {
                 entries.value = local.pending().filter { entry ->
@@ -167,9 +185,9 @@ public class Outbox internal constructor(
 
     /**
      * Retries now: delivers queued messages, skips pending backoff, lifts a
-     * session hold and checks unconfirmed messages again. [ConvoHopStore]
-     * calls it when the device comes online and after the client renews its
-     * session.
+     * session hold and checks unconfirmed messages again. A message still
+     * waits out the authority's `retryAfter`. [ConvoHopStore] calls it when
+     * the device comes online and after the client renews its session.
      */
     public fun drain() {
         forced.set(true)
@@ -201,8 +219,18 @@ public class Outbox internal constructor(
 
     private suspend fun drainOnce() {
         if (forced.getAndSet(false)) {
-            for (job in waiting.values) job.cancel()
-            waiting.clear()
+            // An early wake-up skips the backoff, never the delay the authority asked for.
+            val now = client.environment.now()
+            for ((requestId, wait) in waiting.entries.toList()) {
+                wait.job.cancel()
+                // Clamped so that a clock set back can't stretch the hold beyond the delay the authority asked for.
+                val remaining = (wait.holdUntil - now).coerceIn(0L, wait.holdMillis)
+                if (remaining > 0 && waiting[requestId] === wait) {
+                    arm(requestId, remaining, wait.holdUntil, wait.holdMillis)
+                } else {
+                    waiting.remove(requestId, wait)
+                }
+            }
             lastSweep = null
             held = false
         }
@@ -305,16 +333,33 @@ public class Outbox internal constructor(
                 report(onError, error)
                 Step.HOLD
             }
-            problem != null && problem.outcome == "rejected" && problem.status in 400..499 && problem.status != 408 &&
-                problem.status != 429 -> {
+            // Nothing was sent: the message waits until the recovery journal has room.
+            problem != null && problem.code == "RECOVERY_LIMIT" -> {
+                refused(entry, problem)
+                retryLater(entry, error)
+            }
+            // A refusal that no retry can change, such as QUOTA_EXCEEDED, PLAN_LIMIT_EXCEEDED or SCOPE_REQUIRED.
+            problem != null && problem.outcome == "rejected" && reconnectAction(problem) == ReconnectAction.STOP -> {
                 settle(entry.requestId, PendingState.FAILED, problem.code)
                 report(onError, error)
                 Step.NEXT
             }
             else -> {
                 refused(entry, problem)
+                if (problem != null && reconnectAction(problem) == ReconnectAction.REROUTE) reroute()
                 retryLater(entry, error)
             }
+        }
+    }
+
+    /** Routes the client again after `WRONG_REGION`, so that the next attempt goes to the project's current region. */
+    private suspend fun reroute() {
+        try {
+            client.initialize()
+        } catch (error: CancellationException) {
+            throw error
+        } catch (_: Exception) {
+            // The next attempt fails again and reports the cause.
         }
     }
 
@@ -397,21 +442,28 @@ public class Outbox internal constructor(
         return next
     }
 
-    /** Backs off 1, 4, 16 and then 30 seconds with jitter, or longer when the authority asked for a delay. */
+    /** Backs off 1, 4, 16 and then 30 seconds with jitter, and never less than the authority's `retryAfter`. */
     private fun retryLater(entry: PendingMessage, error: Exception): Step {
         report(onError, error)
         val failure = (failures[entry.requestId] ?: 0) + 1
         failures[entry.requestId] = failure
         val backoff = min(30_000L, 1_000L shl min(2 * (failure - 1), 5))
         val jittered = backoff / 2 + (client.environment.random() * (backoff / 2)).toLong()
-        val hinted = min((error as? ConvoHopProblem)?.retryAfter ?: 0L, 300L) * 1_000L
+        val hold = retryAfterMillis((error as? ConvoHopProblem)?.retryAfter)
+        arm(entry.requestId, max(jittered, hold), client.environment.now() + hold, hold)
+        return Step.WAIT
+    }
+
+    /** Holds the message back for [delayMillis], then wakes the outbox. */
+    private fun arm(requestId: String, delayMillis: Long, holdUntil: Long, holdMillis: Long) {
+        lateinit var wait: Wait
         val timer = scope.launch(start = CoroutineStart.LAZY) {
-            delay(max(jittered, hinted))
-            waiting.remove(entry.requestId)
+            delay(delayMillis)
+            waiting.remove(requestId, wait)
             wake()
         }
-        waiting[entry.requestId] = timer
+        wait = Wait(timer, holdUntil, holdMillis)
+        waiting[requestId] = wait
         timer.start()
-        return Step.WAIT
     }
 }

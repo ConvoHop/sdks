@@ -17,7 +17,8 @@ public open class ConvoHopProblem(
     override val message: String,
     /**
      * Whole seconds to wait before resending the same request, when the authority sent a delay (for example
-     * with `RATE_LIMITED`). The SDK never waits or resends on its own because of it.
+     * with `RATE_LIMITED`). The SDK never resends a call that the app made. When it reconnects a conversation's
+     * stream or resends a queued message on its own, it waits at least this long first.
      */
     public val retryAfter: Long? = null,
     cause: Throwable? = null,
