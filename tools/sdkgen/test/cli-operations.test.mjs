@@ -10,6 +10,7 @@ import cliOperations, {
 import { mcpToolDefinitions } from "../emitters/mcp-tools.mjs";
 import { EmitterError, renderEmitters } from "../lib/emitter.mjs";
 import { buildIr } from "../lib/ir.mjs";
+import { planeCredential, serverCredential } from "../lib/server-operations.mjs";
 import { REPO_ROOT, fixtureSources, repoSources } from "./helpers.mjs";
 
 const edge = (options = {}) => buildIr(fixtureSources(options));
@@ -22,7 +23,26 @@ test("the catalog lists the operations the MCP tools expose, in IR order", () =>
   assert.deepEqual(Object.keys(cliOperationEntries(edge())), [
     "alpha.capabilities", "alpha.resolveRequest", "alpha.job", "alpha.startJob",
     "beta.capabilities", "beta.resolveRequest", "beta.widgets", "beta.createWidget",
-  ], "client-only (items, events, ping), context-permit (redeem), subscription (eventStream) and deprecated (fetchHTTPStatus) operations are left out");
+  ], "client-only (items, events, ping), context-permit (redeem), subscription (eventStream), deprecated (fetchHTTPStatus), " +
+    "anonymous (requestAccess) and other-bearer (claimWidget) operations are left out");
+});
+
+test("tooling sends each plane the server bearer its resolveOperation accepts, and only operations that accept it", () => {
+  const ir = edge();
+  assert.deepEqual(ir.planes.map(plane => planeCredential(ir, plane.name, "cli")), ["serverKey", "serverKey"]);
+  const operation = id => ir.operations.find(item => item.id === id);
+  assert.equal(serverCredential(ir, operation("beta.createWidget"), "cli"), "serverKey");
+  for (const id of ["beta.requestAccess", "beta.claimWidget", "alpha.redeem"]) {
+    assert.equal(serverCredential(ir, operation(id), "cli"), undefined, `${id} needs a credential tooling doesn't hold`);
+  }
+  operation("beta.resolveRequest").auth = [{ credential: "userToken" }];
+  assert.equal(planeCredential(ir, "beta", "cli"), undefined);
+  assert.deepEqual(cliOperationList(ir).map(item => item.id), ["alpha.capabilities", "alpha.resolveRequest", "alpha.job", "alpha.startJob"],
+    "tooling couldn't settle an unknown outcome on a plane whose resolveOperation accepts no server bearer, so it calls none of its operations");
+  assert.throws(() => planeCredential(ir, "gamma", "cli"), new EmitterError("cli: the IR does not define plane gamma"));
+  ir.planes.find(plane => plane.name === "beta").resolveOperation = "beta.nothing";
+  assert.throws(() => planeCredential(ir, "beta", "cli"),
+    new EmitterError("cli: plane beta resolves requests with beta.nothing, which the IR does not define"));
 });
 
 test("entries carry the operation text, credential, authorization, retry, pagination and polling annotations", () => {

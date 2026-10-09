@@ -1725,7 +1725,7 @@ The request-context fields and how the operation uses them.
 public string Idempotency { get; }
 ```
 
-The idempotency class: `safe`, `idempotent` or `permitBound`.
+The idempotency class, such as `safe`, `idempotent`, `permitBound` or `replayOnly`.
 
 #### `OperationDescriptor.Layer` property
 
@@ -1924,7 +1924,7 @@ Inherited from `OperationDescriptor`.
 public string Idempotency { get; }
 ```
 
-The idempotency class: `safe`, `idempotent` or `permitBound`.
+The idempotency class, such as `safe`, `idempotent`, `permitBound` or `replayOnly`.
 
 Inherited from `OperationDescriptor`.
 

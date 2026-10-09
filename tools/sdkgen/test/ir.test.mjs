@@ -53,7 +53,7 @@ test("operations carry the plane, documents, context rules, inputs and annotatio
   assert.deepEqual(ir.operations.map(operation => operation.id), [
     "alpha.capabilities", "alpha.resolveRequest", "alpha.items", "alpha.events", "alpha.job", "alpha.fetchHTTPStatus",
     "alpha.startJob", "alpha.ping", "alpha.redeem", "alpha.eventStream",
-    "beta.capabilities", "beta.resolveRequest", "beta.widgets", "beta.createWidget",
+    "beta.capabilities", "beta.resolveRequest", "beta.widgets", "beta.createWidget", "beta.requestAccess", "beta.claimWidget",
   ]);
   const operation = id => find(ir.operations, "id", id);
 

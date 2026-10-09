@@ -68,6 +68,10 @@ public object Idempotency {
     public val permitBound: IdempotencyClass =
         IdempotencyClass("permitBound", "sameRequest", false, 3, 60000L)
 
+    /** Replay with the same requestId and input; resolveRequest cannot read the outcome. */
+    public val replayOnly: IdempotencyClass =
+        IdempotencyClass("replayOnly", "sameRequest", false, 3, 60000L)
+
     /** Read-only. Repeat freely. */
     public val safe: IdempotencyClass =
         IdempotencyClass("safe", "repeat", false, null, null)
@@ -77,7 +81,7 @@ public object Idempotency {
         IdempotencyClass("singleUse", "sameRequest", true, 2, 1000L)
 
     /** Every class, keyed by name. */
-    public val byName: Map<String, IdempotencyClass> = listOf(ephemeral, idempotent, permitBound, safe, singleUse).associateBy { it.name }
+    public val byName: Map<String, IdempotencyClass> = listOf(ephemeral, idempotent, permitBound, replayOnly, safe, singleUse).associateBy { it.name }
 }
 
 /** The realtime envelope, channels and event catalog. */

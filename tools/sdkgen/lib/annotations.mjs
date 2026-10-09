@@ -188,7 +188,7 @@ function starterEntry(operation, annotations) {
       ? description : "<One sentence that says what the operation does.>",
     layer: "<client|server|both>",
     auth: [{ credential: `<${credentials.join("|") || "credential"}>` }],
-    idempotency: operation.kind === "mutation" ? "<idempotent|singleUse|permitBound|ephemeral>" : "safe",
+    idempotency: operation.kind === "mutation" ? "<idempotent|singleUse|permitBound|replayOnly|ephemeral>" : "safe",
     pagination: paged ? { style: "<cursor|sequence|replay|bounded>", pagePath: paged } : { style: "none" },
     realtime: operation.kind === "subscription" ? { mode: "subscription", channel: "<channel>" } : { mode: "none" },
     errors: { sets: commonErrorSets(operation, annotations), codes: [] },
@@ -388,6 +388,11 @@ function checkSemantics({ annotations, planes, operations, index, report }) {
         report(at("auth", authIndex, "condition"), `unknown condition "${requirement.condition}"`);
       }
     });
+    // An SDK sends nothing for a "none" credential, so it couldn't tell whether to send another one.
+    const anonymous = entry.auth.some(requirement => own(credentials, requirement.credential)?.carrier === "none");
+    if (anonymous && new Set(entry.auth.map(requirement => requirement.credential)).size > 1) {
+      report(at("auth"), `an operation that accepts a credential with carrier "none" accepts no other credential`);
+    }
     if (entry.layer === "client" && runtimes.has("server")) {
       report(at("layer"), `"client" operations accept only client credentials; use "both" when server credentials are also accepted`);
     } else if (entry.layer === "server" && runtimes.has("client")) {
@@ -426,6 +431,20 @@ function checkSemantics({ annotations, planes, operations, index, report }) {
       report(at("idempotency"), `"permitBound" requires every auth entry to use a context-carried permit credential`);
     } else if (operation.kind === "mutation" && carried > 0 && entry.idempotency !== "permitBound") {
       report(at("idempotency"), `mutations authorized by a context-carried permit must be "permitBound"`);
+    }
+    // SDKs settle an unknown outcome of a resolvable class with the plane's resolveOperation, as the same caller.
+    // Context-carried permits are left to the "permitBound" rules above, and an invalid resolveOperation is
+    // reported with the plane.
+    const lookupOperation = plane && index.get(plane.resolveOperation);
+    const resolver = lookupOperation?.plane === operation.plane && lookupOperation.kind === "query" ?
+      own(annotations.operations, plane.resolveOperation) : undefined;
+    if (operation.kind === "mutation" && own(annotations.idempotency, entry.idempotency)?.resolvable && Array.isArray(resolver?.auth)) {
+      const lookup = new Set(resolver.auth.map(requirement => requirement.credential));
+      entry.auth.forEach((requirement, authIndex) => {
+        if (lookup.has(requirement.credential) || own(credentials, requirement.credential)?.carrier === "context") return;
+        report(at("auth", authIndex, "credential"), `"${entry.idempotency}" outcomes are resolved with ${plane.resolveOperation}, ` +
+          `which does not accept ${requirement.credential}; use a class whose outcomes are not resolvable`);
+      });
     }
 
     const pagination = entry.pagination;

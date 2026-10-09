@@ -229,6 +229,50 @@ var operations = []operation{
   }
 }`,
 	},
+	{
+		id:            "beta.requestAccess",
+		plane:         "beta",
+		kind:          "mutation",
+		field:         "requestAccess",
+		operationName: "BetaRequestAccess",
+		result:        "Receipt!",
+		input:         "RequestAccessInput",
+		inputRequired: true,
+		context:       map[string]string{"attempt": "optional", "requestId": "required", "tags": "optional", "tenant": "optional"},
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		document: `mutation BetaRequestAccess($context: ContextInput!, $input: RequestAccessInput!) {
+  requestAccess(context: $context, input: $input) {
+    requestId
+    committed
+    sequence
+  }
+}`,
+	},
+	{
+		id:            "beta.claimWidget",
+		plane:         "beta",
+		kind:          "mutation",
+		field:         "claimWidget",
+		operationName: "BetaClaimWidget",
+		result:        "Widget!",
+		input:         "ClaimWidgetInput",
+		inputRequired: true,
+		context:       map[string]string{"attempt": "optional", "requestId": "required", "tags": "optional", "tenant": "optional"},
+		bearer:        "agentToken",
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		document: `mutation BetaClaimWidget($context: ContextInput!, $input: ClaimWidgetInput!) {
+  claimWidget(context: $context, input: $input) {
+    id
+    label
+    state
+    revision
+  }
+}`,
+	},
 }
 
 var objectTypes = []objectType{
@@ -243,10 +287,12 @@ var objectTypes = []objectType{
 }
 
 var inputTypes = []inputType{
+	{"ClaimWidgetInput", []inputField{{"widgetId", "ID!", false}}},
 	{"CreateWidgetInput", []inputField{{"label", "String!", false}, {"state", "WidgetState", true}, {"ratio", "Ratio", true}, {"nested", "[[Int!]!]", false}, {"shape", "ShapeInput", true}}},
 	{"FetchInput", []inputField{{"method", "HTTPMethod", true}}},
 	{"JobInput", []inputField{{"operationId", "ID!", false}}},
 	{"RedeemInput", []inputField{{"deliveryId", "ID!", false}}},
+	{"RequestAccessInput", []inputField{{"email", "String!", false}, {"challenge", "String!", false}}},
 	{"ResolveInput", []inputField{{"requestId", "ID!", false}}},
 	{"ShapeInput", []inputField{{"kind", "String!", false}, {"sides", "[Int!]!", false}}},
 	{"StartJobInput", []inputField{{"itemId", "ID!", false}, {"repeat", "Int", true}, {"props", "Blob", false}}},

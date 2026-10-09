@@ -265,8 +265,8 @@ Each entry has these fields:
 | --- | --- |
 | `summary` | One sentence that says what the operation does. |
 | `layer` | `client`: client SDKs only, and the operation accepts only client credentials. `server`: server SDKs only, and it accepts no client credentials. `both`: every SDK, and `auth` lists at least one client credential and one server credential. |
-| `auth` | Alternative ways to authorize the call. Any one of them is enough. Each is `{ "credential": ..., "scopes": [...], "condition": ... }`. `scopes` lists every scope a backend key needs. `scopes` and `condition` are optional. |
-| `idempotency` | Queries and subscriptions are `safe`. A mutation is `idempotent` (deduplicated by request ID, so an unknown outcome can be resolved), `singleUse` (like `idempotent`, but returns a short-lived credential for one connection), `permitBound` (authorized by a permit in the request context) or `ephemeral` (a transient signal that's never retried). |
+| `auth` | Alternative ways to authorize the call. Any one of them is enough. Each is `{ "credential": ..., "scopes": [...], "condition": ... }`. `scopes` lists every scope a backend key needs. `scopes` and `condition` are optional. An operation that accepts an anonymous credential (carrier `none`) accepts no other credential. |
+| `idempotency` | Queries and subscriptions are `safe`. A mutation is `idempotent` (deduplicated by request ID, so an unknown outcome can be resolved), `singleUse` (like `idempotent`, but returns a short-lived credential for one connection), `permitBound` (authorized by a permit in the request context), `replayOnly` (deduplicated by request ID, but its outcome can't be looked up, so the caller settles an unknown outcome by sending the same request again) or `ephemeral` (a transient signal that's never retried). Use `replayOnly` when the plane's `resolveOperation` doesn't accept the operation's credentials, for example an anonymous operation. |
 | `destructive` | Optional. `true` for a mutation that deletes, revokes, removes, disables or ends something, or retires a secret. Omit it for every other operation. The MCP server marks these tools `destructiveHint`, and the CLI asks before it runs them. |
 | `pagination` | `{ "style": "none" }`, or a style from `cursor`, `sequence`, `replay` and `bounded` with `pagePath`, the path from the result to the page object (`[]` when the result is the page). `cursor`, `sequence` and `replay` also name the input's `limitField` and `cursorField`. |
 | `realtime` | `{ "mode": "none" }`, with an optional `emits` list of event types for mutations, or `{ "mode": "subscription", "channel": ... }` for subscriptions. |
@@ -275,7 +275,8 @@ Each entry has these fields:
 
 The check also catches inconsistencies, such as a mutation marked `safe`, a
 query or subscription marked `destructive`, a `layer` that doesn't match the
-credentials in `auth`, or a paged result that
+credentials in `auth`, a resolvable class on an operation whose credentials
+the plane's `resolveOperation` doesn't accept, or a paged result that
 lacks the fields its style needs. `planes.<plane>.context.rules` decide which
 request-context fields each operation must send or must not send. If a new
 operation needs different rules, add it to a rule's `only` or `except` list.

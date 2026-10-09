@@ -384,8 +384,63 @@ OPERATIONS: Mapping[str, OperationSpec] = {
         long_running=None,
         errors=("INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"),
     ),
+    "beta.requestAccess": OperationSpec(
+        id="beta.requestAccess",
+        plane="beta",
+        kind="mutation",
+        field="requestAccess",
+        operation_name="BetaRequestAccess",
+        document=(
+            "mutation BetaRequestAccess($context: ContextInput!, $input: RequestAccessInput!) {\n"
+            "  requestAccess(context: $context, input: $input) {\n"
+            "    requestId\n"
+            "    committed\n"
+            "    sequence\n"
+            "  }\n"
+            "}"
+        ),
+        input_type="RequestAccessInput",
+        result_type="Receipt!",
+        returns="value",
+        idempotency="replayOnly",
+        context={"tenant": "optional", "requestId": "required", "attempt": "optional", "permit": "forbidden", "tags": "optional"},
+        echo_path=(),
+        echo=(),
+        item_echo=(),
+        pagination=None,
+        long_running=None,
+        errors=("INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"),
+    ),
+    "beta.claimWidget": OperationSpec(
+        id="beta.claimWidget",
+        plane="beta",
+        kind="mutation",
+        field="claimWidget",
+        operation_name="BetaClaimWidget",
+        document=(
+            "mutation BetaClaimWidget($context: ContextInput!, $input: ClaimWidgetInput!) {\n"
+            "  claimWidget(context: $context, input: $input) {\n"
+            "    id\n"
+            "    label\n"
+            "    state\n"
+            "    revision\n"
+            "  }\n"
+            "}"
+        ),
+        input_type="ClaimWidgetInput",
+        result_type="Widget!",
+        returns="value",
+        idempotency="replayOnly",
+        context={"tenant": "optional", "requestId": "required", "attempt": "optional", "permit": "forbidden", "tags": "optional"},
+        echo_path=(),
+        echo=(),
+        item_echo=(),
+        pagination=None,
+        long_running=None,
+        errors=("INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"),
+    ),
 }
-"""Operations a server runtime calls with a bearer credential, by IR id."""
+"""Operations a server runtime calls with a bearer credential or without a credential, by IR id."""
 
 
 OBJECTS: Mapping[str, Mapping[str, str]] = {
@@ -462,6 +517,13 @@ INPUTS: Mapping[str, Mapping[str, tuple[str, bool]]] = {
         "kind": ("String!", False),
         "sides": ("[Int!]!", False),
     },
+    "RequestAccessInput": {
+        "email": ("String!", False),
+        "challenge": ("String!", False),
+    },
+    "ClaimWidgetInput": {
+        "widgetId": ("ID!", False),
+    },
     "CreateWidgetInput": {
         "label": ("String!", False),
         "state": ("WidgetState", True),
@@ -490,6 +552,7 @@ IDEMPOTENCY: Mapping[str, IdempotencySpec] = {
     "ephemeral": IdempotencySpec(retry="none", resolvable=False, max_attempts=None, window_ms=None),
     "idempotent": IdempotencySpec(retry="sameRequest", resolvable=True, max_attempts=3, window_ms=60000),
     "permitBound": IdempotencySpec(retry="sameRequest", resolvable=False, max_attempts=3, window_ms=60000),
+    "replayOnly": IdempotencySpec(retry="sameRequest", resolvable=False, max_attempts=3, window_ms=60000),
     "safe": IdempotencySpec(retry="repeat", resolvable=False, max_attempts=None, window_ms=None),
     "singleUse": IdempotencySpec(retry="sameRequest", resolvable=True, max_attempts=2, window_ms=1000),
 }

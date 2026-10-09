@@ -43,7 +43,7 @@
       "type": "array",
       "items": { "$ref": "#/$defs/namedSummary" }
     },
-    "idempotency": { "type": "array", "items": { "$ref": "#/$defs/idempotencyMode" }, "minItems": 5, "maxItems": 5 },
+    "idempotency": { "type": "array", "items": { "$ref": "#/$defs/idempotencyMode" }, "minItems": 6, "maxItems": 6 },
     "pagination": { "type": "array", "items": { "$ref": "#/$defs/paginationStyle" }, "minItems": 5, "maxItems": 5 },
     "errors": {
       "type": "object",
@@ -198,20 +198,29 @@
         "name": { "$ref": "#/$defs/identifier" },
         "summary": { "$ref": "#/$defs/summary" },
         "runtime": { "description": "client: safe for client SDKs. server: trusted server runtimes only.", "enum": ["client", "server"] },
-        "carrier": { "description": "bearer: Authorization header. context: a request-context field.", "enum": ["bearer", "context"] },
+        "carrier": {
+          "description": "bearer: Authorization header. context: a request-context field. none: no credential; the authority ignores an Authorization header on the operation.",
+          "enum": ["bearer", "context", "none"]
+        },
         "contextField": { "$ref": "#/$defs/fieldName" },
         "scoped": { "type": "boolean" }
       },
       "if": { "properties": { "carrier": { "const": "context" } } },
       "then": { "required": ["contextField"] },
-      "else": { "not": { "required": ["contextField"] } }
+      "else": { "not": { "required": ["contextField"] } },
+      "allOf": [
+        {
+          "if": { "properties": { "carrier": { "const": "none" } } },
+          "then": { "properties": { "scoped": { "const": false } } }
+        }
+      ]
     },
     "idempotencyMode": {
       "type": "object",
       "additionalProperties": false,
       "required": ["name", "summary", "retry", "resolvable"],
       "properties": {
-        "name": { "enum": ["safe", "idempotent", "singleUse", "permitBound", "ephemeral"] },
+        "name": { "enum": ["safe", "idempotent", "singleUse", "permitBound", "replayOnly", "ephemeral"] },
         "summary": { "$ref": "#/$defs/summary" },
         "retry": { "enum": ["repeat", "sameRequest", "none"] },
         "resolvable": { "type": "boolean" },
@@ -453,7 +462,7 @@
             "depth": { "type": "integer", "minimum": 0 }
           }
         },
-        "idempotency": { "enum": ["safe", "idempotent", "singleUse", "permitBound", "ephemeral"] },
+        "idempotency": { "enum": ["safe", "idempotent", "singleUse", "permitBound", "replayOnly", "ephemeral"] },
         "destructive": {
           "description": "Present only on mutations that delete, revoke, remove, disable or end something, or retire a secret. Absent means the operation is not destructive.",
           "const": true

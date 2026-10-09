@@ -274,11 +274,12 @@ function createModel(ir, options) {
       .filter(({ credential }) => credential.runtime === "server");
     if (!entries.length) fail(where, "accepts no server-runtime credential");
     const carriers = new Set(entries.map(({ credential }) => credential.carrier));
-    if (carriers.size > 1) fail(where, "mixes bearer and context credentials");
+    if (carriers.size > 1) fail(where, `mixes credential carriers (${[...carriers].join(", ")})`);
     const names = [...new Set(entries.map(({ credential }) => credential.name))];
     if (names.length > 1) fail(where, `accepts more than one server credential (${names.join(", ")})`);
     const { credential } = entries[0];
     if (credential.carrier === "bearer") return { entries, bearer: credential };
+    if (credential.carrier === "none") return { entries, anonymous: credential };
     if (credential.carrier !== "context") fail(where, `credential ${credential.name} has unknown carrier ${JSON.stringify(credential.carrier)}`);
     const use = operation.context.fields.find(field => field.name === credential.contextField)?.use;
     if (use !== "required") fail(where, `must require context field ${credential.contextField} for ${credential.name}`);
@@ -301,10 +302,6 @@ function createModel(ir, options) {
         if (argument.role !== "context" && argument.role !== "input") fail(where, `argument ${argument.name} has unsupported role ${JSON.stringify(argument.role)}`);
       }
       const auth = serverAuth(operation);
-      if (auth.bearer) {
-        if (client.bearer && client.bearer !== auth.bearer) fail(where, `uses bearer ${auth.bearer.name}, but other ${plane.name} operations use ${client.bearer.name}`);
-        client.bearer = auth.bearer;
-      }
       return {
         operation,
         client,
@@ -546,6 +543,10 @@ function renderTypes(model) {
 
 function authSentence(model) {
   if (model.auth.permit) return `Authorized by ${model.auth.permit.credential.name}, sent as the permit argument without a bearer token.`;
+  if (model.auth.anonymous) {
+    const conditions = model.auth.entries.map(({ entry }) => entry.condition).filter(Boolean);
+    return `Sent without a bearer token as ${model.auth.anonymous.name}${conditions.length ? ` (condition: ${list(conditions)})` : ""}.`;
+  }
   const phrases = model.auth.entries.map(({ entry }) => {
     let phrase = entry.credential;
     if (entry.scopes?.length) phrase += ` with ${entry.scopes.length === 1 ? "scope" : "all of the scopes"} ${list(entry.scopes)}`;
@@ -645,8 +646,9 @@ function renderPages(shared, model) {
 function clientDoc(client) {
   const where = client.name;
   const credentials = new Map(client.operations.flatMap(model => model.auth.entries.map(({ credential }) => [credential.name, credential])));
+  const labels = { bearer: "Bearer", context: "Context", none: "Anonymous" };
   const lines = [...credentials.values()].map(credential =>
-    `${credential.carrier === "bearer" ? "Bearer" : "Context"} credential: ${credential.name}. ${sentence(textLines(credential.summary, where).join(" "))}`);
+    `${labels[credential.carrier]} credential: ${credential.name}. ${sentence(textLines(credential.summary, where).join(" "))}`);
   return comment([[`${client.name} calls the ${client.plane.name} plane.`, ...textLines(client.plane.summary, where)], lines], where);
 }
 

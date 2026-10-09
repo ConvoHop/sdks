@@ -22,8 +22,7 @@ export const CREDENTIAL_OPERATIONS = Object.freeze({
 export const oneLine = text => text.replace(/\s+/g, " ").trim();
 export const list = items => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`);
 
-/** The first server credential sent as a bearer token that the operation accepts; undefined when there is none. */
-export function serverCredential(ir, operation, where) {
+function firstServerBearer(ir, operation, where) {
   const credentials = byName(ir.credentials);
   for (const auth of operation.auth) {
     const credential = credentials.get(auth.credential);
@@ -34,8 +33,28 @@ export function serverCredential(ir, operation, where) {
 }
 
 /**
- * The queries and mutations a server bearer credential can call, in IR order. Subscriptions, client-only and
- * deprecated operations and CREDENTIAL_OPERATIONS are left out.
+ * The one credential server tooling sends to a plane: the first server credential sent as a bearer token that the
+ * plane's resolveOperation accepts, so tooling can settle the unknown outcome of any request it sends. Undefined
+ * when the resolveOperation accepts none.
+ */
+export function planeCredential(ir, planeName, where) {
+  const plane = byName(ir.planes).get(planeName);
+  if (!plane) throw new EmitterError(`${where}: the IR does not define plane ${planeName}`);
+  const resolver = ir.operations.find(operation => operation.id === plane.resolveOperation);
+  if (!resolver) throw new EmitterError(`${where}: plane ${planeName} resolves requests with ${plane.resolveOperation}, which the IR does not define`);
+  return firstServerBearer(ir, resolver, where);
+}
+
+/** The operation's plane credential (see planeCredential) when the operation accepts it; undefined otherwise. */
+export function serverCredential(ir, operation, where) {
+  const credential = planeCredential(ir, operation.plane, where);
+  return credential !== undefined && operation.auth.some(auth => auth.credential === credential) ? credential : undefined;
+}
+
+/**
+ * The queries and mutations server tooling can call with its plane credentials, in IR order. Subscriptions,
+ * client-only and deprecated operations, CREDENTIAL_OPERATIONS and the operations that need another credential,
+ * such as anonymous ones, are left out.
  */
 export function serverOperations(ir, where) {
   return ir.operations.filter(operation => (operation.kind === "query" || operation.kind === "mutation") &&

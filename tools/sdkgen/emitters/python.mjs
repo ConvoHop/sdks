@@ -7,8 +7,9 @@ import { pascalCase, snakeCase } from "../lib/naming.mjs";
  * `convohop` server package in python/.
  *
  * The emitter covers every query and mutation that a server runtime can
- * authorize with a bearer credential. Client-only operations, subscriptions
- * and operations that only a context-carried permit authorizes are left out.
+ * authorize with a bearer credential or call without a credential.
+ * Client-only operations, subscriptions and operations that only a
+ * context-carried permit authorizes are left out.
  *
  *   types.py       Enums as `Literal` aliases, output objects and input
  *                  objects as frozen dataclasses with wire converters.
@@ -64,18 +65,19 @@ const MODULE_NAMES = new Set([
 ]);
 const MODULE_FILES = new Set(["__init__", "operations", "types"]);
 
-/** The operations a server runtime calls with a bearer credential, in IR order. */
+/** The operations a server runtime calls with a bearer credential or without a credential, in IR order. */
 export function includedOperations(ir) {
   const credentials = byName(ir.credentials);
   return ir.operations.filter(operation => operation.kind !== "subscription" && operation.layer !== "client" &&
     serverAuth(operation, credentials).length > 0);
 }
 
+// The Python clients send their token with every request; an authority ignores it on an operation without a credential.
 function serverAuth(operation, credentials) {
   return operation.auth.filter(auth => {
     const credential = credentials.get(auth.credential);
     if (!credential) throw new EmitterError(`python: ${operation.id} references unknown credential ${JSON.stringify(auth.credential)}`);
-    return credential.runtime === "server" && credential.carrier === "bearer";
+    return credential.runtime === "server" && (credential.carrier === "bearer" || credential.carrier === "none");
   });
 }
 
@@ -303,16 +305,20 @@ function createModel(ir) {
     const ordered = [...params.filter(param => param.fallback === undefined), ...params.filter(param => param.fallback !== undefined)];
     if (operation.kind === "mutation") {
       if (ordered.some(param => param.name === "request_id")) throw new EmitterError(`python: ${operation.id} input would shadow request_id`);
+      const idempotent = lookup(idempotency, operation.idempotency, "idempotency class", operation.id);
+      const replay = idempotent.retry === "sameRequest" && !idempotent.resolvable;
+      const reuse = replay ? "to settle an unknown outcome, call again with the same ``request_id`` and input" : "reuse it only through ``retry_request``";
       ordered.push({
         name: "request_id", annotation: "str | None", fallback: "None",
-        doc: "Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.",
+        doc: `Lowercase UUID that identifies this request. Omit it for a new one; ${reuse}.`,
       });
     }
     return ordered;
   }
 
   function authLine(auth, where) {
-    let line = code(auth.credential);
+    const anonymous = credentials.get(auth.credential).carrier === "none";
+    let line = anonymous ? `No credential (${code(auth.credential)}); the authority ignores the client's token` : code(auth.credential);
     if (auth.scopes) line += ` with ${auth.scopes.length === 1 ? "scope" : "all of the scopes"} ${list(auth.scopes.map(code))}`;
     if (auth.condition) line += `, when ${code(auth.condition)}: ${lookup(conditions, auth.condition, "condition", where).summary}`;
     return sentence(line);
@@ -628,7 +634,7 @@ export function renderPythonOperations(ir) {
     "from __future__ import annotations\n\nimport dataclasses as _dc\nfrom collections.abc import AsyncIterator, Iterator, Mapping\nfrom typing import Any, Literal", [
     exportList(names),
     OPERATIONS_PRELUDE,
-    mapping("OPERATIONS", "Mapping[str, OperationSpec]", model.operations.map(operation => operationEntry(model, operation)), "Operations a server runtime calls with a bearer credential, by IR id."),
+    mapping("OPERATIONS", "Mapping[str, OperationSpec]", model.operations.map(operation => operationEntry(model, operation)), "Operations a server runtime calls with a bearer credential or without a credential, by IR id."),
     mapping("OBJECTS", "Mapping[str, Mapping[str, str]]", objects, "Output object fields and their GraphQL types."),
     mapping("ENUMS", "Mapping[str, tuple[str, ...]]", enums, "Enum values in schema order."),
     mapping("INPUTS", "Mapping[str, Mapping[str, tuple[str, bool]]]", inputs, "Input object fields: their GraphQL type and whether the server has a default."),

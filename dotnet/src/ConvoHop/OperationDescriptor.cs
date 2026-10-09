@@ -115,7 +115,7 @@ namespace ConvoHop
         /// <summary>The request-context fields and how the operation uses them.</summary>
         public IReadOnlyList<ContextField> ContextFields { get; }
 
-        /// <summary>The idempotency class: <c>safe</c>, <c>idempotent</c> or <c>permitBound</c>.</summary>
+        /// <summary>The idempotency class, such as <c>safe</c>, <c>idempotent</c>, <c>permitBound</c> or <c>replayOnly</c>.</summary>
         public string Idempotency { get; }
 
         /// <summary>The SDK layer that may call the operation: <c>client</c>, <c>server</c> or <c>both</c>.</summary>

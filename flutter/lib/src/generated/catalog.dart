@@ -61,6 +61,15 @@ abstract final class IdempotencyClasses {
     windowMs: 60000,
   );
 
+  /// Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+  static const replayOnly = IdempotencySpec(
+    name: 'replayOnly',
+    retry: 'sameRequest',
+    resolvable: false,
+    maxAttempts: 3,
+    windowMs: 60000,
+  );
+
   /// Read-only. Repeat freely; each attempt may use a new requestId.
   static const safe = IdempotencySpec(
     name: 'safe',

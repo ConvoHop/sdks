@@ -8,6 +8,10 @@ export type Box_3dInput = {
   width: number;
 };
 
+export type ClaimWidgetInput = {
+  widgetId: string | number;
+};
+
 /** Request metadata that every root field takes. */
 export type ContextInput = {
   attempt?: number | null | undefined;
@@ -87,6 +91,11 @@ export type PingInput = {
 
 export type RedeemInput = {
   deliveryId: string | number;
+};
+
+export type RequestAccessInput = {
+  challenge: string;
+  email: string;
 };
 
 export type ResolveInput = {
@@ -222,3 +231,19 @@ export type BetaCreateWidgetMutationVariables = Exact<{
 
 
 export type BetaCreateWidgetMutation = { createWidget: { id: string, label: string | null, state: WidgetState, revision: string } };
+
+export type BetaRequestAccessMutationVariables = Exact<{
+  context: ContextInput;
+  input: RequestAccessInput;
+}>;
+
+
+export type BetaRequestAccessMutation = { requestAccess: { requestId: string, committed: boolean, sequence: string | null } };
+
+export type BetaClaimWidgetMutationVariables = Exact<{
+  context: ContextInput;
+  input: ClaimWidgetInput;
+}>;
+
+
+export type BetaClaimWidgetMutation = { claimWidget: { id: string, label: string | null, state: WidgetState, revision: string } };

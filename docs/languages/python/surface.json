@@ -53,7 +53,7 @@
               "name": "retry_request",
               "kind": "method",
               "signatures": ["async def retry_request(self, request_id: str) -> RequestResolution"],
-              "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry."
+              "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\nA `replayOnly` operation cannot be looked up and raises `INVALID_REQUEST`; call the operation again with\nthe same `request_id` and input instead.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry."
             },
             {
               "name": "recovery_states",
@@ -425,7 +425,7 @@
               "name": "retry_request",
               "kind": "method",
               "signatures": ["async def retry_request(self, request_id: str) -> RequestResolution"],
-              "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry."
+              "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\nA `replayOnly` operation cannot be looked up and raises `INVALID_REQUEST`; call the operation again with\nthe same `request_id` and input instead.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry."
             },
             {
               "name": "recovery_states",
@@ -731,7 +731,7 @@
               "name": "retry_request",
               "kind": "method",
               "signatures": ["def retry_request(self, request_id: str) -> RequestResolution"],
-              "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry."
+              "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\nA `replayOnly` operation cannot be looked up and raises `INVALID_REQUEST`; call the operation again with\nthe same `request_id` and input instead.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry."
             },
             {
               "name": "recovery_states",
@@ -1093,7 +1093,7 @@
               "name": "retry_request",
               "kind": "method",
               "signatures": ["def retry_request(self, request_id: str) -> RequestResolution"],
-              "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry."
+              "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\nA `replayOnly` operation cannot be looked up and raises `INVALID_REQUEST`; call the operation again with\nthe same `request_id` and input instead.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry."
             },
             {
               "name": "recovery_states",

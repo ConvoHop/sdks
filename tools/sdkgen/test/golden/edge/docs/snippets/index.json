@@ -141,6 +141,26 @@
       "summary": "Create a widget.",
       "layer": "server",
       "path": "beta/createWidget.md"
+    },
+    {
+      "id": "beta.requestAccess",
+      "plane": "beta",
+      "kind": "mutation",
+      "field": "requestAccess",
+      "operationName": "BetaRequestAccess",
+      "summary": "Ask for access without a credential.",
+      "layer": "server",
+      "path": "beta/requestAccess.md"
+    },
+    {
+      "id": "beta.claimWidget",
+      "plane": "beta",
+      "kind": "mutation",
+      "field": "claimWidget",
+      "operationName": "BetaClaimWidget",
+      "summary": "Claim a widget for an agent.",
+      "layer": "server",
+      "path": "beta/claimWidget.md"
     }
   ]
 }

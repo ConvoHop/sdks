@@ -4869,7 +4869,7 @@ OPERATIONS: Mapping[str, OperationSpec] = {
         errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_LIMIT", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED", "WEBHOOK_ENDPOINT_DISABLED"),
     ),
 }
-"""Operations a server runtime calls with a bearer credential, by IR id."""
+"""Operations a server runtime calls with a bearer credential or without a credential, by IR id."""
 
 
 OBJECTS: Mapping[str, Mapping[str, str]] = {
@@ -6441,6 +6441,7 @@ IDEMPOTENCY: Mapping[str, IdempotencySpec] = {
     "ephemeral": IdempotencySpec(retry="none", resolvable=False, max_attempts=None, window_ms=None),
     "idempotent": IdempotencySpec(retry="sameRequest", resolvable=True, max_attempts=3, window_ms=60000),
     "permitBound": IdempotencySpec(retry="sameRequest", resolvable=False, max_attempts=3, window_ms=60000),
+    "replayOnly": IdempotencySpec(retry="sameRequest", resolvable=False, max_attempts=3, window_ms=60000),
     "safe": IdempotencySpec(retry="repeat", resolvable=False, max_attempts=None, window_ms=None),
     "singleUse": IdempotencySpec(retry="sameRequest", resolvable=True, max_attempts=3, window_ms=60000),
 }

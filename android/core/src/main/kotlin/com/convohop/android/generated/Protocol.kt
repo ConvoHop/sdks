@@ -68,6 +68,10 @@ public object Idempotency {
     public val permitBound: IdempotencyClass =
         IdempotencyClass("permitBound", "sameRequest", false, 3, 60000L)
 
+    /** Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. */
+    public val replayOnly: IdempotencyClass =
+        IdempotencyClass("replayOnly", "sameRequest", false, 3, 60000L)
+
     /** Read-only. Repeat freely; each attempt may use a new requestId. */
     public val safe: IdempotencyClass =
         IdempotencyClass("safe", "repeat", false, null, null)
@@ -77,7 +81,7 @@ public object Idempotency {
         IdempotencyClass("singleUse", "sameRequest", true, 3, 60000L)
 
     /** Every class, keyed by name. */
-    public val byName: Map<String, IdempotencyClass> = listOf(ephemeral, idempotent, permitBound, safe, singleUse).associateBy { it.name }
+    public val byName: Map<String, IdempotencyClass> = listOf(ephemeral, idempotent, permitBound, replayOnly, safe, singleUse).associateBy { it.name }
 }
 
 /** The realtime envelope, channels and event catalog. */

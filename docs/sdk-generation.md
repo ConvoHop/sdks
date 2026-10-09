@@ -80,9 +80,13 @@ Don't edit generated files by hand. Change the inputs and run
 | `dart` | `flutter/lib/src/generated/` | Models, response decoders, operation specs and catalogs for the operations a user session can run, for the [Flutter SDK](../flutter/README.md) |
 | `swift` | `swift/Sources/ConvoHop/Generated/` | Models and the operation catalog of the client and shared operations, with the output shapes that responses are checked against, error codes and realtime event types, for the [Swift client SDK](../swift/README.md) |
 
-Both `mcp-tools` and `cli-operations` leave out subscriptions, client-only and
-deprecated operations, and the operations whose results are credentials, such
-as `communication.issueSession`. The shared rules are in
+Both `mcp-tools` and `cli-operations` send each plane one credential: the
+first server bearer credential that the plane's `resolveOperation` accepts,
+so they can settle an unknown outcome of any request they send. They leave
+out subscriptions, client-only and deprecated operations, the operations that
+don't accept that credential, such as anonymous ones, and the operations whose
+results are credentials, such as `communication.issueSession`. The shared
+rules are in
 [`tools/sdkgen/lib/server-operations.mjs`](../tools/sdkgen/lib/server-operations.mjs).
 
 ## The IR
@@ -180,7 +184,14 @@ Android Kotlin and Dart SDKs can follow the TypeScript one. To add one:
    - Drive retries from the operation's idempotency class: `repeat`,
      `sameRequest` (same request ID and input, within `retryBudget`) or
      `none`. Resolve unknown outcomes with the plane's `resolveOperation`
-     when the class is `resolvable`.
+     when the class is `resolvable`. Never look up an operation whose class
+     isn't resolvable, such as `replayOnly`: the caller settles its unknown
+     outcome by sending the same request again.
+   - Send a credential's token only as its `carrier` says: `bearer` in the
+     `Authorization` header, `context` in the request context. A credential
+     with carrier `none` is anonymous: the authority ignores any
+     `Authorization` header on the operation, so an SDK may omit it or send
+     its configured token.
    - Generate pagination helpers from `pagination` and realtime event types
      from `realtime.events`. Deliver event types that the SDK doesn't know as
      unknown events instead of failing.
@@ -200,8 +211,8 @@ The generator tests are in [`tools/sdkgen/test`](../tools/sdkgen/test) and use
 
 - `fixtures/edge` is a small synthetic API with two planes. It covers edge
   cases that the real schemas don't, such as acronyms in names, deprecations,
-  Markdown-significant descriptions, a long-running operation, every layer
-  and every idempotency class.
+  Markdown-significant descriptions, a long-running operation, anonymous and
+  other-bearer operations, every layer and every idempotency class.
 - `golden/edge` holds the expected output of every emitter for that fixture.
   Tests compare it byte for byte.
 - Other tests check that the committed generated files in this repository

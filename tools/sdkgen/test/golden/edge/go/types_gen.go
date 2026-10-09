@@ -64,6 +64,11 @@ type Capabilities struct {
 	Features []string `json:"features"`
 }
 
+// ClaimWidgetInput is the GraphQL input ClaimWidgetInput.
+type ClaimWidgetInput struct {
+	WidgetID string `json:"widgetId"`
+}
+
 // CreateWidgetInput is the GraphQL input CreateWidgetInput.
 type CreateWidgetInput struct {
 	Label string `json:"label"`
@@ -120,6 +125,12 @@ type Receipt struct {
 // RedeemInput is the GraphQL input RedeemInput.
 type RedeemInput struct {
 	DeliveryID string `json:"deliveryId"`
+}
+
+// RequestAccessInput is the GraphQL input RequestAccessInput.
+type RequestAccessInput struct {
+	Email     string `json:"email"`
+	Challenge string `json:"challenge"`
 }
 
 // ResolveInput is the GraphQL input ResolveInput.

@@ -1388,7 +1388,7 @@
               "name": "Idempotency",
               "kind": "property",
               "signatures": ["public string Idempotency { get; }"],
-              "docs": "The idempotency class: `safe`, `idempotent` or `permitBound`."
+              "docs": "The idempotency class, such as `safe`, `idempotent`, `permitBound` or `replayOnly`."
             },
             {
               "name": "Layer",
@@ -1530,7 +1530,7 @@
               "name": "Idempotency",
               "kind": "property",
               "signatures": ["public string Idempotency { get; }"],
-              "docs": "The idempotency class: `safe`, `idempotent` or `permitBound`.",
+              "docs": "The idempotency class, such as `safe`, `idempotent`, `permitBound` or `replayOnly`.",
               "inherited": "OperationDescriptor"
             },
             {

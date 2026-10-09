@@ -18,6 +18,8 @@ from .types import (
     WidgetPage,
     WidgetsInput,
     ShapeInput,
+    RequestAccessInput,
+    ClaimWidgetInput,
     CreateWidgetInput,
 )
 
@@ -111,6 +113,48 @@ class BetaOperations(SyncInvoker):
         ).to_dict()
         return Widget._from_wire(self._invoke(OPERATIONS["beta.createWidget"], _input, request_id))
 
+    def request_access(
+        self,
+        *,
+        email: str,
+        challenge: str,
+        request_id: str | None = None,
+    ) -> Receipt:
+        """Ask for access without a credential.
+
+        Authorization: No credential (``anon``); the authority ignores the client's token, when ``challenge``: The input answers a challenge the authority issued.
+
+        Idempotency: ``replayOnly``. Replay with the same requestId and input; resolveRequest cannot read the outcome.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = RequestAccessInput(
+            email=email,
+            challenge=challenge,
+        ).to_dict()
+        return Receipt._from_wire(self._invoke(OPERATIONS["beta.requestAccess"], _input, request_id))
+
+    def claim_widget(
+        self,
+        *,
+        widget_id: str,
+        request_id: str | None = None,
+    ) -> Widget:
+        """Claim a widget for an agent.
+
+        Authorization: ``agentToken``.
+
+        Idempotency: ``replayOnly``. Replay with the same requestId and input; resolveRequest cannot read the outcome.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = ClaimWidgetInput(
+            widget_id=widget_id,
+        ).to_dict()
+        return Widget._from_wire(self._invoke(OPERATIONS["beta.claimWidget"], _input, request_id))
+
 
 class AsyncBetaOperations(AsyncInvoker):
     """Asynchronous ``beta`` operations. Widgets."""
@@ -194,3 +238,45 @@ class AsyncBetaOperations(AsyncInvoker):
             shape=shape,
         ).to_dict()
         return Widget._from_wire(await self._invoke(OPERATIONS["beta.createWidget"], _input, request_id))
+
+    async def request_access(
+        self,
+        *,
+        email: str,
+        challenge: str,
+        request_id: str | None = None,
+    ) -> Receipt:
+        """Ask for access without a credential.
+
+        Authorization: No credential (``anon``); the authority ignores the client's token, when ``challenge``: The input answers a challenge the authority issued.
+
+        Idempotency: ``replayOnly``. Replay with the same requestId and input; resolveRequest cannot read the outcome.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = RequestAccessInput(
+            email=email,
+            challenge=challenge,
+        ).to_dict()
+        return Receipt._from_wire(await self._invoke(OPERATIONS["beta.requestAccess"], _input, request_id))
+
+    async def claim_widget(
+        self,
+        *,
+        widget_id: str,
+        request_id: str | None = None,
+    ) -> Widget:
+        """Claim a widget for an agent.
+
+        Authorization: ``agentToken``.
+
+        Idempotency: ``replayOnly``. Replay with the same requestId and input; resolveRequest cannot read the outcome.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = ClaimWidgetInput(
+            widget_id=widget_id,
+        ).to_dict()
+        return Widget._from_wire(await self._invoke(OPERATIONS["beta.claimWidget"], _input, request_id))

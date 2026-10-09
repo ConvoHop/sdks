@@ -158,3 +158,20 @@ mutation BetaCreateWidget($context: ContextInput!, $input: CreateWidgetInput!) {
     revision
   }
 }
+
+mutation BetaRequestAccess($context: ContextInput!, $input: RequestAccessInput!) {
+  requestAccess(context: $context, input: $input) {
+    requestId
+    committed
+    sequence
+  }
+}
+
+mutation BetaClaimWidget($context: ContextInput!, $input: ClaimWidgetInput!) {
+  claimWidget(context: $context, input: $input) {
+    id
+    label
+    state
+    revision
+  }
+}

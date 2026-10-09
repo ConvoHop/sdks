@@ -201,6 +201,12 @@
       "resolvable": false,
       "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
     },
+    "replayOnly": {
+      "summary": "Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.",
+      "retry": "sameRequest",
+      "resolvable": false,
+      "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
+    },
     "ephemeral": {
       "summary": "Transient signal. Not deduplicated or retried; send a fresh signal instead.",
       "retry": "none",

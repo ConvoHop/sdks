@@ -104,12 +104,13 @@
       "description": "Semantics of each idempotency mode. The set of modes is closed because emitters implement each one.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["safe", "idempotent", "singleUse", "permitBound", "ephemeral"],
+      "required": ["safe", "idempotent", "singleUse", "permitBound", "replayOnly", "ephemeral"],
       "properties": {
         "safe": { "$ref": "#/$defs/idempotencyMode" },
         "idempotent": { "$ref": "#/$defs/idempotencyMode" },
         "singleUse": { "$ref": "#/$defs/idempotencyMode" },
         "permitBound": { "$ref": "#/$defs/idempotencyMode" },
+        "replayOnly": { "$ref": "#/$defs/idempotencyMode" },
         "ephemeral": { "$ref": "#/$defs/idempotencyMode" }
       }
     },
@@ -231,13 +232,19 @@
       "properties": {
         "summary": { "$ref": "#/$defs/summary" },
         "runtime": { "enum": ["client", "server"] },
-        "carrier": { "enum": ["bearer", "context"] },
+        "carrier": { "enum": ["bearer", "context", "none"] },
         "contextField": { "$ref": "#/$defs/fieldName" },
         "scoped": { "type": "boolean" }
       },
       "if": { "properties": { "carrier": { "const": "context" } } },
       "then": { "required": ["contextField"] },
-      "else": { "not": { "required": ["contextField"] } }
+      "else": { "not": { "required": ["contextField"] } },
+      "allOf": [
+        {
+          "if": { "properties": { "carrier": { "const": "none" } } },
+          "then": { "properties": { "scoped": { "const": false } } }
+        }
+      ]
     },
     "idempotencyMode": {
       "type": "object",
@@ -407,7 +414,7 @@
           "items": { "$ref": "#/$defs/authRequirement" },
           "minItems": 1
         },
-        "idempotency": { "enum": ["safe", "idempotent", "singleUse", "permitBound", "ephemeral"] },
+        "idempotency": { "enum": ["safe", "idempotent", "singleUse", "permitBound", "replayOnly", "ephemeral"] },
         "destructive": {
           "description": "The mutation deletes, revokes, removes, disables or ends something, or retires a secret. Omit for every other operation.",
           "const": true

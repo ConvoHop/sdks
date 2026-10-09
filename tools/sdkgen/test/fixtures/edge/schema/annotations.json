@@ -84,14 +84,17 @@
       "scoped": false
     },
     "serverKey": {"summary": "Scoped key for server runtimes.", "runtime": "server", "carrier": "bearer", "scoped": true},
-    "userToken": {"summary": "Short-lived token for client runtimes.", "runtime": "client", "carrier": "bearer", "scoped": false}
+    "userToken": {"summary": "Short-lived token for client runtimes.", "runtime": "client", "carrier": "bearer", "scoped": false},
+    "anon": {"summary": "No credential; the input carries the proof.", "runtime": "server", "carrier": "none", "scoped": false},
+    "agentToken": {"summary": "Token an agent holds before it has a key.", "runtime": "server", "carrier": "bearer", "scoped": false}
   },
   "scopes": {
     "itemRead": {"summary": "Read items and jobs."},
     "widgetWrite": {"summary": "Create widgets and start jobs."}
   },
   "conditions": {
-    "owner": {"summary": "The caller made the original request."}
+    "owner": {"summary": "The caller made the original request."},
+    "challenge": {"summary": "The input answers a challenge the authority issued."}
   },
   "idempotency": {
     "safe": {"summary": "Read-only. Repeat freely.", "retry": "repeat", "resolvable": false},
@@ -109,6 +112,12 @@
     },
     "permitBound": {
       "summary": "Authorized by a single-use permit. Retry with the same requestId and permit.",
+      "retry": "sameRequest",
+      "resolvable": false,
+      "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
+    },
+    "replayOnly": {
+      "summary": "Replay with the same requestId and input; resolveRequest cannot read the outcome.",
       "retry": "sameRequest",
       "resolvable": false,
       "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
@@ -312,6 +321,24 @@
       "layer": "server",
       "auth": [{"credential": "serverKey", "scopes": ["widgetWrite"]}],
       "idempotency": "singleUse",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": []}
+    },
+    "beta.requestAccess": {
+      "summary": "Ask for access without a credential.",
+      "layer": "server",
+      "auth": [{"credential": "anon", "condition": "challenge"}],
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": []}
+    },
+    "beta.claimWidget": {
+      "summary": "Claim a widget for an agent.",
+      "layer": "server",
+      "auth": [{"credential": "agentToken"}],
+      "idempotency": "replayOnly",
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {"sets": ["request", "http"], "codes": []}

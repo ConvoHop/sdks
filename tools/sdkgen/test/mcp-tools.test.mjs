@@ -28,7 +28,8 @@ test("server-callable queries and mutations become tools named after their plane
     ["beta_resolve_request", "beta.resolveRequest", "Beta: resolve request"],
     ["beta_widgets", "beta.widgets", "Beta: widgets"],
     ["beta_create_widget", "beta.createWidget", "Beta: create widget"],
-  ], "client-only (items, events, ping), context-permit (redeem), subscription (eventStream) and deprecated (fetchHTTPStatus) operations get no tool");
+  ], "client-only (items, events, ping), context-permit (redeem), subscription (eventStream), deprecated (fetchHTTPStatus), " +
+    "anonymous (requestAccess) and other-bearer (claimWidget) operations get no tool");
 });
 
 test("tool hints and operation metadata carry the auth, idempotency, pagination and polling annotations", () => {

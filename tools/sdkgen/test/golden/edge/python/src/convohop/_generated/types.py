@@ -28,6 +28,8 @@ __all__ = [
     "WidgetsPayload",
     "WidgetsInput",
     "ShapeInput",
+    "RequestAccessInput",
+    "ClaimWidgetInput",
     "CreateWidgetInput",
 ]
 
@@ -309,6 +311,32 @@ class ShapeInput:
         data: dict[str, Any] = {
             "kind": self.kind,
             "sides": self.sides,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class RequestAccessInput:
+    email: str
+    challenge: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "email": self.email,
+            "challenge": self.challenge,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class ClaimWidgetInput:
+    widget_id: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "widgetId": self.widget_id,
         }
         return data
 

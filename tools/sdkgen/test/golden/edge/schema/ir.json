@@ -75,6 +75,20 @@
   ],
   "credentials": [
     {
+      "name": "agentToken",
+      "summary": "Token an agent holds before it has a key.",
+      "runtime": "server",
+      "carrier": "bearer",
+      "scoped": false
+    },
+    {
+      "name": "anon",
+      "summary": "No credential; the input carries the proof.",
+      "runtime": "server",
+      "carrier": "none",
+      "scoped": false
+    },
+    {
       "name": "permit",
       "summary": "Single-use permit sent in the request context.",
       "runtime": "server",
@@ -101,7 +115,10 @@
     {"name": "itemRead", "summary": "Read items and jobs."},
     {"name": "widgetWrite", "summary": "Create widgets and start jobs."}
   ],
-  "conditions": [{"name": "owner", "summary": "The caller made the original request."}],
+  "conditions": [
+    {"name": "challenge", "summary": "The input answers a challenge the authority issued."},
+    {"name": "owner", "summary": "The caller made the original request."}
+  ],
   "idempotency": [
     {
       "name": "ephemeral",
@@ -119,6 +136,13 @@
     {
       "name": "permitBound",
       "summary": "Authorized by a single-use permit. Retry with the same requestId and permit.",
+      "retry": "sameRequest",
+      "resolvable": false,
+      "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
+    },
+    {
+      "name": "replayOnly",
+      "summary": "Replay with the same requestId and input; resolveRequest cannot read the outcome.",
       "retry": "sameRequest",
       "resolvable": false,
       "retryBudget": {"maxAttempts": 3, "windowMs": 60000}
@@ -958,6 +982,102 @@
         "sets": ["request", "http"],
         "codes": ["INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
       }
+    },
+    {
+      "id": "beta.requestAccess",
+      "plane": "beta",
+      "kind": "mutation",
+      "field": "requestAccess",
+      "operationName": "BetaRequestAccess",
+      "summary": "Ask for access without a credential.",
+      "layer": "server",
+      "auth": [{"credential": "anon", "condition": "challenge"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "RequestAccessInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "optional"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "RequestAccessInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "Receipt", "nullable": false}},
+      "document": {
+        "text": "mutation BetaRequestAccess($context: ContextInput!, $input: RequestAccessInput!) {\n  requestAccess(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
+        "bytes": 181,
+        "selectedFields": 4,
+        "depth": 1
+      },
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
+    },
+    {
+      "id": "beta.claimWidget",
+      "plane": "beta",
+      "kind": "mutation",
+      "field": "claimWidget",
+      "operationName": "BetaClaimWidget",
+      "summary": "Claim a widget for an agent.",
+      "layer": "server",
+      "auth": [{"credential": "agentToken"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "ContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "ClaimWidgetInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "ContextInput",
+        "fields": [
+          {"name": "tenant", "use": "optional"},
+          {"name": "requestId", "use": "required"},
+          {"name": "attempt", "use": "optional"},
+          {"name": "permit", "use": "forbidden"},
+          {"name": "tags", "use": "optional"}
+        ]
+      },
+      "input": {"argument": "input", "type": "ClaimWidgetInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "Widget", "nullable": false}},
+      "document": {
+        "text": "mutation BetaClaimWidget($context: ContextInput!, $input: ClaimWidgetInput!) {\n  claimWidget(context: $context, input: $input) {\n    id\n    label\n    state\n    revision\n  }\n}",
+        "bytes": 174,
+        "selectedFields": 5,
+        "depth": 1
+      },
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": ["INVALID_REQUEST", "TRANSPORT_UNKNOWN", "UNAVAILABLE"]
+      }
     }
   ],
   "types": [
@@ -1467,6 +1587,21 @@
           }
         }
       ]
+    },
+    {
+      "name": "RequestAccessInput",
+      "kind": "input",
+      "planes": ["beta"],
+      "fields": [
+        {"name": "email", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "challenge", "type": {"kind": "scalar", "name": "String", "nullable": false}}
+      ]
+    },
+    {
+      "name": "ClaimWidgetInput",
+      "kind": "input",
+      "planes": ["beta"],
+      "fields": [{"name": "widgetId", "type": {"kind": "scalar", "name": "ID", "nullable": false}}]
     },
     {
       "name": "CreateWidgetInput",

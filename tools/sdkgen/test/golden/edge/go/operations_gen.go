@@ -91,6 +91,8 @@ func (c *AlphaClient) Redeem(ctx context.Context, permit string, input RedeemInp
 // Widgets.
 //
 // Bearer credential: serverKey. Scoped key for server runtimes.
+// Anonymous credential: anon. No credential; the input carries the proof.
+// Bearer credential: agentToken. Token an agent holds before it has a key.
 type BetaClient struct {
 	t *transport
 }
@@ -139,5 +141,29 @@ func (c *BetaClient) Widgets(ctx context.Context, input *WidgetsInput, opts ...C
 func (c *BetaClient) CreateWidget(ctx context.Context, input CreateWidgetInput, opts ...CallOption) (*Widget, error) {
 	var out *Widget
 	err := c.t.call(ctx, "beta.createWidget", input, nil, &out, opts)
+	return out, err
+}
+
+// RequestAccess calls the beta.requestAccess mutation.
+// Ask for access without a credential.
+//
+// Idempotency: replayOnly. Replay with the same requestId and input; resolveRequest cannot read the outcome.
+// Retry budget: 3 attempts within 60 seconds.
+// Sent without a bearer token as anon (condition: challenge).
+func (c *BetaClient) RequestAccess(ctx context.Context, input RequestAccessInput, opts ...CallOption) (*Receipt, error) {
+	var out *Receipt
+	err := c.t.call(ctx, "beta.requestAccess", input, nil, &out, opts)
+	return out, err
+}
+
+// ClaimWidget calls the beta.claimWidget mutation.
+// Claim a widget for an agent.
+//
+// Idempotency: replayOnly. Replay with the same requestId and input; resolveRequest cannot read the outcome.
+// Retry budget: 3 attempts within 60 seconds.
+// Authorized by agentToken.
+func (c *BetaClient) ClaimWidget(ctx context.Context, input ClaimWidgetInput, opts ...CallOption) (*Widget, error) {
+	var out *Widget
+	err := c.t.call(ctx, "beta.claimWidget", input, nil, &out, opts)
 	return out, err
 }
