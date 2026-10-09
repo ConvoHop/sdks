@@ -13,7 +13,9 @@ import android.view.WindowManager
 internal class ConvoHopAnswerActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Answering from the lock screen shouldn't ask to unlock first; the app's own screen decides.
+        // Android asks to unlock a secure lock screen before a notification action opens an activity, so the
+        // notification's Answer button needs an unlock. To answer without unlocking, the user answers on the
+        // app's incoming-call screen. Showing when locked matters only if this starts while the device is locked.
         if (Build.VERSION.SDK_INT >= 27) {
             setShowWhenLocked(true)
         } else {
