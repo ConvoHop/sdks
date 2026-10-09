@@ -1,0 +1,391 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "go",
+  "package": "github.com/ConvoHop/sdks/go/push",
+  "layer": "server",
+  "page": "push.md",
+  "symbols": [
+    {
+      "name": "APNSHeaders",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/push#APNSHeaders",
+      "anchor": "apnsheaders-struct",
+      "signatures": [
+        "type APNSHeaders struct {\n\tPushType   string `json:\"apns-push-type\"`\n\tTopic      string `json:\"apns-topic\"`\n\tPriority   string `json:\"apns-priority\"`\n\tExpiration string `json:\"apns-expiration\"`\n\tCollapseID string `json:\"apns-collapse-id,omitempty\"`\n}"
+      ],
+      "docs": "APNSHeaders are an APNs request's HTTP/2 headers, named by their JSON tags.",
+      "members": [
+        {
+          "name": "PushType",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#APNSHeaders.PushType",
+          "anchor": "apnsheaderspushtype-property",
+          "signatures": ["PushType string `json:\"apns-push-type\"`"],
+          "docs": "PushType is \"alert\" or \"voip\"."
+        },
+        {
+          "name": "Topic",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#APNSHeaders.Topic",
+          "anchor": "apnsheaderstopic-property",
+          "signatures": ["Topic string `json:\"apns-topic\"`"],
+          "docs": "Topic is the bundle ID for alerts and \\<bundle ID>.voip for VoIP pushes."
+        },
+        {
+          "name": "Priority",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#APNSHeaders.Priority",
+          "anchor": "apnsheaderspriority-property",
+          "signatures": ["Priority string `json:\"apns-priority\"`"],
+          "docs": "Priority is \"10\"."
+        },
+        {
+          "name": "Expiration",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#APNSHeaders.Expiration",
+          "anchor": "apnsheadersexpiration-property",
+          "signatures": ["Expiration string `json:\"apns-expiration\"`"],
+          "docs": "Expiration is the Unix seconds after which APNs stops trying to deliver."
+        },
+        {
+          "name": "CollapseID",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#APNSHeaders.CollapseID",
+          "anchor": "apnsheaderscollapseid-property",
+          "signatures": ["CollapseID string `json:\"apns-collapse-id,omitempty\"`"],
+          "docs": "CollapseID is set for incoming and missed calls: the ring's collapse key, so a missed-call alert replaces the ring's incoming-call alert."
+        }
+      ]
+    },
+    {
+      "name": "APNSRequest",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/push#APNSRequest",
+      "anchor": "apnsrequest-struct",
+      "signatures": [
+        "type APNSRequest struct {\n\tHeaders APNSHeaders     `json:\"headers\"`\n\tPayload json.RawMessage `json:\"payload\"`\n}"
+      ],
+      "docs": "APNSRequest is an APNs request. Your APNs client adds authorization and sends it to /3/device/\\<token>.",
+      "members": [
+        {
+          "name": "Headers",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#APNSRequest.Headers",
+          "anchor": "apnsrequestheaders-property",
+          "signatures": ["Headers APNSHeaders `json:\"headers\"`"],
+          "docs": ""
+        },
+        {
+          "name": "Payload",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#APNSRequest.Payload",
+          "anchor": "apnsrequestpayload-property",
+          "signatures": ["Payload json.RawMessage `json:\"payload\"`"],
+          "docs": "Payload is the request body as canonical JSON. Send it as it is."
+        }
+      ]
+    },
+    {
+      "name": "Error",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/push#Error",
+      "anchor": "error-struct",
+      "signatures": ["type Error struct {\n\tCode    Code\n\tMessage string\n}"],
+      "docs": "Error is a request that couldn't be built. Its message names the field but never contains its value.",
+      "members": [
+        {
+          "name": "Code",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#Error.Code",
+          "anchor": "errorcode-property",
+          "signatures": ["Code Code"],
+          "docs": ""
+        },
+        {
+          "name": "Message",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#Error.Message",
+          "anchor": "errormessage-property",
+          "signatures": ["Message string"],
+          "docs": ""
+        },
+        {
+          "name": "Error",
+          "kind": "method",
+          "ref": "github.com/ConvoHop/sdks/go/push#Error.Error",
+          "anchor": "errorerror-method",
+          "signatures": ["func (e *Error) Error() string"],
+          "docs": ""
+        },
+        {
+          "name": "Is",
+          "kind": "method",
+          "ref": "github.com/ConvoHop/sdks/go/push#Error.Is",
+          "anchor": "erroris-method",
+          "signatures": ["func (e *Error) Is(target error) bool"],
+          "docs": "Is reports whether target is the error's `Code`."
+        }
+      ]
+    },
+    {
+      "name": "FCMAndroidConfig",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/push#FCMAndroidConfig",
+      "anchor": "fcmandroidconfig-struct",
+      "signatures": [
+        "type FCMAndroidConfig struct {\n\tPriority    string `json:\"priority\"`\n\tTTL         string `json:\"ttl\"`\n\tCollapseKey string `json:\"collapse_key,omitempty\"`\n}"
+      ],
+      "docs": "FCMAndroidConfig is an FCM message's Android delivery options.",
+      "members": [
+        {
+          "name": "Priority",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#FCMAndroidConfig.Priority",
+          "anchor": "fcmandroidconfigpriority-property",
+          "signatures": ["Priority string `json:\"priority\"`"],
+          "docs": "Priority is \"HIGH\"."
+        },
+        {
+          "name": "TTL",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#FCMAndroidConfig.TTL",
+          "anchor": "fcmandroidconfigttl-property",
+          "signatures": ["TTL string `json:\"ttl\"`"],
+          "docs": "TTL is the remaining lifetime, such as \"3600s\"."
+        },
+        {
+          "name": "CollapseKey",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#FCMAndroidConfig.CollapseKey",
+          "anchor": "fcmandroidconfigcollapsekey-property",
+          "signatures": ["CollapseKey string `json:\"collapse_key,omitempty\"`"],
+          "docs": "CollapseKey is set for calls and cancellations: the ring's collapse key."
+        }
+      ]
+    },
+    {
+      "name": "FCMMessage",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/push#FCMMessage",
+      "anchor": "fcmmessage-struct",
+      "signatures": [
+        "type FCMMessage struct {\n\tData    map[string]string `json:\"data\"`\n\tAndroid FCMAndroidConfig  `json:\"android\"`\n}"
+      ],
+      "docs": "FCMMessage is an FCM data message.",
+      "members": [
+        {
+          "name": "Data",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#FCMMessage.Data",
+          "anchor": "fcmmessagedata-property",
+          "signatures": ["Data map[string]string `json:\"data\"`"],
+          "docs": "Data has one key, \"convohop\": the metadata as canonical JSON."
+        },
+        {
+          "name": "Android",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#FCMMessage.Android",
+          "anchor": "fcmmessageandroid-property",
+          "signatures": ["Android FCMAndroidConfig `json:\"android\"`"],
+          "docs": "Android is the REST API's form. Firebase Admin SDKs take it in their own form, such as a TTL duration."
+        }
+      ]
+    },
+    {
+      "name": "FCMRequest",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/push#FCMRequest",
+      "anchor": "fcmrequest-struct",
+      "signatures": ["type FCMRequest struct {\n\tMessage FCMMessage `json:\"message\"`\n}"],
+      "docs": "FCMRequest is the body of an FCM HTTP v1 messages:send request without a target: add message.token or message.fid before you send it.",
+      "members": [
+        {
+          "name": "Message",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#FCMRequest.Message",
+          "anchor": "fcmrequestmessage-property",
+          "signatures": ["Message FCMMessage `json:\"message\"`"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebPushHeaders",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/push#WebPushHeaders",
+      "anchor": "webpushheaders-struct",
+      "signatures": [
+        "type WebPushHeaders struct {\n\tTTL     string `json:\"TTL\"`\n\tUrgency string `json:\"Urgency\"`\n\tTopic   string `json:\"Topic,omitempty\"`\n}"
+      ],
+      "docs": "WebPushHeaders are a Web Push message's headers, named by their JSON tags.",
+      "members": [
+        {
+          "name": "TTL",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#WebPushHeaders.TTL",
+          "anchor": "webpushheadersttl-property",
+          "signatures": ["TTL string `json:\"TTL\"`"],
+          "docs": "TTL is the remaining lifetime in seconds."
+        },
+        {
+          "name": "Urgency",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#WebPushHeaders.Urgency",
+          "anchor": "webpushheadersurgency-property",
+          "signatures": ["Urgency string `json:\"Urgency\"`"],
+          "docs": "Urgency is \"normal\" for messages and \"high\" for calls and cancellations."
+        },
+        {
+          "name": "Topic",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#WebPushHeaders.Topic",
+          "anchor": "webpushheaderstopic-property",
+          "signatures": ["Topic string `json:\"Topic,omitempty\"`"],
+          "docs": "Topic is set for calls and cancellations: the ring's collapse key."
+        }
+      ]
+    },
+    {
+      "name": "WebPushRequest",
+      "kind": "struct",
+      "ref": "github.com/ConvoHop/sdks/go/push#WebPushRequest",
+      "anchor": "webpushrequest-struct",
+      "signatures": [
+        "type WebPushRequest struct {\n\tHeaders WebPushHeaders  `json:\"headers\"`\n\tPayload json.RawMessage `json:\"payload\"`\n}"
+      ],
+      "docs": "WebPushRequest is a Web Push message for your Web Push library, which encrypts the payload (RFC 8291) and signs the request (VAPID).",
+      "members": [
+        {
+          "name": "Headers",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#WebPushRequest.Headers",
+          "anchor": "webpushrequestheaders-property",
+          "signatures": ["Headers WebPushHeaders `json:\"headers\"`"],
+          "docs": "Headers are RFC 8030 headers. Where your library sets TTL, Urgency or Topic from its own options, pass the values there, or its defaults replace them."
+        },
+        {
+          "name": "Payload",
+          "kind": "property",
+          "ref": "github.com/ConvoHop/sdks/go/push#WebPushRequest.Payload",
+          "anchor": "webpushrequestpayload-property",
+          "signatures": ["Payload json.RawMessage `json:\"payload\"`"],
+          "docs": "Payload is the plaintext as canonical JSON. Encrypt it as it is."
+        }
+      ]
+    },
+    {
+      "name": "Code",
+      "kind": "enum",
+      "ref": "github.com/ConvoHop/sdks/go/push#Code",
+      "anchor": "code-enum",
+      "signatures": ["type Code string"],
+      "docs": "Code is why a request couldn't be built. Code implements error so that errors.Is(err, CodeInvalidEvent) matches an `*Error` with that code.",
+      "members": [
+        {
+          "name": "CodeInvalidOptions",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/push#Code.CodeInvalidOptions",
+          "anchor": "codecodeinvalidoptions-case",
+          "signatures": ["const CodeInvalidOptions Code = \"INVALID_OPTIONS\""],
+          "docs": "CodeInvalidOptions means an option is nil or invalid: a title or body that isn't valid UTF-8, a nil clock, or a bundle ID that isn't an app bundle ID. Options are checked first."
+        },
+        {
+          "name": "CodeInvalidEvent",
+          "kind": "case",
+          "ref": "github.com/ConvoHop/sdks/go/push#Code.CodeInvalidEvent",
+          "anchor": "codecodeinvalidevent-case",
+          "signatures": ["const CodeInvalidEvent Code = \"INVALID_EVENT\""],
+          "docs": "CodeInvalidEvent means the event doesn't match the push payload contract."
+        },
+        {
+          "name": "Error",
+          "kind": "method",
+          "ref": "github.com/ConvoHop/sdks/go/push#Code.Error",
+          "anchor": "codeerror-method",
+          "signatures": ["func (c Code) Error() string"],
+          "docs": "Error returns the code as an error message."
+        }
+      ]
+    },
+    {
+      "name": "Option",
+      "kind": "type",
+      "ref": "github.com/ConvoHop/sdks/go/push#Option",
+      "anchor": "option-type",
+      "signatures": ["type Option func(*settings)"],
+      "docs": "Option configures a builder."
+    },
+    {
+      "name": "APNSAlert",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/push#APNSAlert",
+      "anchor": "apnsalert-function",
+      "signatures": [
+        "func APNSAlert(event *webhooks.Notification, bundleID string, options ...Option) (*APNSRequest, error)"
+      ],
+      "docs": "APNSAlert builds an APNs alert for a message, an incoming call or a missed call (a cancellation with reason ended or expired), and returns nil for other cancellations. The payload is at most 4096 bytes. bundleID is the app's bundle ID, the alert's topic."
+    },
+    {
+      "name": "APNSVoIP",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/push#APNSVoIP",
+      "anchor": "apnsvoip-function",
+      "signatures": [
+        "func APNSVoIP(event *webhooks.Notification, bundleID string, options ...Option) (*APNSRequest, error)"
+      ],
+      "docs": "APNSVoIP builds an APNs VoIP push for an incoming call, and returns nil for other events. iOS requires you to report every VoIP push to CallKit as a call. The payload is at most 5120 bytes. bundleID is the app's bundle ID; the push's topic is \\<bundleID>.voip."
+    },
+    {
+      "name": "FCM",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/push#FCM",
+      "anchor": "fcm-function",
+      "signatures": [
+        "func FCM(event *webhooks.Notification, options ...Option) (*FCMRequest, error)"
+      ],
+      "docs": "FCM builds an FCM data message for any notification event. Its data, as JSON, is at most 4096 bytes."
+    },
+    {
+      "name": "WebPush",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/push#WebPush",
+      "anchor": "webpush-function",
+      "signatures": [
+        "func WebPush(event *webhooks.Notification, options ...Option) (*WebPushRequest, error)"
+      ],
+      "docs": "WebPush builds a Web Push message for any notification event. The payload is at most 3993 bytes, the RFC 8291 plaintext limit."
+    },
+    {
+      "name": "WithBody",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/push#WithBody",
+      "anchor": "withbody-function",
+      "signatures": ["func WithBody(body string) Option"],
+      "docs": "WithBody sets the visible body. It replaces a message event's preview. An empty body is omitted."
+    },
+    {
+      "name": "WithClock",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/push#WithClock",
+      "anchor": "withclock-function",
+      "signatures": ["func WithClock(now func() time.Time) Option"],
+      "docs": "WithClock replaces time.Now for the TTL and expiration. Use it in tests."
+    },
+    {
+      "name": "WithTitle",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/push#WithTitle",
+      "anchor": "withtitle-function",
+      "signatures": ["func WithTitle(title string) Option"],
+      "docs": "WithTitle sets the visible title, such as the sender's or the conversation's name. An empty title is omitted."
+    },
+    {
+      "name": "WithoutPreview",
+      "kind": "function",
+      "ref": "github.com/ConvoHop/sdks/go/push#WithoutPreview",
+      "anchor": "withoutpreview-function",
+      "signatures": ["func WithoutPreview() Option"],
+      "docs": "WithoutPreview stops a message event's preview from becoming the body when there is no `WithBody`."
+    }
+  ]
+}

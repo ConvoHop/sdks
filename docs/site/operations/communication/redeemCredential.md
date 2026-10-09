@@ -88,3 +88,4 @@ mutation CommunicationRedeemCredential($context: RequestContextInput!, $input: R
 | [Python](../../python/reference/operations.md) | Not wrapped by a method |
 | [.NET](../../dotnet/reference/operations.md) | [`CommunicationApi.RedeemCredentialAsync`](../../dotnet/reference/api.md#communicationapiredeemcredentialasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.redeemCredential`](../../jvm/reference/server.md#communicationapiredeemcredential-method), [`CommunicationSuspendApi.redeemCredential`](../../jvm/reference/server-kotlin.md#communicationsuspendapiredeemcredential-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.RedeemCredential`](../../go/reference/convohop.md#projectclientredeemcredential-method) |

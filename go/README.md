@@ -362,11 +362,11 @@ http.HandleFunc("POST /convohop/webhooks", func(w http.ResponseWriter, r *http.R
 	}
 	delivery, err := webhooks.Verify(body, r.Header, webhookSecrets)
 	var failure *webhooks.Error
-	if errors.As(err, &failure) {
+	if errors.As(err, &failure) && failure.Code != webhooks.CodeInvalidSecret {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError) // Invalid options: fix your configuration.
+		w.WriteHeader(http.StatusInternalServerError) // INVALID_SECRET or an invalid option: fix your configuration.
 		return
 	}
 	queue.AddOnce(delivery.WebhookID, delivery.Event) // Process after responding.
@@ -435,11 +435,11 @@ ConvoHop doesn't send push notifications for you
 The `push` package builds APNs, FCM and Web Push requests from a
 notification event, following the
 [push payload contract](../spec/push-payload/README.md). The builders hold
-no credentials and send nothing: your push library adds the device token and
-the provider's authorization, encrypts and VAPID-signs Web Push messages,
-and sends them. Subscribe a webhook endpoint to `notification.message`,
-`notification.call` and `notification.callCancelled`, and de-duplicate on
-the event ID.
+no credentials and send nothing: your push library adds the device's token
+or FID and the provider's authorization, encrypts and VAPID-signs Web Push
+messages, and sends them. Subscribe a webhook endpoint to
+`notification.message`, `notification.call` and
+`notification.callCancelled`, and de-duplicate on the event ID.
 
 ```go
 import "github.com/ConvoHop/sdks/go/push"
@@ -469,7 +469,7 @@ cancellation at its `expiresAt`.
 | --- | --- | --- | --- |
 | `APNSAlert(event, bundleID, options...)` | APNs `Headers` and `Payload` for an alert | Stale events, and a `notification.callCancelled` that isn't a missed call | 4096 of the payload |
 | `APNSVoIP(event, bundleID, options...)` | APNs headers and payload for a PushKit VoIP push, on the `<bundleID>.voip` topic | Stale calls, and every event but `notification.call` | 5120 of the payload |
-| `FCM(event, options...)` | The body of an FCM HTTP v1 `messages:send` request without a target, with Android options. Add the target, such as `token`. | Stale events | 4096 of the data |
+| `FCM(event, options...)` | The body of an FCM HTTP v1 `messages:send` request without a target, with Android options. Add `token` or `fid`. | Stale events | 4096 of the data |
 | `WebPush(event, options...)` | RFC 8030 headers (`TTL`, `Urgency` and `Topic`) and a payload for your library to encrypt | Stale events | 3993 of the payload, the RFC 8291 plaintext limit |
 
 `WithTitle` and `WithBody` set the visible text, such as the sender's name.
@@ -483,6 +483,13 @@ and `&`, can grow them past the limit. See the
 [push payload contract](../spec/push-payload/README.md) for the rules, and
 [Calls on iOS](../spec/push-payload/README.md#calls-on-ios) for why VoIP
 pushes are for `notification.call` only.
+
+An FCM message goes to the target that the Android app registered: its
+registration `token` by default, or its `fid`, the Firebase Installation ID,
+when the app's manifest sets `firebase_messaging_installation_id_enabled`.
+The Firebase Admin SDK for Go, `firebase.google.com/go/v4`, sends to a FID
+from 4.21.0, with `messaging.Message{Fid: ...}`. That version marks
+`Message.Token` deprecated, and still sends to it.
 
 A builder that can't build a request returns a `*push.Error` whose message
 names the field but never contains its value. `INVALID_OPTIONS`, checked
@@ -524,6 +531,19 @@ go -C conformance/drivers/go build -o build/conformance-driver .
 npm run conformance -- --driver conformance/drivers/go/build/conformance-driver
 ```
 
+Two more modules serve the [Go docs](../docs/site/go/index.md): the
+extractor reads the SDK's public API for the
+[docs pipeline](../docs/docs-pipeline.md), and the examples hold the code
+that the docs include. The examples' tests start the conformance mock, so
+they need Node.js 22 or later and `npm ci` at the repository root. After you
+change the public API, from the repository root:
+
+```sh
+npm run extract:docs -- go   # refresh docs/languages/go/surface.json
+npm run generate:docs        # regenerate docs/site
+npm run test:docs -- go      # run the docs examples
+```
+
 The `*_gen.go` files are generated from the schemas: never edit them. From
 the repository root, `npm run generate:graphql` regenerates them and
 `npm run check:graphql` checks them. See
@@ -538,3 +558,5 @@ the repository root, `npm run generate:graphql` regenerates them and
 | `internal/contract/` | The push payload contract's value rules, shared by `webhooks` and `push` |
 | `internal/spectest/` | Reads the shared vectors in `../spec` in tests |
 | [`../conformance/drivers/go`](../conformance/drivers/go) | The conformance driver |
+| [`../tools/docgen/extractors/go`](../tools/docgen/extractors/go) | The public API extractor that the docs generator runs |
+| [`../docs/languages/go/examples`](../docs/languages/go/examples) | The code that the Go docs include, and its tests |

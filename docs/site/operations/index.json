@@ -63,6 +63,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapicapabilities-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.Capabilities",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientcapabilities-method"
+          }
         ]
       }
     },
@@ -152,6 +159,18 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.route",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiroute-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.Route",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientroute-method"
+          },
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.Initialize",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientinitialize-method"
           }
         ]
       }
@@ -246,6 +265,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getPrincipal",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapigetprincipal-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.GetPrincipal",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientgetprincipal-method"
           }
         ]
       }
@@ -342,6 +368,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapigetconversation-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.GetConversation",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientgetconversation-method"
+          }
         ]
       }
     },
@@ -431,6 +464,18 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.membersPages",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapimemberspages-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.Members",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientmembers-method"
+          },
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.MembersPages",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientmemberspages-method"
           }
         ]
       }
@@ -562,6 +607,18 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapimessagespages-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.Messages",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientmessages-method"
+          },
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.MessagesPages",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientmessagespages-method"
+          }
         ]
       }
     },
@@ -651,6 +708,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getMessage",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapigetmessage-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.GetMessage",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientgetmessage-method"
           }
         ]
       }
@@ -835,6 +899,18 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiinboxpages-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.Inbox",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientinbox-method"
+          },
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.InboxPages",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientinboxpages-method"
+          }
         ]
       }
     },
@@ -919,6 +995,18 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.searchPages",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisearchpages-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.Search",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientsearch-method"
+          },
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.SearchPages",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientsearchpages-method"
           }
         ]
       }
@@ -1050,6 +1138,18 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiresolverequest-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.ResolveRequest",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientresolverequest-method"
+          },
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.Retry",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientretry-method"
+          }
         ]
       }
     },
@@ -1110,6 +1210,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapigetoperation-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.GetOperation",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientgetoperation-method"
+          }
         ]
       }
     },
@@ -1169,6 +1276,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.conversationMute",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiconversationmute-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.ConversationMute",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientconversationmute-method"
           }
         ]
       }
@@ -1239,6 +1353,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.currentLiveSession",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapicurrentlivesession-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.CurrentLiveSession",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientcurrentlivesession-method"
           }
         ]
       }
@@ -1325,6 +1446,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapilivesession-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.LiveSession",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientlivesession-method"
+          }
         ]
       }
     },
@@ -1410,6 +1538,18 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapilivesessionspages-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessions",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientlivesessions-method"
+          },
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessionsPages",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientlivesessionspages-method"
+          }
         ]
       }
     },
@@ -1494,6 +1634,18 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionParticipantsPages",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapilivesessionparticipantspages-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessionParticipants",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientlivesessionparticipants-method"
+          },
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessionParticipantsPages",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientlivesessionparticipantspages-method"
           }
         ]
       }
@@ -1604,6 +1756,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapilivesessionoperation-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessionOperation",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientlivesessionoperation-method"
+          }
         ]
       }
     },
@@ -1663,6 +1822,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.sessionRequestOutcome",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisessionrequestoutcome-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.SessionRequestOutcome",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientsessionrequestoutcome-method"
           }
         ]
       }
@@ -1729,6 +1895,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapicreateprincipal-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.CreatePrincipal",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientcreateprincipal-method"
+          }
         ]
       }
     },
@@ -1788,6 +1961,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.disablePrincipal",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapidisableprincipal-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.DisablePrincipal",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientdisableprincipal-method"
           }
         ]
       }
@@ -1854,6 +2034,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiissuesession-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.IssueSession",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientissuesession-method"
+          }
         ]
       }
     },
@@ -1914,6 +2101,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapirenewsession-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.RenewSession",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientrenewsession-method"
+          }
         ]
       }
     },
@@ -1973,6 +2167,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.revokeSession",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapirevokesession-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.RevokeSession",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientrevokesession-method"
           }
         ]
       }
@@ -2039,6 +2240,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapicreateconversation-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.CreateConversation",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientcreateconversation-method"
+          }
         ]
       }
     },
@@ -2093,6 +2301,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.updateConversation",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiupdateconversation-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.UpdateConversation",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientupdateconversation-method"
           }
         ]
       }
@@ -2153,6 +2368,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.addMember",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiaddmember-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.AddMember",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientaddmember-method"
           }
         ]
       }
@@ -2219,6 +2441,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiaddmembers-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.AddMembers",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientaddmembers-method"
+          }
         ]
       }
     },
@@ -2279,6 +2508,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiremovemember-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.RemoveMember",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientremovemember-method"
+          }
         ]
       }
     },
@@ -2333,6 +2569,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.historyGrant",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapihistorygrant-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.HistoryGrant",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclienthistorygrant-method"
           }
         ]
       }
@@ -2429,6 +2672,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisendmessage-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.SendMessage",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientsendmessage-method"
+          }
         ]
       }
     },
@@ -2499,6 +2749,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapieditmessage-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.EditMessage",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclienteditmessage-method"
+          }
         ]
       }
     },
@@ -2568,6 +2825,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.deleteMessage",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapideletemessage-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.DeleteMessage",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientdeletemessage-method"
           }
         ]
       }
@@ -2717,6 +2981,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisetbroadcastpermission-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.SetBroadcastPermission",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientsetbroadcastpermission-method"
+          }
         ]
       }
     },
@@ -2776,6 +3047,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.setConversationMute",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisetconversationmute-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.SetConversationMute",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientsetconversationmute-method"
           }
         ]
       }
@@ -2885,6 +3163,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapialertlivesession-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.AlertLiveSession",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientalertlivesession-method"
+          }
         ]
       }
     },
@@ -2964,6 +3249,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiendlivesession-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.EndLiveSession",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientendlivesession-method"
+          }
         ]
       }
     },
@@ -3036,6 +3328,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiredeemcredential-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.RedeemCredential",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientredeemcredential-method"
+          }
         ]
       }
     },
@@ -3068,6 +3367,13 @@
             "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.acknowledgeCredential",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiacknowledgecredential-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ProjectClient.AcknowledgeCredential",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#projectclientacknowledgecredential-method"
           }
         ]
       }
@@ -3162,6 +3468,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapicapabilities-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.Capabilities",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientcapabilities-method"
+          }
         ]
       }
     },
@@ -3205,6 +3518,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizations",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiorganizations-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.Organizations",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientorganizations-method"
           }
         ]
       }
@@ -3250,6 +3570,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapigetorganization-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.GetOrganization",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientgetorganization-method"
+          }
         ]
       }
     },
@@ -3293,6 +3620,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getDeployment",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapigetdeployment-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.GetDeployment",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientgetdeployment-method"
           }
         ]
       }
@@ -3338,6 +3672,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapigetproject-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.GetProject",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientgetproject-method"
+          }
         ]
       }
     },
@@ -3381,6 +3722,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.deploymentHealth",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapideploymenthealth-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.DeploymentHealth",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientdeploymenthealth-method"
           }
         ]
       }
@@ -3426,6 +3774,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapideploymentusage-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.DeploymentUsage",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientdeploymentusage-method"
+          }
         ]
       }
     },
@@ -3470,6 +3825,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiprojectusage-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.ProjectUsage",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientprojectusage-method"
+          }
         ]
       }
     },
@@ -3513,6 +3875,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizationUsage",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiorganizationusage-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.OrganizationUsage",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientorganizationusage-method"
           }
         ]
       }
@@ -3569,6 +3938,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiwebhookendpoints-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.WebhookEndpoints",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientwebhookendpoints-method"
+          }
         ]
       }
     },
@@ -3612,6 +3988,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.webhookDeliveries",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiwebhookdeliveries-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.WebhookDeliveries",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientwebhookdeliveries-method"
           }
         ]
       }
@@ -3682,6 +4065,18 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiresolverequest-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.ResolveRequest",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientresolverequest-method"
+          },
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.Retry",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientretry-method"
+          }
         ]
       }
     },
@@ -3736,6 +4131,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getOperation",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapigetoperation-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.GetOperation",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientgetoperation-method"
           }
         ]
       }
@@ -3792,6 +4194,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapicreateorganization-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.CreateOrganization",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientcreateorganization-method"
+          }
         ]
       }
     },
@@ -3847,6 +4256,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapicreatedeployment-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.CreateDeployment",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientcreatedeployment-method"
+          }
         ]
       }
     },
@@ -3901,6 +4317,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createProject",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapicreateproject-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.CreateProject",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientcreateproject-method"
           }
         ]
       }
@@ -3962,6 +4385,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiissuebackendkey-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.IssueBackendKey",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientissuebackendkey-method"
+          }
         ]
       }
     },
@@ -4006,6 +4436,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapirevokebackendkey-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.RevokeBackendKey",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientrevokebackendkey-method"
+          }
         ]
       }
     },
@@ -4049,6 +4486,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.projectPolicy",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiprojectpolicy-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.ProjectPolicy",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientprojectpolicy-method"
           }
         ]
       }
@@ -4105,6 +4549,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapicredentialpermit-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.CredentialPermit",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientcredentialpermit-method"
+          }
         ]
       }
     },
@@ -4149,6 +4600,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapipauseoperation-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.PauseOperation",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientpauseoperation-method"
+          }
         ]
       }
     },
@@ -4192,6 +4650,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.resumeOperation",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiresumeoperation-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.ResumeOperation",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientresumeoperation-method"
           }
         ]
       }
@@ -4259,6 +4724,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiconfigurewebhook-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.ConfigureWebhook",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientconfigurewebhook-method"
+          }
         ]
       }
     },
@@ -4302,6 +4774,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.updateWebhook",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapiupdatewebhook-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.UpdateWebhook",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientupdatewebhook-method"
           }
         ]
       }
@@ -4347,6 +4826,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapirotatewebhooksecret-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.RotateWebhookSecret",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientrotatewebhooksecret-method"
+          }
         ]
       }
     },
@@ -4391,6 +4877,13 @@
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapidisablewebhook-method"
           }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.DisableWebhook",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientdisablewebhook-method"
+          }
         ]
       }
     },
@@ -4434,6 +4927,13 @@
             "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.replayWebhookDeliveries",
             "package": "com.convohop:convohop-server-kotlin",
             "page": "../jvm/reference/server-kotlin.md#managementsuspendapireplaywebhookdeliveries-method"
+          }
+        ],
+        "go": [
+          {
+            "ref": "github.com/ConvoHop/sdks/go#ManagementClient.ReplayWebhookDeliveries",
+            "package": "github.com/ConvoHop/sdks/go",
+            "page": "../go/reference/convohop.md#managementclientreplaywebhookdeliveries-method"
           }
         ]
       }
