@@ -1,0 +1,30 @@
+<Project>
+  <!--
+    Compiles an sdkgen edge golden ($(EdgeGolden) under tools/sdkgen/test/golden) against the runtime sources that
+    generated code uses, so emitter changes that render C# which does not compile fail the build. Not packed or published.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net10.0</TargetFrameworks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>ConvoHop</RootNamespace>
+    <Golden>$(MSBuildThisFileDirectory)../../tools/sdkgen/test/golden/</Golden>
+    <Runtime>$(MSBuildThisFileDirectory)../src/ConvoHop/</Runtime>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="System.Text.Json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(Runtime)OperationDescriptor.cs" Link="Runtime/OperationDescriptor.cs" />
+    <Compile Include="$(Runtime)Internal/IOperationExecutor.cs" Link="Runtime/IOperationExecutor.cs" />
+    <Compile Include="$(Runtime)Internal/IsExternalInit.cs" Link="Runtime/IsExternalInit.cs" />
+    <Compile Include="$(Runtime)Internal/PageSequence.cs" Link="Runtime/PageSequence.cs" />
+    <Compile Include="$(Runtime)Internal/Protocol.cs" Link="Runtime/Protocol.cs" />
+    <Compile Include="$(Runtime)Internal/TypeShape.cs" Link="Runtime/TypeShape.cs" />
+    <Compile Include="$(Golden)$(EdgeGolden)/dotnet/src/ConvoHop/Generated/*.cs" LinkBase="Generated" />
+  </ItemGroup>
+</Project>

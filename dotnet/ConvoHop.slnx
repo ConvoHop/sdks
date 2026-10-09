@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ConvoHop/ConvoHop.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/ConvoHop.SdkgenEdge.AllLayers/ConvoHop.SdkgenEdge.AllLayers.csproj" />
+    <Project Path="test/ConvoHop.SdkgenEdge/ConvoHop.SdkgenEdge.csproj" />
+    <Project Path="test/ConvoHop.Tests/ConvoHop.Tests.csproj" />
+  </Folder>
+</Solution>
