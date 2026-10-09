@@ -1,2 +1,3 @@
-gradlew.bat text eol=crlf
+# Dependabot commits Gradle's CRLF bytes through the API, bypassing normalization.
+gradlew.bat -text
 *.jar binary
