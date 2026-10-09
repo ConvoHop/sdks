@@ -15,7 +15,7 @@ work, what the packages are called, and how they're versioned and supported.
 
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
-| Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md); .NET: [`ConvoHop`](../dotnet/README.md) |
+| Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md); .NET: [`ConvoHop`](../dotnet/README.md); Go: [`github.com/ConvoHop/sdks/go`](../go/README.md) |
 | Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
@@ -125,7 +125,7 @@ sequenceDiagram
 | Python | Synchronous and `asyncio` clients | Planned |
 | .NET (C#) | `async` methods with `CancellationToken` | Source available |
 | Java and Kotlin | Java core, plus Kotlin coroutine extensions | Source available |
-| Go | `context.Context` first | Planned |
+| Go | `context.Context` first | Source available |
 
 We don't plan PHP or Ruby SDKs. From any other language you can call the
 GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
@@ -177,7 +177,9 @@ a TypeScript reference driver against a deterministic mock, and can target a
 real deployment. The [JVM server SDK](../jvm/README.md) adds a Java and
 Kotlin generator and its own conformance driver. The
 [.NET server SDK](../dotnet/README.md) adds a C# generator and its own
-conformance driver. Generators for the other languages are in development.
+conformance driver. The [Go server SDK](../go/README.md) adds a Go
+generator and its own conformance driver. Generators for the other
+languages are in development.
 The same IR generates the operation catalog of the `convohop` command-line
 tool ([`packages/cli`](../packages/cli/README.md)) and the tools of an MCP
 server for AI agents ([`packages/mcp`](../packages/mcp/README.md)). Neither is
@@ -398,7 +400,7 @@ release.
 | Python | 3.11 and later |
 | .NET | Targets `netstandard2.0`, for .NET Framework 4.7.2 and later, and the current .NET LTS release (`net10.0` today). Tested on .NET 8, 9 and 10; .NET Framework isn't tested yet. |
 | Java and Kotlin | Java 11 and later, tested on Java 11, 17, 21 and 25 |
-| Go | The two most recent Go releases, matching Go's own support policy |
+| Go | The two most recent Go releases, matching Go's own support policy: Go 1.26 and 1.27 today |
 | Web | The current and previous major versions of Chrome, Edge, Firefox and Safari. Calls need WebRTC. |
 | React | 18 and later |
 | iOS and macOS | iOS 15 and later, macOS 12 and later |
@@ -407,8 +409,9 @@ release.
 | Flutter | The current stable release |
 
 Today, CI verifies the TypeScript packages on Node.js 22 and 24, the Java
-and Kotlin SDK on Java 11, 17, 21 and 25, and the .NET SDK on .NET 8, 9 and
-10. Each other row becomes a CI requirement when that SDK lands.
+and Kotlin SDK on Java 11, 17, 21 and 25, the .NET SDK on .NET 8, 9 and 10,
+and the Go SDK on the two most recent Go releases. Each other row becomes a
+CI requirement when that SDK lands.
 
 For the Web row, CI runs the Web client's browser tests in Playwright's
 current builds of Chromium, Firefox and WebKit. For the React row, it runs

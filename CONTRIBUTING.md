@@ -68,6 +68,18 @@ dotnet test dotnet/test/ConvoHop.Tests -f net10.0   # the tests on .NET 10
 tests on .NET 8 and 9, how to pack the library and how to run the
 conformance scenarios with its driver.
 
+The [Go server SDK](go/README.md) is its own module in `go/`, with no
+dependencies. Build and test it with Go 1.26 or later:
+
+```sh
+cd go
+go vet ./...
+CONVOHOP_REQUIRE_SPEC=1 go test -race ./...
+```
+
+[Build and test](go/README.md#build-and-test) explains how to run the
+conformance scenarios with its driver.
+
 ## Repository layout
 
 | Path | Contents |
@@ -78,6 +90,7 @@ conformance scenarios with its driver.
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
 | `jvm/` | Java and Kotlin server SDK (`com.convohop:convohop-server` and `com.convohop:convohop-server-kotlin`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/jvm/` |
 | `dotnet/` | .NET server SDK (`ConvoHop`), its xUnit tests and the projects that compile the C# generator goldens. Its conformance driver is in `conformance/drivers/dotnet/` |
+| `go/` | Go server SDK (`github.com/ConvoHop/sdks/go`), a Go module with no dependencies. Its conformance driver is a separate module in `conformance/drivers/go/` |
 | `packages/cli` | The `convohop` command-line tool (`@convohop/cli`), built on `@convohop/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
 | `packages/mcp` | An MCP server (`@convohop/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
@@ -129,6 +142,7 @@ files from the IR:
 - `jvm/convohop-server/src/generated/java/` and
   `jvm/convohop-server-kotlin/src/generated/kotlin/`
 - `dotnet/src/ConvoHop/Generated/`
+- `go/*_gen.go`
 
 ```sh
 npm run generate:graphql   # regenerate after a schema or annotation change
@@ -256,6 +270,8 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   `jvm/*/src/test/` and run with `./gradlew test` in `jvm/`.
 - The .NET SDK's tests use xUnit. They live in `dotnet/test/ConvoHop.Tests/`
   and run with `dotnet test`.
+- The Go SDK's tests use the standard `testing` package. They live next to
+  the code in `go/` and run with `go test ./...` in `go/`.
 
 ## SDK design rules
 

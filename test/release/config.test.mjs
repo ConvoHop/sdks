@@ -11,6 +11,7 @@ import {
   readPackageManifest,
   releaseTypeOf,
   REPO_ROOT,
+  REPOSITORY,
   REPOSITORY_URL,
   tagName,
 } from '../../scripts/release/lib.mjs';
@@ -120,6 +121,25 @@ test('tags are <component>-v<version> and unique per package', () => {
   const prefixes = Object.keys(config.packages).map((path) => tagName(config, path, ''));
   for (const prefix of prefixes) {
     assert.equal(prefixes.filter((other) => other.startsWith(prefix)).length, 1, `${prefix} overlaps another tag prefix`);
+  }
+});
+
+test('the Go module matches its planned go/vX.Y.Z tags and carries LICENSE and NOTICE', () => {
+  // Go finds the versions of a module in a subdirectory by tags that start with
+  // that directory. Until release.yml can release Go, the entry is the one
+  // RELEASING.md plans; see "Adding a package or language".
+  const entry = config.packages.go ?? { 'release-type': 'go', component: 'go', 'tag-separator': '/' };
+  const planned = { ...config, packages: { ...config.packages, go: entry } };
+  const goMod = readFileSync(join(REPO_ROOT, 'go', 'go.mod'), 'utf8');
+  assert.equal(/^module (\S+)$/m.exec(goMod)?.[1], `github.com/${REPOSITORY}/go`);
+  assert.equal(tagName(planned, 'go', '0.1.0'), 'go/v0.1.0');
+  const prefixes = Object.keys(planned.packages).map((path) => tagName(planned, path, ''));
+  for (const prefix of prefixes) {
+    assert.equal(prefixes.filter((other) => other.startsWith(prefix)).length, 1, `${prefix} overlaps another tag prefix`);
+  }
+  // A module zip holds only the files under go/.
+  for (const file of ['LICENSE', 'NOTICE']) {
+    assert.ok(readFileSync(join(REPO_ROOT, 'go', file)).equals(readFileSync(join(REPO_ROOT, file))), `go/${file} must copy the root ${file}`);
   }
 });
 
