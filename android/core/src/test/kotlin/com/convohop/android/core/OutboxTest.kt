@@ -3,6 +3,7 @@ package com.convohop.android.core
 import com.convohop.android.core.FakeAuthority.Fault
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -219,5 +220,212 @@ class OutboxTest {
             assertEquals(listOf("world"), h.authority.messages(second).map { it.text })
             assertEquals(listOf(hello.requestId, hello.requestId, hello.requestId, world.requestId), h.sends())
         }
+    }
+
+    @Test
+    fun aRateLimitedMessageWaitsOutTheAuthoritysRetryAfter() = runTest {
+        Harness(this).use { h ->
+            val conversation = h.authority.conversation()
+            h.authority.fail("CommunicationSendMessage", Fault.Problem("RATE_LIMITED", 429, retryAfter = 7))
+            val store = h.store()
+
+            val queued = store.outbox.send(conversation, "later")
+            h.settle()
+
+            val entry = store.outbox.pending.value.single()
+            assertEquals(listOf<Any?>(PendingState.QUEUED, "RATE_LIMITED"), listOf(entry.state, entry.errorCode))
+            // Reported for logging only: the message waits instead of failing.
+            assertEquals(listOf("RATE_LIMITED"), h.errorCodes())
+            h.advance(6_999)
+            store.outbox.drain()
+            h.settle()
+            assertEquals("Nothing is sent before the authority's delay", listOf(queued.requestId), h.sends())
+            h.advance(1)
+            assertEquals(listOf(PendingState.SENT), store.states())
+            assertEquals(listOf(queued.requestId, queued.requestId), h.sends())
+        }
+    }
+
+    @Test
+    fun aRefusalNoRetryCanChangeFailsAtOnceWhileOtherFailuresKeepTheRequest() = runTest {
+        for ((code, status, retryAfter) in listOf(
+            Triple("QUOTA_EXCEEDED", 429, 60L), Triple("PLAN_LIMIT_EXCEEDED", 403, null), Triple("MEMBERSHIP_COUNT_INVALID", 503, null),
+        )) {
+            Harness(this).use { h ->
+                val conversation = h.authority.conversation()
+                h.authority.fail("CommunicationSendMessage", Fault.Problem(code, status, retryAfter = retryAfter))
+                val store = h.store()
+
+                val refused = store.outbox.send(conversation, "refused")
+                h.settle()
+
+                val entry = store.outbox.pending.value.single()
+                assertEquals(code, listOf<Any?>(PendingState.FAILED, code), listOf(entry.state, entry.errorCode))
+                assertEquals(listOf(code), h.errorCodes())
+                h.advance(600_000)
+                store.outbox.drain()
+                h.settle()
+                assertEquals("$code is never sent again", listOf(refused.requestId), h.sends())
+            }
+        }
+        // A code the schema doesn't list is judged by its status.
+        for ((code, status) in listOf("AUTHORITY_UNAVAILABLE" to 503, "HTTP_FAILURE" to 408, "RATE_LIMITED" to 429, "UNLISTED_FAILURE" to 502)) {
+            Harness(this).use { h ->
+                val conversation = h.authority.conversation()
+                h.authority.fail("CommunicationSendMessage", Fault.Problem(code, status))
+                val store = h.store()
+
+                val queued = store.outbox.send(conversation, "later")
+                h.settle()
+
+                val entry = store.outbox.pending.value.single()
+                assertEquals(code, listOf<Any?>(PendingState.QUEUED, code), listOf(entry.state, entry.errorCode))
+                h.advance(1_000)
+                assertEquals(code, listOf(PendingState.SENT), store.states())
+                assertEquals(code, listOf(queued.requestId, queued.requestId), h.sends())
+                assertEquals(listOf(code), h.errorCodes())
+            }
+        }
+    }
+
+    @Test
+    fun aMessageRefusedForTheWrongRegionRoutesAgainAndResendsAtTheCurrentEpoch() = runTest {
+        Harness(this).use { h ->
+            val conversation = h.authority.conversation()
+            val client = h.client()
+            client.initialize()
+            val store = h.store(client)
+            // The project has moved since the client routed.
+            h.authority.servingEpoch = "7"
+            h.authority.fail("CommunicationSendMessage", Fault.Problem("WRONG_REGION", 409))
+
+            val queued = store.outbox.send(conversation, "moved")
+            h.settle()
+
+            val entry = store.outbox.pending.value.single()
+            assertEquals(listOf<Any?>(PendingState.QUEUED, "WRONG_REGION"), listOf(entry.state, entry.errorCode))
+            val routing = h.authority.calls.map { it.operation }.filter { it == "CommunicationRoute" || it == "CommunicationSendMessage" }
+            assertEquals(
+                "The outbox routes again before it schedules the resend",
+                listOf("CommunicationRoute", "CommunicationSendMessage", "CommunicationRoute"),
+                routing,
+            )
+            h.advance(1_000)
+            assertEquals(listOf(PendingState.SENT), store.states())
+            assertEquals(listOf(queued.requestId, queued.requestId), h.sends())
+            assertEquals(listOf("1", "7"), h.authority.calls("CommunicationSendMessage").map { it.servingEpoch })
+            assertEquals(listOf("WRONG_REGION"), h.errorCodes())
+        }
+    }
+
+    @Test
+    fun aFullRecoveryJournalKeepsAMessageQueuedUntilAFinalRecordMakesRoom() = runTest {
+        Harness(this).use { h ->
+            val client = h.client()
+            val conversation = h.authority.conversation()
+            val store = h.store(client)
+            // Requests whose outcome is unknown may still be resent, so none of their records can make room.
+            val fillers = List(JOURNAL_LIMIT) { h.environment.uuid() }
+            h.authority.fail("CommunicationSendMessage", *Array(JOURNAL_LIMIT) { Fault.Unreachable })
+            for (requestId in fillers) assertEquals("TRANSPORT_UNKNOWN", failure { client.send(conversation, "filler", requestId) }.code)
+
+            val queued = store.outbox.send(conversation, "waits")
+            h.settle()
+
+            val entry = store.outbox.pending.value.single()
+            assertEquals(listOf<Any?>(PendingState.QUEUED, "RECOVERY_LIMIT"), listOf(entry.state, entry.errorCode))
+            assertEquals("Nothing was sent", fillers, h.sends())
+            assertEquals(listOf("RECOVERY_LIMIT"), h.errorCodes())
+
+            assertEquals("committed", client.requests.retry(fillers[5]).state)
+            store.outbox.drain()
+            h.settle()
+            assertEquals(listOf(PendingState.SENT), store.states())
+            val kept = client.kept()
+            assertEquals(JOURNAL_LIMIT, kept.size)
+            assertTrue("The committed record made room", queued.requestId in kept && fillers[5] !in kept)
+            assertEquals(listOf(fillers[5], queued.requestId), h.sends().drop(JOURNAL_LIMIT))
+        }
+    }
+
+    @Test
+    fun theOutboxKeepsTheRecordOfAMessageItMayStillSettleUntilItCloses() = runTest {
+        Harness(this).use { h ->
+            val client = h.client()
+            val conversation = h.authority.conversation()
+            val store = h.store(client)
+            h.authority.fail("CommunicationSendMessage", Fault.Problem("RATE_LIMITED", 429, retryAfter = 120))
+            val held = store.outbox.send(conversation, "held")
+            h.settle()
+            assertEquals("RATE_LIMITED", store.outbox.pending.value.single().errorCode)
+
+            // Past its 60-second budget the rejected record is final, but the message still waits to settle it.
+            h.advance(61_000)
+            h.authority.fail("CommunicationSendMessage", *Array(JOURNAL_LIMIT - 1) { Fault.Unreachable })
+            repeat(JOURNAL_LIMIT - 1) { assertEquals("TRANSPORT_UNKNOWN", failure { client.send(conversation, "filler") }.code) }
+            val refusal = failure { client.send(conversation, "refused") }
+            assertEquals(listOf<Any>("RECOVERY_LIMIT", "rejected", 409), listOf(refusal.code, refusal.outcome, refusal.status))
+            assertTrue(held.requestId in client.kept())
+
+            store.close()
+            h.settle()
+            client.send(conversation, "admitted")
+            assertFalse("A closed outbox no longer keeps it", held.requestId in client.kept())
+        }
+    }
+
+    @Test
+    fun wakingSkipsTheBackoffButNotTheAuthoritysRetryAfter() = runTest {
+        Harness(this).use { h ->
+            val conversation = h.authority.conversation()
+            h.authority.fail(
+                "CommunicationSendMessage", Fault.Problem("RATE_LIMITED", 429, retryAfter = 7), Fault.Problem("RATE_LIMITED", 429),
+            )
+            val store = h.store()
+            store.outbox.send(conversation, "later")
+            h.settle()
+
+            h.reconnect()
+            assertEquals("A wake never sends before the authority's delay", 1, h.sends().size)
+            h.advance(7_000)
+            assertEquals(2, h.sends().size)
+            assertEquals(listOf(PendingState.QUEUED), store.states())
+            // Without a retryAfter, the second rate limit's backoff gives way to the wake.
+            h.reconnect()
+            assertEquals(listOf(PendingState.SENT), store.states())
+            assertEquals(3, h.sends().size)
+        }
+    }
+
+    @Test
+    fun aLongRetryAfterIsWaitedOutInFull() = runTest {
+        Harness(this).use { h ->
+            val conversation = h.authority.conversation()
+            h.authority.fail("CommunicationSendMessage", Fault.Problem("RATE_LIMITED", 429, retryAfter = 600))
+            val store = h.store()
+
+            val queued = store.outbox.send(conversation, "later")
+            h.settle()
+            h.advance(599_999)
+            h.reconnect()
+
+            assertEquals(listOf(PendingState.QUEUED), store.states())
+            assertEquals(listOf(queued.requestId), h.sends())
+            assertTrue(h.resolutions().isEmpty())
+            h.advance(1)
+            // The wait outlasted the request's 60-second budget, so it is resolved instead of resent. It was never applied.
+            val entry = store.outbox.pending.value.single()
+            assertEquals(listOf<Any?>(PendingState.FAILED, "RATE_LIMITED"), listOf(entry.state, entry.errorCode))
+            assertEquals(listOf(queued.requestId), h.sends())
+            assertEquals(listOf(queued.requestId), h.resolutions())
+        }
+    }
+
+    /** The device drops off the network and comes back, which wakes the outbox. */
+    private fun Harness.reconnect() {
+        online.value = false
+        settle()
+        online.value = true
+        settle()
     }
 }

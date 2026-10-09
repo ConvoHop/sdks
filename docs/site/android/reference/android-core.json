@@ -296,7 +296,7 @@
       "ref": "com.convohop:convohop-android-core#ConversationStream",
       "anchor": "conversationstream-class",
       "signatures": ["public class ConversationStream : AutoCloseable"],
-      "docs": "One conversation's authorized history, replayed from its applied cursor\nand then followed live over `graphql-transport-ws`.\n\nBatches reach the application's apply callback in order, one at a time;\nthe cursor advances and is stored only after the callback returns. A\ndropped socket reconnects with backoff, settles pending mutations,\ncatches up over HTTP and subscribes again from the applied cursor.\nAuthorization failures and protocol violations close the replay and go to\nthe error callback; open a new replay after obtaining a current session.\n\nPackage: `com.convohop.android.core`.",
+      "docs": "One conversation's authorized history, replayed from its applied cursor\nand then followed live over `graphql-transport-ws`.\n\nBatches reach the application's apply callback in order, one at a time;\nthe cursor advances and is stored only after the callback returns. A\ndropped socket reconnects with the conversation channel's backoff, routes\nagain, settles pending mutations, catches up over HTTP and subscribes again\nfrom the applied cursor. A problem with a retryable code and a status of 0,\n408, 429 or 5xx, or `WRONG_REGION`, goes to the error callback and\nreconnects too, never sooner than its `retryAfter`. So does a close whose\nreason names such a problem, such as `RATE_LIMITED retryAfter=4`. Any other\nproblem closes the replay and goes to the error callback: a close that names\n`QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, ended realtime authorization,\nauthorization failures and protocol violations. Open a new replay once the\ncause is resolved, such as after obtaining a current session.\n\nPackage: `com.convohop.android.core`.",
       "members": [
         {
           "name": "conversationId",
@@ -344,7 +344,7 @@
           "ref": "com.convohop:convohop-android-core#ConversationStream.reconnectNow",
           "anchor": "conversationstreamreconnectnow-method",
           "signatures": ["public fun reconnectNow()"],
-          "docs": "Skips the reconnect backoff, for example when the device is back\nonline. Does nothing unless the replay is `ReplayState.RECONNECTING`."
+          "docs": "Skips the reconnect backoff, for example when the device is back\nonline, though never the wait that the authority's `retryAfter` asked\nfor. Does nothing unless the replay is `ReplayState.RECONNECTING`."
         },
         {
           "name": "reconcile",
@@ -551,7 +551,7 @@
           "signatures": [
             "public fun refreshAutomatically(onError: (Throwable) -> Unit): AutoCloseable"
           ],
-          "docs": "Renews the session through the `SessionRefresh` hook before it expires,\nat least 30 seconds and at most 5 minutes ahead. A failed renewal goes to\n`onError` and is retried with backoff until the session expires; the\nschedule stops when renewal is `SessionRefreshState.BLOCKED`, the session\nhas expired, the returned handle is closed or the client is closed.\nInitializes the client first if needed.",
+          "docs": "Renews the session through the `SessionRefresh` hook before it expires,\nat least 30 seconds and at most 5 minutes ahead. A failed renewal goes to\n`onError` and is retried with backoff until the session expires; the\nschedule stops when renewal is `SessionRefreshState.BLOCKED`, the session\nhas expired, the returned handle is closed or the client is closed.\nInitializes the client first if needed. A failed initialization goes to\n`onError` too; one with a retryable code and a status of 0, 408, 429 or\n5xx, or `WRONG_REGION`, is tried again with backoff, never sooner than its\n`retryAfter`, and any other stops the schedule.",
           "operations": [
             {"id": "communication.route", "page": "../../operations/communication/route.md"},
             {
@@ -566,7 +566,7 @@
           "ref": "com.convohop:convohop-android-core#ConvoHopClient.reconnectNow",
           "anchor": "convohopclientreconnectnow-method",
           "signatures": ["public fun reconnectNow()"],
-          "docs": "Skips the reconnect backoff of every replay that is waiting to\nreconnect, for example when the device is back online."
+          "docs": "Skips the reconnect backoff of every replay that is waiting to\nreconnect, for example when the device is back online, though never the\nwait that the authority's `retryAfter` asked for."
         },
         {
           "name": "conversation",
@@ -811,7 +811,7 @@
           "ref": "com.convohop:convohop-android-core#ConvoHopClient.recoverPending",
           "anchor": "convohopclientrecoverpending-method",
           "signatures": ["public suspend fun recoverPending(onError: (Throwable) -> Unit): Unit"],
-          "docs": "Settles up to 16 stored mutations whose outcome is pending or unknown:\nresends the original when its last attempt failed transiently and budget\nremains, otherwise resolves it read-only. Failures go to `onError`.",
+          "docs": "Settles up to 16 stored mutations that may still come to something: those\nwhose outcome is pending or unknown, and those rejected with a retryable\ncode. Resends the original when its last attempt failed transiently and\nbudget remains, otherwise resolves it read-only. Failures go to `onError`.",
           "operations": [
             {
               "id": "communication.resolveRequest",
@@ -1039,7 +1039,7 @@
           "ref": "com.convohop:convohop-android-core#ConvoHopProblem.retryAfter",
           "anchor": "convohopproblemretryafter-property",
           "signatures": ["public val retryAfter: Long?"],
-          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example\nwith `RATE_LIMITED`). The SDK never waits or resends on its own because of it."
+          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example\nwith `RATE_LIMITED`). The SDK never resends a call that the app made. When it reconnects a conversation's\nstream or resends a queued message on its own, it waits at least this long first."
         },
         {
           "name": "toString",
@@ -1075,7 +1075,7 @@
       "ref": "com.convohop:convohop-android-core#ConvoHopStore",
       "anchor": "convohopstore-class",
       "signatures": ["public class ConvoHopStore : AutoCloseable"],
-      "docs": "The offline-first layer over a `ConvoHopClient`: one `Outbox` for\noptimistic sends that survive restarts, and `Timeline`s that show stored\nmessages at once and keep them current.\n\n`local` keeps messages and the outbox; it never holds credentials. Feed\n`online` from the platform's connectivity: going offline holds the outbox,\nand coming back drains it and skips reconnect waits. Errors that the store\nhandles by retrying or by marking a message are still reported to\n`onError`, for logging.\n\nPackage: `com.convohop.android.core`.",
+      "docs": "The offline-first layer over a `ConvoHopClient`: one `Outbox` for\noptimistic sends that survive restarts, and `Timeline`s that show stored\nmessages at once and keep them current.\n\n`local` keeps messages and the outbox; it never holds credentials. Feed\n`online` from the platform's connectivity: going offline holds the outbox,\nand coming back drains it and skips reconnect backoff, though never the\nwait that the authority's `retryAfter` asked for. Errors that the store\nhandles by retrying or by marking a message are still reported to\n`onError`, for logging.\n\nPackage: `com.convohop.android.core`.",
       "members": [
         {
           "name": "constructor",
@@ -2574,7 +2574,7 @@
       "ref": "com.convohop:convohop-android-core#LiveParticipationHandle",
       "anchor": "liveparticipationhandle-class",
       "signatures": ["public class LiveParticipationHandle"],
-      "docs": "This user's participation in one live session: its native media connection and leave.\n\nPackage: `com.convohop.android.core`.",
+      "docs": "This user's participation in one live session: its native media connection\nand leave. While the app keeps a handle, the recovery journal keeps the\nrecords of the leave and credential requests it holds, even once final.\n\nPackage: `com.convohop.android.core`.",
       "members": [
         {
           "name": "live",
@@ -2658,7 +2658,7 @@
       "ref": "com.convohop:convohop-android-core#LiveSessionHandle",
       "anchor": "livesessionhandle-class",
       "signatures": ["public class LiveSessionHandle"],
-      "docs": "One occurrence (generation) of a call or broadcast.\n\nPackage: `com.convohop.android.core`.",
+      "docs": "One occurrence (generation) of a call or broadcast. While the app keeps a\nhandle, the recovery journal keeps the record of the end request it holds,\neven once final, so a repeated `end` reuses that request.\n\nPackage: `com.convohop.android.core`.",
       "members": [
         {
           "name": "client",
@@ -3790,7 +3790,7 @@
       "ref": "com.convohop:convohop-android-core#Outbox",
       "anchor": "outbox-class",
       "signatures": ["public class Outbox"],
-      "docs": "Sends messages optimistically: `send` stores the message, shows it in\n`pending` at once and delivers it when `ConvoHopStore.online` allows,\noldest first within each conversation.\n\nEvery attempt for a message reuses its request ID, payload and the\nclient's retry budget, so the authority applies it at most once. When the\noutcome stays unknown after the budget, the outbox resolves the request\nread-only and reports `PendingState.UNCONFIRMED` instead of guessing; it\nnever resends under a new ID on its own. `sendAgain` does that only when\nthe app asks.\n\nA message becomes `PendingState.SENDING` only after the client has saved\nits request's recovery record, just before each attempt, so a process\nthat ends mid-send leaves either that record or a message never sent.\nOn the next start, a message with a record is resent under the same\nrequest ID while its budget lasts, then resolved read-only; one that was\nnever submitted becomes `PendingState.FAILED` with `RESOLUTION_REQUIRED`.\nWithout durable recovery storage, a SENDING message can only be resolved.\n\nWhen the authority refuses the session, the outbox holds every send and\ntries again only on `drain`, so new sends do not spend the held message's\nretry budget. A refused attempt was not applied: the message stays\n`PendingState.QUEUED` with the refusal in `PendingMessage.errorCode`. If\nthe hold outlasts the budget (three attempts, or 60 seconds from the\nfirst), the message is resolved read-only; one the authority never applied\nbecomes `PendingState.FAILED`.\n\nPackage: `com.convohop.android.core`.",
+      "docs": "Sends messages optimistically: `send` stores the message, shows it in\n`pending` at once and delivers it when `ConvoHopStore.online` allows,\noldest first within each conversation.\n\nEvery attempt for a message reuses its request ID, payload and the\nclient's retry budget, so the authority applies it at most once. When the\noutcome stays unknown after the budget, the outbox resolves the request\nread-only and reports `PendingState.UNCONFIRMED` instead of guessing; it\nnever resends under a new ID on its own. `sendAgain` does that only when\nthe app asks.\n\nA message becomes `PendingState.SENDING` only after the client has saved\nits request's recovery record, just before each attempt, so a process\nthat ends mid-send leaves either that record or a message never sent.\nOn the next start, a message with a record is resent under the same\nrequest ID while its budget lasts, then resolved read-only; one that was\nnever submitted becomes `PendingState.FAILED` with `RESOLUTION_REQUIRED`.\nWithout durable recovery storage, a SENDING message can only be resolved.\n\nWhen the authority refuses the session, the outbox holds every send and\ntries again only on `drain`, so new sends do not spend the held message's\nretry budget. A refused attempt was not applied: the message stays\n`PendingState.QUEUED` with the refusal in `PendingMessage.errorCode`. If\nthe hold outlasts the budget (three attempts, or 60 seconds from the\nfirst), the message is resolved read-only; one the authority never applied\nbecomes `PendingState.FAILED`.\n\nA refusal that a retry can't change, such as `QUOTA_EXCEEDED`,\n`PLAN_LIMIT_EXCEEDED` or `SCOPE_REQUIRED`, fails the message at once and\ngoes to the error callback. Other failures wait and try again with backoff,\nnever sooner than the authority's `retryAfter`, not even on `drain`: an\nunknown outcome, a network failure, a 408, 429 or 5xx with a retryable\ncode, and `RECOVERY_LIMIT`, after which the message stays queued until the\nrecovery journal has room. After `WRONG_REGION` the client routes again\nfirst. The outbox keeps the recovery records of the messages it may still\nresend or resolve from being evicted.\n\nPackage: `com.convohop.android.core`.",
       "members": [
         {
           "name": "pending",
@@ -3852,7 +3852,7 @@
           "ref": "com.convohop:convohop-android-core#Outbox.drain",
           "anchor": "outboxdrain-method",
           "signatures": ["public fun drain()"],
-          "docs": "Retries now: delivers queued messages, skips pending backoff, lifts a\nsession hold and checks unconfirmed messages again. `ConvoHopStore`\ncalls it when the device comes online and after the client renews its\nsession.",
+          "docs": "Retries now: delivers queued messages, skips pending backoff, lifts a\nsession hold and checks unconfirmed messages again. A message still\nwaits out the authority's `retryAfter`. `ConvoHopStore` calls it when\nthe device comes online and after the client renews its session.",
           "operations": [
             {
               "id": "communication.resolveRequest",
@@ -4326,6 +4326,48 @@
       ]
     },
     {
+      "name": "RealtimeUpgradeRefusedException",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-core#RealtimeUpgradeRefusedException",
+      "anchor": "realtimeupgraderefusedexception-class",
+      "signatures": ["public class RealtimeUpgradeRefusedException : IOException"],
+      "docs": "The service refused the realtime upgrade with an HTTP response, such as a\n429 `application/problem+json`. A `RealtimeConnector` that can read the\nresponse passes this to `RealtimeListener.onError`, so the stream classifies\nthe response like any other HTTP response: it reconnects, no sooner than the\nresponse's delay, or stops and reports the problem.\n\nPackage: `com.convohop.android.core`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-core#RealtimeUpgradeRefusedException.constructor",
+          "anchor": "realtimeupgraderefusedexception-constructor",
+          "signatures": ["public constructor(status: Int, retryAfter: String?, body: String?)"],
+          "docs": ""
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#RealtimeUpgradeRefusedException.status",
+          "anchor": "realtimeupgraderefusedexceptionstatus-property",
+          "signatures": ["public val status: Int"],
+          "docs": "The HTTP status of the response."
+        },
+        {
+          "name": "retryAfter",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#RealtimeUpgradeRefusedException.retryAfter",
+          "anchor": "realtimeupgraderefusedexceptionretryafter-property",
+          "signatures": ["public val retryAfter: String?"],
+          "docs": "The response's `Retry-After` header, if any."
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#RealtimeUpgradeRefusedException.body",
+          "anchor": "realtimeupgraderefusedexceptionbody-property",
+          "signatures": ["public val body: String?"],
+          "docs": "The response body, or as much as was read; null when it couldn't be read. One over 65,536 characters isn't parsed."
+        }
+      ]
+    },
+    {
       "name": "RecoveryRecord",
       "kind": "class",
       "ref": "com.convohop:convohop-android-core#RecoveryRecord",
@@ -4437,7 +4479,7 @@
           "ref": "com.convohop:convohop-android-core#RecoveryRecord.resolutionState",
           "anchor": "recoveryrecordresolutionstate-property",
           "signatures": ["public val resolutionState: String"],
-          "docs": "`pending`, `unknown`, `committed` or `accepted`."
+          "docs": "`pending`, `unknown`, `rejected`, `committed` or `accepted`."
         },
         {
           "name": "mediaAdmissionAttempted",
@@ -4636,7 +4678,7 @@
           "ref": "com.convohop:convohop-android-core#ScopeRequiredProblem.retryAfter",
           "anchor": "scoperequiredproblemretryafter-property",
           "signatures": ["public val retryAfter: Long?"],
-          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example\nwith `RATE_LIMITED`). The SDK never waits or resends on its own because of it.",
+          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example\nwith `RATE_LIMITED`). The SDK never resends a call that the app made. When it reconnects a conversation's\nstream or resends a queued message on its own, it waits at least this long first.",
           "inherited": "ConvoHopProblem"
         },
         {
@@ -4750,7 +4792,7 @@
       "ref": "com.convohop:convohop-android-core#Timeline",
       "anchor": "timeline-class",
       "signatures": ["public class Timeline : AutoCloseable"],
-      "docs": "One conversation, kept current: stored messages at once, then the newest\npage and read receipts from the authority, then changes through a replay\nthat reconnects on its own. `items` lists confirmed messages oldest first,\nfollowed by this device's outbox messages until the replay delivers them.\nClose the timeline when the view goes away.\n\nMessage events carry no content, so the timeline reads new and changed\nmessages from the authority as their events arrive. The API has no\npresence or inbound typing events.\n\nPackage: `com.convohop.android.core`.",
+      "docs": "One conversation, kept current: stored messages at once, then the newest\npage and read receipts from the authority, then changes through a replay\nthat reconnects on its own. `items` lists confirmed messages oldest first,\nfollowed by this device's outbox messages until the replay delivers them.\nClose the timeline when the view goes away.\n\nWhen its replay stops, or reading the conversation fails, the timeline\nreads the conversation again after a backoff, and never sooner than the\nauthority's `retryAfter`. It stops for good, with `replay` at\n`ReplayState.CLOSED`, on a problem that trying again can't fix, such as\n`NOT_FOUND`, `FORBIDDEN` or `QUOTA_EXCEEDED`, or on a response that breaks\nthe protocol; open a new timeline to try again. A session problem waits\nfor the session to be renewed, or stops the timeline when the client has\nno `SessionRefresh` to renew it. A replay position that the authority can\nno longer continue gives way to the conversation's current state.\n\nMessage events carry no content, so the timeline reads new and changed\nmessages from the authority as their events arrive. The API has no\npresence or inbound typing events.\n\nPackage: `com.convohop.android.core`.",
       "members": [
         {
           "name": "conversationId",
@@ -4782,7 +4824,7 @@
           "ref": "com.convohop:convohop-android-core#Timeline.replay",
           "anchor": "timelinereplay-property",
           "signatures": ["public val replay: StateFlow<ReplayState>"],
-          "docs": "Where the timeline's replay stands; `ReplayState.CLOSED` once closed or no longer authorized."
+          "docs": "Where the timeline's replay stands; `ReplayState.CLOSED` once closed or stopped for good."
         },
         {
           "name": "hasOlder",
@@ -5323,7 +5365,7 @@
           "ref": "com.convohop:convohop-android-core#RealtimeListener.onError",
           "anchor": "realtimelisteneronerror-method",
           "signatures": ["public fun onError(error: Throwable)"],
-          "docs": ""
+          "docs": "The connection failed; `onClose` follows. When the service answered the upgrade with an HTTP response\ninstead of switching protocols, `error` is a `RealtimeUpgradeRefusedException`."
         },
         {
           "name": "onClose",

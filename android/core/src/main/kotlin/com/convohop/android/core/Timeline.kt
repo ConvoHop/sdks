@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +27,12 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonObject
 import kotlin.math.max
 import kotlin.math.min
+
+/** Problems of the session, which renewal settles rather than the classifier. */
+private val SESSION_CODES = setOf("UNAUTHENTICATED", "SESSION_REFRESH_REQUIRED", "SESSION_EXPIRED")
+
+/** Replay positions that the authority can no longer continue. */
+private val RESYNC_CODES = setOf("CURSOR_AHEAD", "CURSOR_EXPIRED", "CURSOR_SCOPE_MISMATCH")
 
 /** One row of a [Timeline]. */
 public sealed interface TimelineItem {
@@ -49,6 +56,16 @@ public sealed interface TimelineItem {
  * that reconnects on its own. [items] lists confirmed messages oldest first,
  * followed by this device's outbox messages until the replay delivers them.
  * Close the timeline when the view goes away.
+ *
+ * When its replay stops, or reading the conversation fails, the timeline
+ * reads the conversation again after a backoff, and never sooner than the
+ * authority's `retryAfter`. It stops for good, with [replay] at
+ * [ReplayState.CLOSED], on a problem that trying again can't fix, such as
+ * `NOT_FOUND`, `FORBIDDEN` or `QUOTA_EXCEEDED`, or on a response that breaks
+ * the protocol; open a new timeline to try again. A session problem waits
+ * for the session to be renewed, or stops the timeline when the client has
+ * no [SessionRefresh] to renew it. A replay position that the authority can
+ * no longer continue gives way to the conversation's current state.
  *
  * Message events carry no content, so the timeline reads new and changed
  * messages from the authority as their events arrive. The API has no
@@ -100,7 +117,7 @@ public class Timeline internal constructor(
     /** Members' delivery and read progress, by principal ID, for their current membership and visibility. */
     public val receipts: StateFlow<Map<String, ReadReceipt>> = receiptMap.asStateFlow()
 
-    /** Where the timeline's replay stands; [ReplayState.CLOSED] once closed or no longer authorized. */
+    /** Where the timeline's replay stands; [ReplayState.CLOSED] once closed or stopped for good. */
     public val replay: StateFlow<ReplayState> = replayState.asStateFlow()
 
     /** Whether [loadOlder] can load earlier messages. */
@@ -165,15 +182,29 @@ public class Timeline internal constructor(
             }
             replayState.value = ReplayState.RECONNECTING
             failures++
-            val backoff = min(60_000L, 1_000L shl min(failures - 1, 6))
-            withTimeoutOrNull(backoff + (client.environment.random() * 500).toLong()) { wakeups.receive() }
+            val backoff = min(60_000L, 1_000L shl min(failures - 1, 6)) + (client.environment.random() * 500).toLong()
+            // A wake-up skips the backoff, but never the wait that the authority's retryAfter asked for.
+            val hold = retryAfterMillis((problem as? ConvoHopProblem)?.retryAfter)
+            val holdUntil = client.environment.now() + hold
+            withTimeoutOrNull(max(backoff, hold)) { wakeups.receive() }
+            delay((holdUntil - client.environment.now()).coerceIn(0L, hold))
         }
     }
 
-    /** Whether replaying again cannot help: the conversation is gone or no longer readable, or the client is done. */
-    private fun final(error: Throwable): Boolean =
-        client.isClosed || client.sessionRefreshState == SessionRefreshState.BLOCKED ||
-            (error is ConvoHopProblem && error.outcome == "rejected" && (error.status == 403 || error.status == 404))
+    /**
+     * Whether following the conversation again can't help: the client is done, its session can't be renewed, or
+     * the classifier stops on [error]. Of the problems it stops on, two still follow again: a session problem, which
+     * renewal settles when the client has a [SessionRefresh], and a replay position that the authority can no longer
+     * continue, which [synchronize] replaces with the conversation's current state.
+     */
+    private fun final(error: Throwable): Boolean = when {
+        client.isClosed || client.sessionRefreshState == SessionRefreshState.BLOCKED -> true
+        error is HistoryResyncRequired -> false
+        error is ConvoHopProblem && (error.status == 401 || error.code in SESSION_CODES) ->
+            client.sessionRefreshState == SessionRefreshState.DISABLED
+        error is ConvoHopProblem && error.code in RESYNC_CODES -> false
+        else -> reconnectAction(error) == ReconnectAction.STOP
+    }
 
     /** Reads the conversation, newest messages and receipts, then replays what changes after that point. */
     private suspend fun synchronize(): ConversationStream {
@@ -419,7 +450,10 @@ public class Timeline internal constructor(
         return message
     }
 
-    /** Skips reconnect waits, for example when the device is back online. */
+    /**
+     * Skips reconnect waits, for example when the device is back online, though never the wait that the
+     * authority's `retryAfter` asked for.
+     */
     internal fun reconnectNow() {
         stream?.reconnectNow()
         wakeups.trySend(Unit)

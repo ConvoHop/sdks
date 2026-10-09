@@ -216,10 +216,16 @@ and then followed live over `graphql-transport-ws`.
 
 Batches reach the application's apply callback in order, one at a time;
 the cursor advances and is stored only after the callback returns. A
-dropped socket reconnects with backoff, settles pending mutations,
-catches up over HTTP and subscribes again from the applied cursor.
-Authorization failures and protocol violations close the replay and go to
-the error callback; open a new replay after obtaining a current session.
+dropped socket reconnects with the conversation channel's backoff, routes
+again, settles pending mutations, catches up over HTTP and subscribes again
+from the applied cursor. A problem with a retryable code and a status of 0,
+408, 429 or 5xx, or `WRONG_REGION`, goes to the error callback and
+reconnects too, never sooner than its `retryAfter`. So does a close whose
+reason names such a problem, such as `RATE_LIMITED retryAfter=4`. Any other
+problem closes the replay and goes to the error callback: a close that names
+`QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, ended realtime authorization,
+authorization failures and protocol violations. Open a new replay once the
+cause is resolved, such as after obtaining a current session.
 
 Package: `com.convohop.android.core`.
 
@@ -271,7 +277,8 @@ public fun reconnectNow()
 ```
 
 Skips the reconnect backoff, for example when the device is back
-online. Does nothing unless the replay is `ReplayState.RECONNECTING`.
+online, though never the wait that the authority's `retryAfter` asked
+for. Does nothing unless the replay is `ReplayState.RECONNECTING`.
 
 #### `ConversationStream.reconcile` method
 
@@ -451,7 +458,10 @@ at least 30 seconds and at most 5 minutes ahead. A failed renewal goes to
 `onError` and is retried with backoff until the session expires; the
 schedule stops when renewal is `SessionRefreshState.BLOCKED`, the session
 has expired, the returned handle is closed or the client is closed.
-Initializes the client first if needed.
+Initializes the client first if needed. A failed initialization goes to
+`onError` too; one with a retryable code and a status of 0, 408, 429 or
+5xx, or `WRONG_REGION`, is tried again with backoff, never sooner than its
+`retryAfter`, and any other stops the schedule.
 
 Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
 
@@ -462,7 +472,8 @@ public fun reconnectNow()
 ```
 
 Skips the reconnect backoff of every replay that is waiting to
-reconnect, for example when the device is back online.
+reconnect, for example when the device is back online, though never the
+wait that the authority's `retryAfter` asked for.
 
 #### `ConvoHopClient.conversation` method
 
@@ -664,9 +675,10 @@ Sends [`communication.typing`](../../operations/communication/typing.md).
 public suspend fun recoverPending(onError: (Throwable) -> Unit): Unit
 ```
 
-Settles up to 16 stored mutations whose outcome is pending or unknown:
-resends the original when its last attempt failed transiently and budget
-remains, otherwise resolves it read-only. Failures go to `onError`.
+Settles up to 16 stored mutations that may still come to something: those
+whose outcome is pending or unknown, and those rejected with a retryable
+code. Resends the original when its last attempt failed transiently and
+budget remains, otherwise resolves it read-only. Failures go to `onError`.
 
 Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
 
@@ -884,7 +896,8 @@ public val retryAfter: Long?
 ```
 
 Whole seconds to wait before resending the same request, when the authority sent a delay (for example
-with `RATE_LIMITED`). The SDK never waits or resends on its own because of it.
+with `RATE_LIMITED`). The SDK never resends a call that the app made. When it reconnects a conversation's
+stream or resends a queued message on its own, it waits at least this long first.
 
 #### `ConvoHopProblem.toString` method
 
@@ -921,7 +934,8 @@ messages at once and keep them current.
 
 `local` keeps messages and the outbox; it never holds credentials. Feed
 `online` from the platform's connectivity: going offline holds the outbox,
-and coming back drains it and skips reconnect waits. Errors that the store
+and coming back drains it and skips reconnect backoff, though never the
+wait that the authority's `retryAfter` asked for. Errors that the store
 handles by retrying or by marking a message are still reported to
 `onError`, for logging.
 
@@ -2180,7 +2194,9 @@ Inherited from `LiveAction`.
 public class LiveParticipationHandle
 ```
 
-This user's participation in one live session: its native media connection and leave.
+This user's participation in one live session: its native media connection
+and leave. While the app keeps a handle, the recovery journal keeps the
+records of the leave and credential requests it holds, even once final.
 
 Package: `com.convohop.android.core`.
 
@@ -2242,7 +2258,9 @@ Sends [`communication.leaveLiveSession`](../../operations/communication/leaveLiv
 public class LiveSessionHandle
 ```
 
-One occurrence (generation) of a call or broadcast.
+One occurrence (generation) of a call or broadcast. While the app keeps a
+handle, the recovery journal keeps the record of the end request it holds,
+even once final, so a repeated `end` reuses that request.
 
 Package: `com.convohop.android.core`.
 
@@ -3207,6 +3225,16 @@ the hold outlasts the budget (three attempts, or 60 seconds from the
 first), the message is resolved read-only; one the authority never applied
 becomes `PendingState.FAILED`.
 
+A refusal that a retry can't change, such as `QUOTA_EXCEEDED`,
+`PLAN_LIMIT_EXCEEDED` or `SCOPE_REQUIRED`, fails the message at once and
+goes to the error callback. Other failures wait and try again with backoff,
+never sooner than the authority's `retryAfter`, not even on `drain`: an
+unknown outcome, a network failure, a 408, 429 or 5xx with a retryable
+code, and `RECOVERY_LIMIT`, after which the message stays queued until the
+recovery journal has room. After `WRONG_REGION` the client routes again
+first. The outbox keeps the recovery records of the messages it may still
+resend or resolve from being evicted.
+
 Package: `com.convohop.android.core`.
 
 #### `Outbox.pending` property
@@ -3262,9 +3290,9 @@ public fun drain()
 ```
 
 Retries now: delivers queued messages, skips pending backoff, lifts a
-session hold and checks unconfirmed messages again. `ConvoHopStore`
-calls it when the device comes online and after the client renews its
-session.
+session hold and checks unconfirmed messages again. A message still
+waits out the authority's `retryAfter`. `ConvoHopStore` calls it when
+the device comes online and after the client renews its session.
 
 Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../../operations/communication/sendMessage.md).
 
@@ -3670,6 +3698,50 @@ public val requiredPayload: List<String>
 public val optionalPayload: List<String>
 ```
 
+### `RealtimeUpgradeRefusedException` class
+
+```kotlin
+public class RealtimeUpgradeRefusedException : IOException
+```
+
+The service refused the realtime upgrade with an HTTP response, such as a
+429 `application/problem+json`. A `RealtimeConnector` that can read the
+response passes this to `RealtimeListener.onError`, so the stream classifies
+the response like any other HTTP response: it reconnects, no sooner than the
+response's delay, or stops and reports the problem.
+
+Package: `com.convohop.android.core`.
+
+#### `RealtimeUpgradeRefusedException` constructor
+
+```kotlin
+public constructor(status: Int, retryAfter: String?, body: String?)
+```
+
+#### `RealtimeUpgradeRefusedException.status` property
+
+```kotlin
+public val status: Int
+```
+
+The HTTP status of the response.
+
+#### `RealtimeUpgradeRefusedException.retryAfter` property
+
+```kotlin
+public val retryAfter: String?
+```
+
+The response's `Retry-After` header, if any.
+
+#### `RealtimeUpgradeRefusedException.body` property
+
+```kotlin
+public val body: String?
+```
+
+The response body, or as much as was read; null when it couldn't be read. One over 65,536 characters isn't parsed.
+
 ### `RecoveryRecord` class
 
 ```kotlin
@@ -3774,7 +3846,7 @@ public val lastAttemptClassification: String
 public val resolutionState: String
 ```
 
-`pending`, `unknown`, `committed` or `accepted`.
+`pending`, `unknown`, `rejected`, `committed` or `accepted`.
 
 #### `RecoveryRecord.mediaAdmissionAttempted` property
 
@@ -3945,7 +4017,8 @@ public val retryAfter: Long?
 ```
 
 Whole seconds to wait before resending the same request, when the authority sent a delay (for example
-with `RATE_LIMITED`). The SDK never waits or resends on its own because of it.
+with `RATE_LIMITED`). The SDK never resends a call that the app made. When it reconnects a conversation's
+stream or resends a queued message on its own, it waits at least this long first.
 
 Inherited from `ConvoHopProblem`.
 
@@ -4051,6 +4124,16 @@ that reconnects on its own. `items` lists confirmed messages oldest first,
 followed by this device's outbox messages until the replay delivers them.
 Close the timeline when the view goes away.
 
+When its replay stops, or reading the conversation fails, the timeline
+reads the conversation again after a backoff, and never sooner than the
+authority's `retryAfter`. It stops for good, with `replay` at
+`ReplayState.CLOSED`, on a problem that trying again can't fix, such as
+`NOT_FOUND`, `FORBIDDEN` or `QUOTA_EXCEEDED`, or on a response that breaks
+the protocol; open a new timeline to try again. A session problem waits
+for the session to be renewed, or stops the timeline when the client has
+no `SessionRefresh` to renew it. A replay position that the authority can
+no longer continue gives way to the conversation's current state.
+
 Message events carry no content, so the timeline reads new and changed
 messages from the authority as their events arrive. The API has no
 presence or inbound typing events.
@@ -4085,7 +4168,7 @@ Members' delivery and read progress, by principal ID, for their current membersh
 public val replay: StateFlow<ReplayState>
 ```
 
-Where the timeline's replay stands; `ReplayState.CLOSED` once closed or no longer authorized.
+Where the timeline's replay stands; `ReplayState.CLOSED` once closed or stopped for good.
 
 #### `Timeline.hasOlder` property
 
@@ -4591,6 +4674,9 @@ A text frame; null for a binary frame, which the protocol never sends.
 ```kotlin
 public fun onError(error: Throwable)
 ```
+
+The connection failed; `onClose` follows. When the service answered the upgrade with an HTTP response
+instead of switching protocols, `error` is a `RealtimeUpgradeRefusedException`.
 
 #### `RealtimeListener.onClose` method
 

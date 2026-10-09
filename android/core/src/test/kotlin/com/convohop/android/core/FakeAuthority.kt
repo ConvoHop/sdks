@@ -9,6 +9,7 @@ import com.convohop.android.generated.EventPayload
 import com.convohop.android.generated.Features
 import com.convohop.android.generated.InboxItem
 import com.convohop.android.generated.InboxPage
+import com.convohop.android.generated.LiveSession
 import com.convohop.android.generated.Member
 import com.convohop.android.generated.MemberPage
 import com.convohop.android.generated.Message
@@ -80,14 +81,17 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
         /** The authority applies the request but its response is lost. */
         data object LostResponse : Fault
 
-        /** The authority rejects the request. */
-        data class Problem(val code: String, val status: Int, val outcome: String = "rejected") : Fault
+        /** The authority rejects the request, asking the client to wait [retryAfter] seconds if it's set. */
+        data class Problem(val code: String, val status: Int, val outcome: String = "rejected", val retryAfter: Long? = null) : Fault
+
+        /** Something in front of the authority, such as a gateway, answers with [status] and [body] and maybe a `Retry-After`. */
+        data class Http(val status: Int, val body: String, val retryAfter: String? = null) : Fault
 
         /** The authority answers with [result] in an otherwise valid envelope, so tests can check what the SDK accepts. */
         data class Reply(val result: JsonElement) : Fault
     }
 
-    data class Call(val operation: String, val requestId: String, val input: JsonObject, val token: String?)
+    data class Call(val operation: String, val requestId: String, val input: JsonObject, val token: String?, val servingEpoch: String? = null)
 
     private class Rejection(val code: String, val status: Int) : RuntimeException(code)
 
@@ -104,6 +108,7 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
     private val ids = AtomicLong()
     private val tokens = LinkedHashMap<String, Session>()
     private val faults = HashMap<String, ArrayDeque<Fault>>()
+    private val refusals = ArrayDeque<RealtimeUpgradeRefusedException>()
     private val rooms = LinkedHashMap<String, Room>()
     private val ledger = HashMap<String, Retained>()
 
@@ -126,11 +131,21 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
     /** False while the device cannot reach the authority: requests fail and sockets cannot connect. */
     var reachable = true
 
+    /** The serving epoch that routes report; a test moves it to stand for a move between regions. */
+    var servingEpoch = "1"
+
+    /** The live sessions that `liveSession` reports, by ID, as tests set them. */
+    val liveSessions = LinkedHashMap<String, LiveSession>()
+
     /** Every request that left the SDK, in order. */
     val calls = ArrayList<Call>()
 
     /** Open realtime connections. */
     val sockets = ArrayList<Socket>()
+
+    /** How many realtime connections the SDK tried to open, refused or not. */
+    var connects = 0
+        private set
 
     fun calls(operation: String): List<Call> = calls.filter { it.operation == operation }
 
@@ -162,6 +177,11 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
     /** Fails the next request for [operation], an operation name such as `CommunicationSendMessage`. */
     fun fail(operation: String, vararg next: Fault) {
         faults.getOrPut(operation) { ArrayDeque() }.addAll(next)
+    }
+
+    /** Answers the next realtime upgrades with HTTP responses instead of switching protocols, as OkHttp reports them. */
+    fun refuse(vararg next: RealtimeUpgradeRefusedException) {
+        refusals.addAll(next)
     }
 
     /** A conversation whose members are [members]. */
@@ -226,9 +246,9 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
         append(room, "member.removed", "member", principalId, payload)
     }
 
-    /** Ends every realtime connection, as a network change or server restart does. */
-    fun disconnect(code: Int = 1006) {
-        for (socket in sockets.toList()) socket.drop(code)
+    /** Ends every realtime connection, as a network change, server restart or a limit does. */
+    fun disconnect(code: Int = 1006, reason: String = "") {
+        for (socket in sockets.toList()) socket.drop(code, reason)
     }
 
     private fun room(conversationId: String): Room = rooms[conversationId] ?: throw Rejection("NOT_FOUND", 404)
@@ -257,14 +277,17 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
         val body = Json.parseToJsonElement(request.body).jsonObject
         val operation = body.string("operationName")
         val variables = body.getValue("variables").jsonObject
-        val requestId = variables.getValue("context").jsonObject.string("requestId")
+        val context = variables.getValue("context").jsonObject
+        val requestId = context.string("requestId")
         val input = variables["input"] as? JsonObject ?: JsonObject(emptyMap())
         val token = request.headers["authorization"]?.removePrefix("Bearer ")
-        calls += Call(operation, requestId, input, token)
+        val epoch = (context["observedServingEpoch"] as? JsonPrimitive)?.takeIf { it.isString }?.content
+        calls += Call(operation, requestId, input, token, epoch)
         if (!reachable) throw IOException("Authority unreachable")
         val fault = faults[operation]?.removeFirstOrNull()
         if (fault == Fault.Unreachable) throw IOException("Connection reset")
-        if (fault is Fault.Problem) return problem(requestId, fault.code, fault.status, fault.outcome)
+        if (fault is Fault.Problem) return problem(requestId, fault.code, fault.status, fault.outcome, fault.retryAfter)
+        if (fault is Fault.Http) return Response(fault.status, fault.body, fault.retryAfter)
         if (fault is Fault.Reply) return crafted(operation, requestId, fault.result)
         val response = try {
             val session = tokens[token]
@@ -304,6 +327,8 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
                 ReceiptPage(visible(input, principalId).receipts.values.toList(), true, false).toJson()
             "CommunicationTyping" -> "typing" to visible(input, principalId).let { TypingStatus(true).toJson() }
             "CommunicationResolveRequest" -> "resolveRequest" to resolve(input.string("requestId"))
+            "CommunicationLiveSession" -> "liveSession" to
+                (liveSessions[input.string("liveSessionId")] ?: throw Rejection("NOT_FOUND", 404)).toJson()
             "CommunicationSendMessage", "CommunicationReportReceipt" -> return mutation(operation, requestId, input, principalId)
             else -> error("The fake authority does not implement $operation")
         }
@@ -313,7 +338,7 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
     private fun route(): JsonObject = buildJsonObject {
         put("projectId", PROJECT)
         put("incarnation", INCARNATION)
-        put("servingEpoch", "1")
+        put("servingEpoch", servingEpoch)
         put("communicationBase", BASE_URL)
         put("wssUrl", "ws://127.0.0.1:8080/graphql")
         put("expiresAt", Timestamps.format(now() + 3_600_000L))
@@ -409,8 +434,13 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
     private fun reply(field: String, envelope: JsonObject): HttpResponse =
         Response(200, buildJsonObject { put("data", buildJsonObject { put(field, envelope) }) }.toString())
 
-    private fun problem(requestId: String, code: String, status: Int, outcome: String): HttpResponse {
-        val error = buildJsonObject {
+    private fun problem(requestId: String, code: String, status: Int, outcome: String, retryAfter: Long? = null): HttpResponse {
+        val error = graphqlError(requestId, code, status, outcome, retryAfter)
+        return Response(200, buildJsonObject { put("errors", JsonArray(listOf(error))) }.toString())
+    }
+
+    private fun graphqlError(requestId: String, code: String, status: Int, outcome: String, retryAfter: Long?): JsonObject =
+        buildJsonObject {
             put("message", "Fake authority: $code")
             put(
                 "extensions",
@@ -419,22 +449,26 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
                     put("outcome", outcome)
                     put("status", status)
                     put("requestId", requestId)
+                    if (retryAfter != null) put("retryAfter", retryAfter)
                 },
             )
         }
-        return Response(200, buildJsonObject { put("errors", JsonArray(listOf(error))) }.toString())
-    }
 
-    private class Response(override val status: Int, private val body: String) : HttpResponse {
-        override fun header(name: String): String? = null
+    private class Response(override val status: Int, private val body: String, private val retryAfter: String? = null) : HttpResponse {
+        override fun header(name: String): String? = retryAfter?.takeIf { name.equals("retry-after", ignoreCase = true) }
 
         override suspend fun text(): String = body
     }
 
     override fun connect(url: String, subprotocol: String, listener: RealtimeListener): RealtimeSocket {
         check(url == "ws://127.0.0.1:8080/graphql" && subprotocol == "graphql-transport-ws") { "Unexpected socket $url $subprotocol" }
+        connects++
         val socket = Socket(listener)
-        if (reachable) {
+        val refusal = refusals.removeFirstOrNull()
+        if (refusal != null) {
+            listener.onError(refusal)
+            socket.drop(1006)
+        } else if (reachable) {
             sockets += socket
             listener.onOpen()
         } else {
@@ -495,12 +529,24 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
             }
         }
 
-        /** The authority or network ends the connection with [code]. */
-        fun drop(code: Int) {
+        /** Ends the subscription with an `error` frame for [code], as the authority does when a limit applies. */
+        fun reject(code: String, status: Int, retryAfter: Long? = null) {
+            val id = subscription ?: error("Nothing is subscribed")
+            val frame = buildJsonObject {
+                put("type", "error")
+                put("id", id)
+                put("payload", JsonArray(listOf(graphqlError(nextId(), code, status, "rejected", retryAfter))))
+            }
+            subscription = null
+            listener.onMessage(frame.toString())
+        }
+
+        /** The authority or network ends the connection with [code] and [reason]. */
+        fun drop(code: Int, reason: String = "") {
             if (closed) return
             closed = true
             sockets.remove(this)
-            listener.onClose(code, "")
+            listener.onClose(code, reason)
         }
     }
 }

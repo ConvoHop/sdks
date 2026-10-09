@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
  *
  * [local] keeps messages and the outbox; it never holds credentials. Feed
  * [online] from the platform's connectivity: going offline holds the outbox,
- * and coming back drains it and skips reconnect waits. Errors that the store
+ * and coming back drains it and skips reconnect backoff, though never the
+ * wait that the authority's `retryAfter` asked for. Errors that the store
  * handles by retrying or by marking a message are still reported to
  * [onError], for logging.
  */

@@ -267,7 +267,13 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
                 }
                 session = binding
             }.also { sessionInitialization = it }
-            initialization.await()
+            try {
+                initialization.await()
+            } catch (error: Throwable) {
+                // A failed enrollment binds nothing, so a later initialize() proves the bearer again instead of repeating the failure.
+                if (initialization.isCancelled && sessionInitialization === initialization) sessionInitialization = null
+                throw error
+            }
         }
         http.servingEpoch = value.servingEpoch
         route = value
@@ -312,7 +318,10 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
      * [onError] and is retried with backoff until the session expires; the
      * schedule stops when renewal is [SessionRefreshState.BLOCKED], the session
      * has expired, the returned handle is closed or the client is closed.
-     * Initializes the client first if needed.
+     * Initializes the client first if needed. A failed initialization goes to
+     * [onError] too; one with a retryable code and a status of 0, 408, 429 or
+     * 5xx, or `WRONG_REGION`, is tried again with backoff, never sooner than its
+     * `retryAfter`, and any other stops the schedule.
      */
     public fun refreshAutomatically(onError: (Throwable) -> Unit): AutoCloseable {
         require(sessionRefresh != null) { "refreshAutomatically requires a sessionRefresh hook" }
@@ -326,8 +335,10 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
                     throw error
                 } catch (error: Exception) {
                     report(onError, error)
+                    if (reconnectAction(error) == ReconnectAction.STOP) return@launch
                     failures++
-                    delay(min(5_000L shl min(failures - 1, 4), 60_000L))
+                    val backoff = min(5_000L shl min(failures - 1, 4), 60_000L)
+                    delay(max(backoff, retryAfterMillis((error as? ConvoHopProblem)?.retryAfter)))
                     continue
                 }
                 val now = environment.now()
@@ -370,7 +381,8 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
 
     /**
      * Skips the reconnect backoff of every replay that is waiting to
-     * reconnect, for example when the device is back online.
+     * reconnect, for example when the device is back online, though never the
+     * wait that the authority's `retryAfter` asked for.
      */
     public fun reconnectNow() {
         if (closed) return
@@ -716,13 +728,17 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
     }
 
     /**
-     * Settles up to 16 stored mutations whose outcome is pending or unknown:
-     * resends the original when its last attempt failed transiently and budget
-     * remains, otherwise resolves it read-only. Failures go to [onError].
+     * Settles up to 16 stored mutations that may still come to something: those
+     * whose outcome is pending or unknown, and those rejected with a retryable
+     * code. Resends the original when its last attempt failed transiently and
+     * budget remains, otherwise resolves it read-only. Failures go to [onError].
      */
     public suspend fun recoverPending(onError: (Throwable) -> Unit): Unit = serial {
         val pending = http.recoveryStates()
-            .filter { it.resolutionState == "pending" || it.resolutionState == "unknown" }
+            .filter {
+                it.resolutionState == "pending" || it.resolutionState == "unknown" ||
+                    (it.resolutionState == "rejected" && retryableCode(it.lastAttemptClassification))
+            }
             .take(16)
         for (state in pending) {
             val transient = state.lastAttemptClassification in TRANSIENT_CLASSIFICATIONS

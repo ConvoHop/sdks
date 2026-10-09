@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import java.util.WeakHashMap
 import java.util.concurrent.ConcurrentHashMap
 
 private const val REQUEST_TIMEOUT_MILLIS = 12_000L
@@ -56,6 +57,8 @@ internal class ConvoHopTransport(
     private val states = LinkedHashMap<String, RecoveryState>()
     private val activeMutations = HashMap<String, ActiveMutation>()
     private val submissionHooks = ConcurrentHashMap<String, suspend () -> Unit>()
+    private val retainers: MutableSet<() -> Iterable<String>> = ConcurrentHashMap.newKeySet()
+    private val holders = WeakHashMap<Any, (Any) -> Iterable<String>>()
     private var initialization: Deferred<Unit>? = null
     private val writes = Mutex()
 
@@ -104,6 +107,52 @@ internal class ConvoHopTransport(
         val key = parseId(requestId)
         submissionHooks[key] = hook
         return { submissionHooks.remove(key, hook) }
+    }
+
+    /**
+     * Keeps the records of the request IDs that [requestIds] lists from being
+     * evicted to make room, though they are final: a caller that may still
+     * resend or report a request retains its record. [requestIds] runs each
+     * time the journal is full. Unlike other members, it may be called from any
+     * thread. Returns a function that stops retaining them.
+     */
+    fun retainRecovery(requestIds: () -> Iterable<String>): () -> Unit {
+        val retainer: () -> Iterable<String> = { requestIds() }
+        retainers.add(retainer)
+        return { retainers.remove(retainer) }
+    }
+
+    /**
+     * Keeps the records of the request IDs that [held] reads from [owner] from
+     * being evicted to make room, though they are final, for as long as
+     * [owner] is reachable. The transport references [owner] weakly, so this
+     * never keeps it alive, and [held] mustn't reference it either. Unlike
+     * other members, it may be called from any thread.
+     */
+    fun retainWhileReachable(owner: Any, held: (Any) -> Iterable<String>) {
+        synchronized(holders) { holders[owner] = held }
+    }
+
+    /**
+     * Makes room for one more record by evicting the final record attempted
+     * longest ago that no call in progress is using and no caller retains, or
+     * refuses the new request [requestId] with `RECOVERY_LIMIT` before anything
+     * is sent.
+     */
+    private fun reserve(requestId: String) {
+        if (states.size < JOURNAL_LIMIT) return
+        val retained = HashSet<String>()
+        for (retainer in retainers) retained.addAll(retainer())
+        synchronized(holders) { for ((owner, held) in holders) retained.addAll(held(owner)) }
+        val now = environment.now()
+        val evicted = states.values
+            .filter { it.final(now) && !activeMutations.containsKey(it.requestId) && it.requestId !in retained }
+            .minByOrNull { it.lastAttemptAt }
+            ?: throw ConvoHopProblem(
+                "RECOVERY_LIMIT", requestId, "rejected", 409,
+                "Recovery storage already holds $JOURNAL_LIMIT requests that aren't final; retry or resolve them first",
+            )
+        states.remove(evicted.requestId)
     }
 
     /** Writes a full snapshot; snapshots reach storage in the order they were taken. */
@@ -283,11 +332,7 @@ internal class ConvoHopTransport(
             throw resolutionRequired(requestId, "The original request is no longer eligible for resend")
         }
         if (state == null) {
-            if (states.size >= 128) {
-                val settled = states.values.firstOrNull { it.settled && !activeMutations.containsKey(it.requestId) }
-                    ?: throw IllegalStateException("Resolve outstanding mutations before creating more")
-                states.remove(settled.requestId)
-            }
+            reserve(requestId)
             val now = environment.now()
             state = RecoveryState(
                 requestId, incarnation, hash, operation, projectId, input,
@@ -307,9 +352,11 @@ internal class ConvoHopTransport(
             throw resolutionRequired(state.requestId, "Retry budget expired or clock changed; resolve this request read-only")
         }
         submissionHooks[state.requestId]?.invoke()
+        val prior = state.resolutionState
         state.attemptCount += 1
         state.lastAttemptAt = now
-        if (state.resolutionState == "pending") state.resolutionState = "unknown"
+        val attempt = state.attemptCount
+        if (prior == "pending" || prior == "rejected") state.resolutionState = "unknown"
         state.lastAttemptClassification = "submitted"
         persist(state)
         if (state.incarnation != incarnation) throw incarnationMismatch(state.requestId)
@@ -329,6 +376,13 @@ internal class ConvoHopTransport(
             throw error
         } catch (error: Exception) {
             state.lastAttemptClassification = (error as? ConvoHopProblem)?.code ?: "opaqueTransportFailure"
+            // A rejection is the request's outcome only if every attempt was rejected: those before this one, and
+            // this one, while no answer since settled the request.
+            if (error is ConvoHopProblem && error.outcome == "rejected" && (prior == "pending" || prior == "rejected") &&
+                state.resolutionState == "unknown" && state.attemptCount == attempt && state.lastAttemptAt == now
+            ) {
+                state.resolutionState = "rejected"
+            }
             persist(state)
             throw error
         }
@@ -425,7 +479,10 @@ internal class ConvoHopTransport(
         val decoded = try {
             CanonicalJson.parse(text)
         } catch (_: ConvoHopProtocolException) {
-            throw ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", status, "Unrecognized authority response")
+            throw ConvoHopProblem(
+                "INVALID_RESPONSE", requestId, "unknown", status, "Unrecognized authority response",
+                retryDelay(response.header("retry-after")),
+            )
         }
         try {
             val graphql = decoded.protocolObject()
