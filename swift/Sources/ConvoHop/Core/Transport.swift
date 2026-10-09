@@ -87,6 +87,7 @@ actor ConvoHopTransport {
 
     private var records: [RecoveryRecord] = []
     private var active: [String: (identity: String, token: UUID, work: Task<JSONObject, Error>)] = [:]
+    private var submissionHooks: [String: (token: UUID, run: @Sendable () async throws -> Void)] = [:]
     private var recoveryInitialized: Bool
     private var initialization: Task<Void, Error>?
     private var writes: Task<Void, Error>?
@@ -224,6 +225,23 @@ actor ConvoHopTransport {
         record.lastAttemptClassification = "nativeAdmissionAttempted"
         record.mediaAdmissionAttempted = true
         try await persist(record)
+    }
+
+    /// Runs `hook` before each submission of `requestId` within its retry budget: after the transport has stored the
+    /// request's recovery record, and before it counts and sends the attempt, which wait for the hook. A caller that
+    /// records that the request may have been sent does so here, so storage never holds that note without the record
+    /// that recovers the request. If the hook throws, nothing is sent and the submission fails with its error.
+    ///
+    /// Returns the token that ``forgetSubmissionHook(_:token:)`` takes to remove this hook.
+    func beforeSubmitting(_ requestId: String, _ hook: @escaping @Sendable () async throws -> Void) -> UUID {
+        let token = UUID()
+        submissionHooks[requestId] = (token, hook)
+        return token
+    }
+
+    /// Removes the hook that `token` registered, unless a later hook has replaced it.
+    func forgetSubmissionHook(_ requestId: String, token: UUID) {
+        if submissionHooks[requestId]?.token == token { submissionHooks[requestId] = nil }
     }
 
     private func persist(_ record: RecoveryRecord) async throws {
@@ -447,6 +465,7 @@ actor ConvoHopTransport {
             throw resolutionRequired(
                 state.requestId, "Retry budget expired or clock changed; resolve this request read-only")
         }
+        if let hook = submissionHooks[state.requestId]?.run { try await hook() }
         state.attemptCount += 1
         state.lastAttemptAt = now
         if state.resolutionState == .pending { state.resolutionState = .unknown }

@@ -84,7 +84,8 @@ public actor ConvoHopOutbox {
         /// The request ID can't be sent again; look up its outcome first.
         var mustResolve = false
         var rotations = 0
-        /// The incarnation the current request ID was first submitted in.
+        /// The incarnation the request ID was issued in. A request ID never moves to another incarnation, because the
+        /// transport may already hold its recovery record in this one.
         var submittedIncarnation: String?
         var notBefore = 0
         var failures = 0
@@ -211,7 +212,7 @@ public actor ConvoHopOutbox {
         }
         let entry = Entry(
             id: UUID(), requestId: newRequestId(), conversationId: conversation, text: text, props: props,
-            createdAt: environment.now(), state: .queued)
+            createdAt: environment.now(), state: .queued, submittedIncarnation: incarnation)
         entries.append(entry)
         emit()
         do {
@@ -296,7 +297,7 @@ public actor ConvoHopOutbox {
             }
         }
         guard let index = position(of: id), entries[index].state == entry.state, inFlight != id else { return }
-        entries[index].restart()
+        entries[index].restart(in: incarnation)
         emit()
         do {
             try await persist()
@@ -403,33 +404,45 @@ public actor ConvoHopOutbox {
             await resolvePending(id)
             return
         }
-        entries[index].state = .sending
-        entries[index].submittedIncarnation = incarnation
         let entry = entries[index]
-        emit()
-        // The attempt must be durable before it can reach ConvoHop, so a crash leaves it for resolution.
-        do {
-            try await persist()
-        } catch {
-            if let index = self.position(of: id) {
-                entries[index].state = .queued
-                entries[index].note(error)
-                backoff(&entries[index], uncertain: false)
-            }
-            emit()
-            return
+        let requestId = entry.requestId
+        let transport = client.transport
+        // The item turns `sending` in this hook, which the transport runs once it has saved the request's recovery
+        // record, and before it sends. So storage never holds a sending item without the record that recovers it.
+        let hook = await transport.beforeSubmitting(requestId) { [weak self] in
+            guard let self else { throw CancellationError() }
+            try await self.noteAttempt(id, requestId: requestId)
         }
         do {
             let receipt = try await client.send(
-                entry.text, to: entry.conversationId, props: entry.props, requestId: entry.requestId)
+                entry.text, to: entry.conversationId, props: entry.props, requestId: requestId)
             if let index = self.position(of: id) {
                 markSent(at: index, messageId: receipt.messageId, sequence: receipt.sequence)
             }
         } catch {
             sendFailed(id, error)
         }
+        await transport.forgetSubmissionHook(requestId, token: hook)
         emit()
         try? await persist()
+    }
+
+    /// Marks the item `sending` and saves it before the transport counts and sends an attempt. If this throws, the
+    /// transport sends nothing.
+    private func noteAttempt(_ id: UUID, requestId: String) async throws {
+        guard let index = position(of: id), entries[index].requestId == requestId,
+            entries[index].state == .queued || entries[index].state == .sending
+        else { throw CancellationError() }
+        entries[index].state = .sending
+        entries[index].submittedIncarnation = incarnation
+        emit()
+        do {
+            try await persist()
+        } catch {
+            throw ConvoHopError(
+                code: .recoveryStorageFailure, requestId: requestId, outcome: .rejected, status: nil,
+                message: "The outbox could not save the attempt, so the message wasn't sent", underlyingError: error)
+        }
     }
 
     private func sendFailed(_ id: UUID, _ error: any Error) {
@@ -507,7 +520,7 @@ public actor ConvoHopOutbox {
                 entries[index].requestId = newRequestId()
                 entries[index].rotations += 1
                 entries[index].mustResolve = false
-                entries[index].submittedIncarnation = nil
+                entries[index].submittedIncarnation = incarnation
                 entries[index].notBefore = 0
             } else {
                 entries[index].state = .failed
@@ -684,7 +697,7 @@ public actor ConvoHopOutbox {
     }
 
     /// A saved item as the restarted queue sees it: an attempt that was in flight may have reached ConvoHop, and a
-    /// request from another incarnation can't be looked up from this one.
+    /// request ID issued in another incarnation can't be sent or looked up from this one.
     static func restore(_ saved: Entry, incarnation: String) -> Entry? {
         var entry = saved
         entry.notBefore = 0
@@ -703,7 +716,7 @@ public actor ConvoHopOutbox {
                 entry.note(code: .incarnationMismatch, message: unconfirmed)
             } else {
                 entry.requestId = newRequestId()
-                entry.submittedIncarnation = nil
+                entry.submittedIncarnation = incarnation
             }
         }
         return entry
@@ -789,8 +802,8 @@ extension ConvoHopOutbox.Entry {
         }
     }
 
-    /// Starts over under a new request ID.
-    mutating func restart() {
+    /// Starts over under a new request ID, issued in `incarnation`.
+    mutating func restart(in incarnation: String) {
         requestId = newRequestId()
         state = .queued
         uncertain = false
@@ -798,7 +811,7 @@ extension ConvoHopOutbox.Entry {
         rotations = 0
         failures = 0
         notBefore = 0
-        submittedIncarnation = nil
+        submittedIncarnation = incarnation
         failureCode = nil
         failureMessage = nil
     }

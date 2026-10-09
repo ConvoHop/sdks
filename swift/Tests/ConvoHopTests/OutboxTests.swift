@@ -151,4 +151,240 @@ final class OutboxTests: XCTestCase {
         let states = try await relaunched.items().map(\.state)
         XCTAssertEqual(states, [.sent, .sent])
     }
+
+    // MARK: Apps that die
+
+    func testAnAppThatDiesAtAnyStepStillSendsTheMessageOnce() async throws {
+        var steps = 0
+        while true {
+            let context = "dying after \(steps) steps"
+            let values = Shared<[String: String]>([:])
+            let authority = Authority()
+            let clock = TestClock()
+            let http = await authority.http(clock: clock)
+            let first = AppProcess(values: values, authority: http)
+            let requestId = try await queueAndAttempt(in: first, dyingAfter: steps, clock: clock)
+            let completed = !first.died
+
+            let saved = try SavedState(values.value)
+            for item in saved.items where item.state == "sending" {
+                XCTAssertTrue(saved.records.contains(item.requestId), "a sending item without its record, \(context)")
+            }
+
+            let second = AppProcess(values: values, authority: http)
+            let outbox = try ConvoHopOutbox(
+                client: try client(second, clock: clock), network: FakeNetworkMonitor(reachable: true))
+            try await outbox.start()
+            if !saved.items.isEmpty {
+                try await eventually(context) { try await outbox.items().first?.state == .sent }
+            }
+            let items = try await outbox.items().map { [$0.requestId, $0.state.rawValue] }
+            await outbox.stop()
+            XCTAssertEqual(items, saved.items.isEmpty ? [] : [[requestId, "sent"]], context)
+            XCTAssertEqual(Set(authority.sends.value), [requestId], context)
+            XCTAssertEqual(Array(authority.committed.value.keys), [requestId], context)
+            // A restarted outbox can't tell whether a request it noted reached ConvoHop, so it sends the same request
+            // ID again, and ConvoHop replays the stored message.
+            let resent = first.log.contains("send") && !saved.items.isEmpty
+            XCTAssertEqual(authority.sends.value.count, resent ? 2 : 1, context)
+            if completed {
+                XCTAssertEqual(first.log, ["record", "entry", "record", "send", "record", "entry"])
+                return
+            }
+            steps += 1
+            guard steps < 20 else { return XCTFail("The attempt never completes") }
+        }
+    }
+
+    func testARestartInANewIncarnationSendsAnUnsentItemUnderANewRequestId() async throws {
+        let values = Shared<[String: String]>([:])
+        let authority = Authority()
+        let clock = TestClock()
+        let first = AppProcess(values: values, authority: await authority.http(clock: clock))
+        // The app dies once the transport saved the request's record, before the outbox noted the attempt. The item
+        // is still queued, under a request ID that the old incarnation recorded.
+        let requestId = try await queueAndAttempt(in: first, dyingAfter: 1, clock: clock)
+        XCTAssertEqual(first.log, ["record"])
+
+        let incarnation = uuid()
+        let second = AppProcess(values: values, authority: await authority.http(incarnation: incarnation, clock: clock))
+        let outbox = try ConvoHopOutbox(
+            client: try client(second, clock: clock, incarnation: incarnation),
+            network: FakeNetworkMonitor(reachable: true))
+        try await outbox.start()
+        try await eventually { try await outbox.items().first?.state == .sent }
+        let itemValue = try await outbox.items().first
+        await outbox.stop()
+        let item = try XCTUnwrap(itemValue)
+        XCTAssertNotEqual(item.requestId, requestId)
+        XCTAssertEqual(authority.sends.value, [item.requestId])
+        XCTAssertEqual(Array(authority.committed.value.keys), [item.requestId])
+    }
+
+    /// A client of `process`, in `incarnation`.
+    private func client(
+        _ process: AppProcess, clock: TestClock, incarnation: String = TestIDs.incarnation
+    ) throws -> ConvoHopClient {
+        let configuration = ConvoHopConfiguration(
+            baseURL: URL(string: Fixture.baseURL)!, projectId: TestIDs.project, principalId: TestIDs.principal,
+            incarnation: incarnation, sessionToken: "user-token", recoveryStorage: process, refreshSession: nil,
+            httpClient: process, webSocketFactory: FakeWebSocketFactory())
+        return try ConvoHopClient(configuration: configuration, environment: clock.environment)
+    }
+
+    /// Queues a message offline, then goes online with `process` dying after `steps` steps of the first attempt. It
+    /// returns the message's request ID once the attempt ended.
+    private func queueAndAttempt(in process: AppProcess, dyingAfter steps: Int, clock: TestClock) async throws -> String {
+        let network = FakeNetworkMonitor(reachable: false)
+        let outbox = try ConvoHopOutbox(client: try client(process, clock: clock), network: network)
+        try await outbox.start()
+        let requestId = try await outbox.enqueue("sent once", to: TestIDs.conversation).requestId
+        process.die(after: steps)
+        network.set(true)
+        // The outbox writes when an attempt starts and when it ends. A dead app loses both writes, but they look
+        // successful, so the attempt still ends.
+        try await eventually("the attempt to end") { process.entryWrites >= 2 }
+        await outbox.stop()
+        return requestId
+    }
+}
+
+/// One run of an app, over storage that outlives it. It dies after a set number of steps, where a step is a storage
+/// write or a message send. After that its writes are lost, though they look successful, and its requests fail.
+private final class AppProcess: RecoveryStorage, ConvoHopHTTPClient, @unchecked Sendable {
+    let values: Shared<[String: String]>
+    private let authority: StubHTTP
+    private let lock = NSLock()
+    private var steps: [String] = []
+    private var limit = Int.max
+    private var dead = false
+    private var outboxWrites = 0
+
+    init(values: Shared<[String: String]>, authority: StubHTTP) {
+        self.values = values
+        self.authority = authority
+    }
+
+    /// The steps it took: `record` and `entry` writes of the transport and the outbox, and `send`s.
+    var log: [String] { lock.locked { steps } }
+    var died: Bool { lock.locked { dead } }
+    /// The outbox writes it was asked for, including lost ones.
+    var entryWrites: Int { lock.locked { outboxWrites } }
+
+    /// Starts counting steps over, and dies once it took `count` more.
+    func die(after count: Int) {
+        lock.locked {
+            steps = []
+            limit = count
+            dead = false
+            outboxWrites = 0
+        }
+    }
+
+    /// Whether the app lives to take `step`.
+    private func step(_ step: String) -> Bool {
+        lock.locked {
+            if step == "entry" { outboxWrites += 1 }
+            guard !dead, steps.count < limit else {
+                dead = true
+                return false
+            }
+            steps.append(step)
+            return true
+        }
+    }
+
+    private static func kind(_ key: String) -> String {
+        key.hasPrefix("convohop.requests:") ? "record" : "entry"
+    }
+
+    func value(forKey key: String) -> String? {
+        values.value[key]
+    }
+
+    func setValue(_ value: String, forKey key: String) {
+        if step(Self.kind(key)) { values.update { $0[key] = value } }
+    }
+
+    func removeValue(forKey key: String) {
+        if step(Self.kind(key)) { values.update { $0[key] = nil } }
+    }
+
+    func send(_ request: ConvoHopHTTPRequest) async throws -> ConvoHopHTTPResponse {
+        let operationName = try JSONParser.parse(request.body).objectValue?["operationName"]?.stringValue
+        if operationName == Catalog.descriptor("communication.sendMessage").operationName {
+            guard step("send") else { throw URLError(.notConnectedToInternet) }
+        } else if died {
+            throw URLError(.notConnectedToInternet)
+        }
+        return try await authority.send(request)
+    }
+}
+
+/// ConvoHop as an app's runs see it: it stores the message of each request ID once, and replays it for repeats.
+private final class Authority: Sendable {
+    /// The acknowledgement stored for each request ID.
+    let committed = Shared<[String: JSONValue]>([:])
+    /// The request ID of each send, in arrival order.
+    let sends = Shared<[String]>([])
+
+    /// The authority's HTTP interface for clients in `incarnation`.
+    func http(incarnation: String = TestIDs.incarnation, clock: TestClock) async -> StubHTTP {
+        let http = StubHTTP()
+        let committed = self.committed, sends = self.sends
+        await http.on("communication.route") { request in
+            Reply.ok(request, ["result": Fixture.route(now: clock.now, incarnation: incarnation)], now: clock.now)
+        }
+        await http.on("communication.sendMessage") { request in
+            let requestId = request.requestId
+            sends.update { $0.append(requestId) }
+            let ack = committed.update { stored -> JSONValue in
+                if let ack = stored[requestId] { return ack }
+                let ack = Fixture.messageAck(
+                    TestIDs.conversation, sequence: String(stored.count + 1), incarnation: incarnation)
+                stored[requestId] = ack
+                return ack
+            }
+            return Reply.ok(request, ["result": ack])
+        }
+        await http.on("communication.resolveRequest") { request in
+            let target = request.input?["requestId"]?.stringValue ?? ""
+            guard let ack = committed.value[target] else {
+                return Reply.ok(request, ["result": Fixture.resolution(target, "notObservedYet")])
+            }
+            return Reply.ok(
+                request, ["result": Fixture.resolution(target, "committed", retained: ["messageAck": ack])])
+        }
+        return http
+    }
+}
+
+/// What a dead app left in storage: its queued items, and the request IDs of its recovery records.
+private struct SavedState {
+    struct Queue: Decodable {
+        struct Item: Decodable {
+            let requestId: String
+            let state: String
+        }
+
+        let items: [Item]
+    }
+
+    struct Record: Decodable {
+        let requestId: String
+    }
+
+    let items: [Queue.Item]
+    let records: Set<String>
+
+    init(_ values: [String: String]) throws {
+        let namespace = "\(TestIDs.project):\(TestIDs.principal)"
+        let decoder = JSONDecoder()
+        items = try values["convohop.outbox:" + namespace].map { try decoder.decode(Queue.self, from: Data($0.utf8)).items }
+            ?? []
+        records = Set(
+            try values["convohop.requests:" + namespace].map {
+                try decoder.decode([Record].self, from: Data($0.utf8)).map(\.requestId)
+            } ?? [])
+    }
 }

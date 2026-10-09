@@ -764,4 +764,95 @@ final class TransportTests: XCTestCase {
         XCTAssertEqual(requests.map(\.key), ["communication.currentSession"])
         XCTAssertEqual(requests.first?.authorization, "Bearer probe-token")
     }
+
+    // MARK: Submission hooks
+
+    func testASubmissionHookRunsOnceTheRequestIsSavedAndBeforeEachAttemptIsCountedAndSent() async throws {
+        let storage = ScriptedStorage()
+        let http = StubHTTP()
+        let requestId = uuid()
+        await http.on(Self.send) { _ in throw URLError(.networkConnectionLost) }
+        await http.on(Self.resolve) { request in
+            Reply.ok(request, ["result": Fixture.resolution(requestId, "notObservedYet")])
+        }
+        let transport = try await Self.makeTransport(http, storage: storage)
+        let send = Self.send, input = Self.sendInput
+        let mode = Shared(HookMode.fail)
+        let entered = Gate(), gate = Gate()
+        let savedAtHook = Shared<[String]>([]), sentAtHook = Shared<[Int]>([])
+        let hook = await transport.beforeSubmitting(requestId) {
+            let saved = await storage.snapshots.last ?? ""
+            let sent = await http.count(send)
+            savedAtHook.update { $0.append(saved) }
+            sentAtHook.update { $0.append(sent) }
+            switch mode.value {
+            case .fail: throw HookFailure()
+            case .wait:
+                entered.open()
+                await gate.wait()
+            case .proceed: break
+            }
+        }
+
+        let failed = await thrownError {
+            try await transport.execute(send, projectId: TestIDs.project, input: input, requestId: requestId)
+        }
+        XCTAssertNotNil(failed as? HookFailure)
+        let unsent = await http.count(Self.send)
+        XCTAssertEqual(unsent, 0, "a failing hook sends nothing")
+        let refused = await storage.snapshots
+        XCTAssertEqual(try Self.progress(refused), ["pending 0 notSubmitted"])
+
+        mode.update { $0 = .wait }
+        let waiting = Task {
+            try await transport.execute(send, projectId: TestIDs.project, input: input, requestId: requestId)
+        }
+        await entered.wait()
+        for _ in 0..<20 { await Task.yield() }
+        let held = await http.count(Self.send)
+        let counted = try await transport.recoveryStates().map(\.attemptCount)
+        XCTAssertEqual(held, 0, "the attempt waits for the hook")
+        XCTAssertEqual(counted, [0])
+        gate.open()
+        let lost = await convoHopError { try await waiting.value }
+        XCTAssertEqual(lost?.code, .transportUnknown)
+
+        mode.update { $0 = .proceed }
+        let retried = await convoHopError { try await transport.retry(requestId) }
+        XCTAssertEqual(retried?.code, .transportUnknown)
+        await transport.forgetSubmissionHook(requestId, token: hook)
+        let unhooked = await convoHopError { try await transport.retry(requestId) }
+        XCTAssertEqual(unhooked?.code, .transportUnknown)
+
+        XCTAssertEqual(
+            try Self.progress(savedAtHook.value),
+            ["pending 0 notSubmitted", "pending 0 notSubmitted", "unknown 1 TRANSPORT_UNKNOWN"],
+            "each submission runs the hook once, after its record is saved")
+        XCTAssertEqual(sentAtHook.value, [0, 0, 1])
+        let sent = await http.count(Self.send)
+        XCTAssertEqual(sent, 3)
+        let states = try await transport.recoveryStates()
+        XCTAssertEqual(states.map(\.attemptCount), [3])
+    }
+
+    func testForgettingAReplacedHookKeepsItsReplacement() async throws {
+        let http = StubHTTP()
+        await http.on(Self.send) { request in Reply.ok(request) }
+        let transport = try await Self.makeTransport(http, storage: ScriptedStorage())
+        let requestId = uuid()
+        let calls = Shared<[String]>([])
+        let replaced = await transport.beforeSubmitting(requestId) { calls.update { $0.append("replaced") } }
+        _ = await transport.beforeSubmitting(requestId) { calls.update { $0.append("current") } }
+        await transport.forgetSubmissionHook(requestId, token: replaced)
+        _ = try await transport.execute(
+            Self.send, projectId: TestIDs.project, input: Self.sendInput, requestId: requestId)
+
+        XCTAssertEqual(calls.value, ["current"])
+    }
+}
+
+private struct HookFailure: Error {}
+
+private enum HookMode {
+    case fail, wait, proceed
 }

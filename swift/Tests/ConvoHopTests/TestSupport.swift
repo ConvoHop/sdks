@@ -251,13 +251,14 @@ enum Fixture {
 
     /// The acknowledgement of a sent message.
     static func messageAck(
-        _ conversationId: String, messageId: String = uuid(), sequence: String = "1", status: String = "sent"
+        _ conversationId: String, messageId: String = uuid(), sequence: String = "1", status: String = "sent",
+        incarnation: String = TestIDs.incarnation
     ) -> JSONValue {
         full("MessageAck", [
             "messageId": .string(messageId), "conversationId": .string(conversationId),
             "sequence": .string(sequence), "revision": "1", "status": .string(status),
             "cursor": full("Cursor", [
-                "incarnation": .string(TestIDs.incarnation), "conversationId": .string(conversationId),
+                "incarnation": .string(incarnation), "conversationId": .string(conversationId),
                 "sequence": .string(sequence),
             ]),
         ])
