@@ -83,3 +83,12 @@ internal class Harness(private val test: TestScope) : AutoCloseable {
 
 /** The state of each outbox message, in order. */
 internal fun ConvoHopStore.states(): List<PendingState> = outbox.pending.value.map { it.state }
+
+/** The problem that [work] fails with; anything else fails the test. */
+internal suspend fun failure(work: suspend () -> Unit): ConvoHopProblem {
+    val error = runCatching { work() }.exceptionOrNull()
+    return error as? ConvoHopProblem ?: throw AssertionError("Expected a ConvoHopProblem, got $error", error)
+}
+
+/** The request ID of each recovery record the client keeps, in order. */
+internal suspend fun ConvoHopClient.kept(): List<String> = requests.records().map { it.requestId }

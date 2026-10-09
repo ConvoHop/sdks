@@ -77,7 +77,7 @@ suspend fun connectUser(context: Context, signIn: SignIn, sessionRefresh: Sessio
 
 `baseUrl` must be HTTPS, or loopback HTTP for local development. The client keeps the session token in memory only. `initialize()` loads the project's signed route before the first call.
 
-`recoveryStorage` keeps the sends that ConvoHop hasn't confirmed: their request IDs, inputs, including message text, and outcomes, but never tokens. Name it after the project and user, as the sample does, so that users who share a device don't share it. At startup, `recoverPending` settles up to 16 sends whose outcome is unknown. It resends each under its original request ID while its retry budget lasts, and otherwise looks up its outcome without sending it again.
+`recoveryStorage` keeps the sends that ConvoHop hasn't confirmed: their request IDs, inputs, including message text, and outcomes, but never tokens. Name it after the project and user, as the sample does, so that users who share a device don't share it. At startup, `recoverPending` settles up to 16 sends that may still go through: those whose outcome is unknown, and those refused with a problem that resending can fix, such as `RATE_LIMITED`. It resends one under its original request ID when its last attempt failed transiently, such as with a lost connection, and its retry budget lasts. Otherwise it looks up its outcome without sending it again.
 
 ## Renew the session
 
@@ -175,13 +175,17 @@ Sends are optimistic: `timeline.send` stores the message and returns at once, an
 | `UNCONFIRMED` | Three attempts or 60 seconds passed, and ConvoHop hasn't seen it. It may still commit, so it's never resent on its own. |
 | `FAILED` | Not sent. ConvoHop rejected it, or three attempts or 60 seconds passed and none could have been applied. `errorCode` says why. |
 
+A refusal that resending can't change, such as `QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, fails the message at once. After other failures, such as a lost connection or `RATE_LIMITED`, the outbox keeps the message and tries again with backoff, never sooner than the `retryAfter` that ConvoHop asked for, even when the device comes back online.
+
 `sendAgain` sends a copy of an `UNCONFIRMED` or `FAILED` message under a new request ID. An unconfirmed original may still commit and show twice, so ask the user first. `store.outbox.discard(requestId)` removes a message unless it's `SENDING`.
 
 If the app is killed during a send, the next start resends the message under the same request ID, within the same three attempts and 60 seconds, then looks up its outcome. A message that wasn't submitted in time becomes `FAILED` with `RESOLUTION_REQUIRED`.
 
 ## Reconnect and resume
 
-Timelines reconnect on their own. After a dropped connection, they catch up over HTTP from the last event they applied, then follow the conversation live again. While the session renews they pause, and they resume on the renewed session. When the network comes back, the store reconnects at once instead of waiting out its backoff, and the outbox delivers what it holds.
+Timelines reconnect on their own. After a dropped connection, they catch up over HTTP from the last event they applied, then follow the conversation live again. While the session renews they pause, and they resume on the renewed session. When the network comes back, the store reconnects at once instead of waiting out its backoff, though never sooner than a `retryAfter` that ConvoHop asked for, and the outbox delivers what it holds.
+
+A problem that reconnecting can't fix, such as `NOT_FOUND`, `FORBIDDEN` or `QUOTA_EXCEEDED`, or a response that breaks the protocol, stops the timeline: `timeline.replay` becomes `CLOSED`, and the store's error callback gets the error. Open a new timeline to try again.
 
 ## Typing and read receipts
 
@@ -258,6 +262,8 @@ suspend fun sendMessage(client: ConvoHopClient, conversationId: String, text: St
 ```
 
 Create the request ID when the user writes the message, for example with `UUID.randomUUID().toString()`, and keep it with the draft. If the connection drops during a send, `send` throws a `ConvoHopProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached ConvoHop. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
+
+Recovery storage keeps at most 128 requests. When it's full, a new request makes room by forgetting one that can't be sent again: one that ConvoHop committed or rejected for good, or one whose three attempts or 60 seconds are spent. If there's none, `send` throws a `ConvoHopProblem` with code `RECOVERY_LIMIT` before sending anything. Resend or resolve the outstanding requests first.
 
 ## Next steps
 
