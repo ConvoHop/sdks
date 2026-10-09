@@ -345,6 +345,33 @@ Flutter or Android:
    than `node`, so nothing is released without a job.
 3. Add a Dependabot entry for its package ecosystem.
 
+Go needs more care, because its tag is the release:
+
+- Anyone can fetch a version as soon as its `go/vX.Y.Z` tag exists, and the
+  Go module proxy and checksum database then keep it for good. A bad version
+  can't be replaced, only retracted with a `retract` directive in a later
+  version.
+- Because `force-tag-creation` is on, release-please creates each tag with
+  its draft release, before any release job runs. Decide when the Go tag is
+  created before adding the entry. For example, turn `force-tag-creation`
+  off for `go` and have the release job create the tag after its checks
+  pass. release-please finds earlier releases by their tags, so plan for a
+  run that fails before the tag exists.
+- Don't add a placeholder entry with `"skip-github-release": true`.
+  release-please doesn't tag a merged release pull request whose only
+  packages skip GitHub Releases. That pull request keeps its
+  `autorelease: pending` label, and release-please then stops opening
+  release pull requests for every package, npm included. Without tags,
+  release-please also can't find the last Go release.
+- Add `go/v*` to the release tag ruleset, because `*-v*` doesn't match Go
+  tags.
+
+Until then, the [Go workflow](.github/workflows/go.yml) rehearses a release.
+It tags a throwaway repository that holds only `go/` as `go/v0.1.0`, then
+fetches, builds and tests the module from that tag as `go get` would.
+`npm run check:release` checks that the module path in `go/go.mod` matches
+the planned tags.
+
 The Swift SDK is released from its own repository.
 
 ## Before registry publishing (REL-PUB)
@@ -382,4 +409,5 @@ For other registries, when each SDK lands:
 - **Maven Central:** verify the `com.convohop` namespace, which needs the
   `convohop.com` domain, and sign the artifacts.
 - **Go:** the `go/vX.Y.Z` tag is the release. There's no registry to
-  configure.
+  configure, but read the Go notes in
+  [Adding a package or language](#adding-a-package-or-language) first.

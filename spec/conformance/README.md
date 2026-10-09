@@ -38,6 +38,7 @@ flowchart LR
 | [`conformance/drivers/ts/`](../../conformance/drivers/ts) | The TypeScript reference driver. |
 | [`conformance/drivers/jvm/`](../../conformance/drivers/jvm) | The driver for the [Java and Kotlin server SDK](../../jvm/README.md). |
 | [`conformance/drivers/dotnet/`](../../conformance/drivers/dotnet) | The driver for the [.NET server SDK](../../dotnet/README.md). |
+| [`conformance/drivers/go/`](../../conformance/drivers/go) | The driver for the [Go server SDK](../../go/README.md). |
 | [`conformance/drivers/swift/`](../../conformance/drivers/swift) | The driver for the [Swift client SDK](../../swift/README.md), a Swift package in `Driver/`. |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |
 | [`conformance/targets/`](../../conformance/targets) | Descriptors for real targets, such as the dev-stack image. |
@@ -425,6 +426,10 @@ The .NET driver declares the backend and management roles too. With both
 the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 62
 scenarios against the mock and skips the same 2. Its
 [workflow](../../.github/workflows/dotnet.yml) fails on any other skip.
+
+The Go driver also declares the backend and management roles. It passes the
+same 62 scenarios against the mock and skips the same 2. Its
+[workflow](../../.github/workflows/go.yml) fails on any other skip.
 
 The Swift driver declares only the user role; the reference driver serves
 the backend clients that set up its scenarios. It passes 33 scenarios against

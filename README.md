@@ -41,6 +41,7 @@ planned languages, push notifications, package names, versioning and support.
 | [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and push payload builders |
 | [Java and Kotlin server](jvm/README.md) | `com.convohop:convohop-server`, `com.convohop:convohop-server-kotlin` | Java 11 or later. Kotlin coroutine extensions are optional. | User identities and sessions, conversations, membership and messages for your backend, generated APIs with paginators for every server operation, backend key issuance, webhook verification, and push payload builders |
 | [.NET server](dotnet/README.md) | `ConvoHop` | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Organization and project management, backend key issuance, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, generated APIs for every server operation with async page streams, webhook verification, and push payload builders |
+| [Go server](go/README.md) | `github.com/ConvoHop/sdks/go` | Go 1.26 or later, standard library only | Organization and project management, user identities and sessions, conversations, membership, messages, inbox, search and calls for your backend, a generated method with page iterators for every server operation, backend key issuance and delivery, request recovery, webhook verification, and push payload builders |
 | [iOS and macOS client](swift/README.md) | Swift package products `ConvoHop`, `ConvoHopLiveKit`, `ConvoHopCalls`, `ConvoHopPush` and `ConvoHopNotificationService` | iOS 15 or macOS 12 or later, Swift 6.1 or later | Chat and history, realtime updates with replay, a local cache, an offline outbox and a conversation model, typing and read receipts, calls with LiveKit and CallKit, push registration and routing, and a Notification Service Extension helper |
 
 The TypeScript packages depend on [`@convohop/core`](packages/core/README.md), which
@@ -60,7 +61,7 @@ package registry yet. [Install a release](#install-a-release) or
 
 | Layer | Languages and platforms |
 | --- | --- |
-| Server | Python, Go |
+| Server | Python |
 | Client | Android (Kotlin), React Native, Flutter |
 
 ## Tools
@@ -158,6 +159,10 @@ The .NET SDK has its own build and
 [.NET workflow](.github/workflows/dotnet.yml). See
 [Build and test](dotnet/README.md#build-and-test).
 
+The Go SDK is its own module, with its own
+[Go workflow](.github/workflows/go.yml). See
+[Build and test](go/README.md#build-and-test).
+
 The Swift SDK has its own Swift package and
 [Swift workflow](.github/workflows/swift.yml), which runs on GitHub-hosted
 macOS runners. See [Build and test](swift/README.md#build-and-test).
@@ -227,6 +232,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - [Node.js server SDK](packages/server/README.md)
 - [Java and Kotlin server SDK](jvm/README.md)
 - [.NET server SDK](dotnet/README.md)
+- [Go server SDK](go/README.md)
 - [Swift client SDK for iOS and macOS](swift/README.md)
 - [Shared core package](packages/core/README.md)
 - [CLI](packages/cli/README.md) and [MCP server](packages/mcp/README.md)
