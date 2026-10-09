@@ -111,7 +111,8 @@ function conforms(Url: PlatformURLConstructor): boolean {
       a.origin === "https://example.com:8443" && a.href === "https://User:Pa%20ss@example.com:8443/b?q=1#frag" &&
       b.hostname === "[::1]" && b.host === "[::1]" && b.port === "" && b.pathname === "/" && b.origin === "http://[::1]" &&
       c.protocol === "wss:" && c.host === "media.example.test" && c.pathname === "/base/rtc-edge" && c.search === "?x" && c.hash === "" &&
-      throws(() => new Url("media.example.test")) && throws(() => new Url("https://exa mple.com/"));
+      // Chromium percent-encodes a space in a host rather than refusing it, so refusal is checked with an out-of-range port.
+      throws(() => new Url("media.example.test")) && throws(() => new Url("https://example.com:65536/"));
   } catch { return false; }
 }
 /**

@@ -58,7 +58,9 @@ test("a nonconforming URL implementation is refused before it decides where cred
     return { ...Object.fromEntries(fields.map(key => [key, url[key]])), password: "" };
   }
   function Broken() { throw new TypeError("unsupported"); }
-  for (const URLConstructor of [Lossy, Broken])
+  // Accepts a port past 65535, as a parser that skips validation would.
+  class Unbounded extends URL { constructor(value, base) { super(String(value).replace(":65536/", ":6553/"), base); } }
+  for (const URLConstructor of [Lossy, Broken, Unbounded])
     assert.throws(() => transport(typed, { platform: { URL: URLConstructor } }),
       { name: "TypeError", message: "This runtime's URL is not WHATWG-conformant; pass a conforming platform.URL" });
   let constructed = 0;
@@ -66,6 +68,9 @@ test("a nonconforming URL implementation is refused before it decides where cred
   const { client } = transport(typed, { platform: { URL: Counted } });
   assert.equal(client.baseUrl, baseUrl);
   assert.ok(constructed > 0, "a conforming platform URL is used");
+  // Chromium accepts a space in a host, which the URL Standard refuses, yet reads origins correctly.
+  class SpacedHost extends URL { constructor(value, base) { super(String(value).replace(/^(https:\/\/[^/ ]*) /, "$1-"), base); } }
+  assert.equal(transport(typed, { platform: { URL: SpacedHost } }).client.baseUrl, baseUrl);
   assert.throws(() => parseURL("not a url", { URL: Counted }, "Invalid realtime URL"), { name: "TypeError", message: "Invalid realtime URL" });
   assert.throws(() => transport(typed, { baseUrl: "https://example.com/path" }),
     { name: "TypeError", message: "Use an HTTPS origin, or explicit loopback HTTP for local development" });
