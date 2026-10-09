@@ -7,9 +7,10 @@ extension ConvoHopClient {
     ///
     /// A renewal is never due earlier than halfway through the session's remaining life, so a session shorter than
     /// `lead` doesn't renew in a loop. On a client that isn't initialized, the schedule calls ``initialize()`` first
-    /// and retries network failures, rate limits (429) and outages (503) with backoff, honoring the authority's
-    /// `retryAfter`. A renewal that fails while the current session is still verified is retried with backoff, from
-    /// 1 second doubling to 32, until a second before expiry. Any other failure stops the schedule. Every failure
+    /// and retries the failures that the SDK's shared classifier retries, such as network failures, timeouts,
+    /// `RATE_LIMITED` and 5xx outages, with backoff and never sooner than the authority's `retryAfter`. It routes again
+    /// after `WRONG_REGION`. A renewal that fails while the current session is still verified is retried with backoff,
+    /// from 1 second doubling to 32, until a second before expiry. Any other failure stops the schedule. Every failure
     /// goes to `onError`.
     ///
     /// The schedule waits on the wall clock, so a renewal that fell due while the app was suspended or the device
@@ -148,10 +149,10 @@ private struct SessionRenewal {
                 return now()
             } catch {
                 control.report(error)
-                guard let problem = error as? ConvoHopError,
-                    problem.code == .transportUnknown || problem.status == 429 || problem.status == 503
-                else { return nil }
-                return now() + max(backoff(), (problem.retryAfter ?? 0) * 1000)
+                guard RetryPolicy.reconnectAction(error) != .stop, let problem = error as? ConvoHopError else {
+                    return nil
+                }
+                return now() + max(backoff(), RetryPolicy.retryAfterMilliseconds(problem.retryAfter))
             }
         }
         let current = now()

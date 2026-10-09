@@ -35,7 +35,8 @@ public struct ConvoHopError: Error, Sendable, CustomStringConvertible, Localized
     public let status: Int?
     public let message: String
     /// Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
-    /// `RATE_LIMITED`). The SDK never waits or resends on its own because of it.
+    /// `RATE_LIMITED`). The SDK never resends a call you made, but the work it retries by itself waits at least this
+    /// long: stream reconnects, a renewal schedule's initialization and queued messages.
     public let retryAfter: Int?
     /// The error that caused this one, such as a failed recovery write or session refresh callback.
     public let underlyingError: (any Error)?

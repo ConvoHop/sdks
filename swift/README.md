@@ -107,13 +107,17 @@ let renewal = try client.scheduleSessionRefresh(
 The schedule renews a minute before expiry (set `lead:` in seconds), but
 never earlier than halfway through the session's remaining life, then again
 after each renewal. Called before `initialize()`, it initializes the client
-first, retrying network failures, 429 and 503 and honoring `retryAfter`. A
-renewal that fails while the current session is still verified is retried
-with backoff until a second before expiry; any other failure stops the
-schedule. Every failure reaches `onError`, and `onRefreshed` receives each new
-session. Both run on a background task. The schedule waits on the wall clock,
-so a renewal that fell due while the app was suspended runs as soon as the app
-runs again.
+first. An initialization that failed in a way the
+[retry rules](https://github.com/ConvoHop/sdks/blob/main/spec/recovery/README.md#retry-and-reconnect)
+call retryable, such as a network failure, a timeout, `RATE_LIMITED` or a 5xx
+response, or with `WRONG_REGION`, which routes again, is retried with backoff,
+waiting at least `retryAfter`. `QUOTA_EXCEEDED`, `PLAN_LIMIT_EXCEEDED` and
+authorization failures aren't retried. A renewal that fails while the current
+session is still verified is retried with backoff until a second before
+expiry; any other failure stops the schedule. Every failure reaches
+`onError`, and `onRefreshed` receives each new session. Both run on a
+background task. The schedule waits on the wall clock, so a renewal that fell
+due while the app was suspended runs as soon as the app runs again.
 
 To renew yourself, call `try await client.refreshSession()` before the session
 expires: `client.sessionBinding?.expiresAt` says when. The authority drops the
@@ -160,11 +164,35 @@ With recovery storage, the client records each mutation, without credentials,
 so it can resolve them after a restart: call
 `await client.recoverPending(onError:)` after `initialize()`.
 
+The client keeps at most 128 records. When it is full, final records make
+room, oldest attempt first. A record is final when the SDK will never send its
+request again: ConvoHop committed or accepted it, or refused it with an error
+that isn't retryable, or the request's three-attempt, 60-second retry budget
+is spent, whatever its outcome. A spent request fails with
+`RESOLUTION_REQUIRED` instead of being sent, and `resolveRequest(_:)` still
+looks it up after its record is gone. Records of pending and `unknown`
+requests, and of requests refused with a retryable error such as
+`RATE_LIMITED` (`RecoveryState.Resolution.rejected`), stay while their budget
+lasts, since the request can still be resent with its ID. So do the records of
+messages an outbox may still send or look up, and those a live session or
+participation handle holds, whatever their state. When no record is final, a
+new mutation fails without being sent, with `ConvoHopError` code
+`RECOVERY_LIMIT`, outcome `rejected` and status 409: retry or resolve the
+outstanding requests first.
+
 ## Realtime and replay
 
 `watch` replays a conversation's events from the stored cursor, then follows
 them in real time over a WebSocket. When the connection drops, it catches up
-from history and reconnects on its own.
+from history and reconnects on its own. It reconnects after the failures that
+the [retry rules](https://github.com/ConvoHop/sdks/blob/main/spec/recovery/README.md#retry-and-reconnect)
+call retryable, such as network errors, timeouts, `RATE_LIMITED` and 5xx
+responses, with a backoff that waits at least the `retryAfter` the authority
+asked for, and after `WRONG_REGION` it routes again first. A refusal that
+reconnecting can't change, such as `QUOTA_EXCEEDED`, `PLAN_LIMIT_EXCEEDED` or
+an authorization failure, closes the stream and reaches `onError`. A close's
+reason decides, not its code: `4429 RATE_LIMITED retryAfter=5` reconnects
+after 5 seconds, and `4429 QUOTA_EXCEEDED retryAfter=60 meter=messages` stops.
 
 ```swift
 let stream = try await client.watch(conversationId, apply: { events in
@@ -229,10 +257,16 @@ List(model.entries) { entry in
   twice. When the outbox can't learn whether ConvoHop stored a message, the
   item becomes `unresolved`: it rechecks when connectivity returns, and
   `resend(_:)` sends it again under a new request ID once the user accepts the
-  small risk of a duplicate. When the session needs renewal the queue pauses:
-  renew it, then call `resume()`. Each user has one saved queue, so keep one
-  outbox per user, in your app's process: outboxes that share a user's queue,
-  such as a share extension's, overwrite each other's unsent messages.
+  small risk of a duplicate. Failures that the retry rules call retryable keep
+  the request ID and retry it, waiting at least `retryAfter`; `WRONG_REGION`
+  routes again before resending, and a full recovery journal
+  (`RECOVERY_LIMIT`) keeps the message queued until a final record makes room.
+  A refusal that resending can't change, such as `QUOTA_EXCEEDED` or
+  `PLAN_LIMIT_EXCEEDED`, fails the message at once. When the session needs
+  renewal the queue pauses: renew it, then call `resume()`. Each user has one
+  saved queue, so keep one outbox per user, in your app's process: outboxes
+  that share a user's queue, such as a share extension's, overwrite each
+  other's unsent messages.
 - **`ConvoHopTypingIndicator`** reports this user's typing at most every 3
   seconds, and that typing stopped after 5 seconds without edits.
   **`ConvoHopReadReceiptReporter`** reports how far this user has read, only

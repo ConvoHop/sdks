@@ -469,7 +469,8 @@ extension ConvoHopErrorCode {
     /// Temporarily unavailable.
     public static let unavailable = ConvoHopErrorCode(rawValue: "UNAVAILABLE")
 
-    /// The documented HTTP-equivalent status and retryability of each listed code.
+    /// The documented HTTP-equivalent status and retryability of every code the schema lists, including codes that
+    /// only server operations return.
     static let catalog: [String: (status: Int?, retryable: Bool)] = [
         "CURSOR_EXPIRED": (status: 410, retryable: false),
         "INVALID_REQUEST": (status: 400, retryable: false),

@@ -472,20 +472,25 @@ function transportDeclaration(ir) {
     `${INDENT}static let maxDocumentBytes = ${transport.http.maxDocumentBytes}\n}\n`;
 }
 
+/**
+ * Public members name the codes that client operations document, plus the SDK's own. The internal catalog lists
+ * every code in the IR, because the shared retry rules classify a code by its `retryable` flag wherever it comes from.
+ */
 function errorCodesDeclaration(ir, model) {
   const referenced = new Set(model.operations.flatMap(operation => operation.errors?.codes ?? []));
-  const codes = ir.errors.codes.filter(code => referenced.has(code.name) || code.origin === "sdk")
-    .sort((a, b) => codeUnitCompare(a.name, b.name));
+  const all = [...ir.errors.codes].sort((a, b) => codeUnitCompare(a.name, b.name));
+  const codes = all.filter(code => referenced.has(code.name) || code.origin === "sdk");
   uniqueNames(codes, code => caseName(code.name), "error codes");
   const members = codes.map(code =>
     `${docComment(code.summary, 1)}${INDENT}public static let ${swiftIdentifier(caseName(code.name))} = ConvoHopErrorCode(rawValue: ${swiftString(code.name)})`);
-  const catalog = codes.map(code =>
+  const catalog = all.map(code =>
     `${INDENT.repeat(2)}${swiftString(code.name)}: (status: ${code.status ?? "nil"}, retryable: ${code.retryable})`);
   return "/// A ConvoHop error code. Codes that this list doesn't name can still arrive, so handle unknown codes.\n" +
     "public struct ConvoHopErrorCode: RawRepresentable, Hashable, Sendable {\n" +
     `${INDENT}public let rawValue: String\n\n${INDENT}public init(rawValue: String) {\n${INDENT.repeat(2)}self.rawValue = rawValue\n${INDENT}}\n}\n\n` +
     `extension ConvoHopErrorCode {\n${members.join("\n")}\n\n` +
-    `${INDENT}/// The documented HTTP-equivalent status and retryability of each listed code.\n` +
+    `${INDENT}/// The documented HTTP-equivalent status and retryability of every code the schema lists, including codes that\n` +
+    `${INDENT}/// only server operations return.\n` +
     `${INDENT}static let catalog: [String: (status: Int?, retryable: Bool)] = [\n${catalog.join(",\n")},\n${INDENT}]\n}\n`;
 }
 

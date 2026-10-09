@@ -38,6 +38,15 @@ final class RecoveryRecord {
 
     var settled: Bool { resolutionState == .committed || resolutionState == .accepted }
 
+    /// Whether the SDK will never send this request again: the authority committed or accepted it, or rejected every
+    /// attempt with a code that isn't retryable, or the request's retry budget is spent, whatever its outcome. Only
+    /// such records make room in a full journal. A clock set back refuses a resend only until it catches up, so it
+    /// spends nothing.
+    func isFinal(now: Int) -> Bool {
+        settled || (resolutionState == .rejected && !RetryPolicy.retryableCode(lastAttemptClassification))
+            || attemptCount >= ConvoHopTransport.maximumAttempts || now > retryDeadline
+    }
+
     /// The outcome a failure reports for this record: a pending record may already have been sent.
     var failureOutcome: ConvoHopOutcome {
         resolutionState == .pending ? .unknown : ConvoHopOutcome(rawValue: resolutionState.rawValue)
@@ -79,6 +88,8 @@ actor ConvoHopTransport {
     let baseUrl: String
     let incarnation: String
     let durableRecovery: Bool
+    /// The callers that hold request IDs across calls. A full journal never evicts the records they retain.
+    nonisolated let retention = RecoveryRetention()
     private let endpoint: URL
     private let http: any ConvoHopHTTPClient
     private let storage: (any RecoveryStorage)?
@@ -433,14 +444,7 @@ actor ConvoHopTransport {
             throw resolutionRequired(requestId, "The original request is no longer eligible for resend")
         }
         if state == nil {
-            if records.count >= Self.maximumRecords {
-                guard let index = records.firstIndex(where: { $0.settled && active[$0.requestId] == nil }) else {
-                    throw ConvoHopError(
-                        code: .resolutionRequired, requestId: requestId, outcome: .rejected, status: 409,
-                        message: "Resolve outstanding mutations before creating more")
-                }
-                records.remove(at: index)
-            }
+            try reserve(requestId)
             let now = clock()
             let created = RecoveryRecord(
                 requestId: requestId, incarnation: incarnation, payloadFingerprint: hash, operation: operation,
@@ -452,6 +456,28 @@ actor ConvoHopTransport {
             try await persist(created)
         }
         return try await submit(state!, credential: credential, permit: permit, retry: retry)
+    }
+
+    /// Makes room for one more record by forgetting the final record attempted longest ago that no call in progress
+    /// uses and no caller retains, or refuses the new request `requestId` with `RECOVERY_LIMIT` before sending it.
+    private func reserve(_ requestId: String) throws {
+        guard records.count >= Self.maximumRecords else { return }
+        let retained = retention.requestIds, now = clock()
+        var forgotten: RecoveryRecord?
+        // Plain conditions, not `&&`: Swift 6.1's region checker rejects an autoclosure that captures `record`.
+        for record in records {
+            let id = record.requestId
+            guard record.isFinal(now: now), active[id] == nil, !retained.contains(id) else { continue }
+            if let oldest = forgotten, oldest.lastAttemptAt <= record.lastAttemptAt { continue }
+            forgotten = record
+        }
+        guard let forgotten else {
+            throw ConvoHopError(
+                code: .recoveryLimit, requestId: requestId, outcome: .rejected, status: 409,
+                message: "Recovery storage already holds \(Self.maximumRecords) requests that aren't final; "
+                    + "retry or resolve them first")
+        }
+        records.removeAll { $0 === forgotten }
     }
 
     private func submit(
@@ -466,9 +492,11 @@ actor ConvoHopTransport {
                 state.requestId, "Retry budget expired or clock changed; resolve this request read-only")
         }
         if let hook = submissionHooks[state.requestId]?.run { try await hook() }
+        let prior = state.resolutionState
         state.attemptCount += 1
         state.lastAttemptAt = now
-        if state.resolutionState == .pending { state.resolutionState = .unknown }
+        let attempt = state.attemptCount
+        if prior == .pending || prior == .rejected { state.resolutionState = .unknown }
         state.lastAttemptClassification = "submitted"
         try await persist(state)
         if state.incarnation != incarnation { throw incarnationMismatch(state.requestId) }
@@ -493,7 +521,15 @@ actor ConvoHopTransport {
                     message: "A mutation requires authority receipt evidence")
             }
         } catch {
-            state.lastAttemptClassification = (error as? ConvoHopError)?.code.rawValue ?? "opaqueTransportFailure"
+            let problem = error as? ConvoHopError
+            state.lastAttemptClassification = problem?.code.rawValue ?? "opaqueTransportFailure"
+            // A rejection is the request's outcome only if every attempt was rejected: those known before this one,
+            // and none that started meanwhile, which would have changed the record's count or time.
+            if let problem, problem.outcome == .rejected, prior == .pending || prior == .rejected,
+                state.resolutionState == .unknown, state.attemptCount == attempt, state.lastAttemptAt == now
+            {
+                state.resolutionState = .rejected
+            }
             try await persist(state)
             throw error
         }
@@ -624,9 +660,11 @@ actor ConvoHopTransport {
         do {
             decoded = try JSONParser.parse(text)
         } catch {
+            // A proxy's or gateway's error page isn't JSON, but its Retry-After still bounds the next attempt.
             throw ConvoHopError(
                 code: .invalidResponse, requestId: requestId, outcome: .unknown, status: status,
-                message: "Unrecognized authority response")
+                message: "Unrecognized authority response",
+                retryAfter: Self.retryDelay(response.headers["retry-after"].map(JSONValue.string)))
         }
         do {
             let graphql = try ProtocolChecks.object(decoded)

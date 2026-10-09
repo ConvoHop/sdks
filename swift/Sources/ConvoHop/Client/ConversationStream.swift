@@ -211,19 +211,10 @@ public actor ConversationStream {
             onError(reported)
             return
         }
-        let retryable: Bool
-        switch error {
-        case let problem as ConvoHopError:
-            retryable = problem.status == nil || problem.status == 429 || problem.status == 503 || problem.code == .wrongRegion
-        case let terminal as RealtimeTerminal:
-            retryable = terminal.error.code == .wrongRegion
-        default:
-            retryable = false
-        }
-        if retryable {
+        if RetryPolicy.reconnectAction(error) != .stop {
             dropSocket(code: 4000)
             onError(reported)
-            retry()
+            retry(retryAfter: (error as? ConvoHopError)?.retryAfter ?? (error as? RealtimeTerminal)?.error.retryAfter)
             return
         }
         shut()
@@ -312,12 +303,13 @@ public actor ConversationStream {
         schedule(.pace, after: 250 + environment.random(250))
     }
 
-    private func retry() {
+    /// Reconnects after backoff, and never sooner than `retryAfter` seconds.
+    private func retry(retryAfter: Int? = nil) {
         if isClosed || paused || timer != nil { return }
-        let attempt = min(reconnectAttempts, 4)
+        let delay = RetryPolicy.reconnectDelay(
+            attempt: reconnectAttempts, retryAfter: retryAfter, jitter: environment.random(Self.channel.jitterMs))
         reconnectAttempts += 1
-        let delay = min(Self.channel.baseDelayMs * (1 << attempt), Self.channel.maxDelayMs)
-        schedule(.reconnect, after: delay + environment.random(Self.channel.jitterMs))
+        schedule(.reconnect, after: delay)
     }
 
     private func schedule(_ kind: TimerKind, after delay: Int) {
@@ -424,18 +416,16 @@ public actor ConversationStream {
         case .failed:
             setConnected(false)
             if !isClosed && !paused { onError(unavailable(socket.subscriptionId)) }
-        case .closed(let code):
+        case .closed(let code, let reason):
             self.socket = nil
             setConnected(false)
             socket.reader.cancel()
             if isClosed || paused { return }
-            if !Self.channel.terminalCloseCodes.contains(code) {
-                retry()
+            // A close reason that names an error code reports it, such as `QUOTA_EXCEEDED retryAfter=60 meter=messages`.
+            if let problem = RetryPolicy.closeProblem(code: code, reason: reason, requestId: socket.subscriptionId) {
+                fail(problem)
             } else {
-                fail(
-                    ConvoHopError(
-                        code: .unauthenticated, requestId: socket.subscriptionId, outcome: .rejected, status: 401,
-                        message: "Realtime authorization ended; obtain a current session"))
+                retry()
             }
         }
     }
@@ -491,11 +481,16 @@ public actor ConversationStream {
         let requestId = try ProtocolChecks.id(extensions["requestId"])
         let outcome = ConvoHopOutcome(rawValue: try ProtocolChecks.string(extensions["outcome"]))
         let message = try ProtocolChecks.string(problem["message"])
+        let retryAfter = ConvoHopTransport.retryDelay(extensions["retryAfter"])
         guard let number = extensions["status"]?.numberValue, ProtocolChecks.isSafeInteger(number) else {
             return RealtimeTerminal(
-                error: ConvoHopError(code: code, requestId: requestId, outcome: outcome, status: nil, message: message))
+                error: ConvoHopError(
+                    code: code, requestId: requestId, outcome: outcome, status: nil, message: message,
+                    retryAfter: retryAfter))
         }
-        return ConvoHopError(code: code, requestId: requestId, outcome: outcome, status: Int(number), message: message)
+        return ConvoHopError(
+            code: code, requestId: requestId, outcome: outcome, status: Int(number), message: message,
+            retryAfter: retryAfter)
     }
 
     private func subscribe(_ socket: Socket) throws {

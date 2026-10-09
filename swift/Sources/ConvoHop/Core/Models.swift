@@ -59,6 +59,9 @@ public struct RecoveryState: Hashable, Sendable {
         case pending
         /// Sent without a receipt. Resolve or retry it with the same request ID.
         case unknown
+        /// The authority refused every attempt. A retryable refusal, such as `RATE_LIMITED`, can still be retried with
+        /// the same request ID while the retry budget lasts.
+        case rejected
         case committed
         case accepted
     }

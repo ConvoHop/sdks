@@ -15,7 +15,7 @@ private final class RenewalAuthority: @unchecked Sendable {
     private var expiresAt: Int
     private var tokens = ["user-token": 1]
     private var denied: Set<String> = []
-    private var outages: [(key: String, status: Int, retryAfter: Int?)] = []
+    private var outages: [(key: String, status: Int, code: String?, retryAfter: Int?)] = []
     private var hook: Hook = { authority in try authority.renew() }
     private var calls: [Int] = []
     private var issued: [String] = []
@@ -34,9 +34,10 @@ private final class RenewalAuthority: @unchecked Sendable {
     func setHook(_ hook: @escaping Hook) { lock.locked { self.hook = hook } }
     func deny(_ token: String) { lock.locked { _ = denied.insert(token) } }
 
-    /// Answers a request for `key` with an outage, after the outages queued before it.
-    func fail(_ key: String, status: Int, retryAfter: Int? = nil) {
-        lock.locked { outages.append((key, status, retryAfter)) }
+    /// Answers a request for `key` with an outage, after the outages queued before it. Without a `code`, a 429 is
+    /// `RATE_LIMITED` and any other status `UNAVAILABLE`.
+    func fail(_ key: String, status: Int, code: String? = nil, retryAfter: Int? = nil) {
+        lock.locked { outages.append((key, status, code, retryAfter)) }
     }
 
     /// The client's renewal callback: records the call, then runs the hook.
@@ -79,7 +80,8 @@ private final class RenewalAuthority: @unchecked Sendable {
             if let outage = outages.first, outage.key == key {
                 outages.removeFirst()
                 return Reply.failure(
-                    status: outage.status, code: outage.status == 429 ? "RATE_LIMITED" : "UNAVAILABLE",
+                    status: outage.status,
+                    code: outage.code ?? (outage.status == 429 ? "RATE_LIMITED" : "UNAVAILABLE"),
                     retryAfter: outage.retryAfter)
             }
             let result = key == "communication.route" ? Fixture.route(now: now) : current()
@@ -297,6 +299,32 @@ final class SessionRefreshScheduleTests: XCTestCase {
         try await setup.at(91_000)
         XCTAssertEqual(setup.authority.renewals, 1)
         XCTAssertEqual(setup.errorCodes, ["UNAVAILABLE", "RATE_LIMITED", "SESSION_REFRESH_FAILED"])
+    }
+
+    func testAnUninitializedClientRetriesGatewayErrorsButStopsOnAnExhaustedQuota() async throws {
+        let setup = try await RenewalSetup.make()
+        setup.authority.fail("communication.route", status: 502, code: "HTTP_FAILURE")
+        setup.authority.fail("communication.route", status: 504, code: "HTTP_FAILURE", retryAfter: 3)
+        setup.authority.fail("communication.route", status: 429, code: "QUOTA_EXCEEDED", retryAfter: 60)
+        try setup.start(lead: 30)
+        try await setup.at(0)
+        XCTAssertEqual(setup.errorStatuses, [502])
+        try await setup.at(1000)
+        XCTAssertEqual(setup.errorStatuses, [502, 504])
+        // The authority's retryAfter outranks the two-second backoff.
+        try await setup.at(3999)
+        var sent = await setup.requestCount()
+        XCTAssertEqual(sent, 2)
+        try await setup.at(4000)
+        XCTAssertEqual(setup.errorCodes, ["HTTP_FAILURE", "HTTP_FAILURE", "QUOTA_EXCEEDED"])
+        XCTAssertEqual(setup.errorStatuses, [502, 504, 429])
+        XCTAssertEqual(setup.schedule.value?.isFinished, true)
+        try await setup.at(600_000)
+        sent = await setup.requestCount()
+        XCTAssertEqual(sent, 3)
+        XCTAssertEqual(setup.authority.hookCalls.count, 0)
+        let state = await setup.client.sessionRefreshState
+        XCTAssertEqual(state, .uninitialized)
     }
 
     func testAnInitializationTheAuthorityRejectsIsReportedOnceAndNotRetried() async throws {

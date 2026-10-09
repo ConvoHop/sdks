@@ -405,6 +405,39 @@ final class ClientRecoveryTests: XCTestCase {
         let sent = await h.http.requests.count
         XCTAssertEqual(sent, 0)
     }
+
+    func testRecoverPendingFollowsUpRetryableRefusalsAndLeavesFinalOnesAlone() async throws {
+        let limited = uuid(), admitted = uuid(), forbidden = uuid()
+        let storage = try await Fixture.recoveryStorage([
+            Fixture.recoveryRecord(limited, resolution: "rejected", classification: "RATE_LIMITED"),
+            Fixture.recoveryRecord(admitted, resolution: "rejected", classification: "ADMISSION_LIMIT"),
+            Fixture.recoveryRecord(forbidden, resolution: "rejected", classification: "FORBIDDEN"),
+        ])
+        let h = try await Harness.make(storage: storage)
+        let resent = Shared<Set<String>>([])
+        await h.http.on("communication.sendMessage") { request in
+            resent.update { _ = $0.insert(request.requestId) }
+            return Reply.ok(request, ["result": Fixture.messageAck(TestIDs.conversation)])
+        }
+        await h.http.on("communication.resolveRequest") { request in
+            let target = request.input?["requestId"]?.stringValue ?? ""
+            let state = resent.value.contains(target) ? "committed" : "notObservedYet"
+            return Reply.ok(request, ["result": Fixture.resolution(target, state)])
+        }
+        let errors = Shared<[String]>([])
+        await h.client.recoverPending { error in errors.update { $0.append(String(describing: error)) } }
+
+        XCTAssertEqual(errors.value, [])
+        // A transient refusal is resent within its budget once ConvoHop confirms it never saw it. A rate-limited one
+        // is looked up. A refusal that can't succeed later is final, so it is left alone.
+        let sends = await h.http.requests("communication.sendMessage")
+        XCTAssertEqual(sends.map(\.requestId), [admitted])
+        let lookups = await h.http.requests("communication.resolveRequest")
+        XCTAssertEqual(lookups.compactMap { $0.input?["requestId"]?.stringValue }, [limited, admitted, admitted])
+        let states = try await h.client.recoveryStates()
+        XCTAssertEqual(states.map(\.requestId), [limited, admitted, forbidden])
+        XCTAssertEqual(states.map(\.resolutionState), [.rejected, .committed, .rejected])
+    }
 }
 
 final class ClientSessionRefreshTests: XCTestCase {

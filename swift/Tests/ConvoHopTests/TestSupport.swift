@@ -263,6 +263,47 @@ enum Fixture {
             ]),
         ])
     }
+
+    /// A mutation-recovery record as the transport stores it, of a message send by default. It was sent `attempts`
+    /// times, last at the test clock's start or `age` milliseconds before, and may be resent for a minute after the start.
+    static func recoveryRecord(
+        _ requestId: String = uuid(), operation: String = "communication.sendMessage",
+        projectId: String? = TestIDs.project,
+        input: JSONObject = ["conversationId": .string(TestIDs.conversation), "text": "Hello"],
+        incarnation: String = TestIDs.incarnation, resolution: String = "unknown", fingerprint: String? = nil,
+        mediaAdmissionAttempted: Bool = false, classification: String = "TRANSPORT_UNKNOWN", attempts: Int = 1,
+        age: Int = 0
+    ) throws -> JSONObject {
+        let now = TestClock().now
+        var record: JSONObject = [
+            "requestId": .string(requestId), "incarnation": .string(incarnation),
+            "payloadFingerprint": .string(
+                try fingerprint ?? ConvoHopTransport.fingerprint(operation: operation, projectId: projectId, input: input)),
+            "operation": .string(operation), "input": .object(input), "firstSubmittedAt": .number(Double(now - age)),
+            "retryDeadline": .number(Double(now + 60_000)), "attemptCount": .number(Double(attempts)),
+            "lastAttemptAt": .number(Double(now - age)), "lastAttemptClassification": .string(classification),
+            "resolutionState": .string(resolution),
+        ]
+        if let projectId { record["projectId"] = .string(projectId) }
+        if mediaAdmissionAttempted { record["mediaAdmissionAttempted"] = true }
+        return record
+    }
+
+    /// Storage that holds `records` as the test user's mutation-recovery journal.
+    static func recoveryStorage(_ records: [JSONObject]) async -> InMemoryRecoveryStorage {
+        let storage = InMemoryRecoveryStorage()
+        await storage.setValue(
+            JSONValue.array(records.map(JSONValue.object)).jsonText(),
+            forKey: "convohop.requests:\(TestIDs.project):\(TestIDs.principal)")
+        return storage
+    }
+
+    /// The request IDs of the test user's mutation-recovery journal in `storage`, oldest first.
+    static func journal(_ storage: InMemoryRecoveryStorage) async throws -> [String] {
+        let text = await storage.value(forKey: "convohop.requests:\(TestIDs.project):\(TestIDs.principal)")
+        guard let text else { return [] }
+        return try JSONParser.parse(text).arrayValue?.compactMap { $0.objectValue?["requestId"]?.stringValue } ?? []
+    }
 }
 
 // MARK: WebSockets
