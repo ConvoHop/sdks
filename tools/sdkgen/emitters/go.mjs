@@ -429,13 +429,23 @@ function createModel(ir, options) {
     }
   }
 
-  // Runtime response checks: the envelope flag, and input ID fields that the
-  // result must echo (on every page item, the envelope result or the result).
+  // Runtime response checks: the envelope flag, whether the envelope must
+  // carry its result, and input ID fields that the result must echo (on every
+  // page item, the envelope result or the result).
   const isEnvelope = ref => ref.kind === "object" && !ref.nullable &&
     ["status", "requestId"].every(name => types.get(ref.name).fields.some(field => field.name === name));
+  // As in the other SDKs, a reply envelope with an operation reference must
+  // carry its nullable result unless the operation is long-running. A
+  // non-null result is already required by its type.
+  const requiresResult = operation => {
+    const fields = types.get(operation.result.type.name).fields;
+    return !operation.longRunning && fields.some(field => field.name === "operation") &&
+      Boolean(fields.find(field => field.name === "result")?.type.nullable);
+  };
   for (const model of models.values()) {
     const { operation } = model;
     model.envelope = isEnvelope(operation.result.type);
+    model.requireResult = model.envelope && requiresResult(operation);
     model.subject = operation.pagination.pagePath ? [...operation.pagination.pagePath, "items"] : model.envelope ? ["result"] : [];
     model.echo = [];
     if (!operation.input || resolveOperations.has(operation.id)) continue;
@@ -556,7 +566,7 @@ function methodDoc(models, model) {
   if (operation.longRunning) {
     const { poll, refField } = operation.longRunning;
     const target = models.get(poll)?.client === client ? `[${client.name}.${models.get(poll).method}]` : poll;
-    facts.push(`Long-running: poll ${target} with the ${refField} reference from the result until the work completes.`);
+    facts.push(`Long-running: poll ${target} with the reply's ${goName(refField, where)} reference until the work completes.`);
   }
   if (operation.realtime?.emits?.length) facts.push(`Realtime events: ${list(operation.realtime.emits)}.`);
   facts.push(authSentence(model));
@@ -750,6 +760,7 @@ function operationEntry(model) {
   }
   if (model.idempotency.resolvable) add("resolvable", "true");
   if (model.envelope) add("envelope", "true");
+  if (model.requireResult) add("requireResult", "true");
   if (model.subject.length) add("subject", inline("string", model.subject.map(name => goString(name))));
   if (model.echo.length) add("echo", inline("string", model.echo.map(name => goString(name))));
   add("document", goStringBlock(operation.document.text, where));

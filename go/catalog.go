@@ -30,6 +30,7 @@ type operation struct {
 	windowMs      int
 	resolvable    bool
 	envelope      bool
+	requireResult bool
 	subject       []string
 	echo          []string
 	document      string

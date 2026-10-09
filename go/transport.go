@@ -466,6 +466,9 @@ func interpret(op *operation, requestID string, response *http.Response, decoded
 			return nil, malformed
 		}
 	}
+	if op.requireResult && envelope["result"] == nil {
+		return nil, malformed
+	}
 	return envelope, nil
 }
 

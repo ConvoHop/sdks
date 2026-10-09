@@ -171,8 +171,6 @@ func TestPagesStop(t *testing.T) {
 			"Page cursor did not advance", []string{"", "30", "10"}},
 		{"start cursor that repeats", messagesFrom(ptr("50")), "beforeSequence",
 			map[string]map[string]any{"50": before("50")}, 0, "Page cursor did not advance", []string{"50"}},
-		{"missing page", messagesFrom(nil), "beforeSequence",
-			map[string]map[string]any{"": before("30"), "30": nil}, 1, "Missing page result", []string{"", "30"}},
 		{"opaque cursor that repeats", inboxFrom(nil), "cursor",
 			map[string]map[string]any{"": inbox("a"), "a": inbox("a")}, 1, "Page cursor did not advance",
 			[]string{"", "a"}},
@@ -206,6 +204,20 @@ func TestPagesStop(t *testing.T) {
 				t.Fatalf("cursors = %q, want %q", sent, tc.sent)
 			}
 		})
+	}
+}
+
+// TestPagesStopWithoutResult covers a page reply without its result, which
+// the transport rejects: the iterator yields that problem and stops.
+func TestPagesStopWithoutResult(t *testing.T) {
+	a := newAuthority(t, paged(map[string]map[string]any{"": messagePage(map[string]any{"nextCursor": "30"}), "30": nil}))
+	results := collect(newProject(t, a).MessagesPages(context.Background(), messages(nil)))
+	if len(results) != 2 || results[0].page == nil || results[0].err != nil || results[1].page != nil {
+		t.Fatalf("results = %+v", results)
+	}
+	p := expectProblem(t, results[1].err, codeInvalidResponse, OutcomeUnknown, 200)
+	if p.Message != "Malformed authority response; resolve the original request" {
+		t.Fatalf("message %q", p.Message)
 	}
 }
 
