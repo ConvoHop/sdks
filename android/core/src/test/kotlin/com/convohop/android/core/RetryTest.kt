@@ -28,11 +28,14 @@ class RetryTest {
             Triple("INVALID_RESPONSE", 502, ReconnectAction.RETRY),
             Triple("RATE_LIMITED", 429, ReconnectAction.RETRY),
             Triple("ADMISSION_LIMIT", 429, ReconnectAction.RETRY),
+            Triple("SPEND_UNVERIFIED", 503, ReconnectAction.RETRY),
             // Routing again finds the region that serves the project.
             Triple("WRONG_REGION", 409, ReconnectAction.REROUTE),
             // The schema says a later attempt can't succeed, whatever the status.
             Triple("QUOTA_EXCEEDED", 429, ReconnectAction.STOP),
             Triple("PLAN_LIMIT_EXCEEDED", 403, ReconnectAction.STOP),
+            Triple("CREDITS_EXHAUSTED", 402, ReconnectAction.STOP),
+            Triple("SPEND_CAP_REACHED", 402, ReconnectAction.STOP),
             Triple("MEMBERSHIP_COUNT_INVALID", 503, ReconnectAction.STOP),
             Triple("UNAUTHENTICATED", 401, ReconnectAction.STOP),
             Triple("SESSION_REFRESH_REQUIRED", 409, ReconnectAction.STOP),
@@ -56,10 +59,12 @@ class RetryTest {
 
     @Test
     fun aRequestMayBeSentAgainAfterARetryableCodeOrAfterWrongRegionOnceRoutedAgain() {
-        for (code in listOf("RATE_LIMITED", "AUTHORITY_UNAVAILABLE", "TRANSPORT_UNKNOWN", "WRONG_REGION", "NEWLY_ADDED")) {
+        for (code in listOf("RATE_LIMITED", "AUTHORITY_UNAVAILABLE", "TRANSPORT_UNKNOWN", "WRONG_REGION", "SPEND_UNVERIFIED", "NEWLY_ADDED")) {
             assertTrue(code, retryableCode(code))
         }
-        for (code in listOf("QUOTA_EXCEEDED", "PLAN_LIMIT_EXCEEDED", "NOT_FOUND", "FORBIDDEN", "RECOVERY_LIMIT")) {
+        for (code in listOf(
+            "QUOTA_EXCEEDED", "PLAN_LIMIT_EXCEEDED", "NOT_FOUND", "FORBIDDEN", "RECOVERY_LIMIT", "CREDITS_EXHAUSTED", "SPEND_CAP_REACHED",
+        )) {
             assertFalse(code, retryableCode(code))
         }
     }
@@ -88,6 +93,10 @@ class RetryTest {
             Triple(4429 to "RATE_LIMITED retryAfter=5", listOf("RATE_LIMITED", 429, 5L), ReconnectAction.RETRY),
             Triple(4429 to "QUOTA_EXCEEDED retryAfter=60 meter=messages", listOf("QUOTA_EXCEEDED", 429, 60L), ReconnectAction.STOP),
             Triple(4403 to "PLAN_LIMIT_EXCEEDED planLimit=connections", listOf("PLAN_LIMIT_EXCEEDED", 403, null), ReconnectAction.STOP),
+            // Spent credits or a reached spend cap stop; spend that can't be verified waits out its retryAfter.
+            Triple(4402 to "SPEND_CAP_REACHED meter=messages", listOf("SPEND_CAP_REACHED", 402, null), ReconnectAction.STOP),
+            Triple(4402 to "CREDITS_EXHAUSTED meter=mau", listOf("CREDITS_EXHAUSTED", 402, null), ReconnectAction.STOP),
+            Triple(4503 to "SPEND_UNVERIFIED retryAfter=60 meter=mau", listOf("SPEND_UNVERIFIED", 503, 60L), ReconnectAction.RETRY),
             Triple(4409 to "  WRONG_REGION  ", listOf("WRONG_REGION", 409, null), ReconnectAction.REROUTE),
             Triple(1011 to "AUTHORITY_UNAVAILABLE retryAfter=2", listOf("AUTHORITY_UNAVAILABLE", 503, 2L), ReconnectAction.RETRY),
             // A retryAfter that isn't whole seconds is ignored rather than guessed.
