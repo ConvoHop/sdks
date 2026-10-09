@@ -70,3 +70,4 @@ query CommunicationConversationMute($context: RequestContextInput!, $input: Conv
 | [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.GetMuteAsync`](../../dotnet/reference/convohop.md#servermembersgetmuteasync-method), [`CommunicationApi.ConversationMuteAsync`](../../dotnet/reference/api.md#communicationapiconversationmuteasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.conversationMute`](../../jvm/reference/server.md#communicationapiconversationmute-method), [`CommunicationSuspendApi.conversationMute`](../../jvm/reference/server-kotlin.md#communicationsuspendapiconversationmute-method) |
 | [Go](../../go/reference/operations.md) | [`ProjectClient.ConversationMute`](../../go/reference/convohop.md#projectclientconversationmute-method) |
+| [Android](../../android/reference/operations.md) | [`ConversationHandle.mute.get`](../../android/reference/android-core.md#conversationhandlemuteget-method) |

@@ -1,0 +1,154 @@
+{
+  "$schema": "../../../spec/docs/operation-map.schema.json",
+  "operations": {
+    "communication.capabilities": [
+      "com.convohop:convohop-android-core#ConvoHopClient.capabilities"
+    ],
+    "communication.route": [
+      "com.convohop:convohop-android-core#ConvoHopClient.initialize",
+      "com.convohop:convohop-android-core#ConvoHopClient.refreshSession",
+      "com.convohop:convohop-android-core#ConvoHopClient.refreshAutomatically"
+    ],
+    "communication.currentSession": [
+      "com.convohop:convohop-android-core#ConvoHopClient.initialize",
+      "com.convohop:convohop-android-core#ConvoHopClient.refreshSession",
+      "com.convohop:convohop-android-core#ConvoHopClient.refreshAutomatically"
+    ],
+    "communication.getConversation": [
+      "com.convohop:convohop-android-core#ConvoHopClient.getConversation",
+      "com.convohop:convohop-android-core#ConversationHandle.get",
+      "com.convohop:convohop-android-core#ConvoHopClient.resyncAuthorizedHistory",
+      "com.convohop:convohop-android-core#ConvoHopStore.timeline"
+    ],
+    "communication.members": [
+      "com.convohop:convohop-android-core#ConvoHopClient.members"
+    ],
+    "communication.messages": [
+      "com.convohop:convohop-android-core#ConvoHopClient.messages",
+      "com.convohop:convohop-android-core#ConversationHandle.messages.list",
+      "com.convohop:convohop-android-core#ConvoHopStore.timeline",
+      "com.convohop:convohop-android-core#Timeline.loadOlder"
+    ],
+    "communication.getMessage": [
+      "com.convohop:convohop-android-core#ConvoHopClient.getMessage",
+      "com.convohop:convohop-android-core#ConvoHopStore.timeline",
+      "com.convohop:convohop-android#ConvoHopMessageContent.content"
+    ],
+    "communication.events": [
+      "com.convohop:convohop-android-core#ConvoHopClient.events",
+      "com.convohop:convohop-android-core#ConvoHopClient.watch",
+      "com.convohop:convohop-android-core#ConvoHopClient.resyncAuthorizedHistory",
+      "com.convohop:convohop-android-core#ConversationStream.reconcile",
+      "com.convohop:convohop-android-core#ConvoHopStore.timeline"
+    ],
+    "communication.receipts": [
+      "com.convohop:convohop-android-core#ConvoHopClient.receipts",
+      "com.convohop:convohop-android-core#ConvoHopStore.timeline"
+    ],
+    "communication.inbox": [
+      "com.convohop:convohop-android-core#ConvoHopClient.inbox"
+    ],
+    "communication.search": [
+      "com.convohop:convohop-android-core#ConvoHopClient.search"
+    ],
+    "communication.resolveRequest": [
+      "com.convohop:convohop-android-core#ConvoHopClient.requests.resolve",
+      "com.convohop:convohop-android-core#ConvoHopClient.requests.retry",
+      "com.convohop:convohop-android-core#ConvoHopClient.recoverPending",
+      "com.convohop:convohop-android-core#Outbox.send",
+      "com.convohop:convohop-android-core#Outbox.sendAgain",
+      "com.convohop:convohop-android-core#Outbox.drain",
+      "com.convohop:convohop-android-core#Timeline.send",
+      "com.convohop:convohop-android-core#LiveParticipationHandle.connect"
+    ],
+    "communication.conversationMute": [
+      "com.convohop:convohop-android-core#ConversationHandle.mute.get"
+    ],
+    "communication.currentLiveSession": [
+      "com.convohop:convohop-android-core#ConversationLive.current"
+    ],
+    "communication.liveSession": [
+      "com.convohop:convohop-android-core#ConvoHopClient.liveSession",
+      "com.convohop:convohop-android-core#LiveSessionHandle.get",
+      "com.convohop:convohop-android-core#LiveSessionHandle.participation",
+      "com.convohop:convohop-android-core#LiveSessionHandle.end",
+      "com.convohop:convohop-android-core#LiveStartOperation.ready",
+      "com.convohop:convohop-android-core#LiveParticipationHandle.get",
+      "com.convohop:convohop-android#ConvoHopCall.answer:static"
+    ],
+    "communication.liveSessions": [
+      "com.convohop:convohop-android-core#ConversationLive.history"
+    ],
+    "communication.liveSessionParticipants": [
+      "com.convohop:convohop-android-core#LiveSessionHandle.participants"
+    ],
+    "communication.liveSessionAlerts": [
+      "com.convohop:convohop-android-core#ConvoHopClient.liveAlerts.list"
+    ],
+    "communication.liveSessionOperation": [
+      "com.convohop:convohop-android-core#LiveAction.get",
+      "com.convohop:convohop-android-core#LiveAction.completed",
+      "com.convohop:convohop-android-core#LiveStartOperation.ready"
+    ],
+    "communication.sendMessage": [
+      "com.convohop:convohop-android-core#ConvoHopClient.send",
+      "com.convohop:convohop-android-core#ConversationHandle.messages.send",
+      "com.convohop:convohop-android-core#Outbox.send",
+      "com.convohop:convohop-android-core#Outbox.sendAgain",
+      "com.convohop:convohop-android-core#Outbox.drain",
+      "com.convohop:convohop-android-core#Timeline.send"
+    ],
+    "communication.editMessage": [
+      "com.convohop:convohop-android-core#ConvoHopClient.edit",
+      "com.convohop:convohop-android-core#ConversationHandle.messages.edit"
+    ],
+    "communication.deleteMessage": [
+      "com.convohop:convohop-android-core#ConvoHopClient.delete",
+      "com.convohop:convohop-android-core#ConversationHandle.messages.delete"
+    ],
+    "communication.reportReceipt": [
+      "com.convohop:convohop-android-core#ConvoHopClient.reportRead",
+      "com.convohop:convohop-android-core#ConvoHopClient.reportDelivered",
+      "com.convohop:convohop-android-core#Timeline.markRead"
+    ],
+    "communication.typing": [
+      "com.convohop:convohop-android-core#ConvoHopClient.typing",
+      "com.convohop:convohop-android-core#TypingIndicator.keystroke",
+      "com.convohop:convohop-android-core#TypingIndicator.stop",
+      "com.convohop:convohop-android-core#Timeline.send"
+    ],
+    "communication.setConversationMute": [
+      "com.convohop:convohop-android-core#ConversationHandle.mute.set"
+    ],
+    "communication.startLiveSession": [
+      "com.convohop:convohop-android-core#ConversationLive.startVoice",
+      "com.convohop:convohop-android-core#ConversationLive.startVideo",
+      "com.convohop:convohop-android-core#ConversationLive.startBroadcast"
+    ],
+    "communication.joinLiveSession": [
+      "com.convohop:convohop-android-core#LiveSessionHandle.join",
+      "com.convohop:convohop-android#ConvoHopCall.answer:static"
+    ],
+    "communication.alertLiveSession": [
+      "com.convohop:convohop-android-core#LiveSessionHandle.alerts.send"
+    ],
+    "communication.leaveLiveSession": [
+      "com.convohop:convohop-android-core#LiveParticipationHandle.leave",
+      "com.convohop:convohop-android#ConvoHopCall.hangUp"
+    ],
+    "communication.endLiveSession": [
+      "com.convohop:convohop-android-core#LiveSessionHandle.end"
+    ],
+    "communication.liveSessionCredentials": [
+      "com.convohop:convohop-android-core#LiveParticipationHandle.connect",
+      "com.convohop:convohop-android-core#MediaConnection.reconnect",
+      "com.convohop:convohop-android#ConvoHopCall.answer:static",
+      "com.convohop:convohop-android#ConvoHopCall.join:static"
+    ],
+    "communication.conversationEvents": [
+      "com.convohop:convohop-android-core#ConvoHopClient.watch",
+      "com.convohop:convohop-android-core#ConvoHopClient.resyncAuthorizedHistory",
+      "com.convohop:convohop-android-core#ConvoHopStore.timeline"
+    ]
+  }
+}

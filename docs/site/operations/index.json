@@ -70,6 +70,13 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientcapabilities-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.capabilities",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientcapabilities-method"
+          }
         ]
       }
     },
@@ -172,6 +179,23 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientinitialize-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.initialize",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientinitialize-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.refreshSession",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientrefreshsession-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.refreshAutomatically",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientrefreshautomatically-method"
+          }
         ]
       }
     },
@@ -205,6 +229,23 @@
             "ref": "@convohop/react#useSessionRefresh",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#usesessionrefresh-function"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.initialize",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientinitialize-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.refreshSession",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientrefreshsession-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.refreshAutomatically",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientrefreshautomatically-method"
           }
         ]
       }
@@ -375,6 +416,28 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientgetconversation-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.getConversation",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientgetconversation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationHandle.get",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationhandleget-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopStore.timeline",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopstoretimeline-method"
+          }
         ]
       }
     },
@@ -476,6 +539,13 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.MembersPages",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientmemberspages-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.members",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientmembers-method"
           }
         ]
       }
@@ -619,6 +689,28 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientmessagespages-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.messages",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientmessages-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationHandle.messages.list",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationhandlemessageslist-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopStore.timeline",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopstoretimeline-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Timeline.loadOlder",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#timelineloadolder-method"
+          }
         ]
       }
     },
@@ -716,6 +808,23 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientgetmessage-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.getMessage",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientgetmessage-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopStore.timeline",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopstoretimeline-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android#ConvoHopMessageContent.content",
+            "package": "com.convohop:convohop-android",
+            "page": "../android/reference/android.md#convohopmessagecontentcontent-method"
+          }
         ]
       }
     },
@@ -770,6 +879,33 @@
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#conversationviewresync-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.events",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientevents-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.watch",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationStream.reconcile",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationstreamreconcile-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopStore.timeline",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopstoretimeline-method"
+          }
         ]
       }
     },
@@ -813,6 +949,18 @@
             "ref": "@convohop/react#ConversationView.resync",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#conversationviewresync-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.receipts",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientreceipts-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopStore.timeline",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopstoretimeline-method"
           }
         ]
       }
@@ -911,6 +1059,13 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientinboxpages-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.inbox",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientinbox-method"
+          }
         ]
       }
     },
@@ -1007,6 +1162,13 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.SearchPages",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientsearchpages-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.search",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientsearch-method"
           }
         ]
       }
@@ -1150,6 +1312,48 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientretry-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.requests.resolve",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientrequestsresolve-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.requests.retry",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientrequestsretry-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.recoverPending",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientrecoverpending-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Outbox.send",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#outboxsend-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Outbox.sendAgain",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#outboxsendagain-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Outbox.drain",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#outboxdrain-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Timeline.send",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#timelinesend-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#LiveParticipationHandle.connect",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#liveparticipationhandleconnect-method"
+          }
         ]
       }
     },
@@ -1217,7 +1421,8 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientgetoperation-method"
           }
-        ]
+        ],
+        "android": []
       }
     },
     {
@@ -1283,6 +1488,13 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.ConversationMute",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientconversationmute-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationHandle.mute.get",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationhandlemuteget-method"
           }
         ]
       }
@@ -1360,6 +1572,13 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.CurrentLiveSession",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientcurrentlivesession-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationLive.current",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationlivecurrent-method"
           }
         ]
       }
@@ -1452,6 +1671,43 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.LiveSession",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientlivesession-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.liveSession",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientlivesession-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#LiveSessionHandle.get",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#livesessionhandleget-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#LiveSessionHandle.participation",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#livesessionhandleparticipation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#LiveSessionHandle.end",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#livesessionhandleend-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#LiveStartOperation.ready",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#livestartoperationready-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#LiveParticipationHandle.get",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#liveparticipationhandleget-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android#ConvoHopCall.answer:static",
+            "package": "com.convohop:convohop-android",
+            "page": "../android/reference/android.md#convohopcallanswer-static-method"
           }
         ]
       }
@@ -1550,6 +1806,13 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientlivesessionspages-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationLive.history",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationlivehistory-method"
+          }
         ]
       }
     },
@@ -1647,6 +1910,13 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientlivesessionparticipantspages-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#LiveSessionHandle.participants",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#livesessionhandleparticipants-method"
+          }
         ]
       }
     },
@@ -1665,6 +1935,13 @@
             "ref": "@convohop/client#ConvoHopClient.liveAlerts.list",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientlivealertslist-property"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.liveAlerts.list",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientlivealertslist-method"
           }
         ]
       }
@@ -1762,6 +2039,23 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessionOperation",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientlivesessionoperation-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#LiveAction.get",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#liveactionget-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#LiveAction.completed",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#liveactioncompleted-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#LiveStartOperation.ready",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#livestartoperationready-method"
           }
         ]
       }
@@ -2175,7 +2469,8 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientrevokesession-method"
           }
-        ]
+        ],
+        "android": []
       }
     },
     {
@@ -2309,7 +2604,8 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientupdateconversation-method"
           }
-        ]
+        ],
+        "android": []
       }
     },
     {
@@ -2679,6 +2975,38 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientsendmessage-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.send",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientsend-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationHandle.messages.send",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationhandlemessagessend-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Outbox.send",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#outboxsend-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Outbox.sendAgain",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#outboxsendagain-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Outbox.drain",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#outboxdrain-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Timeline.send",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#timelinesend-method"
+          }
         ]
       }
     },
@@ -2755,6 +3083,18 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.EditMessage",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclienteditmessage-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.edit",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientedit-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationHandle.messages.edit",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationhandlemessagesedit-method"
           }
         ]
       }
@@ -2833,6 +3173,18 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientdeletemessage-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.delete",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientdelete-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationHandle.messages.delete",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationhandlemessagesdelete-method"
+          }
         ]
       }
     },
@@ -2876,6 +3228,23 @@
             "ref": "@convohop/react#ConversationView.markDelivered",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#conversationviewmarkdelivered-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.reportRead",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientreportread-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.reportDelivered",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientreportdelivered-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Timeline.markRead",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#timelinemarkread-method"
           }
         ]
       }
@@ -2925,6 +3294,28 @@
             "ref": "@convohop/react#TypingControls.stop",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#typingcontrolsstop-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.typing",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclienttyping-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#TypingIndicator.keystroke",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#typingindicatorkeystroke-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#TypingIndicator.stop",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#typingindicatorstop-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#Timeline.send",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#timelinesend-method"
           }
         ]
       }
@@ -3055,6 +3446,13 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientsetconversationmute-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationHandle.mute.set",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationhandlemuteset-method"
+          }
         ]
       }
     },
@@ -3084,6 +3482,23 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationlivestartbroadcast-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationLive.startVoice",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationlivestartvoice-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationLive.startVideo",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationlivestartvideo-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConversationLive.startBroadcast",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#conversationlivestartbroadcast-method"
+          }
         ]
       }
     },
@@ -3102,6 +3517,18 @@
             "ref": "@convohop/client#LiveSessionHandle.join",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#livesessionhandlejoin-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#LiveSessionHandle.join",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#livesessionhandlejoin-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android#ConvoHopCall.answer:static",
+            "package": "com.convohop:convohop-android",
+            "page": "../android/reference/android.md#convohopcallanswer-static-method"
           }
         ]
       }
@@ -3170,6 +3597,13 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientalertlivesession-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#LiveSessionHandle.alerts.send",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#livesessionhandlealertssend-method"
+          }
         ]
       }
     },
@@ -3188,6 +3622,18 @@
             "ref": "@convohop/client#LiveParticipationHandle.leave",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#liveparticipationhandleleave-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#LiveParticipationHandle.leave",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#liveparticipationhandleleave-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android#ConvoHopCall.hangUp",
+            "package": "com.convohop:convohop-android",
+            "page": "../android/reference/android.md#convohopcallhangup-method"
           }
         ]
       }
@@ -3256,6 +3702,13 @@
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientendlivesession-method"
           }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#LiveSessionHandle.end",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#livesessionhandleend-method"
+          }
         ]
       }
     },
@@ -3294,6 +3747,28 @@
             "ref": "@convohop/react#MediaConnectionView.reconnect",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#mediaconnectionviewreconnect-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#LiveParticipationHandle.connect",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#liveparticipationhandleconnect-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#MediaConnection.reconnect",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#mediaconnectionreconnect-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android#ConvoHopCall.answer:static",
+            "package": "com.convohop:convohop-android",
+            "page": "../android/reference/android.md#convohopcallanswer-static-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android#ConvoHopCall.join:static",
+            "package": "com.convohop:convohop-android",
+            "page": "../android/reference/android.md#convohopcalljoin-static-method"
           }
         ]
       }
@@ -3423,6 +3898,23 @@
             "ref": "@convohop/react#ConversationView.resync",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#conversationviewresync-method"
+          }
+        ],
+        "android": [
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.watch",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "com.convohop:convohop-android-core#ConvoHopStore.timeline",
+            "package": "com.convohop:convohop-android-core",
+            "page": "../android/reference/android-core.md#convohopstoretimeline-method"
           }
         ]
       }

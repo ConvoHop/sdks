@@ -1,0 +1,2002 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "android",
+  "package": "com.convohop:convohop-android-push",
+  "layer": "client",
+  "page": "android-push.md",
+  "symbols": [
+    {
+      "name": "CallInfo",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#CallInfo",
+      "anchor": "callinfo-class",
+      "signatures": ["public class CallInfo"],
+      "docs": "A snapshot of a call on this device.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "notification",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.notification",
+          "anchor": "callinfonotification-property",
+          "signatures": ["public val notification: PushNotification.IncomingCall"],
+          "docs": "The ring that started it."
+        },
+        {
+          "name": "state",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.state",
+          "anchor": "callinfostate-property",
+          "signatures": ["public val state: CallState"],
+          "docs": ""
+        },
+        {
+          "name": "endReason",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.endReason",
+          "anchor": "callinfoendreason-property",
+          "signatures": ["public val endReason: CallEndReason?"],
+          "docs": "Why it ended, once `state` is `CallState.ENDED`."
+        },
+        {
+          "name": "serverReason",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.serverReason",
+          "anchor": "callinfoserverreason-property",
+          "signatures": ["public val serverReason: String?"],
+          "docs": "The `reason` of the server's cancellation, when the server stopped the ring."
+        },
+        {
+          "name": "muted",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.muted",
+          "anchor": "callinfomuted-property",
+          "signatures": ["public val muted: Boolean"],
+          "docs": "Whether the system muted the call."
+        },
+        {
+          "name": "audioRoute",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.audioRoute",
+          "anchor": "callinfoaudioroute-property",
+          "signatures": ["public val audioRoute: AudioRoute?"],
+          "docs": "Where the system plays the call's audio, once it reported a route."
+        },
+        {
+          "name": "availableAudioRoutes",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.availableAudioRoutes",
+          "anchor": "callinfoavailableaudioroutes-property",
+          "signatures": ["public val availableAudioRoutes: Set<AudioRoute>"],
+          "docs": "The routes `ConvoHopNotifications.setAudioRoute` accepts."
+        },
+        {
+          "name": "telecom",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.telecom",
+          "anchor": "callinfotelecom-property",
+          "signatures": ["public val telecom: Boolean"],
+          "docs": "Whether Android's Telecom runs the call through this app's self-managed\n`ConnectionService`. Telecom then owns audio focus, the audio mode and\nthe route, so media must leave them alone; the app still mutes its own\nmicrophone when `muted` and pauses media on hold."
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.alertId",
+          "anchor": "callinfoalertid-property",
+          "signatures": ["public val alertId: String"],
+          "docs": ""
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.liveSessionId",
+          "anchor": "callinfolivesessionid-property",
+          "signatures": ["public val liveSessionId: String"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.conversationId",
+          "anchor": "callinfoconversationid-property",
+          "signatures": ["public val conversationId: String"],
+          "docs": ""
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.projectId",
+          "anchor": "callinfoprojectid-property",
+          "signatures": ["public val projectId: String"],
+          "docs": ""
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.recipientId",
+          "anchor": "callinforecipientid-property",
+          "signatures": ["public val recipientId: String"],
+          "docs": ""
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.senderId",
+          "anchor": "callinfosenderid-property",
+          "signatures": ["public val senderId: String"],
+          "docs": ""
+        },
+        {
+          "name": "mediaProfile",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.mediaProfile",
+          "anchor": "callinfomediaprofile-property",
+          "signatures": ["public val mediaProfile: String"],
+          "docs": ""
+        },
+        {
+          "name": "video",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.video",
+          "anchor": "callinfovideo-property",
+          "signatures": ["public val video: Boolean"],
+          "docs": ""
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.title",
+          "anchor": "callinfotitle-property",
+          "signatures": ["public val title: String?"],
+          "docs": ""
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.body",
+          "anchor": "callinfobody-property",
+          "signatures": ["public val body: String?"],
+          "docs": ""
+        },
+        {
+          "name": "expiresAtMillis",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#CallInfo.expiresAtMillis",
+          "anchor": "callinfoexpiresatmillis-property",
+          "signatures": ["public val expiresAtMillis: Long"],
+          "docs": ""
+        },
+        {
+          "name": "toString",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#CallInfo.toString",
+          "anchor": "callinfotostring-method",
+          "signatures": ["public override fun toString(): String"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopFirebase",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#ConvoHopFirebase",
+      "anchor": "convohopfirebase-class",
+      "signatures": ["public object ConvoHopFirebase"],
+      "docs": "Connects Firebase Cloud Messaging to `ConvoHopNotifications`. Your app\nsupplies `com.google.firebase:firebase-messaging` 25.1.2 or later (Firebase\nBoM 34.18.0 or later) and its own `google-services.json`; this library only\ncompiles against it.\n\nConvoHop follows your app's FCM mode. By default FCM registers the device\nwith a registration token, reported as a `PushRegistration.Token`. If your\nmanifest turns on registration by Firebase Installation ID with\n`<meta-data android:name=\"firebase_messaging_installation_id_enabled\" android:value=\"true\" />`\ninside `<application>`, ConvoHop registers with\n`FirebaseMessaging.register()` instead and reports a\n`PushRegistration.InstallationId`. The flag applies to your whole app:\nFirebase then fails `getToken()` and `deleteToken()` for every library in\nit, so turn it on only once everything in your app that uses FCM supports\ninstallation IDs.\n\nDeclare `ConvoHopMessagingService`, or forward to `handleMessage`,\n`onNewToken`, `onRegistered` and `onUnregistered` from your own messaging\nservice, and call `register` when your app starts.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "INSTALLATION_ID_ENABLED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopFirebase.INSTALLATION_ID_ENABLED:static",
+          "anchor": "convohopfirebaseinstallation_id_enabled-static-property",
+          "signatures": [
+            "public const val INSTALLATION_ID_ENABLED: String = \"firebase_messaging_installation_id_enabled\""
+          ],
+          "docs": "The `<meta-data>` name that turns on FCM registration by Firebase Installation ID.",
+          "static": true
+        },
+        {
+          "name": "handleMessage",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopFirebase.handleMessage:static",
+          "anchor": "convohopfirebasehandlemessage-static-method",
+          "signatures": [
+            "public fun handleMessage(context: Context, message: RemoteMessage): Boolean"
+          ],
+          "docs": "Handles `message` if it is ConvoHop's. False means it isn't: handle it yourself.",
+          "static": true
+        },
+        {
+          "name": "usesInstallationId",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopFirebase.usesInstallationId:static",
+          "anchor": "convohopfirebaseusesinstallationid-static-method",
+          "signatures": ["public fun usesInstallationId(context: Context): Boolean"],
+          "docs": "Whether your manifest turns on registration by Firebase Installation ID.\nRead as Firebase reads it: a missing or non-boolean value is false.",
+          "static": true
+        },
+        {
+          "name": "register",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopFirebase.register:static",
+          "anchor": "convohopfirebaseregister-static-method",
+          "signatures": ["public fun register(context: Context): Task<PushRegistration>"],
+          "docs": "Registers this device with FCM in your app's mode and completes with its\nregistration. Call it when your app starts: it reports the registration\nFCM holds, renewing it only if FCM needs to, so your backend learns it\neven when Firebase's own callbacks don't fire, for example because the\ntoken hasn't changed. With FCM auto-init off, nothing registers until\nyou call it, so you can wait for the user's consent. When the task\nsucceeds, `ConvoHopNotifications` listeners get\n`ConvoHopNotificationListener.onRegistered`, even if another service\nhandles `com.google.firebase.MESSAGING_EVENT`. If it fails, for example\noffline, call it again later.\n\nThrows: `IllegalStateException` if your manifest turns on installation IDs\nbut your firebase-messaging predates them. ConvoHop needs 25.1.2 or later.",
+          "static": true
+        },
+        {
+          "name": "unregister",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopFirebase.unregister:static",
+          "anchor": "convohopfirebaseunregister-static-method",
+          "signatures": ["public fun unregister(context: Context): Task<Void>"],
+          "docs": "Unregisters this device from FCM in your app's mode, for example when the\nuser signs out: deletes its token, or unregisters its installation ID.\nWhen the task succeeds, `ConvoHopNotifications` listeners get\n`ConvoHopNotificationListener.onUnregistered` for the registration this\nprocess knew, if any: delete it from your backend. With auto-init on,\nFirebase registers the device again when your app next starts; turn\nauto-init off to keep it unregistered.\n\nThrows: `IllegalStateException` as `register` does.",
+          "static": true
+        },
+        {
+          "name": "onNewToken",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopFirebase.onNewToken:static",
+          "anchor": "convohopfirebaseonnewtoken-static-method",
+          "signatures": ["public fun onNewToken(context: Context, token: String)"],
+          "docs": "Reports a new token from `FirebaseMessagingService.onNewToken`.",
+          "static": true
+        },
+        {
+          "name": "onRegistered",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopFirebase.onRegistered:static",
+          "anchor": "convohopfirebaseonregistered-static-method",
+          "signatures": ["public fun onRegistered(context: Context, installationId: String)"],
+          "docs": "Reports a registration from `FirebaseMessagingService.onRegistered`.",
+          "static": true
+        },
+        {
+          "name": "onUnregistered",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopFirebase.onUnregistered:static",
+          "anchor": "convohopfirebaseonunregistered-static-method",
+          "signatures": ["public fun onUnregistered(context: Context, installationId: String)"],
+          "docs": "Reports the end of a registration from `FirebaseMessagingService.onUnregistered`.",
+          "static": true
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopMessagingService",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#ConvoHopMessagingService",
+      "anchor": "convohopmessagingservice-class",
+      "signatures": ["public open class ConvoHopMessagingService : FirebaseMessagingService"],
+      "docs": "A messaging service that hands ConvoHop pushes and FCM registrations to\n`ConvoHopNotifications`. Declare it (or a subclass) in your manifest with\nthe `com.google.firebase.MESSAGING_EVENT` intent filter, or call\n`ConvoHopFirebase` from your own service instead. A subclass that overrides\n`onMessageReceived`, `onNewToken`, `onRegistered` or `onUnregistered` must\ncall `super`.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-push#ConvoHopMessagingService.constructor",
+          "anchor": "convohopmessagingservice-constructor",
+          "signatures": ["public constructor()"],
+          "docs": ""
+        },
+        {
+          "name": "onMessageReceived",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopMessagingService.onMessageReceived",
+          "anchor": "convohopmessagingserviceonmessagereceived-method",
+          "signatures": ["public override fun onMessageReceived(message: RemoteMessage)"],
+          "docs": ""
+        },
+        {
+          "name": "onNewToken",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopMessagingService.onNewToken",
+          "anchor": "convohopmessagingserviceonnewtoken-method",
+          "signatures": ["public override fun onNewToken(token: String)"],
+          "docs": ""
+        },
+        {
+          "name": "onRegistered",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopMessagingService.onRegistered",
+          "anchor": "convohopmessagingserviceonregistered-method",
+          "signatures": ["public override fun onRegistered(installationId: String)"],
+          "docs": ""
+        },
+        {
+          "name": "onUnregistered",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopMessagingService.onUnregistered",
+          "anchor": "convohopmessagingserviceonunregistered-method",
+          "signatures": ["public override fun onUnregistered(installationId: String)"],
+          "docs": ""
+        },
+        {
+          "name": "onOtherMessage",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopMessagingService.onOtherMessage",
+          "anchor": "convohopmessagingserviceonothermessage-method",
+          "signatures": ["public open fun onOtherMessage(message: RemoteMessage)"],
+          "docs": "A push that isn't ConvoHop's."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopNotificationOptions",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions",
+      "anchor": "convohopnotificationoptions-class",
+      "signatures": ["public class ConvoHopNotificationOptions"],
+      "docs": "How `ConvoHopNotifications` presents pushes. Set it in `Application.onCreate`, before pushes arrive.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.constructor",
+          "anchor": "convohopnotificationoptions-constructor",
+          "signatures": ["public constructor()"],
+          "docs": ""
+        },
+        {
+          "name": "smallIcon",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.smallIcon",
+          "anchor": "convohopnotificationoptionssmallicon-property",
+          "signatures": ["public var smallIcon: Int"],
+          "docs": "The small icon of every notification. 0 uses the app icon, which Android may show as a plain square."
+        },
+        {
+          "name": "color",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.color",
+          "anchor": "convohopnotificationoptionscolor-property",
+          "signatures": ["public var color: Int?"],
+          "docs": "The notifications' accent color, or null for the system default."
+        },
+        {
+          "name": "showMessages",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.showMessages",
+          "anchor": "convohopnotificationoptionsshowmessages-property",
+          "signatures": ["public var showMessages: Boolean"],
+          "docs": "Post message notifications. Turn this off to show them yourself from `ConvoHopNotificationListener.onMessage`."
+        },
+        {
+          "name": "showMissedCalls",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.showMissedCalls",
+          "anchor": "convohopnotificationoptionsshowmissedcalls-property",
+          "signatures": ["public var showMissedCalls: Boolean"],
+          "docs": "Post a missed-call notification when a ring ends unanswered."
+        },
+        {
+          "name": "useTelecom",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.useTelecom",
+          "anchor": "convohopnotificationoptionsusetelecom-property",
+          "signatures": ["public var useTelecom: Boolean"],
+          "docs": "Ring through a self-managed `ConnectionService` on Android 8.0 and later. Without it, calls are notifications only."
+        },
+        {
+          "name": "recipientFilter",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.recipientFilter",
+          "anchor": "convohopnotificationoptionsrecipientfilter-property",
+          "signatures": ["public var recipientFilter: RecipientFilter?"],
+          "docs": "Which recipients this device accepts. Null accepts all; reject users who signed out."
+        },
+        {
+          "name": "incomingCallIntent",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.incomingCallIntent",
+          "anchor": "convohopnotificationoptionsincomingcallintent-property",
+          "signatures": ["public var incomingCallIntent: CallIntentFactory?"],
+          "docs": "The incoming-call screen, shown full screen over the lock screen when allowed and when the user taps the call."
+        },
+        {
+          "name": "answeredCallIntent",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.answeredCallIntent",
+          "anchor": "convohopnotificationoptionsansweredcallintent-property",
+          "signatures": ["public var answeredCallIntent: CallIntentFactory?"],
+          "docs": "Opens after the user answers from the notification."
+        },
+        {
+          "name": "conversationIntent",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.conversationIntent",
+          "anchor": "convohopnotificationoptionsconversationintent-property",
+          "signatures": ["public var conversationIntent: ConversationIntentFactory?"],
+          "docs": "Opens when the user taps a message or missed-call notification."
+        },
+        {
+          "name": "messageContent",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.messageContent",
+          "anchor": "convohopnotificationoptionsmessagecontent-property",
+          "signatures": ["public var messageContent: MessageContentProvider?"],
+          "docs": "Fetches message text when a push carries none."
+        },
+        {
+          "name": "ledgerStore",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationOptions.ledgerStore",
+          "anchor": "convohopnotificationoptionsledgerstore-property",
+          "signatures": ["public var ledgerStore: PushLedgerStore?"],
+          "docs": "Where delivery state persists; null uses shared preferences. It never holds message text or FCM registrations."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopNotifications",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#ConvoHopNotifications",
+      "anchor": "convohopnotifications-class",
+      "signatures": ["public class ConvoHopNotifications"],
+      "docs": "Turns ConvoHop pushes into Android notifications and incoming calls.\n\nCall `handleNotification` with each FCM data message (or use\n`ConvoHopFirebase` or `ConvoHopMessagingService`). Messages become\nnotifications. A call rings with a full-screen incoming-call notification\nand, on Android 8.0 and later, through a self-managed `ConnectionService`.\nIt stops when the server cancels it, it reaches `expiresAt`, or the user\nanswers or declines. Delivery is at least once and unordered: duplicates\nand late rings are dropped.\n\nConfigure `options` in `Application.onCreate`, because a push can start\nyour process. Methods are thread-safe; listeners run on the main thread.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "options",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.options",
+          "anchor": "convohopnotificationsoptions-property",
+          "signatures": ["public var options: ConvoHopNotificationOptions"],
+          "docs": "How pushes are presented. Replace it before pushes arrive."
+        },
+        {
+          "name": "registration",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.registration",
+          "anchor": "convohopnotificationsregistration-property",
+          "signatures": ["public var registration: PushRegistration?\n    private set"],
+          "docs": "This device's FCM registration as this process last learned it, from\nFirebase's callbacks or `ConvoHopFirebase.register`. Held in memory\nonly; null until then, and after it is unregistered."
+        },
+        {
+          "name": "handleNotification",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.handleNotification",
+          "anchor": "convohopnotificationshandlenotification-method",
+          "signatures": ["public fun handleNotification(data: Map<String, String>): PushResult"],
+          "docs": "Handles an FCM data message. Returns `PushResult.NOT_CONVOHOP` for a push\nthat isn't ConvoHop's, so you can route it elsewhere. It may block\nbriefly while `ConvoHopNotificationOptions.messageContent` fetches text."
+        },
+        {
+          "name": "handle",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.handle",
+          "anchor": "convohopnotificationshandle-method",
+          "signatures": ["public fun handle(notification: PushNotification): PushResult"],
+          "docs": "Handles a notification you already parsed with `ConvoHopPush`."
+        },
+        {
+          "name": "addListener",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.addListener",
+          "anchor": "convohopnotificationsaddlistener-method",
+          "signatures": [
+            "public fun addListener(listener: ConvoHopNotificationListener): AutoCloseable"
+          ],
+          "docs": "Adds `listener` if it isn't added yet. Close the result to remove it."
+        },
+        {
+          "name": "removeListener",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.removeListener",
+          "anchor": "convohopnotificationsremovelistener-method",
+          "signatures": ["public fun removeListener(listener: ConvoHopNotificationListener)"],
+          "docs": ""
+        },
+        {
+          "name": "onNewToken",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.onNewToken",
+          "anchor": "convohopnotificationsonnewtoken-method",
+          "signatures": ["public fun onNewToken(token: String)"],
+          "docs": "Records a new FCM registration token and reports it to listeners as a\n`PushRegistration.Token`: store it with your backend.\n`ConvoHopFirebase.onNewToken` calls this."
+        },
+        {
+          "name": "onRegistered",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.onRegistered",
+          "anchor": "convohopnotificationsonregistered-method",
+          "signatures": ["public fun onRegistered(installationId: String)"],
+          "docs": "Records that FCM registered this device as `installationId` and reports\nit to listeners as a `PushRegistration.InstallationId`: store it with\nyour backend. `ConvoHopFirebase.onRegistered` calls this."
+        },
+        {
+          "name": "onUnregistered",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.onUnregistered",
+          "anchor": "convohopnotificationsonunregistered-method",
+          "signatures": ["public fun onUnregistered(installationId: String)"],
+          "docs": "Records that FCM unregistered `installationId`, so pushes to it stop,\nand reports it to listeners: delete it from your backend.\n`ConvoHopFirebase.onUnregistered` calls this."
+        },
+        {
+          "name": "areNotificationsEnabled",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.areNotificationsEnabled",
+          "anchor": "convohopnotificationsarenotificationsenabled-method",
+          "signatures": ["public fun areNotificationsEnabled(): Boolean"],
+          "docs": "False when the user turned off this app's notifications or hasn't granted `POST_NOTIFICATIONS`."
+        },
+        {
+          "name": "canUseFullScreenIntent",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.canUseFullScreenIntent",
+          "anchor": "convohopnotificationscanusefullscreenintent-method",
+          "signatures": ["public fun canUseFullScreenIntent(): Boolean"],
+          "docs": "Whether incoming calls can take the full screen over the lock screen.\nAndroid 14 lets the user and Google Play deny it; calls then show as a\nheads-up notification. Send the user to `fullScreenIntentSettings`."
+        },
+        {
+          "name": "fullScreenIntentSettings",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.fullScreenIntentSettings",
+          "anchor": "convohopnotificationsfullscreenintentsettings-method",
+          "signatures": ["public fun fullScreenIntentSettings(): Intent"],
+          "docs": "The settings screen where the user allows full-screen incoming calls."
+        },
+        {
+          "name": "calls",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.calls",
+          "anchor": "convohopnotificationscalls-method",
+          "signatures": ["public fun calls(): List<CallInfo>"],
+          "docs": "The calls on this device: ringing, in progress, or ended within the last 60 seconds."
+        },
+        {
+          "name": "call",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.call",
+          "anchor": "convohopnotificationscall-method",
+          "signatures": ["public fun call(alertId: String): CallInfo?"],
+          "docs": "The call with `alertId`, or null."
+        },
+        {
+          "name": "answer",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.answer",
+          "anchor": "convohopnotificationsanswer-method",
+          "signatures": ["public fun answer(alertId: String): Boolean"],
+          "docs": "Answers a ringing call, as the notification's Answer button does. Then join the live session."
+        },
+        {
+          "name": "reject",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.reject",
+          "anchor": "convohopnotificationsreject-method",
+          "signatures": ["public fun reject(alertId: String): Boolean"],
+          "docs": "Declines a ringing call on this device. ConvoHop has no decline operation, so the caller keeps ringing others."
+        },
+        {
+          "name": "end",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.end",
+          "anchor": "convohopnotificationsend-method",
+          "signatures": ["public fun end(alertId: String): Boolean"],
+          "docs": "Ends a call on this device: declines it if it is ringing, otherwise hangs up. Call it when your call ends."
+        },
+        {
+          "name": "forget",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.forget",
+          "anchor": "convohopnotificationsforget-method",
+          "signatures": ["public fun forget(alertId: String): Boolean"],
+          "docs": "Drops an ended call from `calls` before its 60 seconds pass. False for a live or unknown call."
+        },
+        {
+          "name": "setOnHold",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.setOnHold",
+          "anchor": "convohopnotificationssetonhold-method",
+          "signatures": ["public fun setOnHold(alertId: String, onHold: Boolean): Boolean"],
+          "docs": "Puts an answered call on hold or resumes it."
+        },
+        {
+          "name": "setAudioRoute",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.setAudioRoute",
+          "anchor": "convohopnotificationssetaudioroute-method",
+          "signatures": ["public fun setAudioRoute(alertId: String, route: AudioRoute): Boolean"],
+          "docs": "Asks the system to move a call's audio. False without a system call, or when `route` isn't available."
+        },
+        {
+          "name": "EXTRA_ACTION",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.EXTRA_ACTION:static",
+          "anchor": "convohopnotificationsextra_action-static-property",
+          "signatures": [
+            "public const val EXTRA_ACTION: String = \"com.convohop.android.push.extra.ACTION\""
+          ],
+          "docs": "Which notification opened the activity: `ACTION_INCOMING_CALL`, `ACTION_ANSWERED_CALL`, `ACTION_MESSAGE` or `ACTION_MISSED_CALL`.",
+          "static": true
+        },
+        {
+          "name": "EXTRA_ALERT_ID",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.EXTRA_ALERT_ID:static",
+          "anchor": "convohopnotificationsextra_alert_id-static-property",
+          "signatures": [
+            "public const val EXTRA_ALERT_ID: String = \"com.convohop.android.push.extra.ALERT_ID\""
+          ],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "EXTRA_LIVE_SESSION_ID",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.EXTRA_LIVE_SESSION_ID:static",
+          "anchor": "convohopnotificationsextra_live_session_id-static-property",
+          "signatures": [
+            "public const val EXTRA_LIVE_SESSION_ID: String = \"com.convohop.android.push.extra.LIVE_SESSION_ID\""
+          ],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "EXTRA_CONVERSATION_ID",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.EXTRA_CONVERSATION_ID:static",
+          "anchor": "convohopnotificationsextra_conversation_id-static-property",
+          "signatures": [
+            "public const val EXTRA_CONVERSATION_ID: String = \"com.convohop.android.push.extra.CONVERSATION_ID\""
+          ],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "EXTRA_MESSAGE_ID",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.EXTRA_MESSAGE_ID:static",
+          "anchor": "convohopnotificationsextra_message_id-static-property",
+          "signatures": [
+            "public const val EXTRA_MESSAGE_ID: String = \"com.convohop.android.push.extra.MESSAGE_ID\""
+          ],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "EXTRA_VIDEO",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.EXTRA_VIDEO:static",
+          "anchor": "convohopnotificationsextra_video-static-property",
+          "signatures": [
+            "public const val EXTRA_VIDEO: String = \"com.convohop.android.push.extra.VIDEO\""
+          ],
+          "docs": "A boolean: whether the call has video.",
+          "static": true
+        },
+        {
+          "name": "ACTION_INCOMING_CALL",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.ACTION_INCOMING_CALL:static",
+          "anchor": "convohopnotificationsaction_incoming_call-static-property",
+          "signatures": ["public const val ACTION_INCOMING_CALL: String = \"incomingCall\""],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "ACTION_ANSWERED_CALL",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.ACTION_ANSWERED_CALL:static",
+          "anchor": "convohopnotificationsaction_answered_call-static-property",
+          "signatures": ["public const val ACTION_ANSWERED_CALL: String = \"answeredCall\""],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "ACTION_MESSAGE",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.ACTION_MESSAGE:static",
+          "anchor": "convohopnotificationsaction_message-static-property",
+          "signatures": ["public const val ACTION_MESSAGE: String = \"message\""],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "ACTION_MISSED_CALL",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.ACTION_MISSED_CALL:static",
+          "anchor": "convohopnotificationsaction_missed_call-static-property",
+          "signatures": ["public const val ACTION_MISSED_CALL: String = \"missedCall\""],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "getInstance",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotifications.getInstance:static",
+          "anchor": "convohopnotificationsgetinstance-static-method",
+          "signatures": ["public fun getInstance(context: Context): ConvoHopNotifications"],
+          "docs": "The process-wide instance.",
+          "static": true
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopPush",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#ConvoHopPush",
+      "anchor": "convohoppush-class",
+      "signatures": ["public object ConvoHopPush"],
+      "docs": "Parses ConvoHop push payloads. It holds no state and needs no credentials.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "DATA_KEY",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#ConvoHopPush.DATA_KEY:static",
+          "anchor": "convohoppushdata_key-static-property",
+          "signatures": ["public const val DATA_KEY: String = \"convohop\""],
+          "docs": "The FCM `message.data` key that carries the event.",
+          "static": true
+        },
+        {
+          "name": "isConvoHop",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopPush.isConvoHop:static",
+          "anchor": "convohoppushisconvohop-static-method",
+          "signatures": ["public fun isConvoHop(data: Map<String, String>): Boolean"],
+          "docs": "True when `data` is addressed to the ConvoHop SDK, whether or not it is valid. Route other pushes yourself.",
+          "static": true
+        },
+        {
+          "name": "parse",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopPush.parse:static",
+          "anchor": "convohoppushparse-static-method",
+          "signatures": ["public fun parse(data: Map<String, String>): PushNotification?"],
+          "docs": "The notification in an FCM data map, or null when the map has no valid\nConvoHop event. Fields the event's type doesn't define are ignored.",
+          "static": true
+        },
+        {
+          "name": "parseData",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopPush.parseData:static",
+          "anchor": "convohoppushparsedata-static-method",
+          "signatures": ["public fun parseData(json: String): PushNotification?"],
+          "docs": "The notification in a `convohop` JSON object, or null when it is not a valid event.",
+          "static": true
+        }
+      ]
+    },
+    {
+      "name": "MemoryPushLedgerStore",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#MemoryPushLedgerStore",
+      "anchor": "memorypushledgerstore-class",
+      "signatures": ["public class MemoryPushLedgerStore : PushLedgerStore"],
+      "docs": "A `PushLedgerStore` that lives as long as the process.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-push#MemoryPushLedgerStore.constructor",
+          "anchor": "memorypushledgerstore-constructor",
+          "signatures": ["public constructor()"],
+          "docs": ""
+        },
+        {
+          "name": "load",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#MemoryPushLedgerStore.load",
+          "anchor": "memorypushledgerstoreload-method",
+          "signatures": ["public override fun load(): String?"],
+          "docs": ""
+        },
+        {
+          "name": "save",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#MemoryPushLedgerStore.save",
+          "anchor": "memorypushledgerstoresave-method",
+          "signatures": ["public override fun save(value: String)"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "MessageContent",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#MessageContent",
+      "anchor": "messagecontent-class",
+      "signatures": ["public class MessageContent"],
+      "docs": "Text for a message notification.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-push#MessageContent.constructor",
+          "anchor": "messagecontent-constructor",
+          "signatures": ["public constructor(title: String?, body: String?)"],
+          "docs": ""
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#MessageContent.title",
+          "anchor": "messagecontenttitle-property",
+          "signatures": ["public val title: String?"],
+          "docs": ""
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#MessageContent.body",
+          "anchor": "messagecontentbody-property",
+          "signatures": ["public val body: String?"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PushLedger",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#PushLedger",
+      "anchor": "pushledger-class",
+      "signatures": ["public class PushLedger"],
+      "docs": "Applies the push contract's delivery rules. Delivery is at least once and\nunordered, so the ledger handles each `eventId` once, and a ring counts as\nstopped once a cancellation with its `alertId` arrived, even before the\nring itself, or once its `expiresAt` passed. A ring the user answered,\ndeclined or let ring out on this device (`stop`) gets no missed call when\nthe server's cancellation arrives later, even in a new process.\n\nIt is thread-safe. Give it a durable `store` so its state survives the\nshort-lived processes that receive pushes. A store that can't be read\nstarts an empty ledger; that can only repeat a notification.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-push#PushLedger.constructor",
+          "anchor": "pushledger-constructor",
+          "signatures": [
+            "public constructor(\n    store: PushLedgerStore = MemoryPushLedgerStore(),\n    clock: () -> Long = System::currentTimeMillis,\n    capacity: Int = 256,\n)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "record",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushLedger.record",
+          "anchor": "pushledgerrecord-method",
+          "signatures": ["public fun record(notification: PushNotification): PushDecision"],
+          "docs": "Records `notification` and decides what to do with it."
+        },
+        {
+          "name": "isStopped",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushLedger.isStopped",
+          "anchor": "pushledgerisstopped-method",
+          "signatures": ["public fun isStopped(alertId: String, expiresAtMillis: Long): Boolean"],
+          "docs": "True once `alertId` was cancelled or handled here, or `expiresAtMillis` passed."
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushLedger.stop",
+          "anchor": "pushledgerstop-method",
+          "signatures": ["public fun stop(alertId: String, expiresAtMillis: Long)"],
+          "docs": "Marks `alertId`, which rings until `expiresAtMillis`, as handled on this\ndevice: the user answered or declined it, or it rang out here. It no\nlonger rings, and the server's later missed-call cancellation is ignored."
+        }
+      ]
+    },
+    {
+      "name": "PushNotification",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#PushNotification",
+      "anchor": "pushnotification-class",
+      "signatures": ["public sealed class PushNotification"],
+      "docs": "A ConvoHop notification event delivered by your push provider, parsed\nfrom the `convohop` data entry described in `spec/push-payload`.\n\nEvents carry identifiers only. `title` and `body` are the visible text\nyour backend chose; `body` is the start of the message only when the\nproject opted in to message previews. Without them, show your own\ngeneric text or fetch the content with the user's session.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.eventId",
+          "anchor": "pushnotificationeventid-property",
+          "signatures": ["public abstract val eventId: String"],
+          "docs": "Deduplicate on this: retries and replays of an event keep it."
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.occurredAt",
+          "anchor": "pushnotificationoccurredat-property",
+          "signatures": ["public abstract val occurredAt: String"],
+          "docs": ""
+        },
+        {
+          "name": "occurredAtMillis",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.occurredAtMillis",
+          "anchor": "pushnotificationoccurredatmillis-property",
+          "signatures": ["public abstract val occurredAtMillis: Long"],
+          "docs": ""
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.projectId",
+          "anchor": "pushnotificationprojectid-property",
+          "signatures": ["public abstract val projectId: String"],
+          "docs": ""
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.recipientId",
+          "anchor": "pushnotificationrecipientid-property",
+          "signatures": ["public abstract val recipientId: String"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.conversationId",
+          "anchor": "pushnotificationconversationid-property",
+          "signatures": ["public abstract val conversationId: String"],
+          "docs": ""
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.senderId",
+          "anchor": "pushnotificationsenderid-property",
+          "signatures": ["public abstract val senderId: String"],
+          "docs": ""
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.title",
+          "anchor": "pushnotificationtitle-property",
+          "signatures": ["public abstract val title: String?"],
+          "docs": ""
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.body",
+          "anchor": "pushnotificationbody-property",
+          "signatures": ["public abstract val body: String?"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PushNotification.CallCancelled",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled",
+      "anchor": "pushnotificationcallcancelled-class",
+      "signatures": ["public data class CallCancelled : PushNotification"],
+      "docs": "A ring that stopped for the recipient. It can arrive before its `IncomingCall`.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.constructor",
+          "anchor": "pushnotificationcallcancelled-constructor",
+          "signatures": [
+            "public constructor(\n    eventId: String,\n    occurredAt: String,\n    occurredAtMillis: Long,\n    projectId: String,\n    recipientId: String,\n    conversationId: String,\n    senderId: String,\n    title: String?,\n    body: String?,\n    liveSessionId: String,\n    alertId: String,\n    expiresAt: String,\n    expiresAtMillis: Long,\n    mediaProfile: String,\n    reason: String,\n)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.eventId",
+          "anchor": "pushnotificationcallcancelledeventid-property",
+          "signatures": ["public override val eventId: String"],
+          "docs": "Deduplicate on this: retries and replays of an event keep it."
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.occurredAt",
+          "anchor": "pushnotificationcallcancelledoccurredat-property",
+          "signatures": ["public override val occurredAt: String"],
+          "docs": ""
+        },
+        {
+          "name": "occurredAtMillis",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.occurredAtMillis",
+          "anchor": "pushnotificationcallcancelledoccurredatmillis-property",
+          "signatures": ["public override val occurredAtMillis: Long"],
+          "docs": ""
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.projectId",
+          "anchor": "pushnotificationcallcancelledprojectid-property",
+          "signatures": ["public override val projectId: String"],
+          "docs": ""
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.recipientId",
+          "anchor": "pushnotificationcallcancelledrecipientid-property",
+          "signatures": ["public override val recipientId: String"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.conversationId",
+          "anchor": "pushnotificationcallcancelledconversationid-property",
+          "signatures": ["public override val conversationId: String"],
+          "docs": ""
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.senderId",
+          "anchor": "pushnotificationcallcancelledsenderid-property",
+          "signatures": ["public override val senderId: String"],
+          "docs": ""
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.title",
+          "anchor": "pushnotificationcallcancelledtitle-property",
+          "signatures": ["public override val title: String?"],
+          "docs": ""
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.body",
+          "anchor": "pushnotificationcallcancelledbody-property",
+          "signatures": ["public override val body: String?"],
+          "docs": ""
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.liveSessionId",
+          "anchor": "pushnotificationcallcancelledlivesessionid-property",
+          "signatures": ["public val liveSessionId: String"],
+          "docs": ""
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.alertId",
+          "anchor": "pushnotificationcallcancelledalertid-property",
+          "signatures": ["public val alertId: String"],
+          "docs": ""
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.expiresAt",
+          "anchor": "pushnotificationcallcancelledexpiresat-property",
+          "signatures": ["public val expiresAt: String"],
+          "docs": "The stopped ring's original deadline."
+        },
+        {
+          "name": "expiresAtMillis",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.expiresAtMillis",
+          "anchor": "pushnotificationcallcancelledexpiresatmillis-property",
+          "signatures": ["public val expiresAtMillis: Long"],
+          "docs": ""
+        },
+        {
+          "name": "mediaProfile",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.mediaProfile",
+          "anchor": "pushnotificationcallcancelledmediaprofile-property",
+          "signatures": ["public val mediaProfile: String"],
+          "docs": ""
+        },
+        {
+          "name": "reason",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.reason",
+          "anchor": "pushnotificationcallcancelledreason-property",
+          "signatures": ["public val reason: String"],
+          "docs": "`answered`, `declined`, `ended`, `expired` or a later reason."
+        },
+        {
+          "name": "missed",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.CallCancelled.missed",
+          "anchor": "pushnotificationcallcancelledmissed-property",
+          "signatures": ["public val missed: Boolean"],
+          "docs": "True for `ended` and `expired`: nobody answered. Other reasons only stop the ringing."
+        }
+      ]
+    },
+    {
+      "name": "PushNotification.IncomingCall",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall",
+      "anchor": "pushnotificationincomingcall-class",
+      "signatures": ["public data class IncomingCall : PushNotification"],
+      "docs": "One ring of a call for the recipient. It stops at `expiresAt` or when a cancellation with its `alertId` arrives.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.constructor",
+          "anchor": "pushnotificationincomingcall-constructor",
+          "signatures": [
+            "public constructor(\n    eventId: String,\n    occurredAt: String,\n    occurredAtMillis: Long,\n    projectId: String,\n    recipientId: String,\n    conversationId: String,\n    senderId: String,\n    title: String?,\n    body: String?,\n    liveSessionId: String,\n    alertId: String,\n    expiresAt: String,\n    expiresAtMillis: Long,\n    mediaProfile: String,\n)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.eventId",
+          "anchor": "pushnotificationincomingcalleventid-property",
+          "signatures": ["public override val eventId: String"],
+          "docs": "Deduplicate on this: retries and replays of an event keep it."
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.occurredAt",
+          "anchor": "pushnotificationincomingcalloccurredat-property",
+          "signatures": ["public override val occurredAt: String"],
+          "docs": ""
+        },
+        {
+          "name": "occurredAtMillis",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.occurredAtMillis",
+          "anchor": "pushnotificationincomingcalloccurredatmillis-property",
+          "signatures": ["public override val occurredAtMillis: Long"],
+          "docs": ""
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.projectId",
+          "anchor": "pushnotificationincomingcallprojectid-property",
+          "signatures": ["public override val projectId: String"],
+          "docs": ""
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.recipientId",
+          "anchor": "pushnotificationincomingcallrecipientid-property",
+          "signatures": ["public override val recipientId: String"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.conversationId",
+          "anchor": "pushnotificationincomingcallconversationid-property",
+          "signatures": ["public override val conversationId: String"],
+          "docs": ""
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.senderId",
+          "anchor": "pushnotificationincomingcallsenderid-property",
+          "signatures": ["public override val senderId: String"],
+          "docs": ""
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.title",
+          "anchor": "pushnotificationincomingcalltitle-property",
+          "signatures": ["public override val title: String?"],
+          "docs": ""
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.body",
+          "anchor": "pushnotificationincomingcallbody-property",
+          "signatures": ["public override val body: String?"],
+          "docs": ""
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.liveSessionId",
+          "anchor": "pushnotificationincomingcalllivesessionid-property",
+          "signatures": ["public val liveSessionId: String"],
+          "docs": ""
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.alertId",
+          "anchor": "pushnotificationincomingcallalertid-property",
+          "signatures": ["public val alertId: String"],
+          "docs": ""
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.expiresAt",
+          "anchor": "pushnotificationincomingcallexpiresat-property",
+          "signatures": ["public val expiresAt: String"],
+          "docs": ""
+        },
+        {
+          "name": "expiresAtMillis",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.expiresAtMillis",
+          "anchor": "pushnotificationincomingcallexpiresatmillis-property",
+          "signatures": ["public val expiresAtMillis: Long"],
+          "docs": ""
+        },
+        {
+          "name": "mediaProfile",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.mediaProfile",
+          "anchor": "pushnotificationincomingcallmediaprofile-property",
+          "signatures": ["public val mediaProfile: String"],
+          "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a later profile."
+        },
+        {
+          "name": "video",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.IncomingCall.video",
+          "anchor": "pushnotificationincomingcallvideo-property",
+          "signatures": ["public val video: Boolean"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PushNotification.Message",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#PushNotification.Message",
+      "anchor": "pushnotificationmessage-class",
+      "signatures": ["public data class Message : PushNotification"],
+      "docs": "A new message for the recipient.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.constructor",
+          "anchor": "pushnotificationmessage-constructor",
+          "signatures": [
+            "public constructor(\n    eventId: String,\n    occurredAt: String,\n    occurredAtMillis: Long,\n    projectId: String,\n    recipientId: String,\n    conversationId: String,\n    senderId: String,\n    title: String?,\n    body: String?,\n    messageId: String,\n)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.eventId",
+          "anchor": "pushnotificationmessageeventid-property",
+          "signatures": ["public override val eventId: String"],
+          "docs": "Deduplicate on this: retries and replays of an event keep it."
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.occurredAt",
+          "anchor": "pushnotificationmessageoccurredat-property",
+          "signatures": ["public override val occurredAt: String"],
+          "docs": ""
+        },
+        {
+          "name": "occurredAtMillis",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.occurredAtMillis",
+          "anchor": "pushnotificationmessageoccurredatmillis-property",
+          "signatures": ["public override val occurredAtMillis: Long"],
+          "docs": ""
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.projectId",
+          "anchor": "pushnotificationmessageprojectid-property",
+          "signatures": ["public override val projectId: String"],
+          "docs": ""
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.recipientId",
+          "anchor": "pushnotificationmessagerecipientid-property",
+          "signatures": ["public override val recipientId: String"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.conversationId",
+          "anchor": "pushnotificationmessageconversationid-property",
+          "signatures": ["public override val conversationId: String"],
+          "docs": ""
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.senderId",
+          "anchor": "pushnotificationmessagesenderid-property",
+          "signatures": ["public override val senderId: String"],
+          "docs": ""
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.title",
+          "anchor": "pushnotificationmessagetitle-property",
+          "signatures": ["public override val title: String?"],
+          "docs": ""
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.body",
+          "anchor": "pushnotificationmessagebody-property",
+          "signatures": ["public override val body: String?"],
+          "docs": ""
+        },
+        {
+          "name": "messageId",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushNotification.Message.messageId",
+          "anchor": "pushnotificationmessagemessageid-property",
+          "signatures": ["public val messageId: String"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PushRegistration",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#PushRegistration",
+      "anchor": "pushregistration-class",
+      "signatures": ["public sealed class PushRegistration"],
+      "docs": "This device's FCM registration, in the mode your app uses FCM in: a\nregistration `Token` by default, or an `InstallationId` when your manifest\nturns on registration by Firebase Installation ID (see `ConvoHopFirebase`).\nYour backend stores it for the signed-in user and hands it to ConvoHop's\npush delivery; ConvoHop never stores registrations itself.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.kind",
+          "anchor": "pushregistrationkind-property",
+          "signatures": ["public val kind: String"],
+          "docs": "The push service: always `fcm`."
+        },
+        {
+          "name": "toMap",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.toMap",
+          "anchor": "pushregistrationtomap-method",
+          "signatures": ["public abstract fun toMap(): Map<String, String>"],
+          "docs": "`kind` plus `token` or `fid`: the registration as the other ConvoHop SDKs give it to your backend."
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.toJson",
+          "anchor": "pushregistrationtojson-method",
+          "signatures": ["public fun toJson(): String"],
+          "docs": "`toMap` as JSON: `{\"kind\":\"fcm\",\"token\":\"…\"}` or `{\"kind\":\"fcm\",\"fid\":\"…\"}`."
+        }
+      ]
+    },
+    {
+      "name": "PushRegistration.InstallationId",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#PushRegistration.InstallationId",
+      "anchor": "pushregistrationinstallationid-class",
+      "signatures": ["public class InstallationId : PushRegistration"],
+      "docs": "A Firebase Installation ID that FCM registered, from `FirebaseMessaging.register()` or `onRegistered`.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.InstallationId.constructor",
+          "anchor": "pushregistrationinstallationid-constructor",
+          "signatures": ["public constructor(fid: String)"],
+          "docs": ""
+        },
+        {
+          "name": "fid",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.InstallationId.fid",
+          "anchor": "pushregistrationinstallationidfid-property",
+          "signatures": ["public val fid: String"],
+          "docs": ""
+        },
+        {
+          "name": "toMap",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.InstallationId.toMap",
+          "anchor": "pushregistrationinstallationidtomap-method",
+          "signatures": ["public override fun toMap(): Map<String, String>"],
+          "docs": "`kind` plus `token` or `fid`: the registration as the other ConvoHop SDKs give it to your backend."
+        },
+        {
+          "name": "equals",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.InstallationId.equals",
+          "anchor": "pushregistrationinstallationidequals-method",
+          "signatures": ["public override fun equals(other: Any?): Boolean"],
+          "docs": ""
+        },
+        {
+          "name": "hashCode",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.InstallationId.hashCode",
+          "anchor": "pushregistrationinstallationidhashcode-method",
+          "signatures": ["public override fun hashCode(): Int"],
+          "docs": ""
+        },
+        {
+          "name": "toString",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.InstallationId.toString",
+          "anchor": "pushregistrationinstallationidtostring-method",
+          "signatures": ["public override fun toString(): String"],
+          "docs": ""
+        },
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.InstallationId.kind",
+          "anchor": "pushregistrationinstallationidkind-property",
+          "signatures": ["public val kind: String"],
+          "docs": "The push service: always `fcm`.",
+          "inherited": "PushRegistration"
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.InstallationId.toJson",
+          "anchor": "pushregistrationinstallationidtojson-method",
+          "signatures": ["public fun toJson(): String"],
+          "docs": "`toMap` as JSON: `{\"kind\":\"fcm\",\"token\":\"…\"}` or `{\"kind\":\"fcm\",\"fid\":\"…\"}`.",
+          "inherited": "PushRegistration"
+        }
+      ]
+    },
+    {
+      "name": "PushRegistration.Token",
+      "kind": "class",
+      "ref": "com.convohop:convohop-android-push#PushRegistration.Token",
+      "anchor": "pushregistrationtoken-class",
+      "signatures": ["public class Token : PushRegistration"],
+      "docs": "An FCM registration token, from `FirebaseMessaging.getToken()` or `onNewToken`.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.Token.constructor",
+          "anchor": "pushregistrationtoken-constructor",
+          "signatures": ["public constructor(token: String)"],
+          "docs": ""
+        },
+        {
+          "name": "token",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.Token.token",
+          "anchor": "pushregistrationtokentoken-property",
+          "signatures": ["public val token: String"],
+          "docs": ""
+        },
+        {
+          "name": "toMap",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.Token.toMap",
+          "anchor": "pushregistrationtokentomap-method",
+          "signatures": ["public override fun toMap(): Map<String, String>"],
+          "docs": "`kind` plus `token` or `fid`: the registration as the other ConvoHop SDKs give it to your backend."
+        },
+        {
+          "name": "equals",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.Token.equals",
+          "anchor": "pushregistrationtokenequals-method",
+          "signatures": ["public override fun equals(other: Any?): Boolean"],
+          "docs": ""
+        },
+        {
+          "name": "hashCode",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.Token.hashCode",
+          "anchor": "pushregistrationtokenhashcode-method",
+          "signatures": ["public override fun hashCode(): Int"],
+          "docs": ""
+        },
+        {
+          "name": "toString",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.Token.toString",
+          "anchor": "pushregistrationtokentostring-method",
+          "signatures": ["public override fun toString(): String"],
+          "docs": ""
+        },
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.Token.kind",
+          "anchor": "pushregistrationtokenkind-property",
+          "signatures": ["public val kind: String"],
+          "docs": "The push service: always `fcm`.",
+          "inherited": "PushRegistration"
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushRegistration.Token.toJson",
+          "anchor": "pushregistrationtokentojson-method",
+          "signatures": ["public fun toJson(): String"],
+          "docs": "`toMap` as JSON: `{\"kind\":\"fcm\",\"token\":\"…\"}` or `{\"kind\":\"fcm\",\"fid\":\"…\"}`.",
+          "inherited": "PushRegistration"
+        }
+      ]
+    },
+    {
+      "name": "CallIntentFactory",
+      "kind": "interface",
+      "ref": "com.convohop:convohop-android-push#CallIntentFactory",
+      "anchor": "callintentfactory-interface",
+      "signatures": ["public fun interface CallIntentFactory"],
+      "docs": "Builds the activity intent for a call, or null for the default: your launch activity.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "create",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#CallIntentFactory.create",
+          "anchor": "callintentfactorycreate-method",
+          "signatures": ["public fun create(context: Context, call: CallInfo): Intent?"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "ConversationIntentFactory",
+      "kind": "interface",
+      "ref": "com.convohop:convohop-android-push#ConversationIntentFactory",
+      "anchor": "conversationintentfactory-interface",
+      "signatures": ["public fun interface ConversationIntentFactory"],
+      "docs": "Builds the activity intent for a message or missed call, or null for the default: your launch activity.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "create",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConversationIntentFactory.create",
+          "anchor": "conversationintentfactorycreate-method",
+          "signatures": [
+            "public fun create(context: Context, notification: PushNotification): Intent?"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopNotificationListener",
+      "kind": "interface",
+      "ref": "com.convohop:convohop-android-push#ConvoHopNotificationListener",
+      "anchor": "convohopnotificationlistener-interface",
+      "signatures": ["public interface ConvoHopNotificationListener"],
+      "docs": "Events from `ConvoHopNotifications`, on the main thread. Every method has\nan empty default. A listener added late misses earlier events: read\n`ConvoHopNotifications.calls` and `ConvoHopNotifications.registration` when you add it.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "onRegistered",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationListener.onRegistered",
+          "anchor": "convohopnotificationlisteneronregistered-method",
+          "signatures": ["public fun onRegistered(registration: PushRegistration)"],
+          "docs": "FCM registered this device, or confirmed its registration: a token, or\nan installation ID if your app turned that mode on. Store\n`registration` with your backend for the signed-in user; ConvoHop never\nstores registrations. The same registration can arrive more than once,\nbecause Firebase's callback and `ConvoHopFirebase.register`'s task both\nreport it, so store it idempotently."
+        },
+        {
+          "name": "onUnregistered",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationListener.onUnregistered",
+          "anchor": "convohopnotificationlisteneronunregistered-method",
+          "signatures": ["public fun onUnregistered(registration: PushRegistration)"],
+          "docs": "FCM unregistered this device, so pushes to `registration` stop: delete\nit from your backend. It can repeat too."
+        },
+        {
+          "name": "onMessage",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationListener.onMessage",
+          "anchor": "convohopnotificationlisteneronmessage-method",
+          "signatures": ["public fun onMessage(message: PushNotification.Message)"],
+          "docs": "A new message arrived, after its notification was posted (if `ConvoHopNotificationOptions.showMessages`)."
+        },
+        {
+          "name": "onIncomingCall",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationListener.onIncomingCall",
+          "anchor": "convohopnotificationlisteneronincomingcall-method",
+          "signatures": ["public fun onIncomingCall(call: CallInfo)"],
+          "docs": "A call started ringing on this device."
+        },
+        {
+          "name": "onCallAnswered",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationListener.onCallAnswered",
+          "anchor": "convohopnotificationlisteneroncallanswered-method",
+          "signatures": ["public fun onCallAnswered(call: CallInfo)"],
+          "docs": "The user answered: join the live session and connect its media."
+        },
+        {
+          "name": "onCallEnded",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationListener.onCallEnded",
+          "anchor": "convohopnotificationlisteneroncallended-method",
+          "signatures": [
+            "public fun onCallEnded(call: CallInfo, reason: CallEndReason, serverReason: String?)"
+          ],
+          "docs": "A call ended or stopped ringing, once per call. `serverReason` is the cancellation's `reason`, if the server stopped it."
+        },
+        {
+          "name": "onCallHoldChanged",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationListener.onCallHoldChanged",
+          "anchor": "convohopnotificationlisteneroncallholdchanged-method",
+          "signatures": ["public fun onCallHoldChanged(call: CallInfo, onHold: Boolean)"],
+          "docs": "The system put the call on hold or resumed it."
+        },
+        {
+          "name": "onCallMuteChanged",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationListener.onCallMuteChanged",
+          "anchor": "convohopnotificationlisteneroncallmutechanged-method",
+          "signatures": ["public fun onCallMuteChanged(call: CallInfo, muted: Boolean)"],
+          "docs": "The system muted or unmuted the call, for example from a car or headset: mute your microphone track."
+        },
+        {
+          "name": "onCallAudioRouteChanged",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#ConvoHopNotificationListener.onCallAudioRouteChanged",
+          "anchor": "convohopnotificationlisteneroncallaudioroutechanged-method",
+          "signatures": [
+            "public fun onCallAudioRouteChanged(call: CallInfo, route: AudioRoute, available: Set<AudioRoute>)"
+          ],
+          "docs": "The call's audio moved to `route`. `available` are the routes `ConvoHopNotifications.setAudioRoute` accepts."
+        }
+      ]
+    },
+    {
+      "name": "MessageContentProvider",
+      "kind": "interface",
+      "ref": "com.convohop:convohop-android-push#MessageContentProvider",
+      "anchor": "messagecontentprovider-interface",
+      "signatures": ["public fun interface MessageContentProvider"],
+      "docs": "Fetches a message's text on the device, with the user's own session, when\nthe push carries none: previews are off unless the project opts in. It runs\non the thread that handles the push and may block briefly; it is skipped on\nthe main thread. Return null to show the generic text.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "content",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#MessageContentProvider.content",
+          "anchor": "messagecontentprovidercontent-method",
+          "signatures": ["public fun content(message: PushNotification.Message): MessageContent?"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PushLedgerStore",
+      "kind": "interface",
+      "ref": "com.convohop:convohop-android-push#PushLedgerStore",
+      "anchor": "pushledgerstore-interface",
+      "signatures": ["public interface PushLedgerStore"],
+      "docs": "Durable storage for a `PushLedger`, such as shared preferences. The value\nholds event and alert identifiers only: never message text or FCM registrations.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "load",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushLedgerStore.load",
+          "anchor": "pushledgerstoreload-method",
+          "signatures": ["public fun load(): String?"],
+          "docs": ""
+        },
+        {
+          "name": "save",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#PushLedgerStore.save",
+          "anchor": "pushledgerstoresave-method",
+          "signatures": ["public fun save(value: String)"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "RecipientFilter",
+      "kind": "interface",
+      "ref": "com.convohop:convohop-android-push#RecipientFilter",
+      "anchor": "recipientfilter-interface",
+      "signatures": ["public fun interface RecipientFilter"],
+      "docs": "Decides whether this device accepts pushes for a recipient, for example only the signed-in user.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "accepts",
+          "kind": "method",
+          "ref": "com.convohop:convohop-android-push#RecipientFilter.accepts",
+          "anchor": "recipientfilteraccepts-method",
+          "signatures": ["public fun accepts(recipientId: String): Boolean"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "AudioRoute",
+      "kind": "enum",
+      "ref": "com.convohop:convohop-android-push#AudioRoute",
+      "anchor": "audioroute-enum",
+      "signatures": ["public enum class AudioRoute"],
+      "docs": "Where call audio plays.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "EARPIECE",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#AudioRoute.EARPIECE",
+          "anchor": "audiorouteearpiece-case",
+          "signatures": ["EARPIECE"],
+          "docs": ""
+        },
+        {
+          "name": "SPEAKER",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#AudioRoute.SPEAKER",
+          "anchor": "audioroutespeaker-case",
+          "signatures": ["SPEAKER"],
+          "docs": ""
+        },
+        {
+          "name": "BLUETOOTH",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#AudioRoute.BLUETOOTH",
+          "anchor": "audioroutebluetooth-case",
+          "signatures": ["BLUETOOTH"],
+          "docs": ""
+        },
+        {
+          "name": "WIRED_HEADSET",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#AudioRoute.WIRED_HEADSET",
+          "anchor": "audioroutewired_headset-case",
+          "signatures": ["WIRED_HEADSET"],
+          "docs": ""
+        },
+        {
+          "name": "STREAMING",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#AudioRoute.STREAMING",
+          "anchor": "audioroutestreaming-case",
+          "signatures": ["STREAMING"],
+          "docs": ""
+        },
+        {
+          "name": "UNKNOWN",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#AudioRoute.UNKNOWN",
+          "anchor": "audiorouteunknown-case",
+          "signatures": ["UNKNOWN"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "CallEndReason",
+      "kind": "enum",
+      "ref": "com.convohop:convohop-android-push#CallEndReason",
+      "anchor": "callendreason-enum",
+      "signatures": ["public enum class CallEndReason"],
+      "docs": "Why a call this device knew about ended.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "REJECTED",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallEndReason.REJECTED",
+          "anchor": "callendreasonrejected-case",
+          "signatures": ["REJECTED"],
+          "docs": "The user declined it on this device."
+        },
+        {
+          "name": "HUNG_UP",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallEndReason.HUNG_UP",
+          "anchor": "callendreasonhung_up-case",
+          "signatures": ["HUNG_UP"],
+          "docs": "It ended on this device: `ConvoHopNotifications.end`, or the system, such as a headset button."
+        },
+        {
+          "name": "MISSED",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallEndReason.MISSED",
+          "anchor": "callendreasonmissed-case",
+          "signatures": ["MISSED"],
+          "docs": "The server reported that nobody answered (`ended` or `expired`)."
+        },
+        {
+          "name": "ANSWERED_ELSEWHERE",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallEndReason.ANSWERED_ELSEWHERE",
+          "anchor": "callendreasonanswered_elsewhere-case",
+          "signatures": ["ANSWERED_ELSEWHERE"],
+          "docs": "The recipient answered on another device."
+        },
+        {
+          "name": "DECLINED_ELSEWHERE",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallEndReason.DECLINED_ELSEWHERE",
+          "anchor": "callendreasondeclined_elsewhere-case",
+          "signatures": ["DECLINED_ELSEWHERE"],
+          "docs": "The recipient declined on another device."
+        },
+        {
+          "name": "STOPPED",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallEndReason.STOPPED",
+          "anchor": "callendreasonstopped-case",
+          "signatures": ["STOPPED"],
+          "docs": "The server stopped the ring for a reason this SDK version doesn't know."
+        },
+        {
+          "name": "EXPIRED",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallEndReason.EXPIRED",
+          "anchor": "callendreasonexpired-case",
+          "signatures": ["EXPIRED"],
+          "docs": "The ring reached its `expiresAt` on this device."
+        },
+        {
+          "name": "FAILED",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallEndReason.FAILED",
+          "anchor": "callendreasonfailed-case",
+          "signatures": ["FAILED"],
+          "docs": "The system refused or aborted the call."
+        }
+      ]
+    },
+    {
+      "name": "CallState",
+      "kind": "enum",
+      "ref": "com.convohop:convohop-android-push#CallState",
+      "anchor": "callstate-enum",
+      "signatures": ["public enum class CallState"],
+      "docs": "The state of a call on this device.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "RINGING",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallState.RINGING",
+          "anchor": "callstateringing-case",
+          "signatures": ["RINGING"],
+          "docs": ""
+        },
+        {
+          "name": "ACTIVE",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallState.ACTIVE",
+          "anchor": "callstateactive-case",
+          "signatures": ["ACTIVE"],
+          "docs": "Answered and in progress."
+        },
+        {
+          "name": "HELD",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallState.HELD",
+          "anchor": "callstateheld-case",
+          "signatures": ["HELD"],
+          "docs": ""
+        },
+        {
+          "name": "ENDED",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#CallState.ENDED",
+          "anchor": "callstateended-case",
+          "signatures": ["ENDED"],
+          "docs": "It ended; `CallInfo.endReason` says why. Ended calls stay in `ConvoHopNotifications.calls` for 60 seconds."
+        }
+      ]
+    },
+    {
+      "name": "PushDecision",
+      "kind": "enum",
+      "ref": "com.convohop:convohop-android-push#PushDecision",
+      "anchor": "pushdecision-enum",
+      "signatures": ["public enum class PushDecision"],
+      "docs": "What to do with a push, after `PushLedger.record`.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "SHOW_MESSAGE",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushDecision.SHOW_MESSAGE",
+          "anchor": "pushdecisionshow_message-case",
+          "signatures": ["SHOW_MESSAGE"],
+          "docs": "A message the device hasn't shown yet."
+        },
+        {
+          "name": "RING",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushDecision.RING",
+          "anchor": "pushdecisionring-case",
+          "signatures": ["RING"],
+          "docs": "A ring that is neither cancelled nor past its deadline: ring until it expires or is cancelled."
+        },
+        {
+          "name": "STOP_RINGING",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushDecision.STOP_RINGING",
+          "anchor": "pushdecisionstop_ringing-case",
+          "signatures": ["STOP_RINGING"],
+          "docs": "Stop ringing this alert: it was answered, declined or stopped for a reason this SDK doesn't know."
+        },
+        {
+          "name": "MISSED_CALL",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushDecision.MISSED_CALL",
+          "anchor": "pushdecisionmissed_call-case",
+          "signatures": ["MISSED_CALL"],
+          "docs": "Stop ringing this alert and show a missed call: the call ended or nobody answered."
+        },
+        {
+          "name": "IGNORE",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushDecision.IGNORE",
+          "anchor": "pushdecisionignore-case",
+          "signatures": ["IGNORE"],
+          "docs": "Nothing to do: the event was handled before, or the ring was already cancelled or expired."
+        }
+      ]
+    },
+    {
+      "name": "PushResult",
+      "kind": "enum",
+      "ref": "com.convohop:convohop-android-push#PushResult",
+      "anchor": "pushresult-enum",
+      "signatures": ["public enum class PushResult"],
+      "docs": "What `ConvoHopNotifications.handleNotification` did with a push.\n\nPackage: `com.convohop.android.push`.",
+      "members": [
+        {
+          "name": "NOT_CONVOHOP",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushResult.NOT_CONVOHOP",
+          "anchor": "pushresultnot_convohop-case",
+          "signatures": ["NOT_CONVOHOP"],
+          "docs": "The push has no `convohop` entry: handle it yourself."
+        },
+        {
+          "name": "INVALID",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushResult.INVALID",
+          "anchor": "pushresultinvalid-case",
+          "signatures": ["INVALID"],
+          "docs": "The `convohop` entry is not a valid event this SDK version knows."
+        },
+        {
+          "name": "IGNORED",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushResult.IGNORED",
+          "anchor": "pushresultignored-case",
+          "signatures": ["IGNORED"],
+          "docs": "A duplicate, a ring that already stopped, or a recipient your filter rejected."
+        },
+        {
+          "name": "MESSAGE",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushResult.MESSAGE",
+          "anchor": "pushresultmessage-case",
+          "signatures": ["MESSAGE"],
+          "docs": "A new message."
+        },
+        {
+          "name": "RINGING",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushResult.RINGING",
+          "anchor": "pushresultringing-case",
+          "signatures": ["RINGING"],
+          "docs": "A call is ringing."
+        },
+        {
+          "name": "STOPPED",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushResult.STOPPED",
+          "anchor": "pushresultstopped-case",
+          "signatures": ["STOPPED"],
+          "docs": "A ring stopped without a missed call: it was answered or declined, maybe on another device."
+        },
+        {
+          "name": "MISSED",
+          "kind": "case",
+          "ref": "com.convohop:convohop-android-push#PushResult.MISSED",
+          "anchor": "pushresultmissed-case",
+          "signatures": ["MISSED"],
+          "docs": "A ring stopped and nobody answered."
+        }
+      ]
+    }
+  ]
+}

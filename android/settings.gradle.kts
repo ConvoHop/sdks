@@ -39,3 +39,9 @@ include(":edge-fixture")
 // The conformance driver lives beside the other drivers.
 include(":conformance-driver")
 project(":conformance-driver").projectDir = file("../conformance/drivers/android")
+// Writes the SDK's public API for the docs pipeline; run it through tools/docgen/extractors/android.mjs.
+include(":docs-surface")
+project(":docs-surface").projectDir = file("../tools/docgen/extractors/android")
+// The tested snippets that the Android docs pages embed.
+include(":docs-examples")
+project(":docs-examples").projectDir = file("../docs/languages/android/examples")

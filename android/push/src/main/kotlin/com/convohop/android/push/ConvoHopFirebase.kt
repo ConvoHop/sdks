@@ -20,15 +20,11 @@ import java.util.concurrent.Executor
  *
  * ConvoHop follows your app's FCM mode. By default FCM registers the device
  * with a registration token, reported as a [PushRegistration.Token]. If your
- * manifest turns on registration by Firebase Installation ID, inside
- * `<application>`:
- *
- * ```xml
- * <meta-data android:name="firebase_messaging_installation_id_enabled" android:value="true" />
- * ```
- *
- * ConvoHop registers with `FirebaseMessaging.register()` instead and reports
- * a [PushRegistration.InstallationId]. The flag applies to your whole app:
+ * manifest turns on registration by Firebase Installation ID with
+ * `<meta-data android:name="firebase_messaging_installation_id_enabled" android:value="true" />`
+ * inside `<application>`, ConvoHop registers with
+ * `FirebaseMessaging.register()` instead and reports a
+ * [PushRegistration.InstallationId]. The flag applies to your whole app:
  * Firebase then fails `getToken()` and `deleteToken()` for every library in
  * it, so turn it on only once everything in your app that uses FCM supports
  * installation IDs.

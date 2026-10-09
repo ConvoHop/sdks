@@ -94,3 +94,4 @@ mutation CommunicationJoinLiveSession($context: RequestContextInput!, $input: Jo
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`LiveSessionHandle.join`](../../typescript/reference/client.md#livesessionhandlejoin-method) |
+| [Android](../../android/reference/operations.md) | [`LiveSessionHandle.join`](../../android/reference/android-core.md#livesessionhandlejoin-method), [`ConvoHopCall.answer` (static)](../../android/reference/android.md#convohopcallanswer-static-method) |
