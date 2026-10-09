@@ -68,9 +68,9 @@ async function openPage(context) {
   return { page, errors };
 }
 
-/** Opens the conversation in the page as `user`. */
-function join(page, user, conversationId, persist = false) {
-  return page.evaluate(options => window.harness.open(options), { ...user, conversationId, persist });
+/** Opens the conversation in the page as `user`, with the harness's `persist` and `held` options. */
+function join(page, user, conversationId, options = {}) {
+  return page.evaluate(options => window.harness.open(options), { ...user, conversationId, ...options });
 }
 
 /** Waits until `check(arg)` holds in the page and returns the page's view; a timeout reports the last view. */
@@ -148,7 +148,7 @@ for (const name of names) {
       const context = await newContext(t);
       const key = `convohop.outbox:${alice.projectId}:${alice.principalId}`;
       const first = await openPage(context);
-      await join(first.page, alice, conversationId, true);
+      await join(first.page, alice, conversationId, { persist: true });
       await context.setOffline(true);
       await until(first.page, () => !navigator.onLine);
       const requestId = await first.page.evaluate(text => window.harness.send(text), "Written before a reload");
@@ -158,7 +158,7 @@ for (const name of names) {
 
       await context.setOffline(false);
       const second = await openPage(context);
-      await join(second.page, alice, conversationId, true);
+      await join(second.page, alice, conversationId, { persist: true });
       const view = await until(second.page, delivered, "Written before a reload");
       await until(second.page, key => localStorage.getItem(key) === null, key);
       assert.equal((await sends(requestId)).length, 1);
@@ -185,12 +185,12 @@ for (const name of names) {
       }
       /** In the page: whether its outbox holds `count` entries and the slot `base + key` is gone. */
       const took = ({ base, key, count }) => window.harness.view().outbox.length === count && localStorage.getItem(base + key) === null;
-      // Pages can't load offline, so the third tab loads now and opens only its outbox later.
-      const a = await openPage(context), b = await openPage(context), c = await openPage(context);
-      await join(a.page, alice, conversationId, true);
-      await join(b.page, alice, conversationId, true);
-      await context.setOffline(true);
-      for (const { page } of [a, b]) await until(page, () => !navigator.onLine);
+      // Chromium can put a tab of an offline context back online when another tab closes, so these tabs hold their
+      // sends through the outbox's connectivity rather than the browser's offline mode.
+      const held = { persist: true, held: true };
+      const a = await openPage(context), b = await openPage(context);
+      await join(a.page, alice, conversationId, held);
+      await join(b.page, alice, conversationId, held);
       const fromA = await a.page.evaluate(text => window.harness.send(text), "Written in tab A");
       const fromB = await b.page.evaluate(text => window.harness.send(text), "Written in tab B");
       await slots(a.page, { "": ["Written in tab A"], ":1": ["Written in tab B"] }, "each tab saves its own");
@@ -199,12 +199,14 @@ for (const name of names) {
       await until(a.page, took, { base, key: ":1", count: 2 });
       await slots(a.page, { "": ["Written in tab A", "Written in tab B"] }, "the older tab takes over");
 
-      await join(c.page, alice, undefined, true);
+      const c = await openPage(context);
+      await join(c.page, alice, undefined, held);
       await a.page.close();
       await until(c.page, took, { base, key: "", count: 2 });
       await slots(c.page, { ":1": ["Written in tab A", "Written in tab B"] }, "a newer tab takes over");
+      assert.deepEqual([(await sends(fromA)).length, (await sends(fromB)).length], [0, 0], "held tabs send nothing");
 
-      await context.setOffline(false);
+      await c.page.evaluate(() => window.harness.resume());
       const view = await until(c.page, () => window.harness.view().outbox.every(entry => entry.status === "sent"));
       assert.deepEqual(view.outbox.map(entry => entry.requestId), [fromA, fromB]);
       await until(c.page, prefix => !Object.keys(localStorage).some(key => key.startsWith(prefix)), base);
