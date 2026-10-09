@@ -225,6 +225,46 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  # Temporary: proves the arm64 bootstrap that conformance-dev-stack uses, against the
+  # mock, because that job runs only when CONVOHOP_DEV_STACK_IMAGE is set. Removed before merge.
+  probe-arm64:
+    name: Probe the arm64 Flutter bootstrap (temporary)
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          architecture: x64
+      - name: Bootstrap Flutter for arm64
+        run: |
+          uname -m
+          rm -rf "$FLUTTER_ROOT/bin/cache"
+          flutter --version
+          dart --version
+          file "$FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart"
+      - name: Build the driver
+        working-directory: conformance/drivers/dart
+        run: |
+          flutter pub get
+          dart build cli --target bin/driver.dart --output build/driver
+          file build/driver/bundle/bin/driver
+      - name: Run the conformance scenarios against the mock target
+        run: >-
+          npm run conformance --
+          --driver conformance/drivers/dart/build/driver/bundle/bin/driver
+          --reports conformance/reports/dart-arm64
+
   # The example commits no platform folders: flutter create adds them, which
   # also compiles the plugin's Java and Swift code against the current SDKs.
   example-android:
