@@ -37,8 +37,6 @@ android {
         abortOnError = true
         // Also check the pure-JVM runtime against minSdk 24.
         checkDependencies = true
-        textReport = true
-        textOutput = file("stdout")
     }
 
     publishing {

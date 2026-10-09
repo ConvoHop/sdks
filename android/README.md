@@ -19,7 +19,7 @@ It isn't published to a package registry yet:
 - Android 7.0 (API 24) or later.
 - Apps compile against API 36 (`compileSdk = 36`). An app or wrapper that
   uses only `convohop-android-push` needs API 34.
-- Built and tested with Kotlin 2.2.21 and Android Gradle Plugin 9.1.1.
+- Built and tested with Kotlin 2.2.21 and Android Gradle Plugin 9.4.1.
   `convohop-android-push` is compiled for Kotlin 2.0 with standard library
   2.0.21, so wrappers on Kotlin 1.9 can read it. Only Kotlin 2.2.21 is
   tested.
