@@ -2,6 +2,7 @@ package convohop
 
 import (
 	"context"
+	"encoding/json"
 	"maps"
 	"strings"
 	"testing"
@@ -224,6 +225,36 @@ func outcomes(fields map[string]any) func(*exchange) response {
 		})
 		maps.Copy(value, fields)
 		return response{body: success(ex.op, ex.requestID, value)}
+	}
+}
+
+// A deleted message keeps no content: its text and props decode as nil and
+// encode as JSON null, never "" or {}.
+func TestTombstone(t *testing.T) {
+	a := newAuthority(t, replying("communication.deleteMessage", func(ex *exchange) any {
+		return object("Message", map[string]any{
+			"messageId": ex.input["messageId"], "conversationId": ex.input["conversationId"], "revision": "3",
+			"deleted": true, "text": nil, "props": nil,
+		})
+	}))
+	reply, err := newProject(t, a).DeleteMessage(context.Background(), DeleteMessageRequestInput{
+		ConversationID: testConversation, MessageID: otherUUID, ExpectedRevision: "2",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	message := reply.Result
+	if message == nil || !message.Deleted || message.Text != nil || message.Props != nil {
+		t.Fatalf("tombstone %+v", message)
+	}
+	encoded, err := json.Marshal(message)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range []string{`"text":null`, `"props":null`} {
+		if !strings.Contains(string(encoded), field) {
+			t.Errorf("tombstone %s, want %s", encoded, field)
+		}
 	}
 }
 
