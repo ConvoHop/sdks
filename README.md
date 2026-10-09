@@ -36,7 +36,7 @@ planned languages, push notifications, package names, versioning and support.
 
 | SDK | Package | Runtime | Covers |
 | --- | --- | --- | --- |
-| [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, a conversation store with an offline outbox, typing and read receipts, push in a Web Push service worker, and calls through `livekit-client` with explicit connect and capture |
+| [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native has run only by hand, on an Android emulator and an iOS simulator. | Chat, history and search, realtime updates with replay, a conversation store with an offline outbox, typing and read receipts, push in a Web Push service worker, and calls through `livekit-client` with explicit connect and capture |
 | [React hooks](packages/react/README.md) | `@convohop/react`, not in a release yet | React 18 or later, with `@convohop/client` | Conversations with optimistic, offline-safe sends, typing, session renewal, live sessions and browser media |
 | [Android client](android/README.md) | `com.convohop:convohop-android` | Android 7.0 (API 24) or later. Apps compile against API 36. | Chat, history and search, realtime updates with replay, session renewal, a SQLite store with an offline outbox and optimistic sends, typing and read receipts, FCM push with incoming calls through Telecom, and calls through the LiveKit Android SDK with explicit capture |
 | [Flutter](flutter/README.md) | `convohop` (Dart) | Flutter 3.38 or later, on Android 7.0 (API level 24) or later and iOS 13 or later | Session refresh, chat, history and search, realtime updates with resume, a local store and an offline outbox with optimistic sends, typing, read receipts and recent activity, calls through `livekit_client`, push registration, notification handling and the system incoming-call UI |
@@ -192,7 +192,7 @@ an npm workspace, so CI builds and tests it with the other TypeScript
 packages. The [React Native workflow](.github/workflows/react-native.yml)
 also type-checks its example app, runs the conformance scenarios through
 its driver against the mock, runs its Android modules' JVM tests and builds
-the example app for Android. Its iOS modules aren't written yet. See
+the example app for Android and the iOS simulator. See
 [Testing](docs/react-native.md#testing).
 
 The Swift SDK has its own Swift package and

@@ -13,18 +13,14 @@ The package is built in two phases.
 
 | Part | Phase | State |
 | --- | --- | --- |
-| Platform adapter, `createPlatform` | 1 | Written. Tested on Node.js with the globals Hermes lacks removed. Run on Hermes once, by hand, in the example on an Android emulator. |
+| Platform adapter, `createPlatform` | 1 | Written. Tested on Node.js with the globals Hermes lacks removed. Run on Hermes once, by hand, in the example on an Android emulator and once on an iOS simulator. |
 | JavaScript API for push, calls and media | 1 | Written. Tested against fakes of the native modules, React Native and LiveKit. |
 | Codegen specs for `ConvoHopPlatform`, `ConvoHopPush` and `ConvoHopCalls` | 1 | Written. The tests run React Native 0.87.1's Codegen on them. React Native 0.76.0's Codegen generated them once, by hand. |
 | Conformance driver | 1 | Runs the shared scenarios through `createPlatform` against the mock. |
 | Example app's JavaScript | 1 | Written and type-checked. |
 | Android: Kotlin modules, Gradle build and the example's `android/` project | 2 | Written. CI runs the JVM tests and builds the example. The example ran once, by hand, on an Android 15 emulator; see [Testing](#testing). |
-| iOS: Swift modules, podspec and the example's `ios/` project | 2 | Not written. |
-| Push delivery, calls and media on devices | 2 | Android calls and notifications ran on the emulator, from pushes passed to `handleRemoteMessage`. Not run: delivery through FCM or APNs, media, physical devices and iOS. |
-
-Until the iOS modules are written, an iOS app can install the package but
-can't use it: each function that needs a native module fails with an error
-that names it.
+| iOS: Swift modules, podspec and the example's `ios/` project | 2 | Written. CI builds the example for the iOS simulator. The example ran once, by hand, on an iOS 27 simulator; see [Testing](#testing). |
+| Push delivery, calls and media on devices | 2 | Android calls and notifications ran on the emulator, from pushes passed to `handleRemoteMessage`. On the iOS simulator, pushes sent with `simctl push` reached JavaScript and rang CallKit, but the simulator ends calls before anyone can answer them. Not run: delivery through FCM or APNs, answered calls on iOS, media and physical devices. |
 
 ## Scope
 
@@ -48,6 +44,10 @@ Not in scope:
 - React Native's legacy architecture. The native modules are TurboModules
   only, so the floor is React Native 0.76, the first release with the New
   Architecture on by default. Its Codegen reads the specs' event emitters.
+- React Native before 0.84 on iOS. The podspec adds the Swift SDK as a
+  local Swift package, and React Native's `spm_dependency` takes a local
+  path from 0.84. On older releases, `pod install` fails with an error
+  that says so.
 - Expo Go, which can't load other native modules. Expo development builds
   need a config plugin; see [Open questions](#open-questions).
 - UI components.
@@ -132,21 +132,43 @@ ledger or call state of their own, except where a table below says so.
 ### iOS
 
 The modules wrap the [Swift SDK's](sdk-strategy.md#client-sdks) push and
-call helpers: `ConvoHopCalls.shared` for PushKit and CallKit, and its push
-types for APNs payloads and tokens.
+call helpers: `ConvoHopCalls.shared` for PushKit and CallKit, and the
+`ConvoHopPush` types for APNs payloads and tokens. They link only the
+`ConvoHopPush` and `ConvoHopCalls` products.
 
 - **Build.** React Native's iOS autolinking still reads a podspec, so the
   package ships a local `ConvoHopReactNative.podspec`. It isn't published
-  to the CocoaPods trunk. It takes the Swift SDK with React Native's
-  `spm_dependency`, from the Swift package's repository.
-- **App delegate.** iOS delivers APNs tokens, VoIP pushes and the launch
-  notification to the app delegate, before JavaScript runs. The app calls
-  the package's helpers from `application(_:didFinishLaunchingWithOptions:)`
-  and the APNs token callbacks. At launch they start `ConvoHopCalls.shared`
-  with `start(configuration:delegate:)`, which registers for VoIP pushes,
-  and set the notification center's delegate. The configuration's
-  `ledgerSuiteName` is the app's App Group, which the Notification Service
-  Extension shares. The package doesn't swizzle the app delegate.
+  to the CocoaPods trunk. It adds the Swift SDK with React Native's
+  `spm_dependency`, as a local Swift package: this repository's `swift/`,
+  or the checkout that `CONVOHOP_SWIFT_PACKAGE` names. A copy installed
+  from npm has no `swift/`, so it needs `CONVOHOP_SWIFT_PACKAGE`; see
+  [Open questions](#open-questions). `pod install` warns that a Swift
+  package in a statically linked pod might cause linker errors. The example
+  links statically and builds, because only this pod links the products.
+  Resolving the package also downloads the Swift SDK's LiveKit
+  dependencies, about 190 MB, though the app links none of them: its
+  WebRTC is the `LiveKitWebRTC` pod that LiveKit's React Native SDK uses.
+  The pod has a privacy manifest for the push ledger's `UserDefaults`.
+- **App delegate.** iOS can launch the app for a VoIP push, and reports
+  the notification that launched it only to a notification center delegate
+  set during launch. So the app calls `ConvoHopReactNative.configure(_:)`
+  in `application(_:didFinishLaunchingWithOptions:)`, before React Native
+  starts, and forwards the APNs token callbacks to
+  `didRegisterForRemoteNotifications(deviceToken:)` and
+  `didFailToRegisterForRemoteNotifications(error:)`. `configure` starts
+  `ConvoHopCalls.shared` with `start(configuration:delegate:)`, which
+  registers for VoIP pushes, and becomes the notification center's
+  delegate. It forwards other pushes, and `openSettingsFor`, to the
+  delegate it replaced. An app that sets its own delegate later calls
+  `ConvoHopReactNative.userNotificationCenter(_:willPresent:withCompletionHandler:)`
+  and `userNotificationCenter(_:didReceive:withCompletionHandler:)` first
+  from it; each returns `false`, without calling the completion handler,
+  for a push it doesn't handle. The options' `appGroup` is the
+  configuration's `ledgerSuiteName`, which the Notification Service
+  Extension shares, and their `apnsEnvironment` goes with each
+  registration. The package doesn't swizzle the app delegate. Until
+  `configure` runs, `register`, `startOutgoingCall` and `setRecipient` with
+  a recipient reject with `E_NOT_CONFIGURED`.
 - **VoIP pushes.** `ConvoHopCalls.shared` reports every VoIP push to
   CallKit before `pushRegistry(_:didReceiveIncomingPushWith:)` returns, as
   iOS requires. Otherwise iOS terminates the app and, after repeated
@@ -163,24 +185,37 @@ types for APNs payloads and tokens.
 | Spec | iOS |
 | --- | --- |
 | `getRandomBytes` | `SecRandomCopyBytes` |
-| `getPermissionStatus`, `requestPermission` | `UNUserNotificationCenter` authorization |
-| `register` | `registerForRemoteNotifications()`. The app delegate passes the token to the module, which reports it as lowercase hex with `ConvoHopPushToken.hex`, with the APNs `environment` when the app's native setup names it. |
-| `unregister` | Rejects: Apple advises apps not to unregister. The backend deletes the registrations. |
-| `handleRemoteMessage` | Rejects: it's for FCM data messages |
-| `setRecipient` | `ConvoHopCalls.shared.recipient`: `.only(projectId:recipientId:)`, or `.nobody` for `null`. The Swift SDK keeps it in the App Group, where the Notification Service Extension reads it. Nothing in the package sets `.any`, so at launch a recipient that reads `.any`, which nothing set yet, becomes `.nobody`. See [Recipient filter](#recipient-filter). |
-| `getRegistrations` | The latest APNs token this process received |
-| `onNotification`, `takeInitialNotification` | The notification center delegate: `willPresent` is `received`, `didReceive` is `opened`. The response that launched the app is kept for `takeInitialNotification`, once. ConvoHop alert pushes also go to `ConvoHopCalls.shared.handle`, so a missed-call alert ends its ring. |
-| `getCalls`, `forgetCall` | `calls` and `forget` |
+| `getPermissionStatus`, `requestPermission` | `UNUserNotificationCenter` authorization. Authorized and ephemeral are `granted`. `requestPermission` resolves the status after the request, also when iOS refuses it. |
+| `register` | `registerForRemoteNotifications()`, and resolves. The app delegate forwards the token, and `onPushRegistration` reports it as lowercase hex, from `ConvoHopPushToken.hex`, with the options' `apnsEnvironment`. A failure the app delegate forwards is `onPushRegistrationError`. |
+| `unregister` | Rejects with `E_UNSUPPORTED`: Apple advises apps not to unregister. The backend deletes the registrations. |
+| `handleRemoteMessage` | Rejects with `E_UNSUPPORTED`: iOS delivers ConvoHop pushes through the notification center delegate. |
+| `setRecipient` | `ConvoHopCalls.shared.recipient`: `.only(projectId:recipientId:)`, or `.nobody` for `null`. The Swift SDK keeps it in its push ledger, in the App Group's defaults when there is one, where the Notification Service Extension reads it. Nothing in the package sets `.any`, so `configure` turns a recipient that reads `.any`, which nothing set yet, into `.nobody`. See [Recipient filter](#recipient-filter). |
+| `getRegistrations` | The latest APNs token this process received. `getPushRegistrations` adds the VoIP token from `getVoipToken`. |
+| `onNotification`, `takeInitialNotification` | The notification center delegate, for pushes the recipient filter accepts. In the foreground, a message is `received` and shows as the options' `foregroundPresentation`. A call goes to `ConvoHopCalls.shared.handle`, which rings it, and doesn't show. A cancellation goes to `handle` too, which ends its ring, and shows only for a missed call. The default action on a notification is `opened`, after a call or cancellation goes to `handle`. The payload is `{"convohop": …}` with the notification's text. See [Cold start](#cold-start). |
+| `getCalls`, `forgetCall` | `calls` and `forget`. An ended call stays in `calls` for a minute. |
 | `startOutgoingCall` | `startOutgoingCall(liveSessionId:conversationId:handle:displayName:hasVideo:)` |
-| `answerCall`, `endCall` | `answer`, and `end` without a reason; each requests a CallKit action |
-| `stopRinging` | `end` with the reason, such as `answered`, which reports that the call ended elsewhere |
-| `reportConnecting`, `reportConnected` | `reportConnecting` and `reportConnected`, for answered and outgoing calls |
-| `updateCall`, `setMuted`, `setHeld` | `update`, `setMuted` and `setHeld` |
-| `setAudioRoute`, `openFullScreenIntentSettings` | Reject. Apps show the system route picker. |
+| `answerCall` | `answer`, which requests a CallKit action. A call that isn't ringing rejects with `E_CALL_STATE`. |
+| `endCall` | `end` without a reason, which declines a ringing call and hangs up any other. It also resolves for a call that already ended, or an unknown one. |
+| `stopRinging` | For a call that's still ringing, `end` with the reason, such as `answered`, which reports that the call ended elsewhere. It resolves for any other call. |
+| `reportConnecting`, `reportConnected` | `reportConnecting` and `reportConnected`, for answered and outgoing calls. `reportConnecting` leaves a connected call connected. |
+| `updateCall`, `setMuted` | `update` and `setMuted` |
+| `setHeld` | `setHeld`, for an answered or outgoing call. Rejects with `E_UNSUPPORTED` unless the options' `supportsHolding` is on. |
+| `setAudioRoute`, `openFullScreenIntentSettings` | Reject with `E_UNSUPPORTED`. Apps show the system route picker. |
 | `canUseFullScreenIntent` | `true` |
 | `getVoipToken`, `onVoipToken` | The PushKit token, from `didUpdateVoIPToken` |
-| `isAudioSessionActive`, `onAudioSession` | CallKit's `didActivate` and `didDeactivate` |
-| `onCallEvent` | The `ConvoHopCalls` delegate |
+| `isAudioSessionActive`, `onAudioSession` | CallKit's `didActivate` and `didDeactivate`. A provider reset deactivates it. |
+| `onCallEvent` | The `ConvoHopCalls` delegate for `incoming`, `outgoing` and `answered`, and its calls observer for `changed` and `ended`. `incoming` comes once CallKit accepts the report, if the call is still ringing, so a ring that stops first reports only `ended`. |
+
+The iOS modules reject with these codes. They're Android's, plus
+`E_CALLKIT`.
+
+| Code | When |
+| --- | --- |
+| `E_NOT_CONFIGURED` | `ConvoHopReactNative.configure` hasn't run. |
+| `E_INVALID_ARGUMENT` | An argument JavaScript checks first, so apps don't see it |
+| `E_CALL_NOT_FOUND`, `E_CALL_STATE` | No call has the ID, or the call's state doesn't allow the request. |
+| `E_CALLKIT` | CallKit refused the request for another reason. The message has the error's domain and code. |
+| `E_UNSUPPORTED` | `unregister`, `handleRemoteMessage`, `setAudioRoute`, `openFullScreenIntentSettings`, and `setHeld` without `supportsHolding`. JavaScript rejects the first four itself. |
 
 ### Android
 
@@ -334,11 +369,17 @@ offline at sign-out. So the device itself checks whom each push is for.
 
 A push can launch the app, or the user can open one that did. The native
 module keeps the response or intent that launched the app, and
-`takeInitialNotification` returns it once. On Android, a notification the
-user opens before `takeInitialNotification` resolves goes to it too, and an
-activity relaunched from the recent apps reports none. Pushes received
-before JavaScript attaches its listener aren't replayed: the native helpers
-have already shown or rung them.
+`takeInitialNotification` returns it once. A notification the user opens
+before `takeInitialNotification` resolves goes to it too, rather than to
+`onNotification`, so apps call it once at startup.
+
+- On iOS, it resolves `null` a second after the app first became active if
+  the user opened no notification; iOS delivers the launch response around
+  then. If the user opened several, it gets the latest.
+- On Android, an activity relaunched from the recent apps reports none.
+
+Pushes received before JavaScript attaches its listener aren't replayed:
+the native helpers have already shown or rung them.
 
 ## Calls
 
@@ -466,10 +507,11 @@ What runs in CI, without a device:
 - An outbox on a fake AsyncStorage across killed launches: queued messages
   outlive a kill, and a send cut off by one reaches the server once.
 - React Native 0.87.1's Codegen on the specs, generating the iOS and
-  Android interfaces, and a check that the fakes match the specs.
+  Android interfaces. Checks that the fakes match the specs, and that each
+  iOS module implements every method of its generated protocol.
 - The shared [conformance scenarios](../spec/conformance/README.md), through
   the [React Native driver](../conformance/drivers/react-native/driver.mjs),
-  against the mock. 33 pass, and the 31 that only use backend or management
+  against the mock. 41 pass, and the 34 that only use backend or management
   clients or verify webhooks are skipped. The
   [React Native workflow](../.github/workflows/react-native.yml) runs them,
   and also against the dev stack when the repository has one configured.
@@ -480,6 +522,10 @@ What runs in CI, without a device:
   error codes sent to JavaScript, call snapshots, signed notification
   intents, the `convohop` JSON written back for the shared push payload
   vectors, and the recipient filter.
+- A debug build of the example for the iOS simulator, in the workflow's
+  iOS job, with Xcode 26.6 and the CocoaPods that the example's Gemfile
+  resolves. It builds the iOS modules against the Swift SDK in `swift/`.
+  It doesn't run the app.
 
 The example also ran once, by hand, as a debug build on an Android 15
 (API 35) arm64-v8a emulator, on Hermes with the New Architecture and
@@ -509,31 +555,61 @@ React Native Firebase passes them. That run verified:
   and with a PIN.
 - No crashes.
 
+The example also ran once, by hand, as a debug build on an iOS 27
+simulator, built with Xcode 27.0, on Hermes with the New Architecture.
+Pushes went in with `xcrun simctl push`, built with the server SDK's push
+payload builders. That run verified:
+
+- `createPlatform` on Hermes: random bytes and UUIDs, SHA-256 and `URL`.
+  `ConvoHopClient` and a `ConversationStore` ran against the conformance
+  mock. A sent message was confirmed and left the outbox, another user's
+  message arrived over the subscription, and counters stayed strings.
+- Push: the PushKit VoIP token, from `getVoipToken` and
+  `getPushRegistrations`. Provisional permission, which needs no prompt. A
+  message push in the foreground reached `onNotification` as `received`,
+  and the recipient filter dropped a push for another user.
+- Calls: a call push rang CallKit and reported `incoming`. A ring the
+  system ended was `rejected`. A server cancellation with `ended`, before
+  CallKit accepted the ring, ended it as `missed` and reported only
+  `ended`; one with `expired` ended it as `expired`. A ring past its
+  `expiresAt` never rang. `stopRinging` with `answered` ended a ring as
+  `answeredElsewhere`. An outgoing call reported `outgoing`, and `hungUp`
+  when the system ended it. Ended calls left `getCalls()` after a minute.
+- The errors JavaScript gets for Android-only functions, ended calls and
+  bad arguments.
+- No crashes.
+
+The simulator limits what can run there:
+
+- It never delivered the APNs token, so `registerForPush` timed out
+  waiting for it. The same was
+  [reported](https://developer.apple.com/forums/thread/797507) for the iOS
+  26.0 simulator. The VoIP token arrived.
+- CallKit has no call UI there, and ended each call within three seconds
+  of the report, so answering, connecting, muting and holding couldn't run.
+- `simctl` can't grant notification permission, and the full prompt needs
+  a tap.
+
 Not verified:
 
-- A release build, and React Native releases other than 0.87.1. React
-  Native 0.76.0's Codegen generated the specs once, by hand; CI runs only
-  0.87.1's.
-- The iOS modules, podspec and project, which aren't written yet.
-- The Android modules on a physical device, and with Firebase configured.
-- Push delivery through FCM and APNs, and CallKit.
+- A release build, and React Native releases other than 0.87.1, including
+  0.84 to 0.86 on iOS. React Native 0.76.0's Codegen generated the specs
+  once, by hand; CI runs only 0.87.1's.
+- The modules on physical devices, and the Android modules with Firebase
+  configured.
+- Push delivery through FCM and APNs, including VoIP pushes through
+  PushKit.
+- On iOS: answering, connecting, muting and holding calls, the audio
+  session, the full permission prompt, opening a notification, a cold start
+  from one, and a Notification Service Extension with an App Group.
 - An app's own `incomingCallIntent` activity over the lock screen.
+- Missed calls on the Android emulator with the current Android SDK, which
+  changed how it posts them after that run.
 - Real WebRTC media through LiveKit's React Native SDK.
 - How Android's Telecom audio routes and LiveKit's audio session interact.
 - AsyncStorage's behavior under concurrent writes on a device.
 - React Native Firebase and the Android SDK's messaging service in one app,
   in each FCM mode.
-
-## Known issues
-
-- **Android missed calls vanish.** The Android SDK posts a missed call's
-  notification under the ring's tag and ID, replacing the ring's, and the
-  ring's notification times out when the ring expires. On the emulator,
-  Android applied that timeout to the missed call and cancelled it: after
-  a ring expired, 61 milliseconds after the missed call was posted, and
-  after the server stopped a ring with `ended`. The fix belongs in the
-  Android SDK, a notification key of its own for missed calls, so this
-  package doesn't work around it.
 
 ## Assumptions
 
@@ -542,9 +618,19 @@ Not verified:
   Their APIs fit, and each platform keeps one implementation of the push
   ledger, CallKit and Telecom. Where an API is missing, the module keeps
   its own state, as the Android table shows.
-- **A local podspec with `spm_dependency`.** Autolinking needs a podspec,
-  and a local one isn't affected by the CocoaPods trunk becoming read-only.
-  The Swift SDK stays a Swift package.
+- **A local podspec with a local Swift package.** Autolinking needs a
+  podspec, and a local one isn't affected by the CocoaPods trunk becoming
+  read-only. Its `spm_dependency` adds the Swift SDK from a path, this
+  repository's `swift/` or `CONVOHOP_SWIFT_PACKAGE`, because the Swift SDK
+  has no package URL yet. React Native takes a local path from 0.84, so
+  that's the floor on iOS, and the podspec checks it. Android keeps 0.76.
+- **The Swift SDK's push and call products only.** The modules link
+  `ConvoHopPush` and `ConvoHopCalls`. Apps get the client from
+  `@convohop/client` and media from LiveKit's React Native SDK.
+- **Configured from the app delegate, without swizzling.** The app calls
+  `configure` and forwards the APNs token callbacks. The package replaces
+  no app delegate methods, so an app that uses other push libraries decides
+  the order.
 - **`node:test`, not Jest.** The repository's packages test with Node's
   test runner. The fakes stand in for React Native, which Jest's React
   Native preset would otherwise provide.
@@ -561,10 +647,29 @@ Not verified:
   `android/build/repo`, and take only the `com.convohop` group from there.
   The package depends on `0.1.0-SNAPSHOT` unless the app sets
   `convohopAndroidVersion`.
-- **React Native's template.** The example's `android/` project is React
-  Native 0.87.1's template: compile and target SDK 36, minimum SDK 24 and
-  Gradle 9.4.1. It applies the Google services plugin only when the app
-  has a `google-services.json`, so it builds and runs without Firebase.
+- **React Native's template.** The example's `android/` and `ios/`
+  projects are React Native 0.87.1's template.
+  - Android: compile and target SDK 36, minimum SDK 24 and Gradle 9.4.1.
+    It applies the Google services plugin only when the app has a
+    `google-services.json`, so it builds and runs without Firebase.
+  - iOS: iOS 15.1 or later, and the template's Gemfile and Bundler
+    config, which installs the gems in the example's `vendor/bundle`. The
+    app delegate configures the package. A scene delegate starts React
+    Native, because apps built with the iOS 27 SDK must use scenes. The
+    Podfile raises the deployment target of pods' resource bundles, such
+    as AsyncStorage's, which Xcode 27 rejects.
+- **No Podfile lock in the example.** The example doesn't commit
+  `Podfile.lock`, `Gemfile.lock` or the workspace that `pod install`
+  generates. Its pods follow `package-lock.json` and the podspecs. Today
+  the Gemfile resolves CocoaPods 1.15.2.
+- **The APNs environment from the build configuration.** The example
+  registers Debug builds' tokens for APNs's development environment and
+  Release builds' for production, as Xcode signs them by default.
+- **No Notification Service Extension in the example.** It has no App Group
+  either, so in the background iOS shows message pushes as "New message",
+  from the example's `Localizable.strings`, unless the project sends
+  previews. The Swift SDK
+  [shows how to add one](../swift/README.md#message-text-in-a-notification-service-extension).
 - **The example installs on its own.** It isn't one of the repository's
   workspaces. Its own `node_modules` and lockfile hold React Native,
   LiveKit and the other packages with native code, which must have one
@@ -579,9 +684,14 @@ Not verified:
 
 ## Open questions
 
-- **Swift package source.** `spm_dependency` needs a remote package URL. The
-  Swift SDK will be distributed from its own repository, which doesn't
-  exist yet. Until then, phase 2 builds need another source for it.
+- **Swift package source.** A copy of the package installed from npm has no
+  `swift/`, so apps set `CONVOHOP_SWIFT_PACKAGE` to a checkout of the Swift
+  SDK. Once the Swift SDK has its own repository, the podspec can add it by
+  URL and version instead.
+- **LiveKit in the Swift package.** Resolving the Swift package downloads
+  LiveKit's Swift SDK and its binary frameworks, about 190 MB, for the
+  `ConvoHopLiveKit` product, which the modules don't link. A package of
+  only the push and call products would avoid the download.
 - **Android SDK setters.** The Android SDK has no setter for a call's mute
   state, caller name or video, and its calls have no connecting state. The
   module keeps its own until it does.

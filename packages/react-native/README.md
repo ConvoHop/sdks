@@ -17,13 +17,11 @@ replay, receipts, live sessions and push payload parsing. For hooks, use
 [`@convohop/react`](../react/README.md). It isn't published to a package
 registry yet. License: [Apache-2.0](LICENSE).
 
-> [!IMPORTANT]
-> The Android modules that implement the Codegen specs, `ConvoHopPlatform`,
-> `ConvoHopPush` and `ConvoHopCalls`, are here. The iOS ones aren't yet:
-> until they are, an iOS app can install the package but can't use it, and
-> each function reports the module it's missing. The
-> [design](../../docs/react-native.md) describes the native modules and
-> what has been verified.
+> [!NOTE]
+> The iOS and Android modules have run only on a simulator and an
+> emulator, without push delivery through APNs or FCM, and without media.
+> The [design](../../docs/react-native.md#testing) lists what has been
+> verified.
 
 Build and test from the repository's root npm workspace with Node.js 22+:
 
@@ -37,13 +35,18 @@ npm run typecheck:example --workspace @convohop/react-native
 ## Runtimes
 
 - React Native 0.76 or later with the New Architecture: the native modules
-  are TurboModules. The tests and the example use React Native 0.87.1.
+  are TurboModules. On iOS, React Native 0.84 or later, which can add the
+  Swift SDK as a local Swift package. The tests and the example use React
+  Native 0.87.1.
+- iOS 15.1 or later, React Native's minimum. The
+  [Swift SDK](../../swift/README.md) that the iOS modules wrap needs Xcode
+  16.4 or later; CI builds with Xcode 26.6.
 - Hermes. Neither this package nor the client uses the globals Hermes lacks,
   such as Web Crypto and a complete `URL`. CI runs the package's tests and
   the client's send, outbox and push paths on Node.js with those globals
   removed. The package and the client also ran on Hermes once, by hand, in
-  the example on an Android emulator; the
-  [design](../../docs/react-native.md#testing) lists what that run
+  the example on an Android emulator and on an iOS simulator; the
+  [design](../../docs/react-native.md#testing) lists what those runs
   verified.
 - `react-native` and `@convohop/client` are peer dependencies.
   `@convohop/react-native/media` also needs `@livekit/react-native`
@@ -160,6 +163,12 @@ const stopListening = onNotification(({ action, notification }) => {
 });
 ```
 
+Call `takeInitialNotification` once at startup. Until it resolves, a
+notification the user opens goes to it rather than to `onNotification`. On
+iOS, when it has none yet, it waits until a second after the app first
+becomes active, because iOS reports the notification that launched the app
+around then.
+
 Until `setPushRecipient` resolves, the device accepts the recipient it had
 before, which may be a user who didn't sign out. Check that a push's
 `projectId` and `recipientId` belong to the signed-in user before you act on
@@ -167,10 +176,68 @@ it.
 
 ### iOS
 
+- **Pods.** Run `bundle exec pod install` in `ios/`. The podspec adds the
+  [Swift SDK's](../../swift/README.md) `ConvoHopPush` and `ConvoHopCalls`
+  products as a local Swift package, because the Swift SDK can't be added
+  by URL yet: the `swift/` directory of the repository this package comes
+  from, or the checkout that `CONVOHOP_SWIFT_PACKAGE` names. Without
+  either, `pod install` fails and says so.
+- **Capabilities.** Add Push Notifications, and the Voice over IP and Audio
+  background modes. Add `NSMicrophoneUsageDescription` to `Info.plist`,
+  and `NSCameraUsageDescription` for video. A Notification Service
+  Extension also needs an App Group that it shares with the app.
+- **App delegate.** iOS can launch your app for a VoIP push, so configure
+  the native modules before React Native starts, and forward the APNs
+  token:
+
+  ```swift
+  import ConvoHopReactNative
+
+  func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+  ) -> Bool {
+    ConvoHopReactNative.configure(.init(appGroup: "group.com.example.chat", apnsEnvironment: .production))
+    // Then start React Native.
+    return true
+  }
+
+  func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    ConvoHopReactNative.didRegisterForRemoteNotifications(deviceToken: deviceToken)
+  }
+
+  func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+    ConvoHopReactNative.didFailToRegisterForRemoteNotifications(error: error)
+  }
+  ```
+
+  `configure` starts CallKit and PushKit, and makes the package the
+  notification center's delegate. It passes other pushes to the delegate it
+  replaced. If your app sets its own delegate later, call
+  `ConvoHopReactNative.userNotificationCenter(_:willPresent:withCompletionHandler:)`
+  and `userNotificationCenter(_:didReceive:withCompletionHandler:)` first
+  from it. Each returns `false`, without calling the completion handler,
+  for a push that isn't ConvoHop's. Until `configure` runs,
+  `registerForPush`, `startOutgoingCall` and `setPushRecipient` with a
+  recipient reject with `E_NOT_CONFIGURED`. The package doesn't swizzle
+  your app delegate.
+
+  | Option | Default | Use |
+  | --- | --- | --- |
+  | `appGroup` | `nil` | The App Group your Notification Service Extension shares. The push recipient and the notifications the app handled are kept there. |
+  | `apnsEnvironment` | `nil` | `.development` or `.production`, as your app's `aps-environment` entitlement says. Each registration carries it, so your backend knows which APNs server to send to. |
+  | `supportsVideo` | `true` | Video calls in CallKit |
+  | `supportsHolding` | `false` | Holding calls, in CallKit and with `setHeld` |
+  | `includesCallsInRecents` | `true` | Calls in the Phone app's recents |
+  | `ringtoneSound` | `nil` | A sound file in your app bundle, or `nil` for the system ringtone |
+  | `iconTemplateImageData` | `nil` | A 40 × 40 pt template image, as PNG data, for CallKit's button that opens your app |
+  | `foregroundPresentation` | `[.banner, .list, .sound]` | How a message or a missed call shows while your app is in the foreground |
 - `registerForPush` passes the APNs token, `{ kind: "apns", token }`, and,
   when the app receives calls, the PushKit token, `{ kind: "apnsVoip",
-  token }`. Each can carry the APNs `environment`. Send alert requests to
-  the first and VoIP requests to the second.
+  token }`. With the `apnsEnvironment` option, each also has an
+  `environment`. Send alert requests to the first and VoIP requests to the
+  second. It rejects if APNs sends no token within `timeoutMs`, 30 seconds
+  by default.
 - Every VoIP push must reach CallKit at once, or iOS stops delivering them
   and can terminate the app. The native module reports each incoming call
   to CallKit before JavaScript starts, and ends a call for anyone else at
@@ -195,7 +262,7 @@ push's recipient, in memory. Never write a session token to disk or to the
 App Group. Without an extension, iOS shows `CONVOHOP_MESSAGE`.
 
 Give the extension a `ConvoHopNotificationLedger` on your App Group, the
-suite your native setup gives `ConvoHopCalls`. The extension then hides the
+one you pass to `configure` as `appGroup`. The extension then hides the
 text of a push for anyone but the recipient `setPushRecipient` set: no
 title, and a `CONVOHOP_*` string as the body.
 
@@ -278,7 +345,9 @@ participation that already exists, retries, hang-up and media that drops.
   system UI. Follow its `changed` and `ended` events: mute your microphone
   track when it's `muted` or `held`, and leave the live session when it
   ends. To mute from your UI, call `setMuted` and let its `changed` event
-  mute the track.
+  mute the track; `setHeld` works the same way, and on iOS needs the
+  `supportsHolding` option. On iOS, `incoming` comes once CallKit accepts
+  the call, so a ring that stops first reports only `ended`.
 - **Ending.** `endCall` declines a ringing call or hangs up any other. Leave
   the live session too.
 - **Outgoing calls.** On iOS, `startOutgoingCall` reports the call to
@@ -363,10 +432,11 @@ write restores it, with the text of unsent messages:
 - Arguments that don't fit fail with a `TypeError` or `RangeError` before
   anything reaches native code. Native results that don't match the specs
   fail with a `TypeError`: the SDK doesn't pass them on.
-- On Android, a native module that rejects sets the `Error`'s `code`, such
-  as `E_NOT_CONFIGURED`, `E_CALL_NOT_FOUND` or FCM's
-  `SERVICE_NOT_AVAILABLE`. The [design](../../docs/react-native.md#android)
-  lists them.
+- A native module that rejects sets the `Error`'s `code`, such as
+  `E_NOT_CONFIGURED`, `E_CALL_NOT_FOUND`, `E_CALLKIT` on iOS or FCM's
+  `SERVICE_NOT_AVAILABLE` on Android. The design lists them for
+  [iOS](../../docs/react-native.md#ios) and
+  [Android](../../docs/react-native.md#android).
 - Push and call listeners never throw into native code. Errors from your
   listeners, and native data the SDK drops, go to React Native's error
   handler, or to `onError` where a function takes one.

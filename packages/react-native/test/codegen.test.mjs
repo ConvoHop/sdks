@@ -33,9 +33,19 @@ function filesUnder(dir) {
     .map(entry => relative(dir, join(entry.parentPath, entry.name))).sort();
 }
 
+// The selectors of an Objective-C protocol's or implementation's instance methods.
+function selectors(text) {
+  return [...text.matchAll(/^- \([^)]*\)([^;{]*)/gm)].map(([, declaration]) => {
+    const keywords = [...declaration.replace(/\([^)]*\)/g, " ").matchAll(/(\w+)\s*:/g)].map(([, keyword]) => keyword);
+    return keywords.length === 0 ? declaration.trim() : `${keywords.join(":")}:`;
+  });
+}
+
 test("Codegen builds the package's TurboModules from src/specs", () => {
   assert.deepEqual(codegenConfig, { name: "RNConvoHopSpec", type: "modules", jsSrcsDir: "src/specs",
-    android: { javaPackageName: "com.convohop.reactnative" } });
+    android: { javaPackageName: "com.convohop.reactnative" },
+    ios: { modulesProvider: { ConvoHopCalls: "ConvoHopCallsModule", ConvoHopPlatform: "ConvoHopPlatformModule",
+      ConvoHopPush: "ConvoHopPushModule" } } });
 });
 
 test("each spec parses as one TurboModule whose methods and events the test fakes implement", () => {
@@ -63,4 +73,25 @@ test("Codegen generates the Android, iOS and C++ bindings for every spec", t => 
   }
   assert.ok(files.includes(join(codegenConfig.name, `${codegenConfig.name}.h`)), "iOS spec header");
   assert.ok(files.includes(join("jni", `${codegenConfig.name}-generated.cpp`)), "Android JNI bindings");
+});
+
+test("each iOS module provider implements every method of its generated protocol", t => {
+  const outputDirectory = mkdtempSync(join(tmpdir(), "convohop-codegen-ios-"));
+  t.after(() => rmSync(outputDirectory, { recursive: true, force: true }));
+  assert.equal(RNCodegen.generate({ libraryName: codegenConfig.name, schema: { modules: parseSpecs() }, outputDirectory,
+    assumeNonnull: false }, { generators: ["modulesIOS"], test: false }), true);
+  const header = readFileSync(join(outputDirectory, codegenConfig.name, `${codegenConfig.name}.h`), "utf8");
+  assert.deepEqual(Object.keys(codegenConfig.ios.modulesProvider).sort(), Object.keys(fakeSpecs).sort());
+  for (const [name, className] of Object.entries(codegenConfig.ios.modulesProvider)) {
+    const source = readFileSync(join(packageDir, "ios", `${className}.mm`), "utf8");
+    assert.match(source, new RegExp(`@interface ${className}\\s*:\\s*Native${name}SpecBase\\s*<Native${name}Spec\\b`));
+    assert.match(source, new RegExp(`\\+ \\(NSString \\*\\)moduleName\\s*\\{\\s*return @"${name}";`));
+    const protocol = header.match(new RegExp(`@protocol Native${name}Spec <[^>]*>([\\s\\S]*?)@end`));
+    assert.ok(protocol, `${name} protocol`);
+    const required = selectors(protocol[1]);
+    assert.ok(required.length > 0, `${name} selectors`);
+    const implemented = new Set(selectors(source.slice(source.indexOf("@implementation"))));
+    assert.deepEqual(required.filter(selector => !implemented.has(selector)), [], `${className} implements Native${name}Spec`);
+    assert.ok(implemented.has("getTurboModule:"), `${className} creates its JSI module`);
+  }
 });

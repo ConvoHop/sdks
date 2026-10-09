@@ -439,7 +439,7 @@ release.
 | React | 18 and later |
 | iOS and macOS | iOS 15 and later, macOS 12 and later. Builds with Xcode 16.4 (Swift 6.1) and later. |
 | Android | API level 24 (Android 7.0) and later |
-| React Native | 0.76 and later, with the New Architecture |
+| React Native | 0.76 and later on Android and 0.84 and later on iOS, with the New Architecture |
 | Flutter | The current stable release. The package needs Flutter 3.38 or later, and CI tests both. Apps run on Android 7.0 (API level 24) and later and iOS 13 and later. |
 
 Today, CI verifies the TypeScript packages on Node.js 22 and 24, the Java
@@ -453,8 +453,9 @@ requirement when that SDK lands.
 For the Web row, CI runs the Web client's browser tests in Playwright's
 current builds of Chromium, Firefox and WebKit. For the React row, it runs
 the hooks on React 18 and 19. For the React Native row, it runs React
-Native 0.87.1's Codegen on the native modules' specs and type-checks the
-example app; no workflow builds or runs an app yet.
+Native 0.87.1's Codegen on the native modules' specs, type-checks the
+example app and builds it with React Native 0.87.1 for Android and the iOS
+simulator. No workflow runs the app.
 
 For the iOS and macOS row, CI builds and tests the Swift SDK on macOS and in
 the iOS Simulator with Xcode 16.4 and 26.6. It doesn't test on iOS 15 or

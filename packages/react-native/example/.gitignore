@@ -75,3 +75,10 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# pod install generates the workspace and the Podfile lock. Pod versions follow package-lock.json
+# and the podspecs, and a committed lock would go stale at each release of @convohop/react-native.
+# The Gemfile keeps React Native's template ranges, which bundle install resolves.
+ios/*.xcworkspace/
+ios/Podfile.lock
+/Gemfile.lock
