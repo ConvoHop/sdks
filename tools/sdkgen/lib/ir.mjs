@@ -127,6 +127,7 @@ function buildOperation(operation, annotations) {
     result: { type: typeRef(field.type) },
     document: { text: built.document, bytes, selectedFields: built.selectedFields, depth: built.depth },
     idempotency: entry.idempotency,
+    destructive: entry.destructive,
     pagination: buildPagination(operation, entry.pagination),
     realtime: entry.realtime,
     longRunning: entry.longRunning,

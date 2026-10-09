@@ -61,6 +61,18 @@ package registry yet. [Install a release](#install-a-release) or
 | Server | Python, .NET, Go |
 | Client | iOS and macOS (Swift), Android (Kotlin), React Native, Flutter |
 
+## Tools
+
+| Tool | Package | Runtime | Covers |
+| --- | --- | --- | --- |
+| [CLI](packages/cli/README.md) | `@convohop/cli`, command `convohop` | Node.js 22 or later | Login, projects, backend keys, webhook tail and replay, push payload tests, and any server operation with `convohop call` |
+| [MCP server](packages/mcp/README.md) | `@convohop/mcp`, command `convohop-mcp` | Node.js 22 or later | Management and backend-key operations as tools for AI agents, annotated with their credentials, scopes, idempotency and destructiveness |
+
+Both are built on `@convohop/server`, and `tools/sdkgen` generates their
+operation catalogs from the schema. They hold server credentials, so run them
+only on machines you trust. They aren't released yet: run them from a checkout
+of this repository, as their READMEs describe.
+
 ## How it fits together
 
 1. Your users sign in to your app with your own authentication.
@@ -205,6 +217,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - [Node.js server SDK](packages/server/README.md)
 - [Java and Kotlin server SDK](jvm/README.md)
 - [Shared core package](packages/core/README.md)
+- [CLI](packages/cli/README.md) and [MCP server](packages/mcp/README.md)
 - [Releasing](RELEASING.md): how releases happen, and how to install and
   verify them
 - [Conformance suite](spec/conformance/README.md): scenarios, the driver

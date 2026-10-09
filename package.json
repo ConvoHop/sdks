@@ -6,6 +6,8 @@
     "packages/client",
     "packages/server",
     "conformance",
+    "packages/cli",
+    "packages/mcp",
     "packages/react"
   ],
   "scripts": {
