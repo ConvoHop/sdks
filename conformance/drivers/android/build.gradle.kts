@@ -8,6 +8,8 @@ plugins {
     application
 }
 
+version = providers.gradleProperty("convohopVersion").get()
+
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
@@ -23,6 +25,15 @@ java {
 application {
     applicationName = "convohop-conformance-android"
     mainClass.set("com.convohop.conformance.DriverKt")
+    // hello reports the artifact under test: the runtime that convohop-android wraps, since an Android library can't
+    // load on a host JVM. A stdio driver that mostly waits on the network needs only a small heap and a quick-starting JIT.
+    applicationDefaultJvmArgs = listOf(
+        "-Dconvohop.conformance.package=com.convohop:convohop-android-core",
+        "-Dconvohop.conformance.version=$version",
+        "-Xmx256m",
+        "-XX:+UseSerialGC",
+        "-XX:TieredStopAtLevel=1",
+    )
 }
 
 dependencies {
