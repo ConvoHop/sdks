@@ -96,13 +96,14 @@ function settled(state: RecoveryState): boolean {
   return progress[state.resolutionState] >= progress.accepted;
 }
 /**
- * Whether nothing more can come of a record's request: the authority committed or accepted it, or rejected every
- * attempt and won't take another, because the last rejection isn't retryable or the retry budget is spent. Only such
- * records make room in a full journal.
+ * Whether this SDK will never send a record's request again: the authority committed or accepted it, or rejected every
+ * attempt and the last rejection isn't retryable, or the request's retry budget is spent, whatever its outcome. Only
+ * such records make room in a full journal. A clock set back refuses a resend only until it catches up, so it spends
+ * nothing.
  */
 function final(state: RecoveryState, now: number): boolean {
-  return settled(state) || (state.resolutionState === "rejected" &&
-    (!retryableCode(state.lastAttemptClassification) || state.attemptCount >= 3 || now > state.retryDeadline));
+  return settled(state) || (state.resolutionState === "rejected" && !retryableCode(state.lastAttemptClassification)) ||
+    state.attemptCount >= 3 || now > state.retryDeadline;
 }
 /** The refusal to hold one more record while the journal is full of records that aren't final. */
 function recoveryLimit(requestId: string, outcome: string): ConvoHopProblem {

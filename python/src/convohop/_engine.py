@@ -548,20 +548,18 @@ def _budget(operation: OperationSpec) -> tuple[int, int]:
 
 
 def _final(state: Mapping[str, Any], now: int) -> bool:
-    """Whether nothing more can come of a record's request.
+    """Whether the SDK will never send a record's request again.
 
-    The authority committed or accepted it, or rejected every attempt and won't take another: the last rejection's code
-    isn't retryable, or the retry budget is spent. Only such records make room in a full journal.
+    The authority committed or accepted it, or rejected every attempt and the last rejection's code isn't retryable, or
+    the request's retry budget is spent, whatever its outcome. Only such records make room in a full journal. A clock
+    set back refuses a resend only until it catches up, so it spends nothing.
     """
     resolution = state["resolutionState"]
-    if resolution != "rejected":
-        return resolution in _SETTLED
+    if resolution in _SETTLED or (resolution == "rejected" and not _retryable(state["lastAttemptClassification"])):
+        return True
     attempts, _ = _budget(OPERATIONS[state["operation"]])
-    return (
-        not _retryable(state["lastAttemptClassification"])
-        or state["attemptCount"] >= attempts
-        or now > state["retryDeadline"]
-    )
+    count: int = state["attemptCount"]
+    return count >= attempts or now > state["retryDeadline"]
 
 
 def _retryable(code: str) -> bool:

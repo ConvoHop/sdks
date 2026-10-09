@@ -2079,7 +2079,7 @@
           "ref": "package:convohop/convohop.dart#ConvoHopClient.recoverPending",
           "anchor": "convohopclientrecoverpending-method",
           "signatures": ["Future<void> recoverPending(ErrorListener onError)"],
-          "docs": "Resolves up to 16 pending or unknown mutations, resending a request only\nwhile its original retry budget remains. Errors go to `onError`.",
+          "docs": "Resolves up to 16 mutations whose outcome isn't settled: pending,\nunknown, or rejected with a retryable code. It resends a request only\nwhile its original retry budget remains, and otherwise checks it\nread-only. Errors go to `onError`.",
           "operations": [
             {
               "id": "communication.resolveRequest",
@@ -2346,7 +2346,7 @@
       "ref": "package:convohop/convohop.dart#ConvoHopOutbox",
       "anchor": "convohopoutbox-class",
       "signatures": ["final class ConvoHopOutbox"],
-      "docs": "Sends messages in the background so the UI can show them at once\n(optimistic sends), in order within each conversation, across lost\nconnectivity and app restarts.\n\nEach message keeps one request ID for life. The outbox resends it only\nwithin the transport's original three-attempt, 60-second budget, and only\nafter a read-only check found that no earlier attempt was committed. It\nnever invents a new request ID on its own: `resend` does that when the\nuser asks.\n\nWhile the authority is unreachable, it checks read-only before a\nmessage's first submission, so waiting offline doesn't spend the budget.\nCall `flush` when connectivity returns.\n\nWith `ConvoHopClient.storage` set and `persist` on, unsent messages,\nincluding their text, are stored under\n`convohop.outbox:<project>:<principal>` until sent or discarded.",
+      "docs": "Sends messages in the background so the UI can show them at once\n(optimistic sends), in order within each conversation, across lost\nconnectivity and app restarts.\n\nEach message keeps one request ID for life. The outbox resends it only\nwithin the transport's original three-attempt, 60-second budget, and only\nafter a read-only check found that no earlier attempt was committed. It\nnever invents a new request ID on its own: `resend` does that when the\nuser asks.\n\nWhile the authority is unreachable, it checks read-only before a\nmessage's first submission, so waiting offline doesn't spend the budget.\nCall `flush` when connectivity returns.\n\nA message stays queued, and is tried again after a backoff that is never\nshorter than the authority's `ConvoHopProblem.retryAfter`, after an\nunknown outcome, a rejection the realtime stream would also retry (such as\n`RATE_LIMITED`), `WRONG_REGION`, after which the client routes again\nfirst, `RECOVERY_LIMIT` and an ended session. Any other rejection, such as\n`QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, fails it at once.\n\nWhile the outbox is open, the transport never evicts the recovery record\nof a message the outbox may still send or check. A message attempted\nbefore the outbox loaded it may have lost its record meanwhile, evicted\nor lost with storage. Unless a read-only check finds it committed, such a\nmessage isn't sent again: it fails with `RESOLUTION_REQUIRED`, as\n`OutboxState.unknown` if an attempt may have reached the authority.\n\nWith `ConvoHopClient.storage` set and `persist` on, unsent messages,\nincluding their text, are stored under\n`convohop.outbox:<project>:<principal>` until sent or discarded.",
       "members": [
         {
           "name": "ConvoHopOutbox",
@@ -2577,7 +2577,7 @@
           "ref": "package:convohop/convohop.dart#ConvoHopProblem.retryAfter",
           "anchor": "convohopproblemretryafter-property",
           "signatures": ["final int? retryAfter"],
-          "docs": "Whole seconds to wait before resending the same request, when the\nauthority sent a delay (for example with `RATE_LIMITED`). The SDK never\nwaits or resends on its own because of it."
+          "docs": "Whole seconds to wait before resending the same request, when the\nauthority sent a delay (for example with `RATE_LIMITED`). Read from the\nerror's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in\nseconds, or from a realtime close reason's `retryAfter=`. A request you\nsend is never resent on its own; when the SDK reconnects a stream or\nresends a queued outbox message, it waits at least this long first."
         },
         {
           "name": "cause",
@@ -2603,7 +2603,7 @@
       "ref": "package:convohop/convohop.dart#ConvoHopTransport",
       "anchor": "convohoptransport-class",
       "signatures": ["final class ConvoHopTransport"],
-      "docs": "Sends generated operations to `/graphql` and keeps mutation recovery.\n\nA mutation keeps its request ID, payload, incarnation and retry budget\n(three attempts within 60 seconds) across retries and restarts. When the\noutcome is unknown, resolve the original request ID; the transport never\ntreats a lost response as a rejection or a commit.",
+      "docs": "Sends generated operations to `/graphql` and keeps mutation recovery.\n\nA mutation keeps its request ID, payload, incarnation and retry budget\n(three attempts within 60 seconds) across retries and restarts. When the\noutcome is unknown, resolve the original request ID; the transport never\ntreats a lost response as a rejection or a commit.\n\nThe recovery journal holds at most 128 records. When a new mutation finds\nit full, the transport evicts the final record whose last attempt is\noldest and that no call is using and no caller retains. A record is final\nonce the SDK can't send its request again: committed, accepted, rejected\nwith a code that isn't retryable, or out of retry budget. When no record\ncan go, it refuses the new mutation before sending it, with\n`RECOVERY_LIMIT`. An evicted request can still be resolved by its ID.",
       "members": [
         {
           "name": "ConvoHopTransport",
@@ -4806,7 +4806,7 @@
           "ref": "package:convohop/convohop.dart#RecoveryState.resolutionState",
           "anchor": "recoverystateresolutionstate-property",
           "signatures": ["final String resolutionState"],
-          "docs": "`pending` (never sent), `unknown` (sent, outcome not observed),\n`committed` or `accepted`."
+          "docs": "`pending` (never sent), `unknown` (sent, outcome not observed),\n`rejected` (the authority refused every attempt), `committed` or\n`accepted`."
         },
         {
           "name": "mediaAdmissionAttempted",
@@ -5204,7 +5204,7 @@
           "ref": "package:convohop/convohop.dart#ScopeRequiredProblem.retryAfter",
           "anchor": "scoperequiredproblemretryafter-property",
           "signatures": ["final int? retryAfter"],
-          "docs": "Whole seconds to wait before resending the same request, when the\nauthority sent a delay (for example with `RATE_LIMITED`). The SDK never\nwaits or resends on its own because of it.",
+          "docs": "Whole seconds to wait before resending the same request, when the\nauthority sent a delay (for example with `RATE_LIMITED`). Read from the\nerror's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in\nseconds, or from a realtime close reason's `retryAfter=`. A request you\nsend is never resent on its own; when the SDK reconnects a stream or\nresends a queued outbox message, it waits at least this long first.",
           "inherited": "ConvoHopProblem"
         },
         {
@@ -5672,7 +5672,7 @@
           "ref": "package:convohop/convohop.dart#RealtimeSocket.stream",
           "anchor": "realtimesocketstream-property",
           "signatures": ["Stream<Object?> get stream"],
-          "docs": "Incoming frames: text as `String`, binary as `List<int>`. Connection\nfailures arrive as errors, and the stream is done once the connection\ncloses."
+          "docs": "Incoming frames: text as `String`, binary as `List<int>`. Connection\nfailures arrive as errors, and the stream is done once the connection\ncloses.\n\nWhen the server refuses the upgrade, a socket that can read the HTTP\nresponse may add its problem as a `ConvoHopProblem` error. The SDK then\nretries, routes again or stops as it would for that problem over HTTP.\nAfter any other error, it reconnects with backoff once the stream is\ndone."
         },
         {
           "name": "protocol",
@@ -5689,6 +5689,14 @@
           "anchor": "realtimesocketclosecode-property",
           "signatures": ["int? get closeCode"],
           "docs": "The close code the server sent, once `stream` is done."
+        },
+        {
+          "name": "closeReason",
+          "kind": "property",
+          "ref": "package:convohop/convohop.dart#RealtimeSocket.closeReason",
+          "anchor": "realtimesocketclosereason-property",
+          "signatures": ["String? get closeReason"],
+          "docs": "The close reason the server sent, once `stream` is done. A reason that\nstarts with an error code, such as `RATE_LIMITED retryAfter=4`, decides\nwhether and when the SDK reconnects."
         },
         {
           "name": "send",

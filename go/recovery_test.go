@@ -745,11 +745,13 @@ func journalID(n int) string {
 }
 
 // journal is a full journal of stored sendMessage records whose outcome is
-// unknown, the nth changed by edit when it is not nil.
+// unknown and whose retry budget remains, so that none is final, the nth
+// changed by edit when it is not nil.
 func journal(edit func(n int, record map[string]any)) []any {
 	records := make([]any, maxRecoveryRecords)
 	for i := range records {
 		record := storedRecord(journalID(i+1), sendOperation)
+		record["retryDeadline"] = maxSafeInteger
 		if edit != nil {
 			edit(i+1, record)
 		}
@@ -851,6 +853,10 @@ func TestRecoveryCapacity(t *testing.T) {
 				rejected("WRONG_REGION")
 			case 4:
 				rejected("NEWER_SERVICE_CODE")
+			case 5:
+				// Nor is a record from a clock that was ahead: it refuses a
+				// resend only until this clock catches up.
+				record["firstSubmittedAt"], record["lastAttemptAt"], record["retryDeadline"] = now+30_000, now+30_000, now+90_000
 			case 100:
 				// The only final record, attempted after every other.
 				rejected("REVISION_CONFLICT")
@@ -929,8 +935,11 @@ func TestFinalRecords(t *testing.T) {
 	}{
 		{"committed", "committed", "authorityReceipt", 1, now, true},
 		{"accepted", "accepted", "authorityReceipt", 1, now, true},
-		{"pending", "pending", "notSubmitted", 0, now - 1, false},
-		{"unknown with its budget spent", "unknown", "TRANSPORT_UNKNOWN", limit, now - 1, false},
+		{"pending", "pending", "notSubmitted", 0, now, false},
+		{"pending after its window", "pending", "notSubmitted", 0, now - 1, true},
+		{"unknown with attempts left", "unknown", "TRANSPORT_UNKNOWN", limit - 1, now, false},
+		{"unknown with its attempts spent", "unknown", "TRANSPORT_UNKNOWN", limit, now, true},
+		{"unknown after its window", "unknown", "submitted", 1, now - 1, true},
 		{"rejected for good", "rejected", "REVISION_CONFLICT", 1, now, true},
 		{"rejected for now", "rejected", "RATE_LIMITED", limit - 1, now, false},
 		{"in the wrong region", "rejected", "WRONG_REGION", 1, now, false},
@@ -1038,6 +1047,72 @@ func TestRejectedRecords(t *testing.T) {
 		client := newProject(t, a, WithClock(clock.Now), WithRecoveryStore(storing(t, journal(nil)[1:])))
 		_, err := send(client, "hello", WithRequestID(testRequest))
 		expectProblem(t, err, ErrorCodeRateLimited, OutcomeRejected, 429)
+		clock.Set(start.Add(window))
+		limited(t, a, client)
+		clock.Set(start.Add(window + time.Millisecond))
+		evicts(t, a, client, testRequest)
+	})
+}
+
+func TestSpentBudgets(t *testing.T) {
+	t.Run("an unanswered request makes room once its attempts are spent", func(t *testing.T) {
+		a := newAuthority(t, dropping(sendOperation))
+		client := newProject(t, a, WithRecoveryStore(storing(t, journal(nil)[1:])))
+		limit := catalog.operations[sendOperation].maxAttempts
+		for attempt := 1; attempt <= limit; attempt++ {
+			_, err := send(client, "hello", WithRequestID(testRequest))
+			expectProblem(t, err, codeTransportUnknown, OutcomeUnknown, 0)
+			if attempt < limit {
+				limited(t, a, client)
+			}
+		}
+		// The SDK won't send the request again, so its record is final though
+		// its outcome is unknown.
+		_, err := send(client, "hello", WithRequestID(testRequest))
+		expectProblem(t, err, codeResolutionRequired, OutcomeUnknown, 409)
+		if n := a.count(sendOperation); n != limit {
+			t.Fatalf("sent %d attempts, want %d", n, limit)
+		}
+		evicts(t, a, client, testRequest)
+		// Forgotten, the request can still be resolved, but not retried.
+		a.setRespond(resolving(constant("notObservedYet")))
+		reply, err := client.ResolveRequest(context.Background(), ResolveRequestRequestInput{RequestID: testRequest})
+		if err != nil || reply.Result == nil || reply.Result.State != "notObservedYet" {
+			t.Fatalf("resolution = %+v, %v", reply, err)
+		}
+		_, err = client.Retry(context.Background(), testRequest)
+		var p *Problem
+		if err == nil || errors.As(err, &p) || !strings.Contains(err.Error(), "no recovery record") {
+			t.Fatalf("error = %v, want the missing record error", err)
+		}
+		// Sent again under its ID, it is a new record with a new budget. The
+		// authority deduplicates by request ID.
+		if _, err := send(client, "hello", WithRequestID(testRequest)); err != nil {
+			t.Fatal(err)
+		}
+		if n := a.count(sendOperation); n != limit+2 {
+			t.Fatalf("sent %d requests, want %d", n, limit+2)
+		}
+		records := recordsOf(t, client)
+		if last := records[len(records)-1]; len(records) != maxRecoveryRecords || last.RequestID != testRequest ||
+			last.AttemptCount != 1 || last.ResolutionState != "committed" || slices.Contains(idsOf(t, client), testUUID) {
+			t.Fatalf("records = %+v", records)
+		}
+	})
+	t.Run("an unanswered request makes room once its window ends, not when the clock is set back", func(t *testing.T) {
+		clock := newTestClock()
+		start := clock.Now()
+		window := time.Duration(catalog.operations[sendOperation].windowMs) * time.Millisecond
+		a := newAuthority(t, dropping(sendOperation))
+		client := newProject(t, a, WithClock(clock.Now), WithRecoveryStore(storing(t, journal(nil)[1:])))
+		_, err := send(client, "hello", WithRequestID(testRequest))
+		expectProblem(t, err, codeTransportUnknown, OutcomeUnknown, 0)
+		// A clock set back refuses a resend until it catches up, so it spends
+		// nothing.
+		clock.Set(start.Add(-time.Second))
+		_, err = send(client, "hello", WithRequestID(testRequest))
+		expectProblem(t, err, codeResolutionRequired, OutcomeUnknown, 409)
+		limited(t, a, client)
 		clock.Set(start.Add(window))
 		limited(t, a, client)
 		clock.Set(start.Add(window + time.Millisecond))

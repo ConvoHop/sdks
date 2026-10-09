@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
+import 'failures.dart';
 import 'generated/generated.dart';
 import 'problem.dart';
 import 'protocol.dart';
@@ -612,12 +613,19 @@ final class ConvoHopClient {
     return _result(reply.result, reply.requestId, reply.status, 'search page');
   }
 
-  /// Resolves up to 16 pending or unknown mutations, resending a request only
-  /// while its original retry budget remains. Errors go to [onError].
+  /// Resolves up to 16 mutations whose outcome isn't settled: pending,
+  /// unknown, or rejected with a retryable code. It resends a request only
+  /// while its original retry budget remains, and otherwise checks it
+  /// read-only. Errors go to [onError].
   Future<void> recoverPending(ErrorListener onError) async {
     await transport.initializeRecovery();
     final states = transport.recoveryStates
-        .where((state) => state.resolutionState == 'pending' || state.resolutionState == 'unknown')
+        .where(
+          (state) =>
+              state.resolutionState == 'pending' ||
+              state.resolutionState == 'unknown' ||
+              (state.resolutionState == 'rejected' && retryableCode(state.lastAttemptClassification)),
+        )
         .take(16)
         .toList();
     for (final state in states) {
@@ -974,8 +982,13 @@ final class ConversationStream {
     );
     _subscription = socket.stream.listen(
       (data) => _frame(socket, subscriptionId, data),
-      onError: (Object _) {
-        if (!_closed && !_paused && identical(_socket, socket)) {
+      onError: (Object error) {
+        if (_closed || _paused || !identical(_socket, socket)) return;
+        // A connector that reads a refused upgrade's response reports its
+        // problem, which is classified like any other.
+        if (error is ConvoHopProblem) {
+          _fail(error);
+        } else {
           _onError(StateError('Realtime connection unavailable; current history remains authoritative'));
         }
       },
@@ -1041,6 +1054,7 @@ final class ConversationStream {
             parseString(extensions['outcome']),
             status,
             parseString(problem['message']),
+            retryAfter: retryDelay(extensions['retryAfter']),
           );
         }
         _page(parseObject(payload['data'])['conversationEvents']);
@@ -1063,16 +1077,11 @@ final class ConversationStream {
     _socket = null;
     _subscription = null;
     if (_closed || _paused) return;
-    if (_events.terminalCloseCodes.contains(socket.closeCode)) {
-      _fail(
-        ConvoHopProblem(
-          'UNAUTHENTICATED',
-          subscriptionId,
-          'rejected',
-          401,
-          'Realtime authorization ended; obtain a current session',
-        ),
-      );
+    // A close reason that names an error code reports it, such as
+    // `QUOTA_EXCEEDED retryAfter=60 meter=messages`.
+    final problem = closeProblem(socket.closeCode ?? 0, socket.closeReason ?? '', subscriptionId);
+    if (problem != null) {
+      _fail(problem);
     } else {
       _retry();
     }
@@ -1129,11 +1138,11 @@ final class ConversationStream {
     await _saveCursor();
   }
 
-  void _retry() {
+  /// Reconnects after the channel's backoff, and never sooner than
+  /// [retryAfter] seconds.
+  void _retry([int? retryAfter]) {
     if (_closed || _paused || _timer != null) return;
-    final delay =
-        min(_events.baseDelayMs * (1 << min(_reconnectAttempts++, 4)), _events.maxDelayMs) +
-        _jitter.nextInt(_events.jitterMs);
+    final delay = reconnectDelay(_reconnectAttempts++, retryAfter, _jitter);
     _timer = Timer(Duration(milliseconds: delay), () {
       _timer = null;
       if (_closed || _paused) return;
@@ -1187,10 +1196,12 @@ final class ConversationStream {
       _onError(error);
       return;
     }
-    if (error is ConvoHopProblem && (const {0, 429, 503}.contains(error.status) || error.code == 'WRONG_REGION')) {
+    // Network, timeout, rate-limit and server failures reconnect; so does
+    // WRONG_REGION, since reconnecting routes again.
+    if (error is ConvoHopProblem && reconnectAction(error) != ReconnectAction.stop) {
       _dropSocket()?.close(4000, 'Retrying authoritative connection');
       _onError(error);
-      _retry();
+      _retry(error.retryAfter);
       return;
     }
     close();

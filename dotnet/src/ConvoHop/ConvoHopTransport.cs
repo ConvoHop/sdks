@@ -437,13 +437,13 @@ namespace ConvoHop
             _order.RemoveAt(oldest);
         }
 
-        // Whether nothing more can come of a record's request: the authority committed or accepted it, or rejected
-        // every attempt and won't take another, because the last rejection's code isn't retryable or the retry budget
-        // is spent.
+        // Whether the SDK will never send a record's request again: the authority committed or accepted it, or rejected
+        // every attempt and the last rejection's code isn't retryable, or the request's retry budget is spent, whatever
+        // its outcome. A clock set back refuses a resend only until it catches up, so it spends nothing.
         private static bool Final(RecoveryRecord record, long now)
         {
-            if (record.ResolutionState != "rejected") return record.Settled;
-            return !Retryable(record.LastAttemptClassification) || record.AttemptCount >= MaxAttempts || now > record.RetryDeadline;
+            if (record.Settled || (record.ResolutionState == "rejected" && !Retryable(record.LastAttemptClassification))) return true;
+            return record.AttemptCount >= MaxAttempts || now > record.RetryDeadline;
         }
 
         // Unless the schema says otherwise. WRONG_REGION succeeds once routed again; a newer code may too.

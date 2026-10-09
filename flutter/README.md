@@ -127,12 +127,33 @@ request ID, payload and retry budget. Resolve an `unknown` outcome with
 and call `client.recoverPending(onError)` after a restart to finish
 mutations that were in flight.
 
+The client keeps one recovery record per mutation, at most 128, in its
+`recoveryStorage` when you set one. A record is final once the authority
+committed or accepted its request, once an attempt was rejected with a code
+the API documents as not retryable (other than `WRONG_REGION`), or once its
+retry budget is spent: three attempts, or 60 seconds since the first. A
+spent budget makes even a request in doubt final, and only
+`client.requests.resolve` can settle it then. When all 128 places are
+taken, a new mutation forgets the final record whose last attempt is the
+oldest. It keeps the records of requests still running, of messages an open
+outbox may still send or check, and of the end, leave and connection-grant
+requests of call handles your app still holds. When no record can go, the
+mutation fails with `RECOVERY_LIMIT` (status 409, outcome `rejected`) and
+sends nothing: retry or resolve the outstanding requests first.
+`client.requests.resolve` still works by request ID after a record is
+forgotten.
+
 ## Conversation store
 
 `ConversationStore` keeps one conversation current on the device. It loads
 the newest messages and receipts, follows the conversation's realtime
 events, and fetches each new or changed message. After a dropped connection
-it reconnects with backoff and resumes after the last event it applied. With
+it reconnects with backoff and resumes after the last event it applied. It
+tries again after no response or a status 408, 429 or 5xx, never sooner than
+the authority's `retryAfter`, and routes again first after `WRONG_REGION`.
+It also waits through an ended session until the session is renewed. Any
+other problem, such as `QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, stops it
+as `failed`, including when the authority closes the stream with one. With
 `persist: true`, it shows the stored conversation at once on the next launch
 while it catches up.
 
@@ -190,12 +211,22 @@ unreachable, it checks read-only before a message's first attempt, so waiting
 offline doesn't spend the budget. Call `outbox.flush()` when connectivity
 returns.
 
+A message stays queued and is tried again after backoff, never sooner than
+the authority's `retryAfter`, while its outcome is unknown, after a
+rejection the stream would also retry (such as `RATE_LIMITED`), after
+`WRONG_REGION` (the client routes again first), after `RECOVERY_LIMIT`, and
+while the session is renewed. Any other rejection, such as `QUOTA_EXCEEDED`
+or `PLAN_LIMIT_EXCEEDED`, fails it at once. If a message attempted before a
+restart lost its recovery record meanwhile, and a read-only check doesn't
+find it committed, it isn't sent again: it fails with `RESOLUTION_REQUIRED`,
+as `unknown` if an attempt may have reached the authority.
+
 | `OutboxItem.state` | Meaning | Action |
 | --- | --- | --- |
 | `queued`, `sending` | Waiting or in flight | None |
 | `sent` | Committed. The store replaces it with the committed message. | None |
 | `failed` | Rejected, and not committed | `outbox.resend(requestId)` sends the text again as a new message, or `discard` |
-| `unknown` | The retry budget is spent and an attempt may have been committed | `outbox.resolve(requestId)` asks again. Resending can duplicate the message, so ask the user first. |
+| `unknown` | An attempt may have been committed, and none can be sent again | `outbox.resolve(requestId)` asks again. Resending can duplicate the message, so ask the user first. |
 
 The outbox holds at most 100 unsent messages.
 

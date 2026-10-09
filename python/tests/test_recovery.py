@@ -654,6 +654,47 @@ def test_a_spent_retry_budget_makes_a_resendable_rejection_final(clock: list[int
     assert authority.count("management.createOrganization") == 132
 
 
+def test_a_spent_retry_budget_makes_an_unanswered_request_final(clock: list[int]) -> None:
+    online = [False]
+
+    def create(request: Received) -> httpx.Response:
+        if not online[0]:
+            raise httpx.ConnectError("offline")
+        return settle(request)
+
+    storage = Storage()
+    authority = Authority(answer(create, "notObservedYet"))
+    client = authority.management(actor_id=ACTOR, recovery_storage=storage)
+    ids = [uid() for _ in range(127)]
+    for request_id in ids:
+        rejects(partial(create_organization, client, request_id), "TRANSPORT_UNKNOWN", UNAVAILABLE)
+    spent, extra = uid(), uid()
+    for attempt in range(1, 4):
+        clock[0] += 1
+        rejects(partial(create_organization, client, spent), "TRANSPORT_UNKNOWN", UNAVAILABLE)
+        if attempt < 3:
+            problem = rejects(partial(create_organization, client, extra), "RECOVERY_LIMIT", LIMIT)
+            assert (problem.request_id, problem.outcome, problem.status) == (extra, "rejected", 409)
+    # The SDK won't send the request again, so its record is final though its outcome is unknown.
+    online[0] = True
+    problem = rejects(partial(create_organization, client, spent), "RESOLUTION_REQUIRED", BUDGET)
+    assert (problem.request_id, problem.outcome, problem.status) == (spent, "unknown", 409)
+    assert authority.count("management.createOrganization") == 130
+    create_organization(client, extra)
+    assert [record["requestId"] for record in storage.records(MANAGEMENT_KEY)] == [*ids, extra]
+
+    # Forgotten, the request can still be resolved, but not retried.
+    assert client.resolve_request(request_id=spent).state == "notObservedYet"
+    with pytest.raises(LookupError, match="No recovery record exists"):
+        client.retry_request(spent)
+    # Sent again under its ID, it is a new record with a new budget. The authority deduplicates by request ID.
+    create_organization(client, spent)
+    records = storage.records(MANAGEMENT_KEY)
+    assert [record["requestId"] for record in records] == [*ids, spent]
+    assert (records[-1]["attemptCount"], records[-1]["resolutionState"]) == (1, "committed")
+    assert authority.count("management.createOrganization") == 132
+
+
 def test_a_request_is_rejected_only_if_every_attempt_was(clock: list[int]) -> None:
     plan: list[str] = []
 
@@ -689,16 +730,22 @@ def test_restored_records_make_room_only_once_final(clock: list[int]) -> None:
         record("rejected", "RATE_LIMITED", retryDeadline=now - 1, lastAttemptAt=now - 8),
         record("rejected", "FORBIDDEN", lastAttemptAt=now - 7),
         record("rejected", "RATE_LIMITED", attemptCount=3, lastAttemptAt=now - 6),
+        # Final too, though no answer settled them, since their budget is spent.
+        record("unknown", "TRANSPORT_UNKNOWN", attemptCount=3, lastAttemptAt=now - 5),
+        record("pending", "notSubmitted", attemptCount=0, retryDeadline=now - 1, lastAttemptAt=now - 4),
     ]
+    ahead = {"firstSubmittedAt": now + 30_000, "lastAttemptAt": now + 30_000, "retryDeadline": now + 90_000}
     kept = [
         record("rejected", "RATE_LIMITED", attemptCount=2),
         record("rejected", "WRONG_REGION"),
         record("rejected", "NEWER_CODE"),
         record("unknown", "submitted"),
         record("pending", "notSubmitted", attemptCount=0),
+        # A record from a clock that was ahead refuses a resend only until this clock catches up.
+        record("unknown", "submitted", **ahead),
     ]
     filler = [record("unknown", "TRANSPORT_UNKNOWN") for _ in range(128 - len(final) - len(kept))]
-    saved = [final[2], *kept[:2], final[0], *filler, final[3], *kept[2:], final[1]]
+    saved = [final[2], *kept[:2], final[0], final[5], *filler, final[3], *kept[2:], final[1], final[4]]
     storage = Storage()
     storage.values[MANAGEMENT_KEY] = json.dumps(saved)
     authority = Authority(offline)

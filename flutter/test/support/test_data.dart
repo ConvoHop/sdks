@@ -320,18 +320,22 @@ MockClient mockGraphQL(RequestHandler handler, {List<Map<String, Object?>>? bodi
   return handler(request, body);
 });
 
-ConvoHopClient clientWith(http.Client httpClient, {RecoveryStorage? storage, RealtimeConnector? realtime}) =>
-    ConvoHopClient(
-      baseUrl: 'https://authority.example',
-      projectId: projectId,
-      principalId: principalId,
-      sessionToken: 'fake-session-token',
-      incarnation: incarnation,
-      recoveryStorage: storage,
-      httpClient: httpClient,
-      realtimeConnector: realtime,
-      clock: fixedClock,
-    );
+ConvoHopClient clientWith(
+  http.Client httpClient, {
+  RecoveryStorage? storage,
+  RealtimeConnector? realtime,
+  int Function() clock = fixedClock,
+}) => ConvoHopClient(
+  baseUrl: 'https://authority.example',
+  projectId: projectId,
+  principalId: principalId,
+  sessionToken: 'fake-session-token',
+  incarnation: incarnation,
+  recoveryStorage: storage,
+  httpClient: httpClient,
+  realtimeConnector: realtime,
+  clock: clock,
+);
 
 Map<String, Object?> okFor(String operationName, String id, Map<String, Object?> input) {
   switch (operationName) {

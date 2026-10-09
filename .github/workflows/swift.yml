@@ -157,8 +157,8 @@ jobs:
       - name: Run the conformance scenarios against the mock target
         # Not --strict: a client SDK declares only the user role and doesn't verify
         # webhooks, so the runner skips those scenarios. Until the SDK follows
-        # spec/recovery/README.md, it also skips those that need realtime.reconnectPolicy
-        # or recovery.eviction. The next step allows only those.
+        # spec/recovery/README.md, it also skips those that need realtime.reconnectPolicy,
+        # recovery.eviction or recovery.spentBudget. The next step allows only those.
         run: >-
           npm run conformance --
           --driver conformance/drivers/swift/Driver/.build/debug/ConvoHopConformanceDriver
@@ -169,7 +169,7 @@ jobs:
           import { readFileSync } from "node:fs";
           const allowed = [
             /^it only uses [a-z, ]+ clients, which the driver under test does not declare$/,
-            /^driver convohop-swift does not declare feature (webhooks\.verify|realtime\.reconnectPolicy|recovery\.eviction)$/,
+            /^driver convohop-swift does not declare feature (webhooks\.verify|realtime\.reconnectPolicy|recovery\.eviction|recovery\.spentBudget)$/,
           ];
           const summary = JSON.parse(readFileSync("conformance/reports/swift/summary.json", "utf8"));
           const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
@@ -225,7 +225,7 @@ jobs:
           import { readFileSync } from "node:fs";
           const allowed = [
             /^it only uses [a-z, ]+ clients, which the driver under test does not declare$/,
-            /^driver convohop-swift does not declare feature (webhooks\.verify|realtime|realtime\.reconnectPolicy|recovery\.eviction)$/,
+            /^driver convohop-swift does not declare feature (webhooks\.verify|realtime|realtime\.reconnectPolicy|recovery\.eviction|recovery\.spentBudget)$/,
           ];
           const summary = JSON.parse(readFileSync("conformance/reports/swift-linux/summary.json", "utf8"));
           const scenarios = summary.suites.flatMap((suite) => suite.scenarios);

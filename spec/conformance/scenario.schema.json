@@ -47,7 +47,7 @@
     },
     "feature": {
       "description": "Driver features; see spec/conformance/driver-protocol.md#features.",
-      "enum": ["realtime", "realtime.reconnectPolicy", "recovery.eviction", "recovery.storage", "retryAfter", "webhooks.verify"]
+      "enum": ["realtime", "realtime.reconnectPolicy", "recovery.eviction", "recovery.spentBudget", "recovery.storage", "retryAfter", "webhooks.verify"]
     },
     "matcher": { "description": "A value pattern; see spec/conformance/README.md#matchers." },
     "errorExpectation": {

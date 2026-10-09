@@ -2712,8 +2712,10 @@ Sends [`communication.search`](../operations/communication/search.md).
 Future<void> recoverPending(ErrorListener onError)
 ```
 
-Resolves up to 16 pending or unknown mutations, resending a request only
-while its original retry budget remains. Errors go to `onError`.
+Resolves up to 16 mutations whose outcome isn't settled: pending,
+unknown, or rejected with a retryable code. It resends a request only
+while its original retry budget remains, and otherwise checks it
+read-only. Errors go to `onError`.
 
 Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md).
 
@@ -2989,6 +2991,20 @@ While the authority is unreachable, it checks read-only before a
 message's first submission, so waiting offline doesn't spend the budget.
 Call `flush` when connectivity returns.
 
+A message stays queued, and is tried again after a backoff that is never
+shorter than the authority's `ConvoHopProblem.retryAfter`, after an
+unknown outcome, a rejection the realtime stream would also retry (such as
+`RATE_LIMITED`), `WRONG_REGION`, after which the client routes again
+first, `RECOVERY_LIMIT` and an ended session. Any other rejection, such as
+`QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, fails it at once.
+
+While the outbox is open, the transport never evicts the recovery record
+of a message the outbox may still send or check. A message attempted
+before the outbox loaded it may have lost its record meanwhile, evicted
+or lost with storage. Unless a read-only check finds it committed, such a
+message isn't sent again: it fails with `RESOLUTION_REQUIRED`, as
+`OutboxState.unknown` if an attempt may have reached the authority.
+
 With `ConvoHopClient.storage` set and `persist` on, unsent messages,
 including their text, are stored under
 `convohop.outbox:<project>:<principal>` until sent or discarded.
@@ -3209,8 +3225,11 @@ final int? retryAfter
 ```
 
 Whole seconds to wait before resending the same request, when the
-authority sent a delay (for example with `RATE_LIMITED`). The SDK never
-waits or resends on its own because of it.
+authority sent a delay (for example with `RATE_LIMITED`). Read from the
+error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in
+seconds, or from a realtime close reason's `retryAfter=`. A request you
+send is never resent on its own; when the SDK reconnects a stream or
+resends a queued outbox message, it waits at least this long first.
 
 #### `ConvoHopProblem.cause` property
 
@@ -3238,6 +3257,14 @@ A mutation keeps its request ID, payload, incarnation and retry budget
 (three attempts within 60 seconds) across retries and restarts. When the
 outcome is unknown, resolve the original request ID; the transport never
 treats a lost response as a rejection or a commit.
+
+The recovery journal holds at most 128 records. When a new mutation finds
+it full, the transport evicts the final record whose last attempt is
+oldest and that no call is using and no caller retains. A record is final
+once the SDK can't send its request again: committed, accepted, rejected
+with a code that isn't retryable, or out of retry budget. When no record
+can go, it refuses the new mutation before sending it, with
+`RECOVERY_LIMIT`. An evicted request can still be resolved by its ID.
 
 #### `ConvoHopTransport` constructor
 
@@ -6558,7 +6585,8 @@ final String resolutionState
 ```
 
 `pending` (never sent), `unknown` (sent, outcome not observed),
-`committed` or `accepted`.
+`rejected` (the authority refused every attempt), `committed` or
+`accepted`.
 
 #### `RecoveryState.mediaAdmissionAttempted` property
 
@@ -7126,8 +7154,11 @@ final int? retryAfter
 ```
 
 Whole seconds to wait before resending the same request, when the
-authority sent a delay (for example with `RATE_LIMITED`). The SDK never
-waits or resends on its own because of it.
+authority sent a delay (for example with `RATE_LIMITED`). Read from the
+error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in
+seconds, or from a realtime close reason's `retryAfter=`. A request you
+send is never resent on its own; when the SDK reconnects a stream or
+resends a queued outbox message, it waits at least this long first.
 
 Inherited from `ConvoHopProblem`.
 
@@ -7805,6 +7836,12 @@ Incoming frames: text as `String`, binary as `List<int>`. Connection
 failures arrive as errors, and the stream is done once the connection
 closes.
 
+When the server refuses the upgrade, a socket that can read the HTTP
+response may add its problem as a `ConvoHopProblem` error. The SDK then
+retries, routes again or stops as it would for that problem over HTTP.
+After any other error, it reconnects with backoff once the stream is
+done.
+
 #### `RealtimeSocket.protocol` property
 
 ```dart
@@ -7820,6 +7857,16 @@ int? get closeCode
 ```
 
 The close code the server sent, once `stream` is done.
+
+#### `RealtimeSocket.closeReason` property
+
+```dart
+String? get closeReason
+```
+
+The close reason the server sent, once `stream` is done. A reason that
+starts with an error code, such as `RATE_LIMITED retryAfter=4`, decides
+whether and when the SDK reconnects.
 
 #### `RealtimeSocket.send` method
 

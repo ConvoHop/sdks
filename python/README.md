@@ -172,12 +172,14 @@ returning. The async clients also accept `async_recovery_storage=` with
 coroutine methods, which they load on first use; await `initialize_recovery()`
 before reading `recovery_states`, which lists the records. A client keeps at
 most 128 records. To make room for a new request it forgets the final record
-attempted longest ago that no call is using. A record is final when the
-authority committed or accepted the request, or rejected it in a way that
-resending can't change: the problem isn't retryable, or the request's
-three-attempt/60-second retry budget is spent (see the
-[recovery journal rules](../spec/recovery/README.md#recovery-journal)). With
-no final record to forget, the new request fails with `ConvoHopProblem` code
+attempted longest ago that no call is using. A record is final when the SDK
+will never send its request again: the authority committed or accepted it, or
+rejected it with a problem that isn't retryable, or the request's
+three-attempt/60-second retry budget is spent, whatever its outcome (see the
+[recovery journal rules](../spec/recovery/README.md#recovery-journal)). A
+spent request raises `RESOLUTION_REQUIRED` instead of being sent, and
+`resolve_request()` still looks it up once its record is gone. With no final
+record to forget, the new request fails with `ConvoHopProblem` code
 `RECOVERY_LIMIT`, outcome `rejected` and status 409 before it is sent; resend
 or resolve the kept requests first. Records hold inputs, never credentials,
 and use the TypeScript SDK's keys and format, so both SDKs can share them.

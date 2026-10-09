@@ -28,7 +28,7 @@ var declaredRoles = []string{"backend", "management"}
 
 // features are the optional protocol features the driver implements. The Go
 // SDK has no realtime client.
-var features = []string{"recovery.eviction", "recovery.storage", "retryAfter", "webhooks.verify"}
+var features = []string{"recovery.eviction", "recovery.spentBudget", "recovery.storage", "retryAfter", "webhooks.verify"}
 
 func isRole(role string) bool {
 	return role == "user" || role == "backend" || role == "management"

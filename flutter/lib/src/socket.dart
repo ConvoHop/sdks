@@ -13,6 +13,12 @@ abstract interface class RealtimeSocket {
   /// Incoming frames: text as [String], binary as `List<int>`. Connection
   /// failures arrive as errors, and the stream is done once the connection
   /// closes.
+  ///
+  /// When the server refuses the upgrade, a socket that can read the HTTP
+  /// response may add its problem as a `ConvoHopProblem` error. The SDK then
+  /// retries, routes again or stops as it would for that problem over HTTP.
+  /// After any other error, it reconnects with backoff once the stream is
+  /// done.
   Stream<Object?> get stream;
 
   /// The subprotocol the server selected, once [ready] completes.
@@ -20,6 +26,11 @@ abstract interface class RealtimeSocket {
 
   /// The close code the server sent, once [stream] is done.
   int? get closeCode;
+
+  /// The close reason the server sent, once [stream] is done. A reason that
+  /// starts with an error code, such as `RATE_LIMITED retryAfter=4`, decides
+  /// whether and when the SDK reconnects.
+  String? get closeReason;
 
   void send(String text);
 
@@ -51,6 +62,9 @@ final class _ChannelSocket implements RealtimeSocket {
 
   @override
   int? get closeCode => _channel.closeCode;
+
+  @override
+  String? get closeReason => _channel.closeReason;
 
   @override
   void send(String text) {

@@ -44,7 +44,7 @@ __all__ = [
 Api: TypeAlias = Literal["sync", "async"]
 Role: TypeAlias = Literal["backend", "management"]
 ROLES: Final[tuple[Role, ...]] = ("backend", "management")
-FEATURES: Final = ("recovery.eviction", "recovery.storage", "retryAfter", "webhooks.verify")
+FEATURES: Final = ("recovery.eviction", "recovery.spentBudget", "recovery.storage", "retryAfter", "webhooks.verify")
 PACKAGES: Final = {"convohop": convohop.__version__}
 
 # The SDK requires requestedTtlMs; the catalog makes it optional, so use the TypeScript server SDK's default.
