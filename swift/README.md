@@ -519,6 +519,27 @@ it. From the repository root, `npm run generate:graphql` regenerates it and
 `npm run check:graphql` checks it. See
 [SDK generation](https://github.com/ConvoHop/sdks/blob/main/docs/sdk-generation.md).
 
+Two more Swift packages in the repository serve the
+[Swift docs](https://github.com/ConvoHop/sdks/blob/main/docs/site/swift/index.md):
+the extractor in `tools/docgen/extractors/swift` reads this package's public
+API and documentation comments with swift-syntax for the
+[docs pipeline](https://github.com/ConvoHop/sdks/blob/main/docs/docs-pipeline.md),
+and the examples in `docs/languages/swift/examples` hold the code that the
+docs include. The examples' tests start the conformance mock, so they need
+Node.js 22 or later and `npm ci` at the repository root. After you change the
+public API or its documentation comments, from the repository root:
+
+```sh
+npm run extract:docs -- swift          # refresh docs/languages/swift/surface.json
+npm run generate:docs                  # regenerate docs/site
+npm run test:docs -- --install swift   # test the examples on macOS and build them for iOS
+```
+
+The examples' `Package.resolved` pins this package's dependencies, and the
+docs check fails when it's out of date. After you change them in
+`Package.swift`, run
+`swift package update --package-path docs/languages/swift/examples`.
+
 The unit tests use fakes for HTTP, WebSockets and the network. They don't
 prove real WebRTC media, APNs or PushKit delivery, CallKit on a device, or a
 hosted service.

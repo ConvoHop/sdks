@@ -274,6 +274,73 @@
       ]
     },
     {
+      "id": "swift",
+      "name": "Swift",
+      "status": "preview",
+      "codeFence": "swift",
+      "home": "swift/index.md",
+      "reference": "swift/reference/index.md",
+      "coverage": "swift/reference/operations.md",
+      "llmsFull": "swift/llms-full.txt",
+      "packages": [
+        {
+          "name": "ConvoHop",
+          "slug": "convohop",
+          "layer": "client",
+          "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events with replay, the local store, the offline outbox, read receipts, typing, recent activity, call control and push routing. It re-exports ConvoHopPush.",
+          "runtime": "iOS 15 or later, or macOS 12 or later, with Swift 6.1 or later (Xcode 16.4 or later).",
+          "source": "swift/Sources/ConvoHop",
+          "reference": "swift/reference/convohop.md",
+          "data": "swift/reference/convohop.json"
+        },
+        {
+          "name": "ConvoHopLiveKit",
+          "slug": "livekit",
+          "layer": "client",
+          "summary": "Call media through the official LiveKit Swift SDK, and CallKit audio session handling on iOS.",
+          "runtime": "iOS 15 or later, or macOS 12 or later, with LiveKit's client-sdk-swift 2.17.0 or later.",
+          "source": "swift/Sources/ConvoHopLiveKit",
+          "reference": "swift/reference/livekit.md",
+          "data": "swift/reference/livekit.json"
+        },
+        {
+          "name": "ConvoHopPush",
+          "slug": "push",
+          "layer": "client",
+          "summary": "Push payload parsing, deduplication, the ring ledger and the push recipient, with Foundation only so app extensions can use it.",
+          "runtime": "iOS 15 or later, or macOS 12 or later, in an app or an app extension.",
+          "source": "swift/Sources/ConvoHopPush",
+          "reference": "swift/reference/push.md",
+          "data": "swift/reference/push.json"
+        },
+        {
+          "name": "ConvoHopCalls",
+          "slug": "calls",
+          "layer": "client",
+          "summary": "Incoming calls from PushKit VoIP pushes to CallKit, and outgoing calls through CallKit.",
+          "runtime": "iOS 15 or later. On macOS it has only the call model.",
+          "source": "swift/Sources/ConvoHopCalls",
+          "reference": "swift/reference/calls.md",
+          "data": "swift/reference/calls.json"
+        },
+        {
+          "name": "ConvoHopNotificationService",
+          "slug": "notification-service",
+          "layer": "client",
+          "summary": "A Notification Service Extension helper that fetches message text on the device when a push has none, and hides the text of other users' pushes.",
+          "runtime": "iOS 15 or later, or macOS 12 or later, in a Notification Service Extension.",
+          "source": "swift/Sources/ConvoHopNotificationService",
+          "reference": "swift/reference/notification-service.md",
+          "data": "swift/reference/notification-service.json"
+        }
+      ],
+      "quickstarts": [
+        {"topic": "client", "path": "swift/quickstarts/client.md"},
+        {"topic": "push", "path": "swift/quickstarts/push.md"},
+        {"topic": "calling", "path": "swift/quickstarts/calling.md"}
+      ]
+    },
+    {
       "id": "android",
       "name": "Android",
       "status": "preview",
@@ -755,6 +822,91 @@
       "title": "Go operation coverage",
       "description": "The Go SDK members that send each API operation. 65 of the 81 operations that Go packages can send have a method.",
       "language": "go"
+    },
+    {
+      "path": "swift/index.md",
+      "kind": "language",
+      "title": "Swift SDK",
+      "description": "ConvoHop is the Swift SDK for iOS and macOS apps. It acts as one user, with a short-lived session that your backend issues, and covers chat with a local store, an offline outbox and optimistic sends, typing signals and read receipts, calls through the LiveKit Swift SDK, and APNs push notifications, with incoming calls that ring through PushKit and CallKit on iOS. It never holds a backend key.",
+      "language": "swift"
+    },
+    {
+      "path": "swift/quickstarts/client.md",
+      "kind": "quickstart",
+      "title": "Swift client quickstart",
+      "description": "Use ConvoHop in your iOS or macOS app with the ConvoHop Swift package: connect with the session your backend issued and keep it renewed, show a conversation from a local store and keep it current, and send messages optimistically through an outbox that survives dropped connections and restarts.",
+      "language": "swift",
+      "topic": "client"
+    },
+    {
+      "path": "swift/quickstarts/push.md",
+      "kind": "quickstart",
+      "title": "Swift push notifications quickstart",
+      "description": "Show ConvoHop's push notifications in your iOS or macOS app with the ConvoHop Swift package: register the device with APNs, open the conversation or call that a notification is about, and show message text from a Notification Service Extension whether or not the project sends message previews.",
+      "language": "swift",
+      "topic": "push"
+    },
+    {
+      "path": "swift/quickstarts/calling.md",
+      "kind": "quickstart",
+      "title": "Swift calling quickstart",
+      "description": "Add voice and video calls to a conversation with the ConvoHop Swift package and the official LiveKit Swift SDK: start a call and ring other members, join the current call, answer incoming calls through CallKit, and leave or end a call.",
+      "language": "swift",
+      "topic": "calling"
+    },
+    {
+      "path": "swift/reference/index.md",
+      "kind": "reference-index",
+      "title": "Swift reference",
+      "description": "The public API of each Swift package, generated from its declarations.",
+      "language": "swift"
+    },
+    {
+      "path": "swift/reference/convohop.md",
+      "kind": "reference",
+      "title": "ConvoHop",
+      "description": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events with replay, the local store, the offline outbox, read receipts, typing, recent activity, call control and push routing. It re-exports ConvoHopPush.",
+      "language": "swift",
+      "package": "ConvoHop"
+    },
+    {
+      "path": "swift/reference/livekit.md",
+      "kind": "reference",
+      "title": "ConvoHopLiveKit",
+      "description": "Call media through the official LiveKit Swift SDK, and CallKit audio session handling on iOS.",
+      "language": "swift",
+      "package": "ConvoHopLiveKit"
+    },
+    {
+      "path": "swift/reference/push.md",
+      "kind": "reference",
+      "title": "ConvoHopPush",
+      "description": "Push payload parsing, deduplication, the ring ledger and the push recipient, with Foundation only so app extensions can use it.",
+      "language": "swift",
+      "package": "ConvoHopPush"
+    },
+    {
+      "path": "swift/reference/calls.md",
+      "kind": "reference",
+      "title": "ConvoHopCalls",
+      "description": "Incoming calls from PushKit VoIP pushes to CallKit, and outgoing calls through CallKit.",
+      "language": "swift",
+      "package": "ConvoHopCalls"
+    },
+    {
+      "path": "swift/reference/notification-service.md",
+      "kind": "reference",
+      "title": "ConvoHopNotificationService",
+      "description": "A Notification Service Extension helper that fetches message text on the device when a push has none, and hides the text of other users' pushes.",
+      "language": "swift",
+      "package": "ConvoHopNotificationService"
+    },
+    {
+      "path": "swift/reference/operations.md",
+      "kind": "coverage",
+      "title": "Swift operation coverage",
+      "description": "The Swift SDK members that send each API operation. 32 of the 35 operations that Swift packages can send have a method.",
+      "language": "swift"
     },
     {
       "path": "android/index.md",

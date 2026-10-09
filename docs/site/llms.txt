@@ -67,6 +67,20 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [github.com/ConvoHop/sdks/go/push](go/reference/push.md): Builds APNs, FCM and Web Push requests from ConvoHop push notification events.
 - [Go operation coverage](go/reference/operations.md): The Go SDK members that send each API operation. 65 of the 81 operations that Go packages can send have a method.
 
+## Swift
+
+- [Swift SDK](swift/index.md): ConvoHop is the Swift SDK for iOS and macOS apps. It acts as one user, with a short-lived session that your backend issues, and covers chat with a local store, an offline outbox and optimistic sends, typing signals and read receipts, calls through the LiveKit Swift SDK, and APNs push notifications, with incoming calls that ring through PushKit and CallKit on iOS. It never holds a backend key.
+- [Swift client quickstart](swift/quickstarts/client.md): Use ConvoHop in your iOS or macOS app with the ConvoHop Swift package: connect with the session your backend issued and keep it renewed, show a conversation from a local store and keep it current, and send messages optimistically through an outbox that survives dropped connections and restarts.
+- [Swift push notifications quickstart](swift/quickstarts/push.md): Show ConvoHop's push notifications in your iOS or macOS app with the ConvoHop Swift package: register the device with APNs, open the conversation or call that a notification is about, and show message text from a Notification Service Extension whether or not the project sends message previews.
+- [Swift calling quickstart](swift/quickstarts/calling.md): Add voice and video calls to a conversation with the ConvoHop Swift package and the official LiveKit Swift SDK: start a call and ring other members, join the current call, answer incoming calls through CallKit, and leave or end a call.
+- [Swift reference](swift/reference/index.md): The public API of each Swift package, generated from its declarations.
+- [ConvoHop](swift/reference/convohop.md): Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events with replay, the local store, the offline outbox, read receipts, typing, recent activity, call control and push routing. It re-exports ConvoHopPush.
+- [ConvoHopLiveKit](swift/reference/livekit.md): Call media through the official LiveKit Swift SDK, and CallKit audio session handling on iOS.
+- [ConvoHopPush](swift/reference/push.md): Push payload parsing, deduplication, the ring ledger and the push recipient, with Foundation only so app extensions can use it.
+- [ConvoHopCalls](swift/reference/calls.md): Incoming calls from PushKit VoIP pushes to CallKit, and outgoing calls through CallKit.
+- [ConvoHopNotificationService](swift/reference/notification-service.md): A Notification Service Extension helper that fetches message text on the device when a push has none, and hides the text of other users' pushes.
+- [Swift operation coverage](swift/reference/operations.md): The Swift SDK members that send each API operation. 32 of the 35 operations that Swift packages can send have a method.
+
 ## Android
 
 - [Android SDK](android/index.md): com.convohop:convohop-android is the Kotlin SDK for Android apps. It acts as one user, with a short-lived session that your backend issues, and covers chat with a local store, an offline outbox and optimistic sends, typing signals and read receipts, calls through the LiveKit Android SDK, and FCM push notifications that ring incoming calls through Telecom. It never holds a backend key.
@@ -196,5 +210,6 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [.NET in one file](dotnet/llms-full.txt): every .NET page.
 - [Java and Kotlin in one file](jvm/llms-full.txt): every Java and Kotlin page.
 - [Go in one file](go/llms-full.txt): every Go page.
+- [Swift in one file](swift/llms-full.txt): every Swift page.
 - [Android in one file](android/llms-full.txt): every Android page.
 - [Flutter in one file](flutter/llms-full.txt): every Flutter page.

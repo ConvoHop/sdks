@@ -3,7 +3,8 @@
 # Simulator with the oldest and newest supported Xcode, an iOS device build of
 # every product, an app-extension-only build of the products a Notification
 # Service Extension links, and the conformance scenarios through the Swift
-# driver on macOS and on Linux. See swift/README.md.
+# driver on macOS and on Linux. It also checks the Swift docs' API surface and
+# tested examples (see docs/docs-pipeline.md). See swift/README.md.
 name: Swift
 
 on:
@@ -16,6 +17,8 @@ on:
       - spec/**
       - swift/**
       - tools/sdkgen/**
+      - docs/languages/swift/**
+      - tools/docgen/**
   pull_request:
     branches: [main]
     paths:
@@ -25,6 +28,8 @@ on:
       - spec/**
       - swift/**
       - tools/sdkgen/**
+      - docs/languages/swift/**
+      - tools/docgen/**
 
 permissions: {}
 
@@ -301,3 +306,42 @@ jobs:
           path: conformance/reports/swift-dev-stack/
           if-no-files-found: ignore
           retention-days: 14
+
+  # Checks the Swift docs as docs/docs-pipeline.md describes: the extractor's
+  # tests, that docs/languages/swift/surface.json matches the SDK's source, and
+  # the examples the quickstarts include, which run against the conformance
+  # mock on macOS and then build for iOS, where the CallKit samples compile.
+  # The Docs workflow checks the generated pages. The extractor parses the SDK
+  # without compiling it, so the surface doesn't depend on the toolchain. The
+  # job uses the oldest supported Xcode, the likeliest to reject an example
+  # that needs a newer Swift.
+  docs:
+    name: Docs
+    runs-on: macos-15
+    timeout-minutes: 45
+    permissions:
+      contents: read # check out the repository
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      # The examples' tests start the conformance mock, which imports graphql.
+      - run: npm ci --no-audit --no-fund
+      - name: Show the toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Test the Swift extractor's command
+        run: node --test tools/docgen/test/swift.test.mjs
+      - name: Test the Swift extractor
+        run: swift test --package-path tools/docgen/extractors/swift --force-resolved-versions --disable-keychain
+      - name: Check that the Swift surface matches the SDK
+        run: node tools/docgen/cli.mjs extract --check swift
+      - name: Test the Swift examples on macOS and build them for iOS
+        run: node tools/docgen/cli.mjs test --install swift
