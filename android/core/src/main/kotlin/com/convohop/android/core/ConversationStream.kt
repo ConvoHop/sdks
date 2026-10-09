@@ -103,7 +103,7 @@ public class ConversationStream internal constructor(
     /** Where the replay stands. */
     public val state: StateFlow<ReplayState> = stateFlow.asStateFlow()
 
-    /** The last applied position; replay resumes after it. */
+    /** The last applied position; replay resumes after it. It advances only once the position is stored. */
     public val cursor: Cursor? get() = appliedCursor
 
     /** True once [close] ran or the replay failed permanently. */
@@ -122,8 +122,8 @@ public class ConversationStream internal constructor(
     }
 
     private suspend fun saveCursor(next: Cursor) {
-        appliedCursor = next
         if (persistCursor) client.storage?.setItem(storageKey, CanonicalJson.encode(next.toJson()))
+        appliedCursor = next
     }
 
     private fun notifyClosed() {
