@@ -499,9 +499,10 @@ React Native Firebase passes them. That run verified:
   ignored. Answering in the app and from the notification, and declining
   from it. `reportConnecting`, `reportConnected`, mute, hold, `updateCall`
   and the speaker route; the emulator rejected the earpiece with
-  `E_AUDIO_ROUTE`. `endCall`, twice. Each way the server stops a ring,
-  through a cancellation push and through `stopRinging`, and a late
-  cancellation ignored.
+  `E_AUDIO_ROUTE`. `endCall`, twice. A cancellation push for each way the
+  server stops a ring: `answered`, `declined`, `ended` and another reason.
+  `stopRinging` with `ended`, and after answering. A ring expiring on the
+  device, and a late cancellation ignored.
 - The full-screen intent: denied, the call rang as a heads-up notification.
   With the screen off and no lock, it woke the device and opened the app.
   The [lock screen](#android) behaved as described above, with a swipe lock
