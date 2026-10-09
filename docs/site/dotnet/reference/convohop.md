@@ -2682,7 +2682,7 @@ Pause a long-running operation.
 public static readonly OperationDescriptor<ResumeOperationRequestInput, ResumeOperationReply> ResumeOperation;
 ```
 
-Resume a paused operation.
+Resume a paused or blocked operation.
 
 #### `Operations.Management.CreateBillingCheckoutSession` static property
 

@@ -1269,7 +1269,7 @@
             "public ResumeOperationReply resumeOperation(ResumeOperationRequestInput input)",
             "public ResumeOperationReply resumeOperation(ResumeOperationRequestInput input, @Nullable String requestId)"
           ],
-          "docs": "Resume a paused operation.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown",
+          "docs": "Resume a paused or blocked operation.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown",
           "operations": [
             {
               "id": "management.resumeOperation",

@@ -1964,7 +1964,7 @@ Sends [`management.pauseOperation`](../../operations/management/pauseOperation.m
 public Task<ResumeOperationReply> ResumeOperationAsync(ResumeOperationRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
 ```
 
-Resume a paused operation.
+Resume a paused or blocked operation.
 
 Parameters:
 
