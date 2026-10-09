@@ -70,14 +70,17 @@ class RecoveryJournalTest {
                 stored(at(1), "pending", h.environment.uuid(), "notSubmitted", attemptCount = 0),
                 rejected(2, "RATE_LIMITED"),
                 rejected(3, "WRONG_REGION"),
+                // Nor is a record from a clock that was ahead: it refuses a resend only until this clock catches up.
+                stored(now + 30_000, "unknown", h.environment.uuid()),
                 // Final: not retryable, out of attempts, past the retry deadline, then the oldest committed. A spent
-                // budget makes a record final whatever its state, since nothing may send its request again.
-                rejected(4, "NOT_FOUND"),
-                rejected(5, "RATE_LIMITED", attemptCount = 3),
-                rejected(6, "AUTHORITY_UNAVAILABLE", retryDeadline = now - 1),
-                stored(at(7), "unknown", h.environment.uuid(), attemptCount = 3),
-                stored(at(8), "pending", h.environment.uuid(), "notSubmitted", attemptCount = 0, retryDeadline = now - 1),
-            ) + List(119) { stored(at(9 + it), "committed", h.environment.uuid(), "authorityReceipt") }
+                // budget makes a record final whatever its state, since nothing may send its request again: unanswered
+                // three times, or never sent in time.
+                rejected(5, "NOT_FOUND"),
+                rejected(6, "RATE_LIMITED", attemptCount = 3),
+                rejected(7, "AUTHORITY_UNAVAILABLE", retryDeadline = now - 1),
+                stored(at(8), "unknown", h.environment.uuid(), attemptCount = 3),
+                stored(at(9), "pending", h.environment.uuid(), "notSubmitted", attemptCount = 0, retryDeadline = now - 1),
+            ) + List(118) { stored(at(10 + it), "committed", h.environment.uuid(), "authorityReceipt") }
             val storage = MemoryRecoveryStorage()
             storage.setItem(key, JsonArray(records).toString())
             val client = h.client(storage = storage)
@@ -86,7 +89,7 @@ class RecoveryJournalTest {
             val sent = List(6) { h.environment.uuid() }
             for (requestId in sent) client.send(conversation, "fixture", requestId)
 
-            val kept = (records.take(4) + records.drop(10)).map { it.requestId() } + sent
+            val kept = (records.take(5) + records.drop(11)).map { it.requestId() } + sent
             assertEquals(kept, saved(storage))
             assertEquals(kept, client.kept())
         }
@@ -121,6 +124,90 @@ class RecoveryJournalTest {
             client.send(conversation, "fixture", second)
             assertEquals(lost.drop(1) - spent + first + second, client.kept())
             assertEquals(client.kept(), saved(storage))
+        }
+    }
+
+    @Test
+    fun aRequestWhoseBudgetIsSpentIsNeverSentAgainSoAFullJournalFreesItsRecord() = runTest {
+        Harness(this).use { h ->
+            val storage = MemoryRecoveryStorage()
+            val client = h.client(storage = storage)
+            val conversation = h.authority.conversation()
+            val spent = h.environment.uuid()
+            h.authority.fail("CommunicationSendMessage", *Array(3) { Fault.Unreachable })
+            repeat(3) {
+                val lost = failure { client.send(conversation, "fixture", spent) }
+                assertEquals(listOf<Any?>("TRANSPORT_UNKNOWN", "unknown", spent), listOf(lost.code, lost.outcome, lost.requestId))
+            }
+            // The authority is reachable again, but the request is out of attempts, so neither sending it again under
+            // its ID nor retrying it sends it.
+            val resent = failure { client.send(conversation, "fixture", spent) }
+            val retried = failure { client.requests.retry(spent) }
+            for (refusal in listOf(resent, retried)) {
+                assertEquals(
+                    listOf<Any?>("RESOLUTION_REQUIRED", "unknown", 409, spent),
+                    listOf(refusal.code, refusal.outcome, refusal.status, refusal.requestId),
+                )
+            }
+            assertEquals(List(3) { spent }, h.sends())
+
+            val limited = List(JOURNAL_LIMIT - 1) { h.environment.uuid() }
+            h.authority.fail("CommunicationSendMessage", *Array(limited.size) { Fault.Problem("RATE_LIMITED", 429) })
+            for (requestId in limited) assertEquals("RATE_LIMITED", failure { client.send(conversation, "fixture", requestId) }.code)
+            // Its outcome is unknown, but its record is final, so it makes room.
+            val next = h.environment.uuid()
+            client.send(conversation, "fixture", next)
+            assertEquals(limited + next, client.kept())
+            assertEquals(client.kept(), saved(storage))
+
+            // Forgotten, the request can still be resolved, but not retried.
+            assertEquals("notObservedYet", client.requests.resolve(spent).state)
+            val forgotten = runCatching { client.requests.retry(spent) }.exceptionOrNull()
+            assertTrue("$forgotten", forgotten is IllegalStateException && forgotten.message.orEmpty().startsWith("No recovery record exists"))
+            // Sent again under its ID, it is a new record with a new budget. The authority deduplicates by request ID.
+            client.send(conversation, "fixture", spent)
+            assertEquals(4, h.sends().count { it == spent })
+            assertEquals(limited + spent, client.kept())
+        }
+    }
+
+    @Test
+    fun aClockSetBackSpendsNothingAndRefusesAResendOnlyUntilItCatchesUp() = runTest {
+        Harness(this).use { h ->
+            val storage = MemoryRecoveryStorage()
+            val conversation = h.authority.conversation()
+            val lost = h.environment.uuid()
+            h.authority.fail("CommunicationSendMessage", Fault.Unreachable, Fault.Unreachable)
+            assertEquals("TRANSPORT_UNKNOWN", failure { h.client(storage = storage).send(conversation, "fixture", lost) }.code)
+            // A run whose clock was 30 seconds ahead sent it again, also in vain. Then the clock was set back.
+            val ahead = object : ConvoHopEnvironment by h.environment {
+                override fun now(): Long = h.now() + 30_000
+            }
+            val earlier = h.client(storage = storage, environment = ahead)
+            assertEquals("TRANSPORT_UNKNOWN", failure { earlier.send(conversation, "fixture", lost) }.code)
+
+            // This clock is past the first attempt but not the last.
+            val client = h.client(storage = storage)
+            val refusal = failure { client.send(conversation, "fixture", lost) }
+            assertEquals(
+                listOf<Any?>("RESOLUTION_REQUIRED", "unknown", 409, lost),
+                listOf(refusal.code, refusal.outcome, refusal.status, refusal.requestId),
+            )
+            assertEquals(List(2) { lost }, h.sends())
+            assertEquals("The refusal spends no attempt", 2L, client.requests.records().single().attemptCount)
+            // Nor is the record final, so it doesn't make room in a journal of records that aren't.
+            val limited = List(JOURNAL_LIMIT - 1) { h.environment.uuid() }
+            h.authority.fail("CommunicationSendMessage", *Array(limited.size) { Fault.Problem("RATE_LIMITED", 429) })
+            for (requestId in limited) assertEquals("RATE_LIMITED", failure { client.send(conversation, "fixture", requestId) }.code)
+            assertEquals("RECOVERY_LIMIT", failure { client.send(conversation, "fixture", h.environment.uuid()) }.code)
+            assertEquals(listOf(lost) + limited, client.kept())
+
+            // Once this clock passes the last attempt, the request is sent again under its ID with the attempt it has left.
+            h.advance(30_001)
+            client.send(conversation, "fixture", lost)
+            assertEquals(3, h.sends().count { it == lost })
+            val record = client.requests.records().single { it.requestId == lost }
+            assertEquals(listOf<Any>("committed", 3L), listOf(record.resolutionState, record.attemptCount))
         }
     }
 

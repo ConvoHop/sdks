@@ -76,6 +76,34 @@ class LiveRecoveryTest {
         }
     }
 
+    @Test
+    fun aParticipationHandleTheAppDropsLetsGoOfItsRecordsThoughItsSessionHandleKeepsItsOwn() = runTest {
+        Harness(this).use { h ->
+            val storage = MemoryRecoveryStorage()
+            val client = h.client(storage = storage)
+            val conversation = h.authority.conversation()
+            h.authority.liveSessions[LIVE] = liveSession(conversation, participation())
+            val live = LiveSessionHandle(client, h.authority.liveSessions.getValue(LIVE))
+            val ended = h.environment.uuid()
+            h.authority.fail("CommunicationEndLiveSession", *Array(3) { Fault.Unreachable })
+            assertEquals("TRANSPORT_UNKNOWN", failure { live.end(ended) }.code)
+            repeat(2) { assertEquals("TRANSPORT_UNKNOWN", failure { live.end() }.code) }
+            val fillers = List(JOURNAL_LIMIT - 3) { h.environment.uuid() }
+
+            collect(listOf(holdSpentParticipationRequests(h, live, conversation, ended, fillers)))
+
+            // Dropped, the participation handle holds nothing, so its two final records make room. The session handle the
+            // app keeps still holds its end request, though that record is final too.
+            val next = List(2) { h.environment.uuid() }
+            h.authority.fail("CommunicationSendMessage", *Array(next.size) { Fault.Unreachable })
+            for (requestId in next) assertEquals("TRANSPORT_UNKNOWN", failure { client.send(conversation, "fixture", requestId) }.code)
+            assertEquals(listOf(ended) + fillers + next, client.kept())
+            assertEquals(client.kept(), saved(storage))
+            assertEquals("RECOVERY_LIMIT", failure { client.send(conversation, "fixture", h.environment.uuid()) }.code)
+            assertEquals(LIVE, live.liveSessionId)
+        }
+    }
+
     /**
      * Spends the budgets of an end and a credential request through handles
      * that also hold the stored leave [left], fills the journal with
@@ -117,6 +145,40 @@ class LiveRecoveryTest {
         assertEquals(List(3) { ended }, h.authority.calls("CommunicationEndLiveSession").map { it.requestId })
         assertEquals(List(3) { credential }, h.authority.calls("CommunicationLiveSessionCredentials").map { it.requestId })
         return listOf(WeakReference(live), WeakReference(participation))
+    }
+
+    /**
+     * Spends the budgets of a credential request and a leave through a
+     * participation handle of [live], fills the journal with [fillers] and
+     * checks that the handles keep both records and [live]'s spent end
+     * request [ended]. Returns only a weak reference, so once it returns the
+     * app has dropped the participation handle.
+     */
+    private suspend fun holdSpentParticipationRequests(
+        h: Harness,
+        live: LiveSessionHandle,
+        conversation: String,
+        ended: String,
+        fillers: List<String>,
+    ): WeakReference<Any> {
+        val client = live.client
+        val participation = LiveParticipationHandle.create(live, participation())
+        val (credential, left) = List(2) { h.environment.uuid() }
+        h.authority.fail("CommunicationLiveSessionCredentials", *Array(3) { Fault.Unreachable })
+        h.authority.fail("CommunicationLeaveLiveSession", *Array(3) { Fault.Unreachable })
+        assertEquals("TRANSPORT_UNKNOWN", failure { participation.connectionGrant(credential) }.code)
+        repeat(2) { assertEquals("TRANSPORT_UNKNOWN", failure { participation.connectionGrant(null) }.code) }
+        assertEquals("TRANSPORT_UNKNOWN", failure { participation.leave(left) }.code)
+        repeat(2) { assertEquals("TRANSPORT_UNKNOWN", failure { participation.leave() }.code) }
+        h.authority.fail("CommunicationSendMessage", *Array(fillers.size) { Fault.Unreachable })
+        for (requestId in fillers) assertEquals("TRANSPORT_UNKNOWN", failure { client.send(conversation, "fixture", requestId) }.code)
+
+        assertEquals(listOf(ended, credential, left) + fillers, client.kept())
+        assertEquals("RECOVERY_LIMIT", failure { client.send(conversation, "fixture", h.environment.uuid()) }.code)
+        // Left again, the handle finds its leave out of attempts instead of sending it again as a new one.
+        assertEquals(listOf("RESOLUTION_REQUIRED", left), failure { participation.leave() }.let { listOf(it.code, it.requestId) })
+        assertEquals(List(3) { left }, h.authority.calls("CommunicationLeaveLiveSession").map { it.requestId })
+        return WeakReference(participation)
     }
 
     /** Collects garbage until nothing references [handles] any more, as once the app drops them. */
