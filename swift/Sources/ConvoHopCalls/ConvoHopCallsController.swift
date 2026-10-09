@@ -192,7 +192,7 @@ public final class ConvoHopCalls: NSObject {
         let action = CXStartCallAction(call: uuid, handle: CXHandle(type: .generic, value: call.handle))
         action.isVideo = hasVideo
         do {
-            try await callController.request(CXTransaction(action: action))
+            try await request(action)
         } catch {
             book.remove(uuid)
             notify()
@@ -230,17 +230,17 @@ public final class ConvoHopCalls: NSObject {
     public func answer(_ uuid: UUID) async throws {
         guard let call = book[uuid] else { throw CXErrorCodeRequestTransactionError(.unknownCallUUID) }
         guard call.state == .ringing else { throw CXErrorCodeRequestTransactionError(.invalidAction) }
-        try await callController.request(CXTransaction(action: CXAnswerCallAction(call: uuid)))
+        try await request(CXAnswerCallAction(call: uuid))
     }
 
     /// Asks CallKit to mute or unmute. ``ConvoHopCallsDelegate/convoHopCalls(_:didSetMuted:for:)`` applies it.
     public func setMuted(_ muted: Bool, for uuid: UUID) async throws {
-        try await callController.request(CXTransaction(action: CXSetMutedCallAction(call: uuid, muted: muted)))
+        try await request(CXSetMutedCallAction(call: uuid, muted: muted))
     }
 
     /// Asks CallKit to hold or resume. ``ConvoHopCallsDelegate/convoHopCalls(_:didSetHeld:for:)`` applies it.
     public func setHeld(_ onHold: Bool, for uuid: UUID) async throws {
-        try await callController.request(CXTransaction(action: CXSetHeldCallAction(call: uuid, onHold: onHold)))
+        try await request(CXSetHeldCallAction(call: uuid, onHold: onHold))
     }
 
     /// Ends a call.
@@ -249,12 +249,25 @@ public final class ConvoHopCalls: NSObject {
     ///   why the call stopped elsewhere, for example `answered` when another device answered the ring.
     public func end(_ uuid: UUID, reason: ConvoHopCallEndReason? = nil) async throws {
         guard let reason else {
-            try await callController.request(CXTransaction(action: CXEndCallAction(call: uuid)))
+            try await request(CXEndCallAction(call: uuid))
             return
         }
         guard let call = book.end(uuid, reason: reason, ledger: ledger, now: Date()) else { return }
         provider?.reportCall(with: uuid, endedAt: Date(), reason: Self.endedReason(reason))
         didEnd(call, reason: reason)
+    }
+
+    /// Asks CallKit to perform `action`.
+    ///
+    /// The completion-handler API keeps the controller on the main actor. Older SDKs import the async variant as
+    /// nonisolated, so awaiting it would send the controller off the main actor.
+    private func request(_ action: CXAction) async throws {
+        let transaction = CXTransaction(action: action)
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
+            callController.request(transaction) { error in
+                if let error { continuation.resume(throwing: error) } else { continuation.resume() }
+            }
+        }
     }
 
     /// Forgets an ended call before its minute is up. Returns `false` for a call that hasn't ended.
@@ -482,7 +495,8 @@ extension ConvoHopCalls: CXProviderDelegate {
         provider.reportOutgoingCall(with: uuid, startedConnectingAt: nil)
         action.fulfill()
         MainActor.assumeIsolated {
-            provider.reportCall(with: uuid, updated: callUpdate(call))
+            // The stored provider is this callback's provider; capturing the parameter would send it to the main actor.
+            self.provider?.reportCall(with: uuid, updated: callUpdate(call))
             delegate?.convoHopCalls(self, didStartOutgoing: call)
         }
     }
