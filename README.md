@@ -36,9 +36,11 @@ planned languages, push notifications, package names, versioning and support.
 
 | SDK | Package | Runtime | Covers |
 | --- | --- | --- | --- |
-| [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, and calls with explicit connect and capture |
+| [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, a conversation store with an offline outbox, typing and read receipts, push in a Web Push service worker, and calls through `livekit-client` with explicit connect and capture |
+| [React hooks](packages/react/README.md) | `@convohop/react`, not in a release yet | React 18 or later, with `@convohop/client` | Conversations with optimistic, offline-safe sends, typing, session renewal, live sessions and browser media |
 | [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and push payload builders |
 | [Java and Kotlin server](jvm/README.md) | `com.convohop:convohop-server`, `com.convohop:convohop-server-kotlin` | Java 11 or later. Kotlin coroutine extensions are optional. | User identities and sessions, conversations, membership and messages for your backend, generated APIs with paginators for every server operation, backend key issuance, webhook verification, and push payload builders |
+| [.NET server](dotnet/README.md) | `ConvoHop` | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Organization and project management, backend key issuance, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, generated APIs for every server operation with async page streams, webhook verification, and push payload builders |
 | [iOS and macOS client](swift/README.md) | Swift package products `ConvoHop`, `ConvoHopLiveKit`, `ConvoHopCalls`, `ConvoHopPush` and `ConvoHopNotificationService` | iOS 15 or macOS 12 or later, Swift 6.1 or later | Chat and history, realtime updates with replay, a local cache, an offline outbox and a conversation model, typing and read receipts, calls with LiveKit and CallKit, push registration and routing, and a Notification Service Extension helper |
 
 The TypeScript packages depend on [`@convohop/core`](packages/core/README.md), which
@@ -58,8 +60,8 @@ package registry yet. [Install a release](#install-a-release) or
 
 | Layer | Languages and platforms |
 | --- | --- |
-| Server | Python, .NET, Go |
-| Client | React hooks, Android (Kotlin), React Native, Flutter |
+| Server | Python, Go |
+| Client | Android (Kotlin), React Native, Flutter |
 
 ## Tools
 
@@ -144,9 +146,17 @@ for every pull request. On Node.js 24, it also packs `@convohop/core`,
 The [Conformance workflow](.github/workflows/conformance.yml) runs the
 scenarios on Node.js 24. Neither workflow publishes or deploys anything.
 
+The [Web workflow](.github/workflows/web.yml) runs the Web client's browser
+tests in headless Chromium, Firefox and WebKit, and the React hooks on
+React 18. See [Tests](CONTRIBUTING.md#tests).
+
 The Java and Kotlin SDK has its own Gradle build and
 [JVM workflow](.github/workflows/jvm.yml). See
 [Build and test](jvm/README.md#build-and-test).
+
+The .NET SDK has its own build and
+[.NET workflow](.github/workflows/dotnet.yml). See
+[Build and test](dotnet/README.md#build-and-test).
 
 The Swift SDK has its own Swift package and
 [Swift workflow](.github/workflows/swift.yml), which runs on GitHub-hosted
@@ -216,6 +226,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - [Client SDK](packages/client/README.md)
 - [Node.js server SDK](packages/server/README.md)
 - [Java and Kotlin server SDK](jvm/README.md)
+- [.NET server SDK](dotnet/README.md)
 - [Swift client SDK for iOS and macOS](swift/README.md)
 - [Shared core package](packages/core/README.md)
 - [CLI](packages/cli/README.md) and [MCP server](packages/mcp/README.md)

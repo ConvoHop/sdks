@@ -1,0 +1,327 @@
+# Builds and tests the .NET server SDK in dotnet/: its generated code and
+# generator goldens, the library for netstandard2.0 and net10.0 with both
+# edge goldens compiled against its runtime, the tests on .NET 8, 9 and 10,
+# a reproducible dry-run pack checked for its contents and Source Link, and
+# the conformance scenarios through the .NET driver on both library assets.
+# Nothing is pushed to a package feed. See dotnet/README.md.
+name: .NET
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/dotnet.yml
+      - NuGet.config
+      - conformance/**
+      - dotnet/**
+      - global.json
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/dotnet.yml
+      - NuGet.config
+      - conformance/**
+      - dotnet/**
+      - global.json
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+
+permissions: {}
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+
+jobs:
+  build:
+    name: Generate, build and pack
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Check the generated code, including the C# API
+        run: npm run check:graphql
+      - name: Test the generators against their golden files
+        run: npm run test:sdkgen
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      # The test job runs the tests on every supported .NET version.
+      - name: Build the library, the tests and the generator goldens
+        working-directory: dotnet
+        run: dotnet build ConvoHop.slnx -c Release -maxcpucount:2
+      # NuGet stamps every zip entry with DeterministicTimestamp, so fixing it to
+      # the commit time makes two packs from clean builds byte-identical.
+      - name: Pack twice from clean builds (dry run) and compare
+        working-directory: dotnet
+        run: |
+          timestamp="$(git log -1 --format=%ct)"
+          for attempt in first second; do
+            rm -rf src/ConvoHop/bin src/ConvoHop/obj
+            dotnet pack src/ConvoHop/ConvoHop.csproj -c Release -maxcpucount:2 \
+              -p:DeterministicTimestamp="$timestamp" -o "artifacts/$attempt"
+          done
+          python3 - artifacts/first artifacts/second <<'EOF'
+          import pathlib, sys, zipfile
+          first, second = (pathlib.Path(argument) for argument in sys.argv[1:])
+          packages = sorted(path.name for path in first.iterdir())
+          if packages != sorted(path.name for path in second.iterdir()):
+              sys.exit(f"the packs produced different packages: {packages} and {sorted(path.name for path in second.iterdir())}")
+
+          def entries(path):
+              with zipfile.ZipFile(path) as archive:
+                  return {info.filename: (info.date_time, archive.read(info)) for info in archive.infolist()}
+
+          def difference(one, other, entry):
+              if entry not in one or entry not in other:
+                  return f"{entry} (in one pack only)"
+              return f"{entry} ({'contents' if one[entry][1] != other[entry][1] else 'time'})"
+
+          for name in packages:
+              if (first / name).read_bytes() != (second / name).read_bytes():
+                  one, other = entries(first / name), entries(second / name)
+                  differ = [difference(one, other, entry) for entry in sorted(one.keys() | other.keys())
+                            if one.get(entry) != other.get(entry)]
+                  sys.exit(f"{name} differs between the clean builds in {', '.join(differ) or 'its archive layout'}")
+          print(f"Both packs are byte-identical: {', '.join(packages)}")
+          EOF
+      - name: Check the packages, their metadata and Source Link
+        working-directory: dotnet
+        run: |
+          version="$(dotnet msbuild src/ConvoHop/ConvoHop.csproj -getProperty:Version)"
+          python3 - "artifacts/first" "$version" "$(git rev-parse HEAD)" "$(cd .. && pwd)" <<'EOF'
+          import pathlib, sys, zipfile
+          import xml.etree.ElementTree as ElementTree
+          directory, version, commit, root = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4]
+          frameworks = ("netstandard2.0", "net10.0")
+          packages = sorted(path.name for path in directory.iterdir())
+          if packages != [f"ConvoHop.{version}.nupkg", f"ConvoHop.{version}.snupkg"]:
+              sys.exit(f"expected one package and one symbol package for {version}: {packages}")
+
+          def contents(path):
+              with zipfile.ZipFile(path) as archive:
+                  names = set(archive.namelist())
+                  files = {name: archive.read(name) for name in names
+                           if not name.startswith(("_rels/", "package/")) and name != "[Content_Types].xml"}
+              return files
+
+          package = contents(directory / f"ConvoHop.{version}.nupkg")
+          expected = {"ConvoHop.nuspec", "README.md", "LICENSE", "NOTICE"}
+          expected |= {f"lib/{framework}/ConvoHop.{suffix}" for framework in frameworks for suffix in ("dll", "xml")}
+          if set(package) != expected:
+              sys.exit(f"package differs: missing {sorted(expected - set(package))}, extra {sorted(set(package) - expected)}")
+          spec = ElementTree.fromstring(package["ConvoHop.nuspec"])
+          namespace = {"n": spec.tag[1:spec.tag.index("}")]}
+          metadata = spec.find("n:metadata", namespace)
+          text = lambda name: metadata.findtext(f"n:{name}", namespaces=namespace)
+          for name, value in {"id": "ConvoHop", "version": version, "authors": "The ConvoHop Authors",
+                              "license": "Apache-2.0", "readme": "README.md"}.items():
+              if text(name) != value:
+                  sys.exit(f"nuspec {name} is {text(name)!r}, expected {value!r}")
+          repository = metadata.find("n:repository", namespace)
+          if repository is None or repository.get("url") != "https://github.com/ConvoHop/sdks" or repository.get("commit") != commit:
+              sys.exit(f"nuspec repository is {None if repository is None else repository.attrib}, expected commit {commit}")
+          groups = {group.get("targetFramework"): sorted(dependency.get("id") for dependency in group)
+                    for group in metadata.find("n:dependencies", namespace)}
+          wanted = {".NETStandard2.0": ["Microsoft.Bcl.AsyncInterfaces", "Microsoft.Bcl.TimeProvider", "System.Text.Json"], "net10.0": []}
+          if groups != wanted:
+              sys.exit(f"nuspec dependencies are {groups}, expected {wanted}")
+
+          symbols = contents(directory / f"ConvoHop.{version}.snupkg")
+          pdbs = {f"lib/{framework}/ConvoHop.pdb" for framework in frameworks}
+          if set(symbols) != pdbs | {"ConvoHop.nuspec"}:
+              sys.exit(f"symbol package differs: {sorted(symbols)}")
+          link = f'"https://raw.githubusercontent.com/ConvoHop/sdks/{commit}/*"'.encode()
+          for name in sorted(pdbs):
+              if link not in symbols[name]:
+                  sys.exit(f"{name} has no Source Link map to {link.decode()}")
+          for name, data in [*package.items(), *symbols.items()]:
+              if root.encode() in data:
+                  sys.exit(f"{name} contains the build path {root}; the build is not path-independent")
+          print(f"ConvoHop {version}: {len(package)} package files and {len(pdbs)} symbol files, Source Link to {commit}")
+          EOF
+      - name: Upload the packages
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dotnet-packages
+          path: dotnet/artifacts/first/
+          if-no-files-found: error
+          retention-days: 14
+
+  test:
+    name: Tests (${{ matrix.framework }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        # net8.0 and net9.0 run the library's netstandard2.0 asset; net10.0 runs its net10.0 asset.
+        include:
+          - framework: net8.0
+            runtime: 8.0.x
+          - framework: net9.0
+            runtime: 9.0.x
+          - framework: net10.0
+            runtime: 10.0.x
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The SDK that global.json selects builds every target; the other SDK brings the runtime the tests run on.
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+          dotnet-version: ${{ matrix.runtime }}
+      - name: Run the tests
+        working-directory: dotnet
+        env:
+          FRAMEWORK: ${{ matrix.framework }}
+        run: >-
+          dotnet test test/ConvoHop.Tests/ConvoHop.Tests.csproj
+          -c Release -f "$FRAMEWORK" -maxcpucount:2
+          --logger "trx;LogFileName=tests.trx" --results-directory TestResults
+      - name: Upload the test reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dotnet-test-reports-${{ matrix.framework }}
+          path: dotnet/TestResults/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  conformance:
+    name: .NET driver (mock target)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      # The .NET 8 SDK brings the runtime that the driver's netstandard2.0 build runs on.
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+          dotnet-version: 8.0.x
+      - name: Build the .NET driver
+        run: dotnet build conformance/drivers/dotnet/ConvoHop.Conformance.csproj -c Release -maxcpucount:2
+      - name: Run the conformance scenarios with the net10.0 asset
+        id: net10
+        # Not --strict: a server SDK declares no user role, so the runner skips
+        # the scenarios that only use user clients. A later step allows only those.
+        run: >-
+          npm run conformance --
+          --driver "dotnet conformance/drivers/dotnet/bin/Release/net10.0/ConvoHop.Conformance.dll"
+          --reports conformance/reports/dotnet
+      - name: Run the conformance scenarios with the netstandard2.0 asset on .NET 8
+        # Also after a failed net10.0 run, so both reports are available.
+        if: ${{ !cancelled() && steps.net10.outcome != 'skipped' }}
+        run: >-
+          node conformance/runner.mjs
+          --driver "dotnet conformance/drivers/dotnet/bin/Release/net8.0/ConvoHop.Conformance.dll"
+          --reports conformance/reports/dotnet-netstandard
+      - name: Fail on any other skip
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync } from "node:fs";
+          const allowed = "it only uses user clients, which the driver under test does not declare";
+          let failed = false;
+          for (const directory of ["dotnet", "dotnet-netstandard"]) {
+            const summary = JSON.parse(readFileSync(`conformance/reports/${directory}/summary.json`, "utf8"));
+            const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
+            const passed = scenarios.filter((scenario) => scenario.status === "passed");
+            const other = scenarios.filter((scenario) => scenario.status !== "passed"
+              && !(scenario.status === "skipped" && scenario.reason === allowed));
+            for (const scenario of other) {
+              console.log(`::error::${directory} ${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
+            }
+            console.log(`${summary.driver.name} (${directory}): ${passed.length} of ${scenarios.length} passed`);
+            if (summary.driver.name !== "convohop-dotnet" || passed.length === 0 || other.length > 0) failed = true;
+          }
+          if (failed) process.exit(1);
+          EOF
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-dotnet-mock
+          path: |
+            conformance/reports/dotnet/
+            conformance/reports/dotnet-netstandard/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # Like the dev-stack job in conformance.yml, runs the scenarios against the
+  # ConvoHop dev stack: the private, development-only linux/arm64 image that
+  # runs the whole platform in one container (see spec/conformance/targets.md),
+  # which conformance/dev-stack.mjs starts. The job runs only when the
+  # CONVOHOP_DEV_STACK_IMAGE repository variable names the image, and never for
+  # pull requests from forks, which cannot pull it.
+  conformance-dev-stack:
+    name: .NET driver (dev stack)
+    if: vars.CONVOHOP_DEV_STACK_IMAGE != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+      packages: read # pull the dev-stack image from GitHub Packages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Build the .NET driver
+        run: dotnet build conformance/drivers/dotnet/ConvoHop.Conformance.csproj -c Release -f net10.0 -maxcpucount:2
+      - name: Start the dev stack
+        env:
+          CONVOHOP_DEV_STACK_IMAGE: ${{ vars.CONVOHOP_DEV_STACK_IMAGE }}
+          GITHUB_TOKEN: ${{ github.token }}
+        # Pulls the image with the job's token, waits until the stack is ready and exports
+        # the seed.env values that conformance/targets/dev-stack.json reads, masking its credentials.
+        run: node conformance/dev-stack.mjs start
+      - name: Run the conformance scenarios against the dev stack
+        run: >-
+          npm run conformance --
+          --target conformance/targets/dev-stack.json
+          --driver "dotnet conformance/drivers/dotnet/bin/Release/net10.0/ConvoHop.Conformance.dll"
+          --reports conformance/reports/dotnet-dev-stack
+      - name: Show why the dev stack stopped
+        if: failure()
+        # This repository's logs are public, so it prints only the stack supervisor's lines, not the platform's logs.
+        run: node conformance/dev-stack.mjs logs
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-dotnet-dev-stack
+          path: conformance/reports/dotnet-dev-stack/
+          if-no-files-found: ignore
+          retention-days: 14

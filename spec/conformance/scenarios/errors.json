@@ -10,6 +10,7 @@
       "covers": ["errors"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
           "args": { "input": { "title": "Conflicts ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
@@ -17,6 +18,7 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "first draft" } },
         { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" }, "save": "page" },
         { "do": "invoke", "client": "alice", "operation": "messages.edit", "args": { "message": "${saved.page.items.0}", "text": "second draft" },
@@ -34,6 +36,7 @@
       "covers": ["errors"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
           "args": { "input": { "title": "Tombstones ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
@@ -41,6 +44,7 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "short-lived" } },
         { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" }, "save": "page" },
         { "do": "invoke", "client": "alice", "operation": "messages.delete", "args": { "message": "${saved.page.items.0}" },
@@ -56,6 +60,7 @@
       "covers": ["errors", "auth.userToken"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "carol-${nonce}" }, "save": "carol" },
@@ -71,8 +76,11 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.carol.principalId}", "deviceId": "${uuid.carolDevice}" }, "save": "carolSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "client.create", "client": "bob", "role": "user", "credential": "${saved.bobSession.sessionToken}", "principalId": "${saved.bob.principalId}" },
+        { "do": "invoke", "client": "bob", "operation": "route.initialize" },
         { "do": "client.create", "client": "carol", "role": "user", "credential": "${saved.carolSession.sessionToken}", "principalId": "${saved.carol.principalId}" },
+        { "do": "invoke", "client": "carol", "operation": "route.initialize" },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "mine" } },
         { "do": "invoke", "client": "bob", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" }, "save": "page" },
         { "do": "invoke", "client": "bob", "operation": "messages.edit", "args": { "message": "${saved.page.items.0}", "text": "not yours" },
@@ -91,6 +99,7 @@
       "covers": ["errors"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
@@ -114,12 +123,14 @@
       "covers": ["errors"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.get", "args": { "conversationId": "${uuid.missing}" },
           "expect": { "error": { "code": "NOT_FOUND", "status": 404, "outcome": "rejected" } } },
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "invoke", "client": "alice", "operation": "conversations.get", "args": { "conversationId": "${uuid.missing}" },
           "expect": { "error": { "code": "NOT_FOUND", "status": 404, "outcome": "rejected" } } },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${uuid.missing}", "text": "hello?" },
@@ -133,6 +144,7 @@
       "covers": ["errors"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
           "args": { "input": { "title": "", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
@@ -147,6 +159,7 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "invoke", "client": "alice", "operation": "messages.send", "args": { "conversationId": "${saved.conversation.conversationId}", "text": "" },
           "expect": { "error": { "code": "INVALID_REQUEST", "outcome": "rejected" } } },
         { "do": "invoke", "client": "alice", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
@@ -160,6 +173,7 @@
       "covers": ["errors", "errors.rateLimited", "idempotency"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
           "args": { "input": { "title": "Limits ${nonce}", "props": {}, "members": [{ "principalId": "${saved.alice.principalId}", "role": "member" }] } },
@@ -167,6 +181,7 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.alice.principalId}", "deviceId": "${uuid.aliceDevice}" }, "save": "aliceSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "control.fault", "field": "sendMessage", "action": "rateLimit", "retryAfterSeconds": 1 },
         { "do": "invoke", "client": "alice", "operation": "messages.send",
           "args": { "conversationId": "${saved.conversation.conversationId}", "text": "throttled", "requestId": "${uuid.limited}" },
@@ -185,6 +200,7 @@
       "covers": ["errors.rateLimited"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "control.fault", "field": "createPrincipal", "action": "rateLimit", "retryAfterSeconds": 2 },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "requires": ["retryAfter"],
           "expect": { "error": { "code": "RATE_LIMITED", "status": 429, "outcome": "rejected", "retryAfterMs": 2000 } } }
@@ -196,6 +212,7 @@
       "covers": ["errors", "errors.rateLimited", "auth.backendKey"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "control.fault", "field": "createPrincipal", "action": "rateLimit", "retryAfterSeconds": 1 },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" },
           "expect": { "error": { "code": "RATE_LIMITED", "status": 429, "outcome": "rejected", "requestId": { "$type": "uuid" } } } },

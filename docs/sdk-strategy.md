@@ -15,8 +15,8 @@ work, what the packages are called, and how they're versioned and supported.
 
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
-| Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md) |
-| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); iOS and macOS: [`ConvoHop`](../swift/README.md) |
+| Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md); .NET: [`ConvoHop`](../dotnet/README.md) |
+| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md); iOS and macOS: [`ConvoHop`](../swift/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
 
@@ -39,7 +39,7 @@ ever hold a credential that's limited to one user and expires quickly.
 | Scope | Your whole project, limited by the key's permissions | What that one user is allowed to see and do |
 | Realtime | Signed webhooks | WebSocket subscriptions with reconnect and replay |
 | Voice and video | Call control and call reads, no media | Media through the platform's official LiveKit SDK |
-| Local state | None per user. Optional recovery storage lets an interrupted request be resolved or retried safely. | Optional recovery storage. The Swift SDK adds a local cache, an offline outbox with optimistic sends and an observable conversation model, which are planned for the other client SDKs. |
+| Local state | None per user. Optional recovery storage lets an interrupted request be resolved or retried safely. | Optional recovery storage. The Web and Swift SDKs add a conversation store, an offline outbox and optimistic sends, which are planned for the other client SDKs. The Swift SDK also caches messages on the device. |
 
 ### Server SDKs
 
@@ -123,7 +123,7 @@ sequenceDiagram
 | --- | --- | --- |
 | Node.js (TypeScript) | Promise-based, ESM | Source available |
 | Python | Synchronous and `asyncio` clients | Planned |
-| .NET (C#) | `async` methods with `CancellationToken` | Planned |
+| .NET (C#) | `async` methods with `CancellationToken` | Source available |
 | Java and Kotlin | Java core, plus Kotlin coroutine extensions | Source available |
 | Go | `context.Context` first | Planned |
 
@@ -135,7 +135,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 | Platform | Language | Media | Status |
 | --- | --- | --- | --- |
 | Web | TypeScript | LiveKit JavaScript SDK | Source available |
-| React | Hooks on top of the Web SDK | Same as Web | Planned |
+| React | Hooks on top of the Web SDK | Same as Web | Source available |
 | iOS and macOS | Swift | LiveKit Swift SDK | Source available |
 | Android | Kotlin | LiveKit Android SDK | Planned |
 | React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | Planned |
@@ -175,9 +175,11 @@ types in `@convohop/core` and one reference snippet per operation from
 [conformance suite](../spec/conformance/README.md) runs its scenarios through
 a TypeScript reference driver against a deterministic mock, and can target a
 real deployment. The [JVM server SDK](../jvm/README.md) adds a Java and
-Kotlin generator and its own conformance driver, and the
-[Swift client SDK](../swift/README.md) adds a Swift generator and driver.
-Generators for the other languages are in development.
+Kotlin generator and its own conformance driver. The
+[.NET server SDK](../dotnet/README.md) adds a C# generator and its own
+conformance driver, and the [Swift client SDK](../swift/README.md) adds a
+Swift generator and driver. Generators for the other languages are in
+development.
 The same IR generates the operation catalog of the `convohop` command-line
 tool ([`packages/cli`](../packages/cli/README.md)) and the tools of an MCP
 server for AI agents ([`packages/mcp`](../packages/mcp/README.md)). Neither is
@@ -219,9 +221,9 @@ frames.
    then fails.
 
 Treat `connectToken` as a password. Don't log or store it, and send it only
-to `livekitUrl`. The Web SDK uses its own first-frame admission with the same
-rules. Only the ConvoHop media server accepts either path; a stock LiveKit
-server can't.
+to `livekitUrl`. The Web SDK connects the same way, with `livekit-client`.
+Only the ConvoHop media server enforces these rules; a stock LiveKit server
+can't.
 
 ## Push notifications: bring your own
 
@@ -303,7 +305,8 @@ Notes:
   It's installed as a dependency of the other packages, but it isn't a
   supported entry point, so don't import it directly. `@convohop/core`,
   `@convohop/client` and `@convohop/server` are developed in this
-  repository, and their releases are attached to its GitHub Releases. The
+  repository, and their releases are attached to its GitHub Releases.
+  `@convohop/react` is developed here too, but it isn't in a release yet. The
   earlier transitional workspace names,
   `@convohop/browser-sdk` and `@convohop/server-sdk`, were removed before any
   release and were never published.
@@ -398,7 +401,7 @@ release.
 | --- | --- |
 | Node.js | Active LTS and Maintenance LTS releases: Node.js 22 and 24 today. Odd-numbered releases aren't supported. |
 | Python | 3.11 and later |
-| .NET | Targets `netstandard2.0`, for .NET Framework 4.7.2 and later, and the current .NET LTS release (`net10.0` today). Tested on the .NET releases that Microsoft supports. |
+| .NET | Targets `netstandard2.0`, for .NET Framework 4.7.2 and later, and the current .NET LTS release (`net10.0` today). Tested on .NET 8, 9 and 10; .NET Framework isn't tested yet. |
 | Java and Kotlin | Java 11 and later, tested on Java 11, 17, 21 and 25 |
 | Go | The two most recent Go releases, matching Go's own support policy |
 | Web | The current and previous major versions of Chrome, Edge, Firefox and Safari. Calls need WebRTC. |
@@ -408,11 +411,17 @@ release.
 | React Native | 0.76 and later, with the New Architecture |
 | Flutter | The current stable release |
 
-Today, CI verifies the TypeScript packages on Node.js 22 and 24, and the Java
-and Kotlin SDK on Java 11, 17, 21 and 25. Each other row becomes a CI
-requirement when that SDK lands.
-CI builds and tests the Swift SDK on macOS and in the iOS Simulator with
-Xcode 16.4 and 26.6. It doesn't test on iOS 15 or macOS 12.
+Today, CI verifies the TypeScript packages on Node.js 22 and 24, the Java
+and Kotlin SDK on Java 11, 17, 21 and 25, and the .NET SDK on .NET 8, 9 and
+10. Each other row becomes a CI requirement when that SDK lands.
+
+For the Web row, CI runs the Web client's browser tests in Playwright's
+current builds of Chromium, Firefox and WebKit. For the React row, it runs
+the hooks on React 18 and 19.
+
+For the iOS and macOS row, CI builds and tests the Swift SDK on macOS and in
+the iOS Simulator with Xcode 16.4 and 26.6. It doesn't test on iOS 15 or
+macOS 12.
 
 ## Releases and distribution
 

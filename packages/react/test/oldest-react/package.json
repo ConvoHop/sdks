@@ -1,0 +1,10 @@
+{
+  "name": "convohop-react-oldest-react",
+  "private": true,
+  "description": "React 18, the oldest line @convohop/react supports, from a lockfile. The Web workflow's oldest-react job installs it and points the workspace's react and react-test-renderer here. Keep it on 18.x.",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "react": "18.3.1",
+    "react-test-renderer": "18.3.1"
+  }
+}

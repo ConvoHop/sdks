@@ -18,23 +18,26 @@ npm test --workspace @convohop/client
 
 ## Runtimes and entry point
 
-- `@convohop/client` has one ESM entry point with bundled TypeScript
-  declarations. It has no import side effects, so bundlers can tree-shake
-  unused exports.
+- `@convohop/client` is ESM with bundled TypeScript declarations and two
+  entry points: `@convohop/client` and `@convohop/client/push`, a
+  dependency-free module for service workers. Neither has import side
+  effects, so bundlers can tree-shake unused exports.
 - It re-exports the public API of `@convohop/core`, such as `ConvoHopProblem`,
   `ConvoHopTransport`, `operationCatalog` and the generated `GraphqlTypes` types. Import
   them from `@convohop/client`, not from `@convohop/core`.
 - **Browsers:** targets the current and previous major versions of Chrome,
   Edge, Firefox and Safari. Calls need WebRTC and use `livekit-client`. CI
-  runs the unit tests on Node.js with fake network and media APIs, not in a
-  browser or over real WebRTC.
-- **React Native:** intended, but not verified yet. The client uses
-  `fetch`, `WebSocket`, `URL`, `TextEncoder`, `structuredClone`,
-  `AbortSignal.timeout`, `crypto.randomUUID` and `crypto.subtle.digest`, so
-  your app must provide any of these that its JavaScript engine lacks. Metro
+  runs the unit tests on Node.js with fake network and media APIs. It runs
+  the conversation store and outbox over real HTTP and WebSocket against the
+  [conformance mock](../../spec/conformance/targets.md) on Node.js and in
+  Playwright's headless Chromium, Firefox and WebKit, and the push service
+  worker in Chromium. Calls aren't tested over real WebRTC.
+- **React Native:** intended, but not verified yet. Pass a `platform`
+  option with what the JavaScript engine lacks, such as `randomUUID`,
+  `sha256`, a WHATWG-conforming `URL`, `connectivity` and `lifecycle`. Metro
   resolves package `exports` by default from React Native 0.79; on earlier
-  versions, set `resolver.unstable_enablePackageExports = true`. Calls need
-  LiveKit's React Native WebRTC setup.
+  versions, set `resolver.unstable_enablePackageExports = true`. Calls
+  connect through `participation.connectWith` and LiveKit's React Native SDK.
 - **Node.js 22+:** builds and unit tests. Use
   [`@convohop/server`](../server/README.md) for backend code.
 
@@ -65,11 +68,17 @@ const sent = await thread.messages.send(
 // A sent receipt proves the authority commit, not remote delivery.
 ```
 
-`getConversation(id)` reads a snapshot. `messages(id, beforeSequence?)` pages
-history in descending creation order. `edit(message, text)` and
-`delete(message)` use the expected revision. Search hits contain
-`{conversationId, message}`. `reportRead` binds current membership/visibility
-epochs and records device coverage, not human-read attestation.
+`getConversation(id)` reads a snapshot. `messages(id, beforeSequence?, limit?)`
+pages history in descending creation order, and `getMessage(id, messageId)`
+reads one message's current revision. `members(id)`, `receipts(id)` and
+`inbox()` page members, every member's receipt and the user's
+conversations; an incomplete inbox page without a cursor carries
+`partialReason`. Page sizes are 1 to 100 (default 100); other sizes reject
+before any request. `edit(message, text)` and `delete(message)` use the
+expected revision. Search hits contain `{conversationId, message}`.
+`reportRead` and `reportDelivered` bind current membership/visibility epochs,
+record device coverage, not human-read attestation, and return the user's
+current receipt. `capabilities()` reports the project's features and limits.
 `conversation(id).mute.set({ muted, until })` mutes this user's message push
 notifications for the conversation, optionally until a future RFC 3339 time,
 and `mute.get()` reads it. Calls still ring a muted member.
@@ -107,6 +116,92 @@ HTTP/WSS credentials never follow a route to another origin. Recovery storage
 contains original application inputs, including possible message text; use
 a trusted profile/origin, not shared public-machine storage. Tokens and native
 grants are not stored there.
+
+## Conversation store, offline sends and typing
+
+```ts
+import { ConversationStore, Outbox, TypingIndicator } from "@convohop/client";
+
+const outbox = new Outbox(client, { persist: true }); // One per client.
+const store = new ConversationStore(client, conversationId, { outbox, onError: report });
+const unsubscribe = store.subscribe(() => render(store.snapshot));
+await store.open(); // Loads, then follows the conversation.
+
+const entry = store.send("Hello"); // In snapshot.pending at once.
+await store.loadOlder(); // Earlier history, page by page.
+await store.markRead(); // Reports once per newest loaded message.
+
+const typing = new TypingIndicator(client, conversationId,
+  { enabled: (await client.capabilities()).features?.typing === true });
+draft.addEventListener("input", () => typing.input());
+
+unsubscribe(); typing.dispose(); store.close(); outbox.close(); // Teardown.
+```
+
+`ConversationStore` keeps one conversation's messages (oldest first), each
+member's receipts and the user's unsent messages current from the
+authorized event stream. Its `snapshot` is frozen and replaced on every
+change, and unchanged lists keep their identity, so it suits
+`useSyncExternalStore` or any other subscription. New messages, edits and
+deletions are read back from the authority, so the store shows the
+authority's revision, never one it guessed. A dropped realtime connection
+reconnects on its own and catches up from the applied position. If the
+stream closes as `UNAUTHENTICATED` and `sessionRefresh` is configured, the
+store refreshes the session once and follows the conversation again. Status
+`error` with `resyncRequired` means the saved replay position is no longer
+valid; only an explicit `resync()` recovers. Keep one store per
+conversation and client.
+
+`Outbox` sends optimistically and in order per conversation. An entry keeps
+one request ID, payload and the transport's retry budget from `queued`
+through `sending` and `unknown` until it is `sent` or `failed`, so offline
+periods, rate limits and lost responses never duplicate a message. It
+waits while the browser is offline (pass `connectivity` on React Native),
+honors `retryAfter`, and recovers an uncertain send with the read-only
+resolution before resending only what the authority never observed.
+`failed` is final: `resend(requestId)` sends the text again as a new
+message, and `unconfirmed` warns that the old one may have arrived.
+`persist: true` keeps unsent messages, including their text, in the client's
+`recoveryStorage` across reloads; restored sends that may have been
+submitted are recovered, never sent as new. It is off by default.
+
+`TypingIndicator` sends throttled, ephemeral `typing` signals (at most one
+per `intervalMs`, stopping after `idleMs`). Signals are never retried, and
+the indicator turns itself off when the project reports
+`FEATURE_UNSUPPORTED`. Other members' typing and presence aren't delivered
+to clients yet.
+
+## Push notifications
+
+The authority never sends pushes. Your backend builds them from its
+notification webhooks, with the payload in
+[`spec/push-payload/`](../../spec/push-payload/), and sends them to the
+subscriptions your app registers with it. `@convohop/client/push` has no
+dependencies, so service workers can import it.
+
+```ts
+// App, from a user gesture:
+import { subscribePush } from "@convohop/client/push";
+const registration = await navigator.serviceWorker.register("/sw.js", { type: "module" });
+await subscribePush(registration, { applicationServerKey: vapidPublicKey,
+  register: subscription => saveWithYourBackend(subscription) });
+
+// sw.js:
+import { handleNotificationClick, handlePushEvent } from "@convohop/client/push";
+self.addEventListener("push", event => handlePushEvent(self.registration, event));
+self.addEventListener("notificationclick", event => handleNotificationClick(self.clients, event,
+  notification => `/conversations/${notification.conversationId}`));
+```
+
+`handleNotification(payload)` validates a Web Push, APNs or FCM payload and
+decides what to present: `message`, `ring`, `stopRinging` or `missedCall`,
+with a stable `tag` and a `duplicate` flag. It recognizes repeated events and
+a cancellation that arrives before its ring, for as long as the service
+worker runs. `handlePushEvent` shows a notification for every push, because
+browsers expect one; duplicates and stopped rings replace the earlier
+notification silently. Pass `render` for your own text; the default
+fallback titles are English. `unsubscribePush` lets your backend forget the
+subscription before unsubscribing.
 
 ## Explicit live phases
 
@@ -147,10 +242,13 @@ separate.
 A capture denial retains the returned connection/participation. A failed
 native connect retains its reservation: explicitly retry or leave. Unknown
 admission resolves before another credential attempt; it never reuses a
-spent bearer, extends the original expiry or silently recaptures. An
+spent `connectToken`, extends the original expiry or silently recaptures. An
 unresolved native outcome yields `RESOLUTION_REQUIRED`. `disconnect()`
 closes local transport only, not durable participation or proven cutoff.
 Use `connection.enableAudio()` from a gesture when autoplay is blocked.
+After a network interruption LiveKit may resume the same native connection
+(`onResuming`, then `onResumed`); a resume that comes back as another
+participant ends the connection with `onDisconnected`.
 
 Start and end have distinct durable operation IDs and original completion
 snapshots. Handles also expose `get()`, `participants({limit,cursor})`,
@@ -247,8 +345,17 @@ retain the original SQL renewal request/outcome for uncertain retries.
 The hook uses that backend's endpoint, never a backend key in the browser,
 and must bound its own I/O. Do not await this same client from the hook or
 call refresh from a replay application callback: either can await its own
-retirement/admission barrier. There is no SDK automatic renewal timer or
-retry loop; concurrent explicit refresh calls share the same work.
+retirement/admission barrier. `refreshSession()` itself never retries, and
+concurrent explicit refresh calls share the same work.
+
+`client.scheduleSessionRefresh({ leadMs, onRefreshed, onError })` is the
+opt-in timer: it renews `leadMs` (default 60 s) before the verified expiry,
+but never earlier than halfway through the remaining lifetime, then again
+after each renewal, until you call the function it returns. A renewal that
+fails while the current session is still verified retries with backoff
+before expiry; any other failure stops the schedule. An initialization that
+failed with a transport error, 429 or 503 is retried, honoring
+`retryAfter`. Every failure reaches `onError`.
 
 Before replacement, the SDK probes the candidate through generated queries
 at the fixed trusted origin and checks the original session, principal,
@@ -316,10 +423,14 @@ addresses or URLs. TURN/TLS evidence requires a relay candidate and
 `relayProtocol === "tls"`; direct ICE TCP reports `protocol === "tcp"`.
 
 The service requires the participation-aware ConvoHop media server (SFU),
-not a stock LiveKit server. This package admits each connection with a
-one-time `convohop.admission` first frame and never reconnects with a
-cached token. It ignores the grant's `connectToken`, which is for
-[clients built on the official LiveKit SDKs](../../docs/sdk-strategy.md#calls-with-the-official-livekit-sdks).
+not a stock LiveKit server. This package connects through the official
+`livekit-client`, as in
+[Calls with the official LiveKit SDKs](../../docs/sdk-strategy.md#calls-with-the-official-livekit-sdks):
+each connection takes a fresh `liveSessionCredentials` grant (`INITIAL`, or
+`RECONNECT` naming the connection it replaces) and makes one attempt with
+its single-use, 60-second `connectToken`, sent only to the grant's
+`livekitUrl` and never logged or stored. LiveKit resumes only with that token
+or one the media server pushes; a cached token never opens a new connection.
 A server boot change ends the old
 occurrence after durable recovery; explicitly start/join a new occurrence.
 No transparent cross-boot continuity, invitation-only compatibility API,

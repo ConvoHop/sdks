@@ -20,8 +20,14 @@ jobs:
     timeout-minutes: 5
     permissions:
       pull-requests: read # read the PR's commits
+    # One step runs, chosen by the PR's author. github.actor is whoever last
+    # acted on the PR, which zizmor flags as spoofable. Both steps list the
+    # same types, and test/release/workflows.test.mjs checks each list
+    # against release-please's changelog sections.
     steps:
-      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+      - name: Check the title and commit
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
@@ -41,3 +47,28 @@ jobs:
           # squashes a single-commit PR, so that message must match.
           validateSingleCommit: true
           validateSingleCommitMatchesPrTitle: true
+      - name: Check the Dependabot title and commit
+        if: github.event.pull_request.user.login == 'dependabot[bot]'
+        uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          types: |
+            feat
+            fix
+            perf
+            revert
+            docs
+            test
+            refactor
+            build
+            ci
+            chore
+            style
+          # When a Dependabot group has one update, the title says "bump X
+          # from A to B in ..." but the commit "bump X in ...", so they
+          # differ. The commit must still be a Conventional Commit.
+          # Maintainers squash-merge Dependabot PRs with an explicit subject,
+          # so the mismatch can't reach main.
+          validateSingleCommit: true
+          validateSingleCommitMatchesPrTitle: false

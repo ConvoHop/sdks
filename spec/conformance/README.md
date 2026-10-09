@@ -37,6 +37,7 @@ flowchart LR
 | [`conformance/runner.mjs`](../../conformance/runner.mjs) | The runner CLI; its modules are in [`conformance/lib/`](../../conformance/lib). |
 | [`conformance/drivers/ts/`](../../conformance/drivers/ts) | The TypeScript reference driver. |
 | [`conformance/drivers/jvm/`](../../conformance/drivers/jvm) | The driver for the [Java and Kotlin server SDK](../../jvm/README.md). |
+| [`conformance/drivers/dotnet/`](../../conformance/drivers/dotnet) | The driver for the [.NET server SDK](../../dotnet/README.md). |
 | [`conformance/drivers/swift/`](../../conformance/drivers/swift) | The driver for the [Swift client SDK](../../swift/README.md), a Swift package in `Driver/`. |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |
 | [`conformance/targets/`](../../conformance/targets) | Descriptors for real targets, such as the dev-stack image. |
@@ -392,9 +393,10 @@ references and runs the harness's own `node:test` suites in
 schemas, catalog, scenarios and webhook vectors; the
 [push payload vectors](../push-payload/README.md#vectors), against rules
 written independently of the builders; the runner's modules; the mock;
-the driver client, against a scriptable fake driver; and end-to-end runner
-invocations, including the reference driver against the mock and a
-dev-stack descriptor pointed at a local mock.
+the driver client, against a scriptable fake driver; the
+[dev-stack start script](targets.md#dev-stack-target), against a scriptable
+fake Docker CLI; and end-to-end runner invocations, including the reference
+driver against the mock and a dev-stack descriptor pointed at a local mock.
 
 [SDK CI](../../.github/workflows/sdk-ci.yml) runs those tests on Node.js 22
 and 24 as part of `npm test`. The `mock` job of the
@@ -419,6 +421,11 @@ scenarios against the mock and skips the 2 that only use user clients,
 `auth.user-token.invalid` and `realtime.subscribe.invalid-token`. Its
 [workflow](../../.github/workflows/jvm.yml) fails on any other skip.
 
+The .NET driver declares the backend and management roles too. With both
+the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 62
+scenarios against the mock and skips the same 2. Its
+[workflow](../../.github/workflows/dotnet.yml) fails on any other skip.
+
 The Swift driver declares only the user role; the reference driver serves
 the backend clients that set up its scenarios. It passes 33 scenarios against
 the mock and skips 31: the 17 that only use backend or management clients,
@@ -435,11 +442,16 @@ the suite against a real target.
    area, or create `scenarios/<suite>.json` for a new area.
 2. Use only catalog operations, `${nonce}` for anything that must be unique
    on a shared target, and `${uuid.<label>}` for request ids.
-3. Pin observable public behaviour only. Do not pin internal event type
+3. Invoke `route.initialize` on each backend and user client right after
+   creating it. A real server rejects their other commands with 409
+   `WRONG_REGION` until the client has the current serving epoch, which the
+   mock does not check. Authentication comes first, so only a command that
+   must fail with `UNAUTHENTICATED` may precede it.
+4. Pin observable public behaviour only. Do not pin internal event type
    names, timings or a particular SDK's retry strategy. Expect only error
    codes that the IR lists for the operation (see
    [Alignment with the IR](#alignment-with-the-ir)).
-4. Run `npm run test:conformance` for the static and IR checks, then
+5. Run `npm run test:conformance` for the static and IR checks, then
    `npm run conformance -- --filter <id>` against the mock, and against a
    real target when you have one.
 

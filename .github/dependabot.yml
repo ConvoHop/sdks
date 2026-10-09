@@ -115,6 +115,28 @@ updates:
           - minor
           - patch
 
+  # The .NET SDK (dotnet/). Directory.Packages.props holds every version.
+  # NuGet has no development dependency type, so test-only updates get the
+  # fix prefix too.
+  - package-ecosystem: nuget
+    directory: /dotnet
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: fix
+      include: scope
+    groups:
+      nuget:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  # The Swift client SDK (swift/). SwiftPM has no development dependency type,
+  # so test-only updates get the fix prefix too.
   - package-ecosystem: swift
     directory: /swift
     schedule:

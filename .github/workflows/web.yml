@@ -1,0 +1,85 @@
+# Runs the Web client in real browser engines and the React hooks on the
+# oldest supported React. SDK CI runs every package's unit tests on Node.js,
+# including the React hooks on React 19. This workflow covers what needs a
+# browser engine or a second React line. See conformance/browser/web.test.mjs
+# and packages/react/README.md.
+name: Web
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  browsers:
+    name: Web client (${{ matrix.browser }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      # --no-shell: the tests run the full Chromium build in new headless mode,
+      # which shows notifications; the headless shell is not needed.
+      - name: Install the browser and its system dependencies
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: npx playwright install --with-deps --no-shell "$BROWSER"
+      - name: Build the packages
+        run: npm run build
+      - name: Run the Web client against the conformance mock in the browser
+        env:
+          BROWSERS: ${{ matrix.browser }}
+        run: npm run test:browser -w conformance
+
+  oldest-react:
+    name: React hooks (React 18)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read # check out the repository
+    env:
+      # The React tests check that they run on this major.
+      CONVOHOP_REACT_MAJOR: "18"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            packages/react/test/oldest-react/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      # packages/react/test/oldest-react pins React 18 in its own lockfile.
+      # The workspace resolves react and react-test-renderer from the root, so
+      # point both there; React 18's own dependencies resolve from its folder.
+      - name: Replace React 19 with React 18
+        run: |
+          npm ci --no-audit --no-fund --prefix packages/react/test/oldest-react
+          for name in react react-test-renderer; do
+            rm -rf "node_modules/$name"
+            ln -s "../packages/react/test/oldest-react/node_modules/$name" "node_modules/$name"
+          done
+      - name: Build the packages
+        run: npm run build
+      - name: Test the React hooks
+        run: npm test -w packages/react
+      - name: Test the React hooks against the conformance mock
+        run: node --test conformance/test/react.test.mjs

@@ -236,12 +236,30 @@ test('the release build runs every npm check that CI runs', () => {
 
 test('PR titles use exactly the commit types release-please knows', () => {
   const { config } = loadReleaseConfig(REPO_ROOT);
-  const prTitle = readFileSync(join(WORKFLOWS_DIR, 'pr-title.yml'), 'utf8');
-  const block = /^( +)types: \|\n((?:\1 {2}[a-z]+\n)+)/m.exec(prTitle);
-  assert.ok(block, 'pr-title.yml must list types as a block');
-  const allowed = block[2].split('\n').map((type) => type.trim()).filter(Boolean);
   const changelogSections = config['changelog-sections'];
-  assert.deepEqual([...allowed].sort(), changelogSections.map(({ type }) => type).sort());
+  const changelogTypes = changelogSections.map(({ type }) => type).sort();
+  const prTitle = workflows.find(({ name }) => name.endsWith('/pr-title.yml'));
+  assert.ok(prTitle, 'pr-title.yml is missing');
+  // Each step that checks titles has its own copy of the types, and every
+  // copy must match, so they can't drift apart.
+  const checks = [...sections(prTitle.lines).jobs.values()]
+    .flatMap(stepsOf)
+    .filter((step) => /^ *(?:- )?uses:\s*["']?amannn\/action-semantic-pull-request@/m.test(step));
+  assert.ok(checks.length > 0, 'pr-title.yml must check titles with amannn/action-semantic-pull-request');
+  for (const step of checks) {
+    const lines = step.split('\n');
+    const where = `${prTitle.name} step "${lines[0].trim().replace(/^- /, '')}"`;
+    const key = lines.findIndex((line) => /^ *types:/.test(line));
+    assert.match(lines[key] ?? '', /^ *types: \|\s*$/, `${where} must list types as a block`);
+    const block = [];
+    for (const next of lines.slice(key + 1)) {
+      if (next.trim() !== '' && indentOf(next) <= indentOf(lines[key])) break;
+      block.push(next);
+    }
+    // The action reads one type per non-empty line.
+    const allowed = block.map((type) => type.trim()).filter(Boolean);
+    assert.deepEqual(allowed.sort(), changelogTypes, `${where} must allow exactly the changelog section types`);
+  }
   const visible = changelogSections.filter(({ hidden }) => !hidden).map(({ type }) => type);
   assert.deepEqual(visible.sort(), ['feat', 'fix', 'perf', 'revert'], 'only user-facing types release');
 });

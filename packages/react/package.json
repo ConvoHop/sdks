@@ -1,0 +1,45 @@
+{
+  "name": "@convohop/react",
+  "version": "0.1.0",
+  "private": true,
+  "description": "React hooks for the ConvoHop client SDK: conversations, the outbox, typing, session refresh, live sessions and browser media.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ConvoHop/sdks.git",
+    "directory": "packages/react"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "check:package": "publint --strict && attw --pack . --profile esm-only"
+  },
+  "peerDependencies": {
+    "@convohop/client": "*",
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "react": "^18.3.1 || ^19.3.0",
+    "react-test-renderer": "^18.3.1 || ^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}

@@ -10,6 +10,7 @@
       "covers": ["crud", "auth.backendKey", "auth.userToken"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
@@ -24,6 +25,7 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.bob.principalId}", "deviceId": "${uuid.bobDevice}" }, "save": "bobSession" },
         { "do": "client.create", "client": "bob", "role": "user", "credential": "${saved.bobSession.sessionToken}", "principalId": "${saved.bob.principalId}" },
+        { "do": "invoke", "client": "bob", "operation": "route.initialize" },
         { "do": "invoke", "client": "bob", "operation": "conversations.get", "args": { "conversationId": "${saved.conversation.conversationId}" },
           "expect": { "value": { "conversationId": "${saved.conversation.conversationId}", "revision": "1", "title": "Planning ${nonce}",
             "props": { "$eq": { "topic": "launch", "priority": 2, "tags": ["a", "b"] } },
@@ -37,6 +39,7 @@
       "covers": ["crud", "auth.backendKey"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "carol-${nonce}" }, "save": "carol" },
@@ -73,6 +76,7 @@
       "covers": ["crud", "auth.userToken"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
         { "do": "invoke", "client": "backend", "operation": "conversations.create",
@@ -84,7 +88,9 @@
         { "do": "invoke", "client": "backend", "operation": "sessions.issue",
           "args": { "principalId": "${saved.bob.principalId}", "deviceId": "${uuid.bobDevice}" }, "save": "bobSession" },
         { "do": "client.create", "client": "alice", "role": "user", "credential": "${saved.aliceSession.sessionToken}", "principalId": "${saved.alice.principalId}" },
+        { "do": "invoke", "client": "alice", "operation": "route.initialize" },
         { "do": "client.create", "client": "bob", "role": "user", "credential": "${saved.bobSession.sessionToken}", "principalId": "${saved.bob.principalId}" },
+        { "do": "invoke", "client": "bob", "operation": "route.initialize" },
         { "do": "invoke", "client": "alice", "operation": "messages.send",
           "args": { "conversationId": "${saved.conversation.conversationId}", "text": "Hello ${nonce}" },
           "expect": { "value": { "messageId": { "$type": "uuid" }, "conversationId": "${saved.conversation.conversationId}", "sequence": { "$type": "counter" },
@@ -103,10 +109,10 @@
         { "do": "invoke", "client": "bob", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
           "expect": { "value": { "items": [{ "messageId": "${saved.m1.messageId}", "revision": "2", "deleted": false, "text": "Hello again ${nonce}" }] } } },
         { "do": "invoke", "client": "alice", "operation": "messages.delete", "args": { "message": "${saved.edited}" },
-          "expect": { "value": { "messageId": "${saved.m1.messageId}", "revision": "3", "deleted": true, "text": "" } } },
+          "expect": { "value": { "messageId": "${saved.m1.messageId}", "revision": "3", "deleted": true, "text": null } } },
         { "do": "invoke", "client": "bob", "operation": "messages.list", "args": { "conversationId": "${saved.conversation.conversationId}" },
           "note": "A deleted message stays in history as a tombstone without content.",
-          "expect": { "value": { "items": [{ "messageId": "${saved.m1.messageId}", "sequence": "${saved.m1.sequence}", "revision": "3", "deleted": true, "text": "" }] } } }
+          "expect": { "value": { "items": [{ "messageId": "${saved.m1.messageId}", "sequence": "${saved.m1.sequence}", "revision": "3", "deleted": true, "text": null }] } } }
       ]
     },
     {
@@ -115,6 +121,7 @@
       "covers": ["crud", "auth.backendKey"],
       "steps": [
         { "do": "client.create", "client": "backend", "role": "backend", "credential": "${target.credentials.backend}" },
+        { "do": "invoke", "client": "backend", "operation": "route.initialize" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "alice-${nonce}" }, "save": "alice" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "bob-${nonce}" }, "save": "bob" },
         { "do": "invoke", "client": "backend", "operation": "principals.create", "args": { "externalUserId": "carol-${nonce}" }, "save": "carol" },
@@ -154,7 +161,7 @@
             "text": "Moderated ${nonce}" } },
           "save": "edited" },
         { "do": "invoke", "client": "backend", "operation": "messages.delete", "args": { "message": "${saved.edited}" },
-          "expect": { "value": { "messageId": "${saved.m1.messageId}", "revision": "3", "deleted": true, "text": "" } } },
+          "expect": { "value": { "messageId": "${saved.m1.messageId}", "revision": "3", "deleted": true, "text": null } } },
         { "do": "invoke", "client": "backend", "operation": "messages.send",
           "args": { "conversationId": "${saved.conversation.conversationId}", "text": "Not a member ${nonce}", "actAs": "${saved.carol.principalId}" },
           "note": "A backend acts only as an active member; anyone else is NOT_FOUND.",

@@ -2,8 +2,11 @@ import {
   ConvoHopProblem, parseId, parseString, type CommandOptions, type ConversationMute, type OperationPayload, type PageOptions,
   type GraphqlTypes, type ConversationMessage, type ProtocolObject,
 } from "@convohop/core";
+import { randomUUID } from "@convohop/core/internal";
+import { admitConnection } from "./admission.js";
 import type { ConvoHopClient } from "./client.js";
 import { MediaConnection, type MediaOptions } from "./media.js";
+import { abortReason, throwIfAborted } from "./platform.js";
 
 type LiveMediaProfile = GraphqlTypes.LiveMediaProfile;
 
@@ -13,6 +16,32 @@ export type LiveConnectionGrant = OperationPayload<"communication.liveSessionCre
 export type LiveOperation = OperationPayload<"communication.liveSessionOperation">["result"];
 export interface LiveWaitOptions { signal?: AbortSignal; timeoutMs?: number }
 export interface LiveConnectOptions extends MediaOptions, CommandOptions {}
+/**
+ * One admitted native connection attempt. Send `token` only to `url`, and only once: the media server admits at most
+ * one new connection with it, and it expires about 60 seconds after issue. Later resumes of that connection use the
+ * same token or refresh tokens the media server pushes; a new connection needs a new attempt.
+ */
+export interface LiveConnectionAttempt {
+  /** The `liveSessionCredentials` request that issued this attempt's grant. */
+  readonly requestId: string;
+  readonly mode: "INITIAL" | "RECONNECT";
+  /** The media server's WebSocket URL: `wss:`, or `ws:` on a loopback host. */
+  readonly url: string;
+  /** The single-use `connectToken`. */
+  readonly token: string;
+  /** When the server's forwarding lease for this participation expires, unless renewed. */
+  readonly leaseExpiresAt: string;
+}
+/** A native media connection opened by a {@link LiveConnector}. */
+export interface LiveConnection {
+  readonly connected: boolean;
+  disconnect(): Promise<void>;
+}
+/**
+ * Opens one native connection for an admitted attempt, for example with a stock LiveKit SDK:
+ * `async attempt => { await room.connect(attempt.url, attempt.token); return { get connected() { … }, disconnect: () => room.disconnect() }; }`.
+ */
+export type LiveConnector<C extends LiveConnection = LiveConnection> = (attempt: LiveConnectionAttempt) => Promise<C>;
 
 function waitOptions(options: LiveWaitOptions): { deadline: number; signal: AbortSignal | undefined } {
   const timeout = options.timeoutMs ?? 45000;
@@ -21,10 +50,10 @@ function waitOptions(options: LiveWaitOptions): { deadline: number; signal: Abor
 }
 
 async function pause(signal?: AbortSignal): Promise<void> {
-  signal?.throwIfAborted();
+  throwIfAborted(signal);
   await new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => { signal?.removeEventListener("abort", aborted); resolve(); }, 500);
-    function aborted() { clearTimeout(timer); signal?.removeEventListener("abort", aborted); reject(signal?.reason); }
+    function aborted() { clearTimeout(timer); signal?.removeEventListener("abort", aborted); reject(signal && abortReason(signal)); }
     signal?.addEventListener("abort", aborted, { once: true });
   });
 }
@@ -111,7 +140,7 @@ class LiveAction {
   async completed(options: LiveWaitOptions = {}): Promise<NonNullable<LiveOperation["completion"]>> {
     const { deadline, signal } = waitOptions(options);
     do {
-      signal?.throwIfAborted();
+      throwIfAborted(signal);
       const action = await this.get();
       if (action.state === "COMPLETED") {
         if (!action.completion || (this.kind === "END" && action.completion.mediaCutoff?.state !== "ENFORCED"))
@@ -185,10 +214,11 @@ export class LiveSessionHandle {
         { liveSessionId: this.liveSessionId, expectedGeneration: this.generation, principalIds }, options.requestId),
   };
   async end(options: CommandOptions = {}) {
+    await this.client.http.initializeRecovery();
     this.#endRequest = options.requestId ?? this.#endRequest ??
       [...this.client.http.recoveryStates].reverse().find(state =>
         state.operation === "communication.endLiveSession" && state.input.liveSessionId === this.liveSessionId)?.requestId ??
-      crypto.randomUUID();
+      randomUUID(this.client.platform);
     const saved = this.client.http.recoveryStates.find(state => state.requestId === this.#endRequest);
     const revision = saved ? saved.input.expectedRevision : (await this.get()).revision;
     if (typeof revision !== "string") throw new TypeError("Missing original end revision");
@@ -201,8 +231,9 @@ export class LiveSessionHandle {
 export class LiveParticipationHandle {
   readonly participationId: string;
   #attempt: { requestId: string; mode: "INITIAL" | "RECONNECT"; replacementOfConnectionId?: string; used: boolean } | undefined;
-  #connection: MediaConnection | undefined;
-  #connecting: Promise<MediaConnection> | undefined;
+  #connection: LiveConnection | undefined;
+  /** The attempt in flight; `media` is set when it is `connect()`'s own. */
+  #connecting: { media: Promise<MediaConnection> | undefined } | undefined;
   #leaveRequest: string | undefined;
   constructor(readonly live: LiveSessionHandle, readonly snapshot: LiveParticipation) {
     this.participationId = parseId(snapshot.participationId);
@@ -212,22 +243,47 @@ export class LiveParticipationHandle {
   async get(): Promise<LiveParticipation> {
     const current = (await this.live.get()).myParticipation;
     if (!current || current.participationId !== this.participationId)
-      throw new ConvoHopProblem("PARTICIPATION_MISMATCH", crypto.randomUUID(), "rejected", 409, "This participation is no longer current");
+      throw new ConvoHopProblem("PARTICIPATION_MISMATCH", randomUUID(this.live.client.platform), "rejected", 409, "This participation is no longer current");
     return current;
   }
+  /** Connects this participation's media in the browser with `livekit-client`, which is loaded on first use. */
   connect(options: LiveConnectOptions = {}): Promise<MediaConnection> {
     if (this.#leaveRequest) return Promise.reject(new Error("Leave has been requested; resolve its cutoff before rejoining"));
-    if (this.#connecting) return this.#connecting;
-    if (this.#connection?.connected) return Promise.resolve(this.#connection);
-    const work = MediaConnection.connectParticipation(this, options).then(async connection => {
-      if (this.#leaveRequest) { await connection.disconnect(); throw new Error("Participation was left during connection"); }
-      this.#connection = connection; return connection;
-    });
-    this.#connecting = work;
-    return work.finally(() => { this.#connecting = undefined; });
+    if (this.#connecting) return this.#connecting.media ?? Promise.reject(new Error("A connector's native connection attempt is in progress"));
+    if (this.#connection?.connected) return this.#connection instanceof MediaConnection ? Promise.resolve(this.#connection)
+      : Promise.reject(new Error("A connector's native connection is connected; disconnect it first"));
+    const media = this.#settle(MediaConnection.connectParticipation(this, options));
+    this.#connecting = { media };
+    return this.#release(media);
+  }
+  /**
+   * Connects this participation's media with your own native client, such as a stock LiveKit SDK on React Native.
+   * The SDK obtains a participation-bound grant, checks the media URL, records the attempt durably, then calls
+   * `connector` once. A connector failure is `MEDIA_CONNECT_FAILED` with an unknown outcome: the reservation remains,
+   * and the next call resolves the old attempt before a fresh one. Rejects while another attempt is in flight or
+   * another connection is connected.
+   */
+  connectWith<C extends LiveConnection>(connector: LiveConnector<C>, options: CommandOptions = {}): Promise<C> {
+    if (typeof connector !== "function") return Promise.reject(new TypeError("connector must be a function"));
+    if (this.#leaveRequest) return Promise.reject(new Error("Leave has been requested; resolve its cutoff before rejoining"));
+    if (this.#connecting) return Promise.reject(new Error("A native connection attempt is in progress"));
+    if (this.#connection?.connected) return Promise.reject(new Error("A native connection is connected; disconnect it first"));
+    const work = this.#settle(admitConnection(this, options, connector, this.live.client.platform));
+    this.#connecting = { media: undefined };
+    return this.#release(work);
+  }
+  async #settle<C extends LiveConnection>(attempt: Promise<C>): Promise<C> {
+    const connection = await attempt;
+    if (this.#leaveRequest) { await connection.disconnect(); throw new Error("Participation was left during connection"); }
+    this.#connection = connection;
+    return connection;
+  }
+  #release<C>(work: Promise<C>): Promise<C> {
+    const entry = this.#connecting;
+    return work.finally(() => { if (this.#connecting === entry) this.#connecting = undefined; });
   }
   /** @internal Preserves each credential command separately from native connection attempts. */
-  async connectionGrant(options: CommandOptions = {}): Promise<{ requestId: string; grant: LiveConnectionGrant }> {
+  async connectionGrant(options: CommandOptions = {}): Promise<{ requestId: string; mode: "INITIAL" | "RECONNECT"; grant: LiveConnectionGrant }> {
     const { client, liveSessionId, generation } = this.live;
     const current = await this.get();
     if (!this.#attempt) {
@@ -260,7 +316,7 @@ export class LiveParticipationHandle {
         throw new ConvoHopProblem("CREDENTIAL_REFRESH_REQUIRED", old.requestId, "committed", 409, "The resolved old credential requires a separately identified fresh attempt");
       this.#attempt = undefined;
     }
-    this.#attempt ??= { requestId: options.requestId ?? crypto.randomUUID(),
+    this.#attempt ??= { requestId: options.requestId ?? randomUUID(client.platform),
       mode: current.nativeConnectionId ? "RECONNECT" : "INITIAL", used: false,
       ...(current.nativeConnectionId ? { replacementOfConnectionId: current.nativeConnectionId } : {}) };
     const { requestId, mode, replacementOfConnectionId } = this.#attempt;
@@ -270,7 +326,7 @@ export class LiveParticipationHandle {
     const grant = receipt.result;
     if (grant.liveSessionId !== liveSessionId || grant.participationId !== this.participationId || grant.generation !== generation)
       throw new TypeError("Native credential scope differs from the participation");
-    return { requestId, grant };
+    return { requestId, mode, grant };
   }
   /** @internal Once signaling starts, an uncertain admission is resolved, never blindly reused. */
   connectionAttempted(): void | Promise<void> {
@@ -281,7 +337,7 @@ export class LiveParticipationHandle {
   async leave(options: CommandOptions = {}) {
     if (this.#leaveRequest && options.requestId && options.requestId !== this.#leaveRequest)
       throw new Error("Resolve the original leave request before replacing its identity");
-    this.#leaveRequest ??= options.requestId ?? crypto.randomUUID();
+    this.#leaveRequest ??= options.requestId ?? randomUUID(this.live.client.platform);
     await this.#connection?.disconnect();
     return this.live.client.http.execute("communication.leaveLiveSession", this.live.client.projectId,
       { liveSessionId: this.live.liveSessionId, expectedGeneration: this.live.generation,

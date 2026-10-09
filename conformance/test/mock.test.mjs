@@ -93,8 +93,10 @@ describe("GraphQL endpoint", () => {
     await problem(await createPrincipal({ credential: mock.descriptor.credentials.backendExpired }), 401, "UNAUTHENTICATED");
     await problem(await createPrincipal({ credential: mock.descriptor.credentials.management }), 401, "UNAUTHENTICATED");
     await problem(await createPrincipal({ headers: { authorization: `Basic ${mock.descriptor.credentials.backend}` } }), 401, "UNAUTHENTICATED");
-    await problem(await createPrincipal({ context: { requestId, projectId: randomUUID(), incarnation: mock.descriptor.incarnation } }),
-      403, "FORBIDDEN");
+    const unknown = await problem(await createPrincipal({ credential: "not-a-mock-credential" }), 401, "UNAUTHENTICATED");
+    const otherProject = await problem(await createPrincipal({ context: { requestId, projectId: randomUUID(),
+      incarnation: mock.descriptor.incarnation } }), 401, "UNAUTHENTICATED");
+    assert.equal(otherProject.message, unknown.message, "another project cannot tell a valid credential from an unknown one");
     await problem(await createPrincipal({ context: { requestId, projectId: mock.descriptor.projectId, incarnation: randomUUID() } }),
       409, "INCARNATION_MISMATCH");
     await problem(await post("management.capabilities", { plane: "management" }), 401, "UNAUTHENTICATED");
@@ -254,5 +256,132 @@ describe("control API", () => {
     assert.equal((await fetch(`${mock.descriptor.managementUrl}/__conformance/log`)).status, 404);
     await assert.rejects(new ControlClient("http://127.0.0.1:1/").reset(), error =>
       error instanceof ControlError && /^control \/reset failed: /.test(error.message));
+  });
+});
+
+describe("receipts and single-message reads", () => {
+  before(() => control.reset());
+
+  const result = async (response, field) => {
+    assert.equal(response.status, 200);
+    return (await response.json()).data[field].result;
+  };
+  async function room() {
+    const principal = async () => (await result(await createPrincipal(), "createPrincipal")).principalId;
+    const alice = await principal(), bob = await principal(), carol = await principal();
+    const { conversationId } = await result(await post("communication.createConversation", { input: { title: "Receipts", props: {},
+      members: [{ principalId: alice, role: "member" }, { principalId: bob, role: "member" }] } }), "createConversation");
+    const session = async principalId => (await result(await post("communication.issueSession",
+      { input: { principalId, deviceId: randomUUID(), requestedTtlMs: "60000" } }), "issueSession")).sessionToken;
+    const tokens = { alice: await session(alice), bob: await session(bob), carol: await session(carol) };
+    const send = async text => result(await post("communication.sendMessage",
+      { credential: tokens.alice, input: { conversationId, text, props: {} } }), "sendMessage");
+    return { alice, bob, carol, conversationId, tokens, first: await send("first"), second: await send("second") };
+  }
+  const latest = async (conversationId, credential) => (await result(await post("communication.getConversation",
+    { credential, input: { conversationId } }), "getConversation")).latestSequence;
+
+  test("getMessage reads one message from the caller's visibility floor", async () => {
+    const { carol, conversationId, tokens, first } = await room();
+    const read = (messageId, options = {}) => post("communication.getMessage", { input: { conversationId, messageId }, ...options });
+    const message = await result(await read(first.messageId, { credential: tokens.bob }), "getMessage");
+    assert.equal(message.messageId, first.messageId);
+    assert.equal(message.sequence, first.sequence);
+    assert.equal(message.text, "first");
+    assert.deepEqual(await result(await read(first.messageId), "getMessage"), message);
+    assert.deepEqual(await result(await read(first.messageId, { credential: mock.descriptor.credentials.backendLimited }), "getMessage"),
+      message);
+    await problem(await read(randomUUID(), { credential: tokens.bob }), 404, "NOT_FOUND");
+    await problem(await read(first.messageId, { credential: tokens.carol }), 404, "NOT_FOUND");
+    await result(await post("communication.addMembers", { input: { conversationId,
+      members: [{ principalId: carol, role: "member", expectedRevision: "0" }] } }), "addMembers");
+    await problem(await read(first.messageId, { credential: tokens.carol }), 404, "NOT_FOUND");
+  });
+
+  test("a deleted message reads back as a tombstone without text or props", async () => {
+    const { conversationId, tokens, first } = await room();
+    const tombstone = await result(await post("communication.deleteMessage", { credential: tokens.alice,
+      input: { conversationId, messageId: first.messageId, expectedRevision: "1" } }), "deleteMessage");
+    assert.deepEqual([tombstone.messageId, tombstone.revision, tombstone.deleted, tombstone.text, tombstone.props],
+      [first.messageId, "2", true, null, null]);
+    assert.deepEqual(await result(await post("communication.getMessage", { credential: tokens.bob,
+      input: { conversationId, messageId: first.messageId } }), "getMessage"), tombstone);
+  });
+
+  test("reportReceipt advances progress at the current epochs and emits receipt.reported once per advance", async () => {
+    const { bob, conversationId, tokens, first, second } = await room();
+    const report = (input, options = {}) => post("communication.reportReceipt", { credential: tokens.bob,
+      input: { conversationId, kind: "read", membershipEpoch: "1", visibilityEpoch: "1", throughSequence: first.sequence, ...input },
+      ...options });
+    const before = await latest(conversationId, tokens.bob);
+    const read = await result(await report({}), "reportReceipt");
+    assert.deepEqual({ ...read, updatedAt: typeof read.updatedAt }, { principalId: bob, membershipEpoch: "1", visibilityEpoch: "1",
+      deliveredThroughSequence: first.sequence, readThroughSequence: first.sequence, updatedAt: "string" });
+    const after = await latest(conversationId, tokens.bob);
+    assert.equal(BigInt(after), BigInt(before) + 1n);
+    const events = await result(await post("communication.events", { credential: tokens.bob, input: { conversationId, limit: 10,
+      after: { incarnation: mock.descriptor.incarnation, conversationId, sequence: before } } }), "events");
+    // Event payloads are one typed object; fields an event type does not use are null.
+    const present = payload => Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null));
+    assert.deepEqual(events.items.map(({ sequence, type, subjectRef, payload }) => ({ sequence, type, subjectRef,
+      payload: present(payload) })), [{
+      sequence: after, type: "receipt.reported", subjectRef: { kind: "member", id: bob },
+      payload: { principalId: bob, membershipEpoch: "1", visibilityEpoch: "1", kind: "read", throughSequence: first.sequence } }]);
+
+    const unchanged = await result(await report({ kind: "delivered" }), "reportReceipt");
+    assert.equal(unchanged.deliveredThroughSequence, first.sequence);
+    assert.equal(await latest(conversationId, tokens.bob), after);
+    const delivered = await result(await report({ kind: "delivered", throughSequence: second.sequence }), "reportReceipt");
+    assert.deepEqual([delivered.deliveredThroughSequence, delivered.readThroughSequence], [second.sequence, first.sequence]);
+
+    await problem(await report({ membershipEpoch: "2" }), 409, "REVISION_CONFLICT");
+    await problem(await report({ visibilityEpoch: "2" }), 409, "REVISION_CONFLICT");
+    await problem(await report({ kind: "seen" }), 400, "INVALID_REQUEST");
+    await problem(await report({ throughSequence: "1" }), 400, "INVALID_REQUEST");
+    await problem(await report({ throughSequence: String(BigInt(after) + 5n) }), 400, "INVALID_REQUEST");
+    await problem(await report({}, { credential: tokens.carol }), 404, "NOT_FOUND");
+    await problem(await report({}, { credential: mock.descriptor.credentials.backend }), 403, "FORBIDDEN");
+  });
+
+  test("a repeated reportReceipt request replays, and resolution returns the retained receipt", async () => {
+    const { conversationId, tokens, first } = await room();
+    const requestId = randomUUID();
+    const input = { conversationId, kind: "read", membershipEpoch: "1", visibilityEpoch: "1", throughSequence: first.sequence };
+    const committed = (await (await post("communication.reportReceipt", { credential: tokens.bob, requestId, input })).json())
+      .data.reportReceipt;
+    const replayed = (await (await post("communication.reportReceipt", { credential: tokens.bob, requestId, input })).json())
+      .data.reportReceipt;
+    assert.equal(replayed.replayed, true);
+    assert.deepEqual(replayed.result, committed.result);
+    const resolution = await result(await post("communication.resolveRequest", { credential: tokens.bob, input: { requestId } }),
+      "resolveRequest");
+    assert.equal(resolution.state, "committed");
+    assert.equal(resolution.resultWithheld, false);
+    assert.deepEqual(resolution.receipt.result.readReceipt, committed.result);
+  });
+
+  test("receipts pages the active members' progress in principal order for members only", async () => {
+    const { alice, bob, conversationId, tokens, first } = await room();
+    await result(await post("communication.reportReceipt", { credential: tokens.bob, input: { conversationId, kind: "delivered",
+      membershipEpoch: "1", visibilityEpoch: "1", throughSequence: first.sequence } }), "reportReceipt");
+    const list = (input, options = {}) => post("communication.receipts",
+      { credential: tokens.alice, input: { conversationId, limit: 10, ...input }, ...options });
+    const all = await result(await list({}), "receipts");
+    assert.equal(all.complete, true);
+    assert.equal(all.nextCursor, null);
+    const [low, high] = [alice, bob].sort();
+    assert.deepEqual(all.items.map(item => item.principalId), [low, high]);
+    const byPrincipal = new Map(all.items.map(item => [item.principalId, item]));
+    assert.deepEqual(byPrincipal.get(alice), { principalId: alice, membershipEpoch: "1", visibilityEpoch: "1",
+      deliveredThroughSequence: null, readThroughSequence: null, updatedAt: null });
+    assert.equal(byPrincipal.get(bob).deliveredThroughSequence, first.sequence);
+    assert.equal(byPrincipal.get(bob).readThroughSequence, null);
+    const page = await result(await list({ limit: 1 }), "receipts");
+    assert.deepEqual([page.items.length, page.complete, page.nextCursor], [1, false, low]);
+    const rest = await result(await list({ limit: 1, cursor: page.nextCursor }), "receipts");
+    assert.deepEqual([rest.items[0].principalId, rest.complete], [high, true]);
+    await problem(await list({ cursor: "not-a-cursor" }), 400, "INVALID_REQUEST");
+    await problem(await list({}, { credential: tokens.carol }), 404, "NOT_FOUND");
+    await problem(await list({}, { credential: mock.descriptor.credentials.backend }), 403, "FORBIDDEN");
   });
 });

@@ -1,5 +1,5 @@
 // Deterministic in-memory authority used by the conformance mock target.
-// It models only the public behaviour exercised by spec/conformance scenarios;
+// It models only the public behaviour exercised by spec/conformance scenarios and the SDK wire tests;
 // it is not a backend implementation and must not grow private service logic.
 import { createHash } from "node:crypto";
 import { EventEmitter } from "node:events";
@@ -26,6 +26,7 @@ export class Problem extends Error {
 const iso = (time = Date.now()) => new Date(time).toISOString();
 const invalid = message => new Problem("INVALID_REQUEST", 400, message);
 const notFound = what => new Problem("NOT_FOUND", 404, `${what} not found`);
+const unauthenticated = () => new Problem("UNAUTHENTICATED", 401, "A current credential is required");
 
 export function canonical(value) {
   if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
@@ -78,7 +79,7 @@ export class Domain {
 
   authenticate(plane, authorization) {
     const token = /^Bearer (\S+)$/.exec(authorization ?? "")?.[1];
-    const rejected = new Problem("UNAUTHENTICATED", 401, "A current credential is required");
+    const rejected = unauthenticated();
     if (token === undefined) throw rejected;
     if (plane === "management") {
       if (token !== this.credentials.management) throw rejected;
@@ -95,10 +96,11 @@ export class Domain {
     throw rejected;
   }
 
+  // A credential authenticates only in its own project, so another project cannot tell it from an unknown one.
   checkContext(plane, context) {
     if (plane !== "communication") return;
     if (!context.projectId) throw invalid("Communication requests require an explicit project");
-    if (context.projectId !== this.projectId) throw new Problem("FORBIDDEN", 403, "Credential is not valid for this project");
+    if (context.projectId !== this.projectId) throw unauthenticated();
     if (context.incarnation != null && context.incarnation !== this.incarnation)
       throw new Problem("INCARNATION_MISMATCH", 409, "Project incarnation changed; explicit recovery required");
   }
@@ -335,9 +337,10 @@ export class Domain {
     });
   }
 
+  // A tombstone keeps the message's identity and revisions but no content.
   deleteMessage(actor, input) {
     return this.#revise(actor, input, "message.deleted", message => {
-      message.deleted = true; message.text = ""; message.props = {};
+      message.deleted = true; message.text = null; message.props = null;
     });
   }
 
@@ -382,6 +385,60 @@ export class Domain {
     return this.eventPage(conversation, start, Math.min(limit, PAGE_CAPS.events));
   }
 
+  // Reads one message from the same visibility floor as messages; a message below it is NOT_FOUND.
+  getMessage(actor, { conversationId, messageId, actAsPrincipalId }) {
+    const { conversation, member } = actAsPrincipalId == null
+      ? this.#visible(actor, conversationId, "messageRead")
+      : this.#actingAs(actor, conversationId, actAsPrincipalId, "messageRead");
+    const message = conversation.messages.get(messageId);
+    if (!message || BigInt(message.sequence) < BigInt(member?.visibleFromSequence ?? "1")) throw notFound("Message");
+    return structuredClone(message);
+  }
+
+  // Receipt progress is kept beside the membership, so member reads keep their shape.
+  #receipt(conversation, member) {
+    const progress = conversation.receiptProgress?.get(member.principalId);
+    return { principalId: member.principalId, membershipEpoch: member.membershipEpoch, visibilityEpoch: member.visibilityEpoch,
+      deliveredThroughSequence: progress?.delivered ?? null, readThroughSequence: progress?.read ?? null,
+      updatedAt: progress?.updatedAt ?? null };
+  }
+
+  // Receipts are user-session reads, one per active member in principal order. (this.receipts holds request receipts.)
+  readReceipts(actor, { conversationId, limit, cursor }) {
+    const { conversation } = this.#visible(actor, conversationId);
+    if (cursor != null && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(cursor))
+      throw invalid("Unknown receipt cursor");
+    const ordered = [...conversation.members.values()].filter(member => member.status === "active")
+      .sort((a, b) => a.principalId < b.principalId ? -1 : 1)
+      .filter(member => cursor == null || member.principalId > cursor);
+    const items = ordered.slice(0, limit).map(member => this.#receipt(conversation, member));
+    const complete = ordered.length <= items.length;
+    return { items, complete, refreshRequired: false, nextCursor: complete ? null : items.at(-1).principalId };
+  }
+
+  // Progress names a visible, non-deleted message at the caller's current epochs and only moves forward. A read
+  // also counts as delivered, and each advance appends a receipt.reported event.
+  reportReceipt(actor, { conversationId, kind, membershipEpoch, visibilityEpoch, throughSequence }) {
+    const { conversation, member } = this.#visible(actor, conversationId);
+    if (member.membershipEpoch !== membershipEpoch || member.visibilityEpoch !== visibilityEpoch)
+      throw new Problem("REVISION_CONFLICT", 409, "Membership epochs changed; read the conversation and retry");
+    if (kind !== "delivered" && kind !== "read") throw invalid("Receipt kind must be delivered or read");
+    const through = BigInt(throughSequence);
+    if (through < BigInt(member.visibleFromSequence) ||
+        ![...conversation.messages.values()].some(message => message.sequence === throughSequence && !message.deleted))
+      throw invalid("Receipts require a currently visible, non-deleted message");
+    conversation.receiptProgress ??= new Map();
+    const current = conversation.receiptProgress.get(member.principalId) ?? { delivered: null, read: null };
+    if (through > BigInt(current[kind] ?? "0")) {
+      const advance = value => value != null && BigInt(value) >= through ? value : throughSequence;
+      conversation.receiptProgress.set(member.principalId, { delivered: advance(current.delivered),
+        read: kind === "read" ? advance(current.read) : current.read, updatedAt: iso() });
+      this.#append(conversation, "receipt.reported", { kind: "member", id: member.principalId },
+        { principalId: member.principalId, membershipEpoch, visibilityEpoch, kind, throughSequence });
+    }
+    return { result: this.#receipt(conversation, member), retainedKey: "readReceipt" };
+  }
+
   issueBackendKey(actor, { projectId, name, scopes, expiresAt }) {
     if (actor.kind !== "management") throw new Problem("FORBIDDEN", 403, "Management credential required");
     if (projectId !== this.projectId) throw notFound("Project");
@@ -391,7 +448,9 @@ export class Domain {
     const expiry = Date.parse(expiresAt);
     if (!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(expiresAt) || !(expiry > Date.now()))
       throw invalid("expiresAt must be a future UTC millisecond timestamp");
+    // The key is minted when the queued operation runs and its reference arrives with credential delivery, so the
+    // receipt names the project.
     return { accepted: { operation: { operationId: this.nextId(), owner: "management", href: "/graphql", state: "requested" },
-      resourceRef: { kind: "backendKey", id: this.nextId() } } };
+      resourceRef: { kind: "project", id: projectId } } };
   }
 }

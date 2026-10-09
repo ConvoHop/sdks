@@ -37,6 +37,14 @@ npm run check:docs         # generated docs in docs/site match their inputs
 
 None of these commands need service credentials.
 
+The Web client's browser tests also need Playwright's browsers. On Linux, add
+`--with-deps` to install their system libraries too:
+
+```sh
+npx playwright install chromium firefox webkit
+npm run test:browser -w conformance   # set BROWSERS=chromium to run one engine
+```
+
 The [Java and Kotlin server SDK](jvm/README.md) has its own Gradle build in
 `jvm/`. Build it with JDK 17; the Gradle wrapper downloads Gradle itself:
 
@@ -47,6 +55,18 @@ cd jvm
 
 [Build and test](jvm/README.md#build-and-test) explains how to run the tests
 on other JDKs and how to run the conformance scenarios with its driver.
+
+The [.NET server SDK](dotnet/README.md) has its own build in `dotnet/`. Build
+it with the .NET 10 SDK that [`global.json`](global.json) selects:
+
+```sh
+dotnet build dotnet/ConvoHop.slnx                   # the library, its tests and the generator goldens
+dotnet test dotnet/test/ConvoHop.Tests -f net10.0   # the tests on .NET 10
+```
+
+[Build and test](dotnet/README.md#build-and-test) explains how to run the
+tests on .NET 8 and 9, how to pack the library and how to run the
+conformance scenarios with its driver.
 
 The [Swift client SDK](swift/README.md) is a Swift package in `swift/`. Build
 and test it on macOS with Xcode 16.4 or later:
@@ -66,8 +86,10 @@ in the iOS Simulator and the conformance scenarios with its driver.
 | --- | --- |
 | `packages/core` | Shared core (`@convohop/core`): generated GraphQL types and operations, protocol validation and the isomorphic transport |
 | `packages/client` | Client SDK (`@convohop/client`) for browsers and React Native, with realtime and media |
+| `packages/react` | React hooks (`@convohop/react`) over the client SDK. A private workspace, not in a release yet |
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
 | `jvm/` | Java and Kotlin server SDK (`com.convohop:convohop-server` and `com.convohop:convohop-server-kotlin`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/jvm/` |
+| `dotnet/` | .NET server SDK (`ConvoHop`), its xUnit tests and the projects that compile the C# generator goldens. Its conformance driver is in `conformance/drivers/dotnet/` |
 | `swift/` | Swift client SDK for iOS and macOS (the `ConvoHop` Swift package and its products), a self-contained Swift package. Its conformance driver is a separate package in `conformance/drivers/swift/Driver/` |
 | `packages/cli` | The `convohop` command-line tool (`@convohop/cli`), built on `@convohop/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
 | `packages/mcp` | An MCP server (`@convohop/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
@@ -78,7 +100,7 @@ in the iOS Simulator and the conformance scenarios with its driver.
 | `spec/conformance/` | Language-neutral conformance scenarios, the driver protocol, target descriptors and webhook vectors, with their JSON Schemas |
 | `spec/push-payload/` | The push payload contract: notification events, the APNs, FCM and Web Push requests built from them, a JSON Schema and shared vectors |
 | `spec/docs/` | JSON Schemas for the docs pipeline's inputs and its output in `docs/site` |
-| `conformance/` | The conformance runner, the TypeScript reference driver, the mock target and the harness's tests. A private npm workspace that is never published |
+| `conformance/` | The conformance runner, the TypeScript reference driver, the mock target, the harness's tests and the Web client's browser tests. A private npm workspace that is never published |
 | `test/` | Fixtures shared by the package and conformance test suites |
 | `release-please-config.json`, `.release-please-manifest.json` | The released packages and their current versions. See [RELEASING.md](RELEASING.md). |
 | `.github/workflows/` | CI, conformance, release and pull request title workflows |
@@ -119,6 +141,7 @@ files from the IR:
 - `docs/snippets/`
 - `jvm/convohop-server/src/generated/java/` and
   `jvm/convohop-server-kotlin/src/generated/kotlin/`
+- `dotnet/src/ConvoHop/Generated/`
 - `swift/Sources/ConvoHop/Generated/`
 
 ```sh
@@ -230,12 +253,23 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   [conformance scenario](spec/conformance/README.md#adding-a-scenario).
   Run `npm run conformance` when you change a scenario or SDK behavior that
   one covers.
+- The Web client's browser tests live in `conformance/browser/`. A page and a
+  module service worker load the built packages, and Playwright drives them
+  against the mock: sending and following a conversation, holding sends
+  while offline, keeping unsent messages across a reload and, in Chromium,
+  showing push notifications. Run them with
+  `npm run test:browser -w conformance` when you change browser behavior.
+- `@convohop/react`'s tests render the hooks with `react-test-renderer`. CI
+  also runs them, with the hooks' conformance test, on React 18 from the
+  lockfile in `packages/react/test/oldest-react/`.
 - The docs pipeline's tests live in `tools/docgen/test/`. Run them with
   `npm run test:docgen`. Code in the docs is tested too: put it in a
   language's example code and include it by region, as
   [Tested code](docs/docs-pipeline.md#tested-code) describes.
 - The Java and Kotlin SDK's tests use JUnit 5. They live in
   `jvm/*/src/test/` and run with `./gradlew test` in `jvm/`.
+- The .NET SDK's tests use xUnit. They live in `dotnet/test/ConvoHop.Tests/`
+  and run with `dotnet test`.
 - The Swift SDK's tests use XCTest. They live in `swift/Tests/` and run with
   `swift test` in `swift/`.
 
