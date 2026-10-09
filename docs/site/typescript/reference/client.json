@@ -1792,7 +1792,7 @@
           "ref": "@convohop/client#Outbox.close",
           "anchor": "outboxclose-method",
           "signatures": ["close(): void"],
-          "docs": "Stops sending. Persisted entries stay saved, and the client keeps its recovery state."
+          "docs": "Stops sending. Persisted entries stay saved, and the client keeps its recovery state. Once its sends and saves\nsettle, a persistent outbox of the user created meanwhile in this JavaScript context continues with its saved\nentries; otherwise another running one, or the next to start, takes them over."
         }
       ]
     },
@@ -2902,7 +2902,7 @@
           "ref": "@convohop/client#OutboxOptions.persist",
           "anchor": "outboxoptionspersist-property",
           "signatures": ["persist?: boolean"],
-          "docs": "Keep unsent messages, including their text, in the client's `recoveryStorage` or `asyncRecoveryStorage` across\nreloads. Off by default; use one persistent outbox per client. Messages that may have been submitted are\nrecovered, never re-sent as new. Asynchronous storage loads saved messages in the background; they are sent\nbefore messages added meanwhile, and `Outbox.flush` waits for them. Until they load, the limit of 100\nunsent messages counts only messages added meanwhile, so the outbox can hold up to 200."
+          "docs": "Keep unsent messages, including their text, in the client's `recoveryStorage` or `asyncRecoveryStorage` across\nreloads. Off by default; use one persistent outbox per client. Messages that may have been submitted are\nrecovered, never re-sent as new.\n\nEach running persistent outbox of a user saves its messages separately, so tabs sharing `localStorage` keep each\nother's. Up to 16 run at once; they coordinate through Web Locks, or within one JavaScript context where the\nruntime has none. When one stops, such as when its tab closes or reloads, another running outbox takes over the\nmessages it left unsent; if none can yet, the next one to start, come back online or return to the foreground\ndoes. An outbox created in the same JavaScript context while another closes, such as on a React remount,\ncontinues with the closing one's messages instead. While it runs, the outbox holds a Web Lock, so Chromium won't\nkeep the page in its back/forward cache; close the outbox on `pagehide` if you need that.\n\nSaved messages load in the background; they are sent before messages added meanwhile, and\n`Outbox.flush` waits for them. `Outbox.send` refuses a message while 100 are unsent, but loading or\ntaking over saved messages can bring an outbox up to 200."
         },
         {
           "name": "onError",

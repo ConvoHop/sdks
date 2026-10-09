@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import { act } from "react-test-renderer";
 import { ConvoHopProvider, useConversation, useConvoHopClient, useOutbox } from "../dist/index.js";
-import { conversationA, conversationB, fakeOutbox, liveEvent, renderHook, stubClient, waitFor } from "./support.mjs";
+import { alice, conversationA, conversationB, fakeOutbox, liveEvent, renderHook, stubClient, waitFor } from "./support.mjs";
 
 const open = client => client.streams.filter(stream => !stream.closed);
 
@@ -44,6 +44,32 @@ describe("useConversation", () => {
     await unmount();
     assert.equal(store.snapshot.status, "closed");
     assert.deepEqual(open(client), []);
+  });
+
+  test("passes deleted messages through as the authority sends them, with no text or props", async () => {
+    const message = (sequence, fields = {}) => ({ messageId: `5a1b2c3d-4e5f-4a6b-8c7d-00000000000${sequence}`,
+      conversationId: conversationA, authorId: alice, sequence: String(sequence), revision: "1", revisionSequence: String(sequence),
+      createdAt: new Date(0).toISOString(), deleted: false, text: `message ${sequence}`, props: { sequence }, editedAt: null, ...fields });
+    const deletion = { deleted: true, text: null, props: null, revision: "2" };
+    const gone = message(1, { ...deletion, revisionSequence: "3" }), shown = message(2);
+    const client = stubClient({
+      async getConversation(conversationId) {
+        return { conversationId, title: "Stub", latestSequence: "3",
+          membership: { principalId: alice, role: "member", membershipEpoch: "1", visibilityEpoch: "1" } };
+      },
+      async messages() { return { items: [gone, shown], complete: true, nextCursor: null }; },
+      async getMessage(conversationId, messageId) { return { ...shown, ...deletion, messageId, revisionSequence: "4" }; },
+    });
+    const { result, unmount } = await renderHook(() => useConversation(conversationA), { client });
+    await waitFor(() => result.current.status === "live");
+    const shownAs = () => result.current.messages.map(each => [each.sequence, each.deleted, each.text, each.props]);
+    assert.deepEqual(shownAs(), [["1", true, null, null], ["2", false, "message 2", { sequence: 2 }]]);
+
+    const [stream] = open(client);
+    await act(() => stream.apply([{ ...liveEvent(4, "message.deleted"), payload: { messageId: shown.messageId, revision: "2" } }]));
+    assert.deepEqual(shownAs(), [["1", true, null, null], ["2", true, null, null]]);
+    assert.equal(result.current.error, undefined);
+    await unmount();
   });
 
   test("without a conversation, shows idle and refuses actions", async () => {

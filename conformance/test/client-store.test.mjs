@@ -112,10 +112,13 @@ describe("a conversation store over the wire", () => {
     const edited = await bob.client.edit(sent, "the plan");
     await until(store, () => store.snapshot.messages[0].text === "the plan");
     assert.equal(store.snapshot.messages[0].revision, edited.revision);
-    await bob.client.delete(edited);
+    const deleted = await bob.client.delete(edited);
+    assert.deepEqual([deleted.deleted, deleted.text, deleted.props], [true, null, null], "a deletion has no text or props");
     await until(store, () => store.snapshot.messages[0].deleted);
     assert.equal(store.snapshot.messages.length, 1);
     assert.equal(store.snapshot.messages[0].messageId, sent.messageId);
+    assert.deepEqual([store.snapshot.messages[0].text, store.snapshot.messages[0].props, store.snapshot.messages[0].revision],
+      [null, null, deleted.revision], "the store shows the deletion as sent");
   });
 
   test("reports reading once and shows each member's receipt to the other", async () => {
@@ -197,7 +200,8 @@ describe("an outbox over the wire", () => {
 
     const client = alice.connect({ recoveryStorage: storage });
     const outbox = track(new Outbox(client, { persist: true }));
-    assert.deepEqual(outbox.entries.map(entry => [entry.requestId, entry.status, entry.text]), [[requestId, "unknown", "survives a reload"]]);
+    const restored = await until(outbox, () => outbox.entries.length > 0 && outbox.entries);
+    assert.deepEqual(restored.map(entry => [entry.requestId, entry.status, entry.text]), [[requestId, "unknown", "survives a reload"]]);
     const store = track(new ConversationStore(client, conversationId, { outbox }));
     await store.open();
     await until(store, () => store.snapshot.messages.length === 1 && store.snapshot.pending.length === 0);
