@@ -718,8 +718,10 @@ final class TransportTests: XCTestCase {
         await http.on(Self.typing) { request in Reply.ok(request, ["status": "ok"]) }
         let transport = try await Self.makeTransport(http)
         await transport.raiseBarrier()
+        // Capture plain values: the Xcode 26.6 region checker can't analyze a `Self` capture in a `Task`.
+        let operation = Self.typing, input = Self.typingInput
         let pending = Task {
-            try await transport.execute(Self.typing, projectId: TestIDs.project, input: Self.typingInput)
+            try await transport.execute(operation, projectId: TestIDs.project, input: input)
         }
         for _ in 0..<50 { await Task.yield() }
         let held = await http.requests.count

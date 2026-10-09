@@ -491,7 +491,7 @@ struct Harness {
 }
 
 /// The error `work` throws, or a failure when it doesn't throw.
-func thrownError<T>(
+func thrownError<T: Sendable>(
     isolation: isolated (any Actor)? = #isolation, file: StaticString = #filePath, line: UInt = #line,
     _ work: () async throws -> T
 ) async -> (any Error)? {
@@ -505,7 +505,7 @@ func thrownError<T>(
 }
 
 /// The ``ConvoHopError`` `work` throws.
-func convoHopError<T>(
+func convoHopError<T: Sendable>(
     isolation: isolated (any Actor)? = #isolation, file: StaticString = #filePath, line: UInt = #line,
     _ work: () async throws -> T
 ) async -> ConvoHopError? {
