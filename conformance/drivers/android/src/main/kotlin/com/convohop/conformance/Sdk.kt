@@ -29,7 +29,9 @@ internal val ROLES = listOf("user", "backend", "management")
 /** The roles this driver declares. The Android SDK is a user client; the runner's fixture driver serves the rest. */
 internal val DECLARED = listOf("user")
 
-internal val FEATURES = listOf("realtime", "realtime.reconnectPolicy", "recovery.eviction", "recovery.storage", "retryAfter")
+internal val FEATURES = listOf(
+    "realtime", "realtime.reconnectPolicy", "recovery.eviction", "recovery.spentBudget", "recovery.storage", "retryAfter",
+)
 
 /** The catalog operations of the user role, in the order hello declares them. */
 internal val OPERATIONS = listOf(

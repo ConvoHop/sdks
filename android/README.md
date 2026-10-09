@@ -282,10 +282,14 @@ the records.
 
 Recovery storage holds at most 128 records. When it's full, a new request
 makes room by evicting the final record attempted longest ago. A record is
-final when the authority committed or accepted its request, when the
-request's three-attempt/60-second retry budget is spent, or when the
-authority rejected it with a problem that isn't retryable (see the
+final when the SDK will never send its request again: the authority
+committed or accepted it, or rejected it with a problem that isn't
+retryable, or the request's three-attempt/60-second retry budget is spent,
+whatever its outcome (see the
 [recovery journal rules](../spec/recovery/README.md#recovery-journal)).
+Sending or retrying a spent request throws `ConvoHopProblem` code
+`RESOLUTION_REQUIRED` instead of sending it, and
+`client.requests.resolve(id)` still looks it up once its record is gone.
 Records stay while a call in progress uses them, while the outbox may still
 send their message, and while the app holds a live session or participation
 handle that may still end, leave or connect with them. With no record to
