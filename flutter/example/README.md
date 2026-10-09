@@ -63,6 +63,8 @@ also adds a `test/widget_test.dart` for a different app: delete it.
 
 ### iOS
 
+- Use Xcode 26.1 or later, as the
+  [package README](../README.md#requirements) explains.
 - In Xcode, give the `Runner` target a bundle ID and team, then add the Push
   Notifications capability and Background Modes with Voice over IP and
   Audio.

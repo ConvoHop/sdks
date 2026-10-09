@@ -289,7 +289,8 @@ jobs:
 
   example-ios:
     name: Example app (iOS simulator)
-    runs-on: macos-15
+    # device_info_plus, which livekit_client uses, needs the iOS 26.1 SDK.
+    runs-on: macos-26
     timeout-minutes: 45
     permissions:
       contents: read # check out the repository

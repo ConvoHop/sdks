@@ -22,6 +22,9 @@ License: [Apache-2.0](LICENSE).
   builds with CocoaPods, or with Swift Package Manager on Flutter 3.41 or
   later. On earlier releases, leave Swift Package Manager off, as it is by
   default.
+- Xcode 26.1 or later for iOS builds. `livekit_client` uses
+  `device_info_plus`, which from version 12.4.0 calls an API that the iOS
+  26.1 SDK added.
 - Your backend, with a [server SDK](../README.md#available-as-source), signs
   the user in and issues and renews their ConvoHop session.
 
