@@ -40,6 +40,7 @@ flowchart LR
 | [`conformance/drivers/dotnet/`](../../conformance/drivers/dotnet) | The driver for the [.NET server SDK](../../dotnet/README.md). |
 | [`conformance/drivers/go/`](../../conformance/drivers/go) | The driver for the [Go server SDK](../../go/README.md). |
 | [`conformance/drivers/android/`](../../conformance/drivers/android) | The driver for the [Android client SDK](../../android/README.md). |
+| [`conformance/drivers/dart/`](../../conformance/drivers/dart) | The driver for the [Flutter SDK](../../flutter/README.md). |
 | [`conformance/drivers/swift/`](../../conformance/drivers/swift) | The driver for the [Swift client SDK](../../swift/README.md), a Swift package in `Driver/`. |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |
 | [`conformance/targets/`](../../conformance/targets) | Descriptors for real targets, such as the dev-stack image. |
@@ -412,6 +413,13 @@ regression. Its `dev-stack` job is described under
 that CI runs, so it also runs `npm run conformance -- --strict` before it
 packs a release; `npm run check:release` enforces that.
 
+The `conformance` job of the [Flutter workflow](../../.github/workflows/flutter.yml)
+builds the [Dart driver](../../conformance/drivers/dart) and runs the
+scenarios with it against the mock, without `--strict`, and uploads the
+reports as the `conformance-reports-dart-mock` artifact. The Dart driver
+declares only the user role, so the reference driver provides the other
+roles, and scenarios that need what it doesn't declare are skipped.
+
 ### Current results
 
 The TypeScript reference driver passes all 64 scenarios against the mock,
@@ -437,11 +445,14 @@ feature. It passes 33 scenarios against the mock and skips 31: those that
 use only backend or management clients, and those that verify webhooks. Its
 [workflow](../../.github/workflows/android.yml) fails on any other skip.
 
-The Swift driver declares only the user role; the reference driver serves
-the backend clients that set up its scenarios. It passes 33 scenarios against
-the mock and skips 31: the 17 that only use backend or management clients,
-and the 14 `webhooks` scenarios, because a client SDK doesn't verify webhooks.
-On Linux the driver doesn't declare `realtime`, because Ubuntu's libcurl
+The Dart driver also declares only the user role and no `webhooks.verify`
+feature. It passes the same 33 scenarios against the mock and skips the
+same 31. Its [workflow](../../.github/workflows/flutter.yml) fails on any
+other skip.
+
+The Swift driver also declares only the user role and no `webhooks.verify`
+feature. It passes the same 33 scenarios against the mock and skips the
+same 31. On Linux it doesn't declare `realtime`, because Ubuntu's libcurl
 has no WebSocket support. There it passes 24 scenarios and also skips the 9
 realtime ones. Its [workflow](../../.github/workflows/swift.yml) fails on
 any other skip.

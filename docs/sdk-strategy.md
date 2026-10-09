@@ -16,7 +16,7 @@ work, what the packages are called, and how they're versioned and supported.
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
 | Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md); .NET: [`ConvoHop`](../dotnet/README.md); Go: [`github.com/ConvoHop/sdks/go`](../go/README.md); Python: [`convohop`](../python/README.md) |
-| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md); iOS and macOS: [`ConvoHop`](../swift/README.md); Android: [`convohop-android`](../android/README.md) |
+| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md); Android: [`convohop-android`](../android/README.md); Flutter: [`convohop`](../flutter/README.md); iOS and macOS: [`ConvoHop`](../swift/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
 
@@ -39,7 +39,7 @@ ever hold a credential that's limited to one user and expires quickly.
 | Scope | Your whole project, limited by the key's permissions | What that one user is allowed to see and do |
 | Realtime | Signed webhooks | WebSocket subscriptions with reconnect and replay |
 | Voice and video | Call control and call reads, no media | Media through the platform's official LiveKit SDK |
-| Local state | None per user. Optional recovery storage lets an interrupted request be resolved or retried safely. | Optional recovery storage. The Web, Swift and Android SDKs add a conversation store, an offline outbox and optimistic sends, which are planned for the other client SDKs. The Swift and Android SDKs also cache messages on the device. |
+| Local state | None per user. Optional recovery storage lets an interrupted request be resolved or retried safely. | Optional recovery storage. The Web, Android, Flutter and Swift SDKs also have a local store and an offline outbox with optimistic sends; they're planned for the others. |
 
 ### Server SDKs
 
@@ -139,7 +139,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 | iOS and macOS | Swift | LiveKit Swift SDK | Source available |
 | Android | Kotlin | LiveKit Android SDK | Source available |
 | React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | Planned |
-| Flutter | Dart | LiveKit Flutter SDK | Planned |
+| Flutter | Dart | LiveKit Flutter SDK | Source available |
 
 ### How the SDKs are built
 
@@ -168,10 +168,11 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
   pagination, replay, errors and webhook verification. TypeScript is the
   reference implementation. An SDK isn't released until it passes the suite.
 
-Today the annotations, the IR and its TypeScript and reference-snippet
+Today the annotations, the IR and its TypeScript, Dart and reference-snippet
 generators exist. `npm run generate:graphql` generates the operations and
-types in `@convohop/core` and one reference snippet per operation from
-[`schema/`](../schema). See [SDK generation](sdk-generation.md). The
+types in `@convohop/core` and the Flutter SDK, and one reference snippet per
+operation, from [`schema/`](../schema). See
+[SDK generation](sdk-generation.md). The
 [conformance suite](../spec/conformance/README.md) runs its scenarios through
 a TypeScript reference driver against a deterministic mock, and can target a
 real deployment. The [JVM server SDK](../jvm/README.md) adds a Java and
@@ -182,9 +183,10 @@ generator and its own conformance driver. The
 [Python server SDK](../python/README.md) adds a Python generator and its own
 conformance driver. The [Android client SDK](../android/README.md) adds a
 Kotlin generator for Android, separate from the JVM one, and its own
-conformance driver. The [Swift client SDK](../swift/README.md) adds a Swift
-generator and its own conformance driver. Generators for the other languages
-are in development.
+conformance driver. The [Flutter SDK](../flutter/README.md) adds a Dart
+generator and its own conformance driver. The
+[Swift client SDK](../swift/README.md) adds a Swift generator and its own
+conformance driver. Generators for the other languages are in development.
 The same IR generates the operation catalog of the `convohop` command-line
 tool ([`packages/cli`](../packages/cli/README.md)) and the tools of an MCP
 server for AI agents ([`packages/mcp`](../packages/mcp/README.md)). Neither is
@@ -287,8 +289,10 @@ registration error.
 > [push payload contract](../spec/push-payload/README.md) defines the
 > events, the requests and shared vectors for every server SDK. The
 > [Android client SDK](../android/README.md#push-notifications) has the
-> Android helpers, and the [Swift SDK](../swift/README.md#push-notifications)
-> has the iOS and macOS helpers. The other helpers in this table are planned.
+> Android helpers, and the
+> [Flutter SDK](../flutter/README.md#push-notifications) has the Flutter
+> ones. The [Swift SDK](../swift/README.md#push-notifications) has the iOS
+> and macOS helpers. The other helpers in this table are planned.
 
 The SDK helpers are all optional:
 
@@ -298,7 +302,8 @@ The SDK helpers are all optional:
 | Web | A service-worker helper that uses your VAPID keys |
 | iOS and macOS | A Notification Service Extension helper that fetches message content on the device with the user's session, so it never passes through the push service. PushKit-to-CallKit integration for incoming calls. |
 | Android | Handling for high-priority FCM data messages, with a self-managed `ConnectionService` and a full-screen intent for incoming calls |
-| React Native and Flutter | Wrappers around the iOS and Android helpers |
+| React Native | Wrappers around the iOS and Android helpers |
+| Flutter | Its own plugin code, separate from the iOS and Android helpers. On Android: a notification for each FCM data message, and a full-screen call-style notification for incoming calls. On iOS: APNs alerts, and PushKit to CallKit for incoming calls. It has no Notification Service Extension helper, so without message previews, notifications show generic text. |
 
 ## Package names
 
@@ -435,13 +440,14 @@ release.
 | iOS and macOS | iOS 15 and later, macOS 12 and later. Builds with Xcode 16.4 (Swift 6.1) and later. |
 | Android | API level 24 (Android 7.0) and later |
 | React Native | 0.76 and later, with the New Architecture |
-| Flutter | The current stable release |
+| Flutter | The current stable release. The package needs Flutter 3.38 or later, and CI tests both. Apps run on Android 7.0 (API level 24) and later and iOS 13 and later. |
 
 Today, CI verifies the TypeScript packages on Node.js 22 and 24, the Java
 and Kotlin SDK on Java 11, 17, 21 and 25, the .NET SDK on .NET 8, 9 and 10,
 the Go SDK on the two most recent Go releases, the Python SDK on Python
-3.11, 3.12, 3.13 and 3.14, and the Android SDK on Robolectric at API levels
-24, 26, 33 and 34, without a device or emulator. Each other row becomes a CI
+3.11, 3.12, 3.13 and 3.14, the Android SDK on Robolectric at API levels
+24, 26, 33 and 34 without a device or emulator, and the Flutter SDK on
+Flutter 3.38 and the current stable release. Each other row becomes a CI
 requirement when that SDK lands.
 
 For the Web row, CI runs the Web client's browser tests in Playwright's

@@ -80,4 +80,4 @@ mutation CommunicationLiveSessionCredentials($context: RequestContextInput!, $in
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`LiveParticipationHandle.connect`](../../typescript/reference/client.md#liveparticipationhandleconnect-method), [`MediaConnection.reconnect`](../../typescript/reference/client.md#mediaconnectionreconnect-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`LiveParticipationHandle.connect`](../../typescript/reference/client.md#liveparticipationhandleconnect-method), [`LiveParticipationHandle.connectWith`](../../typescript/reference/client.md#liveparticipationhandleconnectwith-method), [`MediaConnection.reconnect`](../../typescript/reference/client.md#mediaconnectionreconnect-method), [`MediaConnectionView.connect`](../../typescript/reference/react.md#mediaconnectionviewconnect-method), [`MediaConnectionView.reconnect`](../../typescript/reference/react.md#mediaconnectionviewreconnect-method) |

@@ -5672,6 +5672,1098 @@
           "origin": "@convohop/core"
         }
       ]
+    },
+    {
+      "name": "@convohop/client/push",
+      "symbols": [
+        {
+          "name": "CallCancelledPushNotification",
+          "kind": "interface",
+          "signatures": ["interface CallCancelledPushNotification extends PushNotificationFields"],
+          "docs": "",
+          "members": [
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["eventType: \"notification.callCancelled\""],
+              "docs": ""
+            },
+            {
+              "name": "liveSessionId",
+              "kind": "property",
+              "signatures": ["liveSessionId: string"],
+              "docs": ""
+            },
+            {
+              "name": "alertId",
+              "kind": "property",
+              "signatures": ["alertId: string"],
+              "docs": "The ring that stopped."
+            },
+            {
+              "name": "expiresAt",
+              "kind": "property",
+              "signatures": ["expiresAt: string"],
+              "docs": ""
+            },
+            {
+              "name": "mediaProfile",
+              "kind": "property",
+              "signatures": ["mediaProfile: string"],
+              "docs": ""
+            },
+            {
+              "name": "reason",
+              "kind": "property",
+              "signatures": ["reason: string"],
+              "docs": "`answered`, `declined`, `ended`, `expired` or a later reason."
+            },
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["eventId: string"],
+              "docs": "Identifies the event across retries and replays of its webhook.",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["occurredAt: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "recipientId",
+              "kind": "property",
+              "signatures": ["recipientId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["conversationId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "senderId",
+              "kind": "property",
+              "signatures": ["senderId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "title",
+              "kind": "property",
+              "signatures": ["title?: string"],
+              "docs": "The visible title your backend set, if any.",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "body",
+              "kind": "property",
+              "signatures": ["body?: string"],
+              "docs": "The visible body your backend set, if any.",
+              "inherited": "PushNotificationFields"
+            }
+          ]
+        },
+        {
+          "name": "CallPushNotification",
+          "kind": "interface",
+          "signatures": ["interface CallPushNotification extends PushNotificationFields"],
+          "docs": "",
+          "members": [
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["eventType: \"notification.call\""],
+              "docs": ""
+            },
+            {
+              "name": "liveSessionId",
+              "kind": "property",
+              "signatures": ["liveSessionId: string"],
+              "docs": ""
+            },
+            {
+              "name": "alertId",
+              "kind": "property",
+              "signatures": ["alertId: string"],
+              "docs": "Identifies this ring. A later ring of the same call has a new `alertId`."
+            },
+            {
+              "name": "expiresAt",
+              "kind": "property",
+              "signatures": ["expiresAt: string"],
+              "docs": "When the ring stops if nobody answers."
+            },
+            {
+              "name": "mediaProfile",
+              "kind": "property",
+              "signatures": ["mediaProfile: string"],
+              "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a later profile."
+            },
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["eventId: string"],
+              "docs": "Identifies the event across retries and replays of its webhook.",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["occurredAt: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "recipientId",
+              "kind": "property",
+              "signatures": ["recipientId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["conversationId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "senderId",
+              "kind": "property",
+              "signatures": ["senderId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "title",
+              "kind": "property",
+              "signatures": ["title?: string"],
+              "docs": "The visible title your backend set, if any.",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "body",
+              "kind": "property",
+              "signatures": ["body?: string"],
+              "docs": "The visible body your backend set, if any.",
+              "inherited": "PushNotificationFields"
+            }
+          ]
+        },
+        {
+          "name": "MessagePushNotification",
+          "kind": "interface",
+          "signatures": ["interface MessagePushNotification extends PushNotificationFields"],
+          "docs": "",
+          "members": [
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["eventType: \"notification.message\""],
+              "docs": ""
+            },
+            {
+              "name": "messageId",
+              "kind": "property",
+              "signatures": ["messageId: string"],
+              "docs": ""
+            },
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["eventId: string"],
+              "docs": "Identifies the event across retries and replays of its webhook.",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["occurredAt: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "recipientId",
+              "kind": "property",
+              "signatures": ["recipientId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["conversationId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "senderId",
+              "kind": "property",
+              "signatures": ["senderId: string"],
+              "docs": "",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "title",
+              "kind": "property",
+              "signatures": ["title?: string"],
+              "docs": "The visible title your backend set, if any.",
+              "inherited": "PushNotificationFields"
+            },
+            {
+              "name": "body",
+              "kind": "property",
+              "signatures": ["body?: string"],
+              "docs": "The visible body your backend set, if any.",
+              "inherited": "PushNotificationFields"
+            }
+          ]
+        },
+        {
+          "name": "NotificationAction",
+          "kind": "interface",
+          "signatures": ["interface NotificationAction"],
+          "docs": "",
+          "members": [
+            {
+              "name": "kind",
+              "kind": "property",
+              "signatures": ["kind: NotificationKind"],
+              "docs": ""
+            },
+            {
+              "name": "notification",
+              "kind": "property",
+              "signatures": ["notification: PushNotification"],
+              "docs": ""
+            },
+            {
+              "name": "tag",
+              "kind": "property",
+              "signatures": ["tag: string"],
+              "docs": "A stable notification ID: the message ID for messages, and for calls the ring's collapse key (its `alertId`\nwithout hyphens). Presenting a notification with the same tag replaces the earlier one."
+            },
+            {
+              "name": "duplicate",
+              "kind": "property",
+              "signatures": ["duplicate: boolean"],
+              "docs": "Whether this event was already handled. Delivery is at least once, so the same event can arrive again."
+            }
+          ]
+        },
+        {
+          "name": "NotificationHandler",
+          "kind": "class",
+          "signatures": ["class NotificationHandler"],
+          "docs": "Decides how to present pushes. It remembers recent events and stopped rings, so it recognizes duplicates and stops\na call whose cancellation arrived first. A service worker keeps this memory only while it runs.",
+          "members": [
+            {
+              "name": "handle",
+              "kind": "method",
+              "signatures": ["handle(payload: unknown, now?: number): NotificationAction"],
+              "docs": "Validates a push, recognizes duplicates by `eventId`, and treats a call as stopped once a cancellation of its ring\narrived (in either order) or its `expiresAt` passed. Throws a `TypeError` for a payload that isn't a valid\nnotification. `now` is in milliseconds."
+            }
+          ]
+        },
+        {
+          "name": "NotificationKind",
+          "kind": "type",
+          "signatures": [
+            "type NotificationKind = \"message\" | \"ring\" | \"stopRinging\" | \"missedCall\""
+          ],
+          "docs": "What to present for a push:\n- `message`: a new message.\n- `ring`: an incoming call that is still ringing.\n- `stopRinging`: the call stopped ringing without being missed: it was answered or declined, on any device, or\n  stopped for a reason this SDK doesn't know.\n- `missedCall`: nobody answered: the call ended first or the ring expired."
+        },
+        {
+          "name": "PushNotification",
+          "kind": "type",
+          "signatures": [
+            "type PushNotification = MessagePushNotification | CallPushNotification | CallCancelledPushNotification"
+          ],
+          "docs": "The `convohop` object a push carries, with only the fields the contract defines for its type."
+        },
+        {
+          "name": "PushNotificationType",
+          "kind": "type",
+          "signatures": [
+            "type PushNotificationType = \"notification.message\" | \"notification.call\" | \"notification.callCancelled\""
+          ],
+          "docs": ""
+        },
+        {
+          "name": "PushRegistration",
+          "kind": "type",
+          "signatures": [
+            "type PushRegistration = {\n    readonly kind: \"webPush\";\n    readonly subscription: WebPushSubscription;\n} | {\n    readonly kind: \"apns\" | \"apnsVoip\";\n    readonly token: string;\n    readonly environment?: \"development\" | \"production\";\n} | {\n    readonly kind: \"fcm\";\n    readonly token: string;\n    readonly fid?: never;\n} | {\n    readonly kind: \"fcm\";\n    readonly fid: string;\n    readonly token?: never;\n}"
+          ],
+          "docs": "Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend\nendpoint can store registrations from browsers and native apps. ConvoHop never sees them.\n\n- `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.\n- `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.\n- `apnsVoip`: an iOS PushKit token for incoming calls.\n- `fcm`: an Android app's Firebase Cloud Messaging target, with exactly one of `token` and `fid`. `token` is the\n  registration token, which apps get by default. `fid` is the Firebase Installation ID, which apps get instead when\n  their manifest sets `firebase_messaging_installation_id_enabled`. Send to it with the FCM HTTP v1 target of the\n  same name."
+        },
+        {
+          "name": "WebClients",
+          "kind": "interface",
+          "signatures": ["interface WebClients"],
+          "docs": "The parts of a service worker's `clients` these helpers use.",
+          "members": [
+            {
+              "name": "matchAll",
+              "kind": "method",
+              "signatures": [
+                "matchAll(options: {\n    type: \"window\";\n    includeUncontrolled: boolean;\n}): Promise<readonly WindowClientLike[]>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "openWindow",
+              "kind": "method",
+              "signatures": ["openWindow(url: string): Promise<unknown>"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "WebNotification",
+          "kind": "interface",
+          "signatures": ["interface WebNotification"],
+          "docs": "A notification to show with `ServiceWorkerRegistration.showNotification`.",
+          "members": [
+            {"name": "title", "kind": "property", "signatures": ["title: string"], "docs": ""},
+            {
+              "name": "options",
+              "kind": "property",
+              "signatures": ["options: NotificationOptions"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "WebNotificationClickEvent",
+          "kind": "interface",
+          "signatures": ["interface WebNotificationClickEvent"],
+          "docs": "The parts of a service worker `notificationclick` event these helpers use.",
+          "members": [
+            {
+              "name": "notification",
+              "kind": "property",
+              "signatures": ["readonly notification: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "data",
+                  "kind": "property",
+                  "signatures": ["readonly data: unknown"],
+                  "docs": ""
+                },
+                {
+                  "name": "tag",
+                  "kind": "property",
+                  "signatures": ["readonly tag: string"],
+                  "docs": ""
+                },
+                {"name": "close", "kind": "method", "signatures": ["close(): void"], "docs": ""}
+              ]
+            },
+            {
+              "name": "action",
+              "kind": "property",
+              "signatures": ["readonly action?: string"],
+              "docs": ""
+            },
+            {
+              "name": "waitUntil",
+              "kind": "method",
+              "signatures": ["waitUntil(promise: Promise<unknown>): void"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "WebPushEvent",
+          "kind": "interface",
+          "signatures": ["interface WebPushEvent"],
+          "docs": "The parts of a service worker `push` event these helpers use.",
+          "members": [
+            {
+              "name": "data",
+              "kind": "property",
+              "signatures": ["readonly data: {\n    json(): unknown;\n} | null"],
+              "docs": ""
+            },
+            {
+              "name": "waitUntil",
+              "kind": "method",
+              "signatures": ["waitUntil(promise: Promise<unknown>): void"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "WebPushEventOptions",
+          "kind": "interface",
+          "signatures": ["interface WebPushEventOptions extends WebPushHandlerOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "onError",
+              "kind": "property",
+              "signatures": ["onError?: (error: Error) => Promise<void> | void"],
+              "docs": "Receives payloads that aren't ConvoHop notifications and failures to show them. The event waits for it, so it\ncan show a notification of its own: browsers expect one for every push."
+            },
+            {
+              "name": "handler",
+              "kind": "property",
+              "signatures": ["handler?: NotificationHandler"],
+              "docs": "Decides what to show. Default: the handler `handleNotification` uses.",
+              "inherited": "WebPushHandlerOptions"
+            },
+            {
+              "name": "render",
+              "kind": "property",
+              "signatures": ["render?: (action: NotificationAction) => WebNotification"],
+              "docs": "Builds the notification to show. Default `defaultWebNotification`.",
+              "inherited": "WebPushHandlerOptions"
+            }
+          ]
+        },
+        {
+          "name": "WebPushHandlerOptions",
+          "kind": "interface",
+          "signatures": ["interface WebPushHandlerOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "handler",
+              "kind": "property",
+              "signatures": ["handler?: NotificationHandler"],
+              "docs": "Decides what to show. Default: the handler `handleNotification` uses."
+            },
+            {
+              "name": "render",
+              "kind": "property",
+              "signatures": ["render?: (action: NotificationAction) => WebNotification"],
+              "docs": "Builds the notification to show. Default `defaultWebNotification`."
+            }
+          ]
+        },
+        {
+          "name": "WebPushSubscribeOptions",
+          "kind": "interface",
+          "signatures": ["interface WebPushSubscribeOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "applicationServerKey",
+              "kind": "property",
+              "signatures": ["applicationServerKey: string | Uint8Array"],
+              "docs": "Your VAPID public key, as base64url or bytes. Your backend signs pushes with its private key."
+            },
+            {
+              "name": "register",
+              "kind": "property",
+              "signatures": ["register: (registration: PushRegistration) => Promise<void> | void"],
+              "docs": "Stores the registration with your backend, for the signed-in user, so it can send pushes to this browser.\nCalled on every subscribe, so your backend can refresh what it stored."
+            }
+          ]
+        },
+        {
+          "name": "WebPushSubscription",
+          "kind": "interface",
+          "signatures": ["interface WebPushSubscription"],
+          "docs": "A Web Push subscription, as `PushSubscription.toJSON()` returns it.",
+          "members": [
+            {
+              "name": "endpoint",
+              "kind": "property",
+              "signatures": ["readonly endpoint?: string"],
+              "docs": ""
+            },
+            {
+              "name": "expirationTime",
+              "kind": "property",
+              "signatures": ["readonly expirationTime?: number | null"],
+              "docs": ""
+            },
+            {
+              "name": "keys",
+              "kind": "property",
+              "signatures": ["readonly keys?: Readonly<Record<string, string>>"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "defaultWebNotification",
+          "kind": "function",
+          "signatures": [
+            "function defaultWebNotification(action: NotificationAction): WebNotification"
+          ],
+          "docs": "The default presentation. It uses the title and body your backend set, with English fallback titles, and the\naction's tag, so a duplicate or a stopped ring replaces its earlier notification. A ring stays until it is handled;\na ring that stopped without being missed is replaced silently."
+        },
+        {
+          "name": "handleNotification",
+          "kind": "function",
+          "signatures": [
+            "function handleNotification(payload: unknown, now?: number): NotificationAction"
+          ],
+          "docs": "`NotificationHandler.handle` with a handler shared by this module."
+        },
+        {
+          "name": "handleNotificationClick",
+          "kind": "function",
+          "signatures": [
+            "function handleNotificationClick(clients: WebClients, event: WebNotificationClickEvent, url: (notification: PushNotification, action: string | undefined) => string): boolean"
+          ],
+          "docs": "Handles a `notificationclick` for a ConvoHop notification: closes it, then focuses a window already showing `url`\nor opens one. `url` maps the notification (and the clicked action, if any) to a URL of your app: relative to the\nservice worker, such as `/conversations/${notification.conversationId}`, or absolute on its origin. Another origin\nis a TypeError, and the notification stays open. Returns whether the notification was a ConvoHop one."
+        },
+        {
+          "name": "handlePushEvent",
+          "kind": "function",
+          "signatures": [
+            "function handlePushEvent(registration: ServiceWorkerRegistration, event: WebPushEvent, options?: WebPushEventOptions): void"
+          ],
+          "docs": "Handles a service worker `push` event: `self.addEventListener(\"push\", event => handlePushEvent(self.registration, event))`."
+        },
+        {
+          "name": "parsePushNotification",
+          "kind": "function",
+          "signatures": ["function parsePushNotification(value: unknown): PushNotification"],
+          "docs": "Validates the `convohop` object of a push against the push payload contract. Returns its known fields and ignores\nfields the contract doesn't define for its type. Throws a `TypeError` for anything else."
+        },
+        {
+          "name": "parsePushPayload",
+          "kind": "function",
+          "signatures": ["function parsePushPayload(payload: unknown): PushNotification"],
+          "docs": "Finds and validates the notification in a push: a Web Push or APNs payload (`{ convohop: {...} }`), FCM data\n(`{ convohop: \"<json>\" }`) or the `convohop` object itself."
+        },
+        {
+          "name": "showPushNotification",
+          "kind": "function",
+          "signatures": [
+            "function showPushNotification(registration: ServiceWorkerRegistration, payload: unknown, options?: WebPushHandlerOptions): Promise<NotificationAction>"
+          ],
+          "docs": "Shows the notification for a decrypted Web Push payload (`event.data.json()`) and returns the action taken.\n\nBrowsers expect every push to show a notification: Safari revokes the subscription after a few pushes that don't,\nand Chrome shows a generic one. So every action, including duplicates and stopped rings, shows or replaces one."
+        },
+        {
+          "name": "subscribePush",
+          "kind": "function",
+          "signatures": [
+            "function subscribePush(registration: ServiceWorkerRegistration, options: WebPushSubscribeOptions): Promise<PushSubscription>"
+          ],
+          "docs": "Subscribes this browser to Web Push with your VAPID key and registers the subscription with your backend.\nReuses a subscription for the same key and replaces one made with another key. Call it from a user gesture:\nsubscribing asks for notification permission, and some browsers only ask from a gesture."
+        },
+        {
+          "name": "unsubscribePush",
+          "kind": "function",
+          "signatures": [
+            "function unsubscribePush(registration: ServiceWorkerRegistration, unregister?: (registration: PushRegistration) => Promise<void> | void): Promise<boolean>"
+          ],
+          "docs": "Unsubscribes this browser and, first, lets your backend forget the subscription. Resolves whether a subscription\nexisted."
+        }
+      ]
+    },
+    {
+      "name": "@convohop/react",
+      "symbols": [
+        {
+          "name": "ConversationOptions",
+          "kind": "interface",
+          "signatures": ["interface ConversationOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "onEvent",
+              "kind": "property",
+              "signatures": ["onEvent?: ((event: ProtocolObject) => void) | undefined"],
+              "docs": "Called after each new event is applied, including call and live-session events the store doesn't track."
+            },
+            {
+              "name": "onError",
+              "kind": "property",
+              "signatures": ["onError?: ((error: Error) => void) | undefined"],
+              "docs": "Called for every error, including realtime interruptions the store recovers from on its own."
+            }
+          ]
+        },
+        {
+          "name": "ConversationView",
+          "kind": "interface",
+          "signatures": ["interface ConversationView extends ConversationSnapshot"],
+          "docs": "A conversation's state and the actions on it. Actions reject, and `send` throws, until the conversation's store exists.",
+          "members": [
+            {
+              "name": "store",
+              "kind": "property",
+              "signatures": ["readonly store: ConversationStore | undefined"],
+              "docs": "The store following the conversation, or undefined without a conversation ID and before the first effect runs."
+            },
+            {
+              "name": "send",
+              "kind": "method",
+              "signatures": ["send(text: string, props?: ProtocolObject): OutboxEntry"],
+              "docs": "Queues a message in the outbox. It shows in `pending` until it appears in `messages`."
+            },
+            {
+              "name": "open",
+              "kind": "method",
+              "signatures": ["open(): Promise<void>"],
+              "docs": "Reconnects after an error, from the loaded state."
+            },
+            {
+              "name": "resync",
+              "kind": "method",
+              "signatures": ["resync(): Promise<void>"],
+              "docs": "Discards the replay position and reloads the conversation; needed when `resyncRequired` is set."
+            },
+            {
+              "name": "loadOlder",
+              "kind": "method",
+              "signatures": ["loadOlder(): Promise<boolean>"],
+              "docs": "Loads the previous page of messages. Resolves whether it added any."
+            },
+            {
+              "name": "markRead",
+              "kind": "method",
+              "signatures": ["markRead(): Promise<boolean>"],
+              "docs": "Reports reading through the newest loaded message. Resolves whether a report was needed."
+            },
+            {
+              "name": "markDelivered",
+              "kind": "method",
+              "signatures": ["markDelivered(): Promise<boolean>"],
+              "docs": "Reports delivery through the newest loaded message. Resolves whether a report was needed."
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["readonly status: ConversationStatus"],
+              "docs": "",
+              "inherited": "ConversationSnapshot"
+            },
+            {
+              "name": "conversation",
+              "kind": "property",
+              "signatures": ["readonly conversation: Readonly<Conversation> | undefined"],
+              "docs": "The conversation and the user's membership, once loaded.",
+              "inherited": "ConversationSnapshot"
+            },
+            {
+              "name": "messages",
+              "kind": "property",
+              "signatures": ["readonly messages: readonly Readonly<ConversationMessage>[]"],
+              "docs": "Loaded messages, oldest first. Deleted messages stay, with `deleted: true` and no text.",
+              "inherited": "ConversationSnapshot"
+            },
+            {
+              "name": "pending",
+              "kind": "property",
+              "signatures": ["readonly pending: readonly OutboxEntry[]"],
+              "docs": "This conversation's outbox entries that aren't in `messages` yet, in send order.",
+              "inherited": "ConversationSnapshot"
+            },
+            {
+              "name": "receipts",
+              "kind": "property",
+              "signatures": ["readonly receipts: readonly Readonly<ReadReceipt>[]"],
+              "docs": "Each member's delivery and read progress, ordered by principal.",
+              "inherited": "ConversationSnapshot"
+            },
+            {
+              "name": "hasOlder",
+              "kind": "property",
+              "signatures": ["readonly hasOlder: boolean"],
+              "docs": "Whether `ConversationStore.loadOlder` can load earlier messages.",
+              "inherited": "ConversationSnapshot"
+            },
+            {
+              "name": "error",
+              "kind": "property",
+              "signatures": ["readonly error: Error | undefined"],
+              "docs": "",
+              "inherited": "ConversationSnapshot"
+            },
+            {
+              "name": "resyncRequired",
+              "kind": "property",
+              "signatures": ["readonly resyncRequired: boolean"],
+              "docs": "The saved replay position is no longer valid. Only `ConversationStore.resync` recovers.",
+              "inherited": "ConversationSnapshot"
+            }
+          ]
+        },
+        {
+          "name": "ConvoHopProvider",
+          "kind": "function",
+          "signatures": [
+            "function ConvoHopProvider({ client, outbox, children }: ConvoHopProviderProps): ReactElement"
+          ],
+          "docs": "Makes a client, and optionally a shared outbox, available to the hooks below it. It doesn't own or close either."
+        },
+        {
+          "name": "ConvoHopProviderProps",
+          "kind": "interface",
+          "signatures": ["interface ConvoHopProviderProps"],
+          "docs": "",
+          "members": [
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["readonly client: ConvoHopClient"],
+              "docs": "The signed-in user's client. Create it outside the provider, or above it, and close it when the user signs out."
+            },
+            {
+              "name": "outbox",
+              "kind": "property",
+              "signatures": ["readonly outbox?: Outbox | undefined"],
+              "docs": "The outbox every conversation below sends through. Without one, each conversation's store sends through an outbox\nof its own, which stops sending when the component unmounts."
+            },
+            {
+              "name": "children",
+              "kind": "property",
+              "signatures": ["readonly children?: ReactNode"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "LiveSessionState",
+          "kind": "interface",
+          "signatures": ["interface LiveSessionState"],
+          "docs": "",
+          "members": [
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["readonly status: LiveSessionStatus"],
+              "docs": ""
+            },
+            {
+              "name": "session",
+              "kind": "property",
+              "signatures": ["readonly session: LiveSessionHandle | null | undefined"],
+              "docs": "The conversation's current live session, `null` when none is running, and undefined until it first loads."
+            },
+            {
+              "name": "error",
+              "kind": "property",
+              "signatures": ["readonly error: Error | undefined"],
+              "docs": "Why the last load failed. `session` keeps the value last loaded."
+            }
+          ]
+        },
+        {
+          "name": "LiveSessionStatus",
+          "kind": "type",
+          "signatures": ["type LiveSessionStatus = \"idle\" | \"loading\" | \"ready\" | \"error\""],
+          "docs": ""
+        },
+        {
+          "name": "LiveSessionView",
+          "kind": "interface",
+          "signatures": ["interface LiveSessionView extends LiveSessionState"],
+          "docs": "",
+          "members": [
+            {
+              "name": "refresh",
+              "kind": "method",
+              "signatures": ["refresh(): Promise<void>"],
+              "docs": "Loads the current live session again; a failure shows in `error`. Calls during a load share one more load after it."
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["readonly status: LiveSessionStatus"],
+              "docs": "",
+              "inherited": "LiveSessionState"
+            },
+            {
+              "name": "session",
+              "kind": "property",
+              "signatures": ["readonly session: LiveSessionHandle | null | undefined"],
+              "docs": "The conversation's current live session, `null` when none is running, and undefined until it first loads.",
+              "inherited": "LiveSessionState"
+            },
+            {
+              "name": "error",
+              "kind": "property",
+              "signatures": ["readonly error: Error | undefined"],
+              "docs": "Why the last load failed. `session` keeps the value last loaded.",
+              "inherited": "LiveSessionState"
+            }
+          ]
+        },
+        {
+          "name": "MediaConnectionState",
+          "kind": "interface",
+          "signatures": ["interface MediaConnectionState"],
+          "docs": "",
+          "members": [
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["readonly status: MediaConnectionStatus"],
+              "docs": ""
+            },
+            {
+              "name": "connection",
+              "kind": "property",
+              "signatures": ["readonly connection: MediaConnection | undefined"],
+              "docs": "The latest connection: use it for the microphone, camera and stats. It stays after a disconnection, for `reconnect()`."
+            },
+            {
+              "name": "tracks",
+              "kind": "property",
+              "signatures": ["readonly tracks: readonly RemoteMedia[]"],
+              "docs": "Remote audio and video, in subscription order. Add each `element` to the page, for example from a ref callback."
+            },
+            {
+              "name": "audioBlocked",
+              "kind": "property",
+              "signatures": ["readonly audioBlocked: boolean"],
+              "docs": "The browser blocked remote audio: call `enableAudio()` from a user gesture, such as a click."
+            },
+            {
+              "name": "error",
+              "kind": "property",
+              "signatures": ["readonly error: Error | undefined"],
+              "docs": "Why the last connect or reconnect failed."
+            }
+          ]
+        },
+        {
+          "name": "MediaConnectionStatus",
+          "kind": "type",
+          "signatures": [
+            "type MediaConnectionStatus = \"idle\" | \"connecting\" | \"connected\" | \"resuming\" | \"disconnected\" | \"failed\""
+          ],
+          "docs": ""
+        },
+        {
+          "name": "MediaConnectionView",
+          "kind": "interface",
+          "signatures": ["interface MediaConnectionView extends MediaConnectionState"],
+          "docs": "",
+          "members": [
+            {
+              "name": "connect",
+              "kind": "method",
+              "signatures": [
+                "connect(participation: LiveParticipationHandle, options?: LiveConnectOptions): Promise<MediaConnection>"
+              ],
+              "docs": "Connects a participation's media with `livekit-client`. Call it from a user gesture, so the browser allows audio and\neach admission is used once. Rejects while this hook's connection is connecting or connected, or when the\nparticipation's media is connected elsewhere."
+            },
+            {
+              "name": "reconnect",
+              "kind": "method",
+              "signatures": ["reconnect(): Promise<MediaConnection>"],
+              "docs": "Connects again with fresh credentials, typically after `disconnected`."
+            },
+            {
+              "name": "disconnect",
+              "kind": "method",
+              "signatures": ["disconnect(): Promise<void>"],
+              "docs": "Disconnects. A connection still opening closes as soon as it opens."
+            },
+            {
+              "name": "enableAudio",
+              "kind": "method",
+              "signatures": ["enableAudio(): Promise<void>"],
+              "docs": "Plays the remote audio the browser blocked. Call it from a user gesture."
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["readonly status: MediaConnectionStatus"],
+              "docs": "",
+              "inherited": "MediaConnectionState"
+            },
+            {
+              "name": "connection",
+              "kind": "property",
+              "signatures": ["readonly connection: MediaConnection | undefined"],
+              "docs": "The latest connection: use it for the microphone, camera and stats. It stays after a disconnection, for `reconnect()`.",
+              "inherited": "MediaConnectionState"
+            },
+            {
+              "name": "tracks",
+              "kind": "property",
+              "signatures": ["readonly tracks: readonly RemoteMedia[]"],
+              "docs": "Remote audio and video, in subscription order. Add each `element` to the page, for example from a ref callback.",
+              "inherited": "MediaConnectionState"
+            },
+            {
+              "name": "audioBlocked",
+              "kind": "property",
+              "signatures": ["readonly audioBlocked: boolean"],
+              "docs": "The browser blocked remote audio: call `enableAudio()` from a user gesture, such as a click.",
+              "inherited": "MediaConnectionState"
+            },
+            {
+              "name": "error",
+              "kind": "property",
+              "signatures": ["readonly error: Error | undefined"],
+              "docs": "Why the last connect or reconnect failed.",
+              "inherited": "MediaConnectionState"
+            }
+          ]
+        },
+        {
+          "name": "SessionRefreshOptions",
+          "kind": "interface",
+          "signatures": ["interface SessionRefreshOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "leadMs",
+              "kind": "property",
+              "signatures": ["leadMs?: number | undefined"],
+              "docs": "How long before the session expires to renew it, in milliseconds. Default 60000."
+            },
+            {
+              "name": "enabled",
+              "kind": "property",
+              "signatures": ["enabled?: boolean | undefined"],
+              "docs": "Whether to keep the session renewed. Default true."
+            },
+            {
+              "name": "onRefreshed",
+              "kind": "property",
+              "signatures": ["onRefreshed?: ((session: SessionMetadata) => void) | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "onError",
+              "kind": "property",
+              "signatures": ["onError?: ((error: Error) => void) | undefined"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "TypingControls",
+          "kind": "interface",
+          "signatures": ["interface TypingControls"],
+          "docs": "",
+          "members": [
+            {
+              "name": "input",
+              "kind": "method",
+              "signatures": ["input(): void"],
+              "docs": "Call on every edit to the draft."
+            },
+            {
+              "name": "stop",
+              "kind": "method",
+              "signatures": ["stop(): void"],
+              "docs": "Call when the user sends or clears the draft."
+            }
+          ]
+        },
+        {
+          "name": "TypingOptions",
+          "kind": "interface",
+          "signatures": ["interface TypingOptions"],
+          "docs": "",
+          "members": [
+            {
+              "name": "intervalMs",
+              "kind": "property",
+              "signatures": ["intervalMs?: number | undefined"],
+              "docs": "The shortest time between typing signals while the user keeps typing, in milliseconds. Default 3000."
+            },
+            {
+              "name": "idleMs",
+              "kind": "property",
+              "signatures": ["idleMs?: number | undefined"],
+              "docs": "How long after the last input the user stops typing, in milliseconds. Default 5000."
+            },
+            {
+              "name": "enabled",
+              "kind": "property",
+              "signatures": ["enabled?: boolean | undefined"],
+              "docs": "Whether to send signals. Pass `capabilities().features?.typing === true` to skip projects without typing. Default true."
+            },
+            {
+              "name": "onError",
+              "kind": "property",
+              "signatures": ["onError?: ((error: Error) => void) | undefined"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "useConversation",
+          "kind": "function",
+          "signatures": [
+            "function useConversation(conversationId: string | null | undefined, options?: ConversationOptions): ConversationView"
+          ],
+          "docs": "Follows a conversation while the component is mounted: it loads the conversation, keeps it live through\nreconnects and session refreshes, and sends optimistically through the provider's outbox. A new `conversationId`,\nclient or outbox closes the old store and opens a new one; `null` closes it."
+        },
+        {
+          "name": "useConvoHopClient",
+          "kind": "function",
+          "signatures": ["function useConvoHopClient(): ConvoHopClient"],
+          "docs": "The provider's client."
+        },
+        {
+          "name": "useLiveSession",
+          "kind": "function",
+          "signatures": [
+            "function useLiveSession(conversationId: string | null | undefined): LiveSessionView"
+          ],
+          "docs": "The conversation's current live session. It loads when the component mounts and again after each live-session event\nthat a mounted `useConversation` for the same conversation, under the same provider, receives. Call `refresh()`\nin other cases, for example when a call push notification arrives."
+        },
+        {
+          "name": "useMediaConnection",
+          "kind": "function",
+          "signatures": ["function useMediaConnection(): MediaConnectionView"],
+          "docs": "Connects a live-session participation's media in the browser and tracks its remote audio and video. Unmounting\ndisconnects. Browser only: on React Native, connect with `participation.connectWith` and a native LiveKit SDK."
+        },
+        {
+          "name": "useOutbox",
+          "kind": "function",
+          "signatures": ["function useOutbox(outbox?: Outbox): readonly OutboxEntry[]"],
+          "docs": "The entries of `outbox`, or of the provider's outbox, in send order."
+        },
+        {
+          "name": "useSessionRefresh",
+          "kind": "function",
+          "signatures": ["function useSessionRefresh(options?: SessionRefreshOptions): void"],
+          "docs": "Renews the provider client's session before it expires while the component is mounted. Needs `sessionRefresh`;\nwithout it, throws `SESSION_REFRESH_REQUIRED` to the nearest error boundary."
+        },
+        {
+          "name": "useTyping",
+          "kind": "function",
+          "signatures": [
+            "function useTyping(conversationId: string | null | undefined, options?: TypingOptions): TypingControls"
+          ],
+          "docs": "Sends throttled typing signals for a conversation while the user types. Unmounting, or a new conversation, signals\nthat typing stopped. The returned functions keep their identity."
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,4 @@
+.dart_tool/
+build/
+# Resolution follows the Flutter SDK's pinned packages, which differ between the Flutter versions CI tests.
+pubspec.lock

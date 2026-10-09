@@ -1,0 +1,805 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "typescript",
+  "package": "@convohop/client/push",
+  "layer": "client",
+  "page": "client-push.md",
+  "symbols": [
+    {
+      "name": "NotificationHandler",
+      "kind": "class",
+      "ref": "@convohop/client/push#NotificationHandler",
+      "anchor": "notificationhandler-class",
+      "signatures": ["class NotificationHandler"],
+      "docs": "Decides how to present pushes. It remembers recent events and stopped rings, so it recognizes duplicates and stops\na call whose cancellation arrived first. A service worker keeps this memory only while it runs.",
+      "members": [
+        {
+          "name": "handle",
+          "kind": "method",
+          "ref": "@convohop/client/push#NotificationHandler.handle",
+          "anchor": "notificationhandlerhandle-method",
+          "signatures": ["handle(payload: unknown, now?: number): NotificationAction"],
+          "docs": "Validates a push, recognizes duplicates by `eventId`, and treats a call as stopped once a cancellation of its ring\narrived (in either order) or its `expiresAt` passed. Throws a `TypeError` for a payload that isn't a valid\nnotification. `now` is in milliseconds."
+        }
+      ]
+    },
+    {
+      "name": "CallCancelledPushNotification",
+      "kind": "interface",
+      "ref": "@convohop/client/push#CallCancelledPushNotification",
+      "anchor": "callcancelledpushnotification-interface",
+      "signatures": ["interface CallCancelledPushNotification extends PushNotificationFields"],
+      "docs": "",
+      "members": [
+        {
+          "name": "eventType",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.eventType",
+          "anchor": "callcancelledpushnotificationeventtype-property",
+          "signatures": ["eventType: \"notification.callCancelled\""],
+          "docs": ""
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.liveSessionId",
+          "anchor": "callcancelledpushnotificationlivesessionid-property",
+          "signatures": ["liveSessionId: string"],
+          "docs": ""
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.alertId",
+          "anchor": "callcancelledpushnotificationalertid-property",
+          "signatures": ["alertId: string"],
+          "docs": "The ring that stopped."
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.expiresAt",
+          "anchor": "callcancelledpushnotificationexpiresat-property",
+          "signatures": ["expiresAt: string"],
+          "docs": ""
+        },
+        {
+          "name": "mediaProfile",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.mediaProfile",
+          "anchor": "callcancelledpushnotificationmediaprofile-property",
+          "signatures": ["mediaProfile: string"],
+          "docs": ""
+        },
+        {
+          "name": "reason",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.reason",
+          "anchor": "callcancelledpushnotificationreason-property",
+          "signatures": ["reason: string"],
+          "docs": "`answered`, `declined`, `ended`, `expired` or a later reason."
+        },
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.eventId",
+          "anchor": "callcancelledpushnotificationeventid-property",
+          "signatures": ["eventId: string"],
+          "docs": "Identifies the event across retries and replays of its webhook.",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.occurredAt",
+          "anchor": "callcancelledpushnotificationoccurredat-property",
+          "signatures": ["occurredAt: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.projectId",
+          "anchor": "callcancelledpushnotificationprojectid-property",
+          "signatures": ["projectId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.recipientId",
+          "anchor": "callcancelledpushnotificationrecipientid-property",
+          "signatures": ["recipientId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.conversationId",
+          "anchor": "callcancelledpushnotificationconversationid-property",
+          "signatures": ["conversationId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.senderId",
+          "anchor": "callcancelledpushnotificationsenderid-property",
+          "signatures": ["senderId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.title",
+          "anchor": "callcancelledpushnotificationtitle-property",
+          "signatures": ["title?: string"],
+          "docs": "The visible title your backend set, if any.",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallCancelledPushNotification.body",
+          "anchor": "callcancelledpushnotificationbody-property",
+          "signatures": ["body?: string"],
+          "docs": "The visible body your backend set, if any.",
+          "inherited": "PushNotificationFields"
+        }
+      ]
+    },
+    {
+      "name": "CallPushNotification",
+      "kind": "interface",
+      "ref": "@convohop/client/push#CallPushNotification",
+      "anchor": "callpushnotification-interface",
+      "signatures": ["interface CallPushNotification extends PushNotificationFields"],
+      "docs": "",
+      "members": [
+        {
+          "name": "eventType",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.eventType",
+          "anchor": "callpushnotificationeventtype-property",
+          "signatures": ["eventType: \"notification.call\""],
+          "docs": ""
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.liveSessionId",
+          "anchor": "callpushnotificationlivesessionid-property",
+          "signatures": ["liveSessionId: string"],
+          "docs": ""
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.alertId",
+          "anchor": "callpushnotificationalertid-property",
+          "signatures": ["alertId: string"],
+          "docs": "Identifies this ring. A later ring of the same call has a new `alertId`."
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.expiresAt",
+          "anchor": "callpushnotificationexpiresat-property",
+          "signatures": ["expiresAt: string"],
+          "docs": "When the ring stops if nobody answers."
+        },
+        {
+          "name": "mediaProfile",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.mediaProfile",
+          "anchor": "callpushnotificationmediaprofile-property",
+          "signatures": ["mediaProfile: string"],
+          "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a later profile."
+        },
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.eventId",
+          "anchor": "callpushnotificationeventid-property",
+          "signatures": ["eventId: string"],
+          "docs": "Identifies the event across retries and replays of its webhook.",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.occurredAt",
+          "anchor": "callpushnotificationoccurredat-property",
+          "signatures": ["occurredAt: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.projectId",
+          "anchor": "callpushnotificationprojectid-property",
+          "signatures": ["projectId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.recipientId",
+          "anchor": "callpushnotificationrecipientid-property",
+          "signatures": ["recipientId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.conversationId",
+          "anchor": "callpushnotificationconversationid-property",
+          "signatures": ["conversationId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.senderId",
+          "anchor": "callpushnotificationsenderid-property",
+          "signatures": ["senderId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.title",
+          "anchor": "callpushnotificationtitle-property",
+          "signatures": ["title?: string"],
+          "docs": "The visible title your backend set, if any.",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "@convohop/client/push#CallPushNotification.body",
+          "anchor": "callpushnotificationbody-property",
+          "signatures": ["body?: string"],
+          "docs": "The visible body your backend set, if any.",
+          "inherited": "PushNotificationFields"
+        }
+      ]
+    },
+    {
+      "name": "MessagePushNotification",
+      "kind": "interface",
+      "ref": "@convohop/client/push#MessagePushNotification",
+      "anchor": "messagepushnotification-interface",
+      "signatures": ["interface MessagePushNotification extends PushNotificationFields"],
+      "docs": "",
+      "members": [
+        {
+          "name": "eventType",
+          "kind": "property",
+          "ref": "@convohop/client/push#MessagePushNotification.eventType",
+          "anchor": "messagepushnotificationeventtype-property",
+          "signatures": ["eventType: \"notification.message\""],
+          "docs": ""
+        },
+        {
+          "name": "messageId",
+          "kind": "property",
+          "ref": "@convohop/client/push#MessagePushNotification.messageId",
+          "anchor": "messagepushnotificationmessageid-property",
+          "signatures": ["messageId: string"],
+          "docs": ""
+        },
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "@convohop/client/push#MessagePushNotification.eventId",
+          "anchor": "messagepushnotificationeventid-property",
+          "signatures": ["eventId: string"],
+          "docs": "Identifies the event across retries and replays of its webhook.",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "@convohop/client/push#MessagePushNotification.occurredAt",
+          "anchor": "messagepushnotificationoccurredat-property",
+          "signatures": ["occurredAt: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "@convohop/client/push#MessagePushNotification.projectId",
+          "anchor": "messagepushnotificationprojectid-property",
+          "signatures": ["projectId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "@convohop/client/push#MessagePushNotification.recipientId",
+          "anchor": "messagepushnotificationrecipientid-property",
+          "signatures": ["recipientId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/client/push#MessagePushNotification.conversationId",
+          "anchor": "messagepushnotificationconversationid-property",
+          "signatures": ["conversationId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "@convohop/client/push#MessagePushNotification.senderId",
+          "anchor": "messagepushnotificationsenderid-property",
+          "signatures": ["senderId: string"],
+          "docs": "",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "@convohop/client/push#MessagePushNotification.title",
+          "anchor": "messagepushnotificationtitle-property",
+          "signatures": ["title?: string"],
+          "docs": "The visible title your backend set, if any.",
+          "inherited": "PushNotificationFields"
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "@convohop/client/push#MessagePushNotification.body",
+          "anchor": "messagepushnotificationbody-property",
+          "signatures": ["body?: string"],
+          "docs": "The visible body your backend set, if any.",
+          "inherited": "PushNotificationFields"
+        }
+      ]
+    },
+    {
+      "name": "NotificationAction",
+      "kind": "interface",
+      "ref": "@convohop/client/push#NotificationAction",
+      "anchor": "notificationaction-interface",
+      "signatures": ["interface NotificationAction"],
+      "docs": "",
+      "members": [
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "@convohop/client/push#NotificationAction.kind",
+          "anchor": "notificationactionkind-property",
+          "signatures": ["kind: NotificationKind"],
+          "docs": ""
+        },
+        {
+          "name": "notification",
+          "kind": "property",
+          "ref": "@convohop/client/push#NotificationAction.notification",
+          "anchor": "notificationactionnotification-property",
+          "signatures": ["notification: PushNotification"],
+          "docs": ""
+        },
+        {
+          "name": "tag",
+          "kind": "property",
+          "ref": "@convohop/client/push#NotificationAction.tag",
+          "anchor": "notificationactiontag-property",
+          "signatures": ["tag: string"],
+          "docs": "A stable notification ID: the message ID for messages, and for calls the ring's collapse key (its `alertId`\nwithout hyphens). Presenting a notification with the same tag replaces the earlier one."
+        },
+        {
+          "name": "duplicate",
+          "kind": "property",
+          "ref": "@convohop/client/push#NotificationAction.duplicate",
+          "anchor": "notificationactionduplicate-property",
+          "signatures": ["duplicate: boolean"],
+          "docs": "Whether this event was already handled. Delivery is at least once, so the same event can arrive again."
+        }
+      ]
+    },
+    {
+      "name": "WebClients",
+      "kind": "interface",
+      "ref": "@convohop/client/push#WebClients",
+      "anchor": "webclients-interface",
+      "signatures": ["interface WebClients"],
+      "docs": "The parts of a service worker's `clients` these helpers use.",
+      "members": [
+        {
+          "name": "matchAll",
+          "kind": "method",
+          "ref": "@convohop/client/push#WebClients.matchAll",
+          "anchor": "webclientsmatchall-method",
+          "signatures": [
+            "matchAll(options: {\n    type: \"window\";\n    includeUncontrolled: boolean;\n}): Promise<readonly WindowClientLike[]>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "openWindow",
+          "kind": "method",
+          "ref": "@convohop/client/push#WebClients.openWindow",
+          "anchor": "webclientsopenwindow-method",
+          "signatures": ["openWindow(url: string): Promise<unknown>"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebNotification",
+      "kind": "interface",
+      "ref": "@convohop/client/push#WebNotification",
+      "anchor": "webnotification-interface",
+      "signatures": ["interface WebNotification"],
+      "docs": "A notification to show with `ServiceWorkerRegistration.showNotification`.",
+      "members": [
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebNotification.title",
+          "anchor": "webnotificationtitle-property",
+          "signatures": ["title: string"],
+          "docs": ""
+        },
+        {
+          "name": "options",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebNotification.options",
+          "anchor": "webnotificationoptions-property",
+          "signatures": ["options: NotificationOptions"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebNotificationClickEvent",
+      "kind": "interface",
+      "ref": "@convohop/client/push#WebNotificationClickEvent",
+      "anchor": "webnotificationclickevent-interface",
+      "signatures": ["interface WebNotificationClickEvent"],
+      "docs": "The parts of a service worker `notificationclick` event these helpers use.",
+      "members": [
+        {
+          "name": "notification",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebNotificationClickEvent.notification",
+          "anchor": "webnotificationclickeventnotification-property",
+          "signatures": ["readonly notification: { … }"],
+          "docs": "",
+          "members": [
+            {
+              "name": "data",
+              "kind": "property",
+              "ref": "@convohop/client/push#WebNotificationClickEvent.notification.data",
+              "anchor": "webnotificationclickeventnotificationdata-property",
+              "signatures": ["readonly data: unknown"],
+              "docs": ""
+            },
+            {
+              "name": "tag",
+              "kind": "property",
+              "ref": "@convohop/client/push#WebNotificationClickEvent.notification.tag",
+              "anchor": "webnotificationclickeventnotificationtag-property",
+              "signatures": ["readonly tag: string"],
+              "docs": ""
+            },
+            {
+              "name": "close",
+              "kind": "method",
+              "ref": "@convohop/client/push#WebNotificationClickEvent.notification.close",
+              "anchor": "webnotificationclickeventnotificationclose-method",
+              "signatures": ["close(): void"],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "action",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebNotificationClickEvent.action",
+          "anchor": "webnotificationclickeventaction-property",
+          "signatures": ["readonly action?: string"],
+          "docs": ""
+        },
+        {
+          "name": "waitUntil",
+          "kind": "method",
+          "ref": "@convohop/client/push#WebNotificationClickEvent.waitUntil",
+          "anchor": "webnotificationclickeventwaituntil-method",
+          "signatures": ["waitUntil(promise: Promise<unknown>): void"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebPushEvent",
+      "kind": "interface",
+      "ref": "@convohop/client/push#WebPushEvent",
+      "anchor": "webpushevent-interface",
+      "signatures": ["interface WebPushEvent"],
+      "docs": "The parts of a service worker `push` event these helpers use.",
+      "members": [
+        {
+          "name": "data",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushEvent.data",
+          "anchor": "webpusheventdata-property",
+          "signatures": ["readonly data: {\n    json(): unknown;\n} | null"],
+          "docs": ""
+        },
+        {
+          "name": "waitUntil",
+          "kind": "method",
+          "ref": "@convohop/client/push#WebPushEvent.waitUntil",
+          "anchor": "webpusheventwaituntil-method",
+          "signatures": ["waitUntil(promise: Promise<unknown>): void"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebPushEventOptions",
+      "kind": "interface",
+      "ref": "@convohop/client/push#WebPushEventOptions",
+      "anchor": "webpusheventoptions-interface",
+      "signatures": ["interface WebPushEventOptions extends WebPushHandlerOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushEventOptions.onError",
+          "anchor": "webpusheventoptionsonerror-property",
+          "signatures": ["onError?: (error: Error) => Promise<void> | void"],
+          "docs": "Receives payloads that aren't ConvoHop notifications and failures to show them. The event waits for it, so it\ncan show a notification of its own: browsers expect one for every push."
+        },
+        {
+          "name": "handler",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushEventOptions.handler",
+          "anchor": "webpusheventoptionshandler-property",
+          "signatures": ["handler?: NotificationHandler"],
+          "docs": "Decides what to show. Default: the handler `handleNotification` uses.",
+          "inherited": "WebPushHandlerOptions"
+        },
+        {
+          "name": "render",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushEventOptions.render",
+          "anchor": "webpusheventoptionsrender-property",
+          "signatures": ["render?: (action: NotificationAction) => WebNotification"],
+          "docs": "Builds the notification to show. Default `defaultWebNotification`.",
+          "inherited": "WebPushHandlerOptions"
+        }
+      ]
+    },
+    {
+      "name": "WebPushHandlerOptions",
+      "kind": "interface",
+      "ref": "@convohop/client/push#WebPushHandlerOptions",
+      "anchor": "webpushhandleroptions-interface",
+      "signatures": ["interface WebPushHandlerOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "handler",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushHandlerOptions.handler",
+          "anchor": "webpushhandleroptionshandler-property",
+          "signatures": ["handler?: NotificationHandler"],
+          "docs": "Decides what to show. Default: the handler `handleNotification` uses."
+        },
+        {
+          "name": "render",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushHandlerOptions.render",
+          "anchor": "webpushhandleroptionsrender-property",
+          "signatures": ["render?: (action: NotificationAction) => WebNotification"],
+          "docs": "Builds the notification to show. Default `defaultWebNotification`."
+        }
+      ]
+    },
+    {
+      "name": "WebPushSubscribeOptions",
+      "kind": "interface",
+      "ref": "@convohop/client/push#WebPushSubscribeOptions",
+      "anchor": "webpushsubscribeoptions-interface",
+      "signatures": ["interface WebPushSubscribeOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "applicationServerKey",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushSubscribeOptions.applicationServerKey",
+          "anchor": "webpushsubscribeoptionsapplicationserverkey-property",
+          "signatures": ["applicationServerKey: string | Uint8Array"],
+          "docs": "Your VAPID public key, as base64url or bytes. Your backend signs pushes with its private key."
+        },
+        {
+          "name": "register",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushSubscribeOptions.register",
+          "anchor": "webpushsubscribeoptionsregister-property",
+          "signatures": ["register: (registration: PushRegistration) => Promise<void> | void"],
+          "docs": "Stores the registration with your backend, for the signed-in user, so it can send pushes to this browser.\nCalled on every subscribe, so your backend can refresh what it stored."
+        }
+      ]
+    },
+    {
+      "name": "WebPushSubscription",
+      "kind": "interface",
+      "ref": "@convohop/client/push#WebPushSubscription",
+      "anchor": "webpushsubscription-interface",
+      "signatures": ["interface WebPushSubscription"],
+      "docs": "A Web Push subscription, as `PushSubscription.toJSON()` returns it.",
+      "members": [
+        {
+          "name": "endpoint",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushSubscription.endpoint",
+          "anchor": "webpushsubscriptionendpoint-property",
+          "signatures": ["readonly endpoint?: string"],
+          "docs": ""
+        },
+        {
+          "name": "expirationTime",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushSubscription.expirationTime",
+          "anchor": "webpushsubscriptionexpirationtime-property",
+          "signatures": ["readonly expirationTime?: number | null"],
+          "docs": ""
+        },
+        {
+          "name": "keys",
+          "kind": "property",
+          "ref": "@convohop/client/push#WebPushSubscription.keys",
+          "anchor": "webpushsubscriptionkeys-property",
+          "signatures": ["readonly keys?: Readonly<Record<string, string>>"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "NotificationKind",
+      "kind": "type",
+      "ref": "@convohop/client/push#NotificationKind",
+      "anchor": "notificationkind-type",
+      "signatures": [
+        "type NotificationKind = \"message\" | \"ring\" | \"stopRinging\" | \"missedCall\""
+      ],
+      "docs": "What to present for a push:\n- `message`: a new message.\n- `ring`: an incoming call that is still ringing.\n- `stopRinging`: the call stopped ringing without being missed: it was answered or declined, on any device, or\n  stopped for a reason this SDK doesn't know.\n- `missedCall`: nobody answered: the call ended first or the ring expired."
+    },
+    {
+      "name": "PushNotification",
+      "kind": "type",
+      "ref": "@convohop/client/push#PushNotification",
+      "anchor": "pushnotification-type",
+      "signatures": [
+        "type PushNotification = MessagePushNotification | CallPushNotification | CallCancelledPushNotification"
+      ],
+      "docs": "The `convohop` object a push carries, with only the fields the contract defines for its type."
+    },
+    {
+      "name": "PushNotificationType",
+      "kind": "type",
+      "ref": "@convohop/client/push#PushNotificationType",
+      "anchor": "pushnotificationtype-type",
+      "signatures": [
+        "type PushNotificationType = \"notification.message\" | \"notification.call\" | \"notification.callCancelled\""
+      ],
+      "docs": ""
+    },
+    {
+      "name": "PushRegistration",
+      "kind": "type",
+      "ref": "@convohop/client/push#PushRegistration",
+      "anchor": "pushregistration-type",
+      "signatures": [
+        "type PushRegistration = {\n    readonly kind: \"webPush\";\n    readonly subscription: WebPushSubscription;\n} | {\n    readonly kind: \"apns\" | \"apnsVoip\";\n    readonly token: string;\n    readonly environment?: \"development\" | \"production\";\n} | {\n    readonly kind: \"fcm\";\n    readonly token: string;\n    readonly fid?: never;\n} | {\n    readonly kind: \"fcm\";\n    readonly fid: string;\n    readonly token?: never;\n}"
+      ],
+      "docs": "Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend\nendpoint can store registrations from browsers and native apps. ConvoHop never sees them.\n\n- `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.\n- `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.\n- `apnsVoip`: an iOS PushKit token for incoming calls.\n- `fcm`: an Android app's Firebase Cloud Messaging target, with exactly one of `token` and `fid`. `token` is the\n  registration token, which apps get by default. `fid` is the Firebase Installation ID, which apps get instead when\n  their manifest sets `firebase_messaging_installation_id_enabled`. Send to it with the FCM HTTP v1 target of the\n  same name."
+    },
+    {
+      "name": "defaultWebNotification",
+      "kind": "function",
+      "ref": "@convohop/client/push#defaultWebNotification",
+      "anchor": "defaultwebnotification-function",
+      "signatures": ["function defaultWebNotification(action: NotificationAction): WebNotification"],
+      "docs": "The default presentation. It uses the title and body your backend set, with English fallback titles, and the\naction's tag, so a duplicate or a stopped ring replaces its earlier notification. A ring stays until it is handled;\na ring that stopped without being missed is replaced silently."
+    },
+    {
+      "name": "handleNotification",
+      "kind": "function",
+      "ref": "@convohop/client/push#handleNotification",
+      "anchor": "handlenotification-function",
+      "signatures": [
+        "function handleNotification(payload: unknown, now?: number): NotificationAction"
+      ],
+      "docs": "`NotificationHandler.handle` with a handler shared by this module."
+    },
+    {
+      "name": "handleNotificationClick",
+      "kind": "function",
+      "ref": "@convohop/client/push#handleNotificationClick",
+      "anchor": "handlenotificationclick-function",
+      "signatures": [
+        "function handleNotificationClick(clients: WebClients, event: WebNotificationClickEvent, url: (notification: PushNotification, action: string | undefined) => string): boolean"
+      ],
+      "docs": "Handles a `notificationclick` for a ConvoHop notification: closes it, then focuses a window already showing `url`\nor opens one. `url` maps the notification (and the clicked action, if any) to a URL of your app: relative to the\nservice worker, such as `/conversations/${notification.conversationId}`, or absolute on its origin. Another origin\nis a TypeError, and the notification stays open. Returns whether the notification was a ConvoHop one."
+    },
+    {
+      "name": "handlePushEvent",
+      "kind": "function",
+      "ref": "@convohop/client/push#handlePushEvent",
+      "anchor": "handlepushevent-function",
+      "signatures": [
+        "function handlePushEvent(registration: ServiceWorkerRegistration, event: WebPushEvent, options?: WebPushEventOptions): void"
+      ],
+      "docs": "Handles a service worker `push` event: `self.addEventListener(\"push\", event => handlePushEvent(self.registration, event))`."
+    },
+    {
+      "name": "parsePushNotification",
+      "kind": "function",
+      "ref": "@convohop/client/push#parsePushNotification",
+      "anchor": "parsepushnotification-function",
+      "signatures": ["function parsePushNotification(value: unknown): PushNotification"],
+      "docs": "Validates the `convohop` object of a push against the push payload contract. Returns its known fields and ignores\nfields the contract doesn't define for its type. Throws a `TypeError` for anything else."
+    },
+    {
+      "name": "parsePushPayload",
+      "kind": "function",
+      "ref": "@convohop/client/push#parsePushPayload",
+      "anchor": "parsepushpayload-function",
+      "signatures": ["function parsePushPayload(payload: unknown): PushNotification"],
+      "docs": "Finds and validates the notification in a push: a Web Push or APNs payload (`{ convohop: {...} }`), FCM data\n(`{ convohop: \"<json>\" }`) or the `convohop` object itself."
+    },
+    {
+      "name": "showPushNotification",
+      "kind": "function",
+      "ref": "@convohop/client/push#showPushNotification",
+      "anchor": "showpushnotification-function",
+      "signatures": [
+        "function showPushNotification(registration: ServiceWorkerRegistration, payload: unknown, options?: WebPushHandlerOptions): Promise<NotificationAction>"
+      ],
+      "docs": "Shows the notification for a decrypted Web Push payload (`event.data.json()`) and returns the action taken.\n\nBrowsers expect every push to show a notification: Safari revokes the subscription after a few pushes that don't,\nand Chrome shows a generic one. So every action, including duplicates and stopped rings, shows or replaces one."
+    },
+    {
+      "name": "subscribePush",
+      "kind": "function",
+      "ref": "@convohop/client/push#subscribePush",
+      "anchor": "subscribepush-function",
+      "signatures": [
+        "function subscribePush(registration: ServiceWorkerRegistration, options: WebPushSubscribeOptions): Promise<PushSubscription>"
+      ],
+      "docs": "Subscribes this browser to Web Push with your VAPID key and registers the subscription with your backend.\nReuses a subscription for the same key and replaces one made with another key. Call it from a user gesture:\nsubscribing asks for notification permission, and some browsers only ask from a gesture."
+    },
+    {
+      "name": "unsubscribePush",
+      "kind": "function",
+      "ref": "@convohop/client/push#unsubscribePush",
+      "anchor": "unsubscribepush-function",
+      "signatures": [
+        "function unsubscribePush(registration: ServiceWorkerRegistration, unregister?: (registration: PushRegistration) => Promise<void> | void): Promise<boolean>"
+      ],
+      "docs": "Unsubscribes this browser and, first, lets your backend forget the subscription. Resolves whether a subscription\nexisted."
+    }
+  ]
+}

@@ -109,7 +109,7 @@ query CommunicationCurrentLiveSession($context: RequestContextInput!, $input: Co
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.live.current`](../../typescript/reference/server.md#serverconversationlivecurrent-method), [`ConversationLive.current`](../../typescript/reference/client.md#conversationlivecurrent-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.live.current`](../../typescript/reference/server.md#serverconversationlivecurrent-method), [`ConversationLive.current`](../../typescript/reference/client.md#conversationlivecurrent-method), [`useLiveSession`](../../typescript/reference/react.md#uselivesession-function), [`LiveSessionView.refresh`](../../typescript/reference/react.md#livesessionviewrefresh-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.current_live_session`](../../python/reference/convohop.md#convohopcurrent_live_session-method), [`AsyncConvoHop.current_live_session`](../../python/reference/convohop.md#asyncconvohopcurrent_live_session-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ServerConversationLive.GetCurrentAsync`](../../dotnet/reference/convohop.md#serverconversationlivegetcurrentasync-method), [`CommunicationApi.CurrentLiveSessionAsync`](../../dotnet/reference/api.md#communicationapicurrentlivesessionasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.currentLiveSession`](../../jvm/reference/server.md#communicationapicurrentlivesession-method), [`CommunicationSuspendApi.currentLiveSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapicurrentlivesession-method) |

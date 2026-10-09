@@ -92,6 +92,22 @@ cd android
 [Build and test](android/README.md#build-and-test) explains the test layers
 and how to run the conformance scenarios with its driver.
 
+The Flutter SDK in `flutter/` and its conformance driver need
+[Flutter](https://docs.flutter.dev/get-started/install) 3.38 or later. CI
+tests Flutter 3.38 and the current stable release. Flutter's own commands
+check and test the package:
+
+```sh
+cd flutter
+flutter pub get            # also gets the example app's dependencies
+dart format lib test example/lib
+flutter analyze --fatal-infos
+flutter test
+```
+
+See the [Flutter SDK README](flutter/README.md#develop) for the conformance
+driver and the example app.
+
 The [Swift client SDK](swift/README.md) is a Swift package in `swift/`. Build
 and test it on macOS with Xcode 16.4 or later:
 
@@ -116,6 +132,7 @@ in the iOS Simulator and the conformance scenarios with its driver.
 | `dotnet/` | .NET server SDK (`ConvoHop`), its xUnit tests and the projects that compile the C# generator goldens. Its conformance driver is in `conformance/drivers/dotnet/` |
 | `go/` | Go server SDK (`github.com/ConvoHop/sdks/go`), a Go module with no dependencies. Its conformance driver is a separate module in `conformance/drivers/go/` |
 | `android/` | Android client SDK (`com.convohop:convohop-android`, with `convohop-android-core` and `convohop-android-push`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/android/` and compiles the Kotlin generator's edge goldens |
+| `flutter/` | Flutter SDK (`convohop`, Dart): the package, its Android and iOS plugin code, tests and an example app. It isn't an npm workspace |
 | `swift/` | Swift client SDK for iOS and macOS (the `ConvoHop` Swift package and its products), a self-contained Swift package. Its conformance driver is a separate package in `conformance/drivers/swift/Driver/` |
 | `packages/cli` | The `convohop` command-line tool (`@convohop/cli`), built on `@convohop/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
 | `packages/mcp` | An MCP server (`@convohop/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
@@ -127,6 +144,7 @@ in the iOS Simulator and the conformance scenarios with its driver.
 | `spec/push-payload/` | The push payload contract: notification events, the APNs, FCM and Web Push requests built from them, a JSON Schema and shared vectors |
 | `spec/docs/` | JSON Schemas for the docs pipeline's inputs and its output in `docs/site` |
 | `conformance/` | The conformance runner, the TypeScript reference driver, the mock target, the harness's tests and the Web client's browser tests. A private npm workspace that is never published |
+| `conformance/drivers/dart/` | The Flutter SDK's conformance driver, a Dart command-line program |
 | `test/` | Fixtures shared by the package and conformance test suites |
 | `release-please-config.json`, `.release-please-manifest.json` | The released packages and their current versions. See [RELEASING.md](RELEASING.md). |
 | `.github/workflows/` | CI, conformance, release and pull request title workflows |
@@ -170,6 +188,7 @@ files from the IR:
 - `dotnet/src/ConvoHop/Generated/`
 - `go/*_gen.go`
 - `android/core/src/main/kotlin/com/convohop/android/generated/`
+- `flutter/lib/src/generated/`
 - `swift/Sources/ConvoHop/Generated/`
 
 ```sh
@@ -268,6 +287,8 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   output of each package's strict TypeScript build. They live in
   `packages/*/test/`. The generator's tests live in `tools/sdkgen/test/` and
   compare the emitters' output with golden files.
+- The Flutter SDK's tests use `package:flutter_test` and live in
+  `flutter/test/`. Run them with `flutter test`.
 - Add or update a regression test in the existing package suite for every
   bug fix and behavior change. Don't add standalone assertion scripts or a
   second test client.

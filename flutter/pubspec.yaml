@@ -1,0 +1,36 @@
+name: convohop
+description: >-
+  ConvoHop client SDK for Flutter: user sessions, conversation history and
+  realtime, an offline outbox, receipts, typing, calls and push.
+version: 0.0.0
+# Registry publishing waits for release approval; see RELEASING.md.
+publish_to: none
+repository: https://github.com/ConvoHop/sdks/tree/main/flutter
+issue_tracker: https://github.com/ConvoHop/sdks/issues
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
+
+dependencies:
+  crypto: ^3.0.7
+  flutter:
+    sdk: flutter
+  http: ^1.6.0
+  livekit_client: ^2.13.1
+  web_socket_channel: ^3.0.3
+
+dev_dependencies:
+  fake_async: ^1.3.3
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.convohop.flutter
+        pluginClass: ConvoHopPlugin
+      ios:
+        pluginClass: ConvoHopPlugin

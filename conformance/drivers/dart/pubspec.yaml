@@ -1,0 +1,13 @@
+name: convohop_conformance_driver
+description: Runs the shared ConvoHop conformance scenarios against the Dart SDK.
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  convohop:
+    path: ../../../flutter
+
+dev_dependencies:
+  lints: ^6.0.0

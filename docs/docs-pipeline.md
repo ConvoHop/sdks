@@ -337,7 +337,10 @@ reads from it resolve inside it.
 
    TypeScript's extractor,
    [`tools/docgen/extractors/typescript.mjs`](../tools/docgen/extractors/typescript.mjs),
-   reads the `.d.ts` files of the built packages. It follows bases by name,
+   reads the `.d.ts` files of the built packages. A listed package can be a
+   subpath export, such as `@convohop/client/push`: the extractor reads that
+   entry's `types` condition, and the subpath's own declarations get no
+   `origin`, because its package declares them. It follows bases by name,
    including through namespace imports such as `core.BaseClient`. It doesn't
    list members inherited from globals or third-party packages, and fails
    for a workspace base whose members it can't read, such as a mixin

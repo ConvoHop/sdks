@@ -1,0 +1,269 @@
+# Tests the Flutter SDK (flutter/) on the oldest supported and the current
+# stable Flutter release, checks that its generated code is current, runs the
+# conformance scenarios through the Dart driver and builds the example app
+# for Android and the iOS simulator. See flutter/README.md and
+# docs/sdk-strategy.md.
+name: Flutter
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "flutter/**"
+      - "conformance/**"
+      - "schema/**"
+      - "spec/**"
+      - "tools/sdkgen/**"
+      - ".github/workflows/flutter.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "flutter/**"
+      - "conformance/**"
+      - "schema/**"
+      - "spec/**"
+      - "tools/sdkgen/**"
+      - ".github/workflows/flutter.yml"
+
+permissions: {}
+
+jobs:
+  package:
+    name: Flutter package (Flutter ${{ matrix.flutter }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The oldest supported release (flutter/pubspec.yaml) and the current stable release.
+          - flutter: "3.38"
+            version: 3.38.x
+          - flutter: stable
+            version: ""
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: ${{ matrix.version }}
+      - run: flutter --version
+      - name: Get the package's and the example's dependencies
+        working-directory: flutter
+        run: flutter pub get
+      # The formatter's style follows the SDK release, so only the current one checks it.
+      - name: Check formatting
+        if: matrix.flutter == 'stable'
+        working-directory: flutter
+        run: dart format --output=none --set-exit-if-changed lib test example/lib
+      - name: Analyze the package, its tests and the example
+        working-directory: flutter
+        run: flutter analyze --fatal-infos
+      - name: Test
+        working-directory: flutter
+        run: flutter test --reporter=expanded
+
+  generated:
+    name: Generated Dart code
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+      - run: npm ci --no-audit --no-fund
+      - name: Test the generator, and analyze and run the Dart emitter's output
+        env:
+          SDKGEN_DART: "1"
+        run: npm run test:sdkgen
+      - name: Check that flutter/lib/src/generated matches the IR
+        run: npm run check:graphql
+
+  conformance:
+    name: Dart driver (mock target)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+      - run: npm ci --no-audit --no-fund
+      - name: Get the driver's dependencies
+        working-directory: conformance/drivers/dart
+        run: flutter pub get
+      - name: Check the driver's formatting and analysis
+        working-directory: conformance/drivers/dart
+        run: |
+          dart format --output=none --set-exit-if-changed .
+          dart analyze --fatal-infos
+      - name: Build the driver
+        working-directory: conformance/drivers/dart
+        # Not dart compile exe, which rejects packages with build hooks, such as
+        # objective_c, which livekit_client brings in through path_provider.
+        run: dart build cli --target bin/driver.dart --output build/driver
+      - name: Run the conformance scenarios against the mock target
+        # Not --strict: the Dart driver declares only the user role, so the runner skips the
+        # scenarios that only use backend or management clients, and the webhook scenarios,
+        # because verifying webhooks belongs to server SDKs. The next step allows only those.
+        run: >-
+          npm run conformance --
+          --driver conformance/drivers/dart/build/driver/bundle/bin/driver
+          --reports conformance/reports/dart
+      - name: Fail on any other skip
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync } from "node:fs";
+          const allowed = new Set([
+            "it only uses backend clients, which the driver under test does not declare",
+            "it only uses management clients, which the driver under test does not declare",
+            "driver convohop-dart does not declare feature webhooks.verify",
+          ]);
+          const summary = JSON.parse(readFileSync("conformance/reports/dart/summary.json", "utf8"));
+          const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
+          const passed = scenarios.filter((scenario) => scenario.status === "passed");
+          const other = scenarios.filter((scenario) => scenario.status !== "passed"
+            && !(scenario.status === "skipped" && allowed.has(scenario.reason)));
+          for (const scenario of other) {
+            console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
+          }
+          console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
+          if (summary.driver.name !== "convohop-dart" || passed.length === 0 || other.length > 0) process.exit(1);
+          EOF
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-dart-mock
+          path: conformance/reports/dart/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # Like the dev-stack job in conformance.yml, runs the scenarios against the
+  # ConvoHop dev stack: the private, development-only linux/arm64 image that
+  # runs the whole platform in one container (see spec/conformance/targets.md),
+  # which conformance/dev-stack.mjs starts. The job runs only when the
+  # CONVOHOP_DEV_STACK_IMAGE repository variable names the image, and never for
+  # pull requests from forks, which cannot pull it.
+  conformance-dev-stack:
+    name: Dart driver (dev stack)
+    if: vars.CONVOHOP_DEV_STACK_IMAGE != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+      packages: read # pull the dev-stack image from GitHub Packages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      # Flutter publishes Linux SDK archives for x64 only. The archive is a git
+      # checkout, so without its x64 cache the first flutter command downloads
+      # the arm64 Dart SDK for the archive's engine.
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          architecture: x64
+      - name: Bootstrap Flutter for arm64
+        run: |
+          rm -rf "$FLUTTER_ROOT/bin/cache"
+          flutter --version
+      - name: Build the driver
+        working-directory: conformance/drivers/dart
+        run: |
+          flutter pub get
+          dart build cli --target bin/driver.dart --output build/driver
+      - name: Start the dev stack
+        env:
+          CONVOHOP_DEV_STACK_IMAGE: ${{ vars.CONVOHOP_DEV_STACK_IMAGE }}
+          GITHUB_TOKEN: ${{ github.token }}
+        # Pulls the image with the job's token, waits until the stack is ready and exports
+        # the seed.env values that conformance/targets/dev-stack.json reads, masking its credentials.
+        run: node conformance/dev-stack.mjs start
+      - name: Run the conformance scenarios against the dev stack
+        run: >-
+          npm run conformance --
+          --target conformance/targets/dev-stack.json
+          --driver conformance/drivers/dart/build/driver/bundle/bin/driver
+          --reports conformance/reports/dart-dev-stack
+      - name: Show why the dev stack stopped
+        if: failure()
+        # This repository's logs are public, so it prints only the stack supervisor's lines, not the platform's logs.
+        run: node conformance/dev-stack.mjs logs
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-dart-dev-stack
+          path: conformance/reports/dart-dev-stack/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # The example commits no platform folders: flutter create adds them, which
+  # also compiles the plugin's Java and Swift code against the current SDKs.
+  example-android:
+    name: Example app (Android)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+      - name: Create the Android project
+        working-directory: flutter/example
+        run: flutter create --platforms=android --org com.convohop --project-name convohop_example .
+      - name: Build a debug APK
+        working-directory: flutter/example
+        run: flutter build apk --debug
+
+  example-ios:
+    name: Example app (iOS simulator)
+    # device_info_plus, which livekit_client uses, needs the iOS 26.1 SDK.
+    runs-on: macos-26
+    timeout-minutes: 45
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+      - name: Create the iOS project
+        working-directory: flutter/example
+        run: flutter create --platforms=ios --org com.convohop --project-name convohop_example .
+      - name: Build for the iOS simulator
+        working-directory: flutter/example
+        run: flutter build ios --simulator --debug --no-codesign
