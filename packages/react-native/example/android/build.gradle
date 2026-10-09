@@ -1,0 +1,41 @@
+buildscript {
+    ext {
+        buildToolsVersion = "36.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 36
+        targetSdkVersion = 36
+        ndkVersion = "27.1.12297006"
+        kotlinVersion = "2.2.0"
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath("com.google.gms:google-services:4.5.0")
+    }
+}
+
+apply plugin: "com.facebook.react.rootproject"
+
+// ConvoHop's Android push SDK, which @convohop/react-native wraps, isn't published yet. The app takes it from the
+// repository's android/ build, which publishes it to android/build/repo:
+//   (cd ../../../../android && ./gradlew :push:publishAllPublicationsToBuildRepository)
+allprojects {
+    repositories {
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "convohopAndroid"
+                    url = rootProject.file("../../../../android/build/repo")
+                }
+            }
+            filter {
+                includeGroup("com.convohop")
+            }
+        }
+    }
+}

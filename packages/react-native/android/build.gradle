@@ -1,0 +1,54 @@
+// The Android TurboModules of @convohop/react-native. They wrap ConvoHop's Android push SDK
+// (com.convohop:convohop-android-push), so Android has one push and call implementation.
+// React Native autolinking includes this project in the app's build; it doesn't build alone.
+
+def safeExtGet(name, fallback) {
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : fallback
+}
+
+// AGP 9 compiles Kotlin itself unless the app sets android.builtInKotlin=false, as React Native's template does.
+def needsKotlinPlugin() {
+    def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0].toInteger()
+    if (agpMajor <= 8) return true
+    def builtInKotlin = providers.gradleProperty("android.builtInKotlin").orNull
+    return builtInKotlin != null && !builtInKotlin.toBoolean()
+}
+
+apply plugin: "com.android.library"
+if (needsKotlinPlugin()) {
+    apply plugin: "kotlin-android"
+}
+// Runs Codegen on ../package.json's codegenConfig and adds the generated specs to this project's sources.
+apply plugin: "com.facebook.react"
+
+android {
+    namespace = "com.convohop.reactnative"
+    compileSdk = safeExtGet("compileSdkVersion", 36)
+
+    defaultConfig {
+        minSdk = safeExtGet("minSdkVersion", 24)
+    }
+
+    testOptions {
+        unitTests.all { test ->
+            // The tests read the push payload vectors that every SDK shares.
+            test.systemProperty("convohop.repoRoot", file("../../..").canonicalPath)
+        }
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.facebook.react:react-android"
+    api "com.convohop:convohop-android-push:${safeExtGet("convohopAndroidVersion", "0.1.0-SNAPSHOT")}"
+    // The push SDK compiles against firebase-messaging without bundling it; this module uses it at run time.
+    implementation "com.google.firebase:firebase-messaging:${safeExtGet("firebaseMessagingVersion", "25.1.2")}"
+
+    testImplementation "junit:junit:4.13.2"
+    // Android's org.json is a stub in JVM tests.
+    testImplementation "org.json:json:20250517"
+}

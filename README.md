@@ -190,9 +190,9 @@ the example app for Android and iOS. It doesn't publish anything either.
 The React Native SDK in [`packages/react-native`](packages/react-native) is
 an npm workspace, so CI builds and tests it with the other TypeScript
 packages. The [React Native workflow](.github/workflows/react-native.yml)
-also type-checks its example app and runs the conformance scenarios through
-its driver against the mock. Its native modules aren't written yet, so no
-workflow builds native code or runs Hermes. See
+also type-checks its example app, runs the conformance scenarios through
+its driver against the mock, runs its Android modules' JVM tests and builds
+the example app for Android. Its iOS modules aren't written yet. See
 [Testing](docs/react-native.md#testing).
 
 The Swift SDK has its own Swift package and

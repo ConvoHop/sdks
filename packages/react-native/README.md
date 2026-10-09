@@ -18,11 +18,11 @@ replay, receipts, live sessions and push payload parsing. For hooks, use
 registry yet. License: [Apache-2.0](LICENSE).
 
 > [!IMPORTANT]
-> This is the JavaScript layer and its Codegen specs. The native modules
-> that implement those specs, `ConvoHopPlatform`, `ConvoHopPush` and
-> `ConvoHopCalls`, aren't here yet. Until they are, an app can install the
-> package but can't use it: each function reports the module it's missing.
-> The [design](../../docs/react-native.md) describes the native modules and
+> The Android modules that implement the Codegen specs, `ConvoHopPlatform`,
+> `ConvoHopPush` and `ConvoHopCalls`, are here. The iOS ones aren't yet:
+> until they are, an iOS app can install the package but can't use it, and
+> each function reports the module it's missing. The
+> [design](../../docs/react-native.md) describes the native modules and
 > what has been verified.
 
 Build and test from the repository's root npm workspace with Node.js 22+:
@@ -41,7 +41,10 @@ npm run typecheck:example --workspace @convohop/react-native
 - Hermes. Neither this package nor the client uses the globals Hermes lacks,
   such as Web Crypto and a complete `URL`. CI runs the package's tests and
   the client's send, outbox and push paths on Node.js with those globals
-  removed. They haven't run on Hermes.
+  removed. The package and the client also ran on Hermes once, by hand, in
+  the example on an Android emulator; the
+  [design](../../docs/react-native.md#testing) lists what that run
+  verified.
 - `react-native` and `@convohop/client` are peer dependencies.
   `@convohop/react-native/media` also needs `@livekit/react-native`
   `^3.0.0`, `@livekit/react-native-webrtc` `^144.2.0` and `livekit-client`
@@ -198,13 +201,31 @@ title, and a `CONVOHOP_*` string as the body.
 
 ### Android
 
+- The package's Gradle module depends on the
+  [Android SDK](../../android/README.md),
+  `com.convohop:convohop-android-push`, which isn't on Maven Central yet.
+  The [example](example/README.md#android) builds it from this repository.
+  Set up Firebase as for any Firebase app, with your `google-services.json`.
 - Your app's manifest declares the Android SDK's
   `ConvoHopMessagingService`, as in the
   [Android SDK](../../android/README.md#push-notifications). It receives
-  data messages, shows message notifications and rings calls. Your
-  `MainApplication.onCreate` configures notifications, because a push can
-  start the process before JavaScript runs. The
-  [design](../../docs/react-native.md#android) describes this native setup.
+  data messages, shows message notifications and rings calls.
+- A push can start the process before JavaScript runs, so configure
+  notifications in `MainApplication.onCreate`, before React Native loads:
+
+  ```kotlin
+  ConvoHopReactNative.configure(this, ConvoHopNotificationOptions().apply {
+      smallIcon = R.drawable.ic_notification
+  })
+  ```
+
+  Use it instead of setting `ConvoHopNotifications.options`: it adds the
+  recipient filter `setPushRecipient` sets, and signs the push it adds to
+  each notification's intent, so a notification reported as `opened` is
+  one your app posted. Until it runs, `registerForPush`,
+  `handleRemoteMessage` and `setPushRecipient` with a recipient reject with
+  `E_NOT_CONFIGURED`. Notifications open your launch activity unless you
+  set the options' intents.
 - If another library, such as React Native Firebase, owns your app's
   messaging service, pass its data messages to `handleRemoteMessage(data)`.
   It resolves what the native handler did, such as `notConvoHop` for a
@@ -218,6 +239,9 @@ title, and a `CONVOHOP_*` string as the body.
   `registerForPush`. It deletes the token or unregisters the FID, and
   resolves the registration it removed, or `null`. Delete it from your
   backend too.
+- Neither this package nor the Android SDK starts a foreground service. To
+  keep a call's media running while your app is in the background, start
+  your own, of type `phoneCall`.
 
 ## Calls
 
@@ -273,7 +297,12 @@ participation that already exists, retries, hang-up and media that drops.
   revoke it. Without it, incoming calls ring as a heads-up notification.
   `canUseFullScreenIntent()` says which applies, and
   `openFullScreenIntentSettings()` opens the setting. iOS always resolves
-  `true`.
+  `true`. The full-screen intent opens your launch activity, or the
+  options' `incomingCallIntent`. To ring over the lock screen in your own
+  UI, use an activity with `showWhenLocked` and `turnScreenOn`. Otherwise,
+  a locked device rings with the call's notification, which has Answer and
+  Decline, and a device locked with a PIN or another secure lock asks for
+  it before the call is answered.
 - **Audio routes.** On Android, `setAudioRoute` chooses one of the call's
   `availableAudioRoutes`. On iOS, show the system route picker, such as
   LiveKit's `AudioSession.showAudioRoutePicker()`.
@@ -317,7 +346,9 @@ write restores it, with the text of unsent messages:
 2. Stop `watchRingingCalls`, and abort or stop `registerForPush`.
 3. `setPushRecipient(null)`, so the device drops the user's pushes even if
    your backend can't delete their registrations.
-4. Stop `subscribeAnsweredCalls`, and hang up.
+4. Stop `subscribeAnsweredCalls`, hang up, and `endCall` each call in
+   `getCalls()` that hasn't ended. With no recipient, the device drops the
+   pushes that would stop a ring, so it would ring until it expires.
 5. `await outbox.close()`, and wait for requests you didn't await, such as
    read receipts.
 6. On Android, `unregisterFromPush()`.
@@ -332,6 +363,10 @@ write restores it, with the text of unsent messages:
 - Arguments that don't fit fail with a `TypeError` or `RangeError` before
   anything reaches native code. Native results that don't match the specs
   fail with a `TypeError`: the SDK doesn't pass them on.
+- On Android, a native module that rejects sets the `Error`'s `code`, such
+  as `E_NOT_CONFIGURED`, `E_CALL_NOT_FOUND` or FCM's
+  `SERVICE_NOT_AVAILABLE`. The [design](../../docs/react-native.md#android)
+  lists them.
 - Push and call listeners never throw into native code. Errors from your
   listeners, and native data the SDK drops, go to React Native's error
   handler, or to `onError` where a function takes one.

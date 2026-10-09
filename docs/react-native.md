@@ -13,17 +13,18 @@ The package is built in two phases.
 
 | Part | Phase | State |
 | --- | --- | --- |
-| Platform adapter, `createPlatform` | 1 | Written. Tested on Node.js with the globals Hermes lacks removed. Not run on Hermes. |
+| Platform adapter, `createPlatform` | 1 | Written. Tested on Node.js with the globals Hermes lacks removed. Run on Hermes once, by hand, in the example on an Android emulator. |
 | JavaScript API for push, calls and media | 1 | Written. Tested against fakes of the native modules, React Native and LiveKit. |
 | Codegen specs for `ConvoHopPlatform`, `ConvoHopPush` and `ConvoHopCalls` | 1 | Written. The tests run React Native 0.87.1's Codegen on them. React Native 0.76.0's Codegen generated them once, by hand. |
 | Conformance driver | 1 | Runs the shared scenarios through `createPlatform` against the mock. |
 | Example app's JavaScript | 1 | Written and type-checked. |
-| Native modules: Swift or Objective-C++ on iOS, Kotlin on Android | 2 | Not written. |
-| Podspec, Gradle build and the example's `ios/` and `android/` projects | 2 | Not written. |
-| Builds on a simulator and an emulator, and tests on devices | 2 | Not run. |
+| Android: Kotlin modules, Gradle build and the example's `android/` project | 2 | Written. CI runs the JVM tests and builds the example. The example ran once, by hand, on an Android 15 emulator; see [Testing](#testing). |
+| iOS: Swift modules, podspec and the example's `ios/` project | 2 | Not written. |
+| Push delivery, calls and media on devices | 2 | Android calls and notifications ran on the emulator, from pushes passed to `handleRemoteMessage`. Not run: delivery through FCM or APNs, media, physical devices and iOS. |
 
-Until phase 2, an app can install the package but can't use it: each
-function that needs a native module fails with an error that names it.
+Until the iOS modules are written, an iOS app can install the package but
+can't use it: each function that needs a native module fails with an error
+that names it.
 
 ## Scope
 
@@ -187,53 +188,99 @@ The modules wrap the [Android SDK's](../android/README.md#push-notifications)
 `com.convohop.android.push`: `ConvoHopFirebase` for registration and
 `ConvoHopNotifications` for notifications and Telecom calls.
 
-- **Build.** The package's Gradle module depends on
-  `com.convohop:convohop-android-push`. Until that's on Maven Central, the
-  example builds against this repository's `android/` build as a Gradle
-  composite build.
+- **Build.** The package's Gradle module, in `android/`, depends on
+  `com.convohop:convohop-android-push` and `firebase-messaging`. It reads
+  `compileSdkVersion`, `minSdkVersion`, `convohopAndroidVersion` and
+  `firebaseMessagingVersion` from the app's root `ext` when the app sets
+  them. Until the Android SDK is on Maven Central, the example publishes
+  this repository's push library to a local Maven repository,
+  `android/build/repo`, and takes only the `com.convohop` group from there.
 - **Manifest.** The app declares the Android SDK's
   `ConvoHopMessagingService` for `com.google.firebase.MESSAGING_EVENT`. If
   another library, such as React Native Firebase, owns that event, it
-  passes ConvoHop data messages to `handleRemoteMessage`.
+  passes ConvoHop data messages to `handleRemoteMessage`. The Android SDK's
+  and LiveKit's manifests declare the permissions.
 - **`MainApplication.onCreate`.** A push can start the process before
-  JavaScript runs, so the app configures notifications there with the
-  package's setup helper. The helper installs the package's
-  `RecipientFilter`, sets the incoming and answered call intents to the
-  app's activity, sets a `conversationIntent` that carries the push's
-  payload, and adds the listener that the modules forward to JavaScript.
-  The app passes its small icon and, optionally, a
-  `MessageContentProvider`.
+  JavaScript runs, so the app configures notifications there:
+  `ConvoHopReactNative.configure(this, options)` instead of setting
+  `ConvoHopNotifications.options`. It wraps the options' `recipientFilter`
+  in the package's, and their `conversationIntent` in one that adds the
+  push's payload, signed. It also adds the listener that the modules
+  forward to JavaScript. The app passes its small icon and, optionally, a
+  `MessageContentProvider` and its own call intents; without them, the
+  Android SDK opens the launch activity. Until `configure` runs,
+  `register`, `handleRemoteMessage` and `setRecipient` with a recipient
+  reject with `E_NOT_CONFIGURED`.
+- **Opened notifications.** The launch activity is exported, so any app
+  can start it with extras of its choosing. The module therefore signs the
+  payload it adds to a notification's intent with HMAC-SHA256, under a
+  random key in the app's private preferences. It reports an opened
+  notification only if the signature verifies, the push is for the stored
+  recipient and the intent didn't come from the recent apps. It removes
+  the payload from the intent, so it's reported once.
 - **Calls.** Incoming calls ring through a self-managed Telecom
   `ConnectionService`, with a call-style notification and a full-screen
   intent. Android 14 grants `USE_FULL_SCREEN_INTENT` only to calling and
   alarm apps, and users can revoke it. Without it, the call rings as a
   heads-up notification. `canUseFullScreenIntent` says which applies, and
-  `openFullScreenIntentSettings` opens the setting.
+  `openFullScreenIntentSettings` opens the setting. The full-screen intent
+  opens the app's `incomingCallIntent`, or the launch activity.
+- **The lock screen.** The example's activity doesn't show over the lock
+  screen. On a locked device, the ring wakes the screen, and the call rings
+  as its notification on the lock screen, which answers and declines. On
+  the Android 15 emulator, answering there dismissed a swipe lock. With a
+  PIN, Android asked for it first, and the call kept ringing until the
+  user entered it. To answer without unlocking, an app sets
+  `incomingCallIntent` to its own activity with `showWhenLocked` and
+  `turnScreenOn`, and answers there with `answerCall`.
 - **Outgoing calls.** The Android SDK doesn't place outgoing Telecom calls.
   The app joins without the system call UI, and LiveKit's audio handling
   manages focus and Bluetooth.
+- **Background.** Neither the Android SDK nor the module starts a
+  foreground service. To keep a call's media running while the app is in
+  the background, the app starts its own, of type `phoneCall`, as the
+  [Android SDK](../android/README.md#calls) describes. The example doesn't:
+  on the Android 15 emulator, Android blocked its network about 4 seconds
+  after the screen turned off.
 
 | Spec | Android |
 | --- | --- |
 | `getRandomBytes` | `SecureRandom` |
-| `getPermissionStatus`, `requestPermission` | `POST_NOTIFICATIONS` on Android 13 and later; before that, `areNotificationsEnabled()` |
-| `register`, `unregister` | `ConvoHopFirebase.register` and `unregister`, in the app's FCM mode: the registration token, or the Firebase installation ID when the manifest sets `firebase_messaging_installation_id_enabled` |
-| `onPushRegistration`, `onPushUnregistration`, `getRegistrations` | The listener's `onRegistered` and `onUnregistered`, and `ConvoHopNotifications.registration` |
-| `setRecipient` | Stores the IDs in `SharedPreferences` for the package's `RecipientFilter`. See [Recipient filter](#recipient-filter). |
-| `handleRemoteMessage` | `ConvoHopNotifications.handleNotification`, off the main thread |
-| `onNotification`, `takeInitialNotification` | The listener's `onMessage` is `received`. The listener and intents get the parsed push, so the module writes its payload back as the `convohop` JSON. A tap opens the app's activity through the `conversationIntent`, which carries that JSON, and that's `opened`. The intent that launched the app is kept for `takeInitialNotification`, once. |
+| `getPermissionStatus`, `requestPermission` | `POST_NOTIFICATIONS` on Android 13 and later, requested through the React Native activity; before that, `areNotificationsEnabled()`. The status is `undetermined` until the app has asked once. Requests made together share one prompt. If another library replaced the activity's permission listener, they settle when the app resumes. |
+| `register`, `unregister` | `ConvoHopFirebase.register` and `unregister`, in the app's FCM mode: the registration token, or the Firebase installation ID when the manifest sets `firebase_messaging_installation_id_enabled`. The registration arrives through `onPushRegistration`. `unregister` resolves the registration it removed. |
+| `onPushRegistration`, `onPushUnregistration`, `getRegistrations` | The listener's `onRegistered` and `onUnregistered`, and `ConvoHopNotifications.registration`. Android never emits `onPushRegistrationError`: `register` rejects instead. |
+| `setRecipient` | Stores the IDs in the module's own `SharedPreferences`. The package's `RecipientFilter` accepts only that recipient, and only if the app's own filter accepts it too. See [Recipient filter](#recipient-filter). |
+| `handleRemoteMessage` | `ConvoHopNotifications.handleNotification`, on the module's worker thread, because the app's `MessageContentProvider` may block |
+| `onNotification` | The listener's `onMessage` is `received`. A tap opens the signed `conversationIntent`, and that's `opened`. The listener and intents get the parsed push, so the module writes its payload back as the `convohop` JSON. |
+| `takeInitialNotification` | The notification that opened the activity, once. It waits for an activity, and resolves `null` once the app has resumed without one. A notification opened before it resolves goes to it rather than to `onNotification`. |
 | `getCalls`, `forgetCall` | `calls()` and `forget` |
 | `startOutgoingCall` | Rejects |
 | `answerCall` | `answer` |
-| `endCall` | `reject` while the call rings; otherwise `end` |
-| `stopRinging` | `handle` with a `CallCancelled` for the ring, so the push ledger records the stop as it would the server's cancellation |
+| `endCall` | `end`, which declines a ringing call and hangs up any other. It also resolves for a call that already ended, or an unknown one. |
+| `stopRinging` | For a call that's still ringing, `handle` with a `CallCancelled` for the ring, as the server's cancellation push would be: the push ledger records the stop, and a missed call shows its notification. The ledger gives each ring one missed call, so the server's own cancellation shows no second one. Like that push, it passes the recipient filter: after `setPushRecipient(null)`, use `endCall`. |
 | `reportConnecting`, `reportConnected` | The module's own state. The Android SDK's calls have no connecting state, so an answered call is `connecting` until `reportConnected` makes it `active`. |
-| `setMuted` | The module's own state, combined with the mute Telecom reports, because the Android SDK has no setter |
-| `updateCall` | The module's own snapshot, because the Android SDK has no setter |
+| `setMuted` | The module's own state, until Telecom reports a mute change, because the Android SDK has no setter |
+| `updateCall` | The module's own snapshot, because the Android SDK has no setter. The call's notification keeps the push's caller and video. |
 | `setHeld`, `setAudioRoute` | `setOnHold` and `setAudioRoute` |
 | `canUseFullScreenIntent`, `openFullScreenIntentSettings` | `canUseFullScreenIntent()`, and an activity for `fullScreenIntentSettings()` |
 | `getVoipToken`, `isAudioSessionActive` | `null` and `false` |
-| `onCallEvent` | The listener's call methods |
+| `onCallEvent` | The listener's call methods, and the module's own changes |
+
+The Android modules reject with these codes. React Native puts the code
+on the rejected `Error`'s `code`.
+
+| Code | When |
+| --- | --- |
+| `E_NOT_CONFIGURED` | `ConvoHopReactNative.configure` hasn't run. |
+| `E_FIREBASE_NOT_INITIALIZED` | `register` and `unregister` without Firebase, such as without `google-services.json` |
+| FCM's code, such as `SERVICE_NOT_AVAILABLE`, or else `E_REGISTRATION` | FCM couldn't register or unregister. Only the code reaches JavaScript. |
+| `E_NO_ACTIVITY` | `requestPermission` without a React Native activity |
+| `E_STORAGE` | `setRecipient` couldn't write the recipient. |
+| `E_INVALID_ARGUMENT` | An argument JavaScript checks first, so apps don't see it |
+| `E_PUSH_HANDLER` | `handleRemoteMessage`'s handler failed, or the module is shutting down. |
+| `E_CALL_NOT_FOUND`, `E_CALL_STATE` | No call has the ID, or the call's state doesn't allow the request. |
+| `E_AUDIO_ROUTE` | The call has no system audio, or the route isn't available. |
+| `E_UNSUPPORTED` | `startOutgoingCall`, and `openFullScreenIntentSettings` on a device without that setting |
 
 ## Push
 
@@ -287,9 +334,11 @@ offline at sign-out. So the device itself checks whom each push is for.
 
 A push can launch the app, or the user can open one that did. The native
 module keeps the response or intent that launched the app, and
-`takeInitialNotification` returns it once. Pushes received before
-JavaScript attaches its listener aren't replayed: the native helpers have
-already shown or rung them.
+`takeInitialNotification` returns it once. On Android, a notification the
+user opens before `takeInitialNotification` resolves goes to it too, and an
+activity relaunched from the recent apps reports none. Pushes received
+before JavaScript attaches its listener aren't replayed: the native helpers
+have already shown or rung them.
 
 ## Calls
 
@@ -357,9 +406,10 @@ their audio too. The app joins, then reports `reportConnecting` and
   `ConvoHopCalls`' `onAudioSession` tells WebRTC through `RTCAudioSession`.
   `isAudioSessionActive` covers an activation that happened before
   JavaScript listened.
-- **Android audio.** The Telecom connection doesn't take audio focus. The
-  app starts LiveKit's `AudioSession` before each call connects and stops
-  it after.
+- **Android audio.** `MainApplication.onCreate` calls LiveKit's
+  `LiveKitReactNative.setup` before React Native loads. The Telecom
+  connection doesn't take audio focus. The app starts LiveKit's
+  `AudioSession` before each call connects and stops it after.
 
 ## Sign-out
 
@@ -368,7 +418,10 @@ Everything that writes recovery state stops before the app deletes it:
 1. Unmount the signed-in screens.
 2. Stop `watchRingingCalls`, and abort `registerForPush`.
 3. `setPushRecipient(null)`.
-4. Hang up, and stop `subscribeAnsweredCalls`.
+4. Stop `subscribeAnsweredCalls`, hang up, and `endCall` each call in
+   `getCalls()` that hasn't ended. With no recipient, the native helpers
+   drop the pushes that would stop a ring, so it would ring until it
+   expires.
 5. `await outbox.close()`, and wait for requests the app didn't await.
 6. On Android, `unregisterFromPush()`.
 7. Sign out with the backend, which ends the user's sessions and deletes
@@ -422,20 +475,64 @@ What runs in CI, without a device:
   and also against the dev stack when the repository has one configured.
 - A type check of the example app, and a test that its dependencies match
   the versions the package is tested with.
+- The Android modules' JVM tests, and a debug build of the example for
+  arm64-v8a, in the workflow's Android job. The tests cover the values and
+  error codes sent to JavaScript, call snapshots, signed notification
+  intents, the `convohop` JSON written back for the shared push payload
+  vectors, and the recipient filter.
+
+The example also ran once, by hand, as a debug build on an Android 15
+(API 35) arm64-v8a emulator, on Hermes with the New Architecture and
+without Firebase. Pushes went in through `handleRemoteMessage`, the way
+React Native Firebase passes them. That run verified:
+
+- `createPlatform` on Hermes: random bytes and UUIDs, SHA-256 and `URL`.
+  `ConvoHopClient` and a `ConversationStore` ran against the conformance
+  mock, reached through `adb reverse`. A sent message was confirmed and
+  left the outbox, another user's message arrived over the subscription,
+  and counters stayed strings.
+- Push: `registerForPush` rejecting with `E_FIREBASE_NOT_INITIALIZED`, the
+  notification permission prompt, message notifications and opening one,
+  and the recipient filter dropping pushes for another user or when there's
+  no recipient.
+- Calls: a ring with a call-style notification, and a duplicate push
+  ignored. Answering in the app and from the notification, and declining
+  from it. `reportConnecting`, `reportConnected`, mute, hold, `updateCall`
+  and the speaker route; the emulator rejected the earpiece with
+  `E_AUDIO_ROUTE`. `endCall`, twice. Each way the server stops a ring,
+  through a cancellation push and through `stopRinging`, and a late
+  cancellation ignored.
+- The full-screen intent: denied, the call rang as a heads-up notification.
+  With the screen off and no lock, it woke the device and opened the app.
+  The [lock screen](#android) behaved as described above, with a swipe lock
+  and with a PIN.
+- No crashes.
 
 Not verified:
 
-- Hermes, and React Native releases other than 0.87.1. React Native
-  0.76.0's Codegen generated the specs once, by hand; CI runs only
+- A release build, and React Native releases other than 0.87.1. React
+  Native 0.76.0's Codegen generated the specs once, by hand; CI runs only
   0.87.1's.
-- Any native module, podspec or Gradle build, on any simulator, emulator
-  or device.
-- Push delivery, CallKit, Telecom and full-screen intents.
+- The iOS modules, podspec and project, which aren't written yet.
+- The Android modules on a physical device, and with Firebase configured.
+- Push delivery through FCM and APNs, and CallKit.
+- An app's own `incomingCallIntent` activity over the lock screen.
 - Real WebRTC media through LiveKit's React Native SDK.
 - How Android's Telecom audio routes and LiveKit's audio session interact.
 - AsyncStorage's behavior under concurrent writes on a device.
 - React Native Firebase and the Android SDK's messaging service in one app,
   in each FCM mode.
+
+## Known issues
+
+- **Android missed calls vanish.** The Android SDK posts a missed call's
+  notification under the ring's tag and ID, replacing the ring's, and the
+  ring's notification times out when the ring expires. On the emulator,
+  Android applied that timeout to the missed call and cancelled it: after
+  a ring expired, 61 milliseconds after the missed call was posted, and
+  after the server stopped a ring with `ended`. The fix belongs in the
+  Android SDK, a notification key of its own for missed calls, so this
+  package doesn't work around it.
 
 ## Assumptions
 
@@ -457,6 +554,27 @@ Not verified:
   option.
 - **Drop pushes by default.** A device with no recipient, or a `null` one,
   shows and rings no ConvoHop push.
+- **A local Maven repository for the Android SDK.** Until
+  `com.convohop:convohop-android-push` is on Maven Central, the example and
+  CI publish it from this repository's `android/` build to
+  `android/build/repo`, and take only the `com.convohop` group from there.
+  The package depends on `0.1.0-SNAPSHOT` unless the app sets
+  `convohopAndroidVersion`.
+- **React Native's template.** The example's `android/` project is React
+  Native 0.87.1's template: compile and target SDK 36, minimum SDK 24 and
+  Gradle 9.4.1. It applies the Google services plugin only when the app
+  has a `google-services.json`, so it builds and runs without Firebase.
+- **The example installs on its own.** It isn't one of the repository's
+  workspaces. Its own `node_modules` and lockfile hold React Native,
+  LiveKit and the other packages with native code, which must have one
+  copy. Metro takes the SDK packages from the repository's workspaces, and
+  autolinking links `@convohop/react-native` from `packages/react-native`.
+- **No Dependabot entries for the example.** A test requires the example's
+  dependencies to match the versions the package is tested with, so they
+  change with those.
+- **No foreground service.** Like the Android SDK, the package starts none.
+  An app that keeps a call's media running in the background starts its
+  own, of type `phoneCall`.
 
 ## Open questions
 
@@ -472,5 +590,8 @@ Not verified:
   `opened` itself until the SDK has a public serializer.
 - **Expo.** A config plugin could add the manifest entries, app delegate
   calls and entitlements for Expo development builds.
-- **The example's lockfile.** The example will get its own lockfile with
-  its native projects in phase 2.
+- **Calls at a recipient change.** Neither native SDK ends the previous
+  user's calls when the recipient changes, and with no recipient both drop
+  the pushes that stop a ring. Apps end those calls at
+  [sign-out](#sign-out). The SDKs could end them when the recipient
+  changes.

@@ -5,8 +5,8 @@ import { ConnectionState, RoomEvent, type Room } from "livekit-client";
 import { AudioSession } from "@livekit/react-native";
 import { ConvoHopProblem, type ConvoHopClient, type LiveConnector, type LiveParticipationHandle, type LiveSessionHandle } from "@convohop/client";
 import {
-  endCall, onCallEvent, reportConnected, reportConnecting, setAudioRoute, setMuted as setSystemMuted, startOutgoingCall,
-  subscribeAnsweredCalls, type AudioRoute, type Call, type CallEvent,
+  endCall, getCalls, onCallEvent, reportConnected, reportConnecting, setAudioRoute, setMuted as setSystemMuted,
+  startOutgoingCall, subscribeAnsweredCalls, type AudioRoute, type Call, type CallEvent,
 } from "@convohop/react-native";
 import { createRoom, createRoomConnector, type RoomConnection } from "@convohop/react-native/media";
 
@@ -171,15 +171,30 @@ export class CallController {
   hangUp(): void {
     if (this.#active !== undefined) this.#finish(this.#active);
   }
-  /** Hangs up, stops joining answered calls, and resolves once every call has been released. Never rejects. */
+  /**
+   * Hangs up, stops joining answered calls, ends the system calls that haven't ended, such as a ring, and resolves once
+   * every call has been released. Never rejects.
+   */
   close(): Promise<void> {
     if (!this.#closed) {
       this.#closed = true;
       for (const stop of this.#stop.splice(0)) stop();
       this.hangUp();
       this.#listeners.clear();
+      // Once the push recipient is cleared, the device ignores the user's cancellations, so a ring would go on until it
+      // expires.
+      this.#released = this.#released.then(() => this.#endSystemCalls());
     }
     return this.#released;
+  }
+  async #endSystemCalls(): Promise<void> {
+    try {
+      for (const call of await getCalls()) {
+        if (call.state !== "ended") await endCall(call.id).catch(this.#onError);
+      }
+    } catch (error) {
+      this.#onError(error);
+    }
   }
 
   #answer(call: Call): void {

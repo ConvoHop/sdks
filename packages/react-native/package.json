@@ -30,6 +30,9 @@
     "dist",
     "!dist/.tsbuildinfo",
     "src/specs",
+    "android",
+    "!android/build",
+    "!android/src/test",
     "NOTICE"
   ],
   "codegenConfig": {
