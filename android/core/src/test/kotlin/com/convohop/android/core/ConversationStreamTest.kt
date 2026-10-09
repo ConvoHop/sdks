@@ -61,4 +61,32 @@ class ConversationStreamTest {
             assertTrue(h.errors.isEmpty())
         }
     }
+
+    @Test
+    fun aPermanentFailureIsReportedBeforeTheReplayCloses() = runTest {
+        Harness(this).use { h ->
+            val conversation = h.authority.conversation()
+            val client = h.client()
+            var stream: ConversationStream? = null
+            val seen = ArrayList<Pair<Boolean, ReplayState>>()
+            stream = client.watch(conversation, {}, { error ->
+                h.errors += error
+                val current = checkNotNull(stream)
+                seen += current.closed to current.state.value
+            })
+            h.settle()
+            assertEquals(ReplayState.LIVE, stream.state.value)
+
+            h.authority.disconnect(4401)
+            h.settle()
+            // Inside onError the replay already counts as closed, but state turns CLOSED only after it, so an
+            // observer on another thread that sees CLOSED also has the reason.
+            assertEquals(listOf(true to ReplayState.LIVE), seen)
+            assertEquals(ReplayState.CLOSED, stream.state.value)
+            assertEquals(listOf("UNAUTHENTICATED"), h.errorCodes())
+            // Reconnecting with the rejected credential would only fail again.
+            h.advance(120_000)
+            assertEquals(1, h.authority.calls("CommunicationEvents").size)
+        }
+    }
 }

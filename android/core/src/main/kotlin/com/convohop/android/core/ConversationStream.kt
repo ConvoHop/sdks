@@ -49,7 +49,7 @@ public enum class ReplayState {
     /** Held while the session is renewed. */
     PAUSED,
 
-    /** Closed by the app, or failed permanently. */
+    /** Closed by the app, or failed permanently; a failure was already reported. */
     CLOSED,
 }
 
@@ -100,13 +100,19 @@ public class ConversationStream internal constructor(
     private val storageKey = storageKey(client, conversationId)
     private val stateFlow = MutableStateFlow(ReplayState.CATCHING_UP)
 
-    /** Where the replay stands. */
+    /**
+     * Where the replay stands. It becomes [ReplayState.CLOSED] only after onError received the reason a
+     * permanent failure ended the replay, so an observer on any thread that sees CLOSED also has the reason.
+     */
     public val state: StateFlow<ReplayState> = stateFlow.asStateFlow()
 
     /** The last applied position; replay resumes after it. It advances only once the position is stored. */
     public val cursor: Cursor? get() = appliedCursor
 
-    /** True once [close] ran or the replay failed permanently. */
+    /**
+     * True once [close] ran or the replay failed permanently. It is already true while onError receives a
+     * permanent failure, which tells it from a transient one.
+     */
     public val closed: Boolean get() = closedFlag
 
     internal companion object {
@@ -142,18 +148,20 @@ public class ConversationStream internal constructor(
         client.post { closeNow() }
     }
 
-    internal fun closeNow() {
+    internal fun closeNow(reason: Throwable? = null) {
         closedFlag = true
+        if (!finished) {
+            finished = true
+            queueGeneration++
+            timer?.cancel()
+            timer = null
+            val current = socket
+            socket = null
+            current?.close(1000, "")
+            if (applying == null) notifyClosed()
+            if (reason != null) report(onError, reason)
+        }
         stateFlow.value = ReplayState.CLOSED
-        if (finished) return
-        finished = true
-        queueGeneration++
-        timer?.cancel()
-        timer = null
-        val current = socket
-        socket = null
-        current?.close(1000, "")
-        if (applying == null) notifyClosed()
     }
 
     internal suspend fun retire() {
@@ -471,8 +479,7 @@ public class ConversationStream internal constructor(
             retry()
             return
         }
-        closeNow()
-        report(onError, error)
+        closeNow(error)
     }
 
     /** One bounded round of at most ten pages; true only when the current replay has more work. */
