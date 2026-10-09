@@ -1,6 +1,6 @@
 {
   "$schema": "../../spec/conformance/target.schema.json",
-  "description": "TODO(DEV-1): the ConvoHop dev-stack container image for SDK CI. CI starts the image and exports these variables; unset optional values make the scenarios that need them skip. Add capabilities as the image gains the control API described in spec/conformance/targets.md.",
+  "description": "The ConvoHop dev-stack container image for SDK CI. In CI, conformance/dev-stack.mjs starts the image and exports the variables this file reads from its seed.env; unset optional values make the scenarios that need them skip. Add capabilities as the image gains the control API described in spec/conformance/targets.md.",
   "name": "dev-stack",
   "communicationUrl": "${env:CONVOHOP_DEV_COMMUNICATION_URL}",
   "managementUrl": "${env:CONVOHOP_DEV_MANAGEMENT_URL}",

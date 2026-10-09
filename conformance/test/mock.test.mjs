@@ -93,8 +93,10 @@ describe("GraphQL endpoint", () => {
     await problem(await createPrincipal({ credential: mock.descriptor.credentials.backendExpired }), 401, "UNAUTHENTICATED");
     await problem(await createPrincipal({ credential: mock.descriptor.credentials.management }), 401, "UNAUTHENTICATED");
     await problem(await createPrincipal({ headers: { authorization: `Basic ${mock.descriptor.credentials.backend}` } }), 401, "UNAUTHENTICATED");
-    await problem(await createPrincipal({ context: { requestId, projectId: randomUUID(), incarnation: mock.descriptor.incarnation } }),
-      403, "FORBIDDEN");
+    const unknown = await problem(await createPrincipal({ credential: "not-a-mock-credential" }), 401, "UNAUTHENTICATED");
+    const otherProject = await problem(await createPrincipal({ context: { requestId, projectId: randomUUID(),
+      incarnation: mock.descriptor.incarnation } }), 401, "UNAUTHENTICATED");
+    assert.equal(otherProject.message, unknown.message, "another project cannot tell a valid credential from an unknown one");
     await problem(await createPrincipal({ context: { requestId, projectId: mock.descriptor.projectId, incarnation: randomUUID() } }),
       409, "INCARNATION_MISMATCH");
     await problem(await post("management.capabilities", { plane: "management" }), 401, "UNAUTHENTICATED");
@@ -294,6 +296,16 @@ describe("receipts and single-message reads", () => {
     await result(await post("communication.addMembers", { input: { conversationId,
       members: [{ principalId: carol, role: "member", expectedRevision: "0" }] } }), "addMembers");
     await problem(await read(first.messageId, { credential: tokens.carol }), 404, "NOT_FOUND");
+  });
+
+  test("a deleted message reads back as a tombstone without text or props", async () => {
+    const { conversationId, tokens, first } = await room();
+    const tombstone = await result(await post("communication.deleteMessage", { credential: tokens.alice,
+      input: { conversationId, messageId: first.messageId, expectedRevision: "1" } }), "deleteMessage");
+    assert.deepEqual([tombstone.messageId, tombstone.revision, tombstone.deleted, tombstone.text, tombstone.props],
+      [first.messageId, "2", true, null, null]);
+    assert.deepEqual(await result(await post("communication.getMessage", { credential: tokens.bob,
+      input: { conversationId, messageId: first.messageId } }), "getMessage"), tombstone);
   });
 
   test("reportReceipt advances progress at the current epochs and emits receipt.reported once per advance", async () => {
