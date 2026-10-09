@@ -30,8 +30,9 @@ const (
 	OutcomeAccepted Outcome = "accepted"
 )
 
-// Codes the runtime raises itself. They are unexported so the runtime does not
-// depend on which codes a schema documents.
+// Codes the runtime raises itself, and WRONG_REGION, which it counts as
+// retryable. They are unexported so the runtime does not depend on which codes
+// a schema documents.
 const (
 	codeCredentialRequired     ErrorCode = "CREDENTIAL_REQUIRED"
 	codeGraphQLError           ErrorCode = "GRAPHQL_ERROR"
@@ -40,11 +41,13 @@ const (
 	codeIncarnationMismatch    ErrorCode = "INCARNATION_MISMATCH"
 	codeInvalidRequest         ErrorCode = "INVALID_REQUEST"
 	codeInvalidResponse        ErrorCode = "INVALID_RESPONSE"
+	codeRecoveryLimit          ErrorCode = "RECOVERY_LIMIT"
 	codeRecoveryStorageFailure ErrorCode = "RECOVERY_STORAGE_FAILURE"
 	codeResolutionRequired     ErrorCode = "RESOLUTION_REQUIRED"
 	codeScopeRequired          ErrorCode = "SCOPE_REQUIRED"
 	codeTransportUnknown       ErrorCode = "TRANSPORT_UNKNOWN"
 	codeUnauthenticated        ErrorCode = "UNAUTHENTICATED"
+	codeWrongRegion            ErrorCode = "WRONG_REGION"
 )
 
 // Problem is a failed request. Classify it by Code and Outcome, never by
@@ -129,6 +132,13 @@ func idempotencyConflict(requestID string) *Problem {
 
 func resolutionRequired(requestID, message string) *Problem {
 	return problem(codeResolutionRequired, requestID, OutcomeUnknown, 409, message)
+}
+
+// recoveryLimit refuses a new request, before anything is sent, because the
+// client holds the most recovery records it keeps and none of them is final.
+func recoveryLimit(requestID string) *Problem {
+	return problem(codeRecoveryLimit, requestID, OutcomeRejected, 409,
+		fmt.Sprintf("Recovery storage already holds %d requests that aren't final; retry or resolve them first", maxRecoveryRecords))
 }
 
 // mismatch reports an authority response that contradicts the request.

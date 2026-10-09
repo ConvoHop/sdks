@@ -87,8 +87,10 @@ type RecoveryRecord struct {
 	// LastAttemptClassification describes the last attempt: notSubmitted,
 	// submitted, authorityReceipt, an error code or opaqueTransportFailure.
 	LastAttemptClassification string `json:"lastAttemptClassification"`
-	// ResolutionState is pending before the first attempt, unknown until the
-	// authority confirms it, then committed or accepted.
+	// ResolutionState is pending before the first attempt and unknown once an
+	// attempt may have taken effect. It is committed or accepted once the
+	// authority confirms the request, and rejected while the authority has
+	// refused every attempt.
 	ResolutionState string `json:"resolutionState"`
 	// MediaAdmissionAttempted marks credentials used for native media
 	// admission, which must never be issued again.
@@ -97,6 +99,26 @@ type RecoveryRecord struct {
 
 func (r *RecoveryRecord) settled() bool {
 	return r.ResolutionState == "committed" || r.ResolutionState == "accepted"
+}
+
+// final reports whether nothing more can come of the record's request at
+// time now: the authority committed or accepted it, or rejected every attempt
+// and won't take another, because the last rejection isn't retryable or the
+// retry budget is spent. Only final records make room in a full journal.
+func (r *RecoveryRecord) final(now int64) bool {
+	if r.settled() {
+		return true
+	}
+	return r.ResolutionState == "rejected" && (!retryableCode(ErrorCode(r.LastAttemptClassification)) ||
+		r.AttemptCount >= int64(catalog.operations[r.Operation].maxAttempts) || now > r.RetryDeadline)
+}
+
+// retryableCode reports whether a later attempt of a request may still succeed
+// after a problem with code. The API documents this for each code it lists.
+// WRONG_REGION succeeds once the client routes again, and a code the API does
+// not list, such as a newer service's, counts as retryable.
+func retryableCode(code ErrorCode) bool {
+	return code == codeWrongRegion || !code.nonRetryable()
 }
 
 func (r *RecoveryRecord) clone() RecoveryRecord {
@@ -187,8 +209,8 @@ func restoreRecord(item any) (*RecoveryRecord, error) {
 	name, _ := v["operation"].(string)
 	op := catalog.operations[name]
 	resolution, _ := v["resolutionState"].(string)
-	if op == nil || op.kind != "mutation" ||
-		(resolution != "pending" && resolution != "unknown" && resolution != "committed" && resolution != "accepted") {
+	if op == nil || op.kind != "mutation" || (resolution != "pending" && resolution != "unknown" &&
+		resolution != "rejected" && resolution != "committed" && resolution != "accepted") {
 		return nil, errRecoveryRecord
 	}
 	_, scoped := op.context["projectId"]
@@ -349,9 +371,9 @@ func (t *transport) mutateOnce(ctx context.Context, op *operation, input map[str
 		return nil, resolutionRequired(requestID, "The original request is no longer eligible for resend")
 	}
 	if state == nil {
-		if len(t.states) >= maxRecoveryRecords && !t.evictSettled() {
+		if len(t.states) >= maxRecoveryRecords && !t.evictFinal() {
 			t.mu.Unlock()
-			return nil, errors.New("convohop: resolve outstanding mutations before creating more")
+			return nil, recoveryLimit(requestID)
 		}
 		now := t.clock()
 		copied, _ := deepCopy(input).(map[string]any)
@@ -372,17 +394,25 @@ func (t *transport) mutateOnce(ctx context.Context, op *operation, input map[str
 	return t.submit(ctx, op, state, permit, retry)
 }
 
-// evictSettled forgets the oldest settled record that is not in flight. The
-// caller holds t.mu.
-func (t *transport) evictSettled() bool {
+// evictFinal forgets the final record whose last attempt is the oldest, of
+// those that no call in progress is using. Records that aren't final always
+// stay. The caller holds t.mu.
+func (t *transport) evictFinal() bool {
+	now := t.clock()
+	oldest := -1
 	for i, id := range t.order {
-		if t.states[id].settled() && t.active[id] == nil {
-			delete(t.states, id)
-			t.order = slices.Delete(t.order, i, i+1)
-			return true
+		state := t.states[id]
+		if state.final(now) && t.active[id] == nil &&
+			(oldest < 0 || state.LastAttemptAt < t.states[t.order[oldest]].LastAttemptAt) {
+			oldest = i
 		}
 	}
-	return false
+	if oldest < 0 {
+		return false
+	}
+	delete(t.states, t.order[oldest])
+	t.order = slices.Delete(t.order, oldest, oldest+1)
+	return true
 }
 
 // submit sends one attempt within the retry budget and records its outcome.
@@ -398,9 +428,10 @@ func (t *transport) submit(ctx context.Context, op *operation, state *RecoveryRe
 		t.mu.Unlock()
 		return nil, resolutionRequired(requestID, "Retry budget expired or clock changed; resolve this request read-only")
 	}
+	prior := state.ResolutionState
 	state.AttemptCount++
 	state.LastAttemptAt = now
-	if state.ResolutionState == "pending" {
+	if prior == "pending" || prior == "rejected" {
 		state.ResolutionState = "unknown"
 	}
 	state.LastAttemptClassification = "submitted"
@@ -420,12 +451,21 @@ func (t *transport) submit(ctx context.Context, op *operation, state *RecoveryRe
 	reply, err := t.request(ctx, op, input, permit, requestID)
 	if err != nil {
 		classification := "opaqueTransportFailure"
+		rejected := false
 		var p *Problem
 		if errors.As(err, &p) {
 			classification = string(p.Code)
+			rejected = p.Outcome == OutcomeRejected
 		}
 		t.mu.Lock()
 		state.LastAttemptClassification = classification
+		// A rejection is the request's outcome only if every attempt was
+		// rejected: after an unknown attempt the request may have taken
+		// effect. The state is no longer unknown if a resolution of the
+		// request settled it meanwhile.
+		if rejected && (prior == "pending" || prior == "rejected") && state.ResolutionState == "unknown" {
+			state.ResolutionState = "rejected"
+		}
 		t.mu.Unlock()
 		if failure := t.persist(ctx, requestID); failure != nil {
 			if errors.As(failure, &p) {

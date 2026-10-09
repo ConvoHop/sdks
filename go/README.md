@@ -214,9 +214,8 @@ if errors.As(err, &problem) {
 - `Message` is a diagnostic for people, and never contains credentials.
 
 Constructors return plain errors, not `*Problem`, for invalid configuration,
-including invalid options. So do two recovery cases that send nothing: a new
-mutation when the client's recovery records are full, and `Retry` for a
-request ID the client has no record of. See [Recovery](#recovery).
+including invalid options. So does `Retry` for a request ID the client has
+no record of, and it sends nothing. See [Recovery](#recovery).
 
 ## Recovery
 
@@ -239,10 +238,12 @@ if errors.As(err, &problem) && problem.Outcome == convohop.OutcomeUnknown {
 
 - Each mutation leaves a recovery record: its request ID, operation,
   project, incarnation, input and attempts, never credentials. Its
-  `ResolutionState` is `unknown` from the first attempt until the authority
-  confirms the request, then `committed` or `accepted`. `WithRequestID` sets
-  the request ID, and the SDK generates one otherwise. `RecoveryRecords`
-  lists the records, oldest first.
+  `ResolutionState` is `pending` until the first attempt and `unknown` once
+  an attempt may have taken effect, then `committed` or `accepted` once the
+  authority confirms the request. It is `rejected` while the authority has
+  refused every attempt. `WithRequestID` sets the request ID, and the SDK
+  generates one otherwise. `RecoveryRecords` lists the records, oldest
+  first.
 - `ResolveRequest` only reads what the authority knows about a request:
   `notObservedYet`, `accepted` or `committed`.
 - `Retry` reads the request's resolution and returns it if the authority
@@ -269,14 +270,22 @@ if errors.As(err, &problem) && problem.Outcome == convohop.OutcomeUnknown {
   you replace a client within one process, but not across a restart.
 - A store failure fails the call with `RECOVERY_STORAGE_FAILURE`. A failed
   load sends nothing, has outcome `rejected` and is tried again by the next
-  call. A failed write has the request's known outcome: `unknown` until the
-  authority confirms the request.
-- A client keeps at most 128 records. A new mutation forgets the oldest
-  record whose state is `committed` or `accepted` and that no call is using.
-  When there is none, the mutation fails with a plain error and sends
-  nothing. Records that stay `unknown`, such as those of rejected requests,
-  are never forgotten. `Retry` also fails with a plain error when the client
-  has no record of the request ID.
+  call. A failed write has the request's known outcome: the record's
+  `ResolutionState`, or `unknown` while that is `pending`.
+- A client keeps at most 128 records. A record is final once its request
+  is `committed` or `accepted`, or once it is `rejected` and can't be sent
+  again: its last code is one the API documents as not retryable, other
+  than `WRONG_REGION`, or its retry budget is spent (3 attempts, or a
+  minute since the first). When all 128 places are taken, a new mutation
+  forgets the final record whose last attempt is the oldest, of those no
+  call is using. Other records are never forgotten: `pending` and `unknown`
+  ones, and those `rejected` with a retryable code, such as `RATE_LIMITED`,
+  while budget remains.
+- When no record is final, a new mutation fails with `RECOVERY_LIMIT`,
+  status 409 and outcome `rejected`, and sends nothing. Retry or resolve the
+  outstanding requests first. Sending a recorded request ID again needs no
+  new place. `Retry` fails with a plain error when the client has no record
+  of the request ID.
 
 ## Management
 

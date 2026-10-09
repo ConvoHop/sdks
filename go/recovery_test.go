@@ -646,7 +646,7 @@ func TestInvalidStoredRecords(t *testing.T) {
 	}
 	tooMany := make([]any, maxRecoveryRecords+1)
 	for i := range tooMany {
-		tooMany[i] = storedRecord(fmt.Sprintf("00000000-0000-4000-8000-%012d", i+1), sendOperation)
+		tooMany[i] = storedRecord(journalID(i+1), sendOperation)
 	}
 	for name, stored := range map[string]any{
 		"not JSON":               []byte("["),
@@ -657,7 +657,7 @@ func TestInvalidStoredRecords(t *testing.T) {
 		"not an object":          []any{"record"},
 		"unknown operation":      with("operation", "communication.unknown"),
 		"query operation":        with("operation", "communication.messages"),
-		"unknown state":          with("resolutionState", "rejected"),
+		"unknown state":          with("resolutionState", "settled"),
 		"missing project":        with("projectId", nil),
 		"invalid project":        with("projectId", "project"),
 		"unexpected project":     with("operation", "management.issueBackendKey"),
@@ -690,10 +690,13 @@ func TestInvalidStoredRecords(t *testing.T) {
 		record["mediaAdmissionAttempted"] = true
 		settled := storedRecord(testUUID, "communication.createPrincipal")
 		settled["resolutionState"] = "committed"
-		client := newProject(t, newAuthority(t, nil), WithRecoveryStore(storing(t, []any{record, settled})))
+		rejected := storedRecord(journalID(1), sendOperation)
+		rejected["resolutionState"], rejected["lastAttemptClassification"] = "rejected", "RATE_LIMITED"
+		client := newProject(t, newAuthority(t, nil), WithRecoveryStore(storing(t, []any{record, settled, rejected})))
 		records := recordsOf(t, client)
-		if len(records) != 2 || !records[0].MediaAdmissionAttempted || records[0].AttemptCount != 1 ||
-			records[0].RetryDeadline != 2 || records[1].RequestID != testUUID || records[1].ResolutionState != "committed" {
+		if len(records) != 3 || !records[0].MediaAdmissionAttempted || records[0].AttemptCount != 1 ||
+			records[0].RetryDeadline != 2 || records[1].RequestID != testUUID || records[1].ResolutionState != "committed" ||
+			records[2].ResolutionState != "rejected" || records[2].LastAttemptClassification != "RATE_LIMITED" {
 			t.Fatalf("records = %+v", records)
 		}
 	})
@@ -712,6 +715,7 @@ func TestRecoveryStoreWriteFailure(t *testing.T) {
 		{"attempt", 2, replying(sendOperation, sent), OutcomeUnknown, 0},
 		{"receipt", 3, replying(sendOperation, sent), OutcomeCommitted, 1},
 		{"failed attempt", 3, dropping(sendOperation), OutcomeUnknown, 1},
+		{"rejected attempt", 3, refusing(ErrorCodeRateLimited, 429), OutcomeRejected, 1},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			a := newAuthority(t, tc.respond)
@@ -725,46 +729,319 @@ func TestRecoveryStoreWriteFailure(t *testing.T) {
 			if n := a.count(sendOperation); n != tc.sent {
 				t.Fatalf("sent %d attempts, want %d", n, tc.sent)
 			}
-			if tc.name == "failed attempt" && !errors.Is(err, codeTransportUnknown) {
-				t.Fatalf("problem %v does not wrap the transport failure", err)
+			failure, failed := map[string]ErrorCode{
+				"failed attempt": codeTransportUnknown, "rejected attempt": ErrorCodeRateLimited,
+			}[tc.name]
+			if failed && !errors.Is(err, failure) {
+				t.Fatalf("problem %v does not wrap the %s failure", err, failure)
 			}
 		})
 	}
 }
 
-func TestRecoveryCapacity(t *testing.T) {
-	full := func(state string) []any {
-		records := make([]any, maxRecoveryRecords)
-		for i := range records {
-			record := storedRecord(fmt.Sprintf("00000000-0000-4000-8000-%012d", i+1), sendOperation)
-			record["resolutionState"] = state
-			records[i] = record
+// journalID is the request ID of the nth record of a test journal.
+func journalID(n int) string {
+	return fmt.Sprintf("00000000-0000-4000-8000-%012d", n)
+}
+
+// journal is a full journal of stored sendMessage records whose outcome is
+// unknown, the nth changed by edit when it is not nil.
+func journal(edit func(n int, record map[string]any)) []any {
+	records := make([]any, maxRecoveryRecords)
+	for i := range records {
+		record := storedRecord(journalID(i+1), sendOperation)
+		if edit != nil {
+			edit(i+1, record)
 		}
-		return records
+		records[i] = record
 	}
-	t.Run("evicts the oldest settled record", func(t *testing.T) {
+	return records
+}
+
+// idsOf lists the request IDs of the client's records, oldest first.
+func idsOf(t *testing.T, c *ProjectClient) []string {
+	t.Helper()
+	var ids []string
+	for _, record := range recordsOf(t, c) {
+		ids = append(ids, record.RequestID)
+	}
+	return ids
+}
+
+// refusing rejects every sendMessage request with code and status.
+func refusing(code ErrorCode, status int) func(*exchange) response {
+	return func(ex *exchange) response {
+		if ex.op.id != sendOperation {
+			return response{}
+		}
+		return response{body: graphQLError("Refused", map[string]any{"code": string(code), "outcome": "rejected", "status": status})}
+	}
+}
+
+// limited requires a new request to fail with RECOVERY_LIMIT and send
+// nothing, because the client's full journal has no record to forget.
+func limited(t *testing.T, a *authority, c *ProjectClient) {
+	t.Helper()
+	before := a.count(sendOperation)
+	_, err := send(c, "hello", WithRequestID(testUUID))
+	if p := expectProblem(t, err, codeRecoveryLimit, OutcomeRejected, 409); p.RequestID != testUUID {
+		t.Fatalf("problem names request %q, want %q", p.RequestID, testUUID)
+	}
+	if n := a.count(sendOperation); n != before {
+		t.Fatalf("sent %d requests, want none", n-before)
+	}
+	if ids := idsOf(t, c); len(ids) != maxRecoveryRecords || slices.Contains(ids, testUUID) {
+		t.Fatalf("records = %v", ids)
+	}
+}
+
+// evicts requires a new request to succeed in the place of the record of id.
+func evicts(t *testing.T, a *authority, c *ProjectClient, id string) {
+	t.Helper()
+	a.setRespond(replying(sendOperation, sent))
+	if _, err := send(c, "hello", WithRequestID(testUUID)); err != nil {
+		t.Fatal(err)
+	}
+	if ids := idsOf(t, c); len(ids) != maxRecoveryRecords || slices.Contains(ids, id) || ids[len(ids)-1] != testUUID {
+		t.Fatalf("records = %v, want %s in the place of %s", ids, testUUID, id)
+	}
+}
+
+func TestRecoveryCapacity(t *testing.T) {
+	t.Run("evicts the final record attempted longest ago", func(t *testing.T) {
+		stored := journal(func(n int, record map[string]any) {
+			record["resolutionState"], record["lastAttemptAt"] = "committed", 10
+			if n == 4 || n == 8 {
+				record["lastAttemptAt"] = 5
+			}
+		})
 		a := newAuthority(t, replying(sendOperation, sent))
-		client := newProject(t, a, WithRecoveryStore(storing(t, full("committed"))))
+		client := newProject(t, a, WithRecoveryStore(storing(t, stored)))
+		want := make([]string, 0, maxRecoveryRecords)
+		for n := 1; n <= maxRecoveryRecords; n++ {
+			want = append(want, journalID(n))
+		}
+		// The two attempted longest ago go first, in journal order, then the
+		// first of the others.
+		for i, gone := range []int{4, 8, 1} {
+			id := journalID(maxRecoveryRecords + 1 + i)
+			if _, err := send(client, "hello", WithRequestID(id)); err != nil {
+				t.Fatal(err)
+			}
+			want = append(slices.DeleteFunc(want, func(kept string) bool { return kept == journalID(gone) }), id)
+			if ids := idsOf(t, client); !slices.Equal(ids, want) {
+				t.Fatalf("after %s, records = %v, want %v", id, ids, want)
+			}
+		}
+	})
+	t.Run("evicts only final records", func(t *testing.T) {
+		clock := newTestClock()
+		now := clock.Now().UnixMilli()
+		stored := journal(func(n int, record map[string]any) {
+			record["firstSubmittedAt"], record["lastAttemptAt"], record["retryDeadline"] = now-1000, now-1000, now+59_000
+			rejected := func(code string) {
+				record["resolutionState"], record["lastAttemptClassification"] = "rejected", code
+			}
+			switch n {
+			case 1:
+				record["resolutionState"], record["lastAttemptClassification"], record["attemptCount"] = "pending", "notSubmitted", 0
+			case 2:
+				rejected("RATE_LIMITED")
+			case 3:
+				rejected("WRONG_REGION")
+			case 4:
+				rejected("NEWER_SERVICE_CODE")
+			case 100:
+				// The only final record, attempted after every other.
+				rejected("REVISION_CONFLICT")
+				record["lastAttemptAt"] = now - 1
+			}
+		})
+		a := newAuthority(t, replying(sendOperation, sent))
+		client := newProject(t, a, WithClock(clock.Now), WithRecoveryStore(storing(t, stored)))
 		if _, err := send(client, "hello", WithRequestID(testRequest)); err != nil {
 			t.Fatal(err)
 		}
-		records := recordsOf(t, client)
-		if len(records) != maxRecoveryRecords || records[0].RequestID != "00000000-0000-4000-8000-000000000002" ||
-			records[len(records)-1].RequestID != testRequest {
-			t.Fatalf("kept %d records from %s to %s", len(records), records[0].RequestID, records[len(records)-1].RequestID)
+		var want []string
+		for n := 1; n <= maxRecoveryRecords; n++ {
+			if n != 100 {
+				want = append(want, journalID(n))
+			}
+		}
+		if ids := idsOf(t, client); !slices.Equal(ids, append(want, testRequest)) {
+			t.Fatalf("records = %v", ids)
+		}
+		// The committed record is now the only final one.
+		evicts(t, a, client, testRequest)
+	})
+	t.Run("fails closed when no record is final", func(t *testing.T) {
+		a := newAuthority(t, dropping(sendOperation))
+		client := newProject(t, a, WithRecoveryStore(storing(t, journal(nil)[1:])))
+		_, err := send(client, "hello", WithRequestID(testRequest))
+		expectProblem(t, err, codeTransportUnknown, OutcomeUnknown, 0)
+		limited(t, a, client)
+		// Sending a recorded request again needs no new place.
+		a.setRespond(replying(sendOperation, sent))
+		if _, err := send(client, "hello", WithRequestID(testRequest)); err != nil {
+			t.Fatal(err)
+		}
+		evicts(t, a, client, testRequest)
+		if n := a.count(sendOperation); n != 3 {
+			t.Fatalf("sent %d requests, want 3", n)
 		}
 	})
-	t.Run("keeps unsettled records", func(t *testing.T) {
-		a := newAuthority(t, nil)
-		client := newProject(t, a, WithRecoveryStore(storing(t, full("unknown"))))
+	t.Run("keeps a final record that a call is using", func(t *testing.T) {
+		a := newAuthority(t, replying(sendOperation, sent))
+		client := newProject(t, a, WithRecoveryStore(storing(t, journal(nil)[1:])))
+		if _, err := send(client, "hello", WithRequestID(testRequest)); err != nil {
+			t.Fatal(err)
+		}
+		arrived, held := make(chan struct{}, 1), make(chan struct{})
+		var once sync.Once
+		release := func() { once.Do(func() { close(held) }) }
+		t.Cleanup(release)
+		a.setRespond(func(ex *exchange) response {
+			arrived <- struct{}{}
+			<-held
+			return response{body: success(ex.op, ex.requestID, sent(ex))}
+		})
+		replay := sendAsync(context.Background(), client, "hello")
+		<-arrived
+		limited(t, a, client)
+		release()
+		if result := <-replay; result.err != nil {
+			t.Fatal(result.err)
+		}
+		evicts(t, a, client, testRequest)
+	})
+}
+
+func TestFinalRecords(t *testing.T) {
+	const now = 1_000
+	limit := int64(catalog.operations[sendOperation].maxAttempts)
+	for _, tc := range []struct {
+		name           string
+		state          string
+		classification string
+		attempts       int64
+		deadline       int64
+		final          bool
+	}{
+		{"committed", "committed", "authorityReceipt", 1, now, true},
+		{"accepted", "accepted", "authorityReceipt", 1, now, true},
+		{"pending", "pending", "notSubmitted", 0, now - 1, false},
+		{"unknown with its budget spent", "unknown", "TRANSPORT_UNKNOWN", limit, now - 1, false},
+		{"rejected for good", "rejected", "REVISION_CONFLICT", 1, now, true},
+		{"rejected for now", "rejected", "RATE_LIMITED", limit - 1, now, false},
+		{"in the wrong region", "rejected", "WRONG_REGION", 1, now, false},
+		{"rejected with an undocumented code", "rejected", "NEWER_SERVICE_CODE", 1, now, false},
+		{"rejected with its attempts spent", "rejected", "RATE_LIMITED", limit, now, true},
+		{"rejected after its window", "rejected", "RATE_LIMITED", 1, now - 1, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			record := RecoveryRecord{
+				Operation: sendOperation, ResolutionState: tc.state, LastAttemptClassification: tc.classification,
+				AttemptCount: tc.attempts, RetryDeadline: tc.deadline,
+			}
+			if got := record.final(now); got != tc.final {
+				t.Fatalf("final = %t, want %t", got, tc.final)
+			}
+		})
+	}
+}
+
+func TestRetryableCodes(t *testing.T) {
+	for code, want := range map[ErrorCode]bool{
+		ErrorCodeRateLimited:      true,
+		codeTransportUnknown:      true,
+		ErrorCodeWrongRegion:      true,
+		"NEWER_SERVICE_CODE":      true,
+		ErrorCodeRevisionConflict: false,
+		codeUnauthenticated:       false,
+		codeRecoveryLimit:         false,
+	} {
+		if got := retryableCode(code); got != want {
+			t.Errorf("retryableCode(%s) = %t, want %t", code, got, want)
+		}
+	}
+}
+
+func TestRejectedRecords(t *testing.T) {
+	t.Run("a request rejected on every attempt is rejected", func(t *testing.T) {
+		a := newAuthority(t, refusing(ErrorCodeRateLimited, 429))
+		client := newProject(t, a)
 		_, err := send(client, "hello", WithRequestID(testRequest))
-		var p *Problem
-		if err == nil || errors.As(err, &p) || !strings.Contains(err.Error(), "resolve outstanding mutations") {
-			t.Fatalf("error = %v, want the capacity error", err)
+		expectProblem(t, err, ErrorCodeRateLimited, OutcomeRejected, 429)
+		if record := onlyRecord(t, client); record.ResolutionState != "rejected" ||
+			record.LastAttemptClassification != "RATE_LIMITED" || record.AttemptCount != 1 {
+			t.Fatalf("record = %+v", record)
 		}
-		if n := len(a.requests()); n != 0 || len(recordsOf(t, client)) != maxRecoveryRecords {
-			t.Fatalf("sent %d requests", n)
+		during := make(chan []RecoveryRecord, 1)
+		a.setRespond(func(ex *exchange) response {
+			records, _ := client.RecoveryRecords(context.Background())
+			during <- records
+			return response{body: success(ex.op, ex.requestID, sent(ex))}
+		})
+		if _, err := send(client, "hello", WithRequestID(testRequest)); err != nil {
+			t.Fatal(err)
 		}
+		if records := <-during; len(records) != 1 || records[0].ResolutionState != "unknown" {
+			t.Fatalf("records while sending again = %+v", records)
+		}
+		if record := onlyRecord(t, client); record.ResolutionState != "committed" || record.AttemptCount != 2 {
+			t.Fatalf("record = %+v", record)
+		}
+	})
+	t.Run("a rejection after an attempt that may have taken effect leaves the outcome unknown", func(t *testing.T) {
+		a := newAuthority(t, dropping(sendOperation))
+		client := newProject(t, a)
+		_, err := send(client, "hello", WithRequestID(testRequest))
+		expectProblem(t, err, codeTransportUnknown, OutcomeUnknown, 0)
+		a.setRespond(refusing(ErrorCodeRateLimited, 429))
+		_, err = send(client, "hello", WithRequestID(testRequest))
+		expectProblem(t, err, ErrorCodeRateLimited, OutcomeRejected, 429)
+		if record := onlyRecord(t, client); record.ResolutionState != "unknown" ||
+			record.LastAttemptClassification != "RATE_LIMITED" || record.AttemptCount != 2 {
+			t.Fatalf("record = %+v", record)
+		}
+	})
+	t.Run("a rejection that can't be retried makes room", func(t *testing.T) {
+		store := storing(t, journal(nil)[1:])
+		a := newAuthority(t, refusing(ErrorCodeRevisionConflict, 409))
+		_, err := send(newProject(t, a, WithRecoveryStore(store)), "hello", WithRequestID(testRequest))
+		expectProblem(t, err, ErrorCodeRevisionConflict, OutcomeRejected, 409)
+		// A restarted client reads the record back as rejected, and final.
+		restarted := newProject(t, a, WithRecoveryStore(store))
+		if records := recordsOf(t, restarted); records[len(records)-1].ResolutionState != "rejected" {
+			t.Fatalf("records = %+v", records)
+		}
+		evicts(t, a, restarted, testRequest)
+	})
+	t.Run("a retryable rejection holds its place until its attempts are spent", func(t *testing.T) {
+		a := newAuthority(t, refusing(ErrorCodeRateLimited, 429))
+		client := newProject(t, a, WithRecoveryStore(storing(t, journal(nil)[1:])))
+		limit := catalog.operations[sendOperation].maxAttempts
+		for attempt := 1; attempt <= limit; attempt++ {
+			_, err := send(client, "hello", WithRequestID(testRequest))
+			expectProblem(t, err, ErrorCodeRateLimited, OutcomeRejected, 429)
+			if attempt < limit {
+				limited(t, a, client)
+			}
+		}
+		evicts(t, a, client, testRequest)
+	})
+	t.Run("a retryable rejection holds its place until its window ends", func(t *testing.T) {
+		clock := newTestClock()
+		start := clock.Now()
+		window := time.Duration(catalog.operations[sendOperation].windowMs) * time.Millisecond
+		a := newAuthority(t, refusing(ErrorCodeRateLimited, 429))
+		client := newProject(t, a, WithClock(clock.Now), WithRecoveryStore(storing(t, journal(nil)[1:])))
+		_, err := send(client, "hello", WithRequestID(testRequest))
+		expectProblem(t, err, ErrorCodeRateLimited, OutcomeRejected, 429)
+		clock.Set(start.Add(window))
+		limited(t, a, client)
+		clock.Set(start.Add(window + time.Millisecond))
+		evicts(t, a, client, testRequest)
 	})
 }
 

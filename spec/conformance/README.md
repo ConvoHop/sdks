@@ -460,8 +460,9 @@ the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 69
 scenarios against the mock and skips the same 4. Its
 [workflow](../../.github/workflows/dotnet.yml) fails on any other skip.
 
-The Go driver also declares the backend and management roles. It passes the
-same 69 scenarios against the mock and skips the same 4. Its
+The Go driver also declares the backend and management roles, and the
+`recovery.eviction` feature. It passes 71 scenarios against the mock and
+skips only the 2 that only use user clients. Its
 [workflow](../../.github/workflows/go.yml) fails on any other skip.
 
 The Android driver declares only the user role and no `webhooks.verify`
