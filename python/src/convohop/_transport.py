@@ -318,7 +318,7 @@ class AsyncDriver:
         if self._initialization is None:
             self._initialization = asyncio.get_running_loop().create_task(self._load())
             self._initialization.add_done_callback(_retrieve)
-        await asyncio.shield(self._initialization)
+        await _join(self._initialization)
 
     async def _load(self) -> None:
         storage = self._async_storage
@@ -416,7 +416,7 @@ class AsyncDriver:
             engine.active[call.request_id] = entry
             task.add_done_callback(functools.partial(_settled, engine, call.request_id, entry))
         work: asyncio.Task[Envelope] = entry.work
-        return await asyncio.shield(work)
+        return await _join(work)
 
 
 def _settled(engine: Engine, request_id: str, entry: _Active, task: asyncio.Task[Envelope]) -> None:
@@ -429,6 +429,14 @@ def _retrieve(task: asyncio.Task[Any]) -> None:
     # Marks a shared task's outcome retrieved: every caller awaiting it may have been cancelled.
     if not task.cancelled():
         task.exception()
+
+
+async def _join(task: asyncio.Task[T]) -> T:
+    # Awaits a shared task without cancelling it when this caller is cancelled. Unlike asyncio.shield, which from
+    # Python 3.14 reports such a task's exception to the loop once a caller is cancelled, this leaves it to _retrieve.
+    if not task.done():
+        await asyncio.wait((task,))
+    return task.result()
 
 
 def _interrupted(request_id: str) -> Exception:
