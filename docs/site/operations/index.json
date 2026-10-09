@@ -29,6 +29,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopcapabilities-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ProjectServerClient.capabilities",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#projectserverclientcapabilities-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.capabilities",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapicapabilities-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.capabilities",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapicapabilities-method"
+          }
         ]
       }
     },
@@ -79,6 +96,23 @@
             "ref": "convohop#AsyncConvoHop.initialize",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopinitialize-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ProjectServerClient.initialize",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#projectserverclientinitialize-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.route",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiroute-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.route",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiroute-method"
           }
         ]
       }
@@ -135,6 +169,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopget_principal-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ProjectServerClient.principals.get",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#projectserverclientprincipalsget-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.getPrincipal",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapigetprincipal-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getPrincipal",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapigetprincipal-method"
+          }
         ]
       }
     },
@@ -176,6 +227,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopget_conversation-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ServerConversation.get",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#serverconversationget-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.getConversation",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapigetconversation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getConversation",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapigetconversation-method"
+          }
         ]
       }
     },
@@ -216,6 +284,33 @@
             "ref": "convohop#AsyncConvoHop.iter_members",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopiter_members-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ServerConversation.members.list",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#serverconversationmemberslist-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.members",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapimembers-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.membersPages",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapimemberspages-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.members",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapimembers-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.membersPages",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapimemberspages-method"
           }
         ]
       }
@@ -268,6 +363,33 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopiter_messages-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ServerConversation.messages.list",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#serverconversationmessageslist-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.messages",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapimessages-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.messagesPages",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapimessagespages-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.messages",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapimessages-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.messagesPages",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapimessagespages-method"
+          }
         ]
       }
     },
@@ -298,6 +420,23 @@
             "ref": "convohop#AsyncConvoHop.get_message",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopget_message-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ServerConversation.messages.get",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#serverconversationmessagesget-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.getMessage",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapigetmessage-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getMessage",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapigetmessage-method"
           }
         ]
       }
@@ -388,6 +527,28 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopiter_inbox-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.inbox",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiinbox-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.inboxPages",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiinboxpages-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.inbox",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiinbox-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.inboxPages",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiinboxpages-method"
+          }
         ]
       }
     },
@@ -433,6 +594,28 @@
             "ref": "convohop#AsyncConvoHop.iter_search",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopiter_search-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.search",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapisearch-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.searchPages",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapisearchpages-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.search",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisearch-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.searchPages",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisearchpages-method"
           }
         ]
       }
@@ -495,6 +678,28 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopretry_request-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#Requests.resolve",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#requestsresolve-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#Requests.retry",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#requestsretry-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.resolveRequest",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiresolverequest-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.resolveRequest",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiresolverequest-method"
+          }
         ]
       }
     },
@@ -525,6 +730,23 @@
             "ref": "convohop#AsyncConvoHop.get_operation",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopget_operation-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ProjectServerClient.operation",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#projectserverclientoperation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.getOperation",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapigetoperation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getOperation",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapigetoperation-method"
           }
         ]
       }
@@ -562,6 +784,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopconversation_mute-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.conversationMute",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiconversationmute-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.conversationMute",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiconversationmute-method"
+          }
         ]
       }
     },
@@ -597,6 +831,18 @@
             "ref": "convohop#AsyncConvoHop.current_live_session",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopcurrent_live_session-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.currentLiveSession",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapicurrentlivesession-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.currentLiveSession",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapicurrentlivesession-method"
           }
         ]
       }
@@ -659,6 +905,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohoplive_session-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.liveSession",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapilivesession-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSession",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapilivesession-method"
+          }
         ]
       }
     },
@@ -705,6 +963,28 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopiter_live_sessions-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.liveSessions",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapilivesessions-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.liveSessionsPages",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapilivesessionspages-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessions",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapilivesessions-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionsPages",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapilivesessionspages-method"
+          }
         ]
       }
     },
@@ -750,6 +1030,28 @@
             "ref": "convohop#AsyncConvoHop.iter_live_session_participants",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopiter_live_session_participants-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.liveSessionParticipants",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapilivesessionparticipants-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.liveSessionParticipantsPages",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapilivesessionparticipantspages-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionParticipants",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapilivesessionparticipants-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionParticipantsPages",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapilivesessionparticipantspages-method"
           }
         ]
       }
@@ -831,6 +1133,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohoplive_session_operation-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.liveSessionOperation",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapilivesessionoperation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionOperation",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapilivesessionoperation-method"
+          }
         ]
       }
     },
@@ -866,6 +1180,18 @@
             "ref": "convohop#AsyncConvoHop.session_request_outcome",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopsession_request_outcome-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.sessionRequestOutcome",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapisessionrequestoutcome-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.sessionRequestOutcome",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisessionrequestoutcome-method"
           }
         ]
       }
@@ -903,6 +1229,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopcreate_principal-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ProjectServerClient.principals.create",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#projectserverclientprincipalscreate-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.createPrincipal",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapicreateprincipal-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.createPrincipal",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapicreateprincipal-method"
+          }
         ]
       }
     },
@@ -933,6 +1276,23 @@
             "ref": "convohop#AsyncConvoHop.disable_principal",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopdisable_principal-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ProjectServerClient.principals.disable",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#projectserverclientprincipalsdisable-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.disablePrincipal",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapidisableprincipal-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.disablePrincipal",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapidisableprincipal-method"
           }
         ]
       }
@@ -970,6 +1330,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopissue_session-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ProjectServerClient.sessions.issue",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#projectserverclientsessionsissue-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.issueSession",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiissuesession-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.issueSession",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiissuesession-method"
+          }
         ]
       }
     },
@@ -1001,6 +1378,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohoprenew_session-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ProjectServerClient.sessions.renew",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#projectserverclientsessionsrenew-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.renewSession",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapirenewsession-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.renewSession",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapirenewsession-method"
+          }
         ]
       }
     },
@@ -1031,6 +1425,23 @@
             "ref": "convohop#AsyncConvoHop.revoke_session",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohoprevoke_session-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ProjectServerClient.sessions.revoke",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#projectserverclientsessionsrevoke-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.revokeSession",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapirevokesession-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.revokeSession",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapirevokesession-method"
           }
         ]
       }
@@ -1068,6 +1479,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopcreate_conversation-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ProjectServerClient.conversations.create",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#projectserverclientconversationscreate-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.createConversation",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapicreateconversation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.createConversation",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapicreateconversation-method"
+          }
         ]
       }
     },
@@ -1099,6 +1527,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopupdate_conversation-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.updateConversation",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiupdateconversation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.updateConversation",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiupdateconversation-method"
+          }
         ]
       }
     },
@@ -1129,6 +1569,23 @@
             "ref": "convohop#AsyncConvoHop.add_member",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopadd_member-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ServerConversation.members.add",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#serverconversationmembersadd-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.addMember",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiaddmember-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.addMember",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiaddmember-method"
           }
         ]
       }
@@ -1166,6 +1623,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopadd_members-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ServerConversation.members.addBatch",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#serverconversationmembersaddbatch-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.addMembers",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiaddmembers-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.addMembers",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiaddmembers-method"
+          }
         ]
       }
     },
@@ -1197,6 +1671,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopremove_member-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ServerConversation.members.remove",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#serverconversationmembersremove-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.removeMember",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiremovemember-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.removeMember",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiremovemember-method"
+          }
         ]
       }
     },
@@ -1227,6 +1718,18 @@
             "ref": "convohop#AsyncConvoHop.history_grant",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohophistory_grant-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.historyGrant",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapihistorygrant-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.historyGrant",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapihistorygrant-method"
           }
         ]
       }
@@ -1269,6 +1772,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopsend_message-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ServerConversation.messages.send",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#serverconversationmessagessend-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.sendMessage",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapisendmessage-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.sendMessage",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisendmessage-method"
+          }
         ]
       }
     },
@@ -1310,6 +1830,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopedit_message-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ServerConversation.messages.edit",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#serverconversationmessagesedit-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.editMessage",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapieditmessage-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.editMessage",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapieditmessage-method"
+          }
         ]
       }
     },
@@ -1350,6 +1887,23 @@
             "ref": "convohop#AsyncConvoHop.delete_message",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopdelete_message-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ServerConversation.messages.delete",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#serverconversationmessagesdelete-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.deleteMessage",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapideletemessage-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.deleteMessage",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapideletemessage-method"
           }
         ]
       }
@@ -1412,6 +1966,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopset_broadcast_permission-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.setBroadcastPermission",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapisetbroadcastpermission-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.setBroadcastPermission",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisetbroadcastpermission-method"
+          }
         ]
       }
     },
@@ -1447,6 +2013,18 @@
             "ref": "convohop#AsyncConvoHop.set_conversation_mute",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopset_conversation_mute-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.setConversationMute",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapisetconversationmute-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.setConversationMute",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapisetconversationmute-method"
           }
         ]
       }
@@ -1532,6 +2110,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopalert_live_session-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.alertLiveSession",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapialertlivesession-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.alertLiveSession",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapialertlivesession-method"
+          }
         ]
       }
     },
@@ -1587,6 +2177,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopend_live_session-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.endLiveSession",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiendlivesession-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.endLiveSession",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiendlivesession-method"
+          }
         ]
       }
     },
@@ -1623,7 +2225,22 @@
       "layer": "server",
       "summary": "Redeem a delivered credential with its delivery permit.",
       "page": "communication/redeemCredential.md",
-      "languages": {"typescript": [], "python": []}
+      "languages": {
+        "typescript": [],
+        "python": [],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.redeemCredential",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiredeemcredential-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.redeemCredential",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiredeemcredential-method"
+          }
+        ]
+      }
     },
     {
       "id": "communication.acknowledgeCredential",
@@ -1634,7 +2251,22 @@
       "layer": "server",
       "summary": "Acknowledge that a redeemed credential is stored, closing the delivery.",
       "page": "communication/acknowledgeCredential.md",
-      "languages": {"typescript": [], "python": []}
+      "languages": {
+        "typescript": [],
+        "python": [],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#CommunicationApi.acknowledgeCredential",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#communicationapiacknowledgecredential-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.acknowledgeCredential",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#communicationsuspendapiacknowledgecredential-method"
+          }
+        ]
+      }
     },
     {
       "id": "communication.conversationEvents",
@@ -1682,6 +2314,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementcapabilities-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.capabilities",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapicapabilities-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.capabilities",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapicapabilities-method"
+          }
         ]
       }
     },
@@ -1706,6 +2350,18 @@
             "ref": "convohop#AsyncConvoHopManagement.organizations",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementorganizations-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.organizations",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiorganizations-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizations",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiorganizations-method"
           }
         ]
       }
@@ -1732,6 +2388,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementget_organization-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.getOrganization",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapigetorganization-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getOrganization",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapigetorganization-method"
+          }
         ]
       }
     },
@@ -1756,6 +2424,18 @@
             "ref": "convohop#AsyncConvoHopManagement.get_deployment",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementget_deployment-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.getDeployment",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapigetdeployment-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getDeployment",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapigetdeployment-method"
           }
         ]
       }
@@ -1782,6 +2462,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementget_project-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.getProject",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapigetproject-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getProject",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapigetproject-method"
+          }
         ]
       }
     },
@@ -1806,6 +2498,18 @@
             "ref": "convohop#AsyncConvoHopManagement.deployment_health",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementdeployment_health-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.deploymentHealth",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapideploymenthealth-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.deploymentHealth",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapideploymenthealth-method"
           }
         ]
       }
@@ -1832,6 +2536,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementdeployment_usage-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.deploymentUsage",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapideploymentusage-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.deploymentUsage",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapideploymentusage-method"
+          }
         ]
       }
     },
@@ -1856,6 +2572,18 @@
             "ref": "convohop#AsyncConvoHopManagement.project_usage",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementproject_usage-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.projectUsage",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiprojectusage-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.projectUsage",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiprojectusage-method"
           }
         ]
       }
@@ -1882,6 +2610,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementorganization_usage-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.organizationUsage",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiorganizationusage-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizationUsage",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiorganizationusage-method"
+          }
         ]
       }
     },
@@ -1907,6 +2647,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementwebhook_endpoints-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.webhookEndpoints",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiwebhookendpoints-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.webhookEndpoints",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiwebhookendpoints-method"
+          }
         ]
       }
     },
@@ -1931,6 +2683,18 @@
             "ref": "convohop#AsyncConvoHopManagement.webhook_deliveries",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementwebhook_deliveries-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.webhookDeliveries",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiwebhookdeliveries-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.webhookDeliveries",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiwebhookdeliveries-method"
           }
         ]
       }
@@ -1967,6 +2731,28 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementretry_request-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#Requests.resolve",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#requestsresolve-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#Requests.retry",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#requestsretry-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.resolveRequest",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiresolverequest-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.resolveRequest",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiresolverequest-method"
+          }
         ]
       }
     },
@@ -1997,6 +2783,18 @@
             "ref": "convohop#AsyncConvoHopManagement.get_operation",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementget_operation-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.getOperation",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapigetoperation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getOperation",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapigetoperation-method"
           }
         ]
       }
@@ -2029,6 +2827,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementcreate_organization-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.createOrganization",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapicreateorganization-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createOrganization",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapicreateorganization-method"
+          }
         ]
       }
     },
@@ -2059,6 +2869,18 @@
             "ref": "convohop#AsyncConvoHopManagement.create_deployment",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementcreate_deployment-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.createDeployment",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapicreatedeployment-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createDeployment",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapicreatedeployment-method"
           }
         ]
       }
@@ -2091,6 +2913,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementcreate_project-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.createProject",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapicreateproject-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createProject",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapicreateproject-method"
+          }
         ]
       }
     },
@@ -2122,6 +2956,23 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementissue_backend_key-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementClient.issueBackendKey",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementclientissuebackendkey-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.issueBackendKey",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiissuebackendkey-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.issueBackendKey",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiissuebackendkey-method"
+          }
         ]
       }
     },
@@ -2147,6 +2998,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementrevoke_backend_key-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.revokeBackendKey",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapirevokebackendkey-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.revokeBackendKey",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapirevokebackendkey-method"
+          }
         ]
       }
     },
@@ -2171,6 +3034,18 @@
             "ref": "convohop#AsyncConvoHopManagement.project_policy",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementproject_policy-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.projectPolicy",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiprojectpolicy-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.projectPolicy",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiprojectpolicy-method"
           }
         ]
       }
@@ -2203,6 +3078,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementcredential_permit-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.credentialPermit",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapicredentialpermit-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.credentialPermit",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapicredentialpermit-method"
+          }
         ]
       }
     },
@@ -2227,6 +3114,18 @@
             "ref": "convohop#AsyncConvoHopManagement.pause_operation",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementpause_operation-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.pauseOperation",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapipauseoperation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.pauseOperation",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapipauseoperation-method"
           }
         ]
       }
@@ -2253,6 +3152,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementresume_operation-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.resumeOperation",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiresumeoperation-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.resumeOperation",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiresumeoperation-method"
+          }
         ]
       }
     },
@@ -2277,6 +3188,18 @@
             "ref": "convohop#AsyncConvoHopManagement.configure_webhook",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementconfigure_webhook-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.configureWebhook",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiconfigurewebhook-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.configureWebhook",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiconfigurewebhook-method"
           }
         ]
       }
@@ -2303,6 +3226,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementupdate_webhook-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.updateWebhook",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapiupdatewebhook-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.updateWebhook",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapiupdatewebhook-method"
+          }
         ]
       }
     },
@@ -2327,6 +3262,18 @@
             "ref": "convohop#AsyncConvoHopManagement.rotate_webhook_secret",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementrotate_webhook_secret-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.rotateWebhookSecret",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapirotatewebhooksecret-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.rotateWebhookSecret",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapirotatewebhooksecret-method"
           }
         ]
       }
@@ -2353,6 +3300,18 @@
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementdisable_webhook-method"
           }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.disableWebhook",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapidisablewebhook-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.disableWebhook",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapidisablewebhook-method"
+          }
         ]
       }
     },
@@ -2377,6 +3336,18 @@
             "ref": "convohop#AsyncConvoHopManagement.replay_webhook_deliveries",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementreplay_webhook_deliveries-method"
+          }
+        ],
+        "jvm": [
+          {
+            "ref": "com.convohop:convohop-server#ManagementApi.replayWebhookDeliveries",
+            "package": "com.convohop:convohop-server",
+            "page": "../jvm/reference/server.md#managementapireplaywebhookdeliveries-method"
+          },
+          {
+            "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.replayWebhookDeliveries",
+            "package": "com.convohop:convohop-server-kotlin",
+            "page": "../jvm/reference/server-kotlin.md#managementsuspendapireplaywebhookdeliveries-method"
           }
         ]
       }

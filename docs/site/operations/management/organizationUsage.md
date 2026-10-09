@@ -94,3 +94,4 @@ query ManagementOrganizationUsage($context: RequestContextInput!, $input: Organi
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.organization_usage`](../../python/reference/convohop.md#convohopmanagementorganization_usage-method), [`AsyncConvoHopManagement.organization_usage`](../../python/reference/convohop.md#asyncconvohopmanagementorganization_usage-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.organizationUsage`](../../jvm/reference/server.md#managementapiorganizationusage-method), [`ManagementSuspendApi.organizationUsage`](../../jvm/reference/server-kotlin.md#managementsuspendapiorganizationusage-method) |

@@ -134,3 +134,4 @@ mutation ManagementDisableWebhook($context: RequestContextInput!, $input: Disabl
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.disable_webhook`](../../python/reference/convohop.md#convohopmanagementdisable_webhook-method), [`AsyncConvoHopManagement.disable_webhook`](../../python/reference/convohop.md#asyncconvohopmanagementdisable_webhook-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.disableWebhook`](../../jvm/reference/server.md#managementapidisablewebhook-method), [`ManagementSuspendApi.disableWebhook`](../../jvm/reference/server-kotlin.md#managementsuspendapidisablewebhook-method) |

@@ -150,3 +150,4 @@ query CommunicationGetOperation($context: RequestContextInput!, $input: GetOpera
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.operation`](../../typescript/reference/server.md#projectserverclientoperation-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.get_operation`](../../python/reference/convohop.md#convohopget_operation-method), [`AsyncConvoHop.get_operation`](../../python/reference/convohop.md#asyncconvohopget_operation-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.operation`](../../jvm/reference/server.md#projectserverclientoperation-method), [`CommunicationApi.getOperation`](../../jvm/reference/server.md#communicationapigetoperation-method), [`CommunicationSuspendApi.getOperation`](../../jvm/reference/server-kotlin.md#communicationsuspendapigetoperation-method) |

@@ -93,3 +93,4 @@ query CommunicationGetMessage($context: RequestContextInput!, $input: GetMessage
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.messages.get`](../../typescript/reference/server.md#serverconversationmessagesget-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.get_message`](../../python/reference/convohop.md#convohopget_message-method), [`AsyncConvoHop.get_message`](../../python/reference/convohop.md#asyncconvohopget_message-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ServerConversation.messages.get`](../../jvm/reference/server.md#serverconversationmessagesget-method), [`CommunicationApi.getMessage`](../../jvm/reference/server.md#communicationapigetmessage-method), [`CommunicationSuspendApi.getMessage`](../../jvm/reference/server-kotlin.md#communicationsuspendapigetmessage-method) |

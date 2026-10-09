@@ -82,3 +82,4 @@ query ManagementGetOrganization($context: RequestContextInput!, $input: GetOrgan
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_organization`](../../python/reference/convohop.md#convohopmanagementget_organization-method), [`AsyncConvoHopManagement.get_organization`](../../python/reference/convohop.md#asyncconvohopmanagementget_organization-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.getOrganization`](../../jvm/reference/server.md#managementapigetorganization-method), [`ManagementSuspendApi.getOrganization`](../../jvm/reference/server-kotlin.md#managementsuspendapigetorganization-method) |

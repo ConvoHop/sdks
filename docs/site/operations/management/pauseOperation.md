@@ -149,3 +149,4 @@ mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseO
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.pause_operation`](../../python/reference/convohop.md#convohopmanagementpause_operation-method), [`AsyncConvoHopManagement.pause_operation`](../../python/reference/convohop.md#asyncconvohopmanagementpause_operation-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.pauseOperation`](../../jvm/reference/server.md#managementapipauseoperation-method), [`ManagementSuspendApi.pauseOperation`](../../jvm/reference/server-kotlin.md#managementsuspendapipauseoperation-method) |

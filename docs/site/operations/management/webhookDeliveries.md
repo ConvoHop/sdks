@@ -101,3 +101,4 @@ query ManagementWebhookDeliveries($context: RequestContextInput!, $input: Webhoo
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.webhook_deliveries`](../../python/reference/convohop.md#convohopmanagementwebhook_deliveries-method), [`AsyncConvoHopManagement.webhook_deliveries`](../../python/reference/convohop.md#asyncconvohopmanagementwebhook_deliveries-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.webhookDeliveries`](../../jvm/reference/server.md#managementapiwebhookdeliveries-method), [`ManagementSuspendApi.webhookDeliveries`](../../jvm/reference/server-kotlin.md#managementsuspendapiwebhookdeliveries-method) |

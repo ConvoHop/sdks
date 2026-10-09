@@ -86,3 +86,4 @@ mutation CommunicationRedeemCredential($context: RequestContextInput!, $input: R
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | Not wrapped by a method |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.redeemCredential`](../../jvm/reference/server.md#communicationapiredeemcredential-method), [`CommunicationSuspendApi.redeemCredential`](../../jvm/reference/server-kotlin.md#communicationsuspendapiredeemcredential-method) |
