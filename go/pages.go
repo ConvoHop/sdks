@@ -18,14 +18,41 @@ type pageState struct {
 	next            *string
 }
 
+// pageOrder is how each next cursor must relate to the cursors before it.
+type pageOrder int
+
+const (
+	// serverOrder cursors are opaque: each must differ from every cursor
+	// already sent.
+	serverOrder pageOrder = iota
+	// ascendingOrder cursors are decimals, each above the one before.
+	ascendingOrder
+	// descendingOrder cursors are decimals, each below the one before.
+	descendingOrder
+)
+
+// pageCursor describes the cursor input of a Pages iterator: the scalar that
+// every next cursor must be a value of, and the order the cursors follow.
+type pageCursor struct {
+	scalar string
+	order  pageOrder
+}
+
 // paginate fetches pages from start until a complete page, a page that
-// requires a refresh, an error or the end of iteration. Every incomplete page
-// must advance the cursor.
-func paginate[P any](start *string, fetch func(cursor *string) (*P, pageState, error)) iter.Seq2[*P, error] {
+// requires a refresh, an error or the end of iteration. An incomplete page
+// must carry a next cursor that is a valid cursor value and advances;
+// otherwise iteration yields an invalid-response error instead of the page
+// and stops. A cycle of opaque cursors therefore stops iteration too, rather
+// than repeating pages forever.
+func paginate[P any](start *string, cursor pageCursor, fetch func(cursor *string) (*P, pageState, error)) iter.Seq2[*P, error] {
 	return func(yield func(*P, error) bool) {
-		cursor := start
+		position := start
+		sent := map[string]bool{}
 		for {
-			page, state, err := fetch(cursor)
+			if position != nil && cursor.order == serverOrder {
+				sent[*position] = true
+			}
+			page, state, err := fetch(position)
 			if err != nil {
 				yield(nil, err)
 				return
@@ -34,23 +61,47 @@ func paginate[P any](start *string, fetch func(cursor *string) (*P, pageState, e
 				yield(page, ErrRefreshRequired)
 				return
 			}
-			if !yield(page, nil) || state.complete {
+			if state.complete {
+				yield(page, nil)
 				return
 			}
-			if state.next == nil {
-				yield(nil, problem(codeInvalidResponse, "", OutcomeUnknown, 503, "Incomplete page has no next cursor"))
+			next, err := cursor.follow(position, state.next, sent)
+			if err != nil {
+				yield(nil, err)
 				return
 			}
-			if cursor != nil && *state.next == *cursor {
-				yield(nil, problem(codeInvalidResponse, "", OutcomeUnknown, 503, "Page cursor did not advance"))
+			if !yield(page, nil) {
 				return
 			}
-			next := *state.next
-			cursor = &next
+			position = &next
 		}
 	}
 }
 
+// follow checks the next cursor of an incomplete page fetched at position,
+// given the opaque cursors already sent.
+func (c pageCursor) follow(position, next *string, sent map[string]bool) (string, error) {
+	if next == nil {
+		return "", invalidPage("Incomplete page has no next cursor")
+	}
+	if _, err := checkScalar(*next, c.scalar, catalog.scalars[c.scalar]); err != nil {
+		return "", invalidPage("Malformed next cursor")
+	}
+	advances := !sent[*next]
+	if c.order != serverOrder && position != nil {
+		comparison := compareDecimal(*next, *position)
+		advances = c.order == ascendingOrder && comparison > 0 || c.order == descendingOrder && comparison < 0
+	}
+	if !advances {
+		return "", invalidPage("Page cursor did not advance")
+	}
+	return *next, nil
+}
+
+func invalidPage(message string) error {
+	return problem(codeInvalidResponse, "", OutcomeUnknown, 503, message)
+}
+
 func missingPage() error {
-	return problem(codeInvalidResponse, "", OutcomeUnknown, 503, "Missing page result")
+	return invalidPage("Missing page result")
 }

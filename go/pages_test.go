@@ -44,6 +44,21 @@ func collect[P any](seq iter.Seq2[*P, error]) []pageResult[P] {
 	return results
 }
 
+// pageOutcome is a page result without its page type: whether it carried a
+// page, and its error.
+type pageOutcome struct {
+	page bool
+	err  error
+}
+
+func pageOutcomes[P any](seq iter.Seq2[*P, error]) []pageOutcome {
+	var results []pageOutcome
+	for _, result := range collect(seq) {
+		results = append(results, pageOutcome{result.page != nil, result.err})
+	}
+	return results
+}
+
 // cursors returns the cursor each request of the operation sent, "" for none.
 func cursors(a *authority, name string) []string {
 	var sent []string
@@ -111,46 +126,84 @@ func TestInboxPagesFollowCursors(t *testing.T) {
 	}
 }
 
+// TestPagesStop covers the pages that end iteration with an invalid response.
+// MessagesPages has descending decimal cursors and InboxPages opaque ones.
 func TestPagesStop(t *testing.T) {
+	messagesFrom := func(start *string) func(*ProjectClient) []pageOutcome {
+		return func(c *ProjectClient) []pageOutcome {
+			return pageOutcomes(c.MessagesPages(context.Background(), messages(start)))
+		}
+	}
+	inboxFrom := func(start *string) func(*ProjectClient) []pageOutcome {
+		return func(c *ProjectClient) []pageOutcome {
+			return pageOutcomes(c.InboxPages(context.Background(), InboxRequestInput{Limit: 2, Cursor: start}))
+		}
+	}
+	before := func(cursor string) map[string]any { return messagePage(map[string]any{"nextCursor": cursor}) }
+	inbox := func(cursor string) map[string]any { return object("InboxPage", map[string]any{"nextCursor": cursor}) }
 	cases := []struct {
-		name  string
-		pages map[string]map[string]any
-		// pages is the number of pages yielded before the last result.
+		name    string
+		iterate func(*ProjectClient) []pageOutcome
+		field   string
+		pages   map[string]map[string]any
+		// yielded is the number of pages yielded before the final error.
 		yielded int
 		message string
-		sent    int
+		// sent is the cursor that each request sent, "" for none.
+		sent []string
 	}{
-		{"incomplete page without a next cursor", map[string]map[string]any{"": messagePage(nil)}, 1,
-			"Incomplete page has no next cursor", 1},
-		{"cursor that does not advance", map[string]map[string]any{
-			"":   messagePage(map[string]any{"nextCursor": "30"}),
-			"30": messagePage(map[string]any{"nextCursor": "30"}),
-		}, 2, "Page cursor did not advance", 2},
-		{"missing page", map[string]map[string]any{"": messagePage(map[string]any{"nextCursor": "30"}), "30": nil}, 1,
-			"Missing page result", 2},
+		{"incomplete page without a next cursor", messagesFrom(nil), "beforeSequence",
+			map[string]map[string]any{"": messagePage(nil)}, 0, "Incomplete page has no next cursor", []string{""}},
+		{"next cursor that isn't a decimal", messagesFrom(nil), "beforeSequence",
+			map[string]map[string]any{"": before("abc")}, 0, "Malformed next cursor", []string{""}},
+		{"next cursor with a leading zero", messagesFrom(nil), "beforeSequence",
+			map[string]map[string]any{"": before("030")}, 0, "Malformed next cursor", []string{""}},
+		{"next cursor above the maximum", messagesFrom(nil), "beforeSequence",
+			map[string]map[string]any{"": before("9223372036854775808")}, 0, "Malformed next cursor", []string{""}},
+		{"cursor that repeats", messagesFrom(nil), "beforeSequence",
+			map[string]map[string]any{"": before("30"), "30": before("30")}, 1, "Page cursor did not advance",
+			[]string{"", "30"}},
+		{"cursor that moves the wrong way", messagesFrom(nil), "beforeSequence",
+			map[string]map[string]any{"": before("30"), "30": before("40")}, 1, "Page cursor did not advance",
+			[]string{"", "30"}},
+		{"cursor cycle", messagesFrom(nil), "beforeSequence",
+			map[string]map[string]any{"": before("30"), "30": before("10"), "10": before("30")}, 2,
+			"Page cursor did not advance", []string{"", "30", "10"}},
+		{"start cursor that repeats", messagesFrom(ptr("50")), "beforeSequence",
+			map[string]map[string]any{"50": before("50")}, 0, "Page cursor did not advance", []string{"50"}},
+		{"missing page", messagesFrom(nil), "beforeSequence",
+			map[string]map[string]any{"": before("30"), "30": nil}, 1, "Missing page result", []string{"", "30"}},
+		{"opaque cursor that repeats", inboxFrom(nil), "cursor",
+			map[string]map[string]any{"": inbox("a"), "a": inbox("a")}, 1, "Page cursor did not advance",
+			[]string{"", "a"}},
+		{"opaque cursor cycle", inboxFrom(nil), "cursor",
+			map[string]map[string]any{"": inbox("a"), "a": inbox("b"), "b": inbox("a")}, 2,
+			"Page cursor did not advance", []string{"", "a", "b"}},
+		{"opaque start cursor that repeats", inboxFrom(ptr("a")), "cursor",
+			map[string]map[string]any{"a": inbox("a")}, 0, "Page cursor did not advance", []string{"a"}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			a := newAuthority(t, paged(tc.pages))
-			results := collect(newProject(t, a).MessagesPages(context.Background(), messages(nil)))
+			results := tc.iterate(newProject(t, a))
 			if len(results) != tc.yielded+1 {
 				t.Fatalf("results = %+v", results)
 			}
 			for _, result := range results[:tc.yielded] {
-				if result.page == nil || result.err != nil {
+				if !result.page || result.err != nil {
 					t.Fatalf("results = %+v", results)
 				}
 			}
 			last := results[tc.yielded]
-			if last.page != nil {
+			if last.page {
 				t.Fatalf("final result carries a page: %+v", last)
 			}
 			p := expectProblem(t, last.err, codeInvalidResponse, OutcomeUnknown, 503)
 			if p.Message != tc.message {
 				t.Fatalf("message %q, want %q", p.Message, tc.message)
 			}
-			if n := len(a.requests()); n != tc.sent {
-				t.Fatalf("sent %d requests, want %d", n, tc.sent)
+			if sent := cursors(a, tc.field); !slices.Equal(sent, tc.sent) {
+				t.Fatalf("cursors = %q, want %q", sent, tc.sent)
 			}
 		})
 	}

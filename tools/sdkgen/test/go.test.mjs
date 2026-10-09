@@ -117,6 +117,30 @@ test("the Go emitter writes three files with the generated-code header, a method
   }
 });
 
+test("Go page iterators check next cursors against the cursor scalar, and in the style's order only for decimal cursors", () => {
+  const iterators = ir => Object.fromEntries([...render(ir)[1].contents.matchAll(
+    /^func \(c \*\w+\) (\w+Pages)\([^\n]*\n\treturn paginate\(input\.\w+, pageCursor\{"(\w+)", (\w+)\}, /gm)]
+    .map(([, method, scalar, order]) => [method, `${scalar} ${order}`]));
+  const reordered = (style, order) => {
+    const ir = buildIr(repoSources());
+    ir.pagination.find(entry => entry.name === style).order = order;
+    return ir;
+  };
+  const opaque = "String serverOrder";
+  assert.deepEqual(iterators(buildIr(repoSources())), {
+    MembersPages: opaque,
+    MessagesPages: "Decimal descendingOrder",
+    InboxPages: opaque,
+    SearchPages: opaque,
+    LiveSessionsPages: opaque,
+    LiveSessionParticipantsPages: opaque,
+  });
+  assert.equal(iterators(reordered("sequence", "ascending")).MessagesPages, "Decimal ascendingOrder");
+  assert.equal(iterators(reordered("cursor", "descending")).InboxPages, opaque, "string cursors stay opaque in an ordered style");
+  assert.throws(() => render(reordered("sequence", "sideways")),
+    goError('communication.messages: pagination style sequence has unsupported order "sideways"'));
+});
+
 const GO_MINIMUM_MINOR = 26;
 const GO_ENV = { ...process.env, GOTOOLCHAIN: "local", GOWORK: "off", GOFLAGS: "" };
 const GO_DIFFERENTIAL = `package main

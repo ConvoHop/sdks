@@ -77,8 +77,9 @@ func (c *ProjectClient) Members(ctx context.Context, input MembersRequestInput, 
 // Each page is a new request with a new request ID.
 // Iteration stops after the complete page or at the first error.
 // A page that requires a refresh yields [ErrRefreshRequired] and stops.
+// An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE [Problem] in place of the page and stops.
 func (c *ProjectClient) MembersPages(ctx context.Context, input MembersRequestInput) iter.Seq2[*MemberPage, error] {
-	return paginate(input.Cursor, func(cursor *string) (*MemberPage, pageState, error) {
+	return paginate(input.Cursor, pageCursor{"String", serverOrder}, func(cursor *string) (*MemberPage, pageState, error) {
 		request := input
 		request.Cursor = cursor
 		out, err := c.Members(ctx, request)
@@ -109,8 +110,9 @@ func (c *ProjectClient) Messages(ctx context.Context, input MessagesRequestInput
 // Each page is a new request with a new request ID.
 // Iteration stops after the complete page or at the first error.
 // A page that requires a refresh yields [ErrRefreshRequired] and stops.
+// An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE [Problem] in place of the page and stops.
 func (c *ProjectClient) MessagesPages(ctx context.Context, input MessagesRequestInput) iter.Seq2[*MessagePage, error] {
-	return paginate(input.BeforeSequence, func(cursor *string) (*MessagePage, pageState, error) {
+	return paginate(input.BeforeSequence, pageCursor{"Decimal", descendingOrder}, func(cursor *string) (*MessagePage, pageState, error) {
 		request := input
 		request.BeforeSequence = cursor
 		out, err := c.Messages(ctx, request)
@@ -152,8 +154,9 @@ func (c *ProjectClient) Inbox(ctx context.Context, input InboxRequestInput, opts
 // Each page is a new request with a new request ID.
 // Iteration stops after the complete page or at the first error.
 // A page that requires a refresh yields [ErrRefreshRequired] and stops.
+// An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE [Problem] in place of the page and stops.
 func (c *ProjectClient) InboxPages(ctx context.Context, input InboxRequestInput) iter.Seq2[*InboxPage, error] {
-	return paginate(input.Cursor, func(cursor *string) (*InboxPage, pageState, error) {
+	return paginate(input.Cursor, pageCursor{"String", serverOrder}, func(cursor *string) (*InboxPage, pageState, error) {
 		request := input
 		request.Cursor = cursor
 		out, err := c.Inbox(ctx, request)
@@ -184,8 +187,9 @@ func (c *ProjectClient) Search(ctx context.Context, input SearchRequestInput, op
 // Each page is a new request with a new request ID.
 // Iteration stops after the complete page or at the first error.
 // A page that requires a refresh yields [ErrRefreshRequired] and stops.
+// An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE [Problem] in place of the page and stops.
 func (c *ProjectClient) SearchPages(ctx context.Context, input SearchRequestInput) iter.Seq2[*SearchPage, error] {
-	return paginate(input.Cursor, func(cursor *string) (*SearchPage, pageState, error) {
+	return paginate(input.Cursor, pageCursor{"String", serverOrder}, func(cursor *string) (*SearchPage, pageState, error) {
 		request := input
 		request.Cursor = cursor
 		out, err := c.Search(ctx, request)
@@ -271,8 +275,9 @@ func (c *ProjectClient) LiveSessions(ctx context.Context, input LiveSessionsInpu
 // Each page is a new request with a new request ID.
 // Iteration stops after the complete page or at the first error.
 // A page that requires a refresh yields [ErrRefreshRequired] and stops.
+// An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE [Problem] in place of the page and stops.
 func (c *ProjectClient) LiveSessionsPages(ctx context.Context, input LiveSessionsInput) iter.Seq2[*LiveSessionPage, error] {
-	return paginate(input.Cursor, func(cursor *string) (*LiveSessionPage, pageState, error) {
+	return paginate(input.Cursor, pageCursor{"String", serverOrder}, func(cursor *string) (*LiveSessionPage, pageState, error) {
 		request := input
 		request.Cursor = cursor
 		out, err := c.LiveSessions(ctx, request)
@@ -300,8 +305,9 @@ func (c *ProjectClient) LiveSessionParticipants(ctx context.Context, input LiveP
 // Each page is a new request with a new request ID.
 // Iteration stops after the complete page or at the first error.
 // A page that requires a refresh yields [ErrRefreshRequired] and stops.
+// An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE [Problem] in place of the page and stops.
 func (c *ProjectClient) LiveSessionParticipantsPages(ctx context.Context, input LiveParticipantsInput) iter.Seq2[*LiveParticipantPage, error] {
-	return paginate(input.Cursor, func(cursor *string) (*LiveParticipantPage, pageState, error) {
+	return paginate(input.Cursor, pageCursor{"String", serverOrder}, func(cursor *string) (*LiveParticipantPage, pageState, error) {
 		request := input
 		request.Cursor = cursor
 		out, err := c.LiveSessionParticipants(ctx, request)

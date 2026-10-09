@@ -155,7 +155,11 @@ for page, err := range client.MessagesPages(ctx, convohop.MessagesRequestInput{
 
 The iterator stops after an error. `ErrRefreshRequired` comes with the page
 the authority can't continue consistently, for example after the member's
-visibility changed: start again from the first page.
+visibility changed: start again from the first page. An incomplete page must
+carry a valid next cursor that advances: a sequence cursor moves in its order,
+and an opaque cursor differs from every cursor already sent. Otherwise the
+iterator yields an `INVALID_RESPONSE` problem in place of that page, so a
+cursor cycle can't repeat pages forever.
 
 ### Errors
 

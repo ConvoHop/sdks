@@ -241,6 +241,8 @@ function keyedLines(entries, indent) {
 }
 
 const LAYERS = new Set(["client", "server", "both"]);
+// The runtime's pageOrder for each pagination style order that takes a cursor.
+const PAGE_ORDER = new Map([["server", "serverOrder"], ["ascending", "ascendingOrder"], ["descending", "descendingOrder"]]);
 const ID_SCALARS = new Set(["ID", "UUID"]);
 const isIdRef = ref => ref.kind === "scalar" && ID_SCALARS.has(ref.name);
 
@@ -382,6 +384,8 @@ function createModel(ir, options) {
 
   // The page iterator for cursor-style operations whose shape the runtime's
   // paginate helper understands; anything else keeps only the plain method.
+  // Ordered styles with a decimal cursor check that each next cursor moves in
+  // that order; other cursors must differ from every cursor already sent.
   const stringScalar = ref => ref?.kind === "scalar" && types.get(ref.name)?.representation === "string";
   const booleanField = (type, name) => {
     const ref = type.fields.find(field => field.name === name)?.type;
@@ -407,7 +411,16 @@ function createModel(ir, options) {
     const next = pageType.fields.find(field => field.name === "nextCursor")?.type;
     if (!booleanField(pageType, "complete") || !booleanField(pageType, "refreshRequired") || !next?.nullable ||
         next.name !== "String") return undefined;
-    return { cursor: goName(cursor.name), path, pageType: goType(pageType.name) };
+    const order = PAGE_ORDER.get(model.pagination.order) ??
+      fail(operation.id, `pagination style ${model.pagination.name} has unsupported order ${JSON.stringify(model.pagination.order)}`);
+    const decimal = types.get(cursor.type.name).constraints?.maximumDecimal !== undefined;
+    return {
+      cursor: goName(cursor.name),
+      scalar: cursor.type.name,
+      order: decimal ? order : PAGE_ORDER.get("server"),
+      path,
+      pageType: goType(pageType.name),
+    };
   }
   for (const client of clients) {
     for (const model of client.operations) {
@@ -579,6 +592,7 @@ function renderPages(shared, model) {
     "Each page is a new request with a new request ID.",
     "Iteration stops after the complete page or at the first error.",
     "A page that requires a refresh yields [ErrRefreshRequired] and stops.",
+    "An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE [Problem] in place of the page and stops.",
   ]], where);
   const parameters = ["ctx context.Context"];
   const arguments_ = ["ctx"];
@@ -591,7 +605,7 @@ function renderPages(shared, model) {
   const missing = expression => [`\t\tif ${expression} == nil {`, "\t\t\treturn nil, pageState{}, missingPage()", "\t\t}"];
   const lines = [
     `func (c *${client.name}) ${pages.method}(${parameters.join(", ")}) iter.Seq2[*${pages.pageType}, error] {`,
-    `\treturn paginate(input.${pages.cursor}, func(cursor *string) (*${pages.pageType}, pageState, error) {`,
+    `\treturn paginate(input.${pages.cursor}, pageCursor{${goString(pages.scalar, where)}, ${pages.order}}, func(cursor *string) (*${pages.pageType}, pageState, error) {`,
     "\t\trequest := input",
     `\t\trequest.${pages.cursor} = cursor`,
     `\t\tout, err := c.${model.method}(${arguments_.join(", ")})`,
