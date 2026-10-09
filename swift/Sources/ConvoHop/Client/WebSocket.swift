@@ -18,6 +18,10 @@ public enum ConvoHopWebSocketEvent: Sendable, Equatable {
 }
 
 /// One realtime connection. Implementations deliver events in order and finish `events` after `closed`.
+///
+/// Pass the server's close reason to `closed`, because the stream reads spend codes from it. Without the reason, a
+/// 4402 spend stop looks like a dropped connection and the stream reconnects with backoff, and a 4503
+/// `SPEND_UNVERIFIED` close loses its `retryAfter`.
 public protocol ConvoHopWebSocket: AnyObject, Sendable {
     var events: AsyncStream<ConvoHopWebSocketEvent> { get }
     func send(_ text: String)

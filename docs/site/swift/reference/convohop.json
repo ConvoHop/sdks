@@ -13650,7 +13650,7 @@
       "ref": "ConvoHop#ConvoHopWebSocket",
       "anchor": "convohopwebsocket-interface",
       "signatures": ["public protocol ConvoHopWebSocket: AnyObject, Sendable"],
-      "docs": "One realtime connection. Implementations deliver events in order and finish `events` after `closed`.",
+      "docs": "One realtime connection. Implementations deliver events in order and finish `events` after `closed`.\n\nPass the server's close reason to `closed`, because the stream reads spend codes from it. Without the reason, a\n4402 spend stop looks like a dropped connection and the stream reconnects with backoff, and a 4503\n`SPEND_UNVERIFIED` close loses its `retryAfter`.",
       "members": [
         {
           "name": "events",
