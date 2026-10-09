@@ -904,6 +904,76 @@
           ]
         },
         {
+          "name": "AgentSignupForApprovalAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.AgentSignupForApprovalAsync",
+          "anchor": "managementapiagentsignupforapprovalasync-method",
+          "signatures": [
+            "public Task<AgentSignupForApprovalReply> AgentSignupForApprovalAsync(AgentSignupForApprovalRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: anonymous (condition approvalToken)."
+        },
+        {
+          "name": "AgentSignupAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.AgentSignupAsync",
+          "anchor": "managementapiagentsignupasync-method",
+          "signatures": [
+            "public Task<AgentSignupReply> AgentSignupAsync(CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.\n\nParameters:\n\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: agentVerifier (condition ownSignup)."
+        },
+        {
+          "name": "AgentGrantsAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.AgentGrantsAsync",
+          "anchor": "managementapiagentgrantsasync-method",
+          "signatures": [
+            "public Task<AgentGrantsReply> AgentGrantsAsync(AgentGrantsRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "List an organization's agent grants with their keys, newest first.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner)."
+        },
+        {
+          "name": "AgentGrantsPagesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.AgentGrantsPagesAsync",
+          "anchor": "managementapiagentgrantspagesasync-method",
+          "signatures": [
+            "public IAsyncEnumerable<AgentGrantPage> AgentGrantsPagesAsync(AgentGrantsRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "The pages of `AgentGrantsAsync`, requested lazily.\n\nParameters:\n\n- `input`: The first page's input.\n- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.\n\nReturns: The pages, in order.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ArgumentException`: The input's `cursor` is not a valid cursor.\n\nEach page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.\n\nEnumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception."
+        },
+        {
+          "name": "AgentAuditEventsAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.AgentAuditEventsAsync",
+          "anchor": "managementapiagentauditeventsasync-method",
+          "signatures": [
+            "public Task<AgentAuditEventsReply> AgentAuditEventsAsync(AgentAuditEventsRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner)."
+        },
+        {
+          "name": "AgentAuditEventsPagesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.AgentAuditEventsPagesAsync",
+          "anchor": "managementapiagentauditeventspagesasync-method",
+          "signatures": [
+            "public IAsyncEnumerable<AgentAuditEventPage> AgentAuditEventsPagesAsync(AgentAuditEventsRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "The pages of `AgentAuditEventsAsync`, requested lazily.\n\nParameters:\n\n- `input`: The first page's input.\n- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.\n\nReturns: The pages, in order.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ArgumentException`: The input's `cursor` is not a valid cursor.\n\nEach page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.\n\nEnumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception."
+        },
+        {
+          "name": "OrganizationSpendAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.OrganizationSpendAsync",
+          "anchor": "managementapiorganizationspendasync-method",
+          "signatures": [
+            "public Task<OrganizationSpendReply> OrganizationSpendAsync(OrganizationSpendRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner)."
+        },
+        {
           "name": "CreateOrganizationAsync",
           "kind": "method",
           "ref": "ConvoHop.Api#ManagementApi.CreateOrganizationAsync",
@@ -1146,6 +1216,86 @@
               "page": "../../operations/management/replayWebhookDeliveries.md"
             }
           ]
+        },
+        {
+          "name": "RequestAgentSignupAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.RequestAgentSignupAsync",
+          "anchor": "managementapirequestagentsignupasync-method",
+          "signatures": [
+            "public Task<RequestAgentSignupReply> RequestAgentSignupAsync(RequestAgentSignupRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nAuthorization: anonymous."
+        },
+        {
+          "name": "RejectAgentSignupAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.RejectAgentSignupAsync",
+          "anchor": "managementapirejectagentsignupasync-method",
+          "signatures": [
+            "public Task<RejectAgentSignupReply> RejectAgentSignupAsync(RejectAgentSignupRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Reject a signup request from its approval link, optionally suppressing future requests to the email.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nAuthorization: anonymous (condition approvalToken)."
+        },
+        {
+          "name": "ApproveAgentSignupAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.ApproveAgentSignupAsync",
+          "anchor": "managementapiapproveagentsignupasync-method",
+          "signatures": [
+            "public Task<ApproveAgentSignupReply> ApproveAgentSignupAsync(ApproveAgentSignupRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition approvalToken)."
+        },
+        {
+          "name": "IssueAgentKeyAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.IssueAgentKeyAsync",
+          "anchor": "managementapiissueagentkeyasync-method",
+          "signatures": [
+            "public Task<IssueAgentKeyReply> IssueAgentKeyAsync(IssueAgentKeyRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nAuthorization: agentVerifier (condition activeGrant)."
+        },
+        {
+          "name": "AgentCredentialPermitAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.AgentCredentialPermitAsync",
+          "anchor": "managementapiagentcredentialpermitasync-method",
+          "signatures": [
+            "public Task<AgentCredentialPermitReply> AgentCredentialPermitAsync(AgentCredentialPermitRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Issue a permit that authorizes the agent to redeem one of its key deliveries.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nAuthorization: agentVerifier (condition activeGrant)."
+        },
+        {
+          "name": "RevokeAgentGrantAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.RevokeAgentGrantAsync",
+          "anchor": "managementapirevokeagentgrantasync-method",
+          "signatures": [
+            "public Task<RevokeAgentGrantReply> RevokeAgentGrantAsync(RevokeAgentGrantRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Revoke an agent grant and every key issued under it.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nDestructive: it deletes, revokes, removes, disables or ends something."
+        },
+        {
+          "name": "SetSpendControlsAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.SetSpendControlsAsync",
+          "anchor": "managementapisetspendcontrolsasync-method",
+          "signatures": [
+            "public Task<SetSpendControlsReply> SetSpendControlsAsync(SetSpendControlsRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Set the organization's monthly spend cap and agent purchase limit.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner)."
+        },
+        {
+          "name": "PurchaseAgentCreditsAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.PurchaseAgentCreditsAsync",
+          "anchor": "managementapipurchaseagentcreditsasync-method",
+          "signatures": [
+            "public Task<PurchaseAgentCreditsReply> PurchaseAgentCreditsAsync(PurchaseAgentCreditsRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nAuthorization: agentVerifier (condition activeGrant)."
         }
       ]
     }

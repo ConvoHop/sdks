@@ -1551,6 +1551,142 @@ Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is
 
 Sends [`management.getOperation`](../../operations/management/getOperation.md).
 
+#### `ManagementApi.agentSignupForApproval` method
+
+```java
+public AgentSignupForApprovalReply agentSignupForApproval(AgentSignupForApprovalRequestInput input)
+```
+
+Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: anonymous (condition approvalToken).
+
+Parameters:
+
+- `input`: the operation input
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.agentSignup` method
+
+```java
+public AgentSignupReply agentSignup()
+```
+
+Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: agentVerifier (condition ownSignup).
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.agentGrants` method
+
+```java
+public AgentGrantsReply agentGrants(AgentGrantsRequestInput input)
+```
+
+List an organization's agent grants with their keys, newest first.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.agentGrantsPages` method
+
+```java
+public Iterable<AgentGrantPage> agentGrantsPages(AgentGrantsRequestInput input)
+```
+
+Every page of `agentGrants(AgentGrantsRequestInput)`, each requested when iteration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and iteration ends after the page whose `complete` is true. Each iteration starts again from `input`, and every request has a new request ID.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
+
+Iteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
+
+Parameters:
+
+- `input`: the first page's input
+
+Returns: the pages, in order
+
+Throws: `IllegalArgumentException` if the input's `cursor` is not a valid cursor
+
+#### `ManagementApi.agentAuditEvents` method
+
+```java
+public AgentAuditEventsReply agentAuditEvents(AgentAuditEventsRequestInput input)
+```
+
+List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.agentAuditEventsPages` method
+
+```java
+public Iterable<AgentAuditEventPage> agentAuditEventsPages(AgentAuditEventsRequestInput input)
+```
+
+Every page of `agentAuditEvents(AgentAuditEventsRequestInput)`, each requested when iteration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and iteration ends after the page whose `complete` is true. Each iteration starts again from `input`, and every request has a new request ID.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
+
+Iteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
+
+Parameters:
+
+- `input`: the first page's input
+
+Returns: the pages, in order
+
+Throws: `IllegalArgumentException` if the input's `cursor` is not a valid cursor
+
+#### `ManagementApi.organizationSpend` method
+
+```java
+public OrganizationSpendReply organizationSpend(OrganizationSpendRequestInput input)
+```
+
+Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
 #### `ManagementApi.createOrganization` method
 
 ```java
@@ -1930,6 +2066,182 @@ Returns: the authority result
 Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md).
+
+#### `ManagementApi.requestAgentSignup` method
+
+```java
+public RequestAgentSignupReply requestAgentSignup(RequestAgentSignupRequestInput input)
+public RequestAgentSignupReply requestAgentSignup(RequestAgentSignupRequestInput input, @Nullable String requestId)
+```
+
+Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Authorization: anonymous.
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.rejectAgentSignup` method
+
+```java
+public RejectAgentSignupReply rejectAgentSignup(RejectAgentSignupRequestInput input)
+public RejectAgentSignupReply rejectAgentSignup(RejectAgentSignupRequestInput input, @Nullable String requestId)
+```
+
+Reject a signup request from its approval link, optionally suppressing future requests to the email.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Authorization: anonymous (condition approvalToken).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.approveAgentSignup` method
+
+```java
+public ApproveAgentSignupReply approveAgentSignup(ApproveAgentSignupRequestInput input)
+public ApproveAgentSignupReply approveAgentSignup(ApproveAgentSignupRequestInput input, @Nullable String requestId)
+```
+
+Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Authorization: portalCredential (condition approvalToken).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.issueAgentKey` method
+
+```java
+public IssueAgentKeyReply issueAgentKey(IssueAgentKeyRequestInput input)
+public IssueAgentKeyReply issueAgentKey(IssueAgentKeyRequestInput input, @Nullable String requestId)
+```
+
+Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Authorization: agentVerifier (condition activeGrant).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.agentCredentialPermit` method
+
+```java
+public AgentCredentialPermitReply agentCredentialPermit(AgentCredentialPermitRequestInput input)
+public AgentCredentialPermitReply agentCredentialPermit(AgentCredentialPermitRequestInput input, @Nullable String requestId)
+```
+
+Issue a permit that authorizes the agent to redeem one of its key deliveries.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Authorization: agentVerifier (condition activeGrant).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.revokeAgentGrant` method
+
+```java
+public RevokeAgentGrantReply revokeAgentGrant(RevokeAgentGrantRequestInput input)
+public RevokeAgentGrantReply revokeAgentGrant(RevokeAgentGrantRequestInput input, @Nullable String requestId)
+```
+
+Revoke an agent grant and every key issued under it.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.setSpendControls` method
+
+```java
+public SetSpendControlsReply setSpendControls(SetSpendControlsRequestInput input)
+public SetSpendControlsReply setSpendControls(SetSpendControlsRequestInput input, @Nullable String requestId)
+```
+
+Set the organization's monthly spend cap and agent purchase limit.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.purchaseAgentCredits` method
+
+```java
+public PurchaseAgentCreditsReply purchaseAgentCredits(PurchaseAgentCreditsRequestInput input)
+public PurchaseAgentCreditsReply purchaseAgentCredits(PurchaseAgentCreditsRequestInput input, @Nullable String requestId)
+```
+
+Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Authorization: agentVerifier (condition activeGrant).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
 
 ### `ManagementClient` class
 
@@ -5333,6 +5645,194 @@ The `AddMembersPayload` result type.
 
 Package: `com.convohop.server.model`.
 
+### `AgentAuditEvent` type
+
+```java
+public final class AgentAuditEvent
+```
+
+The `AgentAuditEvent` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentAuditEventPage` type
+
+```java
+public final class AgentAuditEventPage
+```
+
+The `AgentAuditEventPage` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentAuditEventsReply` type
+
+```java
+public final class AgentAuditEventsReply
+```
+
+The `AgentAuditEventsReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentAuditEventsRequestInput` type
+
+```java
+public final class AgentAuditEventsRequestInput
+```
+
+The `AgentAuditEventsRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
+### `AgentCredentialPermitReply` type
+
+```java
+public final class AgentCredentialPermitReply
+```
+
+The `AgentCredentialPermitReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentCredentialPermitRequestInput` type
+
+```java
+public final class AgentCredentialPermitRequestInput
+```
+
+The `AgentCredentialPermitRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
+### `AgentGrant` type
+
+```java
+public final class AgentGrant
+```
+
+The `AgentGrant` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentGrantPage` type
+
+```java
+public final class AgentGrantPage
+```
+
+The `AgentGrantPage` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentGrantsReply` type
+
+```java
+public final class AgentGrantsReply
+```
+
+The `AgentGrantsReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentGrantsRequestInput` type
+
+```java
+public final class AgentGrantsRequestInput
+```
+
+The `AgentGrantsRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
+### `AgentKey` type
+
+```java
+public final class AgentKey
+```
+
+The `AgentKey` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentPayment` type
+
+```java
+public final class AgentPayment
+```
+
+The `AgentPayment` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentSignupForApprovalReply` type
+
+```java
+public final class AgentSignupForApprovalReply
+```
+
+The `AgentSignupForApprovalReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentSignupForApprovalRequestInput` type
+
+```java
+public final class AgentSignupForApprovalRequestInput
+```
+
+The `AgentSignupForApprovalRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
+### `AgentSignupReply` type
+
+```java
+public final class AgentSignupReply
+```
+
+The `AgentSignupReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentSignupReview` type
+
+```java
+public final class AgentSignupReview
+```
+
+The `AgentSignupReview` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentSignupStatus` type
+
+```java
+public final class AgentSignupStatus
+```
+
+The `AgentSignupStatus` result type.
+
+Package: `com.convohop.server.model`.
+
+### `AgentSignupTicket` type
+
+```java
+public final class AgentSignupTicket
+```
+
+The `AgentSignupTicket` result type.
+
+Package: `com.convohop.server.model`.
+
 ### `AlertLiveSessionInput` type
 
 ```java
@@ -5352,6 +5852,28 @@ public final class AlertLiveSessionPayload
 ```
 
 The `AlertLiveSessionPayload` result type.
+
+Package: `com.convohop.server.model`.
+
+### `ApproveAgentSignupReply` type
+
+```java
+public final class ApproveAgentSignupReply
+```
+
+The `ApproveAgentSignupReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `ApproveAgentSignupRequestInput` type
+
+```java
+public final class ApproveAgentSignupRequestInput
+```
+
+The `ApproveAgentSignupRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
 
 Package: `com.convohop.server.model`.
 
@@ -6149,6 +6671,28 @@ Build instances with `builder()`. Fields without a value are omitted from the re
 
 Package: `com.convohop.server.model`.
 
+### `IssueAgentKeyReply` type
+
+```java
+public final class IssueAgentKeyReply
+```
+
+The `IssueAgentKeyReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `IssueAgentKeyRequestInput` type
+
+```java
+public final class IssueAgentKeyRequestInput
+```
+
+The `IssueAgentKeyRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
 ### `IssueBackendKeyReply` type
 
 ```java
@@ -6691,6 +7235,38 @@ The `OrganizationPage` result type.
 
 Package: `com.convohop.server.model`.
 
+### `OrganizationSpend` type
+
+```java
+public final class OrganizationSpend
+```
+
+The `OrganizationSpend` result type.
+
+Package: `com.convohop.server.model`.
+
+### `OrganizationSpendReply` type
+
+```java
+public final class OrganizationSpendReply
+```
+
+The `OrganizationSpendReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `OrganizationSpendRequestInput` type
+
+```java
+public final class OrganizationSpendRequestInput
+```
+
+The `OrganizationSpendRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
 ### `OrganizationUsage` type
 
 ```java
@@ -6841,6 +7417,28 @@ Build instances with `builder()`. Fields without a value are omitted from the re
 
 Package: `com.convohop.server.model`.
 
+### `PurchaseAgentCreditsReply` type
+
+```java
+public final class PurchaseAgentCreditsReply
+```
+
+The `PurchaseAgentCreditsReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `PurchaseAgentCreditsRequestInput` type
+
+```java
+public final class PurchaseAgentCreditsRequestInput
+```
+
+The `PurchaseAgentCreditsRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
 ### `ReadReceipt` type
 
 ```java
@@ -6868,6 +7466,28 @@ public final class RedeemCredentialRequestInput
 ```
 
 The `RedeemCredentialRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
+### `RejectAgentSignupReply` type
+
+```java
+public final class RejectAgentSignupReply
+```
+
+The `RejectAgentSignupReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `RejectAgentSignupRequestInput` type
+
+```java
+public final class RejectAgentSignupRequestInput
+```
+
+The `RejectAgentSignupRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
@@ -6934,6 +7554,28 @@ public final class ReplayWebhookDeliveriesRequestInput
 ```
 
 The `ReplayWebhookDeliveriesRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
+### `RequestAgentSignupReply` type
+
+```java
+public final class RequestAgentSignupReply
+```
+
+The `RequestAgentSignupReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `RequestAgentSignupRequestInput` type
+
+```java
+public final class RequestAgentSignupRequestInput
+```
+
+The `RequestAgentSignupRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
@@ -7020,6 +7662,28 @@ public final class RetainedResult
 ```
 
 Exactly one typed field contains the retained, currently authorized receipt result.
+
+Package: `com.convohop.server.model`.
+
+### `RevokeAgentGrantReply` type
+
+```java
+public final class RevokeAgentGrantReply
+```
+
+The `RevokeAgentGrantReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `RevokeAgentGrantRequestInput` type
+
+```java
+public final class RevokeAgentGrantRequestInput
+```
+
+The `RevokeAgentGrantRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
 
 Package: `com.convohop.server.model`.
 
@@ -7308,6 +7972,28 @@ public final class SetConversationMutePayload
 ```
 
 The `SetConversationMutePayload` result type.
+
+Package: `com.convohop.server.model`.
+
+### `SetSpendControlsReply` type
+
+```java
+public final class SetSpendControlsReply
+```
+
+The `SetSpendControlsReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `SetSpendControlsRequestInput` type
+
+```java
+public final class SetSpendControlsRequestInput
+```
+
+The `SetSpendControlsRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
 
 Package: `com.convohop.server.model`.
 

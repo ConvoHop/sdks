@@ -115,6 +115,18 @@
     }
   },
   "credentials": {
+    "agentVerifier": {
+      "summary": "Secret verifier an agent generates before requestAgentSignup: ag_ followed by 32 random bytes in base64url, whose base64url SHA-256 digest is the request's pollChallenge. It authenticates the agent to its own signup and grant on the management plane only; the communication plane refuses it. Server runtimes only.",
+      "runtime": "server",
+      "carrier": "bearer",
+      "scoped": false
+    },
+    "anonymous": {
+      "summary": "No credential. The edge limits the caller by its network address, and the operation's input carries the capability.",
+      "runtime": "server",
+      "carrier": "none",
+      "scoped": false
+    },
     "backendKey": {
       "summary": "Scoped project backend key. Server runtimes only; never ship it to clients.",
       "runtime": "server",
@@ -163,6 +175,12 @@
     "sessionManage": {"summary": "Revoke user sessions and inspect session request outcomes."}
   },
   "conditions": {
+    "activeGrant": {
+      "summary": "The agent's grant is neither revoked nor expired, and its organization is active."
+    },
+    "approvalToken": {
+      "summary": "The input carries the approval token from the email sent to the request's named owner."
+    },
     "authorOrModerator": {"summary": "The caller wrote the message or moderates the conversation."},
     "creatorOrModerator": {
       "summary": "The caller started the live session or moderates its conversation."
@@ -174,6 +192,7 @@
     },
     "ownRequest": {"summary": "The caller made the original request."},
     "ownSession": {"summary": "The session belongs to the caller."},
+    "ownSignup": {"summary": "The verifier is the one whose digest the signup request carries."},
     "owner": {"summary": "The caller owns the organization, deployment or project."},
     "participant": {"summary": "The caller holds the referenced participation in the live session."}
   },
@@ -246,6 +265,72 @@
       "origin": "both",
       "status": 429,
       "retryable": true
+    },
+    "AGENTIC_NOT_CONFIGURED": {
+      "summary": "Agent signup is not offered in this environment.",
+      "origin": "server",
+      "status": 503,
+      "retryable": false
+    },
+    "AGENT_CONFIRMATION_CODE_INVALID": {
+      "summary": "The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.",
+      "origin": "server",
+      "status": 403,
+      "retryable": false
+    },
+    "AGENT_GRANT_EXPIRED": {
+      "summary": "The agent's grant has expired. The agent needs a new signup request approved.",
+      "origin": "server",
+      "status": 403,
+      "retryable": false
+    },
+    "AGENT_GRANT_REVOKED": {
+      "summary": "The owner revoked the agent's grant.",
+      "origin": "server",
+      "status": 403,
+      "retryable": false
+    },
+    "AGENT_KEY_LIMIT": {
+      "summary": "The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "AGENT_PURCHASE_LIMIT_EXCEEDED": {
+      "summary": "The purchase would take this month's agent credit purchases beyond the limit the owner set.",
+      "origin": "server",
+      "status": 402,
+      "retryable": false
+    },
+    "AGENT_SCOPE_NOT_GRANTED": {
+      "summary": "A requested scope is outside the agent's grant.",
+      "origin": "server",
+      "status": 403,
+      "retryable": false
+    },
+    "AGENT_SIGNUP_CLOSED": {
+      "summary": "The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "AGENT_SIGNUP_EMAIL_REJECTED": {
+      "summary": "The owner's email address is refused, for example for a disposable domain.",
+      "origin": "server",
+      "status": 400,
+      "retryable": false
+    },
+    "AGENT_SIGNUP_NOT_READY": {
+      "summary": "The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "AGENT_SIGNUP_SUPPRESSED": {
+      "summary": "The owner opted out of agent signup requests to this email address.",
+      "origin": "server",
+      "status": 403,
+      "retryable": false
     },
     "ALREADY_CONNECTED": {
       "summary": "The participation already has an active media connection.",
@@ -346,6 +431,30 @@
     "CREDENTIAL_REQUIRED": {
       "summary": "Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.",
       "origin": "sdk",
+      "status": 409,
+      "retryable": false
+    },
+    "CREDITS_EXHAUSTED": {
+      "summary": "Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+      "origin": "server",
+      "status": 402,
+      "retryable": false
+    },
+    "CREDITS_REQUIRE_METERED_PLAN": {
+      "summary": "Credits apply only to a billed subscription, and none is in force.",
+      "origin": "server",
+      "status": 409,
+      "retryable": false
+    },
+    "CREDIT_AMOUNT_OUT_OF_RANGE": {
+      "summary": "The credit amount is outside the allowed purchase range.",
+      "origin": "server",
+      "status": 400,
+      "retryable": false
+    },
+    "CREDIT_GRANT_LIMIT_REACHED": {
+      "summary": "Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.",
+      "origin": "server",
       "status": 409,
       "retryable": false
     },
@@ -560,6 +669,18 @@
       "status": 409,
       "retryable": false
     },
+    "PAYMENT_DECLINED": {
+      "summary": "The payment rail declined the payment. Nothing was charged.",
+      "origin": "server",
+      "status": 402,
+      "retryable": false
+    },
+    "PAYMENT_RAIL_NOT_CONFIGURED": {
+      "summary": "No payment rail is enabled in this environment.",
+      "origin": "server",
+      "status": 503,
+      "retryable": false
+    },
     "PERMIT_EXPIRED": {
       "summary": "The stored delivery permit has expired. Request a new permit.",
       "origin": "server",
@@ -676,6 +797,18 @@
       "summary": "The refreshed session could not be verified.",
       "origin": "sdk",
       "retryable": false
+    },
+    "SPEND_CAP_REACHED": {
+      "summary": "The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+      "origin": "server",
+      "status": 402,
+      "retryable": false
+    },
+    "SPEND_UNVERIFIED": {
+      "summary": "Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.",
+      "origin": "server",
+      "status": 503,
+      "retryable": true
     },
     "TRANSPORT_UNKNOWN": {
       "summary": "The transport failed after the request may have been sent. Resolve or retry the original request.",
@@ -1531,7 +1664,15 @@
           "communicationMutation",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "QUOTA_EXCEEDED", "PLAN_LIMIT_EXCEEDED", "SCOPE_REQUIRED"]
+        "codes": [
+          "NOT_FOUND",
+          "QUOTA_EXCEEDED",
+          "PLAN_LIMIT_EXCEEDED",
+          "SCOPE_REQUIRED",
+          "CREDITS_EXHAUSTED",
+          "SPEND_CAP_REACHED",
+          "SPEND_UNVERIFIED"
+        ]
       }
     },
     "communication.editMessage": {
@@ -1673,7 +1814,10 @@
           "LIVE_SESSION_EXISTS",
           "MEDIA_RECOVERING",
           "QUOTA_EXCEEDED",
-          "PLAN_LIMIT_EXCEEDED"
+          "PLAN_LIMIT_EXCEEDED",
+          "CREDITS_EXHAUSTED",
+          "SPEND_CAP_REACHED",
+          "SPEND_UNVERIFIED"
         ]
       }
     },
@@ -1694,7 +1838,14 @@
           "live",
           "rateLimited"
         ],
-        "codes": ["NOT_FOUND", "QUOTA_EXCEEDED", "PLAN_LIMIT_EXCEEDED"]
+        "codes": [
+          "NOT_FOUND",
+          "QUOTA_EXCEEDED",
+          "PLAN_LIMIT_EXCEEDED",
+          "CREDITS_EXHAUSTED",
+          "SPEND_CAP_REACHED",
+          "SPEND_UNVERIFIED"
+        ]
       }
     },
     "communication.alertLiveSession": {
@@ -1855,7 +2006,10 @@
           "CURSOR_MISMATCH",
           "RESYNC_REQUIRED",
           "QUOTA_EXCEEDED",
-          "PLAN_LIMIT_EXCEEDED"
+          "PLAN_LIMIT_EXCEEDED",
+          "CREDITS_EXHAUSTED",
+          "SPEND_CAP_REACHED",
+          "SPEND_UNVERIFIED"
         ]
       }
     },
@@ -1987,6 +2141,57 @@
       "pagination": {"style": "none"},
       "realtime": {"mode": "none"},
       "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
+    },
+    "management.agentSignupForApproval": {
+      "summary": "Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.",
+      "layer": "server",
+      "auth": [{"credential": "anonymous", "condition": "approvalToken"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "rateLimited"],
+        "codes": ["AGENTIC_NOT_CONFIGURED", "AGENT_SIGNUP_CLOSED"]
+      }
+    },
+    "management.agentSignup": {
+      "summary": "Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.",
+      "layer": "server",
+      "auth": [{"credential": "agentVerifier", "condition": "ownSignup"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "rateLimited"],
+        "codes": ["AGENTIC_NOT_CONFIGURED", "AGENT_GRANT_REVOKED", "AGENT_GRANT_EXPIRED"]
+      }
+    },
+    "management.agentGrants": {
+      "summary": "List an organization's agent grants with their keys, newest first.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "cursor", "limitField": "limit", "cursorField": "cursor", "pagePath": ["result"]},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND", "CURSOR_SCOPE_MISMATCH"]}
+    },
+    "management.agentAuditEvents": {
+      "summary": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "cursor", "limitField": "limit", "cursorField": "cursor", "pagePath": ["result"]},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND", "CURSOR_SCOPE_MISMATCH"]}
+    },
+    "management.organizationSpend": {
+      "summary": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND", "BILLING_NOT_CONFIGURED"]}
     },
     "management.createOrganization": {
       "summary": "Create an organization.",
@@ -2214,6 +2419,139 @@
       "errors": {
         "sets": ["request", "http", "mutation"],
         "codes": ["NOT_FOUND", "WEBHOOK_ENDPOINT_DISABLED"]
+      }
+    },
+    "management.requestAgentSignup": {
+      "summary": "Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.",
+      "layer": "server",
+      "auth": [{"credential": "anonymous"}],
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": [
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_SIGNUP_EMAIL_REJECTED",
+          "AGENT_SIGNUP_SUPPRESSED",
+          "BILLING_PLAN_UNAVAILABLE"
+        ]
+      }
+    },
+    "management.rejectAgentSignup": {
+      "summary": "Reject a signup request from its approval link, optionally suppressing future requests to the email.",
+      "layer": "server",
+      "auth": [{"credential": "anonymous", "condition": "approvalToken"}],
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": ["AGENTIC_NOT_CONFIGURED", "AGENT_SIGNUP_CLOSED"]
+      }
+    },
+    "management.approveAgentSignup": {
+      "summary": "Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "approvalToken"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": [
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_SIGNUP_CLOSED",
+          "AGENT_CONFIRMATION_CODE_INVALID",
+          "BILLING_PLAN_UNAVAILABLE"
+        ]
+      }
+    },
+    "management.issueAgentKey": {
+      "summary": "Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.",
+      "layer": "server",
+      "auth": [{"credential": "agentVerifier", "condition": "activeGrant"}],
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": [
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_SIGNUP_NOT_READY",
+          "AGENT_GRANT_REVOKED",
+          "AGENT_GRANT_EXPIRED",
+          "AGENT_SCOPE_NOT_GRANTED",
+          "AGENT_KEY_LIMIT"
+        ]
+      }
+    },
+    "management.agentCredentialPermit": {
+      "summary": "Issue a permit that authorizes the agent to redeem one of its key deliveries.",
+      "layer": "server",
+      "auth": [{"credential": "agentVerifier", "condition": "activeGrant"}],
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": [
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_SIGNUP_NOT_READY",
+          "AGENT_GRANT_REVOKED",
+          "AGENT_GRANT_EXPIRED",
+          "NOT_FOUND",
+          "PERMIT_EXPIRED",
+          "CREDENTIAL_DELIVERY_EXPIRED"
+        ]
+      }
+    },
+    "management.revokeAgentGrant": {
+      "summary": "Revoke an agent grant and every key issued under it.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "destructive": true,
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {"sets": ["request", "http", "mutation"], "codes": ["NOT_FOUND"]}
+    },
+    "management.setSpendControls": {
+      "summary": "Set the organization's monthly spend cap and agent purchase limit.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": ["NOT_FOUND", "BILLING_NOT_CONFIGURED", "BILLING_PLAN_UNAVAILABLE"]
+      }
+    },
+    "management.purchaseAgentCredits": {
+      "summary": "Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.",
+      "layer": "server",
+      "auth": [{"credential": "agentVerifier", "condition": "activeGrant"}],
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": [
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_SIGNUP_NOT_READY",
+          "AGENT_GRANT_REVOKED",
+          "AGENT_GRANT_EXPIRED",
+          "BILLING_SUSPENDED",
+          "BILLING_CUSTOMER_MISSING",
+          "CREDITS_REQUIRE_METERED_PLAN",
+          "CREDIT_AMOUNT_OUT_OF_RANGE",
+          "CREDIT_GRANT_LIMIT_REACHED",
+          "AGENT_PURCHASE_LIMIT_EXCEEDED",
+          "PAYMENT_DECLINED",
+          "PAYMENT_RAIL_NOT_CONFIGURED",
+          "BILLING_PROVIDER_REJECTED"
+        ]
       }
     }
   }

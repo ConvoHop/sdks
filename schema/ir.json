@@ -91,6 +91,20 @@
   ],
   "credentials": [
     {
+      "name": "agentVerifier",
+      "summary": "Secret verifier an agent generates before requestAgentSignup: ag_ followed by 32 random bytes in base64url, whose base64url SHA-256 digest is the request's pollChallenge. It authenticates the agent to its own signup and grant on the management plane only; the communication plane refuses it. Server runtimes only.",
+      "runtime": "server",
+      "carrier": "bearer",
+      "scoped": false
+    },
+    {
+      "name": "anonymous",
+      "summary": "No credential. The edge limits the caller by its network address, and the operation's input carries the capability.",
+      "runtime": "server",
+      "carrier": "none",
+      "scoped": false
+    },
+    {
       "name": "backendKey",
       "summary": "Scoped project backend key. Server runtimes only; never ship it to clients.",
       "runtime": "server",
@@ -153,6 +167,14 @@
   ],
   "conditions": [
     {
+      "name": "activeGrant",
+      "summary": "The agent's grant is neither revoked nor expired, and its organization is active."
+    },
+    {
+      "name": "approvalToken",
+      "summary": "The input carries the approval token from the email sent to the request's named owner."
+    },
+    {
       "name": "authorOrModerator",
       "summary": "The caller wrote the message or moderates the conversation."
     },
@@ -168,6 +190,10 @@
     },
     {"name": "ownRequest", "summary": "The caller made the original request."},
     {"name": "ownSession", "summary": "The session belongs to the caller."},
+    {
+      "name": "ownSignup",
+      "summary": "The verifier is the one whose digest the signup request carries."
+    },
     {"name": "owner", "summary": "The caller owns the organization, deployment or project."},
     {
       "name": "participant",
@@ -261,6 +287,83 @@
         "origin": "both",
         "status": 429,
         "retryable": true
+      },
+      {
+        "name": "AGENTIC_NOT_CONFIGURED",
+        "summary": "Agent signup is not offered in this environment.",
+        "origin": "server",
+        "status": 503,
+        "retryable": false
+      },
+      {
+        "name": "AGENT_CONFIRMATION_CODE_INVALID",
+        "summary": "The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.",
+        "origin": "server",
+        "status": 403,
+        "retryable": false
+      },
+      {
+        "name": "AGENT_GRANT_EXPIRED",
+        "summary": "The agent's grant has expired. The agent needs a new signup request approved.",
+        "origin": "server",
+        "status": 403,
+        "retryable": false
+      },
+      {
+        "name": "AGENT_GRANT_REVOKED",
+        "summary": "The owner revoked the agent's grant.",
+        "origin": "server",
+        "status": 403,
+        "retryable": false
+      },
+      {
+        "name": "AGENT_KEY_LIMIT",
+        "summary": "The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "AGENT_PURCHASE_LIMIT_EXCEEDED",
+        "summary": "The purchase would take this month's agent credit purchases beyond the limit the owner set.",
+        "origin": "server",
+        "status": 402,
+        "retryable": false
+      },
+      {
+        "name": "AGENT_SCOPE_NOT_GRANTED",
+        "summary": "A requested scope is outside the agent's grant.",
+        "origin": "server",
+        "status": 403,
+        "retryable": false
+      },
+      {
+        "name": "AGENT_SIGNUP_CLOSED",
+        "summary": "The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "AGENT_SIGNUP_EMAIL_REJECTED",
+        "summary": "The owner's email address is refused, for example for a disposable domain.",
+        "origin": "server",
+        "status": 400,
+        "retryable": false
+      },
+      {
+        "name": "AGENT_SIGNUP_NOT_READY",
+        "summary": "The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "AGENT_SIGNUP_SUPPRESSED",
+        "summary": "The owner opted out of agent signup requests to this email address.",
+        "origin": "server",
+        "status": 403,
+        "retryable": false
       },
       {
         "name": "ALREADY_CONNECTED",
@@ -378,6 +481,34 @@
         "name": "CREDENTIAL_REQUIRED",
         "summary": "Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.",
         "origin": "sdk",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "CREDITS_EXHAUSTED",
+        "summary": "Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+        "origin": "server",
+        "status": 402,
+        "retryable": false
+      },
+      {
+        "name": "CREDITS_REQUIRE_METERED_PLAN",
+        "summary": "Credits apply only to a billed subscription, and none is in force.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "CREDIT_AMOUNT_OUT_OF_RANGE",
+        "summary": "The credit amount is outside the allowed purchase range.",
+        "origin": "server",
+        "status": 400,
+        "retryable": false
+      },
+      {
+        "name": "CREDIT_GRANT_LIMIT_REACHED",
+        "summary": "Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.",
+        "origin": "server",
         "status": 409,
         "retryable": false
       },
@@ -629,6 +760,20 @@
         "retryable": false
       },
       {
+        "name": "PAYMENT_DECLINED",
+        "summary": "The payment rail declined the payment. Nothing was charged.",
+        "origin": "server",
+        "status": 402,
+        "retryable": false
+      },
+      {
+        "name": "PAYMENT_RAIL_NOT_CONFIGURED",
+        "summary": "No payment rail is enabled in this environment.",
+        "origin": "server",
+        "status": 503,
+        "retryable": false
+      },
+      {
         "name": "PERMIT_EXPIRED",
         "summary": "The stored delivery permit has expired. Request a new permit.",
         "origin": "server",
@@ -764,6 +909,20 @@
         "summary": "The refreshed session could not be verified.",
         "origin": "sdk",
         "retryable": false
+      },
+      {
+        "name": "SPEND_CAP_REACHED",
+        "summary": "The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+        "origin": "server",
+        "status": 402,
+        "retryable": false
+      },
+      {
+        "name": "SPEND_UNVERIFIED",
+        "summary": "Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.",
+        "origin": "server",
+        "status": 503,
+        "retryable": true
       },
       {
         "name": "TRANSPORT_UNKNOWN",
@@ -1987,9 +2146,9 @@
       "input": {"argument": "input", "type": "ResolveRequestRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ResolveRequestReply", "nullable": false}},
       "document": {
-        "text": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
-        "bytes": 6507,
-        "selectedFields": 244,
+        "text": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          agentGrant {\n            grantId\n            orgId\n            signupId\n            agentActorId\n            projectId\n            scopes\n            expiresAt\n            revokedAt\n            createdAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n          }\n          agentSignupStatus {\n            signupId\n            state\n            orgId\n            deploymentId\n            projectId\n            nextStep\n            scopes\n            grantExpiresAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n            incarnation\n            servingEpoch\n          }\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          organizationSpend {\n            orgId\n            planId\n            currency\n            catalogVersion\n            monthlySpendCap\n            agentPurchaseLimit\n            updatedAt\n            monthlyMinimum\n            periodStart\n            periodEnd\n            credits\n            charges\n            margin\n            stop\n            refusedMeters\n            evaluatedAt\n            usageThrough\n            validUntil\n            minimumCredit\n            chargeLimit\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+        "bytes": 7902,
+        "selectedFields": 302,
         "depth": 8
       },
       "idempotency": "safe",
@@ -3702,6 +3861,7 @@
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
+          "CREDITS_EXHAUSTED",
           "FEATURE_UNSUPPORTED",
           "FORBIDDEN",
           "GRAPHQL_ERROR",
@@ -3726,6 +3886,8 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "SCOPE_REQUIRED",
+          "SPEND_CAP_REACHED",
+          "SPEND_UNVERIFIED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -4291,6 +4453,7 @@
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
+          "CREDITS_EXHAUSTED",
           "FEATURE_UNSUPPORTED",
           "FORBIDDEN",
           "GRAPHQL_ERROR",
@@ -4316,6 +4479,8 @@
           "RESOLUTION_REQUIRED",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SPEND_CAP_REACHED",
+          "SPEND_UNVERIFIED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -4378,6 +4543,7 @@
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
+          "CREDITS_EXHAUSTED",
           "FEATURE_UNSUPPORTED",
           "FORBIDDEN",
           "GENERATION_CONFLICT",
@@ -4404,6 +4570,8 @@
           "RESOLUTION_REQUIRED",
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
+          "SPEND_CAP_REACHED",
+          "SPEND_UNVERIFIED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED",
           "WRONG_REGION"
@@ -5006,6 +5174,7 @@
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
+          "CREDITS_EXHAUSTED",
           "CURSOR_AHEAD",
           "CURSOR_EXPIRED",
           "CURSOR_MISMATCH",
@@ -5023,6 +5192,8 @@
           "RATE_LIMITED",
           "RESYNC_REQUIRED",
           "RETRY_EXHAUSTED",
+          "SPEND_CAP_REACHED",
+          "SPEND_UNVERIFIED",
           "UNAUTHENTICATED",
           "WRONG_REGION"
         ]
@@ -5859,9 +6030,9 @@
       "input": {"argument": "input", "type": "ResolveRequestRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ResolveRequestReply", "nullable": false}},
       "document": {
-        "text": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
-        "bytes": 6504,
-        "selectedFields": 244,
+        "text": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          agentGrant {\n            grantId\n            orgId\n            signupId\n            agentActorId\n            projectId\n            scopes\n            expiresAt\n            revokedAt\n            createdAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n          }\n          agentSignupStatus {\n            signupId\n            state\n            orgId\n            deploymentId\n            projectId\n            nextStep\n            scopes\n            grantExpiresAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n            incarnation\n            servingEpoch\n          }\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          organizationSpend {\n            orgId\n            planId\n            currency\n            catalogVersion\n            monthlySpendCap\n            agentPurchaseLimit\n            updatedAt\n            monthlyMinimum\n            periodStart\n            periodEnd\n            credits\n            charges\n            margin\n            stop\n            refusedMeters\n            evaluatedAt\n            usageThrough\n            validUntil\n            minimumCredit\n            chargeLimit\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+        "bytes": 7899,
+        "selectedFields": 302,
         "depth": 8
       },
       "idempotency": "safe",
@@ -5939,6 +6110,355 @@
         "codes": [
           "ADMISSION_LIMIT",
           "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "REQUEST_TOO_LARGE",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.agentSignupForApproval",
+      "plane": "management",
+      "kind": "query",
+      "field": "agentSignupForApproval",
+      "operationName": "ManagementAgentSignupForApproval",
+      "summary": "Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.",
+      "layer": "server",
+      "auth": [{"credential": "anonymous", "condition": "approvalToken"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "AgentSignupForApprovalRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "AgentSignupForApprovalRequestInput", "required": true},
+      "result": {
+        "type": {"kind": "object", "name": "AgentSignupForApprovalReply", "nullable": false}
+      },
+      "document": {
+        "text": "query ManagementAgentSignupForApproval($context: RequestContextInput!, $input: AgentSignupForApprovalRequestInput!) {\n  agentSignupForApproval(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      ownerEmail\n      organizationName\n      agentName\n      purpose\n      suggestedPlan\n      suggestedScopes\n      suggestedMonthlySpendCap\n      currency\n      expiresAt\n    }\n  }\n}",
+        "bytes": 594,
+        "selectedFields": 26,
+        "depth": 2
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "rateLimited"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_SIGNUP_CLOSED",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "RATE_LIMITED",
+          "REQUEST_TOO_LARGE",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.agentSignup",
+      "plane": "management",
+      "kind": "query",
+      "field": "agentSignup",
+      "operationName": "ManagementAgentSignup",
+      "summary": "Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.",
+      "layer": "server",
+      "auth": [{"credential": "agentVerifier", "condition": "ownSignup"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": null,
+      "result": {"type": {"kind": "object", "name": "AgentSignupReply", "nullable": false}},
+      "document": {
+        "text": "query ManagementAgentSignup($context: RequestContextInput!) {\n  agentSignup(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      state\n      orgId\n      deploymentId\n      projectId\n      nextStep\n      scopes\n      grantExpiresAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n      incarnation\n      servingEpoch\n    }\n  }\n}",
+        "bytes": 630,
+        "selectedFields": 34,
+        "depth": 3
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "rateLimited"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_GRANT_EXPIRED",
+          "AGENT_GRANT_REVOKED",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "RATE_LIMITED",
+          "REQUEST_TOO_LARGE",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.agentGrants",
+      "plane": "management",
+      "kind": "query",
+      "field": "agentGrants",
+      "operationName": "ManagementAgentGrants",
+      "summary": "List an organization's agent grants with their keys, newest first.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "AgentGrantsRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "AgentGrantsRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "AgentGrantsReply", "nullable": false}},
+      "document": {
+        "text": "query ManagementAgentGrants($context: RequestContextInput!, $input: AgentGrantsRequestInput!) {\n  agentGrants(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        grantId\n        orgId\n        signupId\n        agentActorId\n        projectId\n        scopes\n        expiresAt\n        revokedAt\n        createdAt\n        keys {\n          operationId\n          state\n          scopes\n          expiresAt\n          keyId\n          deliveryId\n          deliveryExpiresAt\n        }\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
+        "bytes": 768,
+        "selectedFields": 37,
+        "depth": 4
+      },
+      "idempotency": "safe",
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": ["result"],
+        "pageType": "AgentGrantPage",
+        "itemType": "AgentGrant"
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "CURSOR_SCOPE_MISMATCH",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "REQUEST_TOO_LARGE",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.agentAuditEvents",
+      "plane": "management",
+      "kind": "query",
+      "field": "agentAuditEvents",
+      "operationName": "ManagementAgentAuditEvents",
+      "summary": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "AgentAuditEventsRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "AgentAuditEventsRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "AgentAuditEventsReply", "nullable": false}},
+      "document": {
+        "text": "query ManagementAgentAuditEvents($context: RequestContextInput!, $input: AgentAuditEventsRequestInput!) {\n  agentAuditEvents(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        eventId\n        orgId\n        grantId\n        actorKind\n        actorId\n        kind\n        details\n        occurredAt\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
+        "bytes": 591,
+        "selectedFields": 28,
+        "depth": 3
+      },
+      "idempotency": "safe",
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": ["result"],
+        "pageType": "AgentAuditEventPage",
+        "itemType": "AgentAuditEvent"
+      },
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "CURSOR_SCOPE_MISMATCH",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "REQUEST_TOO_LARGE",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.organizationSpend",
+      "plane": "management",
+      "kind": "query",
+      "field": "organizationSpend",
+      "operationName": "ManagementOrganizationSpend",
+      "summary": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "OrganizationSpendRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "OrganizationSpendRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "OrganizationSpendReply", "nullable": false}},
+      "document": {
+        "text": "query ManagementOrganizationSpend($context: RequestContextInput!, $input: OrganizationSpendRequestInput!) {\n  organizationSpend(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      planId\n      currency\n      catalogVersion\n      monthlySpendCap\n      agentPurchaseLimit\n      updatedAt\n      monthlyMinimum\n      periodStart\n      periodEnd\n      credits\n      charges\n      margin\n      stop\n      refusedMeters\n      evaluatedAt\n      usageThrough\n      validUntil\n      minimumCredit\n      chargeLimit\n    }\n  }\n}",
+        "bytes": 733,
+        "selectedFields": 36,
+        "depth": 2
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "BILLING_NOT_CONFIGURED",
           "FEATURE_UNSUPPORTED",
           "FORBIDDEN",
           "GRAPHQL_ERROR",
@@ -7174,6 +7694,614 @@
           "WEBHOOK_ENDPOINT_DISABLED"
         ]
       }
+    },
+    {
+      "id": "management.requestAgentSignup",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "requestAgentSignup",
+      "operationName": "ManagementRequestAgentSignup",
+      "summary": "Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.",
+      "layer": "server",
+      "auth": [{"credential": "anonymous"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "RequestAgentSignupRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "RequestAgentSignupRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "RequestAgentSignupReply", "nullable": false}},
+      "document": {
+        "text": "mutation ManagementRequestAgentSignup($context: RequestContextInput!, $input: RequestAgentSignupRequestInput!) {\n  requestAgentSignup(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      confirmationCode\n      expiresAt\n      pollAfterSeconds\n    }\n  }\n}",
+        "bytes": 473,
+        "selectedFields": 20,
+        "depth": 2
+      },
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_SIGNUP_EMAIL_REJECTED",
+          "AGENT_SIGNUP_SUPPRESSED",
+          "AUTHORITY_UNAVAILABLE",
+          "BILLING_PLAN_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
+          "RECOVERY_LIMIT",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.rejectAgentSignup",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "rejectAgentSignup",
+      "operationName": "ManagementRejectAgentSignup",
+      "summary": "Reject a signup request from its approval link, optionally suppressing future requests to the email.",
+      "layer": "server",
+      "auth": [{"credential": "anonymous", "condition": "approvalToken"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "RejectAgentSignupRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "RejectAgentSignupRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "RejectAgentSignupReply", "nullable": false}},
+      "document": {
+        "text": "mutation ManagementRejectAgentSignup($context: RequestContextInput!, $input: RejectAgentSignupRequestInput!) {\n  rejectAgentSignup(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      state\n      orgId\n      deploymentId\n      projectId\n      nextStep\n      scopes\n      grantExpiresAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n      incarnation\n      servingEpoch\n    }\n  }\n}",
+        "bytes": 700,
+        "selectedFields": 34,
+        "depth": 3
+      },
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_SIGNUP_CLOSED",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
+          "RECOVERY_LIMIT",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.approveAgentSignup",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "approveAgentSignup",
+      "operationName": "ManagementApproveAgentSignup",
+      "summary": "Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "approvalToken"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "ApproveAgentSignupRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "ApproveAgentSignupRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "ApproveAgentSignupReply", "nullable": false}},
+      "document": {
+        "text": "mutation ManagementApproveAgentSignup($context: RequestContextInput!, $input: ApproveAgentSignupRequestInput!) {\n  approveAgentSignup(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      state\n      orgId\n      deploymentId\n      projectId\n      nextStep\n      scopes\n      grantExpiresAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n      incarnation\n      servingEpoch\n    }\n  }\n}",
+        "bytes": 703,
+        "selectedFields": 34,
+        "depth": 3
+      },
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_CONFIRMATION_CODE_INVALID",
+          "AGENT_SIGNUP_CLOSED",
+          "AUTHORITY_UNAVAILABLE",
+          "BILLING_PLAN_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "OUTCOME_UNKNOWN",
+          "RECOVERY_LIMIT",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.issueAgentKey",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "issueAgentKey",
+      "operationName": "ManagementIssueAgentKey",
+      "summary": "Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.",
+      "layer": "server",
+      "auth": [{"credential": "agentVerifier", "condition": "activeGrant"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "IssueAgentKeyRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "IssueAgentKeyRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "IssueAgentKeyReply", "nullable": false}},
+      "document": {
+        "text": "mutation ManagementIssueAgentKey($context: RequestContextInput!, $input: IssueAgentKeyRequestInput!) {\n  issueAgentKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      state\n      scopes\n      expiresAt\n      keyId\n      deliveryId\n      deliveryExpiresAt\n    }\n  }\n}",
+        "bytes": 493,
+        "selectedFields": 23,
+        "depth": 2
+      },
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_GRANT_EXPIRED",
+          "AGENT_GRANT_REVOKED",
+          "AGENT_KEY_LIMIT",
+          "AGENT_SCOPE_NOT_GRANTED",
+          "AGENT_SIGNUP_NOT_READY",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "OUTCOME_UNKNOWN",
+          "RATE_LIMITED",
+          "RECOVERY_LIMIT",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.agentCredentialPermit",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "agentCredentialPermit",
+      "operationName": "ManagementAgentCredentialPermit",
+      "summary": "Issue a permit that authorizes the agent to redeem one of its key deliveries.",
+      "layer": "server",
+      "auth": [{"credential": "agentVerifier", "condition": "activeGrant"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "AgentCredentialPermitRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "AgentCredentialPermitRequestInput", "required": true},
+      "result": {
+        "type": {"kind": "object", "name": "AgentCredentialPermitReply", "nullable": false}
+      },
+      "document": {
+        "text": "mutation ManagementAgentCredentialPermit($context: RequestContextInput!, $input: AgentCredentialPermitRequestInput!) {\n  agentCredentialPermit(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result\n  }\n}",
+        "bytes": 397,
+        "selectedFields": 16,
+        "depth": 2
+      },
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_GRANT_EXPIRED",
+          "AGENT_GRANT_REVOKED",
+          "AGENT_SIGNUP_NOT_READY",
+          "AUTHORITY_UNAVAILABLE",
+          "CREDENTIAL_DELIVERY_EXPIRED",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "OUTCOME_UNKNOWN",
+          "PERMIT_EXPIRED",
+          "RATE_LIMITED",
+          "RECOVERY_LIMIT",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.revokeAgentGrant",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "revokeAgentGrant",
+      "operationName": "ManagementRevokeAgentGrant",
+      "summary": "Revoke an agent grant and every key issued under it.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "RevokeAgentGrantRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "RevokeAgentGrantRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "RevokeAgentGrantReply", "nullable": false}},
+      "document": {
+        "text": "mutation ManagementRevokeAgentGrant($context: RequestContextInput!, $input: RevokeAgentGrantRequestInput!) {\n  revokeAgentGrant(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      grantId\n      orgId\n      signupId\n      agentActorId\n      projectId\n      scopes\n      expiresAt\n      revokedAt\n      createdAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n    }\n  }\n}",
+        "bytes": 674,
+        "selectedFields": 33,
+        "depth": 3
+      },
+      "idempotency": "idempotent",
+      "destructive": true,
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "OUTCOME_UNKNOWN",
+          "RECOVERY_LIMIT",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.setSpendControls",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "setSpendControls",
+      "operationName": "ManagementSetSpendControls",
+      "summary": "Set the organization's monthly spend cap and agent purchase limit.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "SetSpendControlsRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "SetSpendControlsRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "SetSpendControlsReply", "nullable": false}},
+      "document": {
+        "text": "mutation ManagementSetSpendControls($context: RequestContextInput!, $input: SetSpendControlsRequestInput!) {\n  setSpendControls(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      planId\n      currency\n      catalogVersion\n      monthlySpendCap\n      agentPurchaseLimit\n      updatedAt\n      monthlyMinimum\n      periodStart\n      periodEnd\n      credits\n      charges\n      margin\n      stop\n      refusedMeters\n      evaluatedAt\n      usageThrough\n      validUntil\n      minimumCredit\n      chargeLimit\n    }\n  }\n}",
+        "bytes": 733,
+        "selectedFields": 36,
+        "depth": 2
+      },
+      "idempotency": "idempotent",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "BILLING_NOT_CONFIGURED",
+          "BILLING_PLAN_UNAVAILABLE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "OUTCOME_UNKNOWN",
+          "RECOVERY_LIMIT",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.purchaseAgentCredits",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "purchaseAgentCredits",
+      "operationName": "ManagementPurchaseAgentCredits",
+      "summary": "Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.",
+      "layer": "server",
+      "auth": [{"credential": "agentVerifier", "condition": "activeGrant"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "PurchaseAgentCreditsRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "PurchaseAgentCreditsRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "PurchaseAgentCreditsReply", "nullable": false}},
+      "document": {
+        "text": "mutation ManagementPurchaseAgentCredits($context: RequestContextInput!, $input: PurchaseAgentCreditsRequestInput!) {\n  purchaseAgentCredits(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      paymentId\n      amount\n      currency\n      state\n    }\n  }\n}",
+        "bytes": 458,
+        "selectedFields": 20,
+        "depth": 2
+      },
+      "idempotency": "replayOnly",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation", "rateLimited"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_GRANT_EXPIRED",
+          "AGENT_GRANT_REVOKED",
+          "AGENT_PURCHASE_LIMIT_EXCEEDED",
+          "AGENT_SIGNUP_NOT_READY",
+          "AUTHORITY_UNAVAILABLE",
+          "BILLING_CUSTOMER_MISSING",
+          "BILLING_PROVIDER_REJECTED",
+          "BILLING_SUSPENDED",
+          "CREDITS_REQUIRE_METERED_PLAN",
+          "CREDIT_AMOUNT_OUT_OF_RANGE",
+          "CREDIT_GRANT_LIMIT_REACHED",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "OUTCOME_UNKNOWN",
+          "PAYMENT_DECLINED",
+          "PAYMENT_RAIL_NOT_CONFIGURED",
+          "RATE_LIMITED",
+          "RECOVERY_LIMIT",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
     }
   ],
   "types": [
@@ -7285,6 +8413,212 @@
           "type": {"kind": "object", "name": "ConversationMemberBatch", "nullable": false}
         }
       ]
+    },
+    {
+      "name": "AgentAuditEvent",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "eventId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "grantId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "actorKind", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "actorId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "kind", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "details", "type": {"kind": "scalar", "name": "Properties", "nullable": true}},
+        {"name": "occurredAt", "type": {"kind": "scalar", "name": "String", "nullable": false}}
+      ]
+    },
+    {
+      "name": "AgentAuditEventPage",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {
+          "name": "items",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "AgentAuditEvent", "nullable": false}
+          }
+        },
+        {"name": "complete", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "refreshRequired",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
+        },
+        {"name": "nextCursor", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "AgentGrant",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "grantId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "signupId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "agentActorId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "projectId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {
+          "name": "scopes",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        },
+        {"name": "expiresAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "revokedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "createdAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "keys",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "AgentKey", "nullable": false}
+          }
+        }
+      ]
+    },
+    {
+      "name": "AgentGrantPage",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {
+          "name": "items",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "AgentGrant", "nullable": false}
+          }
+        },
+        {"name": "complete", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "refreshRequired",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
+        },
+        {"name": "nextCursor", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "AgentKey",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "operationId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "state", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "scopes",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        },
+        {"name": "expiresAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "keyId", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "deliveryId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {
+          "name": "deliveryExpiresAt",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "AgentPayment",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "paymentId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "amount", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "currency", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "state", "type": {"kind": "scalar", "name": "String", "nullable": false}}
+      ]
+    },
+    {
+      "name": "AgentSignupReview",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "signupId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "ownerEmail", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "organizationName",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "agentName", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "purpose", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "suggestedPlan", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {
+          "name": "suggestedScopes",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        },
+        {
+          "name": "suggestedMonthlySpendCap",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        },
+        {"name": "currency", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "expiresAt", "type": {"kind": "scalar", "name": "String", "nullable": false}}
+      ]
+    },
+    {
+      "name": "AgentSignupStatus",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "signupId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "state", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "deploymentId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "projectId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "nextStep", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {
+          "name": "scopes",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        },
+        {"name": "grantExpiresAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {
+          "name": "keys",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "object", "name": "AgentKey", "nullable": false}
+          }
+        },
+        {"name": "incarnation", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "servingEpoch", "type": {"kind": "scalar", "name": "Decimal", "nullable": true}}
+      ]
+    },
+    {
+      "name": "AgentSignupTicket",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "signupId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {
+          "name": "confirmationCode",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "expiresAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "pollAfterSeconds", "type": {"kind": "scalar", "name": "Int", "nullable": false}}
+      ]
+    },
+    {
+      "name": "Int",
+      "kind": "scalar",
+      "planes": ["communication", "management"],
+      "builtIn": true,
+      "representation": "integer"
     },
     {
       "name": "AlertLiveSessionInput",
@@ -7594,6 +8928,33 @@
       "planes": ["communication", "management"],
       "fields": [
         {"name": "deliveryId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}}
+      ]
+    },
+    {
+      "name": "CreditsExhaustedProblem",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "description": "GraphQL error `extensions` when `code` is `CREDITS_EXHAUSTED`. The organization's prepaid credits are spent and its monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (HTTP 402, WebSocket close 4402). Usage within allowances continues. Not retryable until credits are added or the owner raises the cap.",
+      "fields": [
+        {
+          "name": "code",
+          "description": "CREDITS_EXHAUSTED",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "status", "type": {"kind": "scalar", "name": "Int", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "outcome", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "retryable", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "meter",
+          "description": "Canonical usage meter key whose billable usage beyond the plan's allowance was refused, such as `messages_sent`.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {
+          "name": "periodEnd",
+          "description": "RFC 3339 UTC end of the organization's spend month.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        }
       ]
     },
     {
@@ -9126,13 +10487,6 @@
       ]
     },
     {
-      "name": "Int",
-      "kind": "scalar",
-      "planes": ["communication", "management"],
-      "builtIn": true,
-      "representation": "integer"
-    },
-    {
       "name": "OperationStep",
       "kind": "object",
       "planes": ["communication", "management"],
@@ -9194,6 +10548,43 @@
           "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
         },
         {"name": "nextCursor", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "OrganizationSpend",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "planId", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "currency", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "catalogVersion", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "monthlySpendCap", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {
+          "name": "agentPurchaseLimit",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        },
+        {"name": "updatedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "monthlyMinimum", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "periodStart", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "periodEnd", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "credits", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "charges", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "margin", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "stop", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {
+          "name": "refusedMeters",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        },
+        {"name": "evaluatedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "usageThrough", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "validUntil", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "minimumCredit", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "chargeLimit", "type": {"kind": "scalar", "name": "String", "nullable": true}}
       ]
     },
     {
@@ -9675,6 +11066,11 @@
       "planes": ["communication", "management"],
       "description": "Exactly one typed field contains the retained, currently authorized receipt result.",
       "fields": [
+        {"name": "agentGrant", "type": {"kind": "object", "name": "AgentGrant", "nullable": true}},
+        {
+          "name": "agentSignupStatus",
+          "type": {"kind": "object", "name": "AgentSignupStatus", "nullable": true}
+        },
         {
           "name": "billingCheckoutSession",
           "type": {"kind": "object", "name": "BillingCheckoutSession", "nullable": true}
@@ -9734,6 +11130,10 @@
         {
           "name": "organization",
           "type": {"kind": "object", "name": "Organization", "nullable": true}
+        },
+        {
+          "name": "organizationSpend",
+          "type": {"kind": "object", "name": "OrganizationSpend", "nullable": true}
         },
         {"name": "principal", "type": {"kind": "object", "name": "Principal", "nullable": true}},
         {"name": "readReceipt", "type": {"kind": "object", "name": "ReadReceipt", "nullable": true}},
@@ -10055,6 +11455,65 @@
       "constraints": {"maxCanonicalJsonBytes": 32768, "requiredStringProperties": ["signature"]}
     },
     {
+      "name": "SpendCapReachedProblem",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "description": "GraphQL error `extensions` when `code` is `SPEND_CAP_REACHED`. The spend month's usage charges, excluding the plan fee and tax, reached the organization's charge limit, less a safety margin: its prepaid credits plus its monthly spend cap, less the next monthly minimum, which the next invoice bills in advance, plus this month's paid minimum credit. Billable usage beyond the plan's allowances is refused before any effect (HTTP 402, WebSocket close 4402). Usage within allowances continues. Not retryable until credits are added or the owner raises the cap; otherwise usage resumes at `periodEnd` once the next monthly minimum, if any, is paid.",
+      "fields": [
+        {
+          "name": "code",
+          "description": "SPEND_CAP_REACHED",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "status", "type": {"kind": "scalar", "name": "Int", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "outcome", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "retryable", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "meter",
+          "description": "Canonical usage meter key whose billable usage beyond the plan's allowance was refused, such as `messages_sent`.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {
+          "name": "periodEnd",
+          "description": "RFC 3339 UTC end of the organization's spend month.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        }
+      ]
+    },
+    {
+      "name": "SpendUnverifiedProblem",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "description": "GraphQL error `extensions` when `code` is `SPEND_UNVERIFIED`. Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (HTTP 503, WebSocket close 4503). Usage within allowances continues. Resend the same request identity after `retryAfter` seconds.",
+      "fields": [
+        {
+          "name": "code",
+          "description": "SPEND_UNVERIFIED",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "status", "type": {"kind": "scalar", "name": "Int", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "outcome", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "retryable", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {
+          "name": "retryAfter",
+          "description": "Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.",
+          "type": {"kind": "scalar", "name": "Int", "nullable": false}
+        },
+        {
+          "name": "meter",
+          "description": "Canonical usage meter key whose billable usage beyond the plan's allowance was refused, such as `messages_sent`.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {
+          "name": "periodEnd",
+          "description": "RFC 3339 UTC end of the organization's spend month.",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        }
+      ]
+    },
+    {
       "name": "StartLiveSessionInput",
       "kind": "input",
       "planes": ["communication"],
@@ -10277,6 +11736,190 @@
         {"name": "nextCursor", "type": {"kind": "scalar", "name": "String", "nullable": true}},
         {"name": "observedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
         {"name": "partialReason", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "AgentAuditEventsReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "AgentAuditEventPage", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "AgentAuditEventsRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {
+          "name": "limit",
+          "type": {"kind": "scalar", "name": "PageSize", "nullable": false},
+          "defaultValue": 50
+        },
+        {"name": "cursor", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "AgentCredentialPermitReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {"name": "result", "type": {"kind": "scalar", "name": "SignedProof", "nullable": true}}
+      ]
+    },
+    {
+      "name": "AgentCredentialPermitRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "deliveryId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {
+          "name": "redemptionRequestId",
+          "type": {"kind": "scalar", "name": "UUID", "nullable": false}
+        }
+      ]
+    },
+    {
+      "name": "AgentGrantsReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {"name": "result", "type": {"kind": "object", "name": "AgentGrantPage", "nullable": true}}
+      ]
+    },
+    {
+      "name": "AgentGrantsRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {
+          "name": "limit",
+          "type": {"kind": "scalar", "name": "PageSize", "nullable": false},
+          "defaultValue": 50
+        },
+        {"name": "cursor", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
+      "name": "AgentSignupForApprovalReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "AgentSignupReview", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "AgentSignupForApprovalRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "approvalToken", "type": {"kind": "scalar", "name": "String", "nullable": false}}
+      ]
+    },
+    {
+      "name": "AgentSignupReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "AgentSignupStatus", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "ApproveAgentSignupReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "AgentSignupStatus", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "ApproveAgentSignupRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "approvalToken", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "confirmationCode",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "termsRef", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "plan", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "scopes",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        },
+        {"name": "monthlySpendCap", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "agentPurchaseLimit",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        },
+        {"name": "grantExpiresAt", "type": {"kind": "scalar", "name": "String", "nullable": true}}
       ]
     },
     {
@@ -10631,6 +12274,38 @@
       ]
     },
     {
+      "name": "IssueAgentKeyReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {"name": "result", "type": {"kind": "object", "name": "AgentKey", "nullable": true}}
+      ]
+    },
+    {
+      "name": "IssueAgentKeyRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {
+          "name": "scopes",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        },
+        {"name": "expiresAt", "type": {"kind": "scalar", "name": "String", "nullable": true}}
+      ]
+    },
+    {
       "name": "IssueBackendKeyReply",
       "kind": "object",
       "planes": ["management"],
@@ -10685,6 +12360,31 @@
     },
     {
       "name": "OrganizationBillingRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [{"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}}]
+    },
+    {
+      "name": "OrganizationSpendReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "OrganizationSpend", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "OrganizationSpendRequestInput",
       "kind": "input",
       "planes": ["management"],
       "fields": [{"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}}]
@@ -10821,6 +12521,65 @@
       ]
     },
     {
+      "name": "PurchaseAgentCreditsReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {"name": "result", "type": {"kind": "object", "name": "AgentPayment", "nullable": true}}
+      ]
+    },
+    {
+      "name": "PurchaseAgentCreditsRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "amount", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "sharedPaymentToken",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        }
+      ]
+    },
+    {
+      "name": "RejectAgentSignupReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "AgentSignupStatus", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "RejectAgentSignupRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "approvalToken", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "suppressFutureRequests",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
+        }
+      ]
+    },
+    {
       "name": "ReplayWebhookDeliveriesReply",
       "kind": "object",
       "planes": ["management"],
@@ -10849,6 +12608,53 @@
       ]
     },
     {
+      "name": "RequestAgentSignupReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "AgentSignupTicket", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "RequestAgentSignupRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "ownerEmail", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "pollChallenge", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "organizationName",
+          "type": {"kind": "scalar", "name": "String", "nullable": false}
+        },
+        {"name": "agentName", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "purpose", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "suggestedPlan", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {
+          "name": "suggestedScopes",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "ofType": {"kind": "scalar", "name": "String", "nullable": false}
+          }
+        },
+        {
+          "name": "suggestedMonthlySpendCap",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        }
+      ]
+    },
+    {
       "name": "ResumeOperationReply",
       "kind": "object",
       "planes": ["management"],
@@ -10873,6 +12679,34 @@
         {
           "name": "expectedRevision",
           "type": {"kind": "scalar", "name": "Decimal", "nullable": false}
+        }
+      ]
+    },
+    {
+      "name": "RevokeAgentGrantReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {"name": "result", "type": {"kind": "object", "name": "AgentGrant", "nullable": true}}
+      ]
+    },
+    {
+      "name": "RevokeAgentGrantRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "grantId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {
+          "name": "revokeIssuedSessions",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
         }
       ]
     },
@@ -10935,6 +12769,38 @@
         {
           "name": "expectedRevision",
           "type": {"kind": "scalar", "name": "Decimal", "nullable": false}
+        }
+      ]
+    },
+    {
+      "name": "SetSpendControlsReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "OrganizationSpend", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "SetSpendControlsRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "monthlySpendCap", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {
+          "name": "agentPurchaseLimit",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
         }
       ]
     },

@@ -540,6 +540,60 @@
               "docs": "Read the state of a long-running management operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId."
             },
             {
+              "name": "agent_signup_for_approval",
+              "kind": "method",
+              "signatures": [
+                "async def agent_signup_for_approval(self, *, approval_token: str) -> AgentSignupReview"
+              ],
+              "docs": "Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.\n\nAuthorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId."
+            },
+            {
+              "name": "agent_signup",
+              "kind": "method",
+              "signatures": ["async def agent_signup(self) -> AgentSignupStatus"],
+              "docs": "Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.\n\nAuthorization: `agentVerifier`, when `ownSignup`: The verifier is the one whose digest the signup request carries.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId."
+            },
+            {
+              "name": "agent_grants",
+              "kind": "method",
+              "signatures": [
+                "async def agent_grants(\n    self,\n    *,\n    org_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> AgentGrantPage"
+              ],
+              "docs": "List an organization's agent grants with their keys, newest first.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_grants()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server."
+            },
+            {
+              "name": "iter_agent_grants",
+              "kind": "method",
+              "signatures": [
+                "async def iter_agent_grants(\n    self,\n    *,\n    org_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> AsyncIterator[AgentGrant]"
+              ],
+              "docs": "Iterate the `items` of `agent_grants()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server."
+            },
+            {
+              "name": "agent_audit_events",
+              "kind": "method",
+              "signatures": [
+                "async def agent_audit_events(\n    self,\n    *,\n    org_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> AgentAuditEventPage"
+              ],
+              "docs": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_audit_events()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server."
+            },
+            {
+              "name": "iter_agent_audit_events",
+              "kind": "method",
+              "signatures": [
+                "async def iter_agent_audit_events(\n    self,\n    *,\n    org_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> AsyncIterator[AgentAuditEvent]"
+              ],
+              "docs": "Iterate the `items` of `agent_audit_events()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server."
+            },
+            {
+              "name": "organization_spend",
+              "kind": "method",
+              "signatures": [
+                "async def organization_spend(self, *, org_id: str) -> OrganizationSpend"
+              ],
+              "docs": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId."
+            },
+            {
               "name": "create_organization",
               "kind": "method",
               "signatures": [
@@ -666,6 +720,70 @@
                 "async def replay_webhook_deliveries(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n    effect_id: str | None = None,\n    since: str | None = None,\n    until: str | None = None,\n    request_id: str | None = None,\n) -> ReplayWebhookDeliveriesReply"
               ],
               "docs": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
+            },
+            {
+              "name": "request_agent_signup",
+              "kind": "method",
+              "signatures": [
+                "async def request_agent_signup(\n    self,\n    *,\n    owner_email: str,\n    poll_challenge: str,\n    organization_name: str,\n    agent_name: str,\n    suggested_scopes: Sequence[str],\n    purpose: str | None = None,\n    suggested_plan: str | None = None,\n    suggested_monthly_spend_cap: str | None = None,\n    request_id: str | None = None,\n) -> AgentSignupTicket"
+              ],
+              "docs": "Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.\n\nAuthorization: No credential (`anonymous`); the authority ignores the client's token.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input."
+            },
+            {
+              "name": "reject_agent_signup",
+              "kind": "method",
+              "signatures": [
+                "async def reject_agent_signup(\n    self,\n    *,\n    approval_token: str,\n    suppress_future_requests: bool,\n    request_id: str | None = None,\n) -> AgentSignupStatus"
+              ],
+              "docs": "Reject a signup request from its approval link, optionally suppressing future requests to the email.\n\nAuthorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input."
+            },
+            {
+              "name": "approve_agent_signup",
+              "kind": "method",
+              "signatures": [
+                "async def approve_agent_signup(\n    self,\n    *,\n    approval_token: str,\n    confirmation_code: str,\n    terms_ref: str,\n    plan: str,\n    scopes: Sequence[str],\n    monthly_spend_cap: str,\n    agent_purchase_limit: str | None = None,\n    grant_expires_at: str | None = None,\n    request_id: str | None = None,\n) -> AgentSignupStatus"
+              ],
+              "docs": "Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.\n\nAuthorization: `portalCredential`, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
+            },
+            {
+              "name": "issue_agent_key",
+              "kind": "method",
+              "signatures": [
+                "async def issue_agent_key(\n    self,\n    *,\n    scopes: Sequence[str],\n    expires_at: str | None = None,\n    request_id: str | None = None,\n) -> AgentKey"
+              ],
+              "docs": "Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.\n\nAuthorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input."
+            },
+            {
+              "name": "agent_credential_permit",
+              "kind": "method",
+              "signatures": [
+                "async def agent_credential_permit(\n    self,\n    *,\n    delivery_id: str,\n    redemption_request_id: str,\n    request_id: str | None = None,\n) -> dict[str, Any]"
+              ],
+              "docs": "Issue a permit that authorizes the agent to redeem one of its key deliveries.\n\nAuthorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input."
+            },
+            {
+              "name": "revoke_agent_grant",
+              "kind": "method",
+              "signatures": [
+                "async def revoke_agent_grant(\n    self,\n    *,\n    grant_id: str,\n    revoke_issued_sessions: bool,\n    request_id: str | None = None,\n) -> AgentGrant"
+              ],
+              "docs": "Revoke an agent grant and every key issued under it.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
+            },
+            {
+              "name": "set_spend_controls",
+              "kind": "method",
+              "signatures": [
+                "async def set_spend_controls(\n    self,\n    *,\n    org_id: str,\n    monthly_spend_cap: str,\n    agent_purchase_limit: str | None = None,\n    request_id: str | None = None,\n) -> OrganizationSpend"
+              ],
+              "docs": "Set the organization's monthly spend cap and agent purchase limit.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
+            },
+            {
+              "name": "purchase_agent_credits",
+              "kind": "method",
+              "signatures": [
+                "async def purchase_agent_credits(\n    self,\n    *,\n    amount: str,\n    shared_payment_token: str,\n    request_id: str | None = None,\n) -> AgentPayment"
+              ],
+              "docs": "Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.\n\nAuthorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input."
             }
           ]
         },
@@ -1206,6 +1324,58 @@
               "docs": "Read the state of a long-running management operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId."
             },
             {
+              "name": "agent_signup_for_approval",
+              "kind": "method",
+              "signatures": [
+                "def agent_signup_for_approval(self, *, approval_token: str) -> AgentSignupReview"
+              ],
+              "docs": "Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.\n\nAuthorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId."
+            },
+            {
+              "name": "agent_signup",
+              "kind": "method",
+              "signatures": ["def agent_signup(self) -> AgentSignupStatus"],
+              "docs": "Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.\n\nAuthorization: `agentVerifier`, when `ownSignup`: The verifier is the one whose digest the signup request carries.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId."
+            },
+            {
+              "name": "agent_grants",
+              "kind": "method",
+              "signatures": [
+                "def agent_grants(\n    self,\n    *,\n    org_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> AgentGrantPage"
+              ],
+              "docs": "List an organization's agent grants with their keys, newest first.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_grants()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server."
+            },
+            {
+              "name": "iter_agent_grants",
+              "kind": "method",
+              "signatures": [
+                "def iter_agent_grants(\n    self,\n    *,\n    org_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> Iterator[AgentGrant]"
+              ],
+              "docs": "Iterate the `items` of `agent_grants()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server."
+            },
+            {
+              "name": "agent_audit_events",
+              "kind": "method",
+              "signatures": [
+                "def agent_audit_events(\n    self,\n    *,\n    org_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> AgentAuditEventPage"
+              ],
+              "docs": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_audit_events()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server."
+            },
+            {
+              "name": "iter_agent_audit_events",
+              "kind": "method",
+              "signatures": [
+                "def iter_agent_audit_events(\n    self,\n    *,\n    org_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> Iterator[AgentAuditEvent]"
+              ],
+              "docs": "Iterate the `items` of `agent_audit_events()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server."
+            },
+            {
+              "name": "organization_spend",
+              "kind": "method",
+              "signatures": ["def organization_spend(self, *, org_id: str) -> OrganizationSpend"],
+              "docs": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId."
+            },
+            {
               "name": "create_organization",
               "kind": "method",
               "signatures": [
@@ -1332,6 +1502,70 @@
                 "def replay_webhook_deliveries(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n    effect_id: str | None = None,\n    since: str | None = None,\n    until: str | None = None,\n    request_id: str | None = None,\n) -> ReplayWebhookDeliveriesReply"
               ],
               "docs": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
+            },
+            {
+              "name": "request_agent_signup",
+              "kind": "method",
+              "signatures": [
+                "def request_agent_signup(\n    self,\n    *,\n    owner_email: str,\n    poll_challenge: str,\n    organization_name: str,\n    agent_name: str,\n    suggested_scopes: Sequence[str],\n    purpose: str | None = None,\n    suggested_plan: str | None = None,\n    suggested_monthly_spend_cap: str | None = None,\n    request_id: str | None = None,\n) -> AgentSignupTicket"
+              ],
+              "docs": "Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.\n\nAuthorization: No credential (`anonymous`); the authority ignores the client's token.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input."
+            },
+            {
+              "name": "reject_agent_signup",
+              "kind": "method",
+              "signatures": [
+                "def reject_agent_signup(\n    self,\n    *,\n    approval_token: str,\n    suppress_future_requests: bool,\n    request_id: str | None = None,\n) -> AgentSignupStatus"
+              ],
+              "docs": "Reject a signup request from its approval link, optionally suppressing future requests to the email.\n\nAuthorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input."
+            },
+            {
+              "name": "approve_agent_signup",
+              "kind": "method",
+              "signatures": [
+                "def approve_agent_signup(\n    self,\n    *,\n    approval_token: str,\n    confirmation_code: str,\n    terms_ref: str,\n    plan: str,\n    scopes: Sequence[str],\n    monthly_spend_cap: str,\n    agent_purchase_limit: str | None = None,\n    grant_expires_at: str | None = None,\n    request_id: str | None = None,\n) -> AgentSignupStatus"
+              ],
+              "docs": "Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.\n\nAuthorization: `portalCredential`, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
+            },
+            {
+              "name": "issue_agent_key",
+              "kind": "method",
+              "signatures": [
+                "def issue_agent_key(\n    self,\n    *,\n    scopes: Sequence[str],\n    expires_at: str | None = None,\n    request_id: str | None = None,\n) -> AgentKey"
+              ],
+              "docs": "Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.\n\nAuthorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input."
+            },
+            {
+              "name": "agent_credential_permit",
+              "kind": "method",
+              "signatures": [
+                "def agent_credential_permit(\n    self,\n    *,\n    delivery_id: str,\n    redemption_request_id: str,\n    request_id: str | None = None,\n) -> dict[str, Any]"
+              ],
+              "docs": "Issue a permit that authorizes the agent to redeem one of its key deliveries.\n\nAuthorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input."
+            },
+            {
+              "name": "revoke_agent_grant",
+              "kind": "method",
+              "signatures": [
+                "def revoke_agent_grant(\n    self,\n    *,\n    grant_id: str,\n    revoke_issued_sessions: bool,\n    request_id: str | None = None,\n) -> AgentGrant"
+              ],
+              "docs": "Revoke an agent grant and every key issued under it.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
+            },
+            {
+              "name": "set_spend_controls",
+              "kind": "method",
+              "signatures": [
+                "def set_spend_controls(\n    self,\n    *,\n    org_id: str,\n    monthly_spend_cap: str,\n    agent_purchase_limit: str | None = None,\n    request_id: str | None = None,\n) -> OrganizationSpend"
+              ],
+              "docs": "Set the organization's monthly spend cap and agent purchase limit.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`."
+            },
+            {
+              "name": "purchase_agent_credits",
+              "kind": "method",
+              "signatures": [
+                "def purchase_agent_credits(\n    self,\n    *,\n    amount: str,\n    shared_payment_token: str,\n    request_id: str | None = None,\n) -> AgentPayment"
+              ],
+              "docs": "Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.\n\nAuthorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input."
             }
           ]
         },
@@ -3043,6 +3277,150 @@
           "docs": ""
         },
         {
+          "name": "AgentAuditEvent",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentAuditEvent:\n    event_id: str\n    org_id: str\n    grant_id: str | None\n    actor_kind: str\n    actor_id: str | None\n    kind: str\n    details: dict[str, Any] | None\n    occurred_at: str\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentAuditEventPage",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentAuditEventPage:\n    items: tuple[AgentAuditEvent, ...]\n    complete: bool\n    refresh_required: bool\n    next_cursor: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentAuditEventsReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentAuditEventsReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: AgentAuditEventPage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentAuditEventsRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentAuditEventsRequestInput:\n    org_id: str\n    limit: int | None = None\n    cursor: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentCredentialPermitReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentCredentialPermitReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: dict[str, Any] | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentCredentialPermitRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentCredentialPermitRequestInput:\n    delivery_id: str\n    redemption_request_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentGrant",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentGrant:\n    grant_id: str\n    org_id: str\n    signup_id: str\n    agent_actor_id: str\n    project_id: str | None\n    scopes: tuple[str, ...]\n    expires_at: str\n    revoked_at: str | None\n    created_at: str\n    keys: tuple[AgentKey, ...]\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentGrantPage",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentGrantPage:\n    items: tuple[AgentGrant, ...]\n    complete: bool\n    refresh_required: bool\n    next_cursor: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentGrantsReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentGrantsReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: AgentGrantPage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentGrantsRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentGrantsRequestInput:\n    org_id: str\n    limit: int | None = None\n    cursor: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentKey",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentKey:\n    operation_id: str\n    state: str\n    scopes: tuple[str, ...]\n    expires_at: str\n    key_id: str | None\n    delivery_id: str | None\n    delivery_expires_at: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentPayment",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentPayment:\n    payment_id: str\n    amount: str\n    currency: str\n    state: str\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentSignupForApprovalReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentSignupForApprovalReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: AgentSignupReview | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentSignupForApprovalRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentSignupForApprovalRequestInput:\n    approval_token: str\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentSignupReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentSignupReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: AgentSignupStatus | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentSignupReview",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentSignupReview:\n    signup_id: str\n    owner_email: str\n    organization_name: str\n    agent_name: str\n    purpose: str | None\n    suggested_plan: str | None\n    suggested_scopes: tuple[str, ...]\n    suggested_monthly_spend_cap: str | None\n    currency: str\n    expires_at: str\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentSignupStatus",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentSignupStatus:\n    signup_id: str\n    state: str\n    org_id: str | None\n    deployment_id: str | None\n    project_id: str | None\n    next_step: str | None\n    scopes: tuple[str, ...]\n    grant_expires_at: str | None\n    keys: tuple[AgentKey, ...]\n    incarnation: str | None\n    serving_epoch: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "AgentSignupTicket",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AgentSignupTicket:\n    signup_id: str\n    confirmation_code: str\n    expires_at: str\n    poll_after_seconds: int\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
           "name": "AlertLiveSessionInput",
           "kind": "class",
           "signatures": [
@@ -3055,6 +3433,22 @@
           "kind": "class",
           "signatures": [
             "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AlertLiveSessionPayload:\n    status: str\n    request_id: str\n    receipt_id: str\n    committed_at: str\n    replayed: bool\n    result: LiveAlertBatch\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "ApproveAgentSignupReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ApproveAgentSignupReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: AgentSignupStatus | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "ApproveAgentSignupRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ApproveAgentSignupRequestInput:\n    approval_token: str\n    confirmation_code: str\n    terms_ref: str\n    plan: str\n    scopes: Sequence[str]\n    monthly_spend_cap: str\n    agent_purchase_limit: str | None = None\n    grant_expires_at: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
           ],
           "docs": ""
         },
@@ -3643,6 +4037,22 @@
           "docs": ""
         },
         {
+          "name": "IssueAgentKeyReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass IssueAgentKeyReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: AgentKey | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "IssueAgentKeyRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass IssueAgentKeyRequestInput:\n    scopes: Sequence[str]\n    expires_at: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
           "name": "IssueBackendKeyReply",
           "kind": "class",
           "signatures": [
@@ -4143,6 +4553,30 @@
           "docs": ""
         },
         {
+          "name": "OrganizationSpend",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationSpend:\n    org_id: str\n    plan_id: str\n    currency: str\n    catalog_version: str\n    monthly_spend_cap: str | None\n    agent_purchase_limit: str | None\n    updated_at: str | None\n    monthly_minimum: str | None\n    period_start: str | None\n    period_end: str | None\n    credits: str | None\n    charges: str | None\n    margin: str | None\n    stop: str | None\n    refused_meters: tuple[str, ...]\n    evaluated_at: str | None\n    usage_through: str | None\n    valid_until: str | None\n    minimum_credit: str | None\n    charge_limit: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "OrganizationSpendReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationSpendReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OrganizationSpend | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "OrganizationSpendRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationSpendRequestInput:\n    org_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
           "name": "OrganizationUsage",
           "kind": "class",
           "signatures": [
@@ -4255,10 +4689,42 @@
           "docs": ""
         },
         {
+          "name": "PurchaseAgentCreditsReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass PurchaseAgentCreditsReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: AgentPayment | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "PurchaseAgentCreditsRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass PurchaseAgentCreditsRequestInput:\n    amount: str\n    shared_payment_token: str\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
           "name": "ReadReceipt",
           "kind": "class",
           "signatures": [
             "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ReadReceipt:\n    principal_id: str\n    membership_epoch: str\n    visibility_epoch: str\n    delivered_through_sequence: str | None\n    read_through_sequence: str | None\n    updated_at: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "RejectAgentSignupReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RejectAgentSignupReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: AgentSignupStatus | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "RejectAgentSignupRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RejectAgentSignupRequestInput:\n    approval_token: str\n    suppress_future_requests: bool\n    def to_dict(self) -> dict[str, Any]: ..."
           ],
           "docs": ""
         },
@@ -4307,6 +4773,22 @@
           "kind": "class",
           "signatures": [
             "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ReplayWebhookDeliveriesRequestInput:\n    project_id: str\n    endpoint_id: str\n    effect_id: str | None = None\n    since: str | None = None\n    until: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "RequestAgentSignupReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RequestAgentSignupReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: AgentSignupTicket | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "RequestAgentSignupRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RequestAgentSignupRequestInput:\n    owner_email: str\n    poll_challenge: str\n    organization_name: str\n    agent_name: str\n    purpose: str | None = None\n    suggested_plan: str | None = None\n    suggested_scopes: Sequence[str]\n    suggested_monthly_spend_cap: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
           ],
           "docs": ""
         },
@@ -4370,9 +4852,25 @@
           "name": "RetainedResult",
           "kind": "class",
           "signatures": [
-            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RetainedResult:\n    billing_checkout_session: BillingCheckoutSession | None\n    billing_portal_session: BillingPortalSession | None\n    broadcast_permission_changed: BroadcastPermissionChanged | None\n    conversation: Conversation | None\n    conversation_member_batch: ConversationMemberBatch | None\n    conversation_mute: ConversationMute | None\n    credential_delivery_receipt: CredentialDeliveryReceipt | None\n    delivery_ack: DeliveryAck | None\n    live_alert_batch: LiveAlertBatch | None\n    live_credential_issuance: LiveCredentialIssuance | None\n    live_session_end_requested: LiveSessionEndRequested | None\n    live_session_joined: LiveSessionJoined | None\n    live_session_left: LiveSessionLeft | None\n    live_session_started: LiveSessionStarted | None\n    member: Member | None\n    message: Message | None\n    message_ack: MessageAck | None\n    organization: Organization | None\n    principal: Principal | None\n    read_receipt: ReadReceipt | None\n    session_bootstrap: SessionBootstrap | None\n    session_revocation: SessionRevocation | None\n    signed_proof: dict[str, Any] | None\n    def to_dict(self) -> dict[str, Any]: ..."
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RetainedResult:\n    agent_grant: AgentGrant | None\n    agent_signup_status: AgentSignupStatus | None\n    billing_checkout_session: BillingCheckoutSession | None\n    billing_portal_session: BillingPortalSession | None\n    broadcast_permission_changed: BroadcastPermissionChanged | None\n    conversation: Conversation | None\n    conversation_member_batch: ConversationMemberBatch | None\n    conversation_mute: ConversationMute | None\n    credential_delivery_receipt: CredentialDeliveryReceipt | None\n    delivery_ack: DeliveryAck | None\n    live_alert_batch: LiveAlertBatch | None\n    live_credential_issuance: LiveCredentialIssuance | None\n    live_session_end_requested: LiveSessionEndRequested | None\n    live_session_joined: LiveSessionJoined | None\n    live_session_left: LiveSessionLeft | None\n    live_session_started: LiveSessionStarted | None\n    member: Member | None\n    message: Message | None\n    message_ack: MessageAck | None\n    organization: Organization | None\n    organization_spend: OrganizationSpend | None\n    principal: Principal | None\n    read_receipt: ReadReceipt | None\n    session_bootstrap: SessionBootstrap | None\n    session_revocation: SessionRevocation | None\n    signed_proof: dict[str, Any] | None\n    def to_dict(self) -> dict[str, Any]: ..."
           ],
           "docs": "Exactly one typed field contains the retained, currently authorized receipt result."
+        },
+        {
+          "name": "RevokeAgentGrantReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RevokeAgentGrantReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: AgentGrant | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "RevokeAgentGrantRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RevokeAgentGrantRequestInput:\n    grant_id: str\n    revoke_issued_sessions: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
         },
         {
           "name": "RevokeBackendKeyReply",
@@ -4579,6 +5077,22 @@
           "kind": "class",
           "signatures": [
             "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SetConversationMutePayload:\n    status: str\n    request_id: str\n    receipt_id: str\n    committed_at: str\n    replayed: bool\n    result: ConversationMute\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "SetSpendControlsReply",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SetSpendControlsReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OrganizationSpend | None\n    def to_dict(self) -> dict[str, Any]: ..."
+          ],
+          "docs": ""
+        },
+        {
+          "name": "SetSpendControlsRequestInput",
+          "kind": "class",
+          "signatures": [
+            "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SetSpendControlsRequestInput:\n    org_id: str\n    monthly_spend_cap: str\n    agent_purchase_limit: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
           ],
           "docs": ""
         },

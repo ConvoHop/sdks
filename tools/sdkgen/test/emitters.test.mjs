@@ -255,7 +255,9 @@ test("the Java emitter adds lazy pages methods to cursor-paginated queries", () 
     /public Iterable<MessagePage> messagesPages\(MessagesRequestInput input\) \{\n.*\n.*"beforeSequence", Scalars\.DECIMAL,\n {8}Pages\.Order\.DESCENDING, MessagesReply::getResult,/,
     "a descending style with a decimal cursor checks that each next cursor decreases");
   assert.match(repo["CommunicationApi.java"], /"cursor", Wire\.STRING,\n {8}Pages\.Order\.OPAQUE, MembersReply::getResult,/);
-  assert.ok(!repo["ManagementApi.java"].includes("Pages"));
+  assert.match(repo["ManagementApi.java"], /Operations\.MANAGEMENT_AGENT_GRANTS, Wire\.nonNull\(input, "input"\)\.toJson\(\), "cursor", Wire\.STRING,\n {8}Pages\.Order\.OPAQUE, AgentGrantsReply::getResult,/);
+  assert.deepEqual(repo["ManagementApi.java"].match(/(?<=public Iterable<\w+> )\w+Pages(?=\()/g), ["agentGrantsPages", "agentAuditEventsPages"],
+    "only management's cursor-paginated queries get pages methods");
 });
 
 test("the Java emitter rejects cursor pagination it cannot page", () => {

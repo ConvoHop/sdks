@@ -7,7 +7,13 @@ import com.convohop.server.internal.Wire;
 import com.convohop.server.model.AcknowledgeCredentialReply;
 import com.convohop.server.model.AddMemberReply;
 import com.convohop.server.model.AddMembersPayload;
+import com.convohop.server.model.AgentAuditEventsReply;
+import com.convohop.server.model.AgentCredentialPermitReply;
+import com.convohop.server.model.AgentGrantsReply;
+import com.convohop.server.model.AgentSignupForApprovalReply;
+import com.convohop.server.model.AgentSignupReply;
 import com.convohop.server.model.AlertLiveSessionPayload;
+import com.convohop.server.model.ApproveAgentSignupReply;
 import com.convohop.server.model.CapabilitiesReply;
 import com.convohop.server.model.ConfigureWebhookReply;
 import com.convohop.server.model.ConversationMuteReply;
@@ -36,6 +42,7 @@ import com.convohop.server.model.GetPrincipalReply;
 import com.convohop.server.model.GetProjectReply;
 import com.convohop.server.model.HistoryGrantReply;
 import com.convohop.server.model.InboxReply;
+import com.convohop.server.model.IssueAgentKeyReply;
 import com.convohop.server.model.IssueBackendKeyReply;
 import com.convohop.server.model.IssueSessionReply;
 import com.convohop.server.model.LiveParticipantPageReply;
@@ -45,17 +52,22 @@ import com.convohop.server.model.LiveSessionReply;
 import com.convohop.server.model.MembersReply;
 import com.convohop.server.model.MessagesReply;
 import com.convohop.server.model.OrganizationBillingReply;
+import com.convohop.server.model.OrganizationSpendReply;
 import com.convohop.server.model.OrganizationUsageReply;
 import com.convohop.server.model.OrganizationsReply;
 import com.convohop.server.model.PauseOperationReply;
 import com.convohop.server.model.ProjectPolicyReply;
 import com.convohop.server.model.ProjectUsageReply;
+import com.convohop.server.model.PurchaseAgentCreditsReply;
 import com.convohop.server.model.RedeemCredentialReply;
+import com.convohop.server.model.RejectAgentSignupReply;
 import com.convohop.server.model.RemoveMemberReply;
 import com.convohop.server.model.RenewSessionReply;
 import com.convohop.server.model.ReplayWebhookDeliveriesReply;
+import com.convohop.server.model.RequestAgentSignupReply;
 import com.convohop.server.model.ResolveRequestReply;
 import com.convohop.server.model.ResumeOperationReply;
+import com.convohop.server.model.RevokeAgentGrantReply;
 import com.convohop.server.model.RevokeBackendKeyReply;
 import com.convohop.server.model.RevokeSessionReply;
 import com.convohop.server.model.RotateWebhookSecretReply;
@@ -65,6 +77,7 @@ import com.convohop.server.model.SendMessageReply;
 import com.convohop.server.model.SessionRequestOutcomeReply;
 import com.convohop.server.model.SetBroadcastPermissionPayload;
 import com.convohop.server.model.SetConversationMutePayload;
+import com.convohop.server.model.SetSpendControlsReply;
 import com.convohop.server.model.UpdateConversationReply;
 import com.convohop.server.model.UpdateWebhookReply;
 import com.convohop.server.model.WebhookDeliveriesReply;
@@ -634,6 +647,47 @@ public final class Operations {
               + "          id\n"
               + "        }\n"
               + "        result {\n"
+              + "          agentGrant {\n"
+              + "            grantId\n"
+              + "            orgId\n"
+              + "            signupId\n"
+              + "            agentActorId\n"
+              + "            projectId\n"
+              + "            scopes\n"
+              + "            expiresAt\n"
+              + "            revokedAt\n"
+              + "            createdAt\n"
+              + "            keys {\n"
+              + "              operationId\n"
+              + "              state\n"
+              + "              scopes\n"
+              + "              expiresAt\n"
+              + "              keyId\n"
+              + "              deliveryId\n"
+              + "              deliveryExpiresAt\n"
+              + "            }\n"
+              + "          }\n"
+              + "          agentSignupStatus {\n"
+              + "            signupId\n"
+              + "            state\n"
+              + "            orgId\n"
+              + "            deploymentId\n"
+              + "            projectId\n"
+              + "            nextStep\n"
+              + "            scopes\n"
+              + "            grantExpiresAt\n"
+              + "            keys {\n"
+              + "              operationId\n"
+              + "              state\n"
+              + "              scopes\n"
+              + "              expiresAt\n"
+              + "              keyId\n"
+              + "              deliveryId\n"
+              + "              deliveryExpiresAt\n"
+              + "            }\n"
+              + "            incarnation\n"
+              + "            servingEpoch\n"
+              + "          }\n"
               + "          billingCheckoutSession {\n"
               + "            orgId\n"
               + "            planId\n"
@@ -838,6 +892,28 @@ public final class Operations {
               + "            name\n"
               + "            status\n"
               + "            revision\n"
+              + "          }\n"
+              + "          organizationSpend {\n"
+              + "            orgId\n"
+              + "            planId\n"
+              + "            currency\n"
+              + "            catalogVersion\n"
+              + "            monthlySpendCap\n"
+              + "            agentPurchaseLimit\n"
+              + "            updatedAt\n"
+              + "            monthlyMinimum\n"
+              + "            periodStart\n"
+              + "            periodEnd\n"
+              + "            credits\n"
+              + "            charges\n"
+              + "            margin\n"
+              + "            stop\n"
+              + "            refusedMeters\n"
+              + "            evaluatedAt\n"
+              + "            usageThrough\n"
+              + "            validUntil\n"
+              + "            minimumCredit\n"
+              + "            chargeLimit\n"
               + "          }\n"
               + "          principal {\n"
               + "            principalId\n"
@@ -3092,6 +3168,47 @@ public final class Operations {
               + "          id\n"
               + "        }\n"
               + "        result {\n"
+              + "          agentGrant {\n"
+              + "            grantId\n"
+              + "            orgId\n"
+              + "            signupId\n"
+              + "            agentActorId\n"
+              + "            projectId\n"
+              + "            scopes\n"
+              + "            expiresAt\n"
+              + "            revokedAt\n"
+              + "            createdAt\n"
+              + "            keys {\n"
+              + "              operationId\n"
+              + "              state\n"
+              + "              scopes\n"
+              + "              expiresAt\n"
+              + "              keyId\n"
+              + "              deliveryId\n"
+              + "              deliveryExpiresAt\n"
+              + "            }\n"
+              + "          }\n"
+              + "          agentSignupStatus {\n"
+              + "            signupId\n"
+              + "            state\n"
+              + "            orgId\n"
+              + "            deploymentId\n"
+              + "            projectId\n"
+              + "            nextStep\n"
+              + "            scopes\n"
+              + "            grantExpiresAt\n"
+              + "            keys {\n"
+              + "              operationId\n"
+              + "              state\n"
+              + "              scopes\n"
+              + "              expiresAt\n"
+              + "              keyId\n"
+              + "              deliveryId\n"
+              + "              deliveryExpiresAt\n"
+              + "            }\n"
+              + "            incarnation\n"
+              + "            servingEpoch\n"
+              + "          }\n"
               + "          billingCheckoutSession {\n"
               + "            orgId\n"
               + "            planId\n"
@@ -3297,6 +3414,28 @@ public final class Operations {
               + "            status\n"
               + "            revision\n"
               + "          }\n"
+              + "          organizationSpend {\n"
+              + "            orgId\n"
+              + "            planId\n"
+              + "            currency\n"
+              + "            catalogVersion\n"
+              + "            monthlySpendCap\n"
+              + "            agentPurchaseLimit\n"
+              + "            updatedAt\n"
+              + "            monthlyMinimum\n"
+              + "            periodStart\n"
+              + "            periodEnd\n"
+              + "            credits\n"
+              + "            charges\n"
+              + "            margin\n"
+              + "            stop\n"
+              + "            refusedMeters\n"
+              + "            evaluatedAt\n"
+              + "            usageThrough\n"
+              + "            validUntil\n"
+              + "            minimumCredit\n"
+              + "            chargeLimit\n"
+              + "          }\n"
               + "          principal {\n"
               + "            principalId\n"
               + "            externalUserId\n"
@@ -3451,6 +3590,291 @@ public final class Operations {
               + "        messagePreview\n"
               + "      }\n"
               + "      blockedReason\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.agentSignupForApproval</code>: Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap. */
+  public static final OperationDescriptor<AgentSignupForApprovalReply> MANAGEMENT_AGENT_SIGNUP_FOR_APPROVAL =
+      OperationDescriptor.builder("management.agentSignupForApproval", Wire.required(AgentSignupForApprovalReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.QUERY)
+          .field("agentSignupForApproval")
+          .operationName("ManagementAgentSignupForApproval")
+          .resultType("AgentSignupForApprovalReply!")
+          .inputFields(List.of("approvalToken"))
+          .idempotency("safe", OperationDescriptor.Retry.REPEAT, false, 0, 0L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "query ManagementAgentSignupForApproval($context: RequestContextInput!, $input: AgentSignupForApprovalRequestInput!) {\n"
+              + "  agentSignupForApproval(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      signupId\n"
+              + "      ownerEmail\n"
+              + "      organizationName\n"
+              + "      agentName\n"
+              + "      purpose\n"
+              + "      suggestedPlan\n"
+              + "      suggestedScopes\n"
+              + "      suggestedMonthlySpendCap\n"
+              + "      currency\n"
+              + "      expiresAt\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.agentSignup</code>: Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds. */
+  public static final OperationDescriptor<AgentSignupReply> MANAGEMENT_AGENT_SIGNUP =
+      OperationDescriptor.builder("management.agentSignup", Wire.required(AgentSignupReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.QUERY)
+          .field("agentSignup")
+          .operationName("ManagementAgentSignup")
+          .resultType("AgentSignupReply!")
+          .inputFields(List.of())
+          .idempotency("safe", OperationDescriptor.Retry.REPEAT, false, 0, 0L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "query ManagementAgentSignup($context: RequestContextInput!) {\n"
+              + "  agentSignup(context: $context) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      signupId\n"
+              + "      state\n"
+              + "      orgId\n"
+              + "      deploymentId\n"
+              + "      projectId\n"
+              + "      nextStep\n"
+              + "      scopes\n"
+              + "      grantExpiresAt\n"
+              + "      keys {\n"
+              + "        operationId\n"
+              + "        state\n"
+              + "        scopes\n"
+              + "        expiresAt\n"
+              + "        keyId\n"
+              + "        deliveryId\n"
+              + "        deliveryExpiresAt\n"
+              + "      }\n"
+              + "      incarnation\n"
+              + "      servingEpoch\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.agentGrants</code>: List an organization's agent grants with their keys, newest first. */
+  public static final OperationDescriptor<AgentGrantsReply> MANAGEMENT_AGENT_GRANTS =
+      OperationDescriptor.builder("management.agentGrants", Wire.required(AgentGrantsReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.QUERY)
+          .field("agentGrants")
+          .operationName("ManagementAgentGrants")
+          .resultType("AgentGrantsReply!")
+          .inputFields(List.of("orgId", "limit", "cursor"))
+          .idempotency("safe", OperationDescriptor.Retry.REPEAT, false, 0, 0L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "query ManagementAgentGrants($context: RequestContextInput!, $input: AgentGrantsRequestInput!) {\n"
+              + "  agentGrants(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      items {\n"
+              + "        grantId\n"
+              + "        orgId\n"
+              + "        signupId\n"
+              + "        agentActorId\n"
+              + "        projectId\n"
+              + "        scopes\n"
+              + "        expiresAt\n"
+              + "        revokedAt\n"
+              + "        createdAt\n"
+              + "        keys {\n"
+              + "          operationId\n"
+              + "          state\n"
+              + "          scopes\n"
+              + "          expiresAt\n"
+              + "          keyId\n"
+              + "          deliveryId\n"
+              + "          deliveryExpiresAt\n"
+              + "        }\n"
+              + "      }\n"
+              + "      complete\n"
+              + "      refreshRequired\n"
+              + "      nextCursor\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.agentAuditEvents</code>: List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases. */
+  public static final OperationDescriptor<AgentAuditEventsReply> MANAGEMENT_AGENT_AUDIT_EVENTS =
+      OperationDescriptor.builder("management.agentAuditEvents", Wire.required(AgentAuditEventsReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.QUERY)
+          .field("agentAuditEvents")
+          .operationName("ManagementAgentAuditEvents")
+          .resultType("AgentAuditEventsReply!")
+          .inputFields(List.of("orgId", "limit", "cursor"))
+          .idempotency("safe", OperationDescriptor.Retry.REPEAT, false, 0, 0L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "query ManagementAgentAuditEvents($context: RequestContextInput!, $input: AgentAuditEventsRequestInput!) {\n"
+              + "  agentAuditEvents(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      items {\n"
+              + "        eventId\n"
+              + "        orgId\n"
+              + "        grantId\n"
+              + "        actorKind\n"
+              + "        actorId\n"
+              + "        kind\n"
+              + "        details\n"
+              + "        occurredAt\n"
+              + "      }\n"
+              + "      complete\n"
+              + "      refreshRequired\n"
+              + "      nextCursor\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.organizationSpend</code>: Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage. */
+  public static final OperationDescriptor<OrganizationSpendReply> MANAGEMENT_ORGANIZATION_SPEND =
+      OperationDescriptor.builder("management.organizationSpend", Wire.required(OrganizationSpendReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.QUERY)
+          .field("organizationSpend")
+          .operationName("ManagementOrganizationSpend")
+          .resultType("OrganizationSpendReply!")
+          .inputFields(List.of("orgId"))
+          .idempotency("safe", OperationDescriptor.Retry.REPEAT, false, 0, 0L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "query ManagementOrganizationSpend($context: RequestContextInput!, $input: OrganizationSpendRequestInput!) {\n"
+              + "  organizationSpend(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      orgId\n"
+              + "      planId\n"
+              + "      currency\n"
+              + "      catalogVersion\n"
+              + "      monthlySpendCap\n"
+              + "      agentPurchaseLimit\n"
+              + "      updatedAt\n"
+              + "      monthlyMinimum\n"
+              + "      periodStart\n"
+              + "      periodEnd\n"
+              + "      credits\n"
+              + "      charges\n"
+              + "      margin\n"
+              + "      stop\n"
+              + "      refusedMeters\n"
+              + "      evaluatedAt\n"
+              + "      usageThrough\n"
+              + "      validUntil\n"
+              + "      minimumCredit\n"
+              + "      chargeLimit\n"
               + "    }\n"
               + "  }\n"
               + "}")
@@ -4776,6 +5200,416 @@ public final class Operations {
               + "}")
           .build();
 
+  /** <code>management.requestAgentSignup</code>: Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval. */
+  public static final OperationDescriptor<RequestAgentSignupReply> MANAGEMENT_REQUEST_AGENT_SIGNUP =
+      OperationDescriptor.builder("management.requestAgentSignup", Wire.required(RequestAgentSignupReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("requestAgentSignup")
+          .operationName("ManagementRequestAgentSignup")
+          .resultType("RequestAgentSignupReply!")
+          .inputFields(List.of("ownerEmail", "pollChallenge", "organizationName", "agentName", "purpose", "suggestedPlan", "suggestedScopes", "suggestedMonthlySpendCap"))
+          .idempotency("replayOnly", OperationDescriptor.Retry.SAME_REQUEST, false, 3, 60000L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "mutation ManagementRequestAgentSignup($context: RequestContextInput!, $input: RequestAgentSignupRequestInput!) {\n"
+              + "  requestAgentSignup(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      signupId\n"
+              + "      confirmationCode\n"
+              + "      expiresAt\n"
+              + "      pollAfterSeconds\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.rejectAgentSignup</code>: Reject a signup request from its approval link, optionally suppressing future requests to the email. */
+  public static final OperationDescriptor<RejectAgentSignupReply> MANAGEMENT_REJECT_AGENT_SIGNUP =
+      OperationDescriptor.builder("management.rejectAgentSignup", Wire.required(RejectAgentSignupReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("rejectAgentSignup")
+          .operationName("ManagementRejectAgentSignup")
+          .resultType("RejectAgentSignupReply!")
+          .inputFields(List.of("approvalToken", "suppressFutureRequests"))
+          .idempotency("replayOnly", OperationDescriptor.Retry.SAME_REQUEST, false, 3, 60000L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "mutation ManagementRejectAgentSignup($context: RequestContextInput!, $input: RejectAgentSignupRequestInput!) {\n"
+              + "  rejectAgentSignup(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      signupId\n"
+              + "      state\n"
+              + "      orgId\n"
+              + "      deploymentId\n"
+              + "      projectId\n"
+              + "      nextStep\n"
+              + "      scopes\n"
+              + "      grantExpiresAt\n"
+              + "      keys {\n"
+              + "        operationId\n"
+              + "        state\n"
+              + "        scopes\n"
+              + "        expiresAt\n"
+              + "        keyId\n"
+              + "        deliveryId\n"
+              + "        deliveryExpiresAt\n"
+              + "      }\n"
+              + "      incarnation\n"
+              + "      servingEpoch\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.approveAgentSignup</code>: Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner. */
+  public static final OperationDescriptor<ApproveAgentSignupReply> MANAGEMENT_APPROVE_AGENT_SIGNUP =
+      OperationDescriptor.builder("management.approveAgentSignup", Wire.required(ApproveAgentSignupReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("approveAgentSignup")
+          .operationName("ManagementApproveAgentSignup")
+          .resultType("ApproveAgentSignupReply!")
+          .inputFields(List.of("approvalToken", "confirmationCode", "termsRef", "plan", "scopes", "monthlySpendCap", "agentPurchaseLimit", "grantExpiresAt"))
+          .idempotency("idempotent", OperationDescriptor.Retry.SAME_REQUEST, true, 3, 60000L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "mutation ManagementApproveAgentSignup($context: RequestContextInput!, $input: ApproveAgentSignupRequestInput!) {\n"
+              + "  approveAgentSignup(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      signupId\n"
+              + "      state\n"
+              + "      orgId\n"
+              + "      deploymentId\n"
+              + "      projectId\n"
+              + "      nextStep\n"
+              + "      scopes\n"
+              + "      grantExpiresAt\n"
+              + "      keys {\n"
+              + "        operationId\n"
+              + "        state\n"
+              + "        scopes\n"
+              + "        expiresAt\n"
+              + "        keyId\n"
+              + "        deliveryId\n"
+              + "        deliveryExpiresAt\n"
+              + "      }\n"
+              + "      incarnation\n"
+              + "      servingEpoch\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.issueAgentKey</code>: Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit. */
+  public static final OperationDescriptor<IssueAgentKeyReply> MANAGEMENT_ISSUE_AGENT_KEY =
+      OperationDescriptor.builder("management.issueAgentKey", Wire.required(IssueAgentKeyReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("issueAgentKey")
+          .operationName("ManagementIssueAgentKey")
+          .resultType("IssueAgentKeyReply!")
+          .inputFields(List.of("scopes", "expiresAt"))
+          .idempotency("replayOnly", OperationDescriptor.Retry.SAME_REQUEST, false, 3, 60000L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "mutation ManagementIssueAgentKey($context: RequestContextInput!, $input: IssueAgentKeyRequestInput!) {\n"
+              + "  issueAgentKey(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      operationId\n"
+              + "      state\n"
+              + "      scopes\n"
+              + "      expiresAt\n"
+              + "      keyId\n"
+              + "      deliveryId\n"
+              + "      deliveryExpiresAt\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.agentCredentialPermit</code>: Issue a permit that authorizes the agent to redeem one of its key deliveries. */
+  public static final OperationDescriptor<AgentCredentialPermitReply> MANAGEMENT_AGENT_CREDENTIAL_PERMIT =
+      OperationDescriptor.builder("management.agentCredentialPermit", Wire.required(AgentCredentialPermitReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("agentCredentialPermit")
+          .operationName("ManagementAgentCredentialPermit")
+          .resultType("AgentCredentialPermitReply!")
+          .inputFields(List.of("deliveryId", "redemptionRequestId"))
+          .idempotency("replayOnly", OperationDescriptor.Retry.SAME_REQUEST, false, 3, 60000L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "mutation ManagementAgentCredentialPermit($context: RequestContextInput!, $input: AgentCredentialPermitRequestInput!) {\n"
+              + "  agentCredentialPermit(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.revokeAgentGrant</code>: Revoke an agent grant and every key issued under it. */
+  public static final OperationDescriptor<RevokeAgentGrantReply> MANAGEMENT_REVOKE_AGENT_GRANT =
+      OperationDescriptor.builder("management.revokeAgentGrant", Wire.required(RevokeAgentGrantReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("revokeAgentGrant")
+          .operationName("ManagementRevokeAgentGrant")
+          .resultType("RevokeAgentGrantReply!")
+          .inputFields(List.of("grantId", "revokeIssuedSessions"))
+          .idempotency("idempotent", OperationDescriptor.Retry.SAME_REQUEST, true, 3, 60000L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "mutation ManagementRevokeAgentGrant($context: RequestContextInput!, $input: RevokeAgentGrantRequestInput!) {\n"
+              + "  revokeAgentGrant(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      grantId\n"
+              + "      orgId\n"
+              + "      signupId\n"
+              + "      agentActorId\n"
+              + "      projectId\n"
+              + "      scopes\n"
+              + "      expiresAt\n"
+              + "      revokedAt\n"
+              + "      createdAt\n"
+              + "      keys {\n"
+              + "        operationId\n"
+              + "        state\n"
+              + "        scopes\n"
+              + "        expiresAt\n"
+              + "        keyId\n"
+              + "        deliveryId\n"
+              + "        deliveryExpiresAt\n"
+              + "      }\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.setSpendControls</code>: Set the organization's monthly spend cap and agent purchase limit. */
+  public static final OperationDescriptor<SetSpendControlsReply> MANAGEMENT_SET_SPEND_CONTROLS =
+      OperationDescriptor.builder("management.setSpendControls", Wire.required(SetSpendControlsReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("setSpendControls")
+          .operationName("ManagementSetSpendControls")
+          .resultType("SetSpendControlsReply!")
+          .inputFields(List.of("orgId", "monthlySpendCap", "agentPurchaseLimit"))
+          .idempotency("idempotent", OperationDescriptor.Retry.SAME_REQUEST, true, 3, 60000L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "mutation ManagementSetSpendControls($context: RequestContextInput!, $input: SetSpendControlsRequestInput!) {\n"
+              + "  setSpendControls(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      orgId\n"
+              + "      planId\n"
+              + "      currency\n"
+              + "      catalogVersion\n"
+              + "      monthlySpendCap\n"
+              + "      agentPurchaseLimit\n"
+              + "      updatedAt\n"
+              + "      monthlyMinimum\n"
+              + "      periodStart\n"
+              + "      periodEnd\n"
+              + "      credits\n"
+              + "      charges\n"
+              + "      margin\n"
+              + "      stop\n"
+              + "      refusedMeters\n"
+              + "      evaluatedAt\n"
+              + "      usageThrough\n"
+              + "      validUntil\n"
+              + "      minimumCredit\n"
+              + "      chargeLimit\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>management.purchaseAgentCredits</code>: Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit. */
+  public static final OperationDescriptor<PurchaseAgentCreditsReply> MANAGEMENT_PURCHASE_AGENT_CREDITS =
+      OperationDescriptor.builder("management.purchaseAgentCredits", Wire.required(PurchaseAgentCreditsReply::decode))
+          .plane("management")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("purchaseAgentCredits")
+          .operationName("ManagementPurchaseAgentCredits")
+          .resultType("PurchaseAgentCreditsReply!")
+          .inputFields(List.of("amount", "sharedPaymentToken"))
+          .idempotency("replayOnly", OperationDescriptor.Retry.SAME_REQUEST, false, 3, 60000L)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("projectId", OperationDescriptor.Use.FORBIDDEN)
+          .context("incarnation", OperationDescriptor.Use.OPTIONAL)
+          .context("observedServingEpoch", OperationDescriptor.Use.OPTIONAL)
+          .context("credentialDeliveryPermit", OperationDescriptor.Use.FORBIDDEN)
+          .document(
+              "mutation ManagementPurchaseAgentCredits($context: RequestContextInput!, $input: PurchaseAgentCreditsRequestInput!) {\n"
+              + "  purchaseAgentCredits(context: $context, input: $input) {\n"
+              + "    status\n"
+              + "    requestId\n"
+              + "    serverTime\n"
+              + "    receiptId\n"
+              + "    committedAt\n"
+              + "    replayed\n"
+              + "    operation {\n"
+              + "      operationId\n"
+              + "      owner\n"
+              + "      href\n"
+              + "      state\n"
+              + "    }\n"
+              + "    resourceRef {\n"
+              + "      kind\n"
+              + "      id\n"
+              + "    }\n"
+              + "    result {\n"
+              + "      paymentId\n"
+              + "      amount\n"
+              + "      currency\n"
+              + "      state\n"
+              + "    }\n"
+              + "  }\n"
+              + "}")
+          .build();
+
   private static final OperationCatalog CATALOG = new OperationCatalog(
       List.of(COMMUNICATION_CAPABILITIES,
           COMMUNICATION_ROUTE,
@@ -4829,6 +5663,11 @@ public final class Operations {
           MANAGEMENT_WEBHOOK_DELIVERIES,
           MANAGEMENT_RESOLVE_REQUEST,
           MANAGEMENT_GET_OPERATION,
+          MANAGEMENT_AGENT_SIGNUP_FOR_APPROVAL,
+          MANAGEMENT_AGENT_SIGNUP,
+          MANAGEMENT_AGENT_GRANTS,
+          MANAGEMENT_AGENT_AUDIT_EVENTS,
+          MANAGEMENT_ORGANIZATION_SPEND,
           MANAGEMENT_CREATE_ORGANIZATION,
           MANAGEMENT_CREATE_DEPLOYMENT,
           MANAGEMENT_CREATE_PROJECT,
@@ -4844,10 +5683,29 @@ public final class Operations {
           MANAGEMENT_UPDATE_WEBHOOK,
           MANAGEMENT_ROTATE_WEBHOOK_SECRET,
           MANAGEMENT_DISABLE_WEBHOOK,
-          MANAGEMENT_REPLAY_WEBHOOK_DELIVERIES),
+          MANAGEMENT_REPLAY_WEBHOOK_DELIVERIES,
+          MANAGEMENT_REQUEST_AGENT_SIGNUP,
+          MANAGEMENT_REJECT_AGENT_SIGNUP,
+          MANAGEMENT_APPROVE_AGENT_SIGNUP,
+          MANAGEMENT_ISSUE_AGENT_KEY,
+          MANAGEMENT_AGENT_CREDENTIAL_PERMIT,
+          MANAGEMENT_REVOKE_AGENT_GRANT,
+          MANAGEMENT_SET_SPEND_CONTROLS,
+          MANAGEMENT_PURCHASE_AGENT_CREDITS),
       Map.ofEntries(Map.entry("communication", "communication.resolveRequest"),
           Map.entry("management", "management.resolveRequest")),
       Map.ofEntries(Map.entry("ADMISSION_LIMIT", true),
+          Map.entry("AGENTIC_NOT_CONFIGURED", false),
+          Map.entry("AGENT_CONFIRMATION_CODE_INVALID", false),
+          Map.entry("AGENT_GRANT_EXPIRED", false),
+          Map.entry("AGENT_GRANT_REVOKED", false),
+          Map.entry("AGENT_KEY_LIMIT", false),
+          Map.entry("AGENT_PURCHASE_LIMIT_EXCEEDED", false),
+          Map.entry("AGENT_SCOPE_NOT_GRANTED", false),
+          Map.entry("AGENT_SIGNUP_CLOSED", false),
+          Map.entry("AGENT_SIGNUP_EMAIL_REJECTED", false),
+          Map.entry("AGENT_SIGNUP_NOT_READY", false),
+          Map.entry("AGENT_SIGNUP_SUPPRESSED", false),
           Map.entry("ALREADY_CONNECTED", false),
           Map.entry("ALREADY_EXISTS", false),
           Map.entry("AUTHORITY_UNAVAILABLE", true),
@@ -4865,6 +5723,10 @@ public final class Operations {
           Map.entry("CREDENTIAL_EXPIRED", false),
           Map.entry("CREDENTIAL_REFRESH_REQUIRED", false),
           Map.entry("CREDENTIAL_REQUIRED", false),
+          Map.entry("CREDITS_EXHAUSTED", false),
+          Map.entry("CREDITS_REQUIRE_METERED_PLAN", false),
+          Map.entry("CREDIT_AMOUNT_OUT_OF_RANGE", false),
+          Map.entry("CREDIT_GRANT_LIMIT_REACHED", false),
           Map.entry("CURSOR_AHEAD", false),
           Map.entry("CURSOR_EXPIRED", false),
           Map.entry("CURSOR_INVALID", false),
@@ -4901,6 +5763,8 @@ public final class Operations {
           Map.entry("OUTCOME_UNKNOWN", true),
           Map.entry("PAGE_ITEM_TOO_LARGE", false),
           Map.entry("PARTICIPATION_MISMATCH", false),
+          Map.entry("PAYMENT_DECLINED", false),
+          Map.entry("PAYMENT_RAIL_NOT_CONFIGURED", false),
           Map.entry("PERMIT_EXPIRED", false),
           Map.entry("PLAN_LIMIT_EXCEEDED", false),
           Map.entry("QUOTA_EXCEEDED", false),
@@ -4921,6 +5785,8 @@ public final class Operations {
           Map.entry("SESSION_REFRESH_REJECTED", false),
           Map.entry("SESSION_REFRESH_REQUIRED", false),
           Map.entry("SESSION_REFRESH_UNVERIFIED", false),
+          Map.entry("SPEND_CAP_REACHED", false),
+          Map.entry("SPEND_UNVERIFIED", true),
           Map.entry("TRANSPORT_UNKNOWN", true),
           Map.entry("UNAUTHENTICATED", false),
           Map.entry("WEBHOOK_DESTINATION_DENIED", false),

@@ -124,7 +124,8 @@ export const callCommand: Command = {
   positionals: 1,
   details: "convohop call OPERATION --help shows an operation's input and annotations. Mutations get a new request ID; " +
     "when their outcome is unknown, convohop resolves the request and resends it only while the authority hasn't seen " +
-    "it. Destructive operations ask first. Operations whose results are credentials aren't available.",
+    "it. Destructive operations ask first. Operations whose results are credentials, and the owner's approval of an " +
+    "agent signup, aren't available.",
   options: {
     input: text("JSON", "The operation's input, as a JSON object."),
     "input-file": text("FILE", "Read the input from FILE; - reads standard input."),

@@ -110,20 +110,24 @@ test("deprecated fields, enum descriptions and recursive input types are kept", 
   assert.throws(() => types(output), new EmitterError("cli-operations: beta.createWidget.shape.kind: object type Item cannot be an input"));
 });
 
-test("the repository catalog withholds credential-returning operations and marks destructive ones", () => {
+test("the repository catalog withholds credential-returning and consent operations and marks destructive ones", () => {
   const ir = buildIr(repoSources());
   const entries = Object.values(cliOperationEntries(ir));
   const ids = new Set(ir.operations.map(operation => operation.id));
   for (const id of Object.keys(WITHHELD)) {
-    assert.ok(ids.has(id), `withheld operation ${id} no longer exists; update CREDENTIAL_OPERATIONS`);
+    assert.ok(ids.has(id), `withheld operation ${id} no longer exists; update WITHHELD_OPERATIONS`);
     assert.ok(!entries.some(entry => entry.id === id), `${id} must not be in the catalog`);
   }
+  const approve = ir.operations.find(operation => operation.id === "management.approveAgentSignup");
+  assert.equal(serverCredential(ir, approve, "test"), "portalCredential",
+    "the portal credential could send the owner's approval, so only the consent rule keeps it out");
+  assert.match(WITHHELD["management.approveAgentSignup"], /^records an owner's consent/);
   assert.ok(entries.every(entry => entry.credential === (entry.plane === "management" ? "portalCredential" : "backendKey")),
     "the CLI sends the portal credential to the management plane and a backend key to the communication plane");
   assert.deepEqual(entries.filter(entry => entry.destructive).map(entry => entry.id).sort(), [
     "communication.deleteMessage", "communication.disablePrincipal", "communication.endLiveSession", "communication.removeMember",
-    "communication.revokeSession", "management.disableWebhook", "management.revokeBackendKey", "management.rotateWebhookSecret",
-    "management.updateWebhook",
+    "communication.revokeSession", "management.disableWebhook", "management.revokeAgentGrant", "management.revokeBackendKey",
+    "management.rotateWebhookSecret", "management.updateWebhook",
   ]);
   const revoke = entries.find(entry => entry.id === "management.revokeBackendKey");
   assert.equal(revoke.requires, "portalCredential (condition owner: The caller owns the organization, deployment or project)");

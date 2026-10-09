@@ -62,6 +62,150 @@
           "docs": "AddMembersPayload is the GraphQL object AddMembersPayload."
         },
         {
+          "name": "AgentAuditEvent",
+          "kind": "struct",
+          "signatures": [
+            "type AgentAuditEvent struct {\n\tEventID    UUID       `json:\"eventId\"`\n\tOrgID      UUID       `json:\"orgId\"`\n\tGrantID    *UUID      `json:\"grantId\"`\n\tActorKind  string     `json:\"actorKind\"`\n\tActorID    *UUID      `json:\"actorId\"`\n\tKind       string     `json:\"kind\"`\n\tDetails    Properties `json:\"details\"`\n\tOccurredAt string     `json:\"occurredAt\"`\n}"
+          ],
+          "docs": "AgentAuditEvent is the GraphQL object AgentAuditEvent."
+        },
+        {
+          "name": "AgentAuditEventPage",
+          "kind": "struct",
+          "signatures": [
+            "type AgentAuditEventPage struct {\n\tItems           []AgentAuditEvent `json:\"items\"`\n\tComplete        bool              `json:\"complete\"`\n\tRefreshRequired bool              `json:\"refreshRequired\"`\n\tNextCursor      *string           `json:\"nextCursor\"`\n}"
+          ],
+          "docs": "AgentAuditEventPage is the GraphQL object AgentAuditEventPage."
+        },
+        {
+          "name": "AgentAuditEventsReply",
+          "kind": "struct",
+          "signatures": [
+            "type AgentAuditEventsReply struct {\n\tStatus      string               `json:\"status\"`\n\tRequestID   UUID                 `json:\"requestId\"`\n\tServerTime  *string              `json:\"serverTime\"`\n\tReceiptID   *UUID                `json:\"receiptId\"`\n\tCommittedAt *string              `json:\"committedAt\"`\n\tReplayed    *bool                `json:\"replayed\"`\n\tOperation   *OperationRef        `json:\"operation\"`\n\tResourceRef *ResourceRef         `json:\"resourceRef\"`\n\tResult      *AgentAuditEventPage `json:\"result\"`\n}"
+          ],
+          "docs": "AgentAuditEventsReply is the GraphQL object AgentAuditEventsReply."
+        },
+        {
+          "name": "AgentAuditEventsRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type AgentAuditEventsRequestInput struct {\n\tOrgID  UUID      `json:\"orgId\"`\n\tLimit  *PageSize `json:\"limit,omitzero\"`\n\tCursor *string   `json:\"cursor,omitzero\"`\n}"
+          ],
+          "docs": "AgentAuditEventsRequestInput is the GraphQL input AgentAuditEventsRequestInput."
+        },
+        {
+          "name": "AgentCredentialPermitReply",
+          "kind": "struct",
+          "signatures": [
+            "type AgentCredentialPermitReply struct {\n\tStatus      string        `json:\"status\"`\n\tRequestID   UUID          `json:\"requestId\"`\n\tServerTime  *string       `json:\"serverTime\"`\n\tReceiptID   *UUID         `json:\"receiptId\"`\n\tCommittedAt *string       `json:\"committedAt\"`\n\tReplayed    *bool         `json:\"replayed\"`\n\tOperation   *OperationRef `json:\"operation\"`\n\tResourceRef *ResourceRef  `json:\"resourceRef\"`\n\tResult      SignedProof   `json:\"result\"`\n}"
+          ],
+          "docs": "AgentCredentialPermitReply is the GraphQL object AgentCredentialPermitReply."
+        },
+        {
+          "name": "AgentCredentialPermitRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type AgentCredentialPermitRequestInput struct {\n\tDeliveryID          UUID `json:\"deliveryId\"`\n\tRedemptionRequestID UUID `json:\"redemptionRequestId\"`\n}"
+          ],
+          "docs": "AgentCredentialPermitRequestInput is the GraphQL input AgentCredentialPermitRequestInput."
+        },
+        {
+          "name": "AgentGrant",
+          "kind": "struct",
+          "signatures": [
+            "type AgentGrant struct {\n\tGrantID      UUID       `json:\"grantId\"`\n\tOrgID        UUID       `json:\"orgId\"`\n\tSignupID     UUID       `json:\"signupId\"`\n\tAgentActorID UUID       `json:\"agentActorId\"`\n\tProjectID    *UUID      `json:\"projectId\"`\n\tScopes       []string   `json:\"scopes\"`\n\tExpiresAt    string     `json:\"expiresAt\"`\n\tRevokedAt    *string    `json:\"revokedAt\"`\n\tCreatedAt    string     `json:\"createdAt\"`\n\tKeys         []AgentKey `json:\"keys\"`\n}"
+          ],
+          "docs": "AgentGrant is the GraphQL object AgentGrant."
+        },
+        {
+          "name": "AgentGrantPage",
+          "kind": "struct",
+          "signatures": [
+            "type AgentGrantPage struct {\n\tItems           []AgentGrant `json:\"items\"`\n\tComplete        bool         `json:\"complete\"`\n\tRefreshRequired bool         `json:\"refreshRequired\"`\n\tNextCursor      *string      `json:\"nextCursor\"`\n}"
+          ],
+          "docs": "AgentGrantPage is the GraphQL object AgentGrantPage."
+        },
+        {
+          "name": "AgentGrantsReply",
+          "kind": "struct",
+          "signatures": [
+            "type AgentGrantsReply struct {\n\tStatus      string          `json:\"status\"`\n\tRequestID   UUID            `json:\"requestId\"`\n\tServerTime  *string         `json:\"serverTime\"`\n\tReceiptID   *UUID           `json:\"receiptId\"`\n\tCommittedAt *string         `json:\"committedAt\"`\n\tReplayed    *bool           `json:\"replayed\"`\n\tOperation   *OperationRef   `json:\"operation\"`\n\tResourceRef *ResourceRef    `json:\"resourceRef\"`\n\tResult      *AgentGrantPage `json:\"result\"`\n}"
+          ],
+          "docs": "AgentGrantsReply is the GraphQL object AgentGrantsReply."
+        },
+        {
+          "name": "AgentGrantsRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type AgentGrantsRequestInput struct {\n\tOrgID  UUID      `json:\"orgId\"`\n\tLimit  *PageSize `json:\"limit,omitzero\"`\n\tCursor *string   `json:\"cursor,omitzero\"`\n}"
+          ],
+          "docs": "AgentGrantsRequestInput is the GraphQL input AgentGrantsRequestInput."
+        },
+        {
+          "name": "AgentKey",
+          "kind": "struct",
+          "signatures": [
+            "type AgentKey struct {\n\tOperationID       UUID     `json:\"operationId\"`\n\tState             string   `json:\"state\"`\n\tScopes            []string `json:\"scopes\"`\n\tExpiresAt         string   `json:\"expiresAt\"`\n\tKeyID             *string  `json:\"keyId\"`\n\tDeliveryID        *UUID    `json:\"deliveryId\"`\n\tDeliveryExpiresAt *string  `json:\"deliveryExpiresAt\"`\n}"
+          ],
+          "docs": "AgentKey is the GraphQL object AgentKey."
+        },
+        {
+          "name": "AgentPayment",
+          "kind": "struct",
+          "signatures": [
+            "type AgentPayment struct {\n\tPaymentID UUID   `json:\"paymentId\"`\n\tAmount    string `json:\"amount\"`\n\tCurrency  string `json:\"currency\"`\n\tState     string `json:\"state\"`\n}"
+          ],
+          "docs": "AgentPayment is the GraphQL object AgentPayment."
+        },
+        {
+          "name": "AgentSignupForApprovalReply",
+          "kind": "struct",
+          "signatures": [
+            "type AgentSignupForApprovalReply struct {\n\tStatus      string             `json:\"status\"`\n\tRequestID   UUID               `json:\"requestId\"`\n\tServerTime  *string            `json:\"serverTime\"`\n\tReceiptID   *UUID              `json:\"receiptId\"`\n\tCommittedAt *string            `json:\"committedAt\"`\n\tReplayed    *bool              `json:\"replayed\"`\n\tOperation   *OperationRef      `json:\"operation\"`\n\tResourceRef *ResourceRef       `json:\"resourceRef\"`\n\tResult      *AgentSignupReview `json:\"result\"`\n}"
+          ],
+          "docs": "AgentSignupForApprovalReply is the GraphQL object AgentSignupForApprovalReply."
+        },
+        {
+          "name": "AgentSignupForApprovalRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type AgentSignupForApprovalRequestInput struct {\n\tApprovalToken string `json:\"approvalToken\"`\n}"
+          ],
+          "docs": "AgentSignupForApprovalRequestInput is the GraphQL input AgentSignupForApprovalRequestInput."
+        },
+        {
+          "name": "AgentSignupReply",
+          "kind": "struct",
+          "signatures": [
+            "type AgentSignupReply struct {\n\tStatus      string             `json:\"status\"`\n\tRequestID   UUID               `json:\"requestId\"`\n\tServerTime  *string            `json:\"serverTime\"`\n\tReceiptID   *UUID              `json:\"receiptId\"`\n\tCommittedAt *string            `json:\"committedAt\"`\n\tReplayed    *bool              `json:\"replayed\"`\n\tOperation   *OperationRef      `json:\"operation\"`\n\tResourceRef *ResourceRef       `json:\"resourceRef\"`\n\tResult      *AgentSignupStatus `json:\"result\"`\n}"
+          ],
+          "docs": "AgentSignupReply is the GraphQL object AgentSignupReply."
+        },
+        {
+          "name": "AgentSignupReview",
+          "kind": "struct",
+          "signatures": [
+            "type AgentSignupReview struct {\n\tSignupID                 UUID     `json:\"signupId\"`\n\tOwnerEmail               string   `json:\"ownerEmail\"`\n\tOrganizationName         string   `json:\"organizationName\"`\n\tAgentName                string   `json:\"agentName\"`\n\tPurpose                  *string  `json:\"purpose\"`\n\tSuggestedPlan            *string  `json:\"suggestedPlan\"`\n\tSuggestedScopes          []string `json:\"suggestedScopes\"`\n\tSuggestedMonthlySpendCap *string  `json:\"suggestedMonthlySpendCap\"`\n\tCurrency                 string   `json:\"currency\"`\n\tExpiresAt                string   `json:\"expiresAt\"`\n}"
+          ],
+          "docs": "AgentSignupReview is the GraphQL object AgentSignupReview."
+        },
+        {
+          "name": "AgentSignupStatus",
+          "kind": "struct",
+          "signatures": [
+            "type AgentSignupStatus struct {\n\tSignupID       UUID       `json:\"signupId\"`\n\tState          string     `json:\"state\"`\n\tOrgID          *UUID      `json:\"orgId\"`\n\tDeploymentID   *UUID      `json:\"deploymentId\"`\n\tProjectID      *UUID      `json:\"projectId\"`\n\tNextStep       *string    `json:\"nextStep\"`\n\tScopes         []string   `json:\"scopes\"`\n\tGrantExpiresAt *string    `json:\"grantExpiresAt\"`\n\tKeys           []AgentKey `json:\"keys\"`\n\tIncarnation    *UUID      `json:\"incarnation\"`\n\tServingEpoch   *Decimal   `json:\"servingEpoch\"`\n}"
+          ],
+          "docs": "AgentSignupStatus is the GraphQL object AgentSignupStatus."
+        },
+        {
+          "name": "AgentSignupTicket",
+          "kind": "struct",
+          "signatures": [
+            "type AgentSignupTicket struct {\n\tSignupID         UUID   `json:\"signupId\"`\n\tConfirmationCode string `json:\"confirmationCode\"`\n\tExpiresAt        string `json:\"expiresAt\"`\n\tPollAfterSeconds int64  `json:\"pollAfterSeconds\"`\n}"
+          ],
+          "docs": "AgentSignupTicket is the GraphQL object AgentSignupTicket."
+        },
+        {
           "name": "AlertLiveSessionInput",
           "kind": "struct",
           "signatures": [
@@ -76,6 +220,22 @@
             "type AlertLiveSessionPayload struct {\n\tStatus      string         `json:\"status\"`\n\tRequestID   UUID           `json:\"requestId\"`\n\tReceiptID   UUID           `json:\"receiptId\"`\n\tCommittedAt string         `json:\"committedAt\"`\n\tReplayed    bool           `json:\"replayed\"`\n\tResult      LiveAlertBatch `json:\"result\"`\n}"
           ],
           "docs": "AlertLiveSessionPayload is the GraphQL object AlertLiveSessionPayload."
+        },
+        {
+          "name": "ApproveAgentSignupReply",
+          "kind": "struct",
+          "signatures": [
+            "type ApproveAgentSignupReply struct {\n\tStatus      string             `json:\"status\"`\n\tRequestID   UUID               `json:\"requestId\"`\n\tServerTime  *string            `json:\"serverTime\"`\n\tReceiptID   *UUID              `json:\"receiptId\"`\n\tCommittedAt *string            `json:\"committedAt\"`\n\tReplayed    *bool              `json:\"replayed\"`\n\tOperation   *OperationRef      `json:\"operation\"`\n\tResourceRef *ResourceRef       `json:\"resourceRef\"`\n\tResult      *AgentSignupStatus `json:\"result\"`\n}"
+          ],
+          "docs": "ApproveAgentSignupReply is the GraphQL object ApproveAgentSignupReply."
+        },
+        {
+          "name": "ApproveAgentSignupRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type ApproveAgentSignupRequestInput struct {\n\tApprovalToken      string   `json:\"approvalToken\"`\n\tConfirmationCode   string   `json:\"confirmationCode\"`\n\tTermsRef           string   `json:\"termsRef\"`\n\tPlan               string   `json:\"plan\"`\n\tScopes             []string `json:\"scopes\"`\n\tMonthlySpendCap    string   `json:\"monthlySpendCap\"`\n\tAgentPurchaseLimit *string  `json:\"agentPurchaseLimit,omitzero\"`\n\tGrantExpiresAt     *string  `json:\"grantExpiresAt,omitzero\"`\n}"
+          ],
+          "docs": "ApproveAgentSignupRequestInput is the GraphQL input ApproveAgentSignupRequestInput."
         },
         {
           "name": "BillingCheckoutSession",
@@ -534,6 +694,86 @@
               "docs": "A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId. HTTP status 429. Retryable. Raised by the server or the SDK."
             },
             {
+              "name": "ErrorCodeAgenticNotConfigured",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeAgenticNotConfigured ErrorCode = \"AGENTIC_NOT_CONFIGURED\""
+              ],
+              "docs": "Agent signup is not offered in this environment. HTTP status 503. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeAgentConfirmationCodeInvalid",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeAgentConfirmationCodeInvalid ErrorCode = \"AGENT_CONFIRMATION_CODE_INVALID\""
+              ],
+              "docs": "The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request. HTTP status 403. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeAgentGrantExpired",
+              "kind": "case",
+              "signatures": ["const ErrorCodeAgentGrantExpired ErrorCode = \"AGENT_GRANT_EXPIRED\""],
+              "docs": "The agent's grant has expired. The agent needs a new signup request approved. HTTP status 403. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeAgentGrantRevoked",
+              "kind": "case",
+              "signatures": ["const ErrorCodeAgentGrantRevoked ErrorCode = \"AGENT_GRANT_REVOKED\""],
+              "docs": "The owner revoked the agent's grant. HTTP status 403. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeAgentKeyLimit",
+              "kind": "case",
+              "signatures": ["const ErrorCodeAgentKeyLimit ErrorCode = \"AGENT_KEY_LIMIT\""],
+              "docs": "The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeAgentPurchaseLimitExceeded",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeAgentPurchaseLimitExceeded ErrorCode = \"AGENT_PURCHASE_LIMIT_EXCEEDED\""
+              ],
+              "docs": "The purchase would take this month's agent credit purchases beyond the limit the owner set. HTTP status 402. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeAgentScopeNotGranted",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeAgentScopeNotGranted ErrorCode = \"AGENT_SCOPE_NOT_GRANTED\""
+              ],
+              "docs": "A requested scope is outside the agent's grant. HTTP status 403. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeAgentSignupClosed",
+              "kind": "case",
+              "signatures": ["const ErrorCodeAgentSignupClosed ErrorCode = \"AGENT_SIGNUP_CLOSED\""],
+              "docs": "The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeAgentSignupEmailRejected",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeAgentSignupEmailRejected ErrorCode = \"AGENT_SIGNUP_EMAIL_REJECTED\""
+              ],
+              "docs": "The owner's email address is refused, for example for a disposable domain. HTTP status 400. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeAgentSignupNotReady",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeAgentSignupNotReady ErrorCode = \"AGENT_SIGNUP_NOT_READY\""
+              ],
+              "docs": "The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeAgentSignupSuppressed",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeAgentSignupSuppressed ErrorCode = \"AGENT_SIGNUP_SUPPRESSED\""
+              ],
+              "docs": "The owner opted out of agent signup requests to this email address. HTTP status 403. Not retryable. Raised by the server."
+            },
+            {
               "name": "ErrorCodeAlreadyConnected",
               "kind": "case",
               "signatures": ["const ErrorCodeAlreadyConnected ErrorCode = \"ALREADY_CONNECTED\""],
@@ -660,6 +900,36 @@
                 "const ErrorCodeCredentialRequired ErrorCode = \"CREDENTIAL_REQUIRED\""
               ],
               "docs": "Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly. HTTP status 409. Not retryable. Raised by the SDK."
+            },
+            {
+              "name": "ErrorCodeCreditsExhausted",
+              "kind": "case",
+              "signatures": ["const ErrorCodeCreditsExhausted ErrorCode = \"CREDITS_EXHAUSTED\""],
+              "docs": "Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap. HTTP status 402. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeCreditsRequireMeteredPlan",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeCreditsRequireMeteredPlan ErrorCode = \"CREDITS_REQUIRE_METERED_PLAN\""
+              ],
+              "docs": "Credits apply only to a billed subscription, and none is in force. HTTP status 409. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeCreditAmountOutOfRange",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeCreditAmountOutOfRange ErrorCode = \"CREDIT_AMOUNT_OUT_OF_RANGE\""
+              ],
+              "docs": "The credit amount is outside the allowed purchase range. HTTP status 400. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeCreditGrantLimitReached",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodeCreditGrantLimitReached ErrorCode = \"CREDIT_GRANT_LIMIT_REACHED\""
+              ],
+              "docs": "Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some. HTTP status 409. Not retryable. Raised by the server."
             },
             {
               "name": "ErrorCodeCursorAhead",
@@ -908,6 +1178,20 @@
               "docs": "The participation does not belong to the caller or the current live session generation. HTTP status 409. Not retryable. Raised by the server or the SDK."
             },
             {
+              "name": "ErrorCodePaymentDeclined",
+              "kind": "case",
+              "signatures": ["const ErrorCodePaymentDeclined ErrorCode = \"PAYMENT_DECLINED\""],
+              "docs": "The payment rail declined the payment. Nothing was charged. HTTP status 402. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodePaymentRailNotConfigured",
+              "kind": "case",
+              "signatures": [
+                "const ErrorCodePaymentRailNotConfigured ErrorCode = \"PAYMENT_RAIL_NOT_CONFIGURED\""
+              ],
+              "docs": "No payment rail is enabled in this environment. HTTP status 503. Not retryable. Raised by the server."
+            },
+            {
               "name": "ErrorCodePermitExpired",
               "kind": "case",
               "signatures": ["const ErrorCodePermitExpired ErrorCode = \"PERMIT_EXPIRED\""],
@@ -1042,6 +1326,18 @@
                 "const ErrorCodeSessionRefreshUnverified ErrorCode = \"SESSION_REFRESH_UNVERIFIED\""
               ],
               "docs": "The refreshed session could not be verified. Not retryable. Raised by the SDK."
+            },
+            {
+              "name": "ErrorCodeSpendCapReached",
+              "kind": "case",
+              "signatures": ["const ErrorCodeSpendCapReached ErrorCode = \"SPEND_CAP_REACHED\""],
+              "docs": "The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap. HTTP status 402. Not retryable. Raised by the server."
+            },
+            {
+              "name": "ErrorCodeSpendUnverified",
+              "kind": "case",
+              "signatures": ["const ErrorCodeSpendUnverified ErrorCode = \"SPEND_UNVERIFIED\""],
+              "docs": "Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed. HTTP status 503. Retryable. Raised by the server."
             },
             {
               "name": "ErrorCodeTransportUnknown",
@@ -1282,6 +1578,22 @@
             "type InboxRequestInput struct {\n\tLimit            PageSize `json:\"limit\"`\n\tCursor           *string  `json:\"cursor,omitzero\"`\n\tActAsPrincipalID *UUID    `json:\"actAsPrincipalId,omitzero\"`\n}"
           ],
           "docs": "InboxRequestInput is the GraphQL input InboxRequestInput."
+        },
+        {
+          "name": "IssueAgentKeyReply",
+          "kind": "struct",
+          "signatures": [
+            "type IssueAgentKeyReply struct {\n\tStatus      string        `json:\"status\"`\n\tRequestID   UUID          `json:\"requestId\"`\n\tServerTime  *string       `json:\"serverTime\"`\n\tReceiptID   *UUID         `json:\"receiptId\"`\n\tCommittedAt *string       `json:\"committedAt\"`\n\tReplayed    *bool         `json:\"replayed\"`\n\tOperation   *OperationRef `json:\"operation\"`\n\tResourceRef *ResourceRef  `json:\"resourceRef\"`\n\tResult      *AgentKey     `json:\"result\"`\n}"
+          ],
+          "docs": "IssueAgentKeyReply is the GraphQL object IssueAgentKeyReply."
+        },
+        {
+          "name": "IssueAgentKeyRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type IssueAgentKeyRequestInput struct {\n\tScopes    []string `json:\"scopes\"`\n\tExpiresAt *string  `json:\"expiresAt,omitzero\"`\n}"
+          ],
+          "docs": "IssueAgentKeyRequestInput is the GraphQL input IssueAgentKeyRequestInput."
         },
         {
           "name": "IssueBackendKeyReply",
@@ -1617,7 +1929,7 @@
           "signatures": [
             "type ManagementClient struct {\n\t// contains filtered or unexported fields\n}"
           ],
-          "docs": "ManagementClient calls the management plane. Organizations, deployments, projects, backend keys and webhooks.\n\nBearer credential: portalCredential. Operator credential for the management plane. Server runtimes only.",
+          "docs": "ManagementClient calls the management plane. Organizations, deployments, projects, backend keys and webhooks.\n\nBearer credential: portalCredential. Operator credential for the management plane. Server runtimes only. Anonymous credential: anonymous. No credential. The edge limits the caller by its network address, and the operation's input carries the capability. Bearer credential: agentVerifier. Secret verifier an agent generates before requestAgentSignup: ag\\_ followed by 32 random bytes in base64url, whose base64url SHA-256 digest is the request's pollChallenge. It authenticates the agent to its own signup and grant on the management plane only; the communication plane refuses it. Server runtimes only.",
           "members": [
             {
               "name": "Retry",
@@ -1748,6 +2060,62 @@
               "docs": "GetOperation calls the management.getOperation query. Read the state of a long-running management operation.\n\nIdempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner)."
             },
             {
+              "name": "AgentSignupForApproval",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) AgentSignupForApproval(ctx context.Context, input AgentSignupForApprovalRequestInput, opts ...CallOption) (*AgentSignupForApprovalReply, error)"
+              ],
+              "docs": "AgentSignupForApproval calls the management.agentSignupForApproval query. Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.\n\nIdempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Sent without a bearer token as anonymous (condition: approvalToken)."
+            },
+            {
+              "name": "AgentSignup",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) AgentSignup(ctx context.Context, opts ...CallOption) (*AgentSignupReply, error)"
+              ],
+              "docs": "AgentSignup calls the management.agentSignup query. Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.\n\nIdempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by agentVerifier (condition: ownSignup)."
+            },
+            {
+              "name": "AgentGrants",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) AgentGrants(ctx context.Context, input AgentGrantsRequestInput, opts ...CallOption) (*AgentGrantsReply, error)"
+              ],
+              "docs": "AgentGrants calls the management.agentGrants query. List an organization's agent grants with their keys, newest first.\n\nIdempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Pagination: cursor. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `ManagementClient.AgentGrantsPages` iterates over the pages. Authorized by portalCredential (condition: owner)."
+            },
+            {
+              "name": "AgentGrantsPages",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) AgentGrantsPages(ctx context.Context, input AgentGrantsRequestInput) iter.Seq2[*AgentGrantPage, error]"
+              ],
+              "docs": "AgentGrantsPages iterates over the pages of `ManagementClient.AgentGrants`, starting at input.Cursor. Each page is a new request with a new request ID. Iteration stops after the complete page or at the first error. A page that requires a refresh yields `ErrRefreshRequired` and stops. An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE `Problem` in place of the page and stops."
+            },
+            {
+              "name": "AgentAuditEvents",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) AgentAuditEvents(ctx context.Context, input AgentAuditEventsRequestInput, opts ...CallOption) (*AgentAuditEventsReply, error)"
+              ],
+              "docs": "AgentAuditEvents calls the management.agentAuditEvents query. List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.\n\nIdempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Pagination: cursor. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `ManagementClient.AgentAuditEventsPages` iterates over the pages. Authorized by portalCredential (condition: owner)."
+            },
+            {
+              "name": "AgentAuditEventsPages",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) AgentAuditEventsPages(ctx context.Context, input AgentAuditEventsRequestInput) iter.Seq2[*AgentAuditEventPage, error]"
+              ],
+              "docs": "AgentAuditEventsPages iterates over the pages of `ManagementClient.AgentAuditEvents`, starting at input.Cursor. Each page is a new request with a new request ID. Iteration stops after the complete page or at the first error. A page that requires a refresh yields `ErrRefreshRequired` and stops. An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE `Problem` in place of the page and stops."
+            },
+            {
+              "name": "OrganizationSpend",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) OrganizationSpend(ctx context.Context, input OrganizationSpendRequestInput, opts ...CallOption) (*OrganizationSpendReply, error)"
+              ],
+              "docs": "OrganizationSpend calls the management.organizationSpend query. Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.\n\nIdempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner)."
+            },
+            {
               "name": "CreateOrganization",
               "kind": "method",
               "signatures": [
@@ -1874,6 +2242,70 @@
                 "func (c *ManagementClient) ReplayWebhookDeliveries(ctx context.Context, input ReplayWebhookDeliveriesRequestInput, opts ...CallOption) (*ReplayWebhookDeliveriesReply, error)"
               ],
               "docs": "ReplayWebhookDeliveries calls the management.replayWebhookDeliveries mutation. Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.\n\nIdempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Long-running: poll `ManagementClient.GetOperation` with the reply's Operation reference until the work completes. Authorized by portalCredential (condition: owner)."
+            },
+            {
+              "name": "RequestAgentSignup",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) RequestAgentSignup(ctx context.Context, input RequestAgentSignupRequestInput, opts ...CallOption) (*RequestAgentSignupReply, error)"
+              ],
+              "docs": "RequestAgentSignup calls the management.requestAgentSignup mutation. Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.\n\nIdempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Sent without a bearer token as anonymous."
+            },
+            {
+              "name": "RejectAgentSignup",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) RejectAgentSignup(ctx context.Context, input RejectAgentSignupRequestInput, opts ...CallOption) (*RejectAgentSignupReply, error)"
+              ],
+              "docs": "RejectAgentSignup calls the management.rejectAgentSignup mutation. Reject a signup request from its approval link, optionally suppressing future requests to the email.\n\nIdempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Sent without a bearer token as anonymous (condition: approvalToken)."
+            },
+            {
+              "name": "ApproveAgentSignup",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) ApproveAgentSignup(ctx context.Context, input ApproveAgentSignupRequestInput, opts ...CallOption) (*ApproveAgentSignupReply, error)"
+              ],
+              "docs": "ApproveAgentSignup calls the management.approveAgentSignup mutation. Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.\n\nIdempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: approvalToken)."
+            },
+            {
+              "name": "IssueAgentKey",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) IssueAgentKey(ctx context.Context, input IssueAgentKeyRequestInput, opts ...CallOption) (*IssueAgentKeyReply, error)"
+              ],
+              "docs": "IssueAgentKey calls the management.issueAgentKey mutation. Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.\n\nIdempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Authorized by agentVerifier (condition: activeGrant)."
+            },
+            {
+              "name": "AgentCredentialPermit",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) AgentCredentialPermit(ctx context.Context, input AgentCredentialPermitRequestInput, opts ...CallOption) (*AgentCredentialPermitReply, error)"
+              ],
+              "docs": "AgentCredentialPermit calls the management.agentCredentialPermit mutation. Issue a permit that authorizes the agent to redeem one of its key deliveries.\n\nIdempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Authorized by agentVerifier (condition: activeGrant)."
+            },
+            {
+              "name": "RevokeAgentGrant",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) RevokeAgentGrant(ctx context.Context, input RevokeAgentGrantRequestInput, opts ...CallOption) (*RevokeAgentGrantReply, error)"
+              ],
+              "docs": "RevokeAgentGrant calls the management.revokeAgentGrant mutation. Revoke an agent grant and every key issued under it.\n\nIdempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner)."
+            },
+            {
+              "name": "SetSpendControls",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) SetSpendControls(ctx context.Context, input SetSpendControlsRequestInput, opts ...CallOption) (*SetSpendControlsReply, error)"
+              ],
+              "docs": "SetSpendControls calls the management.setSpendControls mutation. Set the organization's monthly spend cap and agent purchase limit.\n\nIdempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner)."
+            },
+            {
+              "name": "PurchaseAgentCredits",
+              "kind": "method",
+              "signatures": [
+                "func (c *ManagementClient) PurchaseAgentCredits(ctx context.Context, input PurchaseAgentCreditsRequestInput, opts ...CallOption) (*PurchaseAgentCreditsReply, error)"
+              ],
+              "docs": "PurchaseAgentCredits calls the management.purchaseAgentCredits mutation. Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.\n\nIdempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Authorized by agentVerifier (condition: activeGrant)."
             }
           ]
         },
@@ -2140,6 +2572,30 @@
             "type OrganizationPage struct {\n\tItems           []Organization `json:\"items\"`\n\tComplete        bool           `json:\"complete\"`\n\tRefreshRequired bool           `json:\"refreshRequired\"`\n\tNextCursor      *string        `json:\"nextCursor\"`\n}"
           ],
           "docs": "OrganizationPage is the GraphQL object OrganizationPage."
+        },
+        {
+          "name": "OrganizationSpend",
+          "kind": "struct",
+          "signatures": [
+            "type OrganizationSpend struct {\n\tOrgID              UUID     `json:\"orgId\"`\n\tPlanID             string   `json:\"planId\"`\n\tCurrency           string   `json:\"currency\"`\n\tCatalogVersion     string   `json:\"catalogVersion\"`\n\tMonthlySpendCap    *string  `json:\"monthlySpendCap\"`\n\tAgentPurchaseLimit *string  `json:\"agentPurchaseLimit\"`\n\tUpdatedAt          *string  `json:\"updatedAt\"`\n\tMonthlyMinimum     *string  `json:\"monthlyMinimum\"`\n\tPeriodStart        *string  `json:\"periodStart\"`\n\tPeriodEnd          *string  `json:\"periodEnd\"`\n\tCredits            *string  `json:\"credits\"`\n\tCharges            *string  `json:\"charges\"`\n\tMargin             *string  `json:\"margin\"`\n\tStop               *string  `json:\"stop\"`\n\tRefusedMeters      []string `json:\"refusedMeters\"`\n\tEvaluatedAt        *string  `json:\"evaluatedAt\"`\n\tUsageThrough       *string  `json:\"usageThrough\"`\n\tValidUntil         *string  `json:\"validUntil\"`\n\tMinimumCredit      *string  `json:\"minimumCredit\"`\n\tChargeLimit        *string  `json:\"chargeLimit\"`\n}"
+          ],
+          "docs": "OrganizationSpend is the GraphQL object OrganizationSpend."
+        },
+        {
+          "name": "OrganizationSpendReply",
+          "kind": "struct",
+          "signatures": [
+            "type OrganizationSpendReply struct {\n\tStatus      string             `json:\"status\"`\n\tRequestID   UUID               `json:\"requestId\"`\n\tServerTime  *string            `json:\"serverTime\"`\n\tReceiptID   *UUID              `json:\"receiptId\"`\n\tCommittedAt *string            `json:\"committedAt\"`\n\tReplayed    *bool              `json:\"replayed\"`\n\tOperation   *OperationRef      `json:\"operation\"`\n\tResourceRef *ResourceRef       `json:\"resourceRef\"`\n\tResult      *OrganizationSpend `json:\"result\"`\n}"
+          ],
+          "docs": "OrganizationSpendReply is the GraphQL object OrganizationSpendReply."
+        },
+        {
+          "name": "OrganizationSpendRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type OrganizationSpendRequestInput struct {\n\tOrgID UUID `json:\"orgId\"`\n}"
+          ],
+          "docs": "OrganizationSpendRequestInput is the GraphQL input OrganizationSpendRequestInput."
         },
         {
           "name": "OrganizationUsage",
@@ -2788,6 +3244,22 @@
           "docs": "Properties is the GraphQL scalar Properties. Application-defined JSON object. Numbers must stay within the interoperable safe-integer range."
         },
         {
+          "name": "PurchaseAgentCreditsReply",
+          "kind": "struct",
+          "signatures": [
+            "type PurchaseAgentCreditsReply struct {\n\tStatus      string        `json:\"status\"`\n\tRequestID   UUID          `json:\"requestId\"`\n\tServerTime  *string       `json:\"serverTime\"`\n\tReceiptID   *UUID         `json:\"receiptId\"`\n\tCommittedAt *string       `json:\"committedAt\"`\n\tReplayed    *bool         `json:\"replayed\"`\n\tOperation   *OperationRef `json:\"operation\"`\n\tResourceRef *ResourceRef  `json:\"resourceRef\"`\n\tResult      *AgentPayment `json:\"result\"`\n}"
+          ],
+          "docs": "PurchaseAgentCreditsReply is the GraphQL object PurchaseAgentCreditsReply."
+        },
+        {
+          "name": "PurchaseAgentCreditsRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type PurchaseAgentCreditsRequestInput struct {\n\tAmount             string `json:\"amount\"`\n\tSharedPaymentToken string `json:\"sharedPaymentToken\"`\n}"
+          ],
+          "docs": "PurchaseAgentCreditsRequestInput is the GraphQL input PurchaseAgentCreditsRequestInput."
+        },
+        {
           "name": "ReadReceipt",
           "kind": "struct",
           "signatures": [
@@ -2926,6 +3398,22 @@
           "docs": "RedeemCredentialRequestInput is the GraphQL input RedeemCredentialRequestInput."
         },
         {
+          "name": "RejectAgentSignupReply",
+          "kind": "struct",
+          "signatures": [
+            "type RejectAgentSignupReply struct {\n\tStatus      string             `json:\"status\"`\n\tRequestID   UUID               `json:\"requestId\"`\n\tServerTime  *string            `json:\"serverTime\"`\n\tReceiptID   *UUID              `json:\"receiptId\"`\n\tCommittedAt *string            `json:\"committedAt\"`\n\tReplayed    *bool              `json:\"replayed\"`\n\tOperation   *OperationRef      `json:\"operation\"`\n\tResourceRef *ResourceRef       `json:\"resourceRef\"`\n\tResult      *AgentSignupStatus `json:\"result\"`\n}"
+          ],
+          "docs": "RejectAgentSignupReply is the GraphQL object RejectAgentSignupReply."
+        },
+        {
+          "name": "RejectAgentSignupRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type RejectAgentSignupRequestInput struct {\n\tApprovalToken          string `json:\"approvalToken\"`\n\tSuppressFutureRequests bool   `json:\"suppressFutureRequests\"`\n}"
+          ],
+          "docs": "RejectAgentSignupRequestInput is the GraphQL input RejectAgentSignupRequestInput."
+        },
+        {
           "name": "RemoveMemberReply",
           "kind": "struct",
           "signatures": [
@@ -2972,6 +3460,22 @@
             "type ReplayWebhookDeliveriesRequestInput struct {\n\tProjectID  UUID    `json:\"projectId\"`\n\tEndpointID UUID    `json:\"endpointId\"`\n\tEffectID   *UUID   `json:\"effectId,omitzero\"`\n\tSince      *string `json:\"since,omitzero\"`\n\tUntil      *string `json:\"until,omitzero\"`\n}"
           ],
           "docs": "ReplayWebhookDeliveriesRequestInput is the GraphQL input ReplayWebhookDeliveriesRequestInput."
+        },
+        {
+          "name": "RequestAgentSignupReply",
+          "kind": "struct",
+          "signatures": [
+            "type RequestAgentSignupReply struct {\n\tStatus      string             `json:\"status\"`\n\tRequestID   UUID               `json:\"requestId\"`\n\tServerTime  *string            `json:\"serverTime\"`\n\tReceiptID   *UUID              `json:\"receiptId\"`\n\tCommittedAt *string            `json:\"committedAt\"`\n\tReplayed    *bool              `json:\"replayed\"`\n\tOperation   *OperationRef      `json:\"operation\"`\n\tResourceRef *ResourceRef       `json:\"resourceRef\"`\n\tResult      *AgentSignupTicket `json:\"result\"`\n}"
+          ],
+          "docs": "RequestAgentSignupReply is the GraphQL object RequestAgentSignupReply."
+        },
+        {
+          "name": "RequestAgentSignupRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type RequestAgentSignupRequestInput struct {\n\tOwnerEmail               string   `json:\"ownerEmail\"`\n\tPollChallenge            string   `json:\"pollChallenge\"`\n\tOrganizationName         string   `json:\"organizationName\"`\n\tAgentName                string   `json:\"agentName\"`\n\tPurpose                  *string  `json:\"purpose,omitzero\"`\n\tSuggestedPlan            *string  `json:\"suggestedPlan,omitzero\"`\n\tSuggestedScopes          []string `json:\"suggestedScopes\"`\n\tSuggestedMonthlySpendCap *string  `json:\"suggestedMonthlySpendCap,omitzero\"`\n}"
+          ],
+          "docs": "RequestAgentSignupRequestInput is the GraphQL input RequestAgentSignupRequestInput."
         },
         {
           "name": "RequestResolution",
@@ -3033,9 +3537,25 @@
           "name": "RetainedResult",
           "kind": "struct",
           "signatures": [
-            "type RetainedResult struct {\n\tBillingCheckoutSession     *BillingCheckoutSession     `json:\"billingCheckoutSession\"`\n\tBillingPortalSession       *BillingPortalSession       `json:\"billingPortalSession\"`\n\tBroadcastPermissionChanged *BroadcastPermissionChanged `json:\"broadcastPermissionChanged\"`\n\tConversation               *Conversation               `json:\"conversation\"`\n\tConversationMemberBatch    *ConversationMemberBatch    `json:\"conversationMemberBatch\"`\n\tConversationMute           *ConversationMute           `json:\"conversationMute\"`\n\tCredentialDeliveryReceipt  *CredentialDeliveryReceipt  `json:\"credentialDeliveryReceipt\"`\n\tDeliveryAck                *DeliveryAck                `json:\"deliveryAck\"`\n\tLiveAlertBatch             *LiveAlertBatch             `json:\"liveAlertBatch\"`\n\tLiveCredentialIssuance     *LiveCredentialIssuance     `json:\"liveCredentialIssuance\"`\n\tLiveSessionEndRequested    *LiveSessionEndRequested    `json:\"liveSessionEndRequested\"`\n\tLiveSessionJoined          *LiveSessionJoined          `json:\"liveSessionJoined\"`\n\tLiveSessionLeft            *LiveSessionLeft            `json:\"liveSessionLeft\"`\n\tLiveSessionStarted         *LiveSessionStarted         `json:\"liveSessionStarted\"`\n\tMember                     *Member                     `json:\"member\"`\n\tMessage                    *Message                    `json:\"message\"`\n\tMessageAck                 *MessageAck                 `json:\"messageAck\"`\n\tOrganization               *Organization               `json:\"organization\"`\n\tPrincipal                  *Principal                  `json:\"principal\"`\n\tReadReceipt                *ReadReceipt                `json:\"readReceipt\"`\n\tSessionBootstrap           *SessionBootstrap           `json:\"sessionBootstrap\"`\n\tSessionRevocation          *SessionRevocation          `json:\"sessionRevocation\"`\n\tSignedProof                SignedProof                 `json:\"signedProof\"`\n}"
+            "type RetainedResult struct {\n\tAgentGrant                 *AgentGrant                 `json:\"agentGrant\"`\n\tAgentSignupStatus          *AgentSignupStatus          `json:\"agentSignupStatus\"`\n\tBillingCheckoutSession     *BillingCheckoutSession     `json:\"billingCheckoutSession\"`\n\tBillingPortalSession       *BillingPortalSession       `json:\"billingPortalSession\"`\n\tBroadcastPermissionChanged *BroadcastPermissionChanged `json:\"broadcastPermissionChanged\"`\n\tConversation               *Conversation               `json:\"conversation\"`\n\tConversationMemberBatch    *ConversationMemberBatch    `json:\"conversationMemberBatch\"`\n\tConversationMute           *ConversationMute           `json:\"conversationMute\"`\n\tCredentialDeliveryReceipt  *CredentialDeliveryReceipt  `json:\"credentialDeliveryReceipt\"`\n\tDeliveryAck                *DeliveryAck                `json:\"deliveryAck\"`\n\tLiveAlertBatch             *LiveAlertBatch             `json:\"liveAlertBatch\"`\n\tLiveCredentialIssuance     *LiveCredentialIssuance     `json:\"liveCredentialIssuance\"`\n\tLiveSessionEndRequested    *LiveSessionEndRequested    `json:\"liveSessionEndRequested\"`\n\tLiveSessionJoined          *LiveSessionJoined          `json:\"liveSessionJoined\"`\n\tLiveSessionLeft            *LiveSessionLeft            `json:\"liveSessionLeft\"`\n\tLiveSessionStarted         *LiveSessionStarted         `json:\"liveSessionStarted\"`\n\tMember                     *Member                     `json:\"member\"`\n\tMessage                    *Message                    `json:\"message\"`\n\tMessageAck                 *MessageAck                 `json:\"messageAck\"`\n\tOrganization               *Organization               `json:\"organization\"`\n\tOrganizationSpend          *OrganizationSpend          `json:\"organizationSpend\"`\n\tPrincipal                  *Principal                  `json:\"principal\"`\n\tReadReceipt                *ReadReceipt                `json:\"readReceipt\"`\n\tSessionBootstrap           *SessionBootstrap           `json:\"sessionBootstrap\"`\n\tSessionRevocation          *SessionRevocation          `json:\"sessionRevocation\"`\n\tSignedProof                SignedProof                 `json:\"signedProof\"`\n}"
           ],
           "docs": "RetainedResult is the GraphQL object RetainedResult. Exactly one typed field contains the retained, currently authorized receipt result."
+        },
+        {
+          "name": "RevokeAgentGrantReply",
+          "kind": "struct",
+          "signatures": [
+            "type RevokeAgentGrantReply struct {\n\tStatus      string        `json:\"status\"`\n\tRequestID   UUID          `json:\"requestId\"`\n\tServerTime  *string       `json:\"serverTime\"`\n\tReceiptID   *UUID         `json:\"receiptId\"`\n\tCommittedAt *string       `json:\"committedAt\"`\n\tReplayed    *bool         `json:\"replayed\"`\n\tOperation   *OperationRef `json:\"operation\"`\n\tResourceRef *ResourceRef  `json:\"resourceRef\"`\n\tResult      *AgentGrant   `json:\"result\"`\n}"
+          ],
+          "docs": "RevokeAgentGrantReply is the GraphQL object RevokeAgentGrantReply."
+        },
+        {
+          "name": "RevokeAgentGrantRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type RevokeAgentGrantRequestInput struct {\n\tGrantID              UUID `json:\"grantId\"`\n\tRevokeIssuedSessions bool `json:\"revokeIssuedSessions\"`\n}"
+          ],
+          "docs": "RevokeAgentGrantRequestInput is the GraphQL input RevokeAgentGrantRequestInput."
         },
         {
           "name": "RevokeBackendKeyReply",
@@ -3242,6 +3762,22 @@
             "type SetConversationMutePayload struct {\n\tStatus      string           `json:\"status\"`\n\tRequestID   UUID             `json:\"requestId\"`\n\tReceiptID   UUID             `json:\"receiptId\"`\n\tCommittedAt string           `json:\"committedAt\"`\n\tReplayed    bool             `json:\"replayed\"`\n\tResult      ConversationMute `json:\"result\"`\n}"
           ],
           "docs": "SetConversationMutePayload is the GraphQL object SetConversationMutePayload."
+        },
+        {
+          "name": "SetSpendControlsReply",
+          "kind": "struct",
+          "signatures": [
+            "type SetSpendControlsReply struct {\n\tStatus      string             `json:\"status\"`\n\tRequestID   UUID               `json:\"requestId\"`\n\tServerTime  *string            `json:\"serverTime\"`\n\tReceiptID   *UUID              `json:\"receiptId\"`\n\tCommittedAt *string            `json:\"committedAt\"`\n\tReplayed    *bool              `json:\"replayed\"`\n\tOperation   *OperationRef      `json:\"operation\"`\n\tResourceRef *ResourceRef       `json:\"resourceRef\"`\n\tResult      *OrganizationSpend `json:\"result\"`\n}"
+          ],
+          "docs": "SetSpendControlsReply is the GraphQL object SetSpendControlsReply."
+        },
+        {
+          "name": "SetSpendControlsRequestInput",
+          "kind": "struct",
+          "signatures": [
+            "type SetSpendControlsRequestInput struct {\n\tOrgID              UUID    `json:\"orgId\"`\n\tMonthlySpendCap    string  `json:\"monthlySpendCap\"`\n\tAgentPurchaseLimit *string `json:\"agentPurchaseLimit,omitzero\"`\n}"
+          ],
+          "docs": "SetSpendControlsRequestInput is the GraphQL input SetSpendControlsRequestInput."
         },
         {
           "name": "SignedProof",

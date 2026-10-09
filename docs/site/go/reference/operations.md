@@ -1,6 +1,6 @@
 # Go operation coverage
 
-The Go SDK members that send each API operation. 65 of the 68 operations that Go packages can send have a method.
+The Go SDK members that send each API operation. 65 of the 81 operations that Go packages can send have a method.
 
 ## Communication
 
@@ -67,6 +67,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md) | server | [`ManagementClient.WebhookDeliveries`](convohop.md#managementclientwebhookdeliveries-method) |
 | [`management.resolveRequest`](../../operations/management/resolveRequest.md) | server | [`ManagementClient.ResolveRequest`](convohop.md#managementclientresolverequest-method), [`ManagementClient.Retry`](convohop.md#managementclientretry-method) |
 | [`management.getOperation`](../../operations/management/getOperation.md) | server | [`ManagementClient.GetOperation`](convohop.md#managementclientgetoperation-method) |
+| [`management.agentSignupForApproval`](../../operations/management/agentSignupForApproval.md) | server | Not wrapped by a method |
+| [`management.agentSignup`](../../operations/management/agentSignup.md) | server | Not wrapped by a method |
+| [`management.agentGrants`](../../operations/management/agentGrants.md) | server | Not wrapped by a method |
+| [`management.agentAuditEvents`](../../operations/management/agentAuditEvents.md) | server | Not wrapped by a method |
+| [`management.organizationSpend`](../../operations/management/organizationSpend.md) | server | Not wrapped by a method |
 | [`management.createOrganization`](../../operations/management/createOrganization.md) | server | [`ManagementClient.CreateOrganization`](convohop.md#managementclientcreateorganization-method) |
 | [`management.createDeployment`](../../operations/management/createDeployment.md) | server | [`ManagementClient.CreateDeployment`](convohop.md#managementclientcreatedeployment-method) |
 | [`management.createProject`](../../operations/management/createProject.md) | server | [`ManagementClient.CreateProject`](convohop.md#managementclientcreateproject-method) |
@@ -83,3 +88,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md) | server | [`ManagementClient.RotateWebhookSecret`](convohop.md#managementclientrotatewebhooksecret-method) |
 | [`management.disableWebhook`](../../operations/management/disableWebhook.md) | server | [`ManagementClient.DisableWebhook`](convohop.md#managementclientdisablewebhook-method) |
 | [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md) | server | [`ManagementClient.ReplayWebhookDeliveries`](convohop.md#managementclientreplaywebhookdeliveries-method) |
+| [`management.requestAgentSignup`](../../operations/management/requestAgentSignup.md) | server | Not wrapped by a method |
+| [`management.rejectAgentSignup`](../../operations/management/rejectAgentSignup.md) | server | Not wrapped by a method |
+| [`management.approveAgentSignup`](../../operations/management/approveAgentSignup.md) | server | Not wrapped by a method |
+| [`management.issueAgentKey`](../../operations/management/issueAgentKey.md) | server | Not wrapped by a method |
+| [`management.agentCredentialPermit`](../../operations/management/agentCredentialPermit.md) | server | Not wrapped by a method |
+| [`management.revokeAgentGrant`](../../operations/management/revokeAgentGrant.md) | server | Not wrapped by a method |
+| [`management.setSpendControls`](../../operations/management/setSpendControls.md) | server | Not wrapped by a method |
+| [`management.purchaseAgentCredits`](../../operations/management/purchaseAgentCredits.md) | server | Not wrapped by a method |

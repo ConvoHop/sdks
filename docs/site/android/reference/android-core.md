@@ -1057,6 +1057,94 @@ public const val ADMISSION_LIMIT: String = "ADMISSION_LIMIT"
 
 A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId.
 
+#### `ErrorCodes.AGENTIC_NOT_CONFIGURED` static property
+
+```kotlin
+public const val AGENTIC_NOT_CONFIGURED: String = "AGENTIC_NOT_CONFIGURED"
+```
+
+Agent signup is not offered in this environment.
+
+#### `ErrorCodes.AGENT_CONFIRMATION_CODE_INVALID` static property
+
+```kotlin
+public const val AGENT_CONFIRMATION_CODE_INVALID: String = "AGENT_CONFIRMATION_CODE_INVALID"
+```
+
+The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.
+
+#### `ErrorCodes.AGENT_GRANT_EXPIRED` static property
+
+```kotlin
+public const val AGENT_GRANT_EXPIRED: String = "AGENT_GRANT_EXPIRED"
+```
+
+The agent's grant has expired. The agent needs a new signup request approved.
+
+#### `ErrorCodes.AGENT_GRANT_REVOKED` static property
+
+```kotlin
+public const val AGENT_GRANT_REVOKED: String = "AGENT_GRANT_REVOKED"
+```
+
+The owner revoked the agent's grant.
+
+#### `ErrorCodes.AGENT_KEY_LIMIT` static property
+
+```kotlin
+public const val AGENT_KEY_LIMIT: String = "AGENT_KEY_LIMIT"
+```
+
+The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.
+
+#### `ErrorCodes.AGENT_PURCHASE_LIMIT_EXCEEDED` static property
+
+```kotlin
+public const val AGENT_PURCHASE_LIMIT_EXCEEDED: String = "AGENT_PURCHASE_LIMIT_EXCEEDED"
+```
+
+The purchase would take this month's agent credit purchases beyond the limit the owner set.
+
+#### `ErrorCodes.AGENT_SCOPE_NOT_GRANTED` static property
+
+```kotlin
+public const val AGENT_SCOPE_NOT_GRANTED: String = "AGENT_SCOPE_NOT_GRANTED"
+```
+
+A requested scope is outside the agent's grant.
+
+#### `ErrorCodes.AGENT_SIGNUP_CLOSED` static property
+
+```kotlin
+public const val AGENT_SIGNUP_CLOSED: String = "AGENT_SIGNUP_CLOSED"
+```
+
+The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.
+
+#### `ErrorCodes.AGENT_SIGNUP_EMAIL_REJECTED` static property
+
+```kotlin
+public const val AGENT_SIGNUP_EMAIL_REJECTED: String = "AGENT_SIGNUP_EMAIL_REJECTED"
+```
+
+The owner's email address is refused, for example for a disposable domain.
+
+#### `ErrorCodes.AGENT_SIGNUP_NOT_READY` static property
+
+```kotlin
+public const val AGENT_SIGNUP_NOT_READY: String = "AGENT_SIGNUP_NOT_READY"
+```
+
+The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.
+
+#### `ErrorCodes.AGENT_SIGNUP_SUPPRESSED` static property
+
+```kotlin
+public const val AGENT_SIGNUP_SUPPRESSED: String = "AGENT_SIGNUP_SUPPRESSED"
+```
+
+The owner opted out of agent signup requests to this email address.
+
 #### `ErrorCodes.ALREADY_CONNECTED` static property
 
 ```kotlin
@@ -1192,6 +1280,38 @@ public const val CREDENTIAL_REQUIRED: String = "CREDENTIAL_REQUIRED"
 ```
 
 Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.
+
+#### `ErrorCodes.CREDITS_EXHAUSTED` static property
+
+```kotlin
+public const val CREDITS_EXHAUSTED: String = "CREDITS_EXHAUSTED"
+```
+
+Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+
+#### `ErrorCodes.CREDITS_REQUIRE_METERED_PLAN` static property
+
+```kotlin
+public const val CREDITS_REQUIRE_METERED_PLAN: String = "CREDITS_REQUIRE_METERED_PLAN"
+```
+
+Credits apply only to a billed subscription, and none is in force.
+
+#### `ErrorCodes.CREDIT_AMOUNT_OUT_OF_RANGE` static property
+
+```kotlin
+public const val CREDIT_AMOUNT_OUT_OF_RANGE: String = "CREDIT_AMOUNT_OUT_OF_RANGE"
+```
+
+The credit amount is outside the allowed purchase range.
+
+#### `ErrorCodes.CREDIT_GRANT_LIMIT_REACHED` static property
+
+```kotlin
+public const val CREDIT_GRANT_LIMIT_REACHED: String = "CREDIT_GRANT_LIMIT_REACHED"
+```
+
+Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.
 
 #### `ErrorCodes.CURSOR_AHEAD` static property
 
@@ -1481,6 +1601,22 @@ public const val PARTICIPATION_MISMATCH: String = "PARTICIPATION_MISMATCH"
 
 The participation does not belong to the caller or the current live session generation.
 
+#### `ErrorCodes.PAYMENT_DECLINED` static property
+
+```kotlin
+public const val PAYMENT_DECLINED: String = "PAYMENT_DECLINED"
+```
+
+The payment rail declined the payment. Nothing was charged.
+
+#### `ErrorCodes.PAYMENT_RAIL_NOT_CONFIGURED` static property
+
+```kotlin
+public const val PAYMENT_RAIL_NOT_CONFIGURED: String = "PAYMENT_RAIL_NOT_CONFIGURED"
+```
+
+No payment rail is enabled in this environment.
+
 #### `ErrorCodes.PERMIT_EXPIRED` static property
 
 ```kotlin
@@ -1640,6 +1776,22 @@ public const val SESSION_REFRESH_UNVERIFIED: String = "SESSION_REFRESH_UNVERIFIE
 ```
 
 The refreshed session could not be verified.
+
+#### `ErrorCodes.SPEND_CAP_REACHED` static property
+
+```kotlin
+public const val SPEND_CAP_REACHED: String = "SPEND_CAP_REACHED"
+```
+
+The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+
+#### `ErrorCodes.SPEND_UNVERIFIED` static property
+
+```kotlin
+public const val SPEND_UNVERIFIED: String = "SPEND_UNVERIFIED"
+```
+
+Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.
 
 #### `ErrorCodes.TRANSPORT_UNKNOWN` static property
 
@@ -1802,6 +1954,14 @@ public val permitBound: IdempotencyClass
 ```
 
 Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.
+
+#### `Idempotency.replayOnly` static property
+
+```kotlin
+public val replayOnly: IdempotencyClass
+```
+
+Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
 
 #### `Idempotency.safe` static property
 
@@ -5069,6 +5229,61 @@ public data class ActorRef(public val tenantId: String, public val objectId: Str
 
 Package: `com.convohop.android.generated`.
 
+### `AgentGrant` type
+
+```kotlin
+public data class AgentGrant(
+    public val grantId: String,
+    public val orgId: String,
+    public val signupId: String,
+    public val agentActorId: String,
+    public val projectId: String? = null,
+    public val scopes: List<String>,
+    public val expiresAt: String,
+    public val revokedAt: String? = null,
+    public val createdAt: String,
+    public val keys: List<AgentKey>,
+)
+```
+
+Package: `com.convohop.android.generated`.
+
+### `AgentKey` type
+
+```kotlin
+public data class AgentKey(
+    public val operationId: String,
+    public val state: String,
+    public val scopes: List<String>,
+    public val expiresAt: String,
+    public val keyId: String? = null,
+    public val deliveryId: String? = null,
+    public val deliveryExpiresAt: String? = null,
+)
+```
+
+Package: `com.convohop.android.generated`.
+
+### `AgentSignupStatus` type
+
+```kotlin
+public data class AgentSignupStatus(
+    public val signupId: String,
+    public val state: String,
+    public val orgId: String? = null,
+    public val deploymentId: String? = null,
+    public val projectId: String? = null,
+    public val nextStep: String? = null,
+    public val scopes: List<String>,
+    public val grantExpiresAt: String? = null,
+    public val keys: List<AgentKey>,
+    public val incarnation: String? = null,
+    public val servingEpoch: String? = null,
+)
+```
+
+Package: `com.convohop.android.generated`.
+
 ### `AlertLiveSessionInput` type
 
 ```kotlin
@@ -6404,6 +6619,35 @@ public data class Organization(
 
 Package: `com.convohop.android.generated`.
 
+### `OrganizationSpend` type
+
+```kotlin
+public data class OrganizationSpend(
+    public val orgId: String,
+    public val planId: String,
+    public val currency: String,
+    public val catalogVersion: String,
+    public val monthlySpendCap: String? = null,
+    public val agentPurchaseLimit: String? = null,
+    public val updatedAt: String? = null,
+    public val monthlyMinimum: String? = null,
+    public val periodStart: String? = null,
+    public val periodEnd: String? = null,
+    public val credits: String? = null,
+    public val charges: String? = null,
+    public val margin: String? = null,
+    public val stop: String? = null,
+    public val refusedMeters: List<String>,
+    public val evaluatedAt: String? = null,
+    public val usageThrough: String? = null,
+    public val validUntil: String? = null,
+    public val minimumCredit: String? = null,
+    public val chargeLimit: String? = null,
+)
+```
+
+Package: `com.convohop.android.generated`.
+
 ### `Principal` type
 
 ```kotlin
@@ -6591,6 +6835,8 @@ Package: `com.convohop.android.generated`.
 
 ```kotlin
 public data class RetainedResult(
+    public val agentGrant: AgentGrant? = null,
+    public val agentSignupStatus: AgentSignupStatus? = null,
     public val billingCheckoutSession: BillingCheckoutSession? = null,
     public val billingPortalSession: BillingPortalSession? = null,
     public val broadcastPermissionChanged: BroadcastPermissionChanged? = null,
@@ -6609,6 +6855,7 @@ public data class RetainedResult(
     public val message: Message? = null,
     public val messageAck: MessageAck? = null,
     public val organization: Organization? = null,
+    public val organizationSpend: OrganizationSpend? = null,
     public val principal: Principal? = null,
     public val readReceipt: ReadReceipt? = null,
     public val sessionBootstrap: SessionBootstrap? = null,

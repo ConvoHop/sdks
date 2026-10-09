@@ -142,7 +142,7 @@ test("unsupported inputs and ambiguous tool names are rejected", () => {
   assert.throws(() => mcpToolDefinitions(colliding), new EmitterError("mcp-tools: beta.Capabilities and beta.capabilities both map to tool name beta_capabilities"));
 });
 
-test("the repository catalog withholds credential-returning operations and marks destructive ones", () => {
+test("the repository catalog withholds credential-returning and consent operations and marks destructive ones", () => {
   const ir = buildIr(repoSources());
   const ids = new Set(ir.operations.map(operation => operation.id));
   for (const id of Object.keys(WITHHELD)) assert.ok(ids.has(id), `withheld operation ${id} no longer exists; update WITHHELD`);
@@ -153,8 +153,8 @@ test("the repository catalog withholds credential-returning operations and marks
   assert.ok(tools.every(tool => tool.operation.credential === (tool.operation.plane === "management" ? "portalCredential" : "backendKey")));
   assert.deepEqual(tools.filter(tool => tool.annotations.destructiveHint).map(tool => tool.operation.id).sort(), [
     "communication.deleteMessage", "communication.disablePrincipal", "communication.endLiveSession", "communication.removeMember",
-    "communication.revokeSession", "management.disableWebhook", "management.revokeBackendKey", "management.rotateWebhookSecret",
-    "management.updateWebhook",
+    "communication.revokeSession", "management.disableWebhook", "management.revokeAgentGrant", "management.revokeBackendKey",
+    "management.rotateWebhookSecret", "management.updateWebhook",
   ]);
   const revoke = byName(tools).management_revoke_backend_key;
   assert.match(revoke.description, /^Requires portalCredential \(condition owner: The caller owns the organization, deployment or project\)\.$/m);

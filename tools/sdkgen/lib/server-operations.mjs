@@ -17,7 +17,19 @@ export const CREDENTIAL_OPERATIONS = Object.freeze({
   "management.credentialPermit": "returns a credential delivery permit",
   "management.createBillingCheckoutSession": "returns a hosted billing link that grants access to whoever holds it",
   "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it",
+  "management.agentCredentialPermit": "returns a credential delivery permit",
 });
+
+/**
+ * Operations that record a person's consent. Server tooling never offers them, because an agent or a script holding
+ * a portal credential must not consent on that person's behalf.
+ */
+export const CONSENT_OPERATIONS = Object.freeze({
+  "management.approveAgentSignup": "records an owner's consent to an agent signup; the owner gives it from the emailed approval link",
+});
+
+/** The operations server tooling never offers, with the reason for each: CREDENTIAL_OPERATIONS and CONSENT_OPERATIONS. */
+export const WITHHELD_OPERATIONS = Object.freeze({ ...CREDENTIAL_OPERATIONS, ...CONSENT_OPERATIONS });
 
 export const oneLine = text => text.replace(/\s+/g, " ").trim();
 export const list = items => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`);
@@ -53,12 +65,12 @@ export function serverCredential(ir, operation, where) {
 
 /**
  * The queries and mutations server tooling can call with its plane credentials, in IR order. Subscriptions,
- * client-only and deprecated operations, CREDENTIAL_OPERATIONS and the operations that need another credential,
+ * client-only and deprecated operations, WITHHELD_OPERATIONS and the operations that need another credential,
  * such as anonymous ones, are left out.
  */
 export function serverOperations(ir, where) {
   return ir.operations.filter(operation => (operation.kind === "query" || operation.kind === "mutation") &&
-    operation.layer !== "client" && !operation.deprecated && !Object.hasOwn(CREDENTIAL_OPERATIONS, operation.id) &&
+    operation.layer !== "client" && !operation.deprecated && !Object.hasOwn(WITHHELD_OPERATIONS, operation.id) &&
     serverCredential(ir, operation, where) !== undefined);
 }
 

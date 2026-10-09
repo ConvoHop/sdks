@@ -84,8 +84,10 @@ Both `mcp-tools` and `cli-operations` send each plane one credential: the
 first server bearer credential that the plane's `resolveOperation` accepts,
 so they can settle an unknown outcome of any request they send. They leave
 out subscriptions, client-only and deprecated operations, the operations that
-don't accept that credential, such as anonymous ones, and the operations whose
-results are credentials, such as `communication.issueSession`. The shared
+don't accept that credential, such as anonymous ones, the operations whose
+results are credentials, such as `communication.issueSession`, and the
+operations that record a person's consent, such as
+`management.approveAgentSignup`. The shared
 rules are in
 [`tools/sdkgen/lib/server-operations.mjs`](../tools/sdkgen/lib/server-operations.mjs).
 

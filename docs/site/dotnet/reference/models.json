@@ -76,6 +76,186 @@
       "docs": "The AddMembersPayload result."
     },
     {
+      "name": "AgentAuditEvent",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentAuditEvent",
+      "anchor": "agentauditevent-class",
+      "signatures": [
+        "public sealed class AgentAuditEvent\n{\n    public AgentAuditEvent();\n    public string EventId { get; init; }\n    public string OrgId { get; init; }\n    public string? GrantId { get; init; }\n    public string ActorKind { get; init; }\n    public string? ActorId { get; init; }\n    public string Kind { get; init; }\n    public JsonElement? Details { get; init; }\n    public string OccurredAt { get; init; }\n}"
+      ],
+      "docs": "The AgentAuditEvent result."
+    },
+    {
+      "name": "AgentAuditEventPage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentAuditEventPage",
+      "anchor": "agentauditeventpage-class",
+      "signatures": [
+        "public sealed class AgentAuditEventPage\n{\n    public AgentAuditEventPage();\n    public IReadOnlyList<AgentAuditEvent> Items { get; init; }\n    public bool Complete { get; init; }\n    public bool RefreshRequired { get; init; }\n    public string? NextCursor { get; init; }\n}"
+      ],
+      "docs": "The AgentAuditEventPage result."
+    },
+    {
+      "name": "AgentAuditEventsReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentAuditEventsReply",
+      "anchor": "agentauditeventsreply-class",
+      "signatures": [
+        "public sealed class AgentAuditEventsReply\n{\n    public AgentAuditEventsReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public AgentAuditEventPage? Result { get; init; }\n}"
+      ],
+      "docs": "The AgentAuditEventsReply result."
+    },
+    {
+      "name": "AgentAuditEventsRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentAuditEventsRequestInput",
+      "anchor": "agentauditeventsrequestinput-class",
+      "signatures": [
+        "public sealed class AgentAuditEventsRequestInput\n{\n    public AgentAuditEventsRequestInput(string orgId);\n    public string OrgId { get; set; }\n    public int? Limit { get; set; }\n    public string? Cursor { get; set; }\n}"
+      ],
+      "docs": "The AgentAuditEventsRequestInput input."
+    },
+    {
+      "name": "AgentCredentialPermitReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentCredentialPermitReply",
+      "anchor": "agentcredentialpermitreply-class",
+      "signatures": [
+        "public sealed class AgentCredentialPermitReply\n{\n    public AgentCredentialPermitReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public JsonElement? Result { get; init; }\n}"
+      ],
+      "docs": "The AgentCredentialPermitReply result."
+    },
+    {
+      "name": "AgentCredentialPermitRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentCredentialPermitRequestInput",
+      "anchor": "agentcredentialpermitrequestinput-class",
+      "signatures": [
+        "public sealed class AgentCredentialPermitRequestInput\n{\n    public AgentCredentialPermitRequestInput(string deliveryId, string redemptionRequestId);\n    public string DeliveryId { get; set; }\n    public string RedemptionRequestId { get; set; }\n}"
+      ],
+      "docs": "The AgentCredentialPermitRequestInput input."
+    },
+    {
+      "name": "AgentGrant",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentGrant",
+      "anchor": "agentgrant-class",
+      "signatures": [
+        "public sealed class AgentGrant\n{\n    public AgentGrant();\n    public string GrantId { get; init; }\n    public string OrgId { get; init; }\n    public string SignupId { get; init; }\n    public string AgentActorId { get; init; }\n    public string? ProjectId { get; init; }\n    public IReadOnlyList<string> Scopes { get; init; }\n    public string ExpiresAt { get; init; }\n    public string? RevokedAt { get; init; }\n    public string CreatedAt { get; init; }\n    public IReadOnlyList<AgentKey> Keys { get; init; }\n}"
+      ],
+      "docs": "The AgentGrant result."
+    },
+    {
+      "name": "AgentGrantPage",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentGrantPage",
+      "anchor": "agentgrantpage-class",
+      "signatures": [
+        "public sealed class AgentGrantPage\n{\n    public AgentGrantPage();\n    public IReadOnlyList<AgentGrant> Items { get; init; }\n    public bool Complete { get; init; }\n    public bool RefreshRequired { get; init; }\n    public string? NextCursor { get; init; }\n}"
+      ],
+      "docs": "The AgentGrantPage result."
+    },
+    {
+      "name": "AgentGrantsReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentGrantsReply",
+      "anchor": "agentgrantsreply-class",
+      "signatures": [
+        "public sealed class AgentGrantsReply\n{\n    public AgentGrantsReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public AgentGrantPage? Result { get; init; }\n}"
+      ],
+      "docs": "The AgentGrantsReply result."
+    },
+    {
+      "name": "AgentGrantsRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentGrantsRequestInput",
+      "anchor": "agentgrantsrequestinput-class",
+      "signatures": [
+        "public sealed class AgentGrantsRequestInput\n{\n    public AgentGrantsRequestInput(string orgId);\n    public string OrgId { get; set; }\n    public int? Limit { get; set; }\n    public string? Cursor { get; set; }\n}"
+      ],
+      "docs": "The AgentGrantsRequestInput input."
+    },
+    {
+      "name": "AgentKey",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentKey",
+      "anchor": "agentkey-class",
+      "signatures": [
+        "public sealed class AgentKey\n{\n    public AgentKey();\n    public string OperationId { get; init; }\n    public string State { get; init; }\n    public IReadOnlyList<string> Scopes { get; init; }\n    public string ExpiresAt { get; init; }\n    public string? KeyId { get; init; }\n    public string? DeliveryId { get; init; }\n    public string? DeliveryExpiresAt { get; init; }\n}"
+      ],
+      "docs": "The AgentKey result."
+    },
+    {
+      "name": "AgentPayment",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentPayment",
+      "anchor": "agentpayment-class",
+      "signatures": [
+        "public sealed class AgentPayment\n{\n    public AgentPayment();\n    public string PaymentId { get; init; }\n    public string Amount { get; init; }\n    public string Currency { get; init; }\n    public string State { get; init; }\n}"
+      ],
+      "docs": "The AgentPayment result."
+    },
+    {
+      "name": "AgentSignupForApprovalReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentSignupForApprovalReply",
+      "anchor": "agentsignupforapprovalreply-class",
+      "signatures": [
+        "public sealed class AgentSignupForApprovalReply\n{\n    public AgentSignupForApprovalReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public AgentSignupReview? Result { get; init; }\n}"
+      ],
+      "docs": "The AgentSignupForApprovalReply result."
+    },
+    {
+      "name": "AgentSignupForApprovalRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentSignupForApprovalRequestInput",
+      "anchor": "agentsignupforapprovalrequestinput-class",
+      "signatures": [
+        "public sealed class AgentSignupForApprovalRequestInput\n{\n    public AgentSignupForApprovalRequestInput(string approvalToken);\n    public string ApprovalToken { get; set; }\n}"
+      ],
+      "docs": "The AgentSignupForApprovalRequestInput input."
+    },
+    {
+      "name": "AgentSignupReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentSignupReply",
+      "anchor": "agentsignupreply-class",
+      "signatures": [
+        "public sealed class AgentSignupReply\n{\n    public AgentSignupReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public AgentSignupStatus? Result { get; init; }\n}"
+      ],
+      "docs": "The AgentSignupReply result."
+    },
+    {
+      "name": "AgentSignupReview",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentSignupReview",
+      "anchor": "agentsignupreview-class",
+      "signatures": [
+        "public sealed class AgentSignupReview\n{\n    public AgentSignupReview();\n    public string SignupId { get; init; }\n    public string OwnerEmail { get; init; }\n    public string OrganizationName { get; init; }\n    public string AgentName { get; init; }\n    public string? Purpose { get; init; }\n    public string? SuggestedPlan { get; init; }\n    public IReadOnlyList<string> SuggestedScopes { get; init; }\n    public string? SuggestedMonthlySpendCap { get; init; }\n    public string Currency { get; init; }\n    public string ExpiresAt { get; init; }\n}"
+      ],
+      "docs": "The AgentSignupReview result."
+    },
+    {
+      "name": "AgentSignupStatus",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentSignupStatus",
+      "anchor": "agentsignupstatus-class",
+      "signatures": [
+        "public sealed class AgentSignupStatus\n{\n    public AgentSignupStatus();\n    public string SignupId { get; init; }\n    public string State { get; init; }\n    public string? OrgId { get; init; }\n    public string? DeploymentId { get; init; }\n    public string? ProjectId { get; init; }\n    public string? NextStep { get; init; }\n    public IReadOnlyList<string> Scopes { get; init; }\n    public string? GrantExpiresAt { get; init; }\n    public IReadOnlyList<AgentKey> Keys { get; init; }\n    public string? Incarnation { get; init; }\n    public string? ServingEpoch { get; init; }\n}"
+      ],
+      "docs": "The AgentSignupStatus result."
+    },
+    {
+      "name": "AgentSignupTicket",
+      "kind": "class",
+      "ref": "ConvoHop.Models#AgentSignupTicket",
+      "anchor": "agentsignupticket-class",
+      "signatures": [
+        "public sealed class AgentSignupTicket\n{\n    public AgentSignupTicket();\n    public string SignupId { get; init; }\n    public string ConfirmationCode { get; init; }\n    public string ExpiresAt { get; init; }\n    public int PollAfterSeconds { get; init; }\n}"
+      ],
+      "docs": "The AgentSignupTicket result."
+    },
+    {
       "name": "AlertLiveSessionInput",
       "kind": "class",
       "ref": "ConvoHop.Models#AlertLiveSessionInput",
@@ -94,6 +274,26 @@
         "public sealed class AlertLiveSessionPayload\n{\n    public AlertLiveSessionPayload();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ReceiptId { get; init; }\n    public string CommittedAt { get; init; }\n    public bool Replayed { get; init; }\n    public LiveAlertBatch Result { get; init; }\n}"
       ],
       "docs": "The AlertLiveSessionPayload result."
+    },
+    {
+      "name": "ApproveAgentSignupReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ApproveAgentSignupReply",
+      "anchor": "approveagentsignupreply-class",
+      "signatures": [
+        "public sealed class ApproveAgentSignupReply\n{\n    public ApproveAgentSignupReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public AgentSignupStatus? Result { get; init; }\n}"
+      ],
+      "docs": "The ApproveAgentSignupReply result."
+    },
+    {
+      "name": "ApproveAgentSignupRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#ApproveAgentSignupRequestInput",
+      "anchor": "approveagentsignuprequestinput-class",
+      "signatures": [
+        "public sealed class ApproveAgentSignupRequestInput\n{\n    public ApproveAgentSignupRequestInput(string approvalToken, string confirmationCode, string termsRef, string plan, IReadOnlyList<string> scopes, string monthlySpendCap);\n    public string ApprovalToken { get; set; }\n    public string ConfirmationCode { get; set; }\n    public string TermsRef { get; set; }\n    public string Plan { get; set; }\n    public IReadOnlyList<string> Scopes { get; set; }\n    public string MonthlySpendCap { get; set; }\n    public string? AgentPurchaseLimit { get; set; }\n    public string? GrantExpiresAt { get; set; }\n}"
+      ],
+      "docs": "The ApproveAgentSignupRequestInput input."
     },
     {
       "name": "BillingCheckoutSession",
@@ -836,6 +1036,26 @@
       "docs": "The InboxRequestInput input."
     },
     {
+      "name": "IssueAgentKeyReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#IssueAgentKeyReply",
+      "anchor": "issueagentkeyreply-class",
+      "signatures": [
+        "public sealed class IssueAgentKeyReply\n{\n    public IssueAgentKeyReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public AgentKey? Result { get; init; }\n}"
+      ],
+      "docs": "The IssueAgentKeyReply result."
+    },
+    {
+      "name": "IssueAgentKeyRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#IssueAgentKeyRequestInput",
+      "anchor": "issueagentkeyrequestinput-class",
+      "signatures": [
+        "public sealed class IssueAgentKeyRequestInput\n{\n    public IssueAgentKeyRequestInput(IReadOnlyList<string> scopes);\n    public IReadOnlyList<string> Scopes { get; set; }\n    public string? ExpiresAt { get; set; }\n}"
+      ],
+      "docs": "The IssueAgentKeyRequestInput input."
+    },
+    {
       "name": "IssueBackendKeyReply",
       "kind": "class",
       "ref": "ConvoHop.Models#IssueBackendKeyReply",
@@ -1356,6 +1576,36 @@
       "docs": "The OrganizationPage result."
     },
     {
+      "name": "OrganizationSpend",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationSpend",
+      "anchor": "organizationspend-class",
+      "signatures": [
+        "public sealed class OrganizationSpend\n{\n    public OrganizationSpend();\n    public string OrgId { get; init; }\n    public string PlanId { get; init; }\n    public string Currency { get; init; }\n    public string CatalogVersion { get; init; }\n    public string? MonthlySpendCap { get; init; }\n    public string? AgentPurchaseLimit { get; init; }\n    public string? UpdatedAt { get; init; }\n    public string? MonthlyMinimum { get; init; }\n    public string? PeriodStart { get; init; }\n    public string? PeriodEnd { get; init; }\n    public string? Credits { get; init; }\n    public string? Charges { get; init; }\n    public string? Margin { get; init; }\n    public string? Stop { get; init; }\n    public IReadOnlyList<string> RefusedMeters { get; init; }\n    public string? EvaluatedAt { get; init; }\n    public string? UsageThrough { get; init; }\n    public string? ValidUntil { get; init; }\n    public string? MinimumCredit { get; init; }\n    public string? ChargeLimit { get; init; }\n}"
+      ],
+      "docs": "The OrganizationSpend result."
+    },
+    {
+      "name": "OrganizationSpendReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationSpendReply",
+      "anchor": "organizationspendreply-class",
+      "signatures": [
+        "public sealed class OrganizationSpendReply\n{\n    public OrganizationSpendReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OrganizationSpend? Result { get; init; }\n}"
+      ],
+      "docs": "The OrganizationSpendReply result."
+    },
+    {
+      "name": "OrganizationSpendRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationSpendRequestInput",
+      "anchor": "organizationspendrequestinput-class",
+      "signatures": [
+        "public sealed class OrganizationSpendRequestInput\n{\n    public OrganizationSpendRequestInput(string orgId);\n    public string OrgId { get; set; }\n}"
+      ],
+      "docs": "The OrganizationSpendRequestInput input."
+    },
+    {
       "name": "OrganizationUsage",
       "kind": "class",
       "ref": "ConvoHop.Models#OrganizationUsage",
@@ -1496,6 +1746,26 @@
       "docs": "The ProjectUsageRequestInput input."
     },
     {
+      "name": "PurchaseAgentCreditsReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#PurchaseAgentCreditsReply",
+      "anchor": "purchaseagentcreditsreply-class",
+      "signatures": [
+        "public sealed class PurchaseAgentCreditsReply\n{\n    public PurchaseAgentCreditsReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public AgentPayment? Result { get; init; }\n}"
+      ],
+      "docs": "The PurchaseAgentCreditsReply result."
+    },
+    {
+      "name": "PurchaseAgentCreditsRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#PurchaseAgentCreditsRequestInput",
+      "anchor": "purchaseagentcreditsrequestinput-class",
+      "signatures": [
+        "public sealed class PurchaseAgentCreditsRequestInput\n{\n    public PurchaseAgentCreditsRequestInput(string amount, string sharedPaymentToken);\n    public string Amount { get; set; }\n    public string SharedPaymentToken { get; set; }\n}"
+      ],
+      "docs": "The PurchaseAgentCreditsRequestInput input."
+    },
+    {
       "name": "ReadReceipt",
       "kind": "class",
       "ref": "ConvoHop.Models#ReadReceipt",
@@ -1524,6 +1794,26 @@
         "public sealed class RedeemCredentialRequestInput\n{\n    public RedeemCredentialRequestInput(string deliveryId);\n    public string DeliveryId { get; set; }\n}"
       ],
       "docs": "The RedeemCredentialRequestInput input."
+    },
+    {
+      "name": "RejectAgentSignupReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RejectAgentSignupReply",
+      "anchor": "rejectagentsignupreply-class",
+      "signatures": [
+        "public sealed class RejectAgentSignupReply\n{\n    public RejectAgentSignupReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public AgentSignupStatus? Result { get; init; }\n}"
+      ],
+      "docs": "The RejectAgentSignupReply result."
+    },
+    {
+      "name": "RejectAgentSignupRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RejectAgentSignupRequestInput",
+      "anchor": "rejectagentsignuprequestinput-class",
+      "signatures": [
+        "public sealed class RejectAgentSignupRequestInput\n{\n    public RejectAgentSignupRequestInput(string approvalToken, bool suppressFutureRequests);\n    public string ApprovalToken { get; set; }\n    public bool SuppressFutureRequests { get; set; }\n}"
+      ],
+      "docs": "The RejectAgentSignupRequestInput input."
     },
     {
       "name": "RemoveMemberReply",
@@ -1584,6 +1874,26 @@
         "public sealed class ReplayWebhookDeliveriesRequestInput\n{\n    public ReplayWebhookDeliveriesRequestInput(string projectId, string endpointId);\n    public string ProjectId { get; set; }\n    public string EndpointId { get; set; }\n    public string? EffectId { get; set; }\n    public string? Since { get; set; }\n    public string? Until { get; set; }\n}"
       ],
       "docs": "The ReplayWebhookDeliveriesRequestInput input."
+    },
+    {
+      "name": "RequestAgentSignupReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RequestAgentSignupReply",
+      "anchor": "requestagentsignupreply-class",
+      "signatures": [
+        "public sealed class RequestAgentSignupReply\n{\n    public RequestAgentSignupReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public AgentSignupTicket? Result { get; init; }\n}"
+      ],
+      "docs": "The RequestAgentSignupReply result."
+    },
+    {
+      "name": "RequestAgentSignupRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RequestAgentSignupRequestInput",
+      "anchor": "requestagentsignuprequestinput-class",
+      "signatures": [
+        "public sealed class RequestAgentSignupRequestInput\n{\n    public RequestAgentSignupRequestInput(string ownerEmail, string pollChallenge, string organizationName, string agentName, IReadOnlyList<string> suggestedScopes);\n    public string OwnerEmail { get; set; }\n    public string PollChallenge { get; set; }\n    public string OrganizationName { get; set; }\n    public string AgentName { get; set; }\n    public string? Purpose { get; set; }\n    public string? SuggestedPlan { get; set; }\n    public IReadOnlyList<string> SuggestedScopes { get; set; }\n    public string? SuggestedMonthlySpendCap { get; set; }\n}"
+      ],
+      "docs": "The RequestAgentSignupRequestInput input."
     },
     {
       "name": "RequestResolution",
@@ -1661,9 +1971,29 @@
       "ref": "ConvoHop.Models#RetainedResult",
       "anchor": "retainedresult-class",
       "signatures": [
-        "public sealed class RetainedResult\n{\n    public RetainedResult();\n    public BillingCheckoutSession? BillingCheckoutSession { get; init; }\n    public BillingPortalSession? BillingPortalSession { get; init; }\n    public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }\n    public Conversation? Conversation { get; init; }\n    public ConversationMemberBatch? ConversationMemberBatch { get; init; }\n    public ConversationMute? ConversationMute { get; init; }\n    public CredentialDeliveryReceipt? CredentialDeliveryReceipt { get; init; }\n    public DeliveryAck? DeliveryAck { get; init; }\n    public LiveAlertBatch? LiveAlertBatch { get; init; }\n    public LiveCredentialIssuance? LiveCredentialIssuance { get; init; }\n    public LiveSessionEndRequested? LiveSessionEndRequested { get; init; }\n    public LiveSessionJoined? LiveSessionJoined { get; init; }\n    public LiveSessionLeft? LiveSessionLeft { get; init; }\n    public LiveSessionStarted? LiveSessionStarted { get; init; }\n    public Member? Member { get; init; }\n    public Message? Message { get; init; }\n    public MessageAck? MessageAck { get; init; }\n    public Organization? Organization { get; init; }\n    public Principal? Principal { get; init; }\n    public ReadReceipt? ReadReceipt { get; init; }\n    public SessionBootstrap? SessionBootstrap { get; init; }\n    public SessionRevocation? SessionRevocation { get; init; }\n    public JsonElement? SignedProof { get; init; }\n}"
+        "public sealed class RetainedResult\n{\n    public RetainedResult();\n    public AgentGrant? AgentGrant { get; init; }\n    public AgentSignupStatus? AgentSignupStatus { get; init; }\n    public BillingCheckoutSession? BillingCheckoutSession { get; init; }\n    public BillingPortalSession? BillingPortalSession { get; init; }\n    public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }\n    public Conversation? Conversation { get; init; }\n    public ConversationMemberBatch? ConversationMemberBatch { get; init; }\n    public ConversationMute? ConversationMute { get; init; }\n    public CredentialDeliveryReceipt? CredentialDeliveryReceipt { get; init; }\n    public DeliveryAck? DeliveryAck { get; init; }\n    public LiveAlertBatch? LiveAlertBatch { get; init; }\n    public LiveCredentialIssuance? LiveCredentialIssuance { get; init; }\n    public LiveSessionEndRequested? LiveSessionEndRequested { get; init; }\n    public LiveSessionJoined? LiveSessionJoined { get; init; }\n    public LiveSessionLeft? LiveSessionLeft { get; init; }\n    public LiveSessionStarted? LiveSessionStarted { get; init; }\n    public Member? Member { get; init; }\n    public Message? Message { get; init; }\n    public MessageAck? MessageAck { get; init; }\n    public Organization? Organization { get; init; }\n    public OrganizationSpend? OrganizationSpend { get; init; }\n    public Principal? Principal { get; init; }\n    public ReadReceipt? ReadReceipt { get; init; }\n    public SessionBootstrap? SessionBootstrap { get; init; }\n    public SessionRevocation? SessionRevocation { get; init; }\n    public JsonElement? SignedProof { get; init; }\n}"
       ],
       "docs": "Exactly one typed field contains the retained, currently authorized receipt result."
+    },
+    {
+      "name": "RevokeAgentGrantReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RevokeAgentGrantReply",
+      "anchor": "revokeagentgrantreply-class",
+      "signatures": [
+        "public sealed class RevokeAgentGrantReply\n{\n    public RevokeAgentGrantReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public AgentGrant? Result { get; init; }\n}"
+      ],
+      "docs": "The RevokeAgentGrantReply result."
+    },
+    {
+      "name": "RevokeAgentGrantRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#RevokeAgentGrantRequestInput",
+      "anchor": "revokeagentgrantrequestinput-class",
+      "signatures": [
+        "public sealed class RevokeAgentGrantRequestInput\n{\n    public RevokeAgentGrantRequestInput(string grantId, bool revokeIssuedSessions);\n    public string GrantId { get; set; }\n    public bool RevokeIssuedSessions { get; set; }\n}"
+      ],
+      "docs": "The RevokeAgentGrantRequestInput input."
     },
     {
       "name": "RevokeBackendKeyReply",
@@ -1924,6 +2254,26 @@
         "public sealed class SetConversationMutePayload\n{\n    public SetConversationMutePayload();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ReceiptId { get; init; }\n    public string CommittedAt { get; init; }\n    public bool Replayed { get; init; }\n    public ConversationMute Result { get; init; }\n}"
       ],
       "docs": "The SetConversationMutePayload result."
+    },
+    {
+      "name": "SetSpendControlsReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SetSpendControlsReply",
+      "anchor": "setspendcontrolsreply-class",
+      "signatures": [
+        "public sealed class SetSpendControlsReply\n{\n    public SetSpendControlsReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OrganizationSpend? Result { get; init; }\n}"
+      ],
+      "docs": "The SetSpendControlsReply result."
+    },
+    {
+      "name": "SetSpendControlsRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#SetSpendControlsRequestInput",
+      "anchor": "setspendcontrolsrequestinput-class",
+      "signatures": [
+        "public sealed class SetSpendControlsRequestInput\n{\n    public SetSpendControlsRequestInput(string orgId, string monthlySpendCap);\n    public string OrgId { get; set; }\n    public string MonthlySpendCap { get; set; }\n    public string? AgentPurchaseLimit { get; set; }\n}"
+      ],
+      "docs": "The SetSpendControlsRequestInput input."
     },
     {
       "name": "UpdateConversationReply",

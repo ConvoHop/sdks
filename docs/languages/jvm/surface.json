@@ -48,6 +48,114 @@
           "docs": "The `AddMembersPayload` result type.\n\nPackage: `com.convohop.server.model`."
         },
         {
+          "name": "AgentAuditEvent",
+          "kind": "type",
+          "signatures": ["public final class AgentAuditEvent"],
+          "docs": "The `AgentAuditEvent` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentAuditEventPage",
+          "kind": "type",
+          "signatures": ["public final class AgentAuditEventPage"],
+          "docs": "The `AgentAuditEventPage` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentAuditEventsReply",
+          "kind": "type",
+          "signatures": ["public final class AgentAuditEventsReply"],
+          "docs": "The `AgentAuditEventsReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentAuditEventsRequestInput",
+          "kind": "type",
+          "signatures": ["public final class AgentAuditEventsRequestInput"],
+          "docs": "The `AgentAuditEventsRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentCredentialPermitReply",
+          "kind": "type",
+          "signatures": ["public final class AgentCredentialPermitReply"],
+          "docs": "The `AgentCredentialPermitReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentCredentialPermitRequestInput",
+          "kind": "type",
+          "signatures": ["public final class AgentCredentialPermitRequestInput"],
+          "docs": "The `AgentCredentialPermitRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentGrant",
+          "kind": "type",
+          "signatures": ["public final class AgentGrant"],
+          "docs": "The `AgentGrant` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentGrantPage",
+          "kind": "type",
+          "signatures": ["public final class AgentGrantPage"],
+          "docs": "The `AgentGrantPage` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentGrantsReply",
+          "kind": "type",
+          "signatures": ["public final class AgentGrantsReply"],
+          "docs": "The `AgentGrantsReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentGrantsRequestInput",
+          "kind": "type",
+          "signatures": ["public final class AgentGrantsRequestInput"],
+          "docs": "The `AgentGrantsRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentKey",
+          "kind": "type",
+          "signatures": ["public final class AgentKey"],
+          "docs": "The `AgentKey` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentPayment",
+          "kind": "type",
+          "signatures": ["public final class AgentPayment"],
+          "docs": "The `AgentPayment` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentSignupForApprovalReply",
+          "kind": "type",
+          "signatures": ["public final class AgentSignupForApprovalReply"],
+          "docs": "The `AgentSignupForApprovalReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentSignupForApprovalRequestInput",
+          "kind": "type",
+          "signatures": ["public final class AgentSignupForApprovalRequestInput"],
+          "docs": "The `AgentSignupForApprovalRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentSignupReply",
+          "kind": "type",
+          "signatures": ["public final class AgentSignupReply"],
+          "docs": "The `AgentSignupReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentSignupReview",
+          "kind": "type",
+          "signatures": ["public final class AgentSignupReview"],
+          "docs": "The `AgentSignupReview` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentSignupStatus",
+          "kind": "type",
+          "signatures": ["public final class AgentSignupStatus"],
+          "docs": "The `AgentSignupStatus` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "AgentSignupTicket",
+          "kind": "type",
+          "signatures": ["public final class AgentSignupTicket"],
+          "docs": "The `AgentSignupTicket` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
           "name": "AlertLiveSessionInput",
           "kind": "type",
           "signatures": ["public final class AlertLiveSessionInput"],
@@ -108,6 +216,18 @@
               "docs": "The JSON payload: at most 4096 bytes for alerts and 5120 bytes for VoIP pushes.\n\nReturns: the payload"
             }
           ]
+        },
+        {
+          "name": "ApproveAgentSignupReply",
+          "kind": "type",
+          "signatures": ["public final class ApproveAgentSignupReply"],
+          "docs": "The `ApproveAgentSignupReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "ApproveAgentSignupRequestInput",
+          "kind": "type",
+          "signatures": ["public final class ApproveAgentSignupRequestInput"],
+          "docs": "The `ApproveAgentSignupRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
         },
         {
           "name": "BillingCheckoutSession",
@@ -995,6 +1115,18 @@
           "docs": "The `InboxRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
         },
         {
+          "name": "IssueAgentKeyReply",
+          "kind": "type",
+          "signatures": ["public final class IssueAgentKeyReply"],
+          "docs": "The `IssueAgentKeyReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "IssueAgentKeyRequestInput",
+          "kind": "type",
+          "signatures": ["public final class IssueAgentKeyRequestInput"],
+          "docs": "The `IssueAgentKeyRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
           "name": "IssueBackendKeyReply",
           "kind": "type",
           "signatures": ["public final class IssueBackendKeyReply"],
@@ -1494,6 +1626,58 @@
               "docs": "Read the state of a long-running management operation.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
             },
             {
+              "name": "agentSignupForApproval",
+              "kind": "method",
+              "signatures": [
+                "public AgentSignupForApprovalReply agentSignupForApproval(AgentSignupForApprovalRequestInput input)"
+              ],
+              "docs": "Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: anonymous (condition approvalToken).\n\nParameters:\n\n- `input`: the operation input\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "agentSignup",
+              "kind": "method",
+              "signatures": ["public AgentSignupReply agentSignup()"],
+              "docs": "Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: agentVerifier (condition ownSignup).\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "agentGrants",
+              "kind": "method",
+              "signatures": ["public AgentGrantsReply agentGrants(AgentGrantsRequestInput input)"],
+              "docs": "List an organization's agent grants with their keys, newest first.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "agentGrantsPages",
+              "kind": "method",
+              "signatures": [
+                "public Iterable<AgentGrantPage> agentGrantsPages(AgentGrantsRequestInput input)"
+              ],
+              "docs": "Every page of `agentGrants(AgentGrantsRequestInput)`, each requested when iteration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and iteration ends after the page whose `complete` is true. Each iteration starts again from `input`, and every request has a new request ID.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.\n\nIteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.\n\nParameters:\n\n- `input`: the first page's input\n\nReturns: the pages, in order\n\nThrows: `IllegalArgumentException` if the input's `cursor` is not a valid cursor"
+            },
+            {
+              "name": "agentAuditEvents",
+              "kind": "method",
+              "signatures": [
+                "public AgentAuditEventsReply agentAuditEvents(AgentAuditEventsRequestInput input)"
+              ],
+              "docs": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "agentAuditEventsPages",
+              "kind": "method",
+              "signatures": [
+                "public Iterable<AgentAuditEventPage> agentAuditEventsPages(AgentAuditEventsRequestInput input)"
+              ],
+              "docs": "Every page of `agentAuditEvents(AgentAuditEventsRequestInput)`, each requested when iteration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and iteration ends after the page whose `complete` is true. Each iteration starts again from `input`, and every request has a new request ID.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.\n\nIteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.\n\nParameters:\n\n- `input`: the first page's input\n\nReturns: the pages, in order\n\nThrows: `IllegalArgumentException` if the input's `cursor` is not a valid cursor"
+            },
+            {
+              "name": "organizationSpend",
+              "kind": "method",
+              "signatures": [
+                "public OrganizationSpendReply organizationSpend(OrganizationSpendRequestInput input)"
+              ],
+              "docs": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
               "name": "createOrganization",
               "kind": "method",
               "signatures": [
@@ -1636,6 +1820,78 @@
                 "public ReplayWebhookDeliveriesReply replayWebhookDeliveries(ReplayWebhookDeliveriesRequestInput input, @Nullable String requestId)"
               ],
               "docs": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "requestAgentSignup",
+              "kind": "method",
+              "signatures": [
+                "public RequestAgentSignupReply requestAgentSignup(RequestAgentSignupRequestInput input)",
+                "public RequestAgentSignupReply requestAgentSignup(RequestAgentSignupRequestInput input, @Nullable String requestId)"
+              ],
+              "docs": "Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nAuthorization: anonymous.\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "rejectAgentSignup",
+              "kind": "method",
+              "signatures": [
+                "public RejectAgentSignupReply rejectAgentSignup(RejectAgentSignupRequestInput input)",
+                "public RejectAgentSignupReply rejectAgentSignup(RejectAgentSignupRequestInput input, @Nullable String requestId)"
+              ],
+              "docs": "Reject a signup request from its approval link, optionally suppressing future requests to the email.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nAuthorization: anonymous (condition approvalToken).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "approveAgentSignup",
+              "kind": "method",
+              "signatures": [
+                "public ApproveAgentSignupReply approveAgentSignup(ApproveAgentSignupRequestInput input)",
+                "public ApproveAgentSignupReply approveAgentSignup(ApproveAgentSignupRequestInput input, @Nullable String requestId)"
+              ],
+              "docs": "Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition approvalToken).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "issueAgentKey",
+              "kind": "method",
+              "signatures": [
+                "public IssueAgentKeyReply issueAgentKey(IssueAgentKeyRequestInput input)",
+                "public IssueAgentKeyReply issueAgentKey(IssueAgentKeyRequestInput input, @Nullable String requestId)"
+              ],
+              "docs": "Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nAuthorization: agentVerifier (condition activeGrant).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "agentCredentialPermit",
+              "kind": "method",
+              "signatures": [
+                "public AgentCredentialPermitReply agentCredentialPermit(AgentCredentialPermitRequestInput input)",
+                "public AgentCredentialPermitReply agentCredentialPermit(AgentCredentialPermitRequestInput input, @Nullable String requestId)"
+              ],
+              "docs": "Issue a permit that authorizes the agent to redeem one of its key deliveries.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nAuthorization: agentVerifier (condition activeGrant).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "revokeAgentGrant",
+              "kind": "method",
+              "signatures": [
+                "public RevokeAgentGrantReply revokeAgentGrant(RevokeAgentGrantRequestInput input)",
+                "public RevokeAgentGrantReply revokeAgentGrant(RevokeAgentGrantRequestInput input, @Nullable String requestId)"
+              ],
+              "docs": "Revoke an agent grant and every key issued under it.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "setSpendControls",
+              "kind": "method",
+              "signatures": [
+                "public SetSpendControlsReply setSpendControls(SetSpendControlsRequestInput input)",
+                "public SetSpendControlsReply setSpendControls(SetSpendControlsRequestInput input, @Nullable String requestId)"
+              ],
+              "docs": "Set the organization's monthly spend cap and agent purchase limit.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+            },
+            {
+              "name": "purchaseAgentCredits",
+              "kind": "method",
+              "signatures": [
+                "public PurchaseAgentCreditsReply purchaseAgentCredits(PurchaseAgentCreditsRequestInput input)",
+                "public PurchaseAgentCreditsReply purchaseAgentCredits(PurchaseAgentCreditsRequestInput input, @Nullable String requestId)"
+              ],
+              "docs": "Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.\n\nIdempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.\n\nAuthorization: agentVerifier (condition activeGrant).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
             }
           ]
         },
@@ -1864,6 +2120,24 @@
           "kind": "type",
           "signatures": ["public final class OrganizationPage"],
           "docs": "The `OrganizationPage` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "OrganizationSpend",
+          "kind": "type",
+          "signatures": ["public final class OrganizationSpend"],
+          "docs": "The `OrganizationSpend` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "OrganizationSpendReply",
+          "kind": "type",
+          "signatures": ["public final class OrganizationSpendReply"],
+          "docs": "The `OrganizationSpendReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "OrganizationSpendRequestInput",
+          "kind": "type",
+          "signatures": ["public final class OrganizationSpendRequestInput"],
+          "docs": "The `OrganizationSpendRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
         },
         {
           "name": "OrganizationUsage",
@@ -2153,6 +2427,18 @@
           "kind": "type",
           "signatures": ["public final class ProjectUsageRequestInput"],
           "docs": "The `ProjectUsageRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "PurchaseAgentCreditsReply",
+          "kind": "type",
+          "signatures": ["public final class PurchaseAgentCreditsReply"],
+          "docs": "The `PurchaseAgentCreditsReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "PurchaseAgentCreditsRequestInput",
+          "kind": "type",
+          "signatures": ["public final class PurchaseAgentCreditsRequestInput"],
+          "docs": "The `PurchaseAgentCreditsRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
         },
         {
           "name": "PushOptions",
@@ -2463,6 +2749,18 @@
           "docs": "The `RedeemCredentialRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
         },
         {
+          "name": "RejectAgentSignupReply",
+          "kind": "type",
+          "signatures": ["public final class RejectAgentSignupReply"],
+          "docs": "The `RejectAgentSignupReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "RejectAgentSignupRequestInput",
+          "kind": "type",
+          "signatures": ["public final class RejectAgentSignupRequestInput"],
+          "docs": "The `RejectAgentSignupRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
           "name": "RemoveMemberReply",
           "kind": "type",
           "signatures": ["public final class RemoveMemberReply"],
@@ -2497,6 +2795,18 @@
           "kind": "type",
           "signatures": ["public final class ReplayWebhookDeliveriesRequestInput"],
           "docs": "The `ReplayWebhookDeliveriesRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "RequestAgentSignupReply",
+          "kind": "type",
+          "signatures": ["public final class RequestAgentSignupReply"],
+          "docs": "The `RequestAgentSignupReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "RequestAgentSignupRequestInput",
+          "kind": "type",
+          "signatures": ["public final class RequestAgentSignupRequestInput"],
+          "docs": "The `RequestAgentSignupRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
         },
         {
           "name": "RequestResolution",
@@ -2565,6 +2875,18 @@
           "kind": "type",
           "signatures": ["public final class RetainedResult"],
           "docs": "Exactly one typed field contains the retained, currently authorized receipt result.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "RevokeAgentGrantReply",
+          "kind": "type",
+          "signatures": ["public final class RevokeAgentGrantReply"],
+          "docs": "The `RevokeAgentGrantReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "RevokeAgentGrantRequestInput",
+          "kind": "type",
+          "signatures": ["public final class RevokeAgentGrantRequestInput"],
+          "docs": "The `RevokeAgentGrantRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
         },
         {
           "name": "RevokeBackendKeyReply",
@@ -2908,6 +3230,18 @@
           "kind": "type",
           "signatures": ["public final class SetConversationMutePayload"],
           "docs": "The `SetConversationMutePayload` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "SetSpendControlsReply",
+          "kind": "type",
+          "signatures": ["public final class SetSpendControlsReply"],
+          "docs": "The `SetSpendControlsReply` result type.\n\nPackage: `com.convohop.server.model`."
+        },
+        {
+          "name": "SetSpendControlsRequestInput",
+          "kind": "type",
+          "signatures": ["public final class SetSpendControlsRequestInput"],
+          "docs": "The `SetSpendControlsRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
         },
         {
           "name": "UpdateConversationReply",
@@ -4368,6 +4702,60 @@
               "docs": "Suspending `ManagementApi.getOperation`."
             },
             {
+              "name": "agentSignupForApproval",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun agentSignupForApproval(input: AgentSignupForApprovalRequestInput): AgentSignupForApprovalReply"
+              ],
+              "docs": "Suspending `ManagementApi.agentSignupForApproval`."
+            },
+            {
+              "name": "agentSignup",
+              "kind": "method",
+              "signatures": ["public suspend fun agentSignup(): AgentSignupReply"],
+              "docs": "Suspending `ManagementApi.agentSignup`."
+            },
+            {
+              "name": "agentGrants",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun agentGrants(input: AgentGrantsRequestInput): AgentGrantsReply"
+              ],
+              "docs": "Suspending `ManagementApi.agentGrants`."
+            },
+            {
+              "name": "agentGrantsPages",
+              "kind": "method",
+              "signatures": [
+                "public fun agentGrantsPages(input: AgentGrantsRequestInput): Flow<AgentGrantPage>"
+              ],
+              "docs": "`ManagementApi.agentGrantsPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it."
+            },
+            {
+              "name": "agentAuditEvents",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun agentAuditEvents(input: AgentAuditEventsRequestInput): AgentAuditEventsReply"
+              ],
+              "docs": "Suspending `ManagementApi.agentAuditEvents`."
+            },
+            {
+              "name": "agentAuditEventsPages",
+              "kind": "method",
+              "signatures": [
+                "public fun agentAuditEventsPages(input: AgentAuditEventsRequestInput): Flow<AgentAuditEventPage>"
+              ],
+              "docs": "`ManagementApi.agentAuditEventsPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it."
+            },
+            {
+              "name": "organizationSpend",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun organizationSpend(input: OrganizationSpendRequestInput): OrganizationSpendReply"
+              ],
+              "docs": "Suspending `ManagementApi.organizationSpend`."
+            },
+            {
               "name": "createOrganization",
               "kind": "method",
               "signatures": [
@@ -4494,6 +4882,70 @@
                 "public suspend fun replayWebhookDeliveries(input: ReplayWebhookDeliveriesRequestInput, requestId: String? = null): ReplayWebhookDeliveriesReply"
               ],
               "docs": "Suspending `ManagementApi.replayWebhookDeliveries`."
+            },
+            {
+              "name": "requestAgentSignup",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun requestAgentSignup(input: RequestAgentSignupRequestInput, requestId: String? = null): RequestAgentSignupReply"
+              ],
+              "docs": "Suspending `ManagementApi.requestAgentSignup`."
+            },
+            {
+              "name": "rejectAgentSignup",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun rejectAgentSignup(input: RejectAgentSignupRequestInput, requestId: String? = null): RejectAgentSignupReply"
+              ],
+              "docs": "Suspending `ManagementApi.rejectAgentSignup`."
+            },
+            {
+              "name": "approveAgentSignup",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun approveAgentSignup(input: ApproveAgentSignupRequestInput, requestId: String? = null): ApproveAgentSignupReply"
+              ],
+              "docs": "Suspending `ManagementApi.approveAgentSignup`."
+            },
+            {
+              "name": "issueAgentKey",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun issueAgentKey(input: IssueAgentKeyRequestInput, requestId: String? = null): IssueAgentKeyReply"
+              ],
+              "docs": "Suspending `ManagementApi.issueAgentKey`."
+            },
+            {
+              "name": "agentCredentialPermit",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun agentCredentialPermit(input: AgentCredentialPermitRequestInput, requestId: String? = null): AgentCredentialPermitReply"
+              ],
+              "docs": "Suspending `ManagementApi.agentCredentialPermit`."
+            },
+            {
+              "name": "revokeAgentGrant",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun revokeAgentGrant(input: RevokeAgentGrantRequestInput, requestId: String? = null): RevokeAgentGrantReply"
+              ],
+              "docs": "Suspending `ManagementApi.revokeAgentGrant`."
+            },
+            {
+              "name": "setSpendControls",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun setSpendControls(input: SetSpendControlsRequestInput, requestId: String? = null): SetSpendControlsReply"
+              ],
+              "docs": "Suspending `ManagementApi.setSpendControls`."
+            },
+            {
+              "name": "purchaseAgentCredits",
+              "kind": "method",
+              "signatures": [
+                "public suspend fun purchaseAgentCredits(input: PurchaseAgentCreditsRequestInput, requestId: String? = null): PurchaseAgentCreditsReply"
+              ],
+              "docs": "Suspending `ManagementApi.purchaseAgentCredits`."
             }
           ]
         },

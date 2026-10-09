@@ -18,6 +18,39 @@ public object ErrorCodes {
     /** A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId. */
     public const val ADMISSION_LIMIT: String = "ADMISSION_LIMIT"
 
+    /** Agent signup is not offered in this environment. */
+    public const val AGENTIC_NOT_CONFIGURED: String = "AGENTIC_NOT_CONFIGURED"
+
+    /** The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request. */
+    public const val AGENT_CONFIRMATION_CODE_INVALID: String = "AGENT_CONFIRMATION_CODE_INVALID"
+
+    /** The agent's grant has expired. The agent needs a new signup request approved. */
+    public const val AGENT_GRANT_EXPIRED: String = "AGENT_GRANT_EXPIRED"
+
+    /** The owner revoked the agent's grant. */
+    public const val AGENT_GRANT_REVOKED: String = "AGENT_GRANT_REVOKED"
+
+    /** The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one. */
+    public const val AGENT_KEY_LIMIT: String = "AGENT_KEY_LIMIT"
+
+    /** The purchase would take this month's agent credit purchases beyond the limit the owner set. */
+    public const val AGENT_PURCHASE_LIMIT_EXCEEDED: String = "AGENT_PURCHASE_LIMIT_EXCEEDED"
+
+    /** A requested scope is outside the agent's grant. */
+    public const val AGENT_SCOPE_NOT_GRANTED: String = "AGENT_SCOPE_NOT_GRANTED"
+
+    /** The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired. */
+    public const val AGENT_SIGNUP_CLOSED: String = "AGENT_SIGNUP_CLOSED"
+
+    /** The owner's email address is refused, for example for a disposable domain. */
+    public const val AGENT_SIGNUP_EMAIL_REJECTED: String = "AGENT_SIGNUP_EMAIL_REJECTED"
+
+    /** The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready. */
+    public const val AGENT_SIGNUP_NOT_READY: String = "AGENT_SIGNUP_NOT_READY"
+
+    /** The owner opted out of agent signup requests to this email address. */
+    public const val AGENT_SIGNUP_SUPPRESSED: String = "AGENT_SIGNUP_SUPPRESSED"
+
     /** The participation already has an active media connection. */
     public const val ALREADY_CONNECTED: String = "ALREADY_CONNECTED"
 
@@ -68,6 +101,18 @@ public object ErrorCodes {
 
     /** Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly. */
     public const val CREDENTIAL_REQUIRED: String = "CREDENTIAL_REQUIRED"
+
+    /** Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap. */
+    public const val CREDITS_EXHAUSTED: String = "CREDITS_EXHAUSTED"
+
+    /** Credits apply only to a billed subscription, and none is in force. */
+    public const val CREDITS_REQUIRE_METERED_PLAN: String = "CREDITS_REQUIRE_METERED_PLAN"
+
+    /** The credit amount is outside the allowed purchase range. */
+    public const val CREDIT_AMOUNT_OUT_OF_RANGE: String = "CREDIT_AMOUNT_OUT_OF_RANGE"
+
+    /** Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some. */
+    public const val CREDIT_GRANT_LIMIT_REACHED: String = "CREDIT_GRANT_LIMIT_REACHED"
 
     /** The cursor is ahead of the committed events of the conversation. */
     public const val CURSOR_AHEAD: String = "CURSOR_AHEAD"
@@ -177,6 +222,12 @@ public object ErrorCodes {
     /** The participation does not belong to the caller or the current live session generation. */
     public const val PARTICIPATION_MISMATCH: String = "PARTICIPATION_MISMATCH"
 
+    /** The payment rail declined the payment. Nothing was charged. */
+    public const val PAYMENT_DECLINED: String = "PAYMENT_DECLINED"
+
+    /** No payment rail is enabled in this environment. */
+    public const val PAYMENT_RAIL_NOT_CONFIGURED: String = "PAYMENT_RAIL_NOT_CONFIGURED"
+
     /** The stored delivery permit has expired. Request a new permit. */
     public const val PERMIT_EXPIRED: String = "PERMIT_EXPIRED"
 
@@ -237,6 +288,12 @@ public object ErrorCodes {
     /** The refreshed session could not be verified. */
     public const val SESSION_REFRESH_UNVERIFIED: String = "SESSION_REFRESH_UNVERIFIED"
 
+    /** The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap. */
+    public const val SPEND_CAP_REACHED: String = "SPEND_CAP_REACHED"
+
+    /** Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed. */
+    public const val SPEND_UNVERIFIED: String = "SPEND_UNVERIFIED"
+
     /** The transport failed after the request may have been sent. Resolve or retry the original request. */
     public const val TRANSPORT_UNKNOWN: String = "TRANSPORT_UNKNOWN"
 
@@ -265,6 +322,17 @@ public object ErrorCodes {
     public val catalog: Map<String, ErrorCodeInfo> =
         listOf(
             ErrorCodeInfo(ADMISSION_LIMIT, "A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId.", "both", 429, true),
+            ErrorCodeInfo(AGENTIC_NOT_CONFIGURED, "Agent signup is not offered in this environment.", "server", 503, false),
+            ErrorCodeInfo(AGENT_CONFIRMATION_CODE_INVALID, "The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.", "server", 403, false),
+            ErrorCodeInfo(AGENT_GRANT_EXPIRED, "The agent's grant has expired. The agent needs a new signup request approved.", "server", 403, false),
+            ErrorCodeInfo(AGENT_GRANT_REVOKED, "The owner revoked the agent's grant.", "server", 403, false),
+            ErrorCodeInfo(AGENT_KEY_LIMIT, "The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.", "server", 409, false),
+            ErrorCodeInfo(AGENT_PURCHASE_LIMIT_EXCEEDED, "The purchase would take this month's agent credit purchases beyond the limit the owner set.", "server", 402, false),
+            ErrorCodeInfo(AGENT_SCOPE_NOT_GRANTED, "A requested scope is outside the agent's grant.", "server", 403, false),
+            ErrorCodeInfo(AGENT_SIGNUP_CLOSED, "The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.", "server", 409, false),
+            ErrorCodeInfo(AGENT_SIGNUP_EMAIL_REJECTED, "The owner's email address is refused, for example for a disposable domain.", "server", 400, false),
+            ErrorCodeInfo(AGENT_SIGNUP_NOT_READY, "The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.", "server", 409, false),
+            ErrorCodeInfo(AGENT_SIGNUP_SUPPRESSED, "The owner opted out of agent signup requests to this email address.", "server", 403, false),
             ErrorCodeInfo(ALREADY_CONNECTED, "The participation already has an active media connection.", "server", 409, false),
             ErrorCodeInfo(ALREADY_EXISTS, "A resource with the same unique key already exists.", "server", 409, false),
             ErrorCodeInfo(AUTHORITY_UNAVAILABLE, "The authority is temporarily unavailable. Retry with the same requestId.", "both", 503, true),
@@ -282,6 +350,10 @@ public object ErrorCodes {
             ErrorCodeInfo(CREDENTIAL_EXPIRED, "The credential carried by the stored result has expired. Request a new one.", "server", 409, false),
             ErrorCodeInfo(CREDENTIAL_REFRESH_REQUIRED, "The media credential must be refreshed before connecting.", "both", 409, false),
             ErrorCodeInfo(CREDENTIAL_REQUIRED, "Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.", "sdk", 409, false),
+            ErrorCodeInfo(CREDITS_EXHAUSTED, "Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.", "server", 402, false),
+            ErrorCodeInfo(CREDITS_REQUIRE_METERED_PLAN, "Credits apply only to a billed subscription, and none is in force.", "server", 409, false),
+            ErrorCodeInfo(CREDIT_AMOUNT_OUT_OF_RANGE, "The credit amount is outside the allowed purchase range.", "server", 400, false),
+            ErrorCodeInfo(CREDIT_GRANT_LIMIT_REACHED, "Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.", "server", 409, false),
             ErrorCodeInfo(CURSOR_AHEAD, "The cursor is ahead of the committed events of the conversation.", "server", 409, false),
             ErrorCodeInfo(CURSOR_EXPIRED, "The cursor is older than retained history. Resynchronize from current state; never reset the cursor silently.", "server", 409, false),
             ErrorCodeInfo(CURSOR_INVALID, "The cursor is malformed or was not issued for this query.", "server", 409, false),
@@ -318,6 +390,8 @@ public object ErrorCodes {
             ErrorCodeInfo(OUTCOME_UNKNOWN, "The mutation may have committed. Retry with the same requestId or resolve it.", "server", 503, true),
             ErrorCodeInfo(PAGE_ITEM_TOO_LARGE, "A single item exceeds the page response limit.", "server", 413, false),
             ErrorCodeInfo(PARTICIPATION_MISMATCH, "The participation does not belong to the caller or the current live session generation.", "both", 409, false),
+            ErrorCodeInfo(PAYMENT_DECLINED, "The payment rail declined the payment. Nothing was charged.", "server", 402, false),
+            ErrorCodeInfo(PAYMENT_RAIL_NOT_CONFIGURED, "No payment rail is enabled in this environment.", "server", 503, false),
             ErrorCodeInfo(PERMIT_EXPIRED, "The stored delivery permit has expired. Request a new permit.", "server", 409, false),
             ErrorCodeInfo(PLAN_LIMIT_EXCEEDED, "The plan does not permit the resource or feature. extensions.planLimit names the limit and extensions.limit holds the plan's value. Change the plan or the limit before trying again.", "server", 403, false),
             ErrorCodeInfo(QUOTA_EXCEEDED, "A hard usage quota refused new work until the quota period ends. extensions.meter, extensions.limit and extensions.periodEnd describe the quota, and extensions.retryAfter (HTTP Retry-After) counts the seconds until it resets. Work already in progress continues.", "server", 429, false),
@@ -338,6 +412,8 @@ public object ErrorCodes {
             ErrorCodeInfo(SESSION_REFRESH_REJECTED, "The refreshed session was rejected because it does not match the current session.", "sdk", 409, false),
             ErrorCodeInfo(SESSION_REFRESH_REQUIRED, "The user session needs renewal and no refresh is configured, or it expired.", "sdk", 409, false),
             ErrorCodeInfo(SESSION_REFRESH_UNVERIFIED, "The refreshed session could not be verified.", "sdk", null, false),
+            ErrorCodeInfo(SPEND_CAP_REACHED, "The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.", "server", 402, false),
+            ErrorCodeInfo(SPEND_UNVERIFIED, "Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.", "server", 503, true),
             ErrorCodeInfo(TRANSPORT_UNKNOWN, "The transport failed after the request may have been sent. Resolve or retry the original request.", "sdk", null, true),
             ErrorCodeInfo(UNAUTHENTICATED, "The credential is missing, invalid or expired.", "both", 401, false),
             ErrorCodeInfo(WEBHOOK_DESTINATION_DENIED, "The webhook URL is not a public HTTPS destination.", "server", 400, false),

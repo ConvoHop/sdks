@@ -52,6 +52,95 @@ type AddMembersPayload {
 	result: ConversationMemberBatch!
 }
 
+type AgentAuditEvent {
+	eventId: UUID!
+	orgId: UUID!
+	grantId: UUID
+	actorKind: String!
+	actorId: UUID
+	kind: String!
+	details: Properties
+	occurredAt: String!
+}
+
+type AgentAuditEventPage {
+	items: [AgentAuditEvent!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type AgentGrant {
+	grantId: UUID!
+	orgId: UUID!
+	signupId: UUID!
+	agentActorId: UUID!
+	projectId: UUID
+	scopes: [String!]!
+	expiresAt: String!
+	revokedAt: String
+	createdAt: String!
+	keys: [AgentKey!]!
+}
+
+type AgentGrantPage {
+	items: [AgentGrant!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type AgentKey {
+	operationId: UUID!
+	state: String!
+	scopes: [String!]!
+	expiresAt: String!
+	keyId: String
+	deliveryId: UUID
+	deliveryExpiresAt: String
+}
+
+type AgentPayment {
+	paymentId: UUID!
+	amount: String!
+	currency: String!
+	state: String!
+}
+
+type AgentSignupReview {
+	signupId: UUID!
+	ownerEmail: String!
+	organizationName: String!
+	agentName: String!
+	purpose: String
+	suggestedPlan: String
+	suggestedScopes: [String!]!
+	suggestedMonthlySpendCap: String
+	currency: String!
+	expiresAt: String!
+}
+
+type AgentSignupStatus {
+	signupId: UUID!
+	state: String!
+	orgId: UUID
+	deploymentId: UUID
+	projectId: UUID
+	nextStep: String
+	scopes: [String!]!
+	grantExpiresAt: String
+	keys: [AgentKey!]!
+	incarnation: UUID
+	servingEpoch: Decimal
+}
+
+type AgentSignupTicket {
+	signupId: UUID!
+	confirmationCode: String!
+	expiresAt: String!
+	pollAfterSeconds: Int!
+}
+
 input AlertLiveSessionInput {
 	liveSessionId: UUID!
 	expectedGeneration: Decimal!
@@ -207,6 +296,28 @@ type CredentialDelivery {
 
 type CredentialDeliveryReceipt {
 	deliveryId: UUID!
+}
+
+"""
+GraphQL error `extensions` when `code` is `CREDITS_EXHAUSTED`. The organization's prepaid credits are spent and its monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (HTTP 402, WebSocket close 4402). Usage within allowances continues. Not retryable until credits are added or the owner raises the cap.
+"""
+type CreditsExhaustedProblem {
+	"""
+	CREDITS_EXHAUSTED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	Canonical usage meter key whose billable usage beyond the plan's allowance was refused, such as `messages_sent`.
+	"""
+	meter: String!
+	"""
+	RFC 3339 UTC end of the organization's spend month.
+	"""
+	periodEnd: String!
 }
 
 type CurrentLiveSessionReply {
@@ -1136,6 +1247,29 @@ type OrganizationPage {
 	nextCursor: String
 }
 
+type OrganizationSpend {
+	orgId: UUID!
+	planId: String!
+	currency: String!
+	catalogVersion: String!
+	monthlySpendCap: String
+	agentPurchaseLimit: String
+	updatedAt: String
+	monthlyMinimum: String
+	periodStart: String
+	periodEnd: String
+	credits: String
+	charges: String
+	margin: String
+	stop: String
+	refusedMeters: [String!]!
+	evaluatedAt: String
+	usageThrough: String
+	validUntil: String
+	minimumCredit: String
+	chargeLimit: String
+}
+
 type OrganizationUsage {
 	orgId: UUID!
 	source: String!
@@ -1447,6 +1581,8 @@ type ResourceRef {
 Exactly one typed field contains the retained, currently authorized receipt result.
 """
 type RetainedResult {
+	agentGrant: AgentGrant
+	agentSignupStatus: AgentSignupStatus
 	billingCheckoutSession: BillingCheckoutSession
 	billingPortalSession: BillingPortalSession
 	broadcastPermissionChanged: BroadcastPermissionChanged
@@ -1465,6 +1601,7 @@ type RetainedResult {
 	message: Message
 	messageAck: MessageAck
 	organization: Organization
+	organizationSpend: OrganizationSpend
 	principal: Principal
 	readReceipt: ReadReceipt
 	sessionBootstrap: SessionBootstrap
@@ -1644,6 +1781,54 @@ type SetConversationMutePayload {
 }
 
 scalar SignedProof
+
+"""
+GraphQL error `extensions` when `code` is `SPEND_CAP_REACHED`. The spend month's usage charges, excluding the plan fee and tax, reached the organization's charge limit, less a safety margin: its prepaid credits plus its monthly spend cap, less the next monthly minimum, which the next invoice bills in advance, plus this month's paid minimum credit. Billable usage beyond the plan's allowances is refused before any effect (HTTP 402, WebSocket close 4402). Usage within allowances continues. Not retryable until credits are added or the owner raises the cap; otherwise usage resumes at `periodEnd` once the next monthly minimum, if any, is paid.
+"""
+type SpendCapReachedProblem {
+	"""
+	SPEND_CAP_REACHED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	Canonical usage meter key whose billable usage beyond the plan's allowance was refused, such as `messages_sent`.
+	"""
+	meter: String!
+	"""
+	RFC 3339 UTC end of the organization's spend month.
+	"""
+	periodEnd: String!
+}
+
+"""
+GraphQL error `extensions` when `code` is `SPEND_UNVERIFIED`. Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (HTTP 503, WebSocket close 4503). Usage within allowances continues. Resend the same request identity after `retryAfter` seconds.
+"""
+type SpendUnverifiedProblem {
+	"""
+	SPEND_UNVERIFIED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.
+	"""
+	retryAfter: Int!
+	"""
+	Canonical usage meter key whose billable usage beyond the plan's allowance was refused, such as `messages_sent`.
+	"""
+	meter: String!
+	"""
+	RFC 3339 UTC end of the organization's spend month.
+	"""
+	periodEnd: String!
+}
 
 input StartLiveSessionInput {
 	conversationId: UUID!

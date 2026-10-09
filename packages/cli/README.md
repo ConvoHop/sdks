@@ -176,7 +176,9 @@ you give it, which can carry tokens. `call` doesn't run the operations whose
 results are credentials, such as `communication.issueSession` and the hosted
 billing links of `management.createBillingCheckoutSession` and
 `management.createBillingPortalSession`; `keys issue --out` and `redeem` write credentials only to a new file that only
-you can read.
+you can read. Nor does it run `management.approveAgentSignup`: approving an
+agent's signup records the owner's consent, which the owner gives from the
+emailed approval link, not a script.
 
 ## What the schema doesn't offer yet
 

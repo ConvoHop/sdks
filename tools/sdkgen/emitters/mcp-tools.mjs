@@ -3,7 +3,7 @@ import { byName, requireType } from "../lib/ir-model.mjs";
 import { formatJson } from "../lib/json.mjs";
 import { capitalize, snakeCase, words } from "../lib/naming.mjs";
 import {
-  CREDENTIAL_OPERATIONS, authText, oneLine, paginationText, serverCredential, serverOperations,
+  WITHHELD_OPERATIONS, authText, oneLine, paginationText, serverCredential, serverOperations,
 } from "../lib/server-operations.mjs";
 
 /**
@@ -22,8 +22,11 @@ export const RETRY_TOOL = "retry_request";
 /** The tool `_meta` key that carries the operation annotations. */
 export const META_KEY = "com.convohop/operation";
 
-/** Operations whose results are credentials. An agent must never receive them, so they get no tool. */
-export const WITHHELD = CREDENTIAL_OPERATIONS;
+/**
+ * Operations whose results are credentials, which an agent must never receive, and operations that record a person's
+ * consent, which an agent must not give. They get no tool.
+ */
+export const WITHHELD = WITHHELD_OPERATIONS;
 
 const NOTICE = "// Generated from the current unversioned GraphQL schemas. Run npm run generate:graphql.\n";
 // Portable across MCP clients: some reject dots and names longer than 64 characters.

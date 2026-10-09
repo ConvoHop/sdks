@@ -824,6 +824,94 @@ public const string AdmissionLimit = "ADMISSION_LIMIT";
 
 A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId.
 
+#### `ErrorCodes.AgenticNotConfigured` static property
+
+```cs
+public const string AgenticNotConfigured = "AGENTIC_NOT_CONFIGURED";
+```
+
+Agent signup is not offered in this environment.
+
+#### `ErrorCodes.AgentConfirmationCodeInvalid` static property
+
+```cs
+public const string AgentConfirmationCodeInvalid = "AGENT_CONFIRMATION_CODE_INVALID";
+```
+
+The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.
+
+#### `ErrorCodes.AgentGrantExpired` static property
+
+```cs
+public const string AgentGrantExpired = "AGENT_GRANT_EXPIRED";
+```
+
+The agent's grant has expired. The agent needs a new signup request approved.
+
+#### `ErrorCodes.AgentGrantRevoked` static property
+
+```cs
+public const string AgentGrantRevoked = "AGENT_GRANT_REVOKED";
+```
+
+The owner revoked the agent's grant.
+
+#### `ErrorCodes.AgentKeyLimit` static property
+
+```cs
+public const string AgentKeyLimit = "AGENT_KEY_LIMIT";
+```
+
+The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.
+
+#### `ErrorCodes.AgentPurchaseLimitExceeded` static property
+
+```cs
+public const string AgentPurchaseLimitExceeded = "AGENT_PURCHASE_LIMIT_EXCEEDED";
+```
+
+The purchase would take this month's agent credit purchases beyond the limit the owner set.
+
+#### `ErrorCodes.AgentScopeNotGranted` static property
+
+```cs
+public const string AgentScopeNotGranted = "AGENT_SCOPE_NOT_GRANTED";
+```
+
+A requested scope is outside the agent's grant.
+
+#### `ErrorCodes.AgentSignupClosed` static property
+
+```cs
+public const string AgentSignupClosed = "AGENT_SIGNUP_CLOSED";
+```
+
+The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.
+
+#### `ErrorCodes.AgentSignupEmailRejected` static property
+
+```cs
+public const string AgentSignupEmailRejected = "AGENT_SIGNUP_EMAIL_REJECTED";
+```
+
+The owner's email address is refused, for example for a disposable domain.
+
+#### `ErrorCodes.AgentSignupNotReady` static property
+
+```cs
+public const string AgentSignupNotReady = "AGENT_SIGNUP_NOT_READY";
+```
+
+The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.
+
+#### `ErrorCodes.AgentSignupSuppressed` static property
+
+```cs
+public const string AgentSignupSuppressed = "AGENT_SIGNUP_SUPPRESSED";
+```
+
+The owner opted out of agent signup requests to this email address.
+
 #### `ErrorCodes.AlreadyConnected` static property
 
 ```cs
@@ -959,6 +1047,38 @@ public const string CredentialRequired = "CREDENTIAL_REQUIRED";
 ```
 
 Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.
+
+#### `ErrorCodes.CreditsExhausted` static property
+
+```cs
+public const string CreditsExhausted = "CREDITS_EXHAUSTED";
+```
+
+Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+
+#### `ErrorCodes.CreditsRequireMeteredPlan` static property
+
+```cs
+public const string CreditsRequireMeteredPlan = "CREDITS_REQUIRE_METERED_PLAN";
+```
+
+Credits apply only to a billed subscription, and none is in force.
+
+#### `ErrorCodes.CreditAmountOutOfRange` static property
+
+```cs
+public const string CreditAmountOutOfRange = "CREDIT_AMOUNT_OUT_OF_RANGE";
+```
+
+The credit amount is outside the allowed purchase range.
+
+#### `ErrorCodes.CreditGrantLimitReached` static property
+
+```cs
+public const string CreditGrantLimitReached = "CREDIT_GRANT_LIMIT_REACHED";
+```
+
+Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.
 
 #### `ErrorCodes.CursorAhead` static property
 
@@ -1248,6 +1368,22 @@ public const string ParticipationMismatch = "PARTICIPATION_MISMATCH";
 
 The participation does not belong to the caller or the current live session generation.
 
+#### `ErrorCodes.PaymentDeclined` static property
+
+```cs
+public const string PaymentDeclined = "PAYMENT_DECLINED";
+```
+
+The payment rail declined the payment. Nothing was charged.
+
+#### `ErrorCodes.PaymentRailNotConfigured` static property
+
+```cs
+public const string PaymentRailNotConfigured = "PAYMENT_RAIL_NOT_CONFIGURED";
+```
+
+No payment rail is enabled in this environment.
+
 #### `ErrorCodes.PermitExpired` static property
 
 ```cs
@@ -1407,6 +1543,22 @@ public const string SessionRefreshUnverified = "SESSION_REFRESH_UNVERIFIED";
 ```
 
 The refreshed session could not be verified.
+
+#### `ErrorCodes.SpendCapReached` static property
+
+```cs
+public const string SpendCapReached = "SPEND_CAP_REACHED";
+```
+
+The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+
+#### `ErrorCodes.SpendUnverified` static property
+
+```cs
+public const string SpendUnverified = "SPEND_UNVERIFIED";
+```
+
+Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.
 
 #### `ErrorCodes.TransportUnknown` static property
 
@@ -2420,6 +2572,46 @@ public static readonly OperationDescriptor<GetOperationRequestInput, GetOperatio
 
 Read the state of a long-running management operation.
 
+#### `Operations.Management.AgentSignupForApproval` static property
+
+```cs
+public static readonly OperationDescriptor<AgentSignupForApprovalRequestInput, AgentSignupForApprovalReply> AgentSignupForApproval;
+```
+
+Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+
+#### `Operations.Management.AgentSignup` static property
+
+```cs
+public static readonly OperationDescriptor<NoInput, AgentSignupReply> AgentSignup;
+```
+
+Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+
+#### `Operations.Management.AgentGrants` static property
+
+```cs
+public static readonly OperationDescriptor<AgentGrantsRequestInput, AgentGrantsReply> AgentGrants;
+```
+
+List an organization's agent grants with their keys, newest first.
+
+#### `Operations.Management.AgentAuditEvents` static property
+
+```cs
+public static readonly OperationDescriptor<AgentAuditEventsRequestInput, AgentAuditEventsReply> AgentAuditEvents;
+```
+
+List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+
+#### `Operations.Management.OrganizationSpend` static property
+
+```cs
+public static readonly OperationDescriptor<OrganizationSpendRequestInput, OrganizationSpendReply> OrganizationSpend;
+```
+
+Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+
 #### `Operations.Management.CreateOrganization` static property
 
 ```cs
@@ -2547,6 +2739,70 @@ public static readonly OperationDescriptor<ReplayWebhookDeliveriesRequestInput, 
 ```
 
 Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.
+
+#### `Operations.Management.RequestAgentSignup` static property
+
+```cs
+public static readonly OperationDescriptor<RequestAgentSignupRequestInput, RequestAgentSignupReply> RequestAgentSignup;
+```
+
+Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+
+#### `Operations.Management.RejectAgentSignup` static property
+
+```cs
+public static readonly OperationDescriptor<RejectAgentSignupRequestInput, RejectAgentSignupReply> RejectAgentSignup;
+```
+
+Reject a signup request from its approval link, optionally suppressing future requests to the email.
+
+#### `Operations.Management.ApproveAgentSignup` static property
+
+```cs
+public static readonly OperationDescriptor<ApproveAgentSignupRequestInput, ApproveAgentSignupReply> ApproveAgentSignup;
+```
+
+Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+
+#### `Operations.Management.IssueAgentKey` static property
+
+```cs
+public static readonly OperationDescriptor<IssueAgentKeyRequestInput, IssueAgentKeyReply> IssueAgentKey;
+```
+
+Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+
+#### `Operations.Management.AgentCredentialPermit` static property
+
+```cs
+public static readonly OperationDescriptor<AgentCredentialPermitRequestInput, AgentCredentialPermitReply> AgentCredentialPermit;
+```
+
+Issue a permit that authorizes the agent to redeem one of its key deliveries.
+
+#### `Operations.Management.RevokeAgentGrant` static property
+
+```cs
+public static readonly OperationDescriptor<RevokeAgentGrantRequestInput, RevokeAgentGrantReply> RevokeAgentGrant;
+```
+
+Revoke an agent grant and every key issued under it.
+
+#### `Operations.Management.SetSpendControls` static property
+
+```cs
+public static readonly OperationDescriptor<SetSpendControlsRequestInput, SetSpendControlsReply> SetSpendControls;
+```
+
+Set the organization's monthly spend cap and agent purchase limit.
+
+#### `Operations.Management.PurchaseAgentCredits` static property
+
+```cs
+public static readonly OperationDescriptor<PurchaseAgentCreditsRequestInput, PurchaseAgentCreditsReply> PurchaseAgentCredits;
+```
+
+Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
 
 ### `ProjectOptions` class
 

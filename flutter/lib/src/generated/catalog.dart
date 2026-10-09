@@ -844,6 +844,47 @@ abstract final class Operations {
         '          id\n'
         '        }\n'
         '        result {\n'
+        '          agentGrant {\n'
+        '            grantId\n'
+        '            orgId\n'
+        '            signupId\n'
+        '            agentActorId\n'
+        '            projectId\n'
+        '            scopes\n'
+        '            expiresAt\n'
+        '            revokedAt\n'
+        '            createdAt\n'
+        '            keys {\n'
+        '              operationId\n'
+        '              state\n'
+        '              scopes\n'
+        '              expiresAt\n'
+        '              keyId\n'
+        '              deliveryId\n'
+        '              deliveryExpiresAt\n'
+        '            }\n'
+        '          }\n'
+        '          agentSignupStatus {\n'
+        '            signupId\n'
+        '            state\n'
+        '            orgId\n'
+        '            deploymentId\n'
+        '            projectId\n'
+        '            nextStep\n'
+        '            scopes\n'
+        '            grantExpiresAt\n'
+        '            keys {\n'
+        '              operationId\n'
+        '              state\n'
+        '              scopes\n'
+        '              expiresAt\n'
+        '              keyId\n'
+        '              deliveryId\n'
+        '              deliveryExpiresAt\n'
+        '            }\n'
+        '            incarnation\n'
+        '            servingEpoch\n'
+        '          }\n'
         '          billingCheckoutSession {\n'
         '            orgId\n'
         '            planId\n'
@@ -1048,6 +1089,28 @@ abstract final class Operations {
         '            name\n'
         '            status\n'
         '            revision\n'
+        '          }\n'
+        '          organizationSpend {\n'
+        '            orgId\n'
+        '            planId\n'
+        '            currency\n'
+        '            catalogVersion\n'
+        '            monthlySpendCap\n'
+        '            agentPurchaseLimit\n'
+        '            updatedAt\n'
+        '            monthlyMinimum\n'
+        '            periodStart\n'
+        '            periodEnd\n'
+        '            credits\n'
+        '            charges\n'
+        '            margin\n'
+        '            stop\n'
+        '            refusedMeters\n'
+        '            evaluatedAt\n'
+        '            usageThrough\n'
+        '            validUntil\n'
+        '            minimumCredit\n'
+        '            chargeLimit\n'
         '          }\n'
         '          principal {\n'
         '            principalId\n'
@@ -1812,7 +1875,7 @@ abstract final class Operations {
     idempotency: IdempotencyClasses.idempotent,
     pagination: 'none',
     realtime: 'none',
-    errorCodes: <String>['ADMISSION_LIMIT', 'AUTHORITY_UNAVAILABLE', 'FEATURE_UNSUPPORTED', 'FORBIDDEN', 'GRAPHQL_ERROR', 'GRAPHQL_INVALID_REQUEST', 'GRAPHQL_QUERY_LIMIT', 'GRAPHQL_RESPONSE_LIMIT', 'HTTP_FAILURE', 'IDEMPOTENCY_CONFLICT', 'INCARNATION_MISMATCH', 'INVALID_REQUEST', 'INVALID_RESPONSE', 'NOT_FOUND', 'OUTCOME_UNKNOWN', 'PLAN_LIMIT_EXCEEDED', 'QUOTA_EXCEEDED', 'RATE_LIMITED', 'RECOVERY_LIMIT', 'RECOVERY_STORAGE_FAILURE', 'REQUEST_EXPIRED', 'REQUEST_TOO_LARGE', 'RESOLUTION_REQUIRED', 'RESPONSE_TOO_LARGE', 'RETRY_EXHAUSTED', 'SCOPE_REQUIRED', 'TRANSPORT_UNKNOWN', 'UNAUTHENTICATED', 'WRONG_REGION'],
+    errorCodes: <String>['ADMISSION_LIMIT', 'AUTHORITY_UNAVAILABLE', 'CREDITS_EXHAUSTED', 'FEATURE_UNSUPPORTED', 'FORBIDDEN', 'GRAPHQL_ERROR', 'GRAPHQL_INVALID_REQUEST', 'GRAPHQL_QUERY_LIMIT', 'GRAPHQL_RESPONSE_LIMIT', 'HTTP_FAILURE', 'IDEMPOTENCY_CONFLICT', 'INCARNATION_MISMATCH', 'INVALID_REQUEST', 'INVALID_RESPONSE', 'NOT_FOUND', 'OUTCOME_UNKNOWN', 'PLAN_LIMIT_EXCEEDED', 'QUOTA_EXCEEDED', 'RATE_LIMITED', 'RECOVERY_LIMIT', 'RECOVERY_STORAGE_FAILURE', 'REQUEST_EXPIRED', 'REQUEST_TOO_LARGE', 'RESOLUTION_REQUIRED', 'RESPONSE_TOO_LARGE', 'RETRY_EXHAUSTED', 'SCOPE_REQUIRED', 'SPEND_CAP_REACHED', 'SPEND_UNVERIFIED', 'TRANSPORT_UNKNOWN', 'UNAUTHENTICATED', 'WRONG_REGION'],
     decode: _resultCommunicationSendMessage,
   );
 
@@ -2086,7 +2149,7 @@ abstract final class Operations {
     idempotency: IdempotencyClasses.idempotent,
     pagination: 'none',
     realtime: 'none',
-    errorCodes: <String>['ADMISSION_LIMIT', 'AUTHORITY_UNAVAILABLE', 'FEATURE_UNSUPPORTED', 'FORBIDDEN', 'GRAPHQL_ERROR', 'GRAPHQL_INVALID_REQUEST', 'GRAPHQL_QUERY_LIMIT', 'GRAPHQL_RESPONSE_LIMIT', 'HTTP_FAILURE', 'IDEMPOTENCY_CONFLICT', 'INCARNATION_MISMATCH', 'INVALID_REQUEST', 'INVALID_RESPONSE', 'LIVE_SESSION_EXISTS', 'MEDIA_RECOVERING', 'NOT_FOUND', 'OUTCOME_UNKNOWN', 'PLAN_LIMIT_EXCEEDED', 'QUOTA_EXCEEDED', 'RATE_LIMITED', 'RECOVERY_LIMIT', 'RECOVERY_STORAGE_FAILURE', 'REQUEST_EXPIRED', 'REQUEST_TOO_LARGE', 'RESOLUTION_REQUIRED', 'RESPONSE_TOO_LARGE', 'RETRY_EXHAUSTED', 'TRANSPORT_UNKNOWN', 'UNAUTHENTICATED', 'WRONG_REGION'],
+    errorCodes: <String>['ADMISSION_LIMIT', 'AUTHORITY_UNAVAILABLE', 'CREDITS_EXHAUSTED', 'FEATURE_UNSUPPORTED', 'FORBIDDEN', 'GRAPHQL_ERROR', 'GRAPHQL_INVALID_REQUEST', 'GRAPHQL_QUERY_LIMIT', 'GRAPHQL_RESPONSE_LIMIT', 'HTTP_FAILURE', 'IDEMPOTENCY_CONFLICT', 'INCARNATION_MISMATCH', 'INVALID_REQUEST', 'INVALID_RESPONSE', 'LIVE_SESSION_EXISTS', 'MEDIA_RECOVERING', 'NOT_FOUND', 'OUTCOME_UNKNOWN', 'PLAN_LIMIT_EXCEEDED', 'QUOTA_EXCEEDED', 'RATE_LIMITED', 'RECOVERY_LIMIT', 'RECOVERY_STORAGE_FAILURE', 'REQUEST_EXPIRED', 'REQUEST_TOO_LARGE', 'RESOLUTION_REQUIRED', 'RESPONSE_TOO_LARGE', 'RETRY_EXHAUSTED', 'SPEND_CAP_REACHED', 'SPEND_UNVERIFIED', 'TRANSPORT_UNKNOWN', 'UNAUTHENTICATED', 'WRONG_REGION'],
     decode: _resultCommunicationStartLiveSession,
   );
 
@@ -2145,7 +2208,7 @@ abstract final class Operations {
     idempotency: IdempotencyClasses.idempotent,
     pagination: 'none',
     realtime: 'none',
-    errorCodes: <String>['ADMISSION_LIMIT', 'AUTHORITY_UNAVAILABLE', 'FEATURE_UNSUPPORTED', 'FORBIDDEN', 'GENERATION_CONFLICT', 'GRAPHQL_ERROR', 'GRAPHQL_INVALID_REQUEST', 'GRAPHQL_QUERY_LIMIT', 'GRAPHQL_RESPONSE_LIMIT', 'HTTP_FAILURE', 'IDEMPOTENCY_CONFLICT', 'INCARNATION_MISMATCH', 'INVALID_REQUEST', 'INVALID_RESPONSE', 'LIVE_SESSION_CLOSED', 'NOT_FOUND', 'OUTCOME_UNKNOWN', 'PARTICIPATION_MISMATCH', 'PLAN_LIMIT_EXCEEDED', 'QUOTA_EXCEEDED', 'RATE_LIMITED', 'RECOVERY_LIMIT', 'RECOVERY_STORAGE_FAILURE', 'REQUEST_EXPIRED', 'REQUEST_TOO_LARGE', 'RESOLUTION_REQUIRED', 'RESPONSE_TOO_LARGE', 'RETRY_EXHAUSTED', 'TRANSPORT_UNKNOWN', 'UNAUTHENTICATED', 'WRONG_REGION'],
+    errorCodes: <String>['ADMISSION_LIMIT', 'AUTHORITY_UNAVAILABLE', 'CREDITS_EXHAUSTED', 'FEATURE_UNSUPPORTED', 'FORBIDDEN', 'GENERATION_CONFLICT', 'GRAPHQL_ERROR', 'GRAPHQL_INVALID_REQUEST', 'GRAPHQL_QUERY_LIMIT', 'GRAPHQL_RESPONSE_LIMIT', 'HTTP_FAILURE', 'IDEMPOTENCY_CONFLICT', 'INCARNATION_MISMATCH', 'INVALID_REQUEST', 'INVALID_RESPONSE', 'LIVE_SESSION_CLOSED', 'NOT_FOUND', 'OUTCOME_UNKNOWN', 'PARTICIPATION_MISMATCH', 'PLAN_LIMIT_EXCEEDED', 'QUOTA_EXCEEDED', 'RATE_LIMITED', 'RECOVERY_LIMIT', 'RECOVERY_STORAGE_FAILURE', 'REQUEST_EXPIRED', 'REQUEST_TOO_LARGE', 'RESOLUTION_REQUIRED', 'RESPONSE_TOO_LARGE', 'RETRY_EXHAUSTED', 'SPEND_CAP_REACHED', 'SPEND_UNVERIFIED', 'TRANSPORT_UNKNOWN', 'UNAUTHENTICATED', 'WRONG_REGION'],
     decode: _resultCommunicationJoinLiveSession,
   );
 
@@ -2377,7 +2440,7 @@ abstract final class Operations {
     idempotency: IdempotencyClasses.safe,
     pagination: 'replay',
     realtime: 'subscription',
-    errorCodes: <String>['ADMISSION_LIMIT', 'AUTHORITY_UNAVAILABLE', 'CURSOR_AHEAD', 'CURSOR_EXPIRED', 'CURSOR_MISMATCH', 'CURSOR_SCOPE_MISMATCH', 'FEATURE_UNSUPPORTED', 'FORBIDDEN', 'GRAPHQL_INVALID_REQUEST', 'GRAPHQL_QUERY_LIMIT', 'GRAPHQL_RESPONSE_LIMIT', 'INCARNATION_MISMATCH', 'INVALID_REQUEST', 'NOT_FOUND', 'PLAN_LIMIT_EXCEEDED', 'QUOTA_EXCEEDED', 'RATE_LIMITED', 'RESYNC_REQUIRED', 'RETRY_EXHAUSTED', 'UNAUTHENTICATED', 'WRONG_REGION'],
+    errorCodes: <String>['ADMISSION_LIMIT', 'AUTHORITY_UNAVAILABLE', 'CREDITS_EXHAUSTED', 'CURSOR_AHEAD', 'CURSOR_EXPIRED', 'CURSOR_MISMATCH', 'CURSOR_SCOPE_MISMATCH', 'FEATURE_UNSUPPORTED', 'FORBIDDEN', 'GRAPHQL_INVALID_REQUEST', 'GRAPHQL_QUERY_LIMIT', 'GRAPHQL_RESPONSE_LIMIT', 'INCARNATION_MISMATCH', 'INVALID_REQUEST', 'NOT_FOUND', 'PLAN_LIMIT_EXCEEDED', 'QUOTA_EXCEEDED', 'RATE_LIMITED', 'RESYNC_REQUIRED', 'RETRY_EXHAUSTED', 'SPEND_CAP_REACHED', 'SPEND_UNVERIFIED', 'UNAUTHENTICATED', 'WRONG_REGION'],
     decode: _resultCommunicationConversationEvents,
   );
 }
@@ -2520,6 +2583,39 @@ abstract final class ErrorCodes {
   /// A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId.
   static const String admissionLimit = 'ADMISSION_LIMIT';
 
+  /// Agent signup is not offered in this environment.
+  static const String agenticNotConfigured = 'AGENTIC_NOT_CONFIGURED';
+
+  /// The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.
+  static const String agentConfirmationCodeInvalid = 'AGENT_CONFIRMATION_CODE_INVALID';
+
+  /// The agent's grant has expired. The agent needs a new signup request approved.
+  static const String agentGrantExpired = 'AGENT_GRANT_EXPIRED';
+
+  /// The owner revoked the agent's grant.
+  static const String agentGrantRevoked = 'AGENT_GRANT_REVOKED';
+
+  /// The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.
+  static const String agentKeyLimit = 'AGENT_KEY_LIMIT';
+
+  /// The purchase would take this month's agent credit purchases beyond the limit the owner set.
+  static const String agentPurchaseLimitExceeded = 'AGENT_PURCHASE_LIMIT_EXCEEDED';
+
+  /// A requested scope is outside the agent's grant.
+  static const String agentScopeNotGranted = 'AGENT_SCOPE_NOT_GRANTED';
+
+  /// The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.
+  static const String agentSignupClosed = 'AGENT_SIGNUP_CLOSED';
+
+  /// The owner's email address is refused, for example for a disposable domain.
+  static const String agentSignupEmailRejected = 'AGENT_SIGNUP_EMAIL_REJECTED';
+
+  /// The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.
+  static const String agentSignupNotReady = 'AGENT_SIGNUP_NOT_READY';
+
+  /// The owner opted out of agent signup requests to this email address.
+  static const String agentSignupSuppressed = 'AGENT_SIGNUP_SUPPRESSED';
+
   /// The participation already has an active media connection.
   static const String alreadyConnected = 'ALREADY_CONNECTED';
 
@@ -2570,6 +2666,18 @@ abstract final class ErrorCodes {
 
   /// Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.
   static const String credentialRequired = 'CREDENTIAL_REQUIRED';
+
+  /// Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+  static const String creditsExhausted = 'CREDITS_EXHAUSTED';
+
+  /// Credits apply only to a billed subscription, and none is in force.
+  static const String creditsRequireMeteredPlan = 'CREDITS_REQUIRE_METERED_PLAN';
+
+  /// The credit amount is outside the allowed purchase range.
+  static const String creditAmountOutOfRange = 'CREDIT_AMOUNT_OUT_OF_RANGE';
+
+  /// Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.
+  static const String creditGrantLimitReached = 'CREDIT_GRANT_LIMIT_REACHED';
 
   /// The cursor is ahead of the committed events of the conversation.
   static const String cursorAhead = 'CURSOR_AHEAD';
@@ -2679,6 +2787,12 @@ abstract final class ErrorCodes {
   /// The participation does not belong to the caller or the current live session generation.
   static const String participationMismatch = 'PARTICIPATION_MISMATCH';
 
+  /// The payment rail declined the payment. Nothing was charged.
+  static const String paymentDeclined = 'PAYMENT_DECLINED';
+
+  /// No payment rail is enabled in this environment.
+  static const String paymentRailNotConfigured = 'PAYMENT_RAIL_NOT_CONFIGURED';
+
   /// The stored delivery permit has expired. Request a new permit.
   static const String permitExpired = 'PERMIT_EXPIRED';
 
@@ -2739,6 +2853,12 @@ abstract final class ErrorCodes {
   /// The refreshed session could not be verified.
   static const String sessionRefreshUnverified = 'SESSION_REFRESH_UNVERIFIED';
 
+  /// The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+  static const String spendCapReached = 'SPEND_CAP_REACHED';
+
+  /// Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.
+  static const String spendUnverified = 'SPEND_UNVERIFIED';
+
   /// The transport failed after the request may have been sent. Resolve or retry the original request.
   static const String transportUnknown = 'TRANSPORT_UNKNOWN';
 
@@ -2767,6 +2887,17 @@ abstract final class ErrorCodes {
 /// Every error code, by code.
 const Map<String, ErrorCodeSpec> errorCodes = <String, ErrorCodeSpec>{
   'ADMISSION_LIMIT': ErrorCodeSpec(code: 'ADMISSION_LIMIT', summary: 'A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId.', origin: 'both', status: 429, retryable: true),
+  'AGENTIC_NOT_CONFIGURED': ErrorCodeSpec(code: 'AGENTIC_NOT_CONFIGURED', summary: 'Agent signup is not offered in this environment.', origin: 'server', status: 503, retryable: false),
+  'AGENT_CONFIRMATION_CODE_INVALID': ErrorCodeSpec(code: 'AGENT_CONFIRMATION_CODE_INVALID', summary: 'The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.', origin: 'server', status: 403, retryable: false),
+  'AGENT_GRANT_EXPIRED': ErrorCodeSpec(code: 'AGENT_GRANT_EXPIRED', summary: 'The agent\'s grant has expired. The agent needs a new signup request approved.', origin: 'server', status: 403, retryable: false),
+  'AGENT_GRANT_REVOKED': ErrorCodeSpec(code: 'AGENT_GRANT_REVOKED', summary: 'The owner revoked the agent\'s grant.', origin: 'server', status: 403, retryable: false),
+  'AGENT_KEY_LIMIT': ErrorCodeSpec(code: 'AGENT_KEY_LIMIT', summary: 'The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.', origin: 'server', status: 409, retryable: false),
+  'AGENT_PURCHASE_LIMIT_EXCEEDED': ErrorCodeSpec(code: 'AGENT_PURCHASE_LIMIT_EXCEEDED', summary: 'The purchase would take this month\'s agent credit purchases beyond the limit the owner set.', origin: 'server', status: 402, retryable: false),
+  'AGENT_SCOPE_NOT_GRANTED': ErrorCodeSpec(code: 'AGENT_SCOPE_NOT_GRANTED', summary: 'A requested scope is outside the agent\'s grant.', origin: 'server', status: 403, retryable: false),
+  'AGENT_SIGNUP_CLOSED': ErrorCodeSpec(code: 'AGENT_SIGNUP_CLOSED', summary: 'The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.', origin: 'server', status: 409, retryable: false),
+  'AGENT_SIGNUP_EMAIL_REJECTED': ErrorCodeSpec(code: 'AGENT_SIGNUP_EMAIL_REJECTED', summary: 'The owner\'s email address is refused, for example for a disposable domain.', origin: 'server', status: 400, retryable: false),
+  'AGENT_SIGNUP_NOT_READY': ErrorCodeSpec(code: 'AGENT_SIGNUP_NOT_READY', summary: 'The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.', origin: 'server', status: 409, retryable: false),
+  'AGENT_SIGNUP_SUPPRESSED': ErrorCodeSpec(code: 'AGENT_SIGNUP_SUPPRESSED', summary: 'The owner opted out of agent signup requests to this email address.', origin: 'server', status: 403, retryable: false),
   'ALREADY_CONNECTED': ErrorCodeSpec(code: 'ALREADY_CONNECTED', summary: 'The participation already has an active media connection.', origin: 'server', status: 409, retryable: false),
   'ALREADY_EXISTS': ErrorCodeSpec(code: 'ALREADY_EXISTS', summary: 'A resource with the same unique key already exists.', origin: 'server', status: 409, retryable: false),
   'AUTHORITY_UNAVAILABLE': ErrorCodeSpec(code: 'AUTHORITY_UNAVAILABLE', summary: 'The authority is temporarily unavailable. Retry with the same requestId.', origin: 'both', status: 503, retryable: true),
@@ -2784,6 +2915,10 @@ const Map<String, ErrorCodeSpec> errorCodes = <String, ErrorCodeSpec>{
   'CREDENTIAL_EXPIRED': ErrorCodeSpec(code: 'CREDENTIAL_EXPIRED', summary: 'The credential carried by the stored result has expired. Request a new one.', origin: 'server', status: 409, retryable: false),
   'CREDENTIAL_REFRESH_REQUIRED': ErrorCodeSpec(code: 'CREDENTIAL_REFRESH_REQUIRED', summary: 'The media credential must be refreshed before connecting.', origin: 'both', status: 409, retryable: false),
   'CREDENTIAL_REQUIRED': ErrorCodeSpec(code: 'CREDENTIAL_REQUIRED', summary: 'Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.', origin: 'sdk', status: 409, retryable: false),
+  'CREDITS_EXHAUSTED': ErrorCodeSpec(code: 'CREDITS_EXHAUSTED', summary: 'Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan\'s allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.', origin: 'server', status: 402, retryable: false),
+  'CREDITS_REQUIRE_METERED_PLAN': ErrorCodeSpec(code: 'CREDITS_REQUIRE_METERED_PLAN', summary: 'Credits apply only to a billed subscription, and none is in force.', origin: 'server', status: 409, retryable: false),
+  'CREDIT_AMOUNT_OUT_OF_RANGE': ErrorCodeSpec(code: 'CREDIT_AMOUNT_OUT_OF_RANGE', summary: 'The credit amount is outside the allowed purchase range.', origin: 'server', status: 400, retryable: false),
+  'CREDIT_GRANT_LIMIT_REACHED': ErrorCodeSpec(code: 'CREDIT_GRANT_LIMIT_REACHED', summary: 'Too many of the organization\'s credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.', origin: 'server', status: 409, retryable: false),
   'CURSOR_AHEAD': ErrorCodeSpec(code: 'CURSOR_AHEAD', summary: 'The cursor is ahead of the committed events of the conversation.', origin: 'server', status: 409, retryable: false),
   'CURSOR_EXPIRED': ErrorCodeSpec(code: 'CURSOR_EXPIRED', summary: 'The cursor is older than retained history. Resynchronize from current state; never reset the cursor silently.', origin: 'server', status: 409, retryable: false),
   'CURSOR_INVALID': ErrorCodeSpec(code: 'CURSOR_INVALID', summary: 'The cursor is malformed or was not issued for this query.', origin: 'server', status: 409, retryable: false),
@@ -2820,6 +2955,8 @@ const Map<String, ErrorCodeSpec> errorCodes = <String, ErrorCodeSpec>{
   'OUTCOME_UNKNOWN': ErrorCodeSpec(code: 'OUTCOME_UNKNOWN', summary: 'The mutation may have committed. Retry with the same requestId or resolve it.', origin: 'server', status: 503, retryable: true),
   'PAGE_ITEM_TOO_LARGE': ErrorCodeSpec(code: 'PAGE_ITEM_TOO_LARGE', summary: 'A single item exceeds the page response limit.', origin: 'server', status: 413, retryable: false),
   'PARTICIPATION_MISMATCH': ErrorCodeSpec(code: 'PARTICIPATION_MISMATCH', summary: 'The participation does not belong to the caller or the current live session generation.', origin: 'both', status: 409, retryable: false),
+  'PAYMENT_DECLINED': ErrorCodeSpec(code: 'PAYMENT_DECLINED', summary: 'The payment rail declined the payment. Nothing was charged.', origin: 'server', status: 402, retryable: false),
+  'PAYMENT_RAIL_NOT_CONFIGURED': ErrorCodeSpec(code: 'PAYMENT_RAIL_NOT_CONFIGURED', summary: 'No payment rail is enabled in this environment.', origin: 'server', status: 503, retryable: false),
   'PERMIT_EXPIRED': ErrorCodeSpec(code: 'PERMIT_EXPIRED', summary: 'The stored delivery permit has expired. Request a new permit.', origin: 'server', status: 409, retryable: false),
   'PLAN_LIMIT_EXCEEDED': ErrorCodeSpec(code: 'PLAN_LIMIT_EXCEEDED', summary: 'The plan does not permit the resource or feature. extensions.planLimit names the limit and extensions.limit holds the plan\'s value. Change the plan or the limit before trying again.', origin: 'server', status: 403, retryable: false),
   'QUOTA_EXCEEDED': ErrorCodeSpec(code: 'QUOTA_EXCEEDED', summary: 'A hard usage quota refused new work until the quota period ends. extensions.meter, extensions.limit and extensions.periodEnd describe the quota, and extensions.retryAfter (HTTP Retry-After) counts the seconds until it resets. Work already in progress continues.', origin: 'server', status: 429, retryable: false),
@@ -2840,6 +2977,8 @@ const Map<String, ErrorCodeSpec> errorCodes = <String, ErrorCodeSpec>{
   'SESSION_REFRESH_REJECTED': ErrorCodeSpec(code: 'SESSION_REFRESH_REJECTED', summary: 'The refreshed session was rejected because it does not match the current session.', origin: 'sdk', status: 409, retryable: false),
   'SESSION_REFRESH_REQUIRED': ErrorCodeSpec(code: 'SESSION_REFRESH_REQUIRED', summary: 'The user session needs renewal and no refresh is configured, or it expired.', origin: 'sdk', status: 409, retryable: false),
   'SESSION_REFRESH_UNVERIFIED': ErrorCodeSpec(code: 'SESSION_REFRESH_UNVERIFIED', summary: 'The refreshed session could not be verified.', origin: 'sdk', status: null, retryable: false),
+  'SPEND_CAP_REACHED': ErrorCodeSpec(code: 'SPEND_CAP_REACHED', summary: 'The spend month\'s usage charges reached the charge limit that the organization\'s prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan\'s allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.', origin: 'server', status: 402, retryable: false),
+  'SPEND_UNVERIFIED': ErrorCodeSpec(code: 'SPEND_UNVERIFIED', summary: 'Current spend cannot be verified, so billable usage beyond the plan\'s allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.', origin: 'server', status: 503, retryable: true),
   'TRANSPORT_UNKNOWN': ErrorCodeSpec(code: 'TRANSPORT_UNKNOWN', summary: 'The transport failed after the request may have been sent. Resolve or retry the original request.', origin: 'sdk', status: null, retryable: true),
   'UNAUTHENTICATED': ErrorCodeSpec(code: 'UNAUTHENTICATED', summary: 'The credential is missing, invalid or expired.', origin: 'both', status: 401, retryable: false),
   'WEBHOOK_DESTINATION_DENIED': ErrorCodeSpec(code: 'WEBHOOK_DESTINATION_DENIED', summary: 'The webhook URL is not a public HTTPS destination.', origin: 'server', status: 400, retryable: false),

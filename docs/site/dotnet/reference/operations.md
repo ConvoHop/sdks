@@ -1,6 +1,6 @@
 # .NET operation coverage
 
-The .NET SDK members that send each API operation. 65 of the 68 operations that .NET packages can send have a method.
+The .NET SDK members that send each API operation. 65 of the 81 operations that .NET packages can send have a method.
 
 ## Communication
 
@@ -67,6 +67,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md) | server | [`ManagementApi.WebhookDeliveriesAsync`](api.md#managementapiwebhookdeliveriesasync-method) |
 | [`management.resolveRequest`](../../operations/management/resolveRequest.md) | server | [`ConvoHopTransport.RetryAsync`](convohop.md#convohoptransportretryasync-method), [`ManagementApi.ResolveRequestAsync`](api.md#managementapiresolverequestasync-method) |
 | [`management.getOperation`](../../operations/management/getOperation.md) | server | [`ConvoHopManagementClient.GetOperationAsync`](convohop.md#convohopmanagementclientgetoperationasync-method), [`ManagementApi.GetOperationAsync`](api.md#managementapigetoperationasync-method) |
+| [`management.agentSignupForApproval`](../../operations/management/agentSignupForApproval.md) | server | Not wrapped by a method |
+| [`management.agentSignup`](../../operations/management/agentSignup.md) | server | Not wrapped by a method |
+| [`management.agentGrants`](../../operations/management/agentGrants.md) | server | Not wrapped by a method |
+| [`management.agentAuditEvents`](../../operations/management/agentAuditEvents.md) | server | Not wrapped by a method |
+| [`management.organizationSpend`](../../operations/management/organizationSpend.md) | server | Not wrapped by a method |
 | [`management.createOrganization`](../../operations/management/createOrganization.md) | server | [`ConvoHopManagementClient.CreateOrganizationAsync`](convohop.md#convohopmanagementclientcreateorganizationasync-method), [`ManagementApi.CreateOrganizationAsync`](api.md#managementapicreateorganizationasync-method) |
 | [`management.createDeployment`](../../operations/management/createDeployment.md) | server | [`ConvoHopManagementClient.CreateDeploymentAsync`](convohop.md#convohopmanagementclientcreatedeploymentasync-method), [`ManagementApi.CreateDeploymentAsync`](api.md#managementapicreatedeploymentasync-method) |
 | [`management.createProject`](../../operations/management/createProject.md) | server | [`ConvoHopManagementClient.CreateProjectAsync`](convohop.md#convohopmanagementclientcreateprojectasync-method), [`ManagementApi.CreateProjectAsync`](api.md#managementapicreateprojectasync-method) |
@@ -83,3 +88,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md) | server | [`ManagementApi.RotateWebhookSecretAsync`](api.md#managementapirotatewebhooksecretasync-method) |
 | [`management.disableWebhook`](../../operations/management/disableWebhook.md) | server | [`ManagementApi.DisableWebhookAsync`](api.md#managementapidisablewebhookasync-method) |
 | [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md) | server | [`ManagementApi.ReplayWebhookDeliveriesAsync`](api.md#managementapireplaywebhookdeliveriesasync-method) |
+| [`management.requestAgentSignup`](../../operations/management/requestAgentSignup.md) | server | Not wrapped by a method |
+| [`management.rejectAgentSignup`](../../operations/management/rejectAgentSignup.md) | server | Not wrapped by a method |
+| [`management.approveAgentSignup`](../../operations/management/approveAgentSignup.md) | server | Not wrapped by a method |
+| [`management.issueAgentKey`](../../operations/management/issueAgentKey.md) | server | Not wrapped by a method |
+| [`management.agentCredentialPermit`](../../operations/management/agentCredentialPermit.md) | server | Not wrapped by a method |
+| [`management.revokeAgentGrant`](../../operations/management/revokeAgentGrant.md) | server | Not wrapped by a method |
+| [`management.setSpendControls`](../../operations/management/setSpendControls.md) | server | Not wrapped by a method |
+| [`management.purchaseAgentCredits`](../../operations/management/purchaseAgentCredits.md) | server | Not wrapped by a method |

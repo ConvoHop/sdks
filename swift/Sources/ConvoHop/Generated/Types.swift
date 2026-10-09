@@ -62,6 +62,111 @@ public struct ActorRef: Codable, Hashable, Sendable {
     }
 }
 
+public struct AgentGrant: Codable, Hashable, Sendable {
+    public var grantId: String
+    public var orgId: String
+    public var signupId: String
+    public var agentActorId: String
+    public var projectId: String?
+    public var scopes: [String]
+    public var expiresAt: String
+    public var revokedAt: String?
+    public var createdAt: String
+    public var keys: [AgentKey]
+
+    public init(
+        grantId: String,
+        orgId: String,
+        signupId: String,
+        agentActorId: String,
+        projectId: String? = nil,
+        scopes: [String],
+        expiresAt: String,
+        revokedAt: String? = nil,
+        createdAt: String,
+        keys: [AgentKey]
+    ) {
+        self.grantId = grantId
+        self.orgId = orgId
+        self.signupId = signupId
+        self.agentActorId = agentActorId
+        self.projectId = projectId
+        self.scopes = scopes
+        self.expiresAt = expiresAt
+        self.revokedAt = revokedAt
+        self.createdAt = createdAt
+        self.keys = keys
+    }
+}
+
+public struct AgentKey: Codable, Hashable, Sendable {
+    public var operationId: String
+    public var state: String
+    public var scopes: [String]
+    public var expiresAt: String
+    public var keyId: String?
+    public var deliveryId: String?
+    public var deliveryExpiresAt: String?
+
+    public init(
+        operationId: String,
+        state: String,
+        scopes: [String],
+        expiresAt: String,
+        keyId: String? = nil,
+        deliveryId: String? = nil,
+        deliveryExpiresAt: String? = nil
+    ) {
+        self.operationId = operationId
+        self.state = state
+        self.scopes = scopes
+        self.expiresAt = expiresAt
+        self.keyId = keyId
+        self.deliveryId = deliveryId
+        self.deliveryExpiresAt = deliveryExpiresAt
+    }
+}
+
+public struct AgentSignupStatus: Codable, Hashable, Sendable {
+    public var signupId: String
+    public var state: String
+    public var orgId: String?
+    public var deploymentId: String?
+    public var projectId: String?
+    public var nextStep: String?
+    public var scopes: [String]
+    public var grantExpiresAt: String?
+    public var keys: [AgentKey]
+    public var incarnation: String?
+    public var servingEpoch: String?
+
+    public init(
+        signupId: String,
+        state: String,
+        orgId: String? = nil,
+        deploymentId: String? = nil,
+        projectId: String? = nil,
+        nextStep: String? = nil,
+        scopes: [String],
+        grantExpiresAt: String? = nil,
+        keys: [AgentKey],
+        incarnation: String? = nil,
+        servingEpoch: String? = nil
+    ) {
+        self.signupId = signupId
+        self.state = state
+        self.orgId = orgId
+        self.deploymentId = deploymentId
+        self.projectId = projectId
+        self.nextStep = nextStep
+        self.scopes = scopes
+        self.grantExpiresAt = grantExpiresAt
+        self.keys = keys
+        self.incarnation = incarnation
+        self.servingEpoch = servingEpoch
+    }
+}
+
 public struct AlertLiveSessionInput: Codable, Hashable, Sendable {
     public var liveSessionId: String
     public var expectedGeneration: String
@@ -2325,6 +2430,73 @@ public struct Organization: Codable, Hashable, Sendable {
     }
 }
 
+public struct OrganizationSpend: Codable, Hashable, Sendable {
+    public var orgId: String
+    public var planId: String
+    public var currency: String
+    public var catalogVersion: String
+    public var monthlySpendCap: String?
+    public var agentPurchaseLimit: String?
+    public var updatedAt: String?
+    public var monthlyMinimum: String?
+    public var periodStart: String?
+    public var periodEnd: String?
+    public var credits: String?
+    public var charges: String?
+    public var margin: String?
+    public var stop: String?
+    public var refusedMeters: [String]
+    public var evaluatedAt: String?
+    public var usageThrough: String?
+    public var validUntil: String?
+    public var minimumCredit: String?
+    public var chargeLimit: String?
+
+    public init(
+        orgId: String,
+        planId: String,
+        currency: String,
+        catalogVersion: String,
+        monthlySpendCap: String? = nil,
+        agentPurchaseLimit: String? = nil,
+        updatedAt: String? = nil,
+        monthlyMinimum: String? = nil,
+        periodStart: String? = nil,
+        periodEnd: String? = nil,
+        credits: String? = nil,
+        charges: String? = nil,
+        margin: String? = nil,
+        stop: String? = nil,
+        refusedMeters: [String],
+        evaluatedAt: String? = nil,
+        usageThrough: String? = nil,
+        validUntil: String? = nil,
+        minimumCredit: String? = nil,
+        chargeLimit: String? = nil
+    ) {
+        self.orgId = orgId
+        self.planId = planId
+        self.currency = currency
+        self.catalogVersion = catalogVersion
+        self.monthlySpendCap = monthlySpendCap
+        self.agentPurchaseLimit = agentPurchaseLimit
+        self.updatedAt = updatedAt
+        self.monthlyMinimum = monthlyMinimum
+        self.periodStart = periodStart
+        self.periodEnd = periodEnd
+        self.credits = credits
+        self.charges = charges
+        self.margin = margin
+        self.stop = stop
+        self.refusedMeters = refusedMeters
+        self.evaluatedAt = evaluatedAt
+        self.usageThrough = usageThrough
+        self.validUntil = validUntil
+        self.minimumCredit = minimumCredit
+        self.chargeLimit = chargeLimit
+    }
+}
+
 public struct Principal: Codable, Hashable, Sendable {
     public var principalId: String
     public var externalUserId: String
@@ -2631,6 +2803,8 @@ public struct ResourceRef: Codable, Hashable, Sendable {
 
 /// Exactly one typed field contains the retained, currently authorized receipt result.
 public struct RetainedResult: Codable, Hashable, Sendable {
+    public var agentGrant: AgentGrant?
+    public var agentSignupStatus: AgentSignupStatus?
     public var billingCheckoutSession: BillingCheckoutSession?
     public var billingPortalSession: BillingPortalSession?
     public var broadcastPermissionChanged: BroadcastPermissionChanged?
@@ -2649,6 +2823,7 @@ public struct RetainedResult: Codable, Hashable, Sendable {
     public var message: Message?
     public var messageAck: MessageAck?
     public var organization: Organization?
+    public var organizationSpend: OrganizationSpend?
     public var principal: Principal?
     public var readReceipt: ReadReceipt?
     public var sessionBootstrap: SessionBootstrap?
@@ -2656,6 +2831,8 @@ public struct RetainedResult: Codable, Hashable, Sendable {
     public var signedProof: JSONObject?
 
     public init(
+        agentGrant: AgentGrant? = nil,
+        agentSignupStatus: AgentSignupStatus? = nil,
         billingCheckoutSession: BillingCheckoutSession? = nil,
         billingPortalSession: BillingPortalSession? = nil,
         broadcastPermissionChanged: BroadcastPermissionChanged? = nil,
@@ -2674,12 +2851,15 @@ public struct RetainedResult: Codable, Hashable, Sendable {
         message: Message? = nil,
         messageAck: MessageAck? = nil,
         organization: Organization? = nil,
+        organizationSpend: OrganizationSpend? = nil,
         principal: Principal? = nil,
         readReceipt: ReadReceipt? = nil,
         sessionBootstrap: SessionBootstrap? = nil,
         sessionRevocation: SessionRevocation? = nil,
         signedProof: JSONObject? = nil
     ) {
+        self.agentGrant = agentGrant
+        self.agentSignupStatus = agentSignupStatus
         self.billingCheckoutSession = billingCheckoutSession
         self.billingPortalSession = billingPortalSession
         self.broadcastPermissionChanged = broadcastPermissionChanged
@@ -2698,6 +2878,7 @@ public struct RetainedResult: Codable, Hashable, Sendable {
         self.message = message
         self.messageAck = messageAck
         self.organization = organization
+        self.organizationSpend = organizationSpend
         self.principal = principal
         self.readReceipt = readReceipt
         self.sessionBootstrap = sessionBootstrap

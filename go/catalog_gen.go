@@ -551,6 +551,47 @@ var operations = []operation{
           id
         }
         result {
+          agentGrant {
+            grantId
+            orgId
+            signupId
+            agentActorId
+            projectId
+            scopes
+            expiresAt
+            revokedAt
+            createdAt
+            keys {
+              operationId
+              state
+              scopes
+              expiresAt
+              keyId
+              deliveryId
+              deliveryExpiresAt
+            }
+          }
+          agentSignupStatus {
+            signupId
+            state
+            orgId
+            deploymentId
+            projectId
+            nextStep
+            scopes
+            grantExpiresAt
+            keys {
+              operationId
+              state
+              scopes
+              expiresAt
+              keyId
+              deliveryId
+              deliveryExpiresAt
+            }
+            incarnation
+            servingEpoch
+          }
           billingCheckoutSession {
             orgId
             planId
@@ -755,6 +796,28 @@ var operations = []operation{
             name
             status
             revision
+          }
+          organizationSpend {
+            orgId
+            planId
+            currency
+            catalogVersion
+            monthlySpendCap
+            agentPurchaseLimit
+            updatedAt
+            monthlyMinimum
+            periodStart
+            periodEnd
+            credits
+            charges
+            margin
+            stop
+            refusedMeters
+            evaluatedAt
+            usageThrough
+            validUntil
+            minimumCredit
+            chargeLimit
           }
           principal {
             principalId
@@ -2997,6 +3060,47 @@ var operations = []operation{
           id
         }
         result {
+          agentGrant {
+            grantId
+            orgId
+            signupId
+            agentActorId
+            projectId
+            scopes
+            expiresAt
+            revokedAt
+            createdAt
+            keys {
+              operationId
+              state
+              scopes
+              expiresAt
+              keyId
+              deliveryId
+              deliveryExpiresAt
+            }
+          }
+          agentSignupStatus {
+            signupId
+            state
+            orgId
+            deploymentId
+            projectId
+            nextStep
+            scopes
+            grantExpiresAt
+            keys {
+              operationId
+              state
+              scopes
+              expiresAt
+              keyId
+              deliveryId
+              deliveryExpiresAt
+            }
+            incarnation
+            servingEpoch
+          }
           billingCheckoutSession {
             orgId
             planId
@@ -3202,6 +3306,28 @@ var operations = []operation{
             status
             revision
           }
+          organizationSpend {
+            orgId
+            planId
+            currency
+            catalogVersion
+            monthlySpendCap
+            agentPurchaseLimit
+            updatedAt
+            monthlyMinimum
+            periodStart
+            periodEnd
+            credits
+            charges
+            margin
+            stop
+            refusedMeters
+            evaluatedAt
+            usageThrough
+            validUntil
+            minimumCredit
+            chargeLimit
+          }
           principal {
             principalId
             externalUserId
@@ -3355,6 +3481,281 @@ var operations = []operation{
         messagePreview
       }
       blockedReason
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.agentSignupForApproval",
+		plane:         "management",
+		kind:          "query",
+		field:         "agentSignupForApproval",
+		operationName: "ManagementAgentSignupForApproval",
+		result:        "AgentSignupForApprovalReply!",
+		input:         "AgentSignupForApprovalRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		retry:         "repeat",
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		document: `query ManagementAgentSignupForApproval($context: RequestContextInput!, $input: AgentSignupForApprovalRequestInput!) {
+  agentSignupForApproval(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      signupId
+      ownerEmail
+      organizationName
+      agentName
+      purpose
+      suggestedPlan
+      suggestedScopes
+      suggestedMonthlySpendCap
+      currency
+      expiresAt
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.agentSignup",
+		plane:         "management",
+		kind:          "query",
+		field:         "agentSignup",
+		operationName: "ManagementAgentSignup",
+		result:        "AgentSignupReply!",
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "agentVerifier",
+		retry:         "repeat",
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		document: `query ManagementAgentSignup($context: RequestContextInput!) {
+  agentSignup(context: $context) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      signupId
+      state
+      orgId
+      deploymentId
+      projectId
+      nextStep
+      scopes
+      grantExpiresAt
+      keys {
+        operationId
+        state
+        scopes
+        expiresAt
+        keyId
+        deliveryId
+        deliveryExpiresAt
+      }
+      incarnation
+      servingEpoch
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.agentGrants",
+		plane:         "management",
+		kind:          "query",
+		field:         "agentGrants",
+		operationName: "ManagementAgentGrants",
+		result:        "AgentGrantsReply!",
+		input:         "AgentGrantsRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "portalCredential",
+		retry:         "repeat",
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result", "items"},
+		echo:          []string{"orgId"},
+		document: `query ManagementAgentGrants($context: RequestContextInput!, $input: AgentGrantsRequestInput!) {
+  agentGrants(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        grantId
+        orgId
+        signupId
+        agentActorId
+        projectId
+        scopes
+        expiresAt
+        revokedAt
+        createdAt
+        keys {
+          operationId
+          state
+          scopes
+          expiresAt
+          keyId
+          deliveryId
+          deliveryExpiresAt
+        }
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.agentAuditEvents",
+		plane:         "management",
+		kind:          "query",
+		field:         "agentAuditEvents",
+		operationName: "ManagementAgentAuditEvents",
+		result:        "AgentAuditEventsReply!",
+		input:         "AgentAuditEventsRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "portalCredential",
+		retry:         "repeat",
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result", "items"},
+		echo:          []string{"orgId"},
+		document: `query ManagementAgentAuditEvents($context: RequestContextInput!, $input: AgentAuditEventsRequestInput!) {
+  agentAuditEvents(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        eventId
+        orgId
+        grantId
+        actorKind
+        actorId
+        kind
+        details
+        occurredAt
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.organizationSpend",
+		plane:         "management",
+		kind:          "query",
+		field:         "organizationSpend",
+		operationName: "ManagementOrganizationSpend",
+		result:        "OrganizationSpendReply!",
+		input:         "OrganizationSpendRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "portalCredential",
+		retry:         "repeat",
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		echo:          []string{"orgId"},
+		document: `query ManagementOrganizationSpend($context: RequestContextInput!, $input: OrganizationSpendRequestInput!) {
+  organizationSpend(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      planId
+      currency
+      catalogVersion
+      monthlySpendCap
+      agentPurchaseLimit
+      updatedAt
+      monthlyMinimum
+      periodStart
+      periodEnd
+      credits
+      charges
+      margin
+      stop
+      refusedMeters
+      evaluatedAt
+      usageThrough
+      validUntil
+      minimumCredit
+      chargeLimit
     }
   }
 }`,
@@ -4697,6 +5098,419 @@ var operations = []operation{
   }
 }`,
 	},
+	{
+		id:            "management.requestAgentSignup",
+		plane:         "management",
+		kind:          "mutation",
+		field:         "requestAgentSignup",
+		operationName: "ManagementRequestAgentSignup",
+		result:        "RequestAgentSignupReply!",
+		input:         "RequestAgentSignupRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		document: `mutation ManagementRequestAgentSignup($context: RequestContextInput!, $input: RequestAgentSignupRequestInput!) {
+  requestAgentSignup(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      signupId
+      confirmationCode
+      expiresAt
+      pollAfterSeconds
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.rejectAgentSignup",
+		plane:         "management",
+		kind:          "mutation",
+		field:         "rejectAgentSignup",
+		operationName: "ManagementRejectAgentSignup",
+		result:        "RejectAgentSignupReply!",
+		input:         "RejectAgentSignupRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		document: `mutation ManagementRejectAgentSignup($context: RequestContextInput!, $input: RejectAgentSignupRequestInput!) {
+  rejectAgentSignup(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      signupId
+      state
+      orgId
+      deploymentId
+      projectId
+      nextStep
+      scopes
+      grantExpiresAt
+      keys {
+        operationId
+        state
+        scopes
+        expiresAt
+        keyId
+        deliveryId
+        deliveryExpiresAt
+      }
+      incarnation
+      servingEpoch
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.approveAgentSignup",
+		plane:         "management",
+		kind:          "mutation",
+		field:         "approveAgentSignup",
+		operationName: "ManagementApproveAgentSignup",
+		result:        "ApproveAgentSignupReply!",
+		input:         "ApproveAgentSignupRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "portalCredential",
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		resolvable:    true,
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		document: `mutation ManagementApproveAgentSignup($context: RequestContextInput!, $input: ApproveAgentSignupRequestInput!) {
+  approveAgentSignup(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      signupId
+      state
+      orgId
+      deploymentId
+      projectId
+      nextStep
+      scopes
+      grantExpiresAt
+      keys {
+        operationId
+        state
+        scopes
+        expiresAt
+        keyId
+        deliveryId
+        deliveryExpiresAt
+      }
+      incarnation
+      servingEpoch
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.issueAgentKey",
+		plane:         "management",
+		kind:          "mutation",
+		field:         "issueAgentKey",
+		operationName: "ManagementIssueAgentKey",
+		result:        "IssueAgentKeyReply!",
+		input:         "IssueAgentKeyRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "agentVerifier",
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		document: `mutation ManagementIssueAgentKey($context: RequestContextInput!, $input: IssueAgentKeyRequestInput!) {
+  issueAgentKey(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      operationId
+      state
+      scopes
+      expiresAt
+      keyId
+      deliveryId
+      deliveryExpiresAt
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.agentCredentialPermit",
+		plane:         "management",
+		kind:          "mutation",
+		field:         "agentCredentialPermit",
+		operationName: "ManagementAgentCredentialPermit",
+		result:        "AgentCredentialPermitReply!",
+		input:         "AgentCredentialPermitRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "agentVerifier",
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		document: `mutation ManagementAgentCredentialPermit($context: RequestContextInput!, $input: AgentCredentialPermitRequestInput!) {
+  agentCredentialPermit(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result
+  }
+}`,
+	},
+	{
+		id:            "management.revokeAgentGrant",
+		plane:         "management",
+		kind:          "mutation",
+		field:         "revokeAgentGrant",
+		operationName: "ManagementRevokeAgentGrant",
+		result:        "RevokeAgentGrantReply!",
+		input:         "RevokeAgentGrantRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "portalCredential",
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		resolvable:    true,
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		echo:          []string{"grantId"},
+		document: `mutation ManagementRevokeAgentGrant($context: RequestContextInput!, $input: RevokeAgentGrantRequestInput!) {
+  revokeAgentGrant(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      grantId
+      orgId
+      signupId
+      agentActorId
+      projectId
+      scopes
+      expiresAt
+      revokedAt
+      createdAt
+      keys {
+        operationId
+        state
+        scopes
+        expiresAt
+        keyId
+        deliveryId
+        deliveryExpiresAt
+      }
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.setSpendControls",
+		plane:         "management",
+		kind:          "mutation",
+		field:         "setSpendControls",
+		operationName: "ManagementSetSpendControls",
+		result:        "SetSpendControlsReply!",
+		input:         "SetSpendControlsRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "portalCredential",
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		resolvable:    true,
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		echo:          []string{"orgId"},
+		document: `mutation ManagementSetSpendControls($context: RequestContextInput!, $input: SetSpendControlsRequestInput!) {
+  setSpendControls(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      planId
+      currency
+      catalogVersion
+      monthlySpendCap
+      agentPurchaseLimit
+      updatedAt
+      monthlyMinimum
+      periodStart
+      periodEnd
+      credits
+      charges
+      margin
+      stop
+      refusedMeters
+      evaluatedAt
+      usageThrough
+      validUntil
+      minimumCredit
+      chargeLimit
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.purchaseAgentCredits",
+		plane:         "management",
+		kind:          "mutation",
+		field:         "purchaseAgentCredits",
+		operationName: "ManagementPurchaseAgentCredits",
+		result:        "PurchaseAgentCreditsReply!",
+		input:         "PurchaseAgentCreditsRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "agentVerifier",
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		envelope:      true,
+		requireResult: true,
+		subject:       []string{"result"},
+		document: `mutation ManagementPurchaseAgentCredits($context: RequestContextInput!, $input: PurchaseAgentCreditsRequestInput!) {
+  purchaseAgentCredits(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      paymentId
+      amount
+      currency
+      state
+    }
+  }
+}`,
+	},
 }
 
 var objectTypes = []objectType{
@@ -4704,7 +5518,22 @@ var objectTypes = []objectType{
 	{"ActorRef", []typeField{{"tenantId", "String!"}, {"objectId", "String!"}}},
 	{"AddMemberReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "Member"}}},
 	{"AddMembersPayload", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"receiptId", "UUID!"}, {"committedAt", "String!"}, {"replayed", "Boolean!"}, {"result", "ConversationMemberBatch!"}}},
+	{"AgentAuditEvent", []typeField{{"eventId", "UUID!"}, {"orgId", "UUID!"}, {"grantId", "UUID"}, {"actorKind", "String!"}, {"actorId", "UUID"}, {"kind", "String!"}, {"details", "Properties"}, {"occurredAt", "String!"}}},
+	{"AgentAuditEventPage", []typeField{{"items", "[AgentAuditEvent!]!"}, {"complete", "Boolean!"}, {"refreshRequired", "Boolean!"}, {"nextCursor", "String"}}},
+	{"AgentAuditEventsReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "AgentAuditEventPage"}}},
+	{"AgentCredentialPermitReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "SignedProof"}}},
+	{"AgentGrant", []typeField{{"grantId", "UUID!"}, {"orgId", "UUID!"}, {"signupId", "UUID!"}, {"agentActorId", "UUID!"}, {"projectId", "UUID"}, {"scopes", "[String!]!"}, {"expiresAt", "String!"}, {"revokedAt", "String"}, {"createdAt", "String!"}, {"keys", "[AgentKey!]!"}}},
+	{"AgentGrantPage", []typeField{{"items", "[AgentGrant!]!"}, {"complete", "Boolean!"}, {"refreshRequired", "Boolean!"}, {"nextCursor", "String"}}},
+	{"AgentGrantsReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "AgentGrantPage"}}},
+	{"AgentKey", []typeField{{"operationId", "UUID!"}, {"state", "String!"}, {"scopes", "[String!]!"}, {"expiresAt", "String!"}, {"keyId", "String"}, {"deliveryId", "UUID"}, {"deliveryExpiresAt", "String"}}},
+	{"AgentPayment", []typeField{{"paymentId", "UUID!"}, {"amount", "String!"}, {"currency", "String!"}, {"state", "String!"}}},
+	{"AgentSignupForApprovalReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "AgentSignupReview"}}},
+	{"AgentSignupReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "AgentSignupStatus"}}},
+	{"AgentSignupReview", []typeField{{"signupId", "UUID!"}, {"ownerEmail", "String!"}, {"organizationName", "String!"}, {"agentName", "String!"}, {"purpose", "String"}, {"suggestedPlan", "String"}, {"suggestedScopes", "[String!]!"}, {"suggestedMonthlySpendCap", "String"}, {"currency", "String!"}, {"expiresAt", "String!"}}},
+	{"AgentSignupStatus", []typeField{{"signupId", "UUID!"}, {"state", "String!"}, {"orgId", "UUID"}, {"deploymentId", "UUID"}, {"projectId", "UUID"}, {"nextStep", "String"}, {"scopes", "[String!]!"}, {"grantExpiresAt", "String"}, {"keys", "[AgentKey!]!"}, {"incarnation", "UUID"}, {"servingEpoch", "Decimal"}}},
+	{"AgentSignupTicket", []typeField{{"signupId", "UUID!"}, {"confirmationCode", "String!"}, {"expiresAt", "String!"}, {"pollAfterSeconds", "Int!"}}},
 	{"AlertLiveSessionPayload", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"receiptId", "UUID!"}, {"committedAt", "String!"}, {"replayed", "Boolean!"}, {"result", "LiveAlertBatch!"}}},
+	{"ApproveAgentSignupReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "AgentSignupStatus"}}},
 	{"BillingCheckoutSession", []typeField{{"orgId", "UUID!"}, {"planId", "String!"}, {"url", "String!"}, {"expiresAt", "String!"}}},
 	{"BillingPortalSession", []typeField{{"orgId", "UUID!"}, {"url", "String!"}, {"expiresAt", "String"}}},
 	{"BroadcastPermissionChanged", []typeField{{"member", "Member!"}, {"mediaCutoff", "LiveMediaCutoff"}}},
@@ -4752,6 +5581,7 @@ var objectTypes = []objectType{
 	{"InboxItem", []typeField{{"conversationId", "UUID!"}, {"title", "String!"}, {"activityAt", "String"}, {"visibilityEpoch", "Decimal!"}, {"latestVisibleMessage", "Message"}, {"hasUnread", "Boolean!"}}},
 	{"InboxPage", []typeField{{"items", "[InboxItem!]!"}, {"complete", "Boolean!"}, {"refreshRequired", "Boolean!"}, {"nextCursor", "String"}, {"partialReason", "String"}}},
 	{"InboxReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "InboxPage"}}},
+	{"IssueAgentKeyReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "AgentKey"}}},
 	{"IssueBackendKeyReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OperationResult"}}},
 	{"IssueSessionReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "SessionBootstrap"}}},
 	{"Limit", []typeField{{"maximum", "Decimal"}, {"unit", "String"}, {"scope", "String"}, {"milliseconds", "Decimal"}, {"policyId", "String"}, {"revision", "Decimal"}}},
@@ -4793,6 +5623,8 @@ var objectTypes = []objectType{
 	{"OrganizationBilling", []typeField{{"orgId", "UUID!"}, {"planId", "String"}, {"standing", "String"}, {"graceUntil", "String"}, {"subscriptionStatus", "String"}, {"currentPeriodEnd", "String"}, {"cancelAtPeriodEnd", "Boolean!"}, {"catalogVersion", "String!"}, {"configured", "Boolean!"}, {"billed", "Boolean!"}}},
 	{"OrganizationBillingReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OrganizationBilling"}}},
 	{"OrganizationPage", []typeField{{"items", "[Organization!]!"}, {"complete", "Boolean!"}, {"refreshRequired", "Boolean!"}, {"nextCursor", "String"}}},
+	{"OrganizationSpend", []typeField{{"orgId", "UUID!"}, {"planId", "String!"}, {"currency", "String!"}, {"catalogVersion", "String!"}, {"monthlySpendCap", "String"}, {"agentPurchaseLimit", "String"}, {"updatedAt", "String"}, {"monthlyMinimum", "String"}, {"periodStart", "String"}, {"periodEnd", "String"}, {"credits", "String"}, {"charges", "String"}, {"margin", "String"}, {"stop", "String"}, {"refusedMeters", "[String!]!"}, {"evaluatedAt", "String"}, {"usageThrough", "String"}, {"validUntil", "String"}, {"minimumCredit", "String"}, {"chargeLimit", "String"}}},
+	{"OrganizationSpendReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OrganizationSpend"}}},
 	{"OrganizationUsage", []typeField{{"orgId", "UUID!"}, {"source", "String!"}, {"observedAt", "String!"}, {"complete", "Boolean!"}, {"reason", "String!"}, {"from", "String!"}, {"to", "String!"}, {"meters", "[UsageMeter!]!"}, {"aggregatedThrough", "String"}}},
 	{"OrganizationUsageReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OrganizationUsage"}}},
 	{"OrganizationsReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OrganizationPage"}}},
@@ -4802,17 +5634,21 @@ var objectTypes = []objectType{
 	{"ProjectPolicyReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OperationResult"}}},
 	{"ProjectUsage", []typeField{{"projectId", "UUID!"}, {"source", "String!"}, {"observedAt", "String!"}, {"complete", "Boolean!"}, {"reason", "String!"}, {"from", "String!"}, {"to", "String!"}, {"meters", "[UsageMeter!]!"}, {"aggregatedThrough", "String"}}},
 	{"ProjectUsageReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "ProjectUsage"}}},
+	{"PurchaseAgentCreditsReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "AgentPayment"}}},
 	{"ReadReceipt", []typeField{{"principalId", "UUID!"}, {"membershipEpoch", "Decimal!"}, {"visibilityEpoch", "Decimal!"}, {"deliveredThroughSequence", "Decimal"}, {"readThroughSequence", "Decimal"}, {"updatedAt", "String"}}},
 	{"RedeemCredentialReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "CredentialCapsule"}}},
+	{"RejectAgentSignupReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "AgentSignupStatus"}}},
 	{"RemoveMemberReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "Member"}}},
 	{"RenewSessionReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "SessionBootstrap"}}},
 	{"ReplayWebhookDeliveriesReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OperationResult"}}},
+	{"RequestAgentSignupReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "AgentSignupTicket"}}},
 	{"RequestResolution", []typeField{{"state", "String!"}, {"requestId", "UUID!"}, {"checkedAt", "String!"}, {"resultWithheld", "Boolean!"}, {"receipt", "ResolvedReceipt"}}},
 	{"ResolveRequestReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "RequestResolution"}}},
 	{"ResolvedReceipt", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "RetainedResult"}}},
 	{"ResourceRef", []typeField{{"kind", "String!"}, {"id", "String!"}}},
 	{"ResumeOperationReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "Operation"}}},
-	{"RetainedResult", []typeField{{"billingCheckoutSession", "BillingCheckoutSession"}, {"billingPortalSession", "BillingPortalSession"}, {"broadcastPermissionChanged", "BroadcastPermissionChanged"}, {"conversation", "Conversation"}, {"conversationMemberBatch", "ConversationMemberBatch"}, {"conversationMute", "ConversationMute"}, {"credentialDeliveryReceipt", "CredentialDeliveryReceipt"}, {"deliveryAck", "DeliveryAck"}, {"liveAlertBatch", "LiveAlertBatch"}, {"liveCredentialIssuance", "LiveCredentialIssuance"}, {"liveSessionEndRequested", "LiveSessionEndRequested"}, {"liveSessionJoined", "LiveSessionJoined"}, {"liveSessionLeft", "LiveSessionLeft"}, {"liveSessionStarted", "LiveSessionStarted"}, {"member", "Member"}, {"message", "Message"}, {"messageAck", "MessageAck"}, {"organization", "Organization"}, {"principal", "Principal"}, {"readReceipt", "ReadReceipt"}, {"sessionBootstrap", "SessionBootstrap"}, {"sessionRevocation", "SessionRevocation"}, {"signedProof", "SignedProof"}}},
+	{"RetainedResult", []typeField{{"agentGrant", "AgentGrant"}, {"agentSignupStatus", "AgentSignupStatus"}, {"billingCheckoutSession", "BillingCheckoutSession"}, {"billingPortalSession", "BillingPortalSession"}, {"broadcastPermissionChanged", "BroadcastPermissionChanged"}, {"conversation", "Conversation"}, {"conversationMemberBatch", "ConversationMemberBatch"}, {"conversationMute", "ConversationMute"}, {"credentialDeliveryReceipt", "CredentialDeliveryReceipt"}, {"deliveryAck", "DeliveryAck"}, {"liveAlertBatch", "LiveAlertBatch"}, {"liveCredentialIssuance", "LiveCredentialIssuance"}, {"liveSessionEndRequested", "LiveSessionEndRequested"}, {"liveSessionJoined", "LiveSessionJoined"}, {"liveSessionLeft", "LiveSessionLeft"}, {"liveSessionStarted", "LiveSessionStarted"}, {"member", "Member"}, {"message", "Message"}, {"messageAck", "MessageAck"}, {"organization", "Organization"}, {"organizationSpend", "OrganizationSpend"}, {"principal", "Principal"}, {"readReceipt", "ReadReceipt"}, {"sessionBootstrap", "SessionBootstrap"}, {"sessionRevocation", "SessionRevocation"}, {"signedProof", "SignedProof"}}},
+	{"RevokeAgentGrantReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "AgentGrant"}}},
 	{"RevokeBackendKeyReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OperationResult"}}},
 	{"RevokeSessionReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "SessionRevocation"}}},
 	{"RotateWebhookSecretReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OperationResult"}}},
@@ -4830,6 +5666,7 @@ var objectTypes = []objectType{
 	{"SessionRevocation", []typeField{{"sessionId", "UUID!"}, {"status", "String!"}, {"mediaCutoff", "MediaCutoff"}}},
 	{"SetBroadcastPermissionPayload", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"receiptId", "UUID!"}, {"committedAt", "String!"}, {"replayed", "Boolean!"}, {"result", "BroadcastPermissionChanged!"}}},
 	{"SetConversationMutePayload", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"receiptId", "UUID!"}, {"committedAt", "String!"}, {"replayed", "Boolean!"}, {"result", "ConversationMute!"}}},
+	{"SetSpendControlsReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OrganizationSpend"}}},
 	{"UpdateConversationReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "Conversation"}}},
 	{"UpdateWebhookReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OperationResult"}}},
 	{"UsageMeter", []typeField{{"meter", "String!"}, {"unit", "String!"}, {"quantity", "Decimal!"}, {"emitted", "Boolean!"}}},
@@ -4845,7 +5682,12 @@ var inputTypes = []inputType{
 	{"AcknowledgeCredentialRequestInput", []inputField{{"deliveryId", "UUID!", false}}},
 	{"AddMemberRequestInput", []inputField{{"conversationId", "UUID!", false}, {"principalId", "UUID!", false}, {"role", "String!", false}, {"expectedRevision", "Decimal!", false}}},
 	{"AddMembersInput", []inputField{{"conversationId", "UUID!", false}, {"members", "[MemberBatchEntryInput!]!", false}}},
+	{"AgentAuditEventsRequestInput", []inputField{{"orgId", "UUID!", false}, {"limit", "PageSize!", true}, {"cursor", "String", false}}},
+	{"AgentCredentialPermitRequestInput", []inputField{{"deliveryId", "UUID!", false}, {"redemptionRequestId", "UUID!", false}}},
+	{"AgentGrantsRequestInput", []inputField{{"orgId", "UUID!", false}, {"limit", "PageSize!", true}, {"cursor", "String", false}}},
+	{"AgentSignupForApprovalRequestInput", []inputField{{"approvalToken", "String!", false}}},
 	{"AlertLiveSessionInput", []inputField{{"liveSessionId", "UUID!", false}, {"expectedGeneration", "Decimal!", false}, {"principalIds", "[UUID!]!", false}}},
+	{"ApproveAgentSignupRequestInput", []inputField{{"approvalToken", "String!", false}, {"confirmationCode", "String!", false}, {"termsRef", "String!", false}, {"plan", "String!", false}, {"scopes", "[String!]!", false}, {"monthlySpendCap", "String!", false}, {"agentPurchaseLimit", "String", false}, {"grantExpiresAt", "String", false}}},
 	{"ConfigureWebhookRequestInput", []inputField{{"projectId", "UUID!", false}, {"url", "String!", false}, {"eventTypes", "[String!]!", false}, {"consentRef", "String!", false}}},
 	{"ConversationLiveInput", []inputField{{"conversationId", "UUID!", false}}},
 	{"ConversationMuteInput", []inputField{{"conversationId", "UUID!", false}, {"actAsPrincipalId", "UUID", false}}},
@@ -4873,6 +5715,7 @@ var inputTypes = []inputType{
 	{"GetProjectRequestInput", []inputField{{"projectId", "UUID!", false}}},
 	{"HistoryGrantRequestInput", []inputField{{"conversationId", "UUID!", false}, {"principalId", "UUID!", false}, {"membershipEpoch", "Decimal!", false}, {"expectedRevision", "Decimal!", false}, {"fromSequence", "Decimal!", false}}},
 	{"InboxRequestInput", []inputField{{"limit", "PageSize!", false}, {"cursor", "String", false}, {"actAsPrincipalId", "UUID", false}}},
+	{"IssueAgentKeyRequestInput", []inputField{{"scopes", "[String!]!", false}, {"expiresAt", "String", false}}},
 	{"IssueBackendKeyRequestInput", []inputField{{"projectId", "UUID!", false}, {"name", "String!", false}, {"scopes", "[String!]!", false}, {"expiresAt", "String!", false}}},
 	{"IssueSessionRequestInput", []inputField{{"principalId", "UUID!", false}, {"deviceId", "UUID!", false}, {"requestedTtlMs", "Decimal!", false}}},
 	{"LiveParticipantsInput", []inputField{{"liveSessionId", "UUID!", false}, {"limit", "PageSize!", true}, {"cursor", "String", false}}},
@@ -4884,17 +5727,22 @@ var inputTypes = []inputType{
 	{"MembersRequestInput", []inputField{{"conversationId", "UUID!", false}, {"limit", "PageSize!", false}, {"cursor", "String", false}}},
 	{"MessagesRequestInput", []inputField{{"conversationId", "UUID!", false}, {"limit", "PageSize!", false}, {"beforeSequence", "Decimal", false}, {"actAsPrincipalId", "UUID", false}}},
 	{"OrganizationBillingRequestInput", []inputField{{"orgId", "UUID!", false}}},
+	{"OrganizationSpendRequestInput", []inputField{{"orgId", "UUID!", false}}},
 	{"OrganizationUsageRequestInput", []inputField{{"orgId", "UUID!", false}, {"from", "String", false}, {"to", "String", false}}},
 	{"PauseOperationRequestInput", []inputField{{"operationId", "UUID!", false}, {"expectedRevision", "Decimal!", false}}},
 	{"PolicyChangeInput", []inputField{{"kind", "String!", false}, {"reason", "String", false}, {"holdId", "String", false}}},
 	{"ProjectPolicyRequestInput", []inputField{{"projectId", "UUID!", false}, {"expectedRevision", "Decimal!", false}, {"change", "PolicyChangeInput!", false}}},
 	{"ProjectUsageRequestInput", []inputField{{"projectId", "UUID!", false}, {"from", "String", false}, {"to", "String", false}}},
+	{"PurchaseAgentCreditsRequestInput", []inputField{{"amount", "String!", false}, {"sharedPaymentToken", "String!", false}}},
 	{"RedeemCredentialRequestInput", []inputField{{"deliveryId", "UUID!", false}}},
+	{"RejectAgentSignupRequestInput", []inputField{{"approvalToken", "String!", false}, {"suppressFutureRequests", "Boolean!", false}}},
 	{"RemoveMemberRequestInput", []inputField{{"conversationId", "UUID!", false}, {"principalId", "UUID!", false}, {"expectedRevision", "Decimal!", false}}},
 	{"RenewSessionRequestInput", []inputField{{"sessionId", "UUID!", false}, {"principalId", "UUID!", false}, {"deviceId", "UUID!", false}, {"expectedRevision", "Decimal!", false}, {"requestedTtlMs", "Decimal!", false}}},
 	{"ReplayWebhookDeliveriesRequestInput", []inputField{{"projectId", "UUID!", false}, {"endpointId", "UUID!", false}, {"effectId", "UUID", false}, {"since", "String", false}, {"until", "String", false}}},
+	{"RequestAgentSignupRequestInput", []inputField{{"ownerEmail", "String!", false}, {"pollChallenge", "String!", false}, {"organizationName", "String!", false}, {"agentName", "String!", false}, {"purpose", "String", false}, {"suggestedPlan", "String", false}, {"suggestedScopes", "[String!]!", false}, {"suggestedMonthlySpendCap", "String", false}}},
 	{"ResolveRequestRequestInput", []inputField{{"requestId", "UUID!", false}}},
 	{"ResumeOperationRequestInput", []inputField{{"operationId", "UUID!", false}, {"expectedRevision", "Decimal!", false}}},
+	{"RevokeAgentGrantRequestInput", []inputField{{"grantId", "UUID!", false}, {"revokeIssuedSessions", "Boolean!", false}}},
 	{"RevokeBackendKeyRequestInput", []inputField{{"projectId", "UUID!", false}, {"keyId", "String!", false}, {"expectedRevision", "Decimal!", false}, {"revokeIssuedSessions", "Boolean!", false}}},
 	{"RevokeSessionRequestInput", []inputField{{"sessionId", "UUID!", false}, {"expectedRevision", "Decimal!", false}}},
 	{"RotateWebhookSecretRequestInput", []inputField{{"projectId", "UUID!", false}, {"endpointId", "UUID!", false}, {"expectedRevision", "Decimal!", false}}},
@@ -4904,6 +5752,7 @@ var inputTypes = []inputType{
 	{"SessionRequestOutcomeRequestInput", []inputField{{"requestId", "UUID!", false}}},
 	{"SetBroadcastPermissionInput", []inputField{{"conversationId", "UUID!", false}, {"principalId", "UUID!", false}, {"allowed", "Boolean!", false}, {"expectedMembershipRevision", "Decimal!", false}}},
 	{"SetConversationMuteInput", []inputField{{"conversationId", "UUID!", false}, {"muted", "Boolean!", false}, {"until", "String", false}, {"actAsPrincipalId", "UUID", false}}},
+	{"SetSpendControlsRequestInput", []inputField{{"orgId", "UUID!", false}, {"monthlySpendCap", "String!", false}, {"agentPurchaseLimit", "String", false}}},
 	{"UpdateConversationRequestInput", []inputField{{"conversationId", "UUID!", false}, {"expectedRevision", "Decimal!", false}, {"title", "String", false}, {"props", "Properties", false}}},
 	{"UpdateWebhookRequestInput", []inputField{{"projectId", "UUID!", false}, {"endpointId", "UUID!", false}, {"expectedRevision", "Decimal!", false}, {"eventTypes", "[String!]!", false}, {"enabled", "Boolean!", false}}},
 	{"WebhookDeliveriesRequestInput", []inputField{{"projectId", "UUID!", false}, {"endpointId", "UUID!", false}}},

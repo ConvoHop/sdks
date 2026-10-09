@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopTransport, ConvoHopClient, ConversationStream, ConvoHopProblem, parseId, parseCounter, parseMessage, parseMembership, parseConversation, parseSearchHit } from "@convohop/client";
+import { ConvoHopTransport, ConvoHopClient, ConversationStream, ConvoHopProblem, operationCatalog, parseId, parseCounter, parseMessage, parseMembership, parseConversation, parseSearchHit } from "@convohop/client";
 import { event, full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID();
@@ -863,6 +863,31 @@ test(`unknown ${operation} needs a fresh permit without unauthorized request loo
   await assert.rejects(transport.retry(requestId), { code: "CREDENTIAL_REQUIRED", requestId });
   assert.equal(writes, 1);
   assert.ok([...saved.values.values()].every(value => !value.includes("never-persist")));
+});
+
+test("an unknown replay-only request is never looked up; only an explicit resend of the same request settles it", async () => {
+  const requestId = id(), sent = [], input = { scopes: ["messageRead"], expiresAt: "2026-12-01T00:00:00.000Z" };
+  let lose = true;
+  const transport = new ConvoHopTransport({ baseUrl: "http://localhost:18080", credential: "fixture-agent-verifier",
+    namespace: "replay-only", recoveryStorage: storage(),
+    fetch: async (_url, options) => {
+      const request = JSON.parse(options.body);
+      sent.push([request.operationName, request.variables.context.requestId]);
+      if (lose) { lose = false; throw new Error("response lost"); }
+      return response("committed", { operationId: id(), state: "pending", scopes: input.scopes, expiresAt: input.expiresAt,
+        keyId: null, deliveryId: null, deliveryExpiresAt: null }, options, { replayed: true });
+    } });
+  assert.equal(operationCatalog["management.issueAgentKey"].idempotency, "replayOnly");
+  await assert.rejects(transport.execute("management.issueAgentKey", undefined, input, requestId), { code: "TRANSPORT_UNKNOWN", requestId });
+  await assert.rejects(transport.retry(requestId), { code: "INVALID_REQUEST", requestId, outcome: "unknown", status: 400,
+    message: /cannot be looked up; send the same request ID and payload again explicitly/ });
+  assert.deepEqual(sent, [["ManagementIssueAgentKey", requestId]], "retry sends no request lookup");
+  await assert.rejects(transport.execute("management.issueAgentKey", undefined, { ...input, scopes: ["callRead"] }, requestId),
+    { code: "IDEMPOTENCY_CONFLICT", requestId });
+  const settled = await transport.execute("management.issueAgentKey", undefined, input, requestId);
+  assert.equal(settled.status, "committed");
+  assert.equal(settled.result.state, "pending");
+  assert.deepEqual(sent, [["ManagementIssueAgentKey", requestId], ["ManagementIssueAgentKey", requestId]]);
 });
 
 test("missing committed receipt metadata stays unknown despite a complete result object", async () => {

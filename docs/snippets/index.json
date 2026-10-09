@@ -632,6 +632,56 @@
       "path": "management/getOperation.md"
     },
     {
+      "id": "management.agentSignupForApproval",
+      "plane": "management",
+      "kind": "query",
+      "field": "agentSignupForApproval",
+      "operationName": "ManagementAgentSignupForApproval",
+      "summary": "Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.",
+      "layer": "server",
+      "path": "management/agentSignupForApproval.md"
+    },
+    {
+      "id": "management.agentSignup",
+      "plane": "management",
+      "kind": "query",
+      "field": "agentSignup",
+      "operationName": "ManagementAgentSignup",
+      "summary": "Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.",
+      "layer": "server",
+      "path": "management/agentSignup.md"
+    },
+    {
+      "id": "management.agentGrants",
+      "plane": "management",
+      "kind": "query",
+      "field": "agentGrants",
+      "operationName": "ManagementAgentGrants",
+      "summary": "List an organization's agent grants with their keys, newest first.",
+      "layer": "server",
+      "path": "management/agentGrants.md"
+    },
+    {
+      "id": "management.agentAuditEvents",
+      "plane": "management",
+      "kind": "query",
+      "field": "agentAuditEvents",
+      "operationName": "ManagementAgentAuditEvents",
+      "summary": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.",
+      "layer": "server",
+      "path": "management/agentAuditEvents.md"
+    },
+    {
+      "id": "management.organizationSpend",
+      "plane": "management",
+      "kind": "query",
+      "field": "organizationSpend",
+      "operationName": "ManagementOrganizationSpend",
+      "summary": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.",
+      "layer": "server",
+      "path": "management/organizationSpend.md"
+    },
+    {
       "id": "management.createOrganization",
       "plane": "management",
       "kind": "mutation",
@@ -790,6 +840,86 @@
       "summary": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.",
       "layer": "server",
       "path": "management/replayWebhookDeliveries.md"
+    },
+    {
+      "id": "management.requestAgentSignup",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "requestAgentSignup",
+      "operationName": "ManagementRequestAgentSignup",
+      "summary": "Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.",
+      "layer": "server",
+      "path": "management/requestAgentSignup.md"
+    },
+    {
+      "id": "management.rejectAgentSignup",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "rejectAgentSignup",
+      "operationName": "ManagementRejectAgentSignup",
+      "summary": "Reject a signup request from its approval link, optionally suppressing future requests to the email.",
+      "layer": "server",
+      "path": "management/rejectAgentSignup.md"
+    },
+    {
+      "id": "management.approveAgentSignup",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "approveAgentSignup",
+      "operationName": "ManagementApproveAgentSignup",
+      "summary": "Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.",
+      "layer": "server",
+      "path": "management/approveAgentSignup.md"
+    },
+    {
+      "id": "management.issueAgentKey",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "issueAgentKey",
+      "operationName": "ManagementIssueAgentKey",
+      "summary": "Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.",
+      "layer": "server",
+      "path": "management/issueAgentKey.md"
+    },
+    {
+      "id": "management.agentCredentialPermit",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "agentCredentialPermit",
+      "operationName": "ManagementAgentCredentialPermit",
+      "summary": "Issue a permit that authorizes the agent to redeem one of its key deliveries.",
+      "layer": "server",
+      "path": "management/agentCredentialPermit.md"
+    },
+    {
+      "id": "management.revokeAgentGrant",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "revokeAgentGrant",
+      "operationName": "ManagementRevokeAgentGrant",
+      "summary": "Revoke an agent grant and every key issued under it.",
+      "layer": "server",
+      "path": "management/revokeAgentGrant.md"
+    },
+    {
+      "id": "management.setSpendControls",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "setSpendControls",
+      "operationName": "ManagementSetSpendControls",
+      "summary": "Set the organization's monthly spend cap and agent purchase limit.",
+      "layer": "server",
+      "path": "management/setSpendControls.md"
+    },
+    {
+      "id": "management.purchaseAgentCredits",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "purchaseAgentCredits",
+      "operationName": "ManagementPurchaseAgentCredits",
+      "summary": "Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.",
+      "layer": "server",
+      "path": "management/purchaseAgentCredits.md"
     }
   ]
 }

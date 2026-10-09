@@ -900,6 +900,74 @@
           ]
         },
         {
+          "name": "agentSignupForApproval",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentSignupForApproval",
+          "anchor": "managementsuspendapiagentsignupforapproval-method",
+          "signatures": [
+            "public suspend fun agentSignupForApproval(input: AgentSignupForApprovalRequestInput): AgentSignupForApprovalReply"
+          ],
+          "docs": "Suspending `ManagementApi.agentSignupForApproval`."
+        },
+        {
+          "name": "agentSignup",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentSignup",
+          "anchor": "managementsuspendapiagentsignup-method",
+          "signatures": ["public suspend fun agentSignup(): AgentSignupReply"],
+          "docs": "Suspending `ManagementApi.agentSignup`."
+        },
+        {
+          "name": "agentGrants",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentGrants",
+          "anchor": "managementsuspendapiagentgrants-method",
+          "signatures": [
+            "public suspend fun agentGrants(input: AgentGrantsRequestInput): AgentGrantsReply"
+          ],
+          "docs": "Suspending `ManagementApi.agentGrants`."
+        },
+        {
+          "name": "agentGrantsPages",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentGrantsPages",
+          "anchor": "managementsuspendapiagentgrantspages-method",
+          "signatures": [
+            "public fun agentGrantsPages(input: AgentGrantsRequestInput): Flow<AgentGrantPage>"
+          ],
+          "docs": "`ManagementApi.agentGrantsPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it."
+        },
+        {
+          "name": "agentAuditEvents",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentAuditEvents",
+          "anchor": "managementsuspendapiagentauditevents-method",
+          "signatures": [
+            "public suspend fun agentAuditEvents(input: AgentAuditEventsRequestInput): AgentAuditEventsReply"
+          ],
+          "docs": "Suspending `ManagementApi.agentAuditEvents`."
+        },
+        {
+          "name": "agentAuditEventsPages",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentAuditEventsPages",
+          "anchor": "managementsuspendapiagentauditeventspages-method",
+          "signatures": [
+            "public fun agentAuditEventsPages(input: AgentAuditEventsRequestInput): Flow<AgentAuditEventPage>"
+          ],
+          "docs": "`ManagementApi.agentAuditEventsPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it."
+        },
+        {
+          "name": "organizationSpend",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizationSpend",
+          "anchor": "managementsuspendapiorganizationspend-method",
+          "signatures": [
+            "public suspend fun organizationSpend(input: OrganizationSpendRequestInput): OrganizationSpendReply"
+          ],
+          "docs": "Suspending `ManagementApi.organizationSpend`."
+        },
+        {
           "name": "createOrganization",
           "kind": "method",
           "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createOrganization",
@@ -1142,6 +1210,86 @@
               "page": "../../operations/management/replayWebhookDeliveries.md"
             }
           ]
+        },
+        {
+          "name": "requestAgentSignup",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.requestAgentSignup",
+          "anchor": "managementsuspendapirequestagentsignup-method",
+          "signatures": [
+            "public suspend fun requestAgentSignup(input: RequestAgentSignupRequestInput, requestId: String? = null): RequestAgentSignupReply"
+          ],
+          "docs": "Suspending `ManagementApi.requestAgentSignup`."
+        },
+        {
+          "name": "rejectAgentSignup",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.rejectAgentSignup",
+          "anchor": "managementsuspendapirejectagentsignup-method",
+          "signatures": [
+            "public suspend fun rejectAgentSignup(input: RejectAgentSignupRequestInput, requestId: String? = null): RejectAgentSignupReply"
+          ],
+          "docs": "Suspending `ManagementApi.rejectAgentSignup`."
+        },
+        {
+          "name": "approveAgentSignup",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.approveAgentSignup",
+          "anchor": "managementsuspendapiapproveagentsignup-method",
+          "signatures": [
+            "public suspend fun approveAgentSignup(input: ApproveAgentSignupRequestInput, requestId: String? = null): ApproveAgentSignupReply"
+          ],
+          "docs": "Suspending `ManagementApi.approveAgentSignup`."
+        },
+        {
+          "name": "issueAgentKey",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.issueAgentKey",
+          "anchor": "managementsuspendapiissueagentkey-method",
+          "signatures": [
+            "public suspend fun issueAgentKey(input: IssueAgentKeyRequestInput, requestId: String? = null): IssueAgentKeyReply"
+          ],
+          "docs": "Suspending `ManagementApi.issueAgentKey`."
+        },
+        {
+          "name": "agentCredentialPermit",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentCredentialPermit",
+          "anchor": "managementsuspendapiagentcredentialpermit-method",
+          "signatures": [
+            "public suspend fun agentCredentialPermit(input: AgentCredentialPermitRequestInput, requestId: String? = null): AgentCredentialPermitReply"
+          ],
+          "docs": "Suspending `ManagementApi.agentCredentialPermit`."
+        },
+        {
+          "name": "revokeAgentGrant",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.revokeAgentGrant",
+          "anchor": "managementsuspendapirevokeagentgrant-method",
+          "signatures": [
+            "public suspend fun revokeAgentGrant(input: RevokeAgentGrantRequestInput, requestId: String? = null): RevokeAgentGrantReply"
+          ],
+          "docs": "Suspending `ManagementApi.revokeAgentGrant`."
+        },
+        {
+          "name": "setSpendControls",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.setSpendControls",
+          "anchor": "managementsuspendapisetspendcontrols-method",
+          "signatures": [
+            "public suspend fun setSpendControls(input: SetSpendControlsRequestInput, requestId: String? = null): SetSpendControlsReply"
+          ],
+          "docs": "Suspending `ManagementApi.setSpendControls`."
+        },
+        {
+          "name": "purchaseAgentCredits",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.purchaseAgentCredits",
+          "anchor": "managementsuspendapipurchaseagentcredits-method",
+          "signatures": [
+            "public suspend fun purchaseAgentCredits(input: PurchaseAgentCreditsRequestInput, requestId: String? = null): PurchaseAgentCreditsReply"
+          ],
+          "docs": "Suspending `ManagementApi.purchaseAgentCredits`."
         }
       ]
     },

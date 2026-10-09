@@ -1385,6 +1385,130 @@ Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new reques
 
 Sends [`management.getOperation`](../../operations/management/getOperation.md).
 
+#### `AsyncConvoHopManagement.agent_signup_for_approval` method
+
+```python
+async def agent_signup_for_approval(self, *, approval_token: str) -> AgentSignupReview
+```
+
+Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+#### `AsyncConvoHopManagement.agent_signup` method
+
+```python
+async def agent_signup(self) -> AgentSignupStatus
+```
+
+Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+
+Authorization: `agentVerifier`, when `ownSignup`: The verifier is the one whose digest the signup request carries.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+#### `AsyncConvoHopManagement.agent_grants` method
+
+```python
+async def agent_grants(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AgentGrantPage
+```
+
+List an organization's agent grants with their keys, newest first.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_grants()` follows the cursor for you.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `AsyncConvoHopManagement.iter_agent_grants` method
+
+```python
+async def iter_agent_grants(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AsyncIterator[AgentGrant]
+```
+
+Iterate the `items` of `agent_grants()` across pages.
+
+Follows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `AsyncConvoHopManagement.agent_audit_events` method
+
+```python
+async def agent_audit_events(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AgentAuditEventPage
+```
+
+List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_audit_events()` follows the cursor for you.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `AsyncConvoHopManagement.iter_agent_audit_events` method
+
+```python
+async def iter_agent_audit_events(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AsyncIterator[AgentAuditEvent]
+```
+
+Iterate the `items` of `agent_audit_events()` across pages.
+
+Follows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `AsyncConvoHopManagement.organization_spend` method
+
+```python
+async def organization_spend(self, *, org_id: str) -> OrganizationSpend
+```
+
+Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
 #### `AsyncConvoHopManagement.create_organization` method
 
 ```python
@@ -1804,6 +1928,195 @@ Parameters:
 - `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 Sends [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md).
+
+#### `AsyncConvoHopManagement.request_agent_signup` method
+
+```python
+async def request_agent_signup(
+    self,
+    *,
+    owner_email: str,
+    poll_challenge: str,
+    organization_name: str,
+    agent_name: str,
+    suggested_scopes: Sequence[str],
+    purpose: str | None = None,
+    suggested_plan: str | None = None,
+    suggested_monthly_spend_cap: str | None = None,
+    request_id: str | None = None,
+) -> AgentSignupTicket
+```
+
+Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `AsyncConvoHopManagement.reject_agent_signup` method
+
+```python
+async def reject_agent_signup(
+    self,
+    *,
+    approval_token: str,
+    suppress_future_requests: bool,
+    request_id: str | None = None,
+) -> AgentSignupStatus
+```
+
+Reject a signup request from its approval link, optionally suppressing future requests to the email.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `AsyncConvoHopManagement.approve_agent_signup` method
+
+```python
+async def approve_agent_signup(
+    self,
+    *,
+    approval_token: str,
+    confirmation_code: str,
+    terms_ref: str,
+    plan: str,
+    scopes: Sequence[str],
+    monthly_spend_cap: str,
+    agent_purchase_limit: str | None = None,
+    grant_expires_at: str | None = None,
+    request_id: str | None = None,
+) -> AgentSignupStatus
+```
+
+Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+
+Authorization: `portalCredential`, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `AsyncConvoHopManagement.issue_agent_key` method
+
+```python
+async def issue_agent_key(
+    self,
+    *,
+    scopes: Sequence[str],
+    expires_at: str | None = None,
+    request_id: str | None = None,
+) -> AgentKey
+```
+
+Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `AsyncConvoHopManagement.agent_credential_permit` method
+
+```python
+async def agent_credential_permit(
+    self,
+    *,
+    delivery_id: str,
+    redemption_request_id: str,
+    request_id: str | None = None,
+) -> dict[str, Any]
+```
+
+Issue a permit that authorizes the agent to redeem one of its key deliveries.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `AsyncConvoHopManagement.revoke_agent_grant` method
+
+```python
+async def revoke_agent_grant(
+    self,
+    *,
+    grant_id: str,
+    revoke_issued_sessions: bool,
+    request_id: str | None = None,
+) -> AgentGrant
+```
+
+Revoke an agent grant and every key issued under it.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `AsyncConvoHopManagement.set_spend_controls` method
+
+```python
+async def set_spend_controls(
+    self,
+    *,
+    org_id: str,
+    monthly_spend_cap: str,
+    agent_purchase_limit: str | None = None,
+    request_id: str | None = None,
+) -> OrganizationSpend
+```
+
+Set the organization's monthly spend cap and agent purchase limit.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `AsyncConvoHopManagement.purchase_agent_credits` method
+
+```python
+async def purchase_agent_credits(
+    self,
+    *,
+    amount: str,
+    shared_payment_token: str,
+    request_id: str | None = None,
+) -> AgentPayment
+```
+
+Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
 
 ### `ConvoHop` class
 
@@ -3166,6 +3479,130 @@ Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new reques
 
 Sends [`management.getOperation`](../../operations/management/getOperation.md).
 
+#### `ConvoHopManagement.agent_signup_for_approval` method
+
+```python
+def agent_signup_for_approval(self, *, approval_token: str) -> AgentSignupReview
+```
+
+Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+#### `ConvoHopManagement.agent_signup` method
+
+```python
+def agent_signup(self) -> AgentSignupStatus
+```
+
+Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+
+Authorization: `agentVerifier`, when `ownSignup`: The verifier is the one whose digest the signup request carries.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+#### `ConvoHopManagement.agent_grants` method
+
+```python
+def agent_grants(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AgentGrantPage
+```
+
+List an organization's agent grants with their keys, newest first.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_grants()` follows the cursor for you.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `ConvoHopManagement.iter_agent_grants` method
+
+```python
+def iter_agent_grants(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> Iterator[AgentGrant]
+```
+
+Iterate the `items` of `agent_grants()` across pages.
+
+Follows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `ConvoHopManagement.agent_audit_events` method
+
+```python
+def agent_audit_events(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AgentAuditEventPage
+```
+
+List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_audit_events()` follows the cursor for you.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `ConvoHopManagement.iter_agent_audit_events` method
+
+```python
+def iter_agent_audit_events(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> Iterator[AgentAuditEvent]
+```
+
+Iterate the `items` of `agent_audit_events()` across pages.
+
+Follows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `ConvoHopManagement.organization_spend` method
+
+```python
+def organization_spend(self, *, org_id: str) -> OrganizationSpend
+```
+
+Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
 #### `ConvoHopManagement.create_organization` method
 
 ```python
@@ -3585,6 +4022,195 @@ Parameters:
 - `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 Sends [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md).
+
+#### `ConvoHopManagement.request_agent_signup` method
+
+```python
+def request_agent_signup(
+    self,
+    *,
+    owner_email: str,
+    poll_challenge: str,
+    organization_name: str,
+    agent_name: str,
+    suggested_scopes: Sequence[str],
+    purpose: str | None = None,
+    suggested_plan: str | None = None,
+    suggested_monthly_spend_cap: str | None = None,
+    request_id: str | None = None,
+) -> AgentSignupTicket
+```
+
+Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `ConvoHopManagement.reject_agent_signup` method
+
+```python
+def reject_agent_signup(
+    self,
+    *,
+    approval_token: str,
+    suppress_future_requests: bool,
+    request_id: str | None = None,
+) -> AgentSignupStatus
+```
+
+Reject a signup request from its approval link, optionally suppressing future requests to the email.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `ConvoHopManagement.approve_agent_signup` method
+
+```python
+def approve_agent_signup(
+    self,
+    *,
+    approval_token: str,
+    confirmation_code: str,
+    terms_ref: str,
+    plan: str,
+    scopes: Sequence[str],
+    monthly_spend_cap: str,
+    agent_purchase_limit: str | None = None,
+    grant_expires_at: str | None = None,
+    request_id: str | None = None,
+) -> AgentSignupStatus
+```
+
+Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+
+Authorization: `portalCredential`, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `ConvoHopManagement.issue_agent_key` method
+
+```python
+def issue_agent_key(
+    self,
+    *,
+    scopes: Sequence[str],
+    expires_at: str | None = None,
+    request_id: str | None = None,
+) -> AgentKey
+```
+
+Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `ConvoHopManagement.agent_credential_permit` method
+
+```python
+def agent_credential_permit(
+    self,
+    *,
+    delivery_id: str,
+    redemption_request_id: str,
+    request_id: str | None = None,
+) -> dict[str, Any]
+```
+
+Issue a permit that authorizes the agent to redeem one of its key deliveries.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `ConvoHopManagement.revoke_agent_grant` method
+
+```python
+def revoke_agent_grant(
+    self,
+    *,
+    grant_id: str,
+    revoke_issued_sessions: bool,
+    request_id: str | None = None,
+) -> AgentGrant
+```
+
+Revoke an agent grant and every key issued under it.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `ConvoHopManagement.set_spend_controls` method
+
+```python
+def set_spend_controls(
+    self,
+    *,
+    org_id: str,
+    monthly_spend_cap: str,
+    agent_purchase_limit: str | None = None,
+    request_id: str | None = None,
+) -> OrganizationSpend
+```
+
+Set the organization's monthly spend cap and agent purchase limit.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `ConvoHopManagement.purchase_agent_credits` method
+
+```python
+def purchase_agent_credits(
+    self,
+    *,
+    amount: str,
+    shared_payment_token: str,
+    request_id: str | None = None,
+) -> AgentPayment
+```
+
+Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
 
 ### `ConvoHopProblem` class
 

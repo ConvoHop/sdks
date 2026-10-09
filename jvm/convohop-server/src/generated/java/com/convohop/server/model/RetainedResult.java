@@ -10,6 +10,8 @@ import org.jspecify.annotations.Nullable;
 
 /** Exactly one typed field contains the retained, currently authorized receipt result. */
 public final class RetainedResult implements WireValue {
+  private final @Nullable AgentGrant agentGrant;
+  private final @Nullable AgentSignupStatus agentSignupStatus;
   private final @Nullable BillingCheckoutSession billingCheckoutSession;
   private final @Nullable BillingPortalSession billingPortalSession;
   private final @Nullable BroadcastPermissionChanged broadcastPermissionChanged;
@@ -28,6 +30,7 @@ public final class RetainedResult implements WireValue {
   private final @Nullable Message message;
   private final @Nullable MessageAck messageAck;
   private final @Nullable Organization organization;
+  private final @Nullable OrganizationSpend organizationSpend;
   private final @Nullable Principal principal;
   private final @Nullable ReadReceipt readReceipt;
   private final @Nullable SessionBootstrap sessionBootstrap;
@@ -35,6 +38,8 @@ public final class RetainedResult implements WireValue {
   private final @Nullable Map<String, @Nullable Object> signedProof;
 
   private RetainedResult(
+      @Nullable AgentGrant agentGrant,
+      @Nullable AgentSignupStatus agentSignupStatus,
       @Nullable BillingCheckoutSession billingCheckoutSession,
       @Nullable BillingPortalSession billingPortalSession,
       @Nullable BroadcastPermissionChanged broadcastPermissionChanged,
@@ -53,11 +58,14 @@ public final class RetainedResult implements WireValue {
       @Nullable Message message,
       @Nullable MessageAck messageAck,
       @Nullable Organization organization,
+      @Nullable OrganizationSpend organizationSpend,
       @Nullable Principal principal,
       @Nullable ReadReceipt readReceipt,
       @Nullable SessionBootstrap sessionBootstrap,
       @Nullable SessionRevocation sessionRevocation,
       @Nullable Map<String, @Nullable Object> signedProof) {
+    this.agentGrant = agentGrant;
+    this.agentSignupStatus = agentSignupStatus;
     this.billingCheckoutSession = billingCheckoutSession;
     this.billingPortalSession = billingPortalSession;
     this.broadcastPermissionChanged = broadcastPermissionChanged;
@@ -76,6 +84,7 @@ public final class RetainedResult implements WireValue {
     this.message = message;
     this.messageAck = messageAck;
     this.organization = organization;
+    this.organizationSpend = organizationSpend;
     this.principal = principal;
     this.readReceipt = readReceipt;
     this.sessionBootstrap = sessionBootstrap;
@@ -105,6 +114,8 @@ public final class RetainedResult implements WireValue {
     Map<String, @Nullable Object> object = Wire.object(value, "RetainedResult");
     Wire.exactlyOneNonNull(object, "RetainedResult");
     return new RetainedResult(
+        Wire.field(object, "RetainedResult", "agentGrant", depth, Wire.optional(AgentGrant::decode)),
+        Wire.field(object, "RetainedResult", "agentSignupStatus", depth, Wire.optional(AgentSignupStatus::decode)),
         Wire.field(object, "RetainedResult", "billingCheckoutSession", depth, Wire.optional(BillingCheckoutSession::decode)),
         Wire.field(object, "RetainedResult", "billingPortalSession", depth, Wire.optional(BillingPortalSession::decode)),
         Wire.field(object, "RetainedResult", "broadcastPermissionChanged", depth, Wire.optional(BroadcastPermissionChanged::decode)),
@@ -123,11 +134,22 @@ public final class RetainedResult implements WireValue {
         Wire.field(object, "RetainedResult", "message", depth, Wire.optional(Message::decode)),
         Wire.field(object, "RetainedResult", "messageAck", depth, Wire.optional(MessageAck::decode)),
         Wire.field(object, "RetainedResult", "organization", depth, Wire.optional(Organization::decode)),
+        Wire.field(object, "RetainedResult", "organizationSpend", depth, Wire.optional(OrganizationSpend::decode)),
         Wire.field(object, "RetainedResult", "principal", depth, Wire.optional(Principal::decode)),
         Wire.field(object, "RetainedResult", "readReceipt", depth, Wire.optional(ReadReceipt::decode)),
         Wire.field(object, "RetainedResult", "sessionBootstrap", depth, Wire.optional(SessionBootstrap::decode)),
         Wire.field(object, "RetainedResult", "sessionRevocation", depth, Wire.optional(SessionRevocation::decode)),
         Wire.field(object, "RetainedResult", "signedProof", depth, Wire.optional(Scalars.SIGNED_PROOF)));
+  }
+
+  /** The <code>agentGrant</code> field. */
+  public @Nullable AgentGrant getAgentGrant() {
+    return this.agentGrant;
+  }
+
+  /** The <code>agentSignupStatus</code> field. */
+  public @Nullable AgentSignupStatus getAgentSignupStatus() {
+    return this.agentSignupStatus;
   }
 
   /** The <code>billingCheckoutSession</code> field. */
@@ -220,6 +242,11 @@ public final class RetainedResult implements WireValue {
     return this.organization;
   }
 
+  /** The <code>organizationSpend</code> field. */
+  public @Nullable OrganizationSpend getOrganizationSpend() {
+    return this.organizationSpend;
+  }
+
   /** The <code>principal</code> field. */
   public @Nullable Principal getPrincipal() {
     return this.principal;
@@ -249,6 +276,8 @@ public final class RetainedResult implements WireValue {
   @Override
   public Map<String, @Nullable Object> toJson() {
     Map<String, @Nullable Object> json = new LinkedHashMap<>();
+    json.put("agentGrant", Wire.json(this.agentGrant));
+    json.put("agentSignupStatus", Wire.json(this.agentSignupStatus));
     json.put("billingCheckoutSession", Wire.json(this.billingCheckoutSession));
     json.put("billingPortalSession", Wire.json(this.billingPortalSession));
     json.put("broadcastPermissionChanged", Wire.json(this.broadcastPermissionChanged));
@@ -267,6 +296,7 @@ public final class RetainedResult implements WireValue {
     json.put("message", Wire.json(this.message));
     json.put("messageAck", Wire.json(this.messageAck));
     json.put("organization", Wire.json(this.organization));
+    json.put("organizationSpend", Wire.json(this.organizationSpend));
     json.put("principal", Wire.json(this.principal));
     json.put("readReceipt", Wire.json(this.readReceipt));
     json.put("sessionBootstrap", Wire.json(this.sessionBootstrap));
@@ -284,7 +314,9 @@ public final class RetainedResult implements WireValue {
       return false;
     }
     RetainedResult that = (RetainedResult) other;
-    return Objects.equals(this.billingCheckoutSession, that.billingCheckoutSession)
+    return Objects.equals(this.agentGrant, that.agentGrant)
+        && Objects.equals(this.agentSignupStatus, that.agentSignupStatus)
+        && Objects.equals(this.billingCheckoutSession, that.billingCheckoutSession)
         && Objects.equals(this.billingPortalSession, that.billingPortalSession)
         && Objects.equals(this.broadcastPermissionChanged, that.broadcastPermissionChanged)
         && Objects.equals(this.conversation, that.conversation)
@@ -302,6 +334,7 @@ public final class RetainedResult implements WireValue {
         && Objects.equals(this.message, that.message)
         && Objects.equals(this.messageAck, that.messageAck)
         && Objects.equals(this.organization, that.organization)
+        && Objects.equals(this.organizationSpend, that.organizationSpend)
         && Objects.equals(this.principal, that.principal)
         && Objects.equals(this.readReceipt, that.readReceipt)
         && Objects.equals(this.sessionBootstrap, that.sessionBootstrap)
@@ -311,12 +344,14 @@ public final class RetainedResult implements WireValue {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.billingCheckoutSession, this.billingPortalSession, this.broadcastPermissionChanged, this.conversation, this.conversationMemberBatch, this.conversationMute, this.credentialDeliveryReceipt, this.deliveryAck, this.liveAlertBatch, this.liveCredentialIssuance, this.liveSessionEndRequested, this.liveSessionJoined, this.liveSessionLeft, this.liveSessionStarted, this.member, this.message, this.messageAck, this.organization, this.principal, this.readReceipt, this.sessionBootstrap, this.sessionRevocation, this.signedProof);
+    return Objects.hash(this.agentGrant, this.agentSignupStatus, this.billingCheckoutSession, this.billingPortalSession, this.broadcastPermissionChanged, this.conversation, this.conversationMemberBatch, this.conversationMute, this.credentialDeliveryReceipt, this.deliveryAck, this.liveAlertBatch, this.liveCredentialIssuance, this.liveSessionEndRequested, this.liveSessionJoined, this.liveSessionLeft, this.liveSessionStarted, this.member, this.message, this.messageAck, this.organization, this.organizationSpend, this.principal, this.readReceipt, this.sessionBootstrap, this.sessionRevocation, this.signedProof);
   }
 
   @Override
   public String toString() {
-    return "RetainedResult{billingCheckoutSession=" + this.billingCheckoutSession
+    return "RetainedResult{agentGrant=" + this.agentGrant
+        + ", agentSignupStatus=" + this.agentSignupStatus
+        + ", billingCheckoutSession=" + this.billingCheckoutSession
         + ", billingPortalSession=" + this.billingPortalSession
         + ", broadcastPermissionChanged=" + this.broadcastPermissionChanged
         + ", conversation=" + this.conversation
@@ -334,6 +369,7 @@ public final class RetainedResult implements WireValue {
         + ", message=" + this.message
         + ", messageAck=" + this.messageAck
         + ", organization=" + this.organization
+        + ", organizationSpend=" + this.organizationSpend
         + ", principal=" + this.principal
         + ", readReceipt=" + this.readReceipt
         + ", sessionBootstrap=" + this.sessionBootstrap

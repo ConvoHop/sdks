@@ -17,6 +17,15 @@ __all__ = [
     "AddMemberRequestInput",
     "AddMembersInput",
     "AddMembersPayload",
+    "AgentAuditEvent",
+    "AgentAuditEventPage",
+    "AgentGrant",
+    "AgentGrantPage",
+    "AgentKey",
+    "AgentPayment",
+    "AgentSignupReview",
+    "AgentSignupStatus",
+    "AgentSignupTicket",
     "AlertLiveSessionInput",
     "AlertLiveSessionPayload",
     "BillingCheckoutSession",
@@ -125,6 +134,7 @@ __all__ = [
     "Organization",
     "OrganizationBilling",
     "OrganizationPage",
+    "OrganizationSpend",
     "OrganizationUsage",
     "PolicyChangeInput",
     "Principal",
@@ -170,6 +180,17 @@ __all__ = [
     "WebhookDeliveryPage",
     "WebhookEndpoint",
     "WebhookEndpointPage",
+    "AgentAuditEventsReply",
+    "AgentAuditEventsRequestInput",
+    "AgentCredentialPermitReply",
+    "AgentCredentialPermitRequestInput",
+    "AgentGrantsReply",
+    "AgentGrantsRequestInput",
+    "AgentSignupForApprovalReply",
+    "AgentSignupForApprovalRequestInput",
+    "AgentSignupReply",
+    "ApproveAgentSignupReply",
+    "ApproveAgentSignupRequestInput",
     "ConfigureWebhookReply",
     "ConfigureWebhookRequestInput",
     "CreateBillingCheckoutSessionReply",
@@ -196,10 +217,14 @@ __all__ = [
     "GetOrganizationRequestInput",
     "GetProjectReply",
     "GetProjectRequestInput",
+    "IssueAgentKeyReply",
+    "IssueAgentKeyRequestInput",
     "IssueBackendKeyReply",
     "IssueBackendKeyRequestInput",
     "OrganizationBillingReply",
     "OrganizationBillingRequestInput",
+    "OrganizationSpendReply",
+    "OrganizationSpendRequestInput",
     "OrganizationUsageReply",
     "OrganizationUsageRequestInput",
     "OrganizationsReply",
@@ -209,14 +234,24 @@ __all__ = [
     "ProjectPolicyRequestInput",
     "ProjectUsageReply",
     "ProjectUsageRequestInput",
+    "PurchaseAgentCreditsReply",
+    "PurchaseAgentCreditsRequestInput",
+    "RejectAgentSignupReply",
+    "RejectAgentSignupRequestInput",
     "ReplayWebhookDeliveriesReply",
     "ReplayWebhookDeliveriesRequestInput",
+    "RequestAgentSignupReply",
+    "RequestAgentSignupRequestInput",
     "ResumeOperationReply",
     "ResumeOperationRequestInput",
+    "RevokeAgentGrantReply",
+    "RevokeAgentGrantRequestInput",
     "RevokeBackendKeyReply",
     "RevokeBackendKeyRequestInput",
     "RotateWebhookSecretReply",
     "RotateWebhookSecretRequestInput",
+    "SetSpendControlsReply",
+    "SetSpendControlsRequestInput",
     "UpdateWebhookReply",
     "UpdateWebhookRequestInput",
     "WebhookDeliveriesReply",
@@ -348,6 +383,318 @@ class AddMembersPayload:
             "committedAt": self.committed_at,
             "replayed": self.replayed,
             "result": self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEvent:
+    event_id: str
+    org_id: str
+    grant_id: str | None
+    actor_kind: str
+    actor_id: str | None
+    kind: str
+    details: dict[str, Any] | None
+    occurred_at: str
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentAuditEvent:
+        return cls(
+            event_id=data["eventId"],
+            org_id=data["orgId"],
+            grant_id=data["grantId"],
+            actor_kind=data["actorKind"],
+            actor_id=data["actorId"],
+            kind=data["kind"],
+            details=data["details"],
+            occurred_at=data["occurredAt"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "eventId": self.event_id,
+            "orgId": self.org_id,
+            "grantId": self.grant_id,
+            "actorKind": self.actor_kind,
+            "actorId": self.actor_id,
+            "kind": self.kind,
+            "details": self.details,
+            "occurredAt": self.occurred_at,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEventPage:
+    items: tuple[AgentAuditEvent, ...]
+    complete: bool
+    refresh_required: bool
+    next_cursor: str | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentAuditEventPage:
+        return cls(
+            items=tuple(AgentAuditEvent._from_wire(item1) for item1 in data["items"]),
+            complete=data["complete"],
+            refresh_required=data["refreshRequired"],
+            next_cursor=data["nextCursor"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "items": [item1.to_dict() for item1 in self.items],
+            "complete": self.complete,
+            "refreshRequired": self.refresh_required,
+            "nextCursor": self.next_cursor,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrant:
+    grant_id: str
+    org_id: str
+    signup_id: str
+    agent_actor_id: str
+    project_id: str | None
+    scopes: tuple[str, ...]
+    expires_at: str
+    revoked_at: str | None
+    created_at: str
+    keys: tuple[AgentKey, ...]
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentGrant:
+        return cls(
+            grant_id=data["grantId"],
+            org_id=data["orgId"],
+            signup_id=data["signupId"],
+            agent_actor_id=data["agentActorId"],
+            project_id=data["projectId"],
+            scopes=tuple(data["scopes"]),
+            expires_at=data["expiresAt"],
+            revoked_at=data["revokedAt"],
+            created_at=data["createdAt"],
+            keys=tuple(AgentKey._from_wire(item1) for item1 in data["keys"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "grantId": self.grant_id,
+            "orgId": self.org_id,
+            "signupId": self.signup_id,
+            "agentActorId": self.agent_actor_id,
+            "projectId": self.project_id,
+            "scopes": list(self.scopes),
+            "expiresAt": self.expires_at,
+            "revokedAt": self.revoked_at,
+            "createdAt": self.created_at,
+            "keys": [item1.to_dict() for item1 in self.keys],
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrantPage:
+    items: tuple[AgentGrant, ...]
+    complete: bool
+    refresh_required: bool
+    next_cursor: str | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentGrantPage:
+        return cls(
+            items=tuple(AgentGrant._from_wire(item1) for item1 in data["items"]),
+            complete=data["complete"],
+            refresh_required=data["refreshRequired"],
+            next_cursor=data["nextCursor"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "items": [item1.to_dict() for item1 in self.items],
+            "complete": self.complete,
+            "refreshRequired": self.refresh_required,
+            "nextCursor": self.next_cursor,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentKey:
+    operation_id: str
+    state: str
+    scopes: tuple[str, ...]
+    expires_at: str
+    key_id: str | None
+    delivery_id: str | None
+    delivery_expires_at: str | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentKey:
+        return cls(
+            operation_id=data["operationId"],
+            state=data["state"],
+            scopes=tuple(data["scopes"]),
+            expires_at=data["expiresAt"],
+            key_id=data["keyId"],
+            delivery_id=data["deliveryId"],
+            delivery_expires_at=data["deliveryExpiresAt"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "operationId": self.operation_id,
+            "state": self.state,
+            "scopes": list(self.scopes),
+            "expiresAt": self.expires_at,
+            "keyId": self.key_id,
+            "deliveryId": self.delivery_id,
+            "deliveryExpiresAt": self.delivery_expires_at,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentPayment:
+    payment_id: str
+    amount: str
+    currency: str
+    state: str
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentPayment:
+        return cls(
+            payment_id=data["paymentId"],
+            amount=data["amount"],
+            currency=data["currency"],
+            state=data["state"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "paymentId": self.payment_id,
+            "amount": self.amount,
+            "currency": self.currency,
+            "state": self.state,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupReview:
+    signup_id: str
+    owner_email: str
+    organization_name: str
+    agent_name: str
+    purpose: str | None
+    suggested_plan: str | None
+    suggested_scopes: tuple[str, ...]
+    suggested_monthly_spend_cap: str | None
+    currency: str
+    expires_at: str
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentSignupReview:
+        return cls(
+            signup_id=data["signupId"],
+            owner_email=data["ownerEmail"],
+            organization_name=data["organizationName"],
+            agent_name=data["agentName"],
+            purpose=data["purpose"],
+            suggested_plan=data["suggestedPlan"],
+            suggested_scopes=tuple(data["suggestedScopes"]),
+            suggested_monthly_spend_cap=data["suggestedMonthlySpendCap"],
+            currency=data["currency"],
+            expires_at=data["expiresAt"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "signupId": self.signup_id,
+            "ownerEmail": self.owner_email,
+            "organizationName": self.organization_name,
+            "agentName": self.agent_name,
+            "purpose": self.purpose,
+            "suggestedPlan": self.suggested_plan,
+            "suggestedScopes": list(self.suggested_scopes),
+            "suggestedMonthlySpendCap": self.suggested_monthly_spend_cap,
+            "currency": self.currency,
+            "expiresAt": self.expires_at,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupStatus:
+    signup_id: str
+    state: str
+    org_id: str | None
+    deployment_id: str | None
+    project_id: str | None
+    next_step: str | None
+    scopes: tuple[str, ...]
+    grant_expires_at: str | None
+    keys: tuple[AgentKey, ...]
+    incarnation: str | None
+    serving_epoch: str | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentSignupStatus:
+        return cls(
+            signup_id=data["signupId"],
+            state=data["state"],
+            org_id=data["orgId"],
+            deployment_id=data["deploymentId"],
+            project_id=data["projectId"],
+            next_step=data["nextStep"],
+            scopes=tuple(data["scopes"]),
+            grant_expires_at=data["grantExpiresAt"],
+            keys=tuple(AgentKey._from_wire(item1) for item1 in data["keys"]),
+            incarnation=data["incarnation"],
+            serving_epoch=data["servingEpoch"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "signupId": self.signup_id,
+            "state": self.state,
+            "orgId": self.org_id,
+            "deploymentId": self.deployment_id,
+            "projectId": self.project_id,
+            "nextStep": self.next_step,
+            "scopes": list(self.scopes),
+            "grantExpiresAt": self.grant_expires_at,
+            "keys": [item1.to_dict() for item1 in self.keys],
+            "incarnation": self.incarnation,
+            "servingEpoch": self.serving_epoch,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupTicket:
+    signup_id: str
+    confirmation_code: str
+    expires_at: str
+    poll_after_seconds: int
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentSignupTicket:
+        return cls(
+            signup_id=data["signupId"],
+            confirmation_code=data["confirmationCode"],
+            expires_at=data["expiresAt"],
+            poll_after_seconds=data["pollAfterSeconds"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "signupId": self.signup_id,
+            "confirmationCode": self.confirmation_code,
+            "expiresAt": self.expires_at,
+            "pollAfterSeconds": self.poll_after_seconds,
         }
 
 
@@ -3193,6 +3540,80 @@ class OrganizationPage:
 
 
 @_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationSpend:
+    org_id: str
+    plan_id: str
+    currency: str
+    catalog_version: str
+    monthly_spend_cap: str | None
+    agent_purchase_limit: str | None
+    updated_at: str | None
+    monthly_minimum: str | None
+    period_start: str | None
+    period_end: str | None
+    credits: str | None
+    charges: str | None
+    margin: str | None
+    stop: str | None
+    refused_meters: tuple[str, ...]
+    evaluated_at: str | None
+    usage_through: str | None
+    valid_until: str | None
+    minimum_credit: str | None
+    charge_limit: str | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> OrganizationSpend:
+        return cls(
+            org_id=data["orgId"],
+            plan_id=data["planId"],
+            currency=data["currency"],
+            catalog_version=data["catalogVersion"],
+            monthly_spend_cap=data["monthlySpendCap"],
+            agent_purchase_limit=data["agentPurchaseLimit"],
+            updated_at=data["updatedAt"],
+            monthly_minimum=data["monthlyMinimum"],
+            period_start=data["periodStart"],
+            period_end=data["periodEnd"],
+            credits=data["credits"],
+            charges=data["charges"],
+            margin=data["margin"],
+            stop=data["stop"],
+            refused_meters=tuple(data["refusedMeters"]),
+            evaluated_at=data["evaluatedAt"],
+            usage_through=data["usageThrough"],
+            valid_until=data["validUntil"],
+            minimum_credit=data["minimumCredit"],
+            charge_limit=data["chargeLimit"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "orgId": self.org_id,
+            "planId": self.plan_id,
+            "currency": self.currency,
+            "catalogVersion": self.catalog_version,
+            "monthlySpendCap": self.monthly_spend_cap,
+            "agentPurchaseLimit": self.agent_purchase_limit,
+            "updatedAt": self.updated_at,
+            "monthlyMinimum": self.monthly_minimum,
+            "periodStart": self.period_start,
+            "periodEnd": self.period_end,
+            "credits": self.credits,
+            "charges": self.charges,
+            "margin": self.margin,
+            "stop": self.stop,
+            "refusedMeters": list(self.refused_meters),
+            "evaluatedAt": self.evaluated_at,
+            "usageThrough": self.usage_through,
+            "validUntil": self.valid_until,
+            "minimumCredit": self.minimum_credit,
+            "chargeLimit": self.charge_limit,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
 class OrganizationUsage:
     org_id: str
     source: str
@@ -3662,6 +4083,8 @@ class ResourceRef:
 class RetainedResult:
     """Exactly one typed field contains the retained, currently authorized receipt result."""
 
+    agent_grant: AgentGrant | None
+    agent_signup_status: AgentSignupStatus | None
     billing_checkout_session: BillingCheckoutSession | None
     billing_portal_session: BillingPortalSession | None
     broadcast_permission_changed: BroadcastPermissionChanged | None
@@ -3680,6 +4103,7 @@ class RetainedResult:
     message: Message | None
     message_ack: MessageAck | None
     organization: Organization | None
+    organization_spend: OrganizationSpend | None
     principal: Principal | None
     read_receipt: ReadReceipt | None
     session_bootstrap: SessionBootstrap | None
@@ -3689,6 +4113,8 @@ class RetainedResult:
     @classmethod
     def _from_wire(cls, data: Mapping[str, Any]) -> RetainedResult:
         return cls(
+            agent_grant=None if data["agentGrant"] is None else AgentGrant._from_wire(data["agentGrant"]),
+            agent_signup_status=None if data["agentSignupStatus"] is None else AgentSignupStatus._from_wire(data["agentSignupStatus"]),
             billing_checkout_session=None if data["billingCheckoutSession"] is None else BillingCheckoutSession._from_wire(data["billingCheckoutSession"]),
             billing_portal_session=None if data["billingPortalSession"] is None else BillingPortalSession._from_wire(data["billingPortalSession"]),
             broadcast_permission_changed=None if data["broadcastPermissionChanged"] is None else BroadcastPermissionChanged._from_wire(data["broadcastPermissionChanged"]),
@@ -3707,6 +4133,7 @@ class RetainedResult:
             message=None if data["message"] is None else Message._from_wire(data["message"]),
             message_ack=None if data["messageAck"] is None else MessageAck._from_wire(data["messageAck"]),
             organization=None if data["organization"] is None else Organization._from_wire(data["organization"]),
+            organization_spend=None if data["organizationSpend"] is None else OrganizationSpend._from_wire(data["organizationSpend"]),
             principal=None if data["principal"] is None else Principal._from_wire(data["principal"]),
             read_receipt=None if data["readReceipt"] is None else ReadReceipt._from_wire(data["readReceipt"]),
             session_bootstrap=None if data["sessionBootstrap"] is None else SessionBootstrap._from_wire(data["sessionBootstrap"]),
@@ -3717,6 +4144,8 @@ class RetainedResult:
     def to_dict(self) -> dict[str, Any]:
         """The wire form, keyed by GraphQL field name."""
         return {
+            "agentGrant": None if self.agent_grant is None else self.agent_grant.to_dict(),
+            "agentSignupStatus": None if self.agent_signup_status is None else self.agent_signup_status.to_dict(),
             "billingCheckoutSession": None if self.billing_checkout_session is None else self.billing_checkout_session.to_dict(),
             "billingPortalSession": None if self.billing_portal_session is None else self.billing_portal_session.to_dict(),
             "broadcastPermissionChanged": None if self.broadcast_permission_changed is None else self.broadcast_permission_changed.to_dict(),
@@ -3735,6 +4164,7 @@ class RetainedResult:
             "message": None if self.message is None else self.message.to_dict(),
             "messageAck": None if self.message_ack is None else self.message_ack.to_dict(),
             "organization": None if self.organization is None else self.organization.to_dict(),
+            "organizationSpend": None if self.organization_spend is None else self.organization_spend.to_dict(),
             "principal": None if self.principal is None else self.principal.to_dict(),
             "readReceipt": None if self.read_receipt is None else self.read_receipt.to_dict(),
             "sessionBootstrap": None if self.session_bootstrap is None else self.session_bootstrap.to_dict(),
@@ -4587,6 +5017,344 @@ class WebhookEndpointPage:
 
 
 @_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEventsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentAuditEventPage | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentAuditEventsReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else AgentAuditEventPage._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEventsRequestInput:
+    org_id: str
+    limit: int | None = None
+    """Defaults to ``50`` on the server."""
+    cursor: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "orgId": self.org_id,
+        }
+        if self.limit is not None:
+            data["limit"] = self.limit
+        if self.cursor is not None:
+            data["cursor"] = self.cursor
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentCredentialPermitReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: dict[str, Any] | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentCredentialPermitReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=data["result"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": self.result,
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentCredentialPermitRequestInput:
+    delivery_id: str
+    redemption_request_id: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "deliveryId": self.delivery_id,
+            "redemptionRequestId": self.redemption_request_id,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrantsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentGrantPage | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentGrantsReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else AgentGrantPage._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrantsRequestInput:
+    org_id: str
+    limit: int | None = None
+    """Defaults to ``50`` on the server."""
+    cursor: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "orgId": self.org_id,
+        }
+        if self.limit is not None:
+            data["limit"] = self.limit
+        if self.cursor is not None:
+            data["cursor"] = self.cursor
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupForApprovalReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupReview | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentSignupForApprovalReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else AgentSignupReview._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupForApprovalRequestInput:
+    approval_token: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "approvalToken": self.approval_token,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupStatus | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> AgentSignupReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else AgentSignupStatus._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class ApproveAgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupStatus | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> ApproveAgentSignupReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else AgentSignupStatus._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class ApproveAgentSignupRequestInput:
+    approval_token: str
+    confirmation_code: str
+    terms_ref: str
+    plan: str
+    scopes: Sequence[str]
+    monthly_spend_cap: str
+    agent_purchase_limit: str | None = None
+    grant_expires_at: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "approvalToken": self.approval_token,
+            "confirmationCode": self.confirmation_code,
+            "termsRef": self.terms_ref,
+            "plan": self.plan,
+            "scopes": self.scopes,
+            "monthlySpendCap": self.monthly_spend_cap,
+        }
+        if self.agent_purchase_limit is not None:
+            data["agentPurchaseLimit"] = self.agent_purchase_limit
+        if self.grant_expires_at is not None:
+            data["grantExpiresAt"] = self.grant_expires_at
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
 class ConfigureWebhookReply:
     status: str
     request_id: str
@@ -5314,6 +6082,62 @@ class GetProjectRequestInput:
 
 
 @_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class IssueAgentKeyReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentKey | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> IssueAgentKeyReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else AgentKey._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class IssueAgentKeyRequestInput:
+    scopes: Sequence[str]
+    expires_at: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "scopes": self.scopes,
+        }
+        if self.expires_at is not None:
+            data["expiresAt"] = self.expires_at
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
 class IssueBackendKeyReply:
     status: str
     request_id: str
@@ -5415,6 +6239,59 @@ class OrganizationBillingReply:
 
 @_dc.dataclass(frozen=True, slots=True, kw_only=True)
 class OrganizationBillingRequestInput:
+    org_id: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "orgId": self.org_id,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationSpendReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: OrganizationSpend | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> OrganizationSpendReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else OrganizationSpend._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationSpendRequestInput:
     org_id: str
 
     def to_dict(self) -> dict[str, Any]:
@@ -5697,6 +6574,116 @@ class ProjectUsageRequestInput:
 
 
 @_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class PurchaseAgentCreditsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentPayment | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> PurchaseAgentCreditsReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else AgentPayment._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class PurchaseAgentCreditsRequestInput:
+    amount: str
+    shared_payment_token: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "amount": self.amount,
+            "sharedPaymentToken": self.shared_payment_token,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class RejectAgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupStatus | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> RejectAgentSignupReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else AgentSignupStatus._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class RejectAgentSignupRequestInput:
+    approval_token: str
+    suppress_future_requests: bool
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "approvalToken": self.approval_token,
+            "suppressFutureRequests": self.suppress_future_requests,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
 class ReplayWebhookDeliveriesReply:
     status: str
     request_id: str
@@ -5761,6 +6748,76 @@ class ReplayWebhookDeliveriesRequestInput:
 
 
 @_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class RequestAgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupTicket | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> RequestAgentSignupReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else AgentSignupTicket._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class RequestAgentSignupRequestInput:
+    owner_email: str
+    poll_challenge: str
+    organization_name: str
+    agent_name: str
+    purpose: str | None = None
+    suggested_plan: str | None = None
+    suggested_scopes: Sequence[str]
+    suggested_monthly_spend_cap: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "ownerEmail": self.owner_email,
+            "pollChallenge": self.poll_challenge,
+            "organizationName": self.organization_name,
+            "agentName": self.agent_name,
+            "suggestedScopes": self.suggested_scopes,
+        }
+        if self.purpose is not None:
+            data["purpose"] = self.purpose
+        if self.suggested_plan is not None:
+            data["suggestedPlan"] = self.suggested_plan
+        if self.suggested_monthly_spend_cap is not None:
+            data["suggestedMonthlySpendCap"] = self.suggested_monthly_spend_cap
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
 class ResumeOperationReply:
     status: str
     request_id: str
@@ -5811,6 +6868,61 @@ class ResumeOperationRequestInput:
         data: dict[str, Any] = {
             "operationId": self.operation_id,
             "expectedRevision": self.expected_revision,
+        }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class RevokeAgentGrantReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentGrant | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> RevokeAgentGrantReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else AgentGrant._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class RevokeAgentGrantRequestInput:
+    grant_id: str
+    revoke_issued_sessions: bool
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "grantId": self.grant_id,
+            "revokeIssuedSessions": self.revoke_issued_sessions,
         }
         return data
 
@@ -5928,6 +7040,64 @@ class RotateWebhookSecretRequestInput:
             "endpointId": self.endpoint_id,
             "expectedRevision": self.expected_revision,
         }
+        return data
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class SetSpendControlsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: OrganizationSpend | None
+
+    @classmethod
+    def _from_wire(cls, data: Mapping[str, Any]) -> SetSpendControlsReply:
+        return cls(
+            status=data["status"],
+            request_id=data["requestId"],
+            server_time=data["serverTime"],
+            receipt_id=data["receiptId"],
+            committed_at=data["committedAt"],
+            replayed=data["replayed"],
+            operation=None if data["operation"] is None else OperationRef._from_wire(data["operation"]),
+            resource_ref=None if data["resourceRef"] is None else ResourceRef._from_wire(data["resourceRef"]),
+            result=None if data["result"] is None else OrganizationSpend._from_wire(data["result"]),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name."""
+        return {
+            "status": self.status,
+            "requestId": self.request_id,
+            "serverTime": self.server_time,
+            "receiptId": self.receipt_id,
+            "committedAt": self.committed_at,
+            "replayed": self.replayed,
+            "operation": None if self.operation is None else self.operation.to_dict(),
+            "resourceRef": None if self.resource_ref is None else self.resource_ref.to_dict(),
+            "result": None if self.result is None else self.result.to_dict(),
+        }
+
+
+@_dc.dataclass(frozen=True, slots=True, kw_only=True)
+class SetSpendControlsRequestInput:
+    org_id: str
+    monthly_spend_cap: str
+    agent_purchase_limit: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """The wire form, keyed by GraphQL field name. ``None`` fields are omitted."""
+        data: dict[str, Any] = {
+            "orgId": self.org_id,
+            "monthlySpendCap": self.monthly_spend_cap,
+        }
+        if self.agent_purchase_limit is not None:
+            data["agentPurchaseLimit"] = self.agent_purchase_limit
         return data
 
 

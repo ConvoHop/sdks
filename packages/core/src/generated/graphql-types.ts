@@ -18,10 +18,42 @@ export type AddMembersInput = {
   members: Array<MemberBatchEntryInput>;
 };
 
+export type AgentAuditEventsRequestInput = {
+  cursor?: string | null | undefined;
+  limit?: number;
+  orgId: string;
+};
+
+export type AgentCredentialPermitRequestInput = {
+  deliveryId: string;
+  redemptionRequestId: string;
+};
+
+export type AgentGrantsRequestInput = {
+  cursor?: string | null | undefined;
+  limit?: number;
+  orgId: string;
+};
+
+export type AgentSignupForApprovalRequestInput = {
+  approvalToken: string;
+};
+
 export type AlertLiveSessionInput = {
   expectedGeneration: string;
   liveSessionId: string;
   principalIds: Array<string>;
+};
+
+export type ApproveAgentSignupRequestInput = {
+  agentPurchaseLimit?: string | null | undefined;
+  approvalToken: string;
+  confirmationCode: string;
+  grantExpiresAt?: string | null | undefined;
+  monthlySpendCap: string;
+  plan: string;
+  scopes: Array<string>;
+  termsRef: string;
 };
 
 export type ConfigureWebhookRequestInput = {
@@ -182,6 +214,11 @@ export type InboxRequestInput = {
   limit: number;
 };
 
+export type IssueAgentKeyRequestInput = {
+  expiresAt?: string | null | undefined;
+  scopes: Array<string>;
+};
+
 export type IssueBackendKeyRequestInput = {
   expiresAt: string;
   name: string;
@@ -337,6 +374,10 @@ export type OrganizationBillingRequestInput = {
   orgId: string;
 };
 
+export type OrganizationSpendRequestInput = {
+  orgId: string;
+};
+
 export type OrganizationUsageRequestInput = {
   from?: string | null | undefined;
   orgId: string;
@@ -366,6 +407,11 @@ export type ProjectUsageRequestInput = {
   to?: string | null | undefined;
 };
 
+export type PurchaseAgentCreditsRequestInput = {
+  amount: string;
+  sharedPaymentToken: string;
+};
+
 export type ReceiptsRequestInput = {
   conversationId: string;
   cursor?: string | null | undefined;
@@ -374,6 +420,11 @@ export type ReceiptsRequestInput = {
 
 export type RedeemCredentialRequestInput = {
   deliveryId: string;
+};
+
+export type RejectAgentSignupRequestInput = {
+  approvalToken: string;
+  suppressFutureRequests: boolean;
 };
 
 export type RemoveMemberRequestInput = {
@@ -406,6 +457,17 @@ export type ReportReceiptRequestInput = {
   visibilityEpoch: string;
 };
 
+export type RequestAgentSignupRequestInput = {
+  agentName: string;
+  organizationName: string;
+  ownerEmail: string;
+  pollChallenge: string;
+  purpose?: string | null | undefined;
+  suggestedMonthlySpendCap?: string | null | undefined;
+  suggestedPlan?: string | null | undefined;
+  suggestedScopes: Array<string>;
+};
+
 export type RequestContextInput = {
   credentialDeliveryPermit?: Record<string, unknown> | null | undefined;
   incarnation?: string | null | undefined;
@@ -421,6 +483,11 @@ export type ResolveRequestRequestInput = {
 export type ResumeOperationRequestInput = {
   expectedRevision: string;
   operationId: string;
+};
+
+export type RevokeAgentGrantRequestInput = {
+  grantId: string;
+  revokeIssuedSessions: boolean;
 };
 
 export type RevokeBackendKeyRequestInput = {
@@ -476,6 +543,12 @@ export type SetConversationMuteInput = {
   conversationId: string;
   muted: boolean;
   until?: string | null | undefined;
+};
+
+export type SetSpendControlsRequestInput = {
+  agentPurchaseLimit?: string | null | undefined;
+  monthlySpendCap: string;
+  orgId: string;
 };
 
 export type StartLiveSessionInput = {
@@ -612,7 +685,7 @@ export type CommunicationResolveRequestQueryVariables = Exact<{
 }>;
 
 
-export type CommunicationResolveRequestQuery = { resolveRequest: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { state: string, requestId: string, checkedAt: string, resultWithheld: boolean, receipt: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signedProof: Record<string, unknown> | null, billingCheckoutSession: { orgId: string, planId: string, url: string, expiresAt: string } | null, billingPortalSession: { orgId: string, url: string, expiresAt: string | null } | null, broadcastPermissionChanged: { member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, conversation: { conversationId: string, revision: string, title: string, props: Record<string, unknown> | null, latestSequence: string, membership: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null } | null, conversationMemberBatch: { items: Array<{ conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }> } | null, conversationMute: { conversationId: string, principalId: string, muted: boolean, until: string | null } | null, credentialDeliveryReceipt: { deliveryId: string } | null, deliveryAck: { deliveryId: string, acknowledged: boolean } | null, liveAlertBatch: { liveSessionId: string, created: string, suppressed: string } | null, liveCredentialIssuance: { liveSessionId: string, participationId: string, generation: string, leaseId: string, grantOrdinal: string, admissionExpiresAt: string, leaseExpiresAt: string } | null, liveSessionEndRequested: { liveSessionId: string, operationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionJoined: { liveSessionId: string, generation: string, participation: { participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } } | null, liveSessionLeft: { liveSessionId: string, participationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionStarted: { liveSessionId: string, conversationId: string, kind: LiveSessionKind, mediaProfile: LiveMediaProfile, operationId: string } | null, member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null, message: { messageId: string, conversationId: string, authorId: string, sequence: string, revision: string, revisionSequence: string, createdAt: string, deleted: boolean, text: string | null, props: Record<string, unknown> | null, editedAt: string | null } | null, messageAck: { messageId: string, conversationId: string, sequence: string, revision: string, status: string, cursor: { incarnation: string, conversationId: string, sequence: string } | null } | null, organization: { orgId: string, name: string, status: string, revision: string } | null, principal: { principalId: string, externalUserId: string, status: string, revision: string } | null, readReceipt: { principalId: string, membershipEpoch: string, visibilityEpoch: string, deliveredThroughSequence: string | null, readThroughSequence: string | null, updatedAt: string | null } | null, sessionBootstrap: { tokenExpiresAt: string, sessionToken: string, session: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } | null } | null, sessionRevocation: { sessionId: string, status: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } | null } | null } };
+export type CommunicationResolveRequestQuery = { resolveRequest: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { state: string, requestId: string, checkedAt: string, resultWithheld: boolean, receipt: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signedProof: Record<string, unknown> | null, agentGrant: { grantId: string, orgId: string, signupId: string, agentActorId: string, projectId: string | null, scopes: Array<string>, expiresAt: string, revokedAt: string | null, createdAt: string, keys: Array<{ operationId: string, state: string, scopes: Array<string>, expiresAt: string, keyId: string | null, deliveryId: string | null, deliveryExpiresAt: string | null }> } | null, agentSignupStatus: { signupId: string, state: string, orgId: string | null, deploymentId: string | null, projectId: string | null, nextStep: string | null, scopes: Array<string>, grantExpiresAt: string | null, incarnation: string | null, servingEpoch: string | null, keys: Array<{ operationId: string, state: string, scopes: Array<string>, expiresAt: string, keyId: string | null, deliveryId: string | null, deliveryExpiresAt: string | null }> } | null, billingCheckoutSession: { orgId: string, planId: string, url: string, expiresAt: string } | null, billingPortalSession: { orgId: string, url: string, expiresAt: string | null } | null, broadcastPermissionChanged: { member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, conversation: { conversationId: string, revision: string, title: string, props: Record<string, unknown> | null, latestSequence: string, membership: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null } | null, conversationMemberBatch: { items: Array<{ conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }> } | null, conversationMute: { conversationId: string, principalId: string, muted: boolean, until: string | null } | null, credentialDeliveryReceipt: { deliveryId: string } | null, deliveryAck: { deliveryId: string, acknowledged: boolean } | null, liveAlertBatch: { liveSessionId: string, created: string, suppressed: string } | null, liveCredentialIssuance: { liveSessionId: string, participationId: string, generation: string, leaseId: string, grantOrdinal: string, admissionExpiresAt: string, leaseExpiresAt: string } | null, liveSessionEndRequested: { liveSessionId: string, operationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionJoined: { liveSessionId: string, generation: string, participation: { participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } } | null, liveSessionLeft: { liveSessionId: string, participationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionStarted: { liveSessionId: string, conversationId: string, kind: LiveSessionKind, mediaProfile: LiveMediaProfile, operationId: string } | null, member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null, message: { messageId: string, conversationId: string, authorId: string, sequence: string, revision: string, revisionSequence: string, createdAt: string, deleted: boolean, text: string | null, props: Record<string, unknown> | null, editedAt: string | null } | null, messageAck: { messageId: string, conversationId: string, sequence: string, revision: string, status: string, cursor: { incarnation: string, conversationId: string, sequence: string } | null } | null, organization: { orgId: string, name: string, status: string, revision: string } | null, organizationSpend: { orgId: string, planId: string, currency: string, catalogVersion: string, monthlySpendCap: string | null, agentPurchaseLimit: string | null, updatedAt: string | null, monthlyMinimum: string | null, periodStart: string | null, periodEnd: string | null, credits: string | null, charges: string | null, margin: string | null, stop: string | null, refusedMeters: Array<string>, evaluatedAt: string | null, usageThrough: string | null, validUntil: string | null, minimumCredit: string | null, chargeLimit: string | null } | null, principal: { principalId: string, externalUserId: string, status: string, revision: string } | null, readReceipt: { principalId: string, membershipEpoch: string, visibilityEpoch: string, deliveredThroughSequence: string | null, readThroughSequence: string | null, updatedAt: string | null } | null, sessionBootstrap: { tokenExpiresAt: string, sessionToken: string, session: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } | null } | null, sessionRevocation: { sessionId: string, status: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } | null } | null } };
 
 export type CommunicationGetOperationQueryVariables = Exact<{
   context: RequestContextInput;
@@ -1002,7 +1075,7 @@ export type ManagementResolveRequestQueryVariables = Exact<{
 }>;
 
 
-export type ManagementResolveRequestQuery = { resolveRequest: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { state: string, requestId: string, checkedAt: string, resultWithheld: boolean, receipt: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signedProof: Record<string, unknown> | null, billingCheckoutSession: { orgId: string, planId: string, url: string, expiresAt: string } | null, billingPortalSession: { orgId: string, url: string, expiresAt: string | null } | null, broadcastPermissionChanged: { member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, conversation: { conversationId: string, revision: string, title: string, props: Record<string, unknown> | null, latestSequence: string, membership: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null } | null, conversationMemberBatch: { items: Array<{ conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }> } | null, conversationMute: { conversationId: string, principalId: string, muted: boolean, until: string | null } | null, credentialDeliveryReceipt: { deliveryId: string } | null, deliveryAck: { deliveryId: string, acknowledged: boolean } | null, liveAlertBatch: { liveSessionId: string, created: string, suppressed: string } | null, liveCredentialIssuance: { liveSessionId: string, participationId: string, generation: string, leaseId: string, grantOrdinal: string, admissionExpiresAt: string, leaseExpiresAt: string } | null, liveSessionEndRequested: { liveSessionId: string, operationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionJoined: { liveSessionId: string, generation: string, participation: { participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } } | null, liveSessionLeft: { liveSessionId: string, participationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionStarted: { liveSessionId: string, conversationId: string, kind: LiveSessionKind, mediaProfile: LiveMediaProfile, operationId: string } | null, member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null, message: { messageId: string, conversationId: string, authorId: string, sequence: string, revision: string, revisionSequence: string, createdAt: string, deleted: boolean, text: string | null, props: Record<string, unknown> | null, editedAt: string | null } | null, messageAck: { messageId: string, conversationId: string, sequence: string, revision: string, status: string, cursor: { incarnation: string, conversationId: string, sequence: string } | null } | null, organization: { orgId: string, name: string, status: string, revision: string } | null, principal: { principalId: string, externalUserId: string, status: string, revision: string } | null, readReceipt: { principalId: string, membershipEpoch: string, visibilityEpoch: string, deliveredThroughSequence: string | null, readThroughSequence: string | null, updatedAt: string | null } | null, sessionBootstrap: { tokenExpiresAt: string, sessionToken: string, session: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } | null } | null, sessionRevocation: { sessionId: string, status: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } | null } | null } };
+export type ManagementResolveRequestQuery = { resolveRequest: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { state: string, requestId: string, checkedAt: string, resultWithheld: boolean, receipt: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signedProof: Record<string, unknown> | null, agentGrant: { grantId: string, orgId: string, signupId: string, agentActorId: string, projectId: string | null, scopes: Array<string>, expiresAt: string, revokedAt: string | null, createdAt: string, keys: Array<{ operationId: string, state: string, scopes: Array<string>, expiresAt: string, keyId: string | null, deliveryId: string | null, deliveryExpiresAt: string | null }> } | null, agentSignupStatus: { signupId: string, state: string, orgId: string | null, deploymentId: string | null, projectId: string | null, nextStep: string | null, scopes: Array<string>, grantExpiresAt: string | null, incarnation: string | null, servingEpoch: string | null, keys: Array<{ operationId: string, state: string, scopes: Array<string>, expiresAt: string, keyId: string | null, deliveryId: string | null, deliveryExpiresAt: string | null }> } | null, billingCheckoutSession: { orgId: string, planId: string, url: string, expiresAt: string } | null, billingPortalSession: { orgId: string, url: string, expiresAt: string | null } | null, broadcastPermissionChanged: { member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null, conversation: { conversationId: string, revision: string, title: string, props: Record<string, unknown> | null, latestSequence: string, membership: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null } | null, conversationMemberBatch: { items: Array<{ conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean }> } | null, conversationMute: { conversationId: string, principalId: string, muted: boolean, until: string | null } | null, credentialDeliveryReceipt: { deliveryId: string } | null, deliveryAck: { deliveryId: string, acknowledged: boolean } | null, liveAlertBatch: { liveSessionId: string, created: string, suppressed: string } | null, liveCredentialIssuance: { liveSessionId: string, participationId: string, generation: string, leaseId: string, grantOrdinal: string, admissionExpiresAt: string, leaseExpiresAt: string } | null, liveSessionEndRequested: { liveSessionId: string, operationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionJoined: { liveSessionId: string, generation: string, participation: { participationId: string, principalId: string, membershipEpoch: string, role: LiveRole, state: LiveParticipationState, reservationExpiresAt: string | null, nativeConnectionId: string | null, permissions: { microphone: boolean, camera: boolean, subscribe: boolean }, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } } | null, liveSessionLeft: { liveSessionId: string, participationId: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } } | null, liveSessionStarted: { liveSessionId: string, conversationId: string, kind: LiveSessionKind, mediaProfile: LiveMediaProfile, operationId: string } | null, member: { conversationId: string, principalId: string, role: string, status: string, membershipEpoch: string, visibilityEpoch: string, revision: string, visibleFromSequence: string, canStartBroadcast: boolean } | null, message: { messageId: string, conversationId: string, authorId: string, sequence: string, revision: string, revisionSequence: string, createdAt: string, deleted: boolean, text: string | null, props: Record<string, unknown> | null, editedAt: string | null } | null, messageAck: { messageId: string, conversationId: string, sequence: string, revision: string, status: string, cursor: { incarnation: string, conversationId: string, sequence: string } | null } | null, organization: { orgId: string, name: string, status: string, revision: string } | null, organizationSpend: { orgId: string, planId: string, currency: string, catalogVersion: string, monthlySpendCap: string | null, agentPurchaseLimit: string | null, updatedAt: string | null, monthlyMinimum: string | null, periodStart: string | null, periodEnd: string | null, credits: string | null, charges: string | null, margin: string | null, stop: string | null, refusedMeters: Array<string>, evaluatedAt: string | null, usageThrough: string | null, validUntil: string | null, minimumCredit: string | null, chargeLimit: string | null } | null, principal: { principalId: string, externalUserId: string, status: string, revision: string } | null, readReceipt: { principalId: string, membershipEpoch: string, visibilityEpoch: string, deliveredThroughSequence: string | null, readThroughSequence: string | null, updatedAt: string | null } | null, sessionBootstrap: { tokenExpiresAt: string, sessionToken: string, session: { sessionId: string, principalId: string, deviceId: string, incarnation: string, sessionRevision: string, expiresAt: string, status: string } | null } | null, sessionRevocation: { sessionId: string, status: string, mediaCutoff: { state: string, scope: { kind: string, principalId: string | null, sessionId: string | null, deviceId: string | null, callId: string | null } | null } | null } | null } | null } | null } | null } };
 
 export type ManagementGetOperationQueryVariables = Exact<{
   context: RequestContextInput;
@@ -1011,6 +1084,45 @@ export type ManagementGetOperationQueryVariables = Exact<{
 
 
 export type ManagementGetOperationQuery = { getOperation: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { operationId: string, kind: string, state: string, revision: string, requestedAt: string, updatedAt: string, blockedReason: string | null, targetRef: { kind: string, id: string } | null, steps: Array<{ stepId: string, state: string }>, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, replayedDeliveries: number | null, skippedDeliveries: number | null, messagePreview: boolean | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } | null } };
+
+export type ManagementAgentSignupForApprovalQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: AgentSignupForApprovalRequestInput;
+}>;
+
+
+export type ManagementAgentSignupForApprovalQuery = { agentSignupForApproval: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signupId: string, ownerEmail: string, organizationName: string, agentName: string, purpose: string | null, suggestedPlan: string | null, suggestedScopes: Array<string>, suggestedMonthlySpendCap: string | null, currency: string, expiresAt: string } | null } };
+
+export type ManagementAgentSignupQueryVariables = Exact<{
+  context: RequestContextInput;
+}>;
+
+
+export type ManagementAgentSignupQuery = { agentSignup: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signupId: string, state: string, orgId: string | null, deploymentId: string | null, projectId: string | null, nextStep: string | null, scopes: Array<string>, grantExpiresAt: string | null, incarnation: string | null, servingEpoch: string | null, keys: Array<{ operationId: string, state: string, scopes: Array<string>, expiresAt: string, keyId: string | null, deliveryId: string | null, deliveryExpiresAt: string | null }> } | null } };
+
+export type ManagementAgentGrantsQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: AgentGrantsRequestInput;
+}>;
+
+
+export type ManagementAgentGrantsQuery = { agentGrants: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { complete: boolean, refreshRequired: boolean, nextCursor: string | null, items: Array<{ grantId: string, orgId: string, signupId: string, agentActorId: string, projectId: string | null, scopes: Array<string>, expiresAt: string, revokedAt: string | null, createdAt: string, keys: Array<{ operationId: string, state: string, scopes: Array<string>, expiresAt: string, keyId: string | null, deliveryId: string | null, deliveryExpiresAt: string | null }> }> } | null } };
+
+export type ManagementAgentAuditEventsQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: AgentAuditEventsRequestInput;
+}>;
+
+
+export type ManagementAgentAuditEventsQuery = { agentAuditEvents: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { complete: boolean, refreshRequired: boolean, nextCursor: string | null, items: Array<{ eventId: string, orgId: string, grantId: string | null, actorKind: string, actorId: string | null, kind: string, details: Record<string, unknown> | null, occurredAt: string }> } | null } };
+
+export type ManagementOrganizationSpendQueryVariables = Exact<{
+  context: RequestContextInput;
+  input: OrganizationSpendRequestInput;
+}>;
+
+
+export type ManagementOrganizationSpendQuery = { organizationSpend: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { orgId: string, planId: string, currency: string, catalogVersion: string, monthlySpendCap: string | null, agentPurchaseLimit: string | null, updatedAt: string | null, monthlyMinimum: string | null, periodStart: string | null, periodEnd: string | null, credits: string | null, charges: string | null, margin: string | null, stop: string | null, refusedMeters: Array<string>, evaluatedAt: string | null, usageThrough: string | null, validUntil: string | null, minimumCredit: string | null, chargeLimit: string | null } | null } };
 
 export type ManagementCreateOrganizationMutationVariables = Exact<{
   context: RequestContextInput;
@@ -1139,3 +1251,67 @@ export type ManagementReplayWebhookDeliveriesMutationVariables = Exact<{
 
 
 export type ManagementReplayWebhookDeliveriesMutation = { replayWebhookDeliveries: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { projectId: string | null, incarnation: string | null, status: string | null, backend: string | null, environment: string | null, policyRevision: string | null, expiresAt: string | null, kind: string | null, keyId: string | null, endpointId: string | null, enabled: boolean | null, replayedDeliveries: number | null, skippedDeliveries: number | null, messagePreview: boolean | null, resourceRef: { kind: string, id: string } | null, delivery: { deliveryId: string, kind: string, projectId: string, installationId: string, expiresAt: string, payloadDigest: string, resourceRef: { kind: string, id: string } | null, recipientActorRef: { tenantId: string, objectId: string } | null } | null, liveSessionCompletion: { liveSessionId: string, generation: string, state: LiveSessionState, revision: string, completedAt: string, mediaCutoff: { state: LiveCutoffState, evidence: LiveCutoffEvidence | null, enforcedAt: string | null, operationId: string | null, scope: { kind: LiveCutoffScopeKind, liveSessionId: string, generation: string, participationId: string | null } } | null } | null } | null } };
+
+export type ManagementRequestAgentSignupMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: RequestAgentSignupRequestInput;
+}>;
+
+
+export type ManagementRequestAgentSignupMutation = { requestAgentSignup: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signupId: string, confirmationCode: string, expiresAt: string, pollAfterSeconds: number } | null } };
+
+export type ManagementRejectAgentSignupMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: RejectAgentSignupRequestInput;
+}>;
+
+
+export type ManagementRejectAgentSignupMutation = { rejectAgentSignup: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signupId: string, state: string, orgId: string | null, deploymentId: string | null, projectId: string | null, nextStep: string | null, scopes: Array<string>, grantExpiresAt: string | null, incarnation: string | null, servingEpoch: string | null, keys: Array<{ operationId: string, state: string, scopes: Array<string>, expiresAt: string, keyId: string | null, deliveryId: string | null, deliveryExpiresAt: string | null }> } | null } };
+
+export type ManagementApproveAgentSignupMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: ApproveAgentSignupRequestInput;
+}>;
+
+
+export type ManagementApproveAgentSignupMutation = { approveAgentSignup: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { signupId: string, state: string, orgId: string | null, deploymentId: string | null, projectId: string | null, nextStep: string | null, scopes: Array<string>, grantExpiresAt: string | null, incarnation: string | null, servingEpoch: string | null, keys: Array<{ operationId: string, state: string, scopes: Array<string>, expiresAt: string, keyId: string | null, deliveryId: string | null, deliveryExpiresAt: string | null }> } | null } };
+
+export type ManagementIssueAgentKeyMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: IssueAgentKeyRequestInput;
+}>;
+
+
+export type ManagementIssueAgentKeyMutation = { issueAgentKey: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { operationId: string, state: string, scopes: Array<string>, expiresAt: string, keyId: string | null, deliveryId: string | null, deliveryExpiresAt: string | null } | null } };
+
+export type ManagementAgentCredentialPermitMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: AgentCredentialPermitRequestInput;
+}>;
+
+
+export type ManagementAgentCredentialPermitMutation = { agentCredentialPermit: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, result: Record<string, unknown> | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null } };
+
+export type ManagementRevokeAgentGrantMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: RevokeAgentGrantRequestInput;
+}>;
+
+
+export type ManagementRevokeAgentGrantMutation = { revokeAgentGrant: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { grantId: string, orgId: string, signupId: string, agentActorId: string, projectId: string | null, scopes: Array<string>, expiresAt: string, revokedAt: string | null, createdAt: string, keys: Array<{ operationId: string, state: string, scopes: Array<string>, expiresAt: string, keyId: string | null, deliveryId: string | null, deliveryExpiresAt: string | null }> } | null } };
+
+export type ManagementSetSpendControlsMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: SetSpendControlsRequestInput;
+}>;
+
+
+export type ManagementSetSpendControlsMutation = { setSpendControls: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { orgId: string, planId: string, currency: string, catalogVersion: string, monthlySpendCap: string | null, agentPurchaseLimit: string | null, updatedAt: string | null, monthlyMinimum: string | null, periodStart: string | null, periodEnd: string | null, credits: string | null, charges: string | null, margin: string | null, stop: string | null, refusedMeters: Array<string>, evaluatedAt: string | null, usageThrough: string | null, validUntil: string | null, minimumCredit: string | null, chargeLimit: string | null } | null } };
+
+export type ManagementPurchaseAgentCreditsMutationVariables = Exact<{
+  context: RequestContextInput;
+  input: PurchaseAgentCreditsRequestInput;
+}>;
+
+
+export type ManagementPurchaseAgentCreditsMutation = { purchaseAgentCredits: { status: string, requestId: string, serverTime: string | null, receiptId: string | null, committedAt: string | null, replayed: boolean | null, operation: { operationId: string, owner: string, href: string, state: string } | null, resourceRef: { kind: string, id: string } | null, result: { paymentId: string, amount: string, currency: string, state: string } | null } };

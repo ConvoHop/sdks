@@ -477,7 +477,7 @@
       "path": "typescript/reference/operations.md",
       "kind": "coverage",
       "title": "TypeScript operation coverage",
-      "description": "The TypeScript SDK members that send each API operation. 53 of the 79 operations that TypeScript packages can send have a method.",
+      "description": "The TypeScript SDK members that send each API operation. 53 of the 92 operations that TypeScript packages can send have a method.",
       "language": "typescript"
     },
     {
@@ -554,7 +554,7 @@
       "path": "python/reference/operations.md",
       "kind": "coverage",
       "title": "Python operation coverage",
-      "description": "The Python SDK members that send each API operation. 63 of the 68 operations that Python packages can send have a method.",
+      "description": "The Python SDK members that send each API operation. 63 of the 81 operations that Python packages can send have a method.",
       "language": "python"
     },
     {
@@ -623,7 +623,7 @@
       "path": "dotnet/reference/operations.md",
       "kind": "coverage",
       "title": ".NET operation coverage",
-      "description": "The .NET SDK members that send each API operation. 65 of the 68 operations that .NET packages can send have a method.",
+      "description": "The .NET SDK members that send each API operation. 65 of the 81 operations that .NET packages can send have a method.",
       "language": "dotnet"
     },
     {
@@ -684,7 +684,7 @@
       "path": "jvm/reference/operations.md",
       "kind": "coverage",
       "title": "Java and Kotlin operation coverage",
-      "description": "The Java and Kotlin SDK members that send each API operation. 65 of the 68 operations that Java and Kotlin packages can send have a method.",
+      "description": "The Java and Kotlin SDK members that send each API operation. 65 of the 81 operations that Java and Kotlin packages can send have a method.",
       "language": "jvm"
     },
     {
@@ -753,7 +753,7 @@
       "path": "go/reference/operations.md",
       "kind": "coverage",
       "title": "Go operation coverage",
-      "description": "The Go SDK members that send each API operation. 65 of the 68 operations that Go packages can send have a method.",
+      "description": "The Go SDK members that send each API operation. 65 of the 81 operations that Go packages can send have a method.",
       "language": "go"
     },
     {
@@ -1350,6 +1350,41 @@
       "operation": "management.getOperation"
     },
     {
+      "path": "operations/management/agentSignupForApproval.md",
+      "kind": "operation",
+      "title": "management.agentSignupForApproval",
+      "description": "Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.",
+      "operation": "management.agentSignupForApproval"
+    },
+    {
+      "path": "operations/management/agentSignup.md",
+      "kind": "operation",
+      "title": "management.agentSignup",
+      "description": "Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.",
+      "operation": "management.agentSignup"
+    },
+    {
+      "path": "operations/management/agentGrants.md",
+      "kind": "operation",
+      "title": "management.agentGrants",
+      "description": "List an organization's agent grants with their keys, newest first.",
+      "operation": "management.agentGrants"
+    },
+    {
+      "path": "operations/management/agentAuditEvents.md",
+      "kind": "operation",
+      "title": "management.agentAuditEvents",
+      "description": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.",
+      "operation": "management.agentAuditEvents"
+    },
+    {
+      "path": "operations/management/organizationSpend.md",
+      "kind": "operation",
+      "title": "management.organizationSpend",
+      "description": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.",
+      "operation": "management.organizationSpend"
+    },
+    {
       "path": "operations/management/createOrganization.md",
       "kind": "operation",
       "title": "management.createOrganization",
@@ -1460,6 +1495,62 @@
       "title": "management.replayWebhookDeliveries",
       "description": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.",
       "operation": "management.replayWebhookDeliveries"
+    },
+    {
+      "path": "operations/management/requestAgentSignup.md",
+      "kind": "operation",
+      "title": "management.requestAgentSignup",
+      "description": "Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.",
+      "operation": "management.requestAgentSignup"
+    },
+    {
+      "path": "operations/management/rejectAgentSignup.md",
+      "kind": "operation",
+      "title": "management.rejectAgentSignup",
+      "description": "Reject a signup request from its approval link, optionally suppressing future requests to the email.",
+      "operation": "management.rejectAgentSignup"
+    },
+    {
+      "path": "operations/management/approveAgentSignup.md",
+      "kind": "operation",
+      "title": "management.approveAgentSignup",
+      "description": "Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.",
+      "operation": "management.approveAgentSignup"
+    },
+    {
+      "path": "operations/management/issueAgentKey.md",
+      "kind": "operation",
+      "title": "management.issueAgentKey",
+      "description": "Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.",
+      "operation": "management.issueAgentKey"
+    },
+    {
+      "path": "operations/management/agentCredentialPermit.md",
+      "kind": "operation",
+      "title": "management.agentCredentialPermit",
+      "description": "Issue a permit that authorizes the agent to redeem one of its key deliveries.",
+      "operation": "management.agentCredentialPermit"
+    },
+    {
+      "path": "operations/management/revokeAgentGrant.md",
+      "kind": "operation",
+      "title": "management.revokeAgentGrant",
+      "description": "Revoke an agent grant and every key issued under it.",
+      "operation": "management.revokeAgentGrant"
+    },
+    {
+      "path": "operations/management/setSpendControls.md",
+      "kind": "operation",
+      "title": "management.setSpendControls",
+      "description": "Set the organization's monthly spend cap and agent purchase limit.",
+      "operation": "management.setSpendControls"
+    },
+    {
+      "path": "operations/management/purchaseAgentCredits.md",
+      "kind": "operation",
+      "title": "management.purchaseAgentCredits",
+      "description": "Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.",
+      "operation": "management.purchaseAgentCredits"
     }
   ]
 }

@@ -3,6 +3,199 @@ type ActorRef {
 	objectId: String!
 }
 
+type AgentAuditEvent {
+	eventId: UUID!
+	orgId: UUID!
+	grantId: UUID
+	actorKind: String!
+	actorId: UUID
+	kind: String!
+	details: Properties
+	occurredAt: String!
+}
+
+type AgentAuditEventPage {
+	items: [AgentAuditEvent!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type AgentAuditEventsReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: AgentAuditEventPage
+}
+
+input AgentAuditEventsRequestInput {
+	orgId: UUID!
+	limit: PageSize! = 50
+	cursor: String
+}
+
+type AgentCredentialPermitReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: SignedProof
+}
+
+input AgentCredentialPermitRequestInput {
+	deliveryId: UUID!
+	redemptionRequestId: UUID!
+}
+
+type AgentGrant {
+	grantId: UUID!
+	orgId: UUID!
+	signupId: UUID!
+	agentActorId: UUID!
+	projectId: UUID
+	scopes: [String!]!
+	expiresAt: String!
+	revokedAt: String
+	createdAt: String!
+	keys: [AgentKey!]!
+}
+
+type AgentGrantPage {
+	items: [AgentGrant!]!
+	complete: Boolean!
+	refreshRequired: Boolean!
+	nextCursor: String
+}
+
+type AgentGrantsReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: AgentGrantPage
+}
+
+input AgentGrantsRequestInput {
+	orgId: UUID!
+	limit: PageSize! = 50
+	cursor: String
+}
+
+type AgentKey {
+	operationId: UUID!
+	state: String!
+	scopes: [String!]!
+	expiresAt: String!
+	keyId: String
+	deliveryId: UUID
+	deliveryExpiresAt: String
+}
+
+type AgentPayment {
+	paymentId: UUID!
+	amount: String!
+	currency: String!
+	state: String!
+}
+
+type AgentSignupForApprovalReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: AgentSignupReview
+}
+
+input AgentSignupForApprovalRequestInput {
+	approvalToken: String!
+}
+
+type AgentSignupReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: AgentSignupStatus
+}
+
+type AgentSignupReview {
+	signupId: UUID!
+	ownerEmail: String!
+	organizationName: String!
+	agentName: String!
+	purpose: String
+	suggestedPlan: String
+	suggestedScopes: [String!]!
+	suggestedMonthlySpendCap: String
+	currency: String!
+	expiresAt: String!
+}
+
+type AgentSignupStatus {
+	signupId: UUID!
+	state: String!
+	orgId: UUID
+	deploymentId: UUID
+	projectId: UUID
+	nextStep: String
+	scopes: [String!]!
+	grantExpiresAt: String
+	keys: [AgentKey!]!
+	incarnation: UUID
+	servingEpoch: Decimal
+}
+
+type AgentSignupTicket {
+	signupId: UUID!
+	confirmationCode: String!
+	expiresAt: String!
+	pollAfterSeconds: Int!
+}
+
+type ApproveAgentSignupReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: AgentSignupStatus
+}
+
+input ApproveAgentSignupRequestInput {
+	approvalToken: String!
+	confirmationCode: String!
+	termsRef: String!
+	plan: String!
+	scopes: [String!]!
+	monthlySpendCap: String!
+	agentPurchaseLimit: String
+	grantExpiresAt: String
+}
+
 type BillingCheckoutSession {
 	orgId: UUID!
 	planId: String!
@@ -219,6 +412,28 @@ input CredentialPermitRequestInput {
 	projectId: UUID!
 	deliveryId: UUID!
 	redemptionRequestId: UUID!
+}
+
+"""
+GraphQL error `extensions` when `code` is `CREDITS_EXHAUSTED`. The organization's prepaid credits are spent and its monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (HTTP 402, WebSocket close 4402). Usage within allowances continues. Not retryable until credits are added or the owner raises the cap.
+"""
+type CreditsExhaustedProblem {
+	"""
+	CREDITS_EXHAUSTED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	Canonical usage meter key whose billable usage beyond the plan's allowance was refused, such as `messages_sent`.
+	"""
+	meter: String!
+	"""
+	RFC 3339 UTC end of the organization's spend month.
+	"""
+	periodEnd: String!
 }
 
 type Cursor {
@@ -455,6 +670,23 @@ type InboxPage {
 	refreshRequired: Boolean!
 	nextCursor: String
 	partialReason: String
+}
+
+type IssueAgentKeyReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: AgentKey
+}
+
+input IssueAgentKeyRequestInput {
+	scopes: [String!]!
+	expiresAt: String
 }
 
 type IssueBackendKeyReply {
@@ -831,6 +1063,14 @@ type Mutation {
 	rotateWebhookSecret(context: RequestContextInput!, input: RotateWebhookSecretRequestInput!): RotateWebhookSecretReply!
 	disableWebhook(context: RequestContextInput!, input: DisableWebhookRequestInput!): DisableWebhookReply!
 	replayWebhookDeliveries(context: RequestContextInput!, input: ReplayWebhookDeliveriesRequestInput!): ReplayWebhookDeliveriesReply!
+	requestAgentSignup(context: RequestContextInput!, input: RequestAgentSignupRequestInput!): RequestAgentSignupReply!
+	rejectAgentSignup(context: RequestContextInput!, input: RejectAgentSignupRequestInput!): RejectAgentSignupReply!
+	approveAgentSignup(context: RequestContextInput!, input: ApproveAgentSignupRequestInput!): ApproveAgentSignupReply!
+	issueAgentKey(context: RequestContextInput!, input: IssueAgentKeyRequestInput!): IssueAgentKeyReply!
+	agentCredentialPermit(context: RequestContextInput!, input: AgentCredentialPermitRequestInput!): AgentCredentialPermitReply!
+	revokeAgentGrant(context: RequestContextInput!, input: RevokeAgentGrantRequestInput!): RevokeAgentGrantReply!
+	setSpendControls(context: RequestContextInput!, input: SetSpendControlsRequestInput!): SetSpendControlsReply!
+	purchaseAgentCredits(context: RequestContextInput!, input: PurchaseAgentCreditsRequestInput!): PurchaseAgentCreditsReply!
 }
 
 type Operation {
@@ -919,6 +1159,45 @@ type OrganizationPage {
 	complete: Boolean!
 	refreshRequired: Boolean!
 	nextCursor: String
+}
+
+type OrganizationSpend {
+	orgId: UUID!
+	planId: String!
+	currency: String!
+	catalogVersion: String!
+	monthlySpendCap: String
+	agentPurchaseLimit: String
+	updatedAt: String
+	monthlyMinimum: String
+	periodStart: String
+	periodEnd: String
+	credits: String
+	charges: String
+	margin: String
+	stop: String
+	refusedMeters: [String!]!
+	evaluatedAt: String
+	usageThrough: String
+	validUntil: String
+	minimumCredit: String
+	chargeLimit: String
+}
+
+type OrganizationSpendReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OrganizationSpend
+}
+
+input OrganizationSpendRequestInput {
+	orgId: UUID!
 }
 
 type OrganizationUsage {
@@ -1081,6 +1360,23 @@ input ProjectUsageRequestInput {
 
 scalar Properties
 
+type PurchaseAgentCreditsReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: AgentPayment
+}
+
+input PurchaseAgentCreditsRequestInput {
+	amount: String!
+	sharedPaymentToken: String!
+}
+
 type Query {
 	capabilities(context: RequestContextInput!): CapabilitiesReply!
 	organizations(context: RequestContextInput!): OrganizationsReply!
@@ -1096,6 +1392,11 @@ type Query {
 	webhookDeliveries(context: RequestContextInput!, input: WebhookDeliveriesRequestInput!): WebhookDeliveriesReply!
 	resolveRequest(context: RequestContextInput!, input: ResolveRequestRequestInput!): ResolveRequestReply!
 	getOperation(context: RequestContextInput!, input: GetOperationRequestInput!): GetOperationReply!
+	agentSignupForApproval(context: RequestContextInput!, input: AgentSignupForApprovalRequestInput!): AgentSignupForApprovalReply!
+	agentSignup(context: RequestContextInput!): AgentSignupReply!
+	agentGrants(context: RequestContextInput!, input: AgentGrantsRequestInput!): AgentGrantsReply!
+	agentAuditEvents(context: RequestContextInput!, input: AgentAuditEventsRequestInput!): AgentAuditEventsReply!
+	organizationSpend(context: RequestContextInput!, input: OrganizationSpendRequestInput!): OrganizationSpendReply!
 }
 
 """
@@ -1162,6 +1463,23 @@ type ReceiptPage {
 	nextCursor: String
 }
 
+type RejectAgentSignupReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: AgentSignupStatus
+}
+
+input RejectAgentSignupRequestInput {
+	approvalToken: String!
+	suppressFutureRequests: Boolean!
+}
+
 type ReplayWebhookDeliveriesReply {
 	status: String!
 	requestId: UUID!
@@ -1180,6 +1498,29 @@ input ReplayWebhookDeliveriesRequestInput {
 	effectId: UUID
 	since: String
 	until: String
+}
+
+type RequestAgentSignupReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: AgentSignupTicket
+}
+
+input RequestAgentSignupRequestInput {
+	ownerEmail: String!
+	pollChallenge: String!
+	organizationName: String!
+	agentName: String!
+	purpose: String
+	suggestedPlan: String
+	suggestedScopes: [String!]!
+	suggestedMonthlySpendCap: String
 }
 
 input RequestContextInput {
@@ -1252,6 +1593,8 @@ input ResumeOperationRequestInput {
 Exactly one typed field contains the retained, currently authorized receipt result.
 """
 type RetainedResult {
+	agentGrant: AgentGrant
+	agentSignupStatus: AgentSignupStatus
 	billingCheckoutSession: BillingCheckoutSession
 	billingPortalSession: BillingPortalSession
 	broadcastPermissionChanged: BroadcastPermissionChanged
@@ -1270,11 +1613,29 @@ type RetainedResult {
 	message: Message
 	messageAck: MessageAck
 	organization: Organization
+	organizationSpend: OrganizationSpend
 	principal: Principal
 	readReceipt: ReadReceipt
 	sessionBootstrap: SessionBootstrap
 	sessionRevocation: SessionRevocation
 	signedProof: SignedProof
+}
+
+type RevokeAgentGrantReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: AgentGrant
+}
+
+input RevokeAgentGrantRequestInput {
+	grantId: UUID!
+	revokeIssuedSessions: Boolean!
 }
 
 type RevokeBackendKeyReply {
@@ -1362,7 +1723,73 @@ type SessionRevocation {
 	mediaCutoff: MediaCutoff
 }
 
+type SetSpendControlsReply {
+	status: String!
+	requestId: UUID!
+	serverTime: String
+	receiptId: UUID
+	committedAt: String
+	replayed: Boolean
+	operation: OperationRef
+	resourceRef: ResourceRef
+	result: OrganizationSpend
+}
+
+input SetSpendControlsRequestInput {
+	orgId: UUID!
+	monthlySpendCap: String!
+	agentPurchaseLimit: String
+}
+
 scalar SignedProof
+
+"""
+GraphQL error `extensions` when `code` is `SPEND_CAP_REACHED`. The spend month's usage charges, excluding the plan fee and tax, reached the organization's charge limit, less a safety margin: its prepaid credits plus its monthly spend cap, less the next monthly minimum, which the next invoice bills in advance, plus this month's paid minimum credit. Billable usage beyond the plan's allowances is refused before any effect (HTTP 402, WebSocket close 4402). Usage within allowances continues. Not retryable until credits are added or the owner raises the cap; otherwise usage resumes at `periodEnd` once the next monthly minimum, if any, is paid.
+"""
+type SpendCapReachedProblem {
+	"""
+	SPEND_CAP_REACHED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	Canonical usage meter key whose billable usage beyond the plan's allowance was refused, such as `messages_sent`.
+	"""
+	meter: String!
+	"""
+	RFC 3339 UTC end of the organization's spend month.
+	"""
+	periodEnd: String!
+}
+
+"""
+GraphQL error `extensions` when `code` is `SPEND_UNVERIFIED`. Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (HTTP 503, WebSocket close 4503). Usage within allowances continues. Resend the same request identity after `retryAfter` seconds.
+"""
+type SpendUnverifiedProblem {
+	"""
+	SPEND_UNVERIFIED
+	"""
+	code: String!
+	status: Int!
+	requestId: UUID!
+	outcome: String!
+	retryable: Boolean!
+	"""
+	Whole seconds before the same request may succeed; HTTP responses repeat it in `Retry-After`.
+	"""
+	retryAfter: Int!
+	"""
+	Canonical usage meter key whose billable usage beyond the plan's allowance was refused, such as `messages_sent`.
+	"""
+	meter: String!
+	"""
+	RFC 3339 UTC end of the organization's spend month.
+	"""
+	periodEnd: String!
+}
 
 type TypingStatus {
 	accepted: Boolean!
