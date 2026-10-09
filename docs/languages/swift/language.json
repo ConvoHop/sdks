@@ -1,0 +1,62 @@
+{
+  "$schema": "../../../spec/docs/language.schema.json",
+  "id": "swift",
+  "name": "Swift",
+  "order": 60,
+  "status": "preview",
+  "codeFence": "swift",
+  "regionComment": "//",
+  "testedFences": ["swift"],
+  "snippetRoots": ["examples/Sources"],
+  "packages": [
+    {
+      "name": "ConvoHop",
+      "slug": "convohop",
+      "layer": "client",
+      "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events with replay, the local store, the offline outbox, read receipts, typing, recent activity, call control and push routing. It re-exports `ConvoHopPush`.",
+      "runtime": "iOS 15 or later, or macOS 12 or later, with Swift 6.1 or later (Xcode 16.4 or later).",
+      "source": "swift/Sources/ConvoHop"
+    },
+    {
+      "name": "ConvoHopLiveKit",
+      "slug": "livekit",
+      "layer": "client",
+      "summary": "Call media through the official LiveKit Swift SDK, and CallKit audio session handling on iOS.",
+      "runtime": "iOS 15 or later, or macOS 12 or later, with LiveKit's `client-sdk-swift` 2.17.0 or later.",
+      "source": "swift/Sources/ConvoHopLiveKit"
+    },
+    {
+      "name": "ConvoHopPush",
+      "slug": "push",
+      "layer": "client",
+      "summary": "Push payload parsing, deduplication, the ring ledger and the push recipient, with Foundation only so app extensions can use it.",
+      "runtime": "iOS 15 or later, or macOS 12 or later, in an app or an app extension.",
+      "source": "swift/Sources/ConvoHopPush"
+    },
+    {
+      "name": "ConvoHopCalls",
+      "slug": "calls",
+      "layer": "client",
+      "summary": "Incoming calls from PushKit VoIP pushes to CallKit, and outgoing calls through CallKit.",
+      "runtime": "iOS 15 or later. On macOS it has only the call model.",
+      "source": "swift/Sources/ConvoHopCalls"
+    },
+    {
+      "name": "ConvoHopNotificationService",
+      "slug": "notification-service",
+      "layer": "client",
+      "summary": "A Notification Service Extension helper that fetches message text on the device when a push has none, and hides the text of other users' pushes.",
+      "runtime": "iOS 15 or later, or macOS 12 or later, in a Notification Service Extension.",
+      "source": "swift/Sources/ConvoHopNotificationService"
+    }
+  ],
+  "quickstarts": ["client", "push", "calling"],
+  "operations": "operations.json",
+  "extract": {
+    "command": ["node", "tools/docgen/extractors/swift.mjs", "docs/languages/swift/language.json"]
+  },
+  "test": {
+    "install": ["swift", "package", "resolve", "--package-path", "docs/languages/swift/examples", "--force-resolved-versions", "--disable-keychain"],
+    "command": ["node", "docs/languages/swift/examples/test.mjs"]
+  }
+}

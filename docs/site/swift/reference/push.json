@@ -1,0 +1,535 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "swift",
+  "package": "ConvoHopPush",
+  "layer": "client",
+  "page": "push.md",
+  "symbols": [
+    {
+      "name": "ConvoHopNotificationLedger",
+      "kind": "class",
+      "ref": "ConvoHopPush#ConvoHopNotificationLedger",
+      "anchor": "convohopnotificationledger-class",
+      "signatures": ["public final class ConvoHopNotificationLedger: @unchecked Sendable"],
+      "docs": "Remembers the notification events this device handled and the rings that stopped.\n\nDelivery is at least once and unordered: a redelivered event has the same `eventId`, and a cancellation can arrive\nbefore its ring. Record each event once, and drop a ring the ledger reports as stopped.\n\nPass the same App Group suite in your app and its Notification Service Extension to share one ledger. Two processes\nwriting at the same moment can drop an entry, so treat the ledger as best effort. At sign-out, set `recipient` to\n`ConvoHopPushRecipient.nobody` and call `removeAll()`.",
+      "members": [
+        {
+          "name": "init",
+          "kind": "constructor",
+          "ref": "ConvoHopPush#ConvoHopNotificationLedger.init",
+          "anchor": "convohopnotificationledger-constructor",
+          "signatures": ["public init(suiteName: String? = nil, capacity: Int = 512)"],
+          "docs": "Parameters:\n\n- `suiteName`: An App Group suite to share with your extensions, or `nil` for the app's standard defaults.\n- `capacity`: How many event IDs and stopped rings to remember, at least 16."
+        },
+        {
+          "name": "record",
+          "kind": "method",
+          "ref": "ConvoHopPush#ConvoHopNotificationLedger.record",
+          "anchor": "convohopnotificationledgerrecord-method",
+          "signatures": [
+            "@discardableResult\npublic func record(_ notification: ConvoHopNotification) -> Bool"
+          ],
+          "docs": "Records the event, and the stopped ring of a cancellation. Returns `false` when the event was already recorded."
+        },
+        {
+          "name": "contains",
+          "kind": "method",
+          "ref": "ConvoHopPush#ConvoHopNotificationLedger.contains",
+          "anchor": "convohopnotificationledgercontains-method",
+          "signatures": ["public func contains(eventId: String) -> Bool"],
+          "docs": "Whether the event was recorded."
+        },
+        {
+          "name": "markStopped",
+          "kind": "method",
+          "ref": "ConvoHopPush#ConvoHopNotificationLedger.markStopped",
+          "anchor": "convohopnotificationledgermarkstopped-method",
+          "signatures": [
+            "public func markStopped(_ alert: ConvoHopCallAlert, reason: ConvoHopCallEndReason)"
+          ],
+          "docs": "Records that a ring stopped, for example when your app ended it."
+        },
+        {
+          "name": "stopReason",
+          "kind": "method",
+          "ref": "ConvoHopPush#ConvoHopNotificationLedger.stopReason",
+          "anchor": "convohopnotificationledgerstopreason-method",
+          "signatures": ["public func stopReason(alertId: String) -> ConvoHopCallEndReason?"],
+          "docs": "Why the ring stopped, if a cancellation or stop was recorded for its `alertId`."
+        },
+        {
+          "name": "isStopped",
+          "kind": "method",
+          "ref": "ConvoHopPush#ConvoHopNotificationLedger.isStopped",
+          "anchor": "convohopnotificationledgerisstopped-method",
+          "signatures": [
+            "public func isStopped(_ alert: ConvoHopCallAlert, at now: Date = Date()) -> Bool"
+          ],
+          "docs": "Whether the ring has stopped: a cancellation was recorded or its deadline has passed."
+        },
+        {
+          "name": "recipient",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotificationLedger.recipient",
+          "anchor": "convohopnotificationledgerrecipient-property",
+          "signatures": ["public var recipient: ConvoHopPushRecipient { get set }"],
+          "docs": "Whose pushes this device rings for and shows. `ConvoHopPushRecipient.any` until you set one.\n\nIt's stored in the ledger's suite, so a Notification Service Extension that shares the suite, and your app\nafter a relaunch, see it. A stored value this version can't read counts as `ConvoHopPushRecipient.nobody`."
+        },
+        {
+          "name": "removeAll",
+          "kind": "method",
+          "ref": "ConvoHopPush#ConvoHopNotificationLedger.removeAll",
+          "anchor": "convohopnotificationledgerremoveall-method",
+          "signatures": ["public func removeAll()"],
+          "docs": "Forgets every event and ring. It keeps `recipient`."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopCallAlert",
+      "kind": "struct",
+      "ref": "ConvoHopPush#ConvoHopCallAlert",
+      "anchor": "convohopcallalert-struct",
+      "signatures": ["public struct ConvoHopCallAlert: Sendable, Hashable"],
+      "docs": "One ring of a call for one recipient. A later ring of the same call has a new `alertId`.",
+      "members": [
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallAlert.liveSessionId",
+          "anchor": "convohopcallalertlivesessionid-property",
+          "signatures": ["public let liveSessionId: String"],
+          "docs": ""
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallAlert.alertId",
+          "anchor": "convohopcallalertalertid-property",
+          "signatures": ["public let alertId: String"],
+          "docs": ""
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallAlert.expiresAt",
+          "anchor": "convohopcallalertexpiresat-property",
+          "signatures": ["public let expiresAt: Date"],
+          "docs": "When the ring stops if nobody answers. A cancellation carries the stopped ring's original deadline."
+        },
+        {
+          "name": "mediaProfile",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallAlert.mediaProfile",
+          "anchor": "convohopcallalertmediaprofile-property",
+          "signatures": ["public let mediaProfile: String"],
+          "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a later profile."
+        },
+        {
+          "name": "uuid",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallAlert.uuid",
+          "anchor": "convohopcallalertuuid-property",
+          "signatures": ["public let uuid: UUID"],
+          "docs": "The ring's CallKit UUID: `alertId`."
+        },
+        {
+          "name": "hasVideo",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallAlert.hasVideo",
+          "anchor": "convohopcallalerthasvideo-property",
+          "signatures": ["public var hasVideo: Bool { get }"],
+          "docs": "Whether the call starts with video."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopCallEndReason",
+      "kind": "struct",
+      "ref": "ConvoHopPush#ConvoHopCallEndReason",
+      "anchor": "convohopcallendreason-struct",
+      "signatures": [
+        "public struct ConvoHopCallEndReason: RawRepresentable, Hashable, Sendable, CustomStringConvertible"
+      ],
+      "docs": "Why a ring stopped. The set is open: treat a reason you don't know as \"stop ringing\", without a missed call.",
+      "members": [
+        {
+          "name": "rawValue",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallEndReason.rawValue",
+          "anchor": "convohopcallendreasonrawvalue-property",
+          "signatures": ["public let rawValue: String"],
+          "docs": ""
+        },
+        {
+          "name": "init",
+          "kind": "constructor",
+          "ref": "ConvoHopPush#ConvoHopCallEndReason.init",
+          "anchor": "convohopcallendreason-constructor",
+          "signatures": ["public init(rawValue: String)"],
+          "docs": ""
+        },
+        {
+          "name": "answered",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallEndReason.answered:static",
+          "anchor": "convohopcallendreasonanswered-static-property",
+          "signatures": [
+            "public static let answered = ConvoHopCallEndReason(rawValue: \"answered\")"
+          ],
+          "docs": "The recipient answered, on any device. Only stops the ringing.",
+          "static": true
+        },
+        {
+          "name": "declined",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallEndReason.declined:static",
+          "anchor": "convohopcallendreasondeclined-static-property",
+          "signatures": [
+            "public static let declined = ConvoHopCallEndReason(rawValue: \"declined\")"
+          ],
+          "docs": "The recipient declined, on any device. Only stops the ringing.",
+          "static": true
+        },
+        {
+          "name": "ended",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallEndReason.ended:static",
+          "anchor": "convohopcallendreasonended-static-property",
+          "signatures": ["public static let ended = ConvoHopCallEndReason(rawValue: \"ended\")"],
+          "docs": "The call ended or stopped ringing first: a missed call.",
+          "static": true
+        },
+        {
+          "name": "expired",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallEndReason.expired:static",
+          "anchor": "convohopcallendreasonexpired-static-property",
+          "signatures": ["public static let expired = ConvoHopCallEndReason(rawValue: \"expired\")"],
+          "docs": "Nobody answered by the ring's deadline: a missed call.",
+          "static": true
+        },
+        {
+          "name": "failed",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallEndReason.failed:static",
+          "anchor": "convohopcallendreasonfailed-static-property",
+          "signatures": ["public static let failed = ConvoHopCallEndReason(rawValue: \"failed\")"],
+          "docs": "This device couldn't handle the call. ConvoHop never sends it; the SDK and your app use it locally.",
+          "static": true
+        },
+        {
+          "name": "isMissedCall",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallEndReason.isMissedCall",
+          "anchor": "convohopcallendreasonismissedcall-property",
+          "signatures": ["public var isMissedCall: Bool { get }"],
+          "docs": "Whether the user missed the call."
+        },
+        {
+          "name": "description",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopCallEndReason.description",
+          "anchor": "convohopcallendreasondescription-property",
+          "signatures": ["public var description: String { get }"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopNotification",
+      "kind": "struct",
+      "ref": "ConvoHopPush#ConvoHopNotification",
+      "anchor": "convohopnotification-struct",
+      "signatures": ["public struct ConvoHopNotification: Sendable, Hashable"],
+      "docs": "A ConvoHop notification event from an APNs, PushKit or FCM payload.\n\nEvents carry identifiers and, only when the project opts in to message previews, visible text. Delivery is at\nleast once and unordered: deduplicate on `eventId` with `ConvoHopNotificationLedger`.",
+      "members": [
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.eventId",
+          "anchor": "convohopnotificationeventid-property",
+          "signatures": ["public let eventId: String"],
+          "docs": ""
+        },
+        {
+          "name": "eventType",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.eventType",
+          "anchor": "convohopnotificationeventtype-property",
+          "signatures": ["public let eventType: String"],
+          "docs": "`notification.message`, `notification.call` or `notification.callCancelled`."
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.projectId",
+          "anchor": "convohopnotificationprojectid-property",
+          "signatures": ["public let projectId: String"],
+          "docs": ""
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.recipientId",
+          "anchor": "convohopnotificationrecipientid-property",
+          "signatures": ["public let recipientId: String"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.conversationId",
+          "anchor": "convohopnotificationconversationid-property",
+          "signatures": ["public let conversationId: String"],
+          "docs": ""
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.senderId",
+          "anchor": "convohopnotificationsenderid-property",
+          "signatures": ["public let senderId: String"],
+          "docs": ""
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.occurredAt",
+          "anchor": "convohopnotificationoccurredat-property",
+          "signatures": ["public let occurredAt: Date"],
+          "docs": ""
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.title",
+          "anchor": "convohopnotificationtitle-property",
+          "signatures": ["public let title: String?"],
+          "docs": "The visible title, if the push carries one."
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.body",
+          "anchor": "convohopnotificationbody-property",
+          "signatures": ["public let body: String?"],
+          "docs": "The visible body, if the push carries one: your backend's text or, when the project opts in, the message\npreview. Absent by default."
+        },
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.kind",
+          "anchor": "convohopnotificationkind-property",
+          "signatures": ["public let kind: Kind"],
+          "docs": ""
+        },
+        {
+          "name": "callAlert",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopNotification.callAlert",
+          "anchor": "convohopnotificationcallalert-property",
+          "signatures": ["public var callAlert: ConvoHopCallAlert? { get }"],
+          "docs": "The ring, for calls and cancellations."
+        },
+        {
+          "name": "init",
+          "kind": "constructor",
+          "ref": "ConvoHopPush#ConvoHopNotification.init",
+          "anchor": "convohopnotification-constructor",
+          "signatures": [
+            "public init?(userInfo: [AnyHashable: Any])",
+            "public init(jsonObject: Any) throws",
+            "public init(jsonData: Data) throws"
+          ],
+          "docs": "Reads the `convohop` object of a push's `userInfo`, and the visible text of an APNs alert.\n\nReturns `nil` when the push has no valid `convohop` object or it isn't a notification event this SDK supports.\nFields the contract doesn't define are ignored.\n\nValidates a `convohop` object: a dictionary, or its JSON text as FCM data carries it.\n\nValidates the JSON text of a `convohop` object."
+        },
+        {
+          "name": "parse",
+          "kind": "method",
+          "ref": "ConvoHopPush#ConvoHopNotification.parse:static",
+          "anchor": "convohopnotificationparse-static-method",
+          "signatures": [
+            "public static func parse(userInfo: [AnyHashable: Any]) throws -> ConvoHopNotification?"
+          ],
+          "docs": "Reads a push's `userInfo` like `init(userInfo:)`, but throws `ConvoHopPushPayloadError` when the `convohop`\nobject is malformed.\n\nReturns `nil` when the push has no `convohop` object or its event type isn't one this SDK supports.",
+          "static": true
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopDeliveredNotifications",
+      "kind": "enum",
+      "ref": "ConvoHopPush#ConvoHopDeliveredNotifications",
+      "anchor": "convohopdeliverednotifications-enum",
+      "signatures": ["public enum ConvoHopDeliveredNotifications"],
+      "docs": "Removes notifications that iOS or macOS already shows for a ring.",
+      "members": [
+        {
+          "name": "remove",
+          "kind": "method",
+          "ref": "ConvoHopPush#ConvoHopDeliveredNotifications.remove:static",
+          "anchor": "convohopdeliverednotificationsremove-static-method",
+          "signatures": ["public static func remove(alertId: String) async"],
+          "docs": "Removes delivered notifications whose `convohop.alertId` is `alertId`.\n\nA ring the user answered or declined gets no push, so an incoming-call alert stays until your app removes it.",
+          "static": true
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopNotification.Kind",
+      "kind": "enum",
+      "ref": "ConvoHopPush#ConvoHopNotification.Kind",
+      "anchor": "convohopnotificationkind-enum",
+      "signatures": ["public enum Kind: Sendable, Hashable"],
+      "docs": "",
+      "members": [
+        {
+          "name": "message",
+          "kind": "case",
+          "ref": "ConvoHopPush#ConvoHopNotification.Kind.message",
+          "anchor": "convohopnotificationkindmessage-case",
+          "signatures": ["case message(messageId: String)"],
+          "docs": "A new message. Open the conversation; fetch the message with the user's session."
+        },
+        {
+          "name": "call",
+          "kind": "case",
+          "ref": "ConvoHopPush#ConvoHopNotification.Kind.call",
+          "anchor": "convohopnotificationkindcall-case",
+          "signatures": ["case call(ConvoHopCallAlert)"],
+          "docs": "An incoming call. On iOS, report it to CallKit."
+        },
+        {
+          "name": "callCancelled",
+          "kind": "case",
+          "ref": "ConvoHopPush#ConvoHopNotification.Kind.callCancelled",
+          "anchor": "convohopnotificationkindcallcancelled-case",
+          "signatures": ["case callCancelled(ConvoHopCallAlert, reason: ConvoHopCallEndReason)"],
+          "docs": "A ring stopped. `reason` `ConvoHopCallEndReason.ended` and `ConvoHopCallEndReason.expired` are missed\ncalls."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopPushPayloadError",
+      "kind": "enum",
+      "ref": "ConvoHopPush#ConvoHopPushPayloadError",
+      "anchor": "convohoppushpayloaderror-enum",
+      "signatures": [
+        "public enum ConvoHopPushPayloadError: Error, Sendable, Equatable, CustomStringConvertible, LocalizedError"
+      ],
+      "docs": "A payload that isn't a ConvoHop notification event under the push payload contract.",
+      "members": [
+        {
+          "name": "missing",
+          "kind": "case",
+          "ref": "ConvoHopPush#ConvoHopPushPayloadError.missing",
+          "anchor": "convohoppushpayloaderrormissing-case",
+          "signatures": ["case missing"],
+          "docs": "The payload has no `convohop` object."
+        },
+        {
+          "name": "notAnObject",
+          "kind": "case",
+          "ref": "ConvoHopPush#ConvoHopPushPayloadError.notAnObject",
+          "anchor": "convohoppushpayloaderrornotanobject-case",
+          "signatures": ["case notAnObject"],
+          "docs": "`convohop` isn't a JSON object."
+        },
+        {
+          "name": "unsupportedEventType",
+          "kind": "case",
+          "ref": "ConvoHopPush#ConvoHopPushPayloadError.unsupportedEventType",
+          "anchor": "convohoppushpayloaderrorunsupportedeventtype-case",
+          "signatures": ["case unsupportedEventType(String)"],
+          "docs": "An event type this SDK doesn't know. Ignore the push."
+        },
+        {
+          "name": "invalidField",
+          "kind": "case",
+          "ref": "ConvoHopPush#ConvoHopPushPayloadError.invalidField",
+          "anchor": "convohoppushpayloaderrorinvalidfield-case",
+          "signatures": ["case invalidField(String)"],
+          "docs": "A field the event type requires is missing or malformed."
+        },
+        {
+          "name": "description",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopPushPayloadError.description",
+          "anchor": "convohoppushpayloaderrordescription-property",
+          "signatures": ["public var description: String { get }"],
+          "docs": ""
+        },
+        {
+          "name": "errorDescription",
+          "kind": "property",
+          "ref": "ConvoHopPush#ConvoHopPushPayloadError.errorDescription",
+          "anchor": "convohoppushpayloaderrorerrordescription-property",
+          "signatures": ["public var errorDescription: String? { get }"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopPushRecipient",
+      "kind": "enum",
+      "ref": "ConvoHopPush#ConvoHopPushRecipient",
+      "anchor": "convohoppushrecipient-enum",
+      "signatures": ["public enum ConvoHopPushRecipient: Sendable, Hashable"],
+      "docs": "Whose ConvoHop pushes this device rings for and shows.\n\nSet it at sign-in to the signed-in user, and to `nobody` at sign-out: your backend can still hold the device's\ntokens, and their pushes keep arriving. Store it with `ConvoHopNotificationLedger.recipient`, or set\n`ConvoHopCalls.recipient`, so your Notification Service Extension and a relaunch for a VoIP push see it.",
+      "members": [
+        {
+          "name": "any",
+          "kind": "case",
+          "ref": "ConvoHopPush#ConvoHopPushRecipient.any",
+          "anchor": "convohoppushrecipientany-case",
+          "signatures": ["case any"],
+          "docs": "Every ConvoHop push. The default until you set a recipient."
+        },
+        {
+          "name": "only",
+          "kind": "case",
+          "ref": "ConvoHopPush#ConvoHopPushRecipient.only",
+          "anchor": "convohoppushrecipientonly-case",
+          "signatures": ["case only(projectId: String, recipientId: String)"],
+          "docs": "Only pushes for this user in this project."
+        },
+        {
+          "name": "nobody",
+          "kind": "case",
+          "ref": "ConvoHopPush#ConvoHopPushRecipient.nobody",
+          "anchor": "convohoppushrecipientnobody-case",
+          "signatures": ["case nobody"],
+          "docs": "No ConvoHop push, for example after sign-out."
+        },
+        {
+          "name": "accepts",
+          "kind": "method",
+          "ref": "ConvoHopPush#ConvoHopPushRecipient.accepts",
+          "anchor": "convohoppushrecipientaccepts-method",
+          "signatures": ["public func accepts(_ notification: ConvoHopNotification) -> Bool"],
+          "docs": "Whether the push is for this recipient."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopPushToken",
+      "kind": "enum",
+      "ref": "ConvoHopPush#ConvoHopPushToken",
+      "anchor": "convohoppushtoken-enum",
+      "signatures": ["public enum ConvoHopPushToken"],
+      "docs": "Device tokens for your backend. ConvoHop never stores them.",
+      "members": [
+        {
+          "name": "hex",
+          "kind": "method",
+          "ref": "ConvoHopPush#ConvoHopPushToken.hex:static",
+          "anchor": "convohoppushtokenhex-static-method",
+          "signatures": ["public static func hex(_ token: Data) -> String"],
+          "docs": "An APNs or PushKit token as lowercase hex, the form APNs requests use.",
+          "static": true
+        }
+      ]
+    }
+  ]
+}
