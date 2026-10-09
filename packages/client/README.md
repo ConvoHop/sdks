@@ -165,7 +165,9 @@ message, and `unconfirmed` warns that the old one may have arrived.
 `recoveryStorage` across reloads; restored sends that may have been
 submitted are recovered, never sent as new. It is off by default. Each tab's
 outbox saves separately, coordinated through Web Locks, and when a tab
-closes or reloads, another tab's outbox takes over what it left unsent.
+closes or reloads, another tab's outbox takes over what it left unsent. A
+message that tab may already have sent is recovered from the recovery record
+it saved, within the original retry budget, never sent as new.
 `close()` resolves once the outbox and the sends it started have stopped
 writing, so on sign-out, await it before clearing that storage. Requests
 still running elsewhere on the client save their recovery records when they
@@ -291,6 +293,21 @@ Do not pass a Promise-returning adapter as synchronous storage. Explicit
 succeeds, synchronous `recoveryStates` throws instead of reporting empty.
 The [Server SDK storage contract](../server/README.md#asynchronous-database-recovery-storage)
 describes failure custody, durable commit and cross-process writer ownership.
+
+Clients of one user that share `recoveryStorage`, such as the user's tabs,
+share one journal, `convohop.requests:<projectId>:<principalId>`. Each save
+reads it and merges in that client's records request by request, so tabs
+keep each other's records, and `client.requests.retry(id)` can continue a
+request another tab saved. The journal holds at most 128 records. Settled
+records go first. Creating a request then fails rather than drop another
+tab's unresolved one, while any other save drops another tab's oldest
+unresolved ones, so a tab's own records always fit. Records this SDK can't
+read, such as a newer SDK's, stay as saved, and so do fields it doesn't know.
+Until its first attempt is saved, a request gives way to another saved under
+the same ID and fails with `IDEMPOTENCY_CONFLICT`. Saves aren't atomic across
+tabs: when two tabs save at the same moment, one can drop the other's latest
+change until that tab saves again. A journal that can't be parsed is never
+replaced: saves fail until it's repaired or removed.
 
 The low-level surface is
 `client.http.execute("communication.operation", projectId, input, requestId)`.

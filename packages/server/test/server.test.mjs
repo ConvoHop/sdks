@@ -250,8 +250,9 @@ test("async project recovery restores before route access and survives scoped ba
   const requestId = crypto.randomUUID(), conversationId = crypto.randomUUID();
   const key = "convohop.requests:backend:" + projectId;
   const read = Promise.withResolvers(), entered = Promise.withResolvers();
+  let blocked = Infinity;
   const saved = asyncStorage({ onRead: async () => {
-    if (saved.reads.length === 2) { entered.resolve(); await read.promise; }
+    if (saved.reads.length === blocked) { entered.resolve(); await read.promise; }
   } });
   const input = { title: "original", props: {}, members: [{ principalId, role: "member" }] };
   const clientOptions = { baseUrl: "http://localhost:18080", projectId, incarnation, asyncRecoveryStorage: saved };
@@ -281,10 +282,14 @@ test("async project recovery restores before route access and survives scoped ba
       title: "original", props: {}, latestSequence: "1" }) });
   } });
   assert.throws(() => restarted.http.recoveryStates, /initializeRecovery/);
+  // The first client restored once and merged each write into the stored journal; the restart's restore is held.
+  const before = saved.reads.length;
+  assert.equal(before, 1 + saved.writes.length);
+  blocked = before + 1;
   const initialized = restarted.initialize();
   await entered.promise;
   assert.equal(requests.length, 0);
-  assert.deepEqual(saved.reads, [key, key]);
+  assert.deepEqual(saved.reads.slice(before), [key]);
   read.resolve();
   await initialized;
   assert.deepEqual(restarted.http.recoveryStates, first.http.recoveryStates);
@@ -329,7 +334,8 @@ test("management forwards async storage and scopes the journal to the actor rath
     } });
   await client.createOrganization("original", "fixture");
   const key = "convohop.requests:management:" + actorId;
-  assert.deepEqual(saved.reads, [key]);
+  // Restored once; each write merges into the stored journal.
+  assert.deepEqual(saved.reads, Array(1 + saved.writes.length).fill(key));
   assert.ok(saved.writes.every(value => value.key === key && !value.value.includes("fixture-operator")));
 });
 
