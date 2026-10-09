@@ -699,16 +699,15 @@ public actor ConvoHopClient {
         }
     }
 
-    /// Tells other members whether this user is typing. Typing is a signal: it is never stored or resent.
+    /// Tells other members whether this user is typing. Typing is a signal: it is never stored, resent or resolved.
     @discardableResult
     public func setTyping(_ isTyping: Bool, in conversationId: String) async throws -> Bool {
         try await guarded {
             let input = TypingRequestInput(
                 conversationId: try Self.requireId(conversationId, "conversation"), isTyping: isTyping)
-            let members = try JSONValue.encoding(input).objectValue ?? [:]
-            let reply = try await transport.signal(
-                ConvoHopOperations.communicationTyping.descriptor.key, projectId: projectId, input: members)
-            return try optional(reply, as: TypingStatus.self)?.accepted ?? false
+            return try required(
+                try await execute(ConvoHopOperations.communicationTyping, input), as: TypingStatus.self
+            ).accepted
         }
     }
 

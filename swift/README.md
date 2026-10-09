@@ -119,12 +119,14 @@ let older = try await conversation.messages.list(before: page.items.last?.sequen
 The same operations are on the client: `send(_:to:props:requestId:)`,
 `messages(in:before:)`, `getMessage(_:in:)`, `edit(_:text:requestId:)`,
 `delete(_:requestId:)`, `members(in:)`, `receipts(in:)`, `inbox()` and
-`search(_:in:)`. `conversation.mute` reads and sets this user's mute.
+`search(_:in:)`. `conversation.mute` reads and sets this user's mute. A deleted
+message stays in lists with `deleted` set and `nil` `text` and `props`.
 
 **Retries.** Every mutation has a request ID, which stays the same across the
 SDK's own retries. A `ConvoHopError` with an `unknown` outcome isn't a
-rejection: the message may or may not be stored. Resend it with the same
-request ID, or look it up:
+rejection: the message may or may not be stored. That includes
+`TRANSPORT_UNKNOWN` after a lost connection or a redirected response, which the
+SDK never follows. Resend it with the same request ID, or look it up:
 
 ```swift
 do {
@@ -248,9 +250,13 @@ _ = try await participation.leave()
 
 Each connection is admitted once, with a single-use token: LiveKit resumes a
 dropped connection while that token allows, and `media.reconnect()` makes a
-new, admitted connection after that. Pass `onDisconnected` to `.liveKit(...)`
-to hear about a lost connection. The SDK never connects twice with one media
-credential.
+new, admitted connection after that. Pass `onResuming` and `onResumed` to
+`.liveKit(...)` to show that a resume is in progress (`media.resuming`), and
+`onDisconnected` to hear about a lost connection. A resume must keep the
+admitted connection: if LiveKit comes back as another participant, the SDK
+closes the connection and calls `onDisconnected`. The SDK never connects twice
+with one media credential, and a failed connection's error never includes
+LiveKit's error, whose signaling URL can carry the token.
 
 ### Incoming calls with CallKit (iOS)
 

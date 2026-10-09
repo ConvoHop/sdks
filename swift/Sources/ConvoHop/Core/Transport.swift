@@ -314,20 +314,6 @@ actor ConvoHopTransport {
         }
     }
 
-    /// Sends an ephemeral signal, such as typing. It keeps no recovery record and is never resent.
-    func signal(_ key: String, projectId: String, input: JSONObject) async throws -> JSONObject {
-        let requestId = newRequestId()
-        guard let operation = GraphQLCatalog.operations[key], operation.idempotency.name == "ephemeral" else {
-            throw ConvoHopUsageError("Only ephemeral operations are sent as signals")
-        }
-        _ = try plan(key, projectId: projectId, input: input, requestId: requestId, permit: nil)
-        return try await authorized(requestId) { credential in
-            try await self.request(
-                key, projectId: projectId, input: input, requestId: requestId, credential: credential, permit: nil,
-                observedServingEpoch: nil, signal: true)
-        }
-    }
-
     /// Sends a session probe with an explicit credential, bypassing the gate that a refresh holds.
     func probe(
         _ key: String, projectId: String, credential: String, observedServingEpoch: String? = nil
@@ -345,7 +331,7 @@ actor ConvoHopTransport {
         try await initializeRecovery()
         if self.incarnation != incarnation { throw incarnationMismatch(requestId) }
         let result =
-            operation.kind == .mutation
+            Self.recorded(operation)
             ? try await mutate(
                 key, projectId: projectId, input: body, requestId: requestId, credential: credential, permit: permit)
             : try await request(
@@ -585,7 +571,7 @@ actor ConvoHopTransport {
 
     private func request(
         _ key: String, projectId: String?, input: JSONObject, requestId: String, credential: String?,
-        permit: JSONObject?, observedServingEpoch: String?, signal: Bool = false
+        permit: JSONObject?, observedServingEpoch: String?
     ) async throws -> JSONObject {
         let plan = try plan(
             key, projectId: projectId, input: input, requestId: requestId, permit: permit,
@@ -601,6 +587,12 @@ actor ConvoHopTransport {
             throw ConvoHopError(
                 code: .transportUnknown, requestId: requestId, outcome: .unknown, status: nil,
                 message: "Authority response unavailable; resolve the original request")
+        }
+        // A redirect is not the authority's answer, and following it could send the credential elsewhere.
+        if Self.redirectStatuses.contains(response.status) {
+            throw ConvoHopError(
+                code: .transportUnknown, requestId: requestId, outcome: .unknown, status: nil,
+                message: "Authority response was redirected; resolve the original request")
         }
         let status = response.status
         let text = String(decoding: response.body, as: UTF8.self)
@@ -651,7 +643,7 @@ actor ConvoHopTransport {
                     code: .invalidResponse, requestId: requestId, outcome: .unknown, status: status,
                     message: "Mismatched authority request identity")
             }
-            if plan.operation.kind == .mutation {
+            if Self.recorded(plan.operation) {
                 switch envelope {
                 case "committed":
                     _ = try ProtocolChecks.id(value["receiptId"])
@@ -660,7 +652,7 @@ actor ConvoHopTransport {
                 case "accepted":
                     _ = try ProtocolChecks.id(try ProtocolChecks.object(value["operation"])["operationId"])
                 default:
-                    if !signal { throw ProtocolViolation("A mutation requires authority receipt evidence") }
+                    throw ProtocolViolation("A mutation requires authority receipt evidence")
                 }
             }
             return value
@@ -673,6 +665,15 @@ actor ConvoHopTransport {
     }
 
     // MARK: Helpers
+
+    /// Whether an operation keeps a recovery record. Ephemeral signals, such as typing, are neither deduplicated nor
+    /// resolvable, so they keep none and are never resent.
+    static func recorded(_ operation: GraphQLOperationDescriptor) -> Bool {
+        operation.kind == .mutation && operation.idempotency.name != "ephemeral"
+    }
+
+    /// The HTTP statuses of a redirect. The SDK never follows one.
+    static let redirectStatuses: Set<Int> = [301, 302, 303, 307, 308]
 
     /// Whole seconds from `extensions.retryAfter` or an HTTP `Retry-After` delay. Anything else is ignored.
     static func retryDelay(_ value: JSONValue?) -> Int? {

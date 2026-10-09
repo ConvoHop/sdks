@@ -36,13 +36,11 @@ public struct ConvoHopHTTPResponse: Sendable {
 
 /// Sends HTTP requests. Throw when no complete response arrived; the SDK reports that as `TRANSPORT_UNKNOWN`.
 ///
-/// Implementations must not follow redirects, send cookies or use caches.
+/// Implementations must not follow redirects, send cookies or use caches. Return a redirect response as it is: the
+/// SDK reports it as `TRANSPORT_UNKNOWN`, because another location's answer isn't the authority's.
 public protocol ConvoHopHTTPClient: Sendable {
     func send(_ request: ConvoHopHTTPRequest) async throws -> ConvoHopHTTPResponse
 }
-
-/// A redirect the client refused to follow.
-struct RedirectRefused: Error {}
 
 /// The default HTTP client: an ephemeral `URLSession` without cookies, caches or redirects, with a 12 second budget.
 public final class URLSessionHTTPClient: ConvoHopHTTPClient, @unchecked Sendable {
@@ -76,7 +74,6 @@ public final class URLSessionHTTPClient: ConvoHopHTTPClient, @unchecked Sendable
         urlRequest.httpBody = request.body
         let (data, response) = try await session.data(for: urlRequest, delegate: RedirectRefusal())
         guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
-        if [301, 302, 303, 307, 308].contains(http.statusCode) { throw RedirectRefused() }
         var headers: [String: String] = [:]
         for (name, value) in http.allHeaderFields {
             if let name = name as? String, let value = value as? String { headers[name.lowercased()] = value }
