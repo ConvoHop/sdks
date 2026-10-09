@@ -16,7 +16,7 @@ from collections.abc import Callable, Generator, Mapping
 from typing import Any, Literal, TypeAlias, TypeVar
 
 from ._checks import Scope, check, invalid, missing
-from ._generated.operations import IDEMPOTENCY, OPERATIONS, PLANES, OperationSpec
+from ._generated.operations import ERRORS, IDEMPOTENCY, OPERATIONS, PLANES, OperationSpec
 from ._json import canonical, normalize, parse
 from ._protocol import parse_counter, parse_id, parse_timestamp, retry_delay
 from ._validate import validate_input, validate_output
@@ -29,12 +29,15 @@ BODY_CAP = 3 * RESPONSE_BOUND + 3
 """Bytes worth reading: no longer UTF-8 body (with a byte order mark) decodes to text within the bound."""
 
 _SETTLED = ("committed", "accepted")
+_RESENDABLE = ("pending", "rejected")
+"""States in which no attempt may have been applied: never sent, or every attempt rejected."""
 _RESOLVE = frozenset(PLANES.values())
 _ROLES = ("member", "moderator")
 _DEFAULT_ATTEMPTS = 3
 _DEFAULT_WINDOW_MS = 60_000
 _ELIGIBILITY = "The original request is no longer eligible for resend"
 _STORAGE = "Recovery storage did not confirm durability; retain the original request and its outcome"
+_LIMIT = f"Recovery storage already holds {MAX_RECORDS} requests that aren't final; retry or resolve them first"
 
 Envelope: TypeAlias = dict[str, Any]
 T = TypeVar("T")
@@ -347,14 +350,14 @@ class Engine:
             yield from self._persist(target)
 
     def _make_room(self, request_id: str) -> None:
+        """Forgets the final record attempted longest ago that no mutation is using, or refuses ``request_id``."""
         if len(self.states) < MAX_RECORDS:
             return
-        for key, state in self.states.items():
-            if state["resolutionState"] in _SETTLED and key not in self.active:
-                del self.states[key]
-                return
-        message = "Resolve outstanding mutations before creating more"
-        raise _problem("RESOLUTION_REQUIRED", request_id, "rejected", 409, message)
+        now = _now_ms()
+        final = [state for key, state in tuple(self.states.items()) if key not in self.active and _final(state, now)]
+        if not final:
+            raise _problem("RECOVERY_LIMIT", request_id, "rejected", 409, _LIMIT)
+        del self.states[min(final, key=lambda state: state["lastAttemptAt"])["requestId"]]
 
     def _submit(self, state: dict[str, Any], retry: bool) -> Flow[Envelope]:
         request_id = state["requestId"]
@@ -373,7 +376,8 @@ class Engine:
             raise _problem("RESOLUTION_REQUIRED", request_id, "unknown", 409, message)
         state["attemptCount"] += 1
         state["lastAttemptAt"] = now
-        if state["resolutionState"] == "pending":
+        prior = state["resolutionState"]
+        if prior in _RESENDABLE:
             state["resolutionState"] = "unknown"
         state["lastAttemptClassification"] = "submitted"
         yield from self._persist(request_id)
@@ -392,6 +396,15 @@ class Engine:
             state["lastAttemptClassification"] = (
                 error.code if isinstance(error, ConvoHopProblem) else "opaqueTransportFailure"
             )
+            # A rejection is the request's outcome only if every attempt was rejected; one that may have been
+            # applied keeps it unknown.
+            if (
+                isinstance(error, ConvoHopProblem)
+                and error.outcome == "rejected"
+                and prior in _RESENDABLE
+                and state["resolutionState"] == "unknown"
+            ):
+                state["resolutionState"] = "rejected"
             yield from self._persist(request_id)
             raise
         if state["resolutionState"] != "committed":
@@ -527,6 +540,29 @@ def _budget(operation: OperationSpec) -> tuple[int, int]:
     attempts = spec.max_attempts if spec is not None and spec.max_attempts is not None else _DEFAULT_ATTEMPTS
     window = spec.window_ms if spec is not None and spec.window_ms is not None else _DEFAULT_WINDOW_MS
     return attempts, window
+
+
+def _final(state: Mapping[str, Any], now: int) -> bool:
+    """Whether nothing more can come of a record's request.
+
+    The authority committed or accepted it, or rejected every attempt and won't take another: the last rejection's code
+    isn't retryable, or the retry budget is spent. Only such records make room in a full journal.
+    """
+    resolution = state["resolutionState"]
+    if resolution != "rejected":
+        return resolution in _SETTLED
+    attempts, _ = _budget(OPERATIONS[state["operation"]])
+    return (
+        not _retryable(state["lastAttemptClassification"])
+        or state["attemptCount"] >= attempts
+        or now > state["retryDeadline"]
+    )
+
+
+def _retryable(code: str) -> bool:
+    """Unless the error catalog says otherwise. ``WRONG_REGION`` succeeds once routed again; a newer code may too."""
+    spec = ERRORS.get(code)
+    return code == "WRONG_REGION" or spec is None or spec.retryable
 
 
 def _fingerprint(operation: str, project_id: str | None, data: Mapping[str, Any]) -> str:

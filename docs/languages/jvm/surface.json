@@ -2392,6 +2392,12 @@
               "docs": "Sent, but the outcome is uncertain: resolve or retry the same request."
             },
             {
+              "name": "REJECTED",
+              "kind": "case",
+              "signatures": ["REJECTED"],
+              "docs": "The authority rejected every attempt, so the mutation had no effect. Whether a resend may succeed depends on the last attempt's error code and the retry budget."
+            },
+            {
               "name": "COMMITTED",
               "kind": "case",
               "signatures": ["COMMITTED"],

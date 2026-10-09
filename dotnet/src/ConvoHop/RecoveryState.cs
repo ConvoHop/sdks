@@ -63,7 +63,7 @@ namespace ConvoHop
         /// <summary>How the last attempt ended: <c>notSubmitted</c>, <c>submitted</c>, <c>authorityReceipt</c>, an error code, or <c>opaqueTransportFailure</c>.</summary>
         public string LastAttemptClassification { get; }
 
-        /// <summary>What is known about the outcome: <c>pending</c>, <c>unknown</c>, <c>committed</c> or <c>accepted</c>.</summary>
+        /// <summary>What is known about the outcome: <c>pending</c> (never sent), <c>unknown</c>, <c>rejected</c> (the authority rejected every attempt), <c>committed</c> or <c>accepted</c>.</summary>
         public string ResolutionState { get; }
 
         /// <summary>Whether a native media admission was attempted with the credentials this request issued.</summary>
@@ -187,7 +187,8 @@ namespace ConvoHop.Internal
             if (operation == null) throw new InvalidDataException("Unknown generated GraphQL operation");
             string? resolutionState = JsonParsing.OptionalString(item, "resolutionState");
             if (operation.Kind != OperationKind.Mutation ||
-                (resolutionState != "pending" && resolutionState != "unknown" && resolutionState != "committed" && resolutionState != "accepted"))
+                (resolutionState != "pending" && resolutionState != "unknown" && resolutionState != "rejected" &&
+                 resolutionState != "committed" && resolutionState != "accepted"))
             {
                 throw new InvalidDataException("Invalid recovery record");
             }

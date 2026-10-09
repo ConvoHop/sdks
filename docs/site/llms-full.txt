@@ -13815,10 +13815,11 @@ last_attempt_classification: str
 #### `RecoveryState.resolution_state` property
 
 ```python
-resolution_state: Literal["pending", "unknown", "committed", "accepted"]
+resolution_state: Literal["pending", "unknown", "rejected", "committed", "accepted"]
 ```
 
-`pending` (never sent), `unknown`, `committed` or `accepted`.
+`pending` (never sent), `unknown`, `rejected` (the authority rejected every attempt),
+`committed` or `accepted`.
 
 #### `RecoveryState.media_admission_attempted` property
 
@@ -13845,7 +13846,7 @@ def __init__(
     attempt_count: int,
     last_attempt_at: int,
     last_attempt_classification: str,
-    resolution_state: Literal["pending", "unknown", "committed", "accepted"],
+    resolution_state: Literal["pending", "unknown", "rejected", "committed", "accepted"],
     media_admission_attempted: bool = False,
 ) -> None
 ```
@@ -22359,7 +22360,7 @@ How the last attempt ended: `notSubmitted`, `submitted`, `authorityReceipt`, an 
 public string ResolutionState { get; }
 ```
 
-What is known about the outcome: `pending`, `unknown`, `committed` or `accepted`.
+What is known about the outcome: `pending` (never sent), `unknown`, `rejected` (the authority rejected every attempt), `committed` or `accepted`.
 
 #### `RecoveryState.MediaAdmissionAttempted` property
 
@@ -36262,6 +36263,14 @@ UNKNOWN
 ```
 
 Sent, but the outcome is uncertain: resolve or retry the same request.
+
+#### `RecoveryState.Resolution.REJECTED` case
+
+```java
+REJECTED
+```
+
+The authority rejected every attempt, so the mutation had no effect. Whether a resend may succeed depends on the last attempt's error code and the retry budget.
 
 #### `RecoveryState.Resolution.COMMITTED` case
 

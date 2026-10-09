@@ -12,7 +12,8 @@ import { pascalCase } from "../lib/naming.mjs";
  * - Inputs.cs: input classes; required fields are constructor parameters.
  * - Outputs.cs: output classes with init-only properties.
  * - Operations.cs: typed operation descriptors, nested by plane.
- * - ErrorCodes.cs: the stable error codes.
+ * - ErrorCodes.cs: the stable error codes, and whether the schema marks each
+ *   retryable.
  * - Schema.cs: output shapes and scalar constraints for response validation.
  * - JsonContext.cs: the System.Text.Json source-generation context.
  * - Apis.cs: one class per plane with a method per operation, and an
@@ -376,11 +377,20 @@ ${resolvers.join("")}                default: return null;
 }
 
 function renderErrorCodes(ir) {
-  const codes = ir.errors.codes.map(code => [code.name, memberName(code.name, `error code ${code.name}`), code]);
-  uniqueMembers(codes, "ErrorCodes", "ErrorCodes");
+  const codes = ir.errors.codes.map(code => {
+    if (typeof code.retryable !== "boolean") throw new EmitterError(`csharp: error code ${code.name} has no boolean retryable`);
+    return [code.name, memberName(code.name, `error code ${code.name}`), code];
+  });
+  uniqueMembers([...codes, ["the Retryable lookup", "Retryable"]], "ErrorCodes", "ErrorCodes");
   const body = codes.map(([wire, member, code]) => docComment(code.summary, "        ")
     + `        public const string ${member} = ${csString(wire)};\n`).join("\n");
-  return [`    /// <summary>Stable machine-readable error codes. Classify errors by code, never by message text.</summary>\n    public static class ErrorCodes\n    {\n${body}    }\n`];
+  const cases = [true, false].map(retryable => {
+    const members = codes.filter(([, , code]) => code.retryable === retryable).map(([, member]) => `                case ${member}:\n`);
+    return members.length ? `${members.join("")}                    return ${retryable};\n` : "";
+  }).join("");
+  const lookup = docXml("Whether the schema says a later attempt with the same requestId may succeed after <paramref name=\"code\"/>; null for a code it doesn't list.", "        ")
+    + `        internal static bool? Retryable(string code)\n        {\n            switch (code)\n            {\n${cases}                default:\n                    return null;\n            }\n        }\n`;
+  return [`    /// <summary>Stable machine-readable error codes. Classify errors by code, never by message text.</summary>\n    public static class ErrorCodes\n    {\n${body}\n${lookup}    }\n`];
 }
 
 function scalarShape(type) {

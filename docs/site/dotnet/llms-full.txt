@@ -3848,7 +3848,7 @@ How the last attempt ended: `notSubmitted`, `submitted`, `authorityReceipt`, an 
 public string ResolutionState { get; }
 ```
 
-What is known about the outcome: `pending`, `unknown`, `committed` or `accepted`.
+What is known about the outcome: `pending` (never sent), `unknown`, `rejected` (the authority rejected every attempt), `committed` or `accepted`.
 
 #### `RecoveryState.MediaAdmissionAttempted` property
 

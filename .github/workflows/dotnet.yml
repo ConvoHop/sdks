@@ -269,9 +269,7 @@ jobs:
       - name: Run the conformance scenarios with the net10.0 asset
         id: net10
         # Not --strict: a server SDK declares no user role, so the runner skips
-        # the scenarios that only use user clients. Until the SDK follows the
-        # recovery journal rules (spec/recovery/README.md), it also skips those that
-        # need recovery.eviction. A later step allows only those.
+        # the scenarios that only use user clients. A later step allows only those.
         run: >-
           npm run conformance --
           --driver "dotnet conformance/drivers/dotnet/bin/Release/net10.0/ConvoHop.Conformance.dll"
@@ -287,17 +285,14 @@ jobs:
         run: |
           node --input-type=module <<'EOF'
           import { readFileSync } from "node:fs";
-          const allowed = new Set([
-            "it only uses user clients, which the driver under test does not declare",
-            "driver convohop-dotnet does not declare feature recovery.eviction",
-          ]);
+          const allowed = "it only uses user clients, which the driver under test does not declare";
           let failed = false;
           for (const directory of ["dotnet", "dotnet-netstandard"]) {
             const summary = JSON.parse(readFileSync(`conformance/reports/${directory}/summary.json`, "utf8"));
             const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
             const passed = scenarios.filter((scenario) => scenario.status === "passed");
             const other = scenarios.filter((scenario) => scenario.status !== "passed"
-              && !(scenario.status === "skipped" && allowed.has(scenario.reason)));
+              && !(scenario.status === "skipped" && scenario.reason === allowed));
             for (const scenario of other) {
               console.log(`::error::${directory} ${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
             }

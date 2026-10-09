@@ -253,5 +253,99 @@ namespace ConvoHop
 
         /// <summary>The observed serving epoch is stale. Route again, then retry.</summary>
         public const string WrongRegion = "WRONG_REGION";
+
+        /// <summary>Whether the schema says a later attempt with the same requestId may succeed after <paramref name="code"/>; null for a code it doesn't list.</summary>
+        internal static bool? Retryable(string code)
+        {
+            switch (code)
+            {
+                case AdmissionLimit:
+                case AuthorityUnavailable:
+                case HttpFailure:
+                case InvalidResponse:
+                case OutcomeUnknown:
+                case RateLimited:
+                case RetryExhausted:
+                case TransportUnknown:
+                    return true;
+                case AlreadyConnected:
+                case AlreadyExists:
+                case BillingCatalogConflict:
+                case BillingCatalogNotSynced:
+                case BillingCustomerMissing:
+                case BillingLinkExpired:
+                case BillingNotConfigured:
+                case BillingPlanUnavailable:
+                case BillingProviderChanged:
+                case BillingProviderRejected:
+                case BillingSubscriptionActive:
+                case BillingSuspended:
+                case CredentialDeliveryExpired:
+                case CredentialExpired:
+                case CredentialRefreshRequired:
+                case CredentialRequired:
+                case CursorAhead:
+                case CursorExpired:
+                case CursorInvalid:
+                case CursorMismatch:
+                case CursorScopeMismatch:
+                case DeliveryConsumed:
+                case DeliveryNotRedeemed:
+                case DeploymentNotReady:
+                case FeatureUnsupported:
+                case Forbidden:
+                case GenerationConflict:
+                case GraphqlError:
+                case GraphqlInvalidRequest:
+                case GraphqlQueryLimit:
+                case GraphqlResponseLimit:
+                case IdempotencyConflict:
+                case IncarnationMismatch:
+                case InvalidReplacement:
+                case InvalidRequest:
+                case LiveAlertLimit:
+                case LiveSessionClosed:
+                case LiveSessionExists:
+                case MediaConnectFailed:
+                case MediaFenceRequired:
+                case MediaNotReady:
+                case MediaRecovering:
+                case MembershipCountInvalid:
+                case MemberLimit:
+                case MessageDeleted:
+                case NotASessionRequest:
+                case NotFound:
+                case PageItemTooLarge:
+                case ParticipationMismatch:
+                case PermitExpired:
+                case PlanLimitExceeded:
+                case QuotaExceeded:
+                case RecoveryLimit:
+                case RecoveryStorageFailure:
+                case RequestExpired:
+                case RequestTooLarge:
+                case ResolutionRequired:
+                case ResponseTooLarge:
+                case ResyncRequired:
+                case RevisionConflict:
+                case ScopeRequired:
+                case SessionReceiptBindingMismatch:
+                case SessionReceiptInvalid:
+                case SessionRefreshFailed:
+                case SessionRefreshRejected:
+                case SessionRefreshRequired:
+                case SessionRefreshUnverified:
+                case Unauthenticated:
+                case WebhookDestinationDenied:
+                case WebhookEndpointDisabled:
+                case WebhookEndpointLimit:
+                case WebhookRotationPending:
+                case WebhookSecretUnacknowledged:
+                case WrongRegion:
+                    return false;
+                default:
+                    return null;
+            }
+        }
     }
 }

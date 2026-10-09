@@ -22,7 +22,7 @@ __all__ = ["AsyncRecoveryStorage", "MemoryStorage", "RecoveryState", "RecoverySt
 
 MAX_RECORDS = 128
 MANAGEMENT_INCARNATION = "management"
-_STATES = ("pending", "unknown", "committed", "accepted")
+_STATES = ("pending", "unknown", "rejected", "committed", "accepted")
 _CLOCKS = ("firstSubmittedAt", "retryDeadline", "attemptCount", "lastAttemptAt")
 
 
@@ -86,7 +86,8 @@ class RecoveryState:
         last_attempt_at: Unix milliseconds of the latest attempt.
         last_attempt_classification: ``notSubmitted``, ``submitted``, ``authorityReceipt``, an error code or
             ``opaqueTransportFailure``.
-        resolution_state: ``pending`` (never sent), ``unknown``, ``committed`` or ``accepted``.
+        resolution_state: ``pending`` (never sent), ``unknown``, ``rejected`` (the authority rejected every attempt),
+            ``committed`` or ``accepted``.
         media_admission_attempted: Whether native media admission used this request's credentials.
     """
 
@@ -101,7 +102,7 @@ class RecoveryState:
     attempt_count: int
     last_attempt_at: int
     last_attempt_classification: str
-    resolution_state: Literal["pending", "unknown", "committed", "accepted"]
+    resolution_state: Literal["pending", "unknown", "rejected", "committed", "accepted"]
     media_admission_attempted: bool = False
 
 

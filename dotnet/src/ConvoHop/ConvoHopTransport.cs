@@ -325,7 +325,7 @@ namespace ConvoHop
                     throw new ConvoHopException(ErrorCodes.ResolutionRequired, requestId, "unknown", 409, ResolutionRequiredMessage);
                 if (state == null)
                 {
-                    if (_states.Count >= RecoveryRecord.MaxRecords) EvictSettledRecord();
+                    if (_states.Count >= RecoveryRecord.MaxRecords) EvictFinalRecord(requestId);
                     long now = Now();
                     state = new RecoveryRecord(requestId, Incarnation, fingerprint, operation, projectId, input, now,
                         now + RetryWindowMilliseconds, 0, now, "notSubmitted", "pending", false);
@@ -342,6 +342,7 @@ namespace ConvoHop
         private async Task<Payload> SubmitAsync(RecoveryRecord state, JsonElement? permit, bool retry, CancellationToken cancellationToken)
         {
             Task persisted;
+            string prior;
             lock (_gate)
             {
                 if (state.Incarnation != Incarnation) throw IncarnationMismatch(state.RequestId);
@@ -354,7 +355,8 @@ namespace ConvoHop
 
                 state.AttemptCount += 1;
                 state.LastAttemptAt = now;
-                if (state.ResolutionState == "pending") state.ResolutionState = "unknown";
+                prior = state.ResolutionState;
+                if (Resendable(prior)) state.ResolutionState = "unknown";
                 state.LastAttemptClassification = "submitted";
                 persisted = Persist(state);
             }
@@ -381,6 +383,14 @@ namespace ConvoHop
                 lock (_gate)
                 {
                     state.LastAttemptClassification = error is ConvoHopException problem ? problem.Code : "opaqueTransportFailure";
+                    // A rejection is the request's outcome only if every attempt was rejected; one that may have been
+                    // applied keeps it unknown.
+                    if (error is ConvoHopException rejection && rejection.Outcome == "rejected" && Resendable(prior) &&
+                        state.ResolutionState == "unknown")
+                    {
+                        state.ResolutionState = "rejected";
+                    }
+
                     persisted = Persist(state);
                 }
 
@@ -399,20 +409,43 @@ namespace ConvoHop
             return payload;
         }
 
-        // Called under the gate. A full record set cannot grow until a settled record that is not in flight can go.
-        private void EvictSettledRecord()
+        // Called under the gate. A full record set forgets the final record attempted longest ago that no mutation is
+        // using, or refuses the new request before it is sent.
+        private void EvictFinalRecord(string requestId)
         {
+            long now = Now();
+            int oldest = -1;
             for (int index = 0; index < _order.Count; index++)
             {
                 RecoveryRecord record = _order[index];
-                if (!record.Settled || _active.ContainsKey(record.RequestId)) continue;
-                _order.RemoveAt(index);
-                _states.Remove(record.RequestId);
-                return;
+                if (_active.ContainsKey(record.RequestId) || !Final(record, now)) continue;
+                if (oldest < 0 || record.LastAttemptAt < _order[oldest].LastAttemptAt) oldest = index;
             }
 
-            throw new InvalidOperationException("Resolve outstanding mutations before creating more");
+            if (oldest < 0)
+            {
+                throw new ConvoHopException(ErrorCodes.RecoveryLimit, requestId, "rejected", 409,
+                    "Recovery storage already holds " + RecoveryRecord.MaxRecords + " requests that aren't final; retry or resolve them first");
+            }
+
+            _states.Remove(_order[oldest].RequestId);
+            _order.RemoveAt(oldest);
         }
+
+        // Whether nothing more can come of a record's request: the authority committed or accepted it, or rejected
+        // every attempt and won't take another, because the last rejection's code isn't retryable or the retry budget
+        // is spent.
+        private static bool Final(RecoveryRecord record, long now)
+        {
+            if (record.ResolutionState != "rejected") return record.Settled;
+            return !Retryable(record.LastAttemptClassification) || record.AttemptCount >= MaxAttempts || now > record.RetryDeadline;
+        }
+
+        // Unless the schema says otherwise. WRONG_REGION succeeds once routed again; a newer code may too.
+        private static bool Retryable(string code) => code == ErrorCodes.WrongRegion || ErrorCodes.Retryable(code) != false;
+
+        // States in which no attempt may have been applied: never sent, or every attempt rejected.
+        private static bool Resendable(string resolutionState) => resolutionState == "pending" || resolutionState == "rejected";
 
         // Called under the gate: the snapshot is taken now, and writes complete in order.
         private Task Persist(RecoveryRecord state)

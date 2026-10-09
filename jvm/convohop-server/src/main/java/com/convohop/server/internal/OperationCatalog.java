@@ -7,19 +7,27 @@ import java.util.List;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
-/** Every generated operation, by ID, with each plane's resolve operation. Not API. */
+/**
+ * Every generated operation, by ID, with each plane's resolve operation and whether the schema marks each error code
+ * retryable. Not API.
+ */
 public final class OperationCatalog {
   private final Map<String, OperationDescriptor<?>> operations;
   private final Map<String, String> resolveOperations;
+  private final Map<String, Boolean> retryable;
 
   /**
    * Creates the catalog.
    *
    * @param operations the descriptors
    * @param resolveOperations the resolve operation ID for each plane that has one
+   * @param retryable whether the schema marks each error code retryable
    * @throws IllegalArgumentException if an ID repeats or a resolve operation is missing
    */
-  public OperationCatalog(List<? extends OperationDescriptor<?>> operations, Map<String, String> resolveOperations) {
+  public OperationCatalog(
+      List<? extends OperationDescriptor<?>> operations,
+      Map<String, String> resolveOperations,
+      Map<String, Boolean> retryable) {
     Map<String, OperationDescriptor<?>> byId = new LinkedHashMap<>();
     for (OperationDescriptor<?> operation : operations) {
       if (byId.put(operation.id(), operation) != null) {
@@ -33,6 +41,7 @@ public final class OperationCatalog {
     }
     this.operations = Collections.unmodifiableMap(byId);
     this.resolveOperations = Map.copyOf(resolveOperations);
+    this.retryable = Map.copyOf(retryable);
   }
 
   /**
@@ -63,5 +72,15 @@ public final class OperationCatalog {
    */
   public Collection<OperationDescriptor<?>> operations() {
     return operations.values();
+  }
+
+  /**
+   * Whether the schema says a later attempt with the same request ID may succeed after an error code.
+   *
+   * @param code the error code
+   * @return the schema's answer, or null when the schema does not list the code
+   */
+  public @Nullable Boolean retryable(String code) {
+    return retryable.get(code);
   }
 }

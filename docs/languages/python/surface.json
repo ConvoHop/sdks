@@ -1734,9 +1734,9 @@
               "name": "resolution_state",
               "kind": "property",
               "signatures": [
-                "resolution_state: Literal[\"pending\", \"unknown\", \"committed\", \"accepted\"]"
+                "resolution_state: Literal[\"pending\", \"unknown\", \"rejected\", \"committed\", \"accepted\"]"
               ],
-              "docs": "`pending` (never sent), `unknown`, `committed` or `accepted`."
+              "docs": "`pending` (never sent), `unknown`, `rejected` (the authority rejected every attempt),\n`committed` or `accepted`."
             },
             {
               "name": "media_admission_attempted",
@@ -1748,7 +1748,7 @@
               "name": "__init__",
               "kind": "constructor",
               "signatures": [
-                "def __init__(\n    self,\n    *,\n    request_id: str,\n    incarnation: str,\n    payload_fingerprint: str,\n    operation: str,\n    project_id: str | None,\n    input: Mapping[str, Any],\n    first_submitted_at: int,\n    retry_deadline: int,\n    attempt_count: int,\n    last_attempt_at: int,\n    last_attempt_classification: str,\n    resolution_state: Literal[\"pending\", \"unknown\", \"committed\", \"accepted\"],\n    media_admission_attempted: bool = False,\n) -> None"
+                "def __init__(\n    self,\n    *,\n    request_id: str,\n    incarnation: str,\n    payload_fingerprint: str,\n    operation: str,\n    project_id: str | None,\n    input: Mapping[str, Any],\n    first_submitted_at: int,\n    retry_deadline: int,\n    attempt_count: int,\n    last_attempt_at: int,\n    last_attempt_classification: str,\n    resolution_state: Literal[\"pending\", \"unknown\", \"rejected\", \"committed\", \"accepted\"],\n    media_admission_attempted: bool = False,\n) -> None"
               ],
               "docs": ""
             }

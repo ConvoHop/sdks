@@ -2728,7 +2728,7 @@
               "name": "ResolutionState",
               "kind": "property",
               "signatures": ["public string ResolutionState { get; }"],
-              "docs": "What is known about the outcome: `pending`, `unknown`, `committed` or `accepted`."
+              "docs": "What is known about the outcome: `pending` (never sent), `unknown`, `rejected` (the authority rejected every attempt), `committed` or `accepted`."
             },
             {
               "name": "MediaAdmissionAttempted",
