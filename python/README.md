@@ -242,9 +242,9 @@ signatures or the body.
 ConvoHop doesn't send push notifications for you
 ([bring your own](../docs/sdk-strategy.md#push-notifications-bring-your-own)).
 `convohop.push` builds requests from a verified notification event. The
-builders are pure functions: your push library adds the device token and the
-APNs or FCM authorization, encrypts and signs Web Push messages, and sends
-them. They follow the [push payload contract](../spec/push-payload/README.md)
+builders are pure functions: your push library adds the device's token or
+FID and the APNs or FCM authorization, encrypts and signs Web Push messages,
+and sends them. They follow the [push payload contract](../spec/push-payload/README.md)
 and produce its shared vectors' requests exactly. Subscribe a webhook
 endpoint to `notification.message`, `notification.call` and
 `notification.callCancelled` to receive the events.
@@ -255,7 +255,7 @@ from convohop import push
 
 def notify(event):  # A notification event from webhooks.verify().
     title = display_name(event.sender_id)  # Your own text and localization.
-    for device in devices_of(event.recipient_id):  # Your own token store.
+    for device in devices_of(event.recipient_id):  # Your own device store.
         if device.platform == "ios":
             # A CallKit app gets incoming calls as VoIP pushes. apns_voip() returns None for other events.
             voip = push.apns_voip(event, bundle_id=bundle_id, title=title)
@@ -267,7 +267,8 @@ def notify(event):  # A notification event from webhooks.verify().
         elif device.platform == "android":
             request = push.fcm(event, title=title)
             if request:
-                send_fcm({**request["message"], "token": device.token})
+                # device.target is {"token": ...} by default, or {"fid": ...}: see below.
+                send_fcm({**request["message"], **device.target})
         else:
             request = push.web_push(event, title=title)
             if request:
@@ -281,7 +282,7 @@ to its platform or is stale. Send nothing for `None`.
 | --- | --- | --- | --- |
 | `push.apns_alert(event, bundle_id=...)` | APNs `headers` and `payload` for an alert | A `notification.callCancelled` that isn't a missed call | 4096 of `payload` |
 | `push.apns_voip(event, bundle_id=...)` | APNs `headers` and `payload` for a VoIP push on `<bundle_id>.voip` | Every event but `notification.call` | 5120 of `payload` |
-| `push.fcm(event)` | An FCM HTTP v1 `message` with `data` and Android options. Add `token`. | Stale events only | 4096 of `message.data` |
+| `push.fcm(event)` | An FCM HTTP v1 `message` with `data` and Android options. Add `token` or `fid`. | Stale events only | 4096 of `message.data` |
 | `push.web_push(event)` | RFC 8030 `headers` and a `payload` for your library to encrypt | Stale events only | 3993 of `payload` |
 
 - `title` and `body` are the visible text; an empty string is the same as
@@ -302,6 +303,12 @@ to its platform or is stale. Send nothing for `None`.
   `firebase_admin`, for example, takes `messaging.AndroidConfig(priority="high", ttl=..., collapse_key=...)`
   with `ttl` in seconds. `pywebpush` keeps the request's `TTL` header when
   you pass the `headers` and leave its `ttl` argument at 0.
+- An FCM message goes to the target that the Android app registered: its
+  registration `token` by default, or its `fid`, the Firebase Installation
+  ID, when the app's manifest sets
+  `firebase_messaging_installation_id_enabled`. `firebase_admin` sends to a
+  FID from 7.5.0, with `messaging.Message(fid=...)`. From that version,
+  `Message(token=...)` still sends but warns that it's deprecated.
 
 An invalid option or event raises `PushPayloadError`. Options are checked
 first. The message names the field but never contains its value.
