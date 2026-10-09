@@ -2989,6 +2989,11 @@ type PushRegistration = {
 } | {
     readonly kind: "fcm";
     readonly token: string;
+    readonly fid?: never;
+} | {
+    readonly kind: "fcm";
+    readonly fid: string;
+    readonly token?: never;
 }
 ```
 
@@ -2998,7 +3003,10 @@ endpoint can store registrations from browsers and native apps. ConvoHop never s
 - `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.
 - `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.
 - `apnsVoip`: an iOS PushKit token for incoming calls.
-- `fcm`: an Android Firebase Cloud Messaging registration token.
+- `fcm`: an Android app's Firebase Cloud Messaging target, with exactly one of `token` and `fid`. `token` is the
+  registration token, which apps get by default. `fid` is the Firebase Installation ID, which apps get instead when
+  their manifest sets `firebase_messaging_installation_id_enabled`. Send to it with the FCM HTTP v1 target of the
+  same name.
 
 ### `ReadReceipt` type
 

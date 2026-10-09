@@ -233,7 +233,8 @@ tokens. You keep control of:
 
 - Your push credentials: APNs keys or certificates, Firebase Cloud Messaging
   service accounts and Web Push (VAPID) keys.
-- Device tokens and push subscriptions, stored in your own backend.
+- Device tokens, Firebase Installation IDs and push subscriptions, stored in
+  your own backend.
 - Notification text, localization and branding.
 - Your delivery tooling. Send directly to APNs, FCM and Web Push, or through a
   push or engagement service that you already use.
@@ -242,7 +243,9 @@ How it works:
 
 1. Your app registers for push with the platform as usual. Client SDK helpers
    hand the device token or Web Push subscription to your app, and your app
-   sends it to your backend.
+   sends it to your backend. On Android, that's the FCM registration token,
+   or a Firebase Installation ID (FID) when the app's manifest sets
+   `firebase_messaging_installation_id_enabled`.
 2. When a user should be notified, ConvoHop sends your backend a signed
    webhook with a per-recipient notification event. Examples are a new
    message in one of their conversations, an incoming call, or a call that
@@ -254,6 +257,13 @@ How it works:
    it through your provider.
 4. On the device, the client SDK parses the notification, opens the right
    conversation or call, and fetches any content with the user's own session.
+
+Your backend sends to a registration token with the FCM HTTP v1 `token`
+target, and to a FID with the `fid` target, which `firebase-admin` supports
+from 14.1.0 for Node.js and 7.5.0 for Python. Those versions mark the
+`token` target deprecated, and still send to it. The manifest flag applies
+to the whole app: with it, `FirebaseMessaging.getToken()` throws for every
+library in the app, so set it only if none of them needs a token.
 
 > [!NOTE]
 > The Node.js server SDK verifies webhooks, with

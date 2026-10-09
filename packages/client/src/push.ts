@@ -318,12 +318,16 @@ export interface WebPushSubscription {
  * - `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.
  * - `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.
  * - `apnsVoip`: an iOS PushKit token for incoming calls.
- * - `fcm`: an Android Firebase Cloud Messaging registration token.
+ * - `fcm`: an Android app's Firebase Cloud Messaging target, with exactly one of `token` and `fid`. `token` is the
+ *   registration token, which apps get by default. `fid` is the Firebase Installation ID, which apps get instead when
+ *   their manifest sets `firebase_messaging_installation_id_enabled`. Send to it with the FCM HTTP v1 target of the
+ *   same name.
  */
 export type PushRegistration =
   | { readonly kind: "webPush"; readonly subscription: WebPushSubscription }
   | { readonly kind: "apns" | "apnsVoip"; readonly token: string; readonly environment?: "development" | "production" }
-  | { readonly kind: "fcm"; readonly token: string };
+  | { readonly kind: "fcm"; readonly token: string; readonly fid?: never }
+  | { readonly kind: "fcm"; readonly fid: string; readonly token?: never };
 export interface WebPushSubscribeOptions {
   /** Your VAPID public key, as base64url or bytes. Your backend signs pushes with its private key. */
   applicationServerKey: string | Uint8Array;

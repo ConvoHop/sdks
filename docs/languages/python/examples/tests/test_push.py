@@ -20,6 +20,7 @@ from deliveries import new_secret, sign_delivery, wire_json
 from push import (
     AndroidDevice,
     Device,
+    FcmTarget,
     IosDevice,
     PushOptions,
     WebDevice,
@@ -58,10 +59,12 @@ SUBSCRIPTION: WebSubscription = {
 VAPID_PRIVATE_KEY = b64url(ec.generate_private_key(ec.SECP256R1()).private_numbers().private_value.to_bytes(32, "big"))
 VAPID_SUBJECT = "mailto:push@app.example"
 
+# An Android app's registration token, which it gets by default, and a FID.
+FCM_TARGETS: list[FcmTarget] = [{"token": "android-token"}, {"fid": "android-fid"}]
 DEVICES: list[Device] = [
     IosDevice("ios-token"),
     IosDevice("callkit-token", voip_token="callkit-voip-token"),
-    AndroidDevice("android-fid"),
+    *(AndroidDevice(target) for target in FCM_TARGETS),
     WebDevice(SUBSCRIPTION),
 ]
 
@@ -90,13 +93,13 @@ def builder_options(vector: PushVector) -> PushOptions:
 
 @dataclass
 class RecordingSenders:
-    sent: list[tuple[str, str, object]] = field(default_factory=list)
+    sent: list[tuple[str, object, object]] = field(default_factory=list)
 
     def apns(self, token: str, request: push.ApnsAlertRequest | push.ApnsVoipRequest) -> None:
         self.sent.append(("apns", token, request))
 
-    def fcm(self, token: str, request: push.FcmRequest) -> None:
-        self.sent.append(("fcm", token, request))
+    def fcm(self, target: FcmTarget, request: push.FcmRequest) -> None:
+        self.sent.append(("fcm", target, request))
 
     def web_push(self, subscription: WebSubscription, request: push.WebPushRequest) -> None:
         self.sent.append(("webPush", subscription["endpoint"], request))
@@ -121,7 +124,7 @@ def test_notify_sends_each_device_the_request_the_vector_expects(vector: PushVec
     assert senders.sent == [
         *([("apns", "ios-token", alert["request"])] if alert else []),
         *callkit,
-        *([("fcm", "android-fid", fcm["request"])] if fcm else []),
+        *([("fcm", target, fcm["request"]) for target in FCM_TARGETS] if fcm else []),
         *([("webPush", SUBSCRIPTION["endpoint"], web["request"])] if web else []),
     ]
 
@@ -225,11 +228,13 @@ def test_firebase_message_passes_firebase_admins_check_and_sends_the_requests_an
     assert fcm_requests
     for request in fcm_requests:
         android = request["message"]["android"]
-        assert sent_by_firebase_admin(firebase_message("android-fid", request)) == {
-            "fid": "android-fid",
-            "data": request["message"]["data"],
-            "android": {**android, "priority": android["priority"].lower()},
-        }
+        options = {"data": request["message"]["data"], "android": {**android, "priority": android["priority"].lower()}}
+        # firebase-admin 7.5.0 and later warn that a token target is deprecated, and still send to it.
+        with pytest.warns(DeprecationWarning, match="Message.token is deprecated"):
+            to_token = firebase_message({"token": "android-token"}, request)
+        assert sent_by_firebase_admin(to_token) == {"token": "android-token", **options}
+        to_fid = firebase_message({"fid": "android-fid"}, request)
+        assert sent_by_firebase_admin(to_fid) == {"fid": "android-fid", **options}
 
     # Why: firebase-admin rejects the request's REST form of the priority and the ttl.
     call = next(vector["expected"]["fcm"] for vector in VECTORS if vector["id"] == "call-incoming")

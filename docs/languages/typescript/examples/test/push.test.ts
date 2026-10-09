@@ -5,7 +5,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import webpush from "web-push";
 import { webhooks, type FcmRequest, type WebhookEvent, type WebhookNotificationEvent, type WebPushRequest } from "@convohop/server";
-import { firebaseMessage, notify, webPushOptions, type Device, type PushSenders, type WebSubscription } from "../src/push.ts";
+import { firebaseMessage, notify, webPushOptions, type Device, type FcmTarget, type PushSenders, type WebSubscription } from "../src/push.ts";
 import { newSecret, signDelivery } from "./deliveries.ts";
 import { pushVectors } from "./vectors.ts";
 
@@ -17,10 +17,12 @@ const subscription: WebSubscription = {
   endpoint: "https://push.example/send/subscription-1",
   keys: { p256dh: ecdh.getPublicKey("base64url"), auth: randomBytes(16).toString("base64url") },
 };
+// An Android app's registration token, which it gets by default, and a FID.
+const fcmTargets: FcmTarget[] = [{ token: "android-token" }, { fid: "android-fid" }];
 const devices: Device[] = [
   { platform: "ios", token: "ios-token" },
   { platform: "ios", token: "callkit-token", voipToken: "callkit-voip-token" },
-  { platform: "android", token: "android-token" },
+  ...fcmTargets.map(target => ({ platform: "android" as const, target })),
   { platform: "web", subscription },
 ];
 
@@ -41,7 +43,7 @@ test("notify sends each device the request the push payload vectors expect", asy
     const sent: unknown[] = [];
     const senders: PushSenders = {
       apns: async (token, request) => void sent.push(["apns", token, request]),
-      fcm: async (token, request) => void sent.push(["fcm", token, request]),
+      fcm: async (target, request) => void sent.push(["fcm", target, request]),
       webPush: async (target, request) => void sent.push(["webPush", target.endpoint, request]),
     };
     const now = new Date(vector.nowSeconds * 1000);
@@ -53,7 +55,7 @@ test("notify sends each device the request the push payload vectors expect", asy
     assert.deepEqual(sent, [
       ...(apnsAlert ? [["apns", "ios-token", apnsAlert.request]] : []),
       ...(callKit ? [callKit] : []),
-      ...(fcm ? [["fcm", "android-token", fcm.request]] : []),
+      ...(fcm ? fcmTargets.map(target => ["fcm", target, fcm.request]) : []),
       ...(webPush ? [["webPush", subscription.endpoint, webPush.request]] : []),
     ], vector.id);
   }
@@ -91,11 +93,11 @@ test("firebaseMessage passes firebase-admin's check and sends the request's Andr
   for (const vector of vectors) {
     const request = vector.expected.fcm?.request as FcmRequest | undefined;
     if (!request) continue;
-    const sent = structuredClone(firebaseMessage("android-token", request));
-    validateMessage(sent); // Converts it in place to what firebase-admin sends.
-    const { android } = request.message;
-    assert.deepEqual(sent, { token: "android-token", data: request.message.data,
-      android: { ...android, priority: android.priority.toLowerCase() } }, vector.id);
+    const sent = fcmTargets.map(target => structuredClone(firebaseMessage(target, request)));
+    for (const message of sent) validateMessage(message); // Converts it in place to what firebase-admin sends.
+    const { data, android } = request.message;
+    assert.deepEqual(sent, fcmTargets.map(target => ({ ...target, data,
+      android: { ...android, priority: android.priority.toLowerCase() } })), vector.id);
     checked += 1;
   }
   assert.ok(checked > 0);
