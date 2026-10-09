@@ -1,10 +1,12 @@
 # Checks what SDK CI doesn't for the React Native SDK in packages/react-native:
-# the example app's type check, and the shared conformance scenarios through
-# the React Native driver (conformance/drivers/react-native). The driver runs
-# the SDK in Node.js with React Native's globals and stand-ins for its native
-# modules. SDK CI runs the package's unit and Codegen tests on Node.js 22 and
-# 24 as part of npm test. No job builds native code, runs Hermes or starts a
-# simulator or emulator. See docs/react-native.md#testing.
+# the example app's type check, the shared conformance scenarios through the
+# React Native driver (conformance/drivers/react-native), and the Android
+# modules. The driver runs the SDK in Node.js with React Native's globals and
+# stand-ins for its native modules. The Android job runs the modules' JVM
+# tests and builds the example app's debug APK against the Android SDK in
+# android/. SDK CI runs the package's unit and Codegen tests on Node.js 22 and
+# 24 as part of npm test. No job runs Hermes or starts a simulator or
+# emulator. See docs/react-native.md#testing.
 name: React Native
 
 on:
@@ -12,6 +14,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/react-native.yml
+      - android/**
       - conformance/**
       - package-lock.json
       - packages/client/**
@@ -23,6 +26,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/react-native.yml
+      - android/**
       - conformance/**
       - package-lock.json
       - packages/client/**
@@ -52,6 +56,67 @@ jobs:
       # The example isn't a workspace; it compiles against the root node_modules.
       - name: Type-check the example app
         run: npm run typecheck:example -w @convohop/react-native
+
+  android:
+    name: Android modules (JVM tests) and example app (debug build)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            packages/react-native/example/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      # The example isn't a workspace: React Native and the packages with native
+      # code install in its own node_modules, where autolinking and Codegen look.
+      - name: Install the example app's dependencies
+        working-directory: packages/react-native/example
+        run: npm ci --no-audit --no-fund
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            android/**/*.gradle.kts
+            android/gradle/libs.versions.toml
+            android/gradle/wrapper/gradle-wrapper.properties
+            packages/react-native/android/build.gradle
+            packages/react-native/example/android/**/*.gradle
+            packages/react-native/example/android/gradle/wrapper/gradle-wrapper.properties
+      # Until the Android SDK is on Maven Central, the example app takes the
+      # com.convohop group from this Maven repository in the build directory.
+      - name: Publish the Android SDK's push library to android/build/repo
+        working-directory: android
+        run: ./gradlew --no-daemon --console=plain :push:publishAllPublicationsToBuildRepository
+      # gradle.properties caps the build at two workers. A debug build loads its
+      # JavaScript from Metro, so this builds the native code only, for arm64-v8a.
+      - name: Test the Android modules on the JVM and build the example app
+        working-directory: packages/react-native/example/android
+        run: >-
+          ./gradlew --no-daemon --console=plain --continue
+          :convohop_react-native:testDebugUnitTest :app:assembleDebug
+          -PreactNativeArchitectures=arm64-v8a
+      - name: Upload the test reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: react-native-android-reports
+          path: |
+            packages/react-native/android/build/reports/
+            packages/react-native/android/build/test-results/
+            packages/react-native/example/android/app/build/reports/
+          if-no-files-found: ignore
+          retention-days: 14
 
   conformance:
     name: React Native driver (mock target)

@@ -7,10 +7,10 @@ and makes and answers calls through CallKit or Android's Telecom framework.
 License: [Apache-2.0](../LICENSE).
 
 > [!IMPORTANT]
-> This directory holds the app's JavaScript only. The `ios/` and `android/`
-> projects aren't here yet, and neither are the package's native modules, so
-> the app doesn't run on a device yet. CI type-checks it. The
-> [design](../../../docs/react-native.md#status) says what comes next.
+> The `android/` project is here; the `ios/` project and the package's iOS
+> modules aren't yet, so the app doesn't run on iOS. The
+> [design](../../../docs/react-native.md#status) says what has been
+> verified.
 
 Type-check it from the repository root:
 
@@ -24,9 +24,50 @@ root `node_modules`, where npm links `@convohop/client`, `@convohop/react` and
 `@convohop/react-native` and installs the package's development
 dependencies. [`test/example.test.mjs`](../test/example.test.mjs) keeps the
 versions in `package.json` in step with those, so update both together.
-Running the app will need its own `npm install`. React Native 0.87.1 renders
-with React 19.2.3, and the `react` package must have exactly that version,
-so `package.json` pins it; the test checks that too.
+To run, the app has its own `node_modules` and lockfile, for React Native
+and the packages with native code, which must have one copy. Metro takes
+the SDK packages from the repository's workspaces. React Native 0.87.1
+renders with React 19.2.3, and the `react` package must have exactly that
+version, so `package.json` pins it; the test checks that too.
+
+## Android
+
+You need JDK 17 and the Android SDK with Android 16 (API 36), build tools
+36.0.0 and NDK 27.1.12297006, as React Native's
+[environment setup](https://reactnative.dev/docs/set-up-your-environment)
+describes. From the repository root:
+
+1. Build the SDK packages: `npm ci`, then `npm run build`.
+2. Publish the [Android SDK](../../../android/README.md)'s push library to
+   the repository's local Maven repository, which the app takes
+   `com.convohop` packages from: in `android/`, run
+   `./gradlew :push:publishAllPublicationsToBuildRepository`.
+3. In `packages/react-native/example/`, run `npm ci`.
+4. For push, add your Firebase project's `google-services.json` to
+   `android/app/`; Git ignores it. Without it, the app runs without push,
+   and `registerForPush` rejects with `E_FIREBASE_NOT_INITIALIZED`.
+5. Set your backend's URL in [`src/config.ts`](src/config.ts). Run
+   `npm start`, and in another terminal, `npm run android`.
+
+- **Calls on the lock screen.** Incoming calls ring with a full-screen
+  intent that opens `MainActivity`, which doesn't show over the lock
+  screen. On a locked device, they wake the screen and ring with their
+  notification, which has Decline and Answer, labelled Video for a video
+  call. Answering dismisses a swipe lock, but a PIN or another secure lock
+  is asked for first, and the call rings until the user enters it. To ring
+  and answer in your own UI there, set the `incomingCallIntent` of the
+  options in `MainApplication` to an activity with `showWhenLocked` and
+  `turnScreenOn`.
+- **In the background.** The app starts no foreground service, so Android
+  can stop a call's media while the app is in the background: on an
+  Android 15 emulator, it blocked the app's network about 4 seconds after
+  the screen turned off. A real app starts its own for each call, of type
+  `phoneCall`.
+- **A backend on your computer.** The client accepts plain HTTP only for a
+  loopback address, so it rejects the emulator's `10.0.2.2`. Forward each
+  port with `adb reverse tcp:PORT tcp:PORT`, and use
+  `http://127.0.0.1:PORT` for the ConvoHop `baseUrl` your backend returns,
+  and for `BACKEND_URL`. Only debug builds allow plain HTTP.
 
 ## Your backend
 
@@ -92,12 +133,13 @@ with the [push payload builders](../../server/README.md#push-payloads):
   ConvoHop push until the next sign-in, even if your backend couldn't delete
   the registrations.
 - **Sign-out order.** `Session.end()` stops watching rings, aborts push
-  registration, clears the push recipient, hangs up, and awaits
-  `outbox.close()` and the read receipts still in flight. Then, on Android,
-  it unregisters from FCM. It signs out with your backend and deletes the
-  user's recovery state. Anything still running could write recovery records
-  after the deletion, and with them the text of unsent messages. The app
-  unmounts the signed-in screens before it starts.
+  registration, clears the push recipient, hangs up and ends the calls still
+  ringing, and awaits `outbox.close()` and the read receipts still in
+  flight. Then, on Android, it unregisters from FCM. It signs out with your
+  backend and deletes the user's recovery state. Anything still running
+  could write recovery records after the deletion, and with them the text
+  of unsent messages. The app unmounts the signed-in screens before it
+  starts.
 - **One user's recovery state.** Recovery state on the device belongs to the
   user who last signed in. When someone else signs in, the app deletes it
   first. The same user keeps theirs, so the outbox sends the messages they
@@ -114,7 +156,10 @@ with the [push payload builders](../../server/README.md#push-payloads):
   still current.
 - **No author names.** Messages carry the author's principal ID. Look up
   names in your own user directory.
-- **Not verified on a device.** Hermes, the native modules, push delivery,
-  CallKit and Telecom, and real WebRTC media haven't run yet. Nobody has
-  checked how Android's Telecom audio routes and LiveKit's audio session
-  interact.
+- **Verified on an Android emulator only.** The app ran once, by hand, on
+  an Android 15 emulator without Firebase, with pushes passed to
+  `handleRemoteMessage`. It hasn't run on a physical device, with FCM, with
+  real media or on iOS, and nobody has checked how Android's Telecom audio
+  routes and LiveKit's audio session interact. The
+  [design](../../../docs/react-native.md#testing) lists what that run
+  verified.
