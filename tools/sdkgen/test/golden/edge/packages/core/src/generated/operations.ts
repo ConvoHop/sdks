@@ -17,7 +17,7 @@ export interface OperationTypes {
   "beta.createWidget": { variables: Generated.BetaCreateWidgetMutationVariables; result: Generated.BetaCreateWidgetMutation };
 }
 export type OperationKey = keyof OperationTypes;
-export interface OperationCatalogEntry { plane: string; kind: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }
+export interface OperationCatalogEntry { plane: string; kind: string; idempotency: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }
 export type OutputShape = { kind: "scalar" } | { kind: "enum"; values: readonly string[] } | { kind: "object"; fields: Readonly<Record<string, string>> };
 export const outputShapes: Readonly<Record<string, OutputShape>> = {
   "Counter": {
@@ -200,6 +200,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.capabilities": {
     "plane": "alpha",
     "kind": "query",
+    "idempotency": "safe",
     "field": "capabilities",
     "operationName": "AlphaCapabilities",
     "query": "query AlphaCapabilities($context: ContextInput!) {\n  capabilities(context: $context) {\n    version\n    wssUrl\n    features\n  }\n}",
@@ -209,6 +210,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.resolveRequest": {
     "plane": "alpha",
     "kind": "query",
+    "idempotency": "safe",
     "field": "resolveRequest",
     "operationName": "AlphaResolveRequest",
     "query": "query AlphaResolveRequest($context: ContextInput!, $input: ResolveInput!) {\n  resolveRequest(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
@@ -220,6 +222,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.items": {
     "plane": "alpha",
     "kind": "query",
+    "idempotency": "safe",
     "field": "items",
     "operationName": "AlphaItems",
     "query": "query AlphaItems($context: ContextInput!, $input: ItemsInput!) {\n  items(context: $context, input: $input) {\n    items {\n      id\n      name\n      fruit\n      weight\n      ripe\n      oldName\n      legacyCode\n      grid\n      aliases\n      history\n    }\n    complete\n    refreshRequired\n    nextCursor\n  }\n}",
@@ -240,6 +243,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.events": {
     "plane": "alpha",
     "kind": "query",
+    "idempotency": "safe",
     "field": "events",
     "operationName": "AlphaEvents",
     "query": "query AlphaEvents($context: ContextInput!, $input: EventsInput!) {\n  events(context: $context, input: $input) {\n    items {\n      sequence\n      type\n      subjectRef {\n        kind\n        id\n      }\n      payload {\n        itemId\n        jobId\n        revision\n        note\n      }\n    }\n    complete\n    refreshRequired\n    nextCursor\n  }\n}",
@@ -252,6 +256,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.job": {
     "plane": "alpha",
     "kind": "query",
+    "idempotency": "safe",
     "field": "job",
     "operationName": "AlphaJob",
     "query": "query AlphaJob($context: ContextInput!, $input: JobInput!) {\n  job(context: $context, input: $input) {\n    operationId\n    state\n    progress\n    output\n  }\n}",
@@ -263,6 +268,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.fetchHTTPStatus": {
     "plane": "alpha",
     "kind": "query",
+    "idempotency": "safe",
     "field": "fetchHTTPStatus",
     "operationName": "AlphaFetchHTTPStatus",
     "query": "query AlphaFetchHTTPStatus($context: ContextInput!, $input: FetchInput) {\n  fetchHTTPStatus(context: $context, input: $input)\n}",
@@ -274,6 +280,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.startJob": {
     "plane": "alpha",
     "kind": "mutation",
+    "idempotency": "idempotent",
     "field": "startJob",
     "operationName": "AlphaStartJob",
     "query": "mutation AlphaStartJob($context: ContextInput!, $input: StartJobInput!) {\n  startJob(context: $context, input: $input) {\n    requestId\n    receipt {\n      requestId\n      committed\n      sequence\n    }\n    job {\n      operationId\n      state\n    }\n  }\n}",
@@ -287,6 +294,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.ping": {
     "plane": "alpha",
     "kind": "mutation",
+    "idempotency": "ephemeral",
     "field": "ping",
     "operationName": "AlphaPing",
     "query": "mutation AlphaPing($context: ContextInput!, $input: PingInput) {\n  ping(context: $context, input: $input)\n}",
@@ -298,6 +306,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.redeem": {
     "plane": "alpha",
     "kind": "mutation",
+    "idempotency": "permitBound",
     "field": "redeem",
     "operationName": "AlphaRedeem",
     "query": "mutation AlphaRedeem($context: ContextInput!, $input: RedeemInput!) {\n  redeem(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
@@ -309,6 +318,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "alpha.eventStream": {
     "plane": "alpha",
     "kind": "subscription",
+    "idempotency": "safe",
     "field": "eventStream",
     "operationName": "AlphaEventStream",
     "query": "subscription AlphaEventStream($context: ContextInput!, $input: EventsInput!) {\n  eventStream(context: $context, input: $input) {\n    items {\n      sequence\n      type\n      subjectRef {\n        kind\n        id\n      }\n      payload {\n        itemId\n        jobId\n        revision\n        note\n      }\n    }\n    complete\n    refreshRequired\n    nextCursor\n  }\n}",
@@ -321,6 +331,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "beta.capabilities": {
     "plane": "beta",
     "kind": "query",
+    "idempotency": "safe",
     "field": "capabilities",
     "operationName": "BetaCapabilities",
     "query": "query BetaCapabilities($context: ContextInput!) {\n  capabilities(context: $context) {\n    version\n    wssUrl\n    features\n  }\n}",
@@ -330,6 +341,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "beta.resolveRequest": {
     "plane": "beta",
     "kind": "query",
+    "idempotency": "safe",
     "field": "resolveRequest",
     "operationName": "BetaResolveRequest",
     "query": "query BetaResolveRequest($context: ContextInput!, $input: ResolveInput!) {\n  resolveRequest(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
@@ -341,6 +353,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "beta.widgets": {
     "plane": "beta",
     "kind": "query",
+    "idempotency": "safe",
     "field": "widgets",
     "operationName": "BetaWidgets",
     "query": "query BetaWidgets($context: ContextInput!, $input: WidgetsInput) {\n  widgets(context: $context, input: $input) {\n    requestId\n    result {\n      items {\n        id\n        label\n        state\n        revision\n      }\n      complete\n      refreshRequired\n    }\n  }\n}",
@@ -352,6 +365,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
   "beta.createWidget": {
     "plane": "beta",
     "kind": "mutation",
+    "idempotency": "singleUse",
     "field": "createWidget",
     "operationName": "BetaCreateWidget",
     "query": "mutation BetaCreateWidget($context: ContextInput!, $input: CreateWidgetInput!) {\n  createWidget(context: $context, input: $input) {\n    id\n    label\n    state\n    revision\n  }\n}",

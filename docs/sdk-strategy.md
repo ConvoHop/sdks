@@ -16,7 +16,7 @@ work, what the packages are called, and how they're versioned and supported.
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
 | Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md) |
-| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md) |
+| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
 
@@ -135,7 +135,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 | Platform | Language | Media | Status |
 | --- | --- | --- | --- |
 | Web | TypeScript | LiveKit JavaScript SDK | Source available |
-| React | Hooks on top of the Web SDK | Same as Web | Planned |
+| React | Hooks on top of the Web SDK | Same as Web | Source available |
 | iOS and macOS | Swift | LiveKit Swift SDK | Planned |
 | Android | Kotlin | LiveKit Android SDK | Planned |
 | React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | Planned |
@@ -218,9 +218,9 @@ frames.
    then fails.
 
 Treat `connectToken` as a password. Don't log or store it, and send it only
-to `livekitUrl`. The Web SDK uses its own first-frame admission with the same
-rules. Only the ConvoHop media server accepts either path; a stock LiveKit
-server can't.
+to `livekitUrl`. The Web SDK connects the same way, with `livekit-client`.
+Only the ConvoHop media server enforces these rules; a stock LiveKit server
+can't.
 
 ## Push notifications: bring your own
 
@@ -301,7 +301,8 @@ Notes:
   It's installed as a dependency of the other packages, but it isn't a
   supported entry point, so don't import it directly. `@convohop/core`,
   `@convohop/client` and `@convohop/server` are developed in this
-  repository, and their releases are attached to its GitHub Releases. The
+  repository, and their releases are attached to its GitHub Releases.
+  `@convohop/react` is developed here too, but it isn't in a release yet. The
   earlier transitional workspace names,
   `@convohop/browser-sdk` and `@convohop/server-sdk`, were removed before any
   release and were never published.
@@ -407,6 +408,10 @@ release.
 Today, CI verifies the TypeScript packages on Node.js 22 and 24, and the Java
 and Kotlin SDK on Java 11, 17, 21 and 25. Each other row becomes a CI
 requirement when that SDK lands.
+
+For the Web row, CI runs the Web client's browser tests in Playwright's
+current builds of Chromium, Firefox and WebKit. For the React row, it runs
+the hooks on React 18 and 19.
 
 ## Releases and distribution
 

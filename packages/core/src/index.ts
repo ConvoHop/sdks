@@ -14,3 +14,7 @@ export type {
 } from "./protocol.js";
 export { ConvoHopTransport } from "./transport.js";
 export type { ConvoHopTransportOptions } from "./transport.js";
+export type {
+  ConvoHopPlatform, Connectivity, Lifecycle, LifecycleState, PlatformURL, PlatformURLConstructor, PlatformWebSocket,
+  PlatformWebSocketConstructor,
+} from "./platform.js";

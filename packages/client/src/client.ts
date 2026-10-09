@@ -1,17 +1,43 @@
 import {
-  ConvoHopProblem, parseConversation, parseCounter, parseCursor, parseId, parseMessage, operationCatalog, parsePage, parseObject, parseSearchHit, parseString,
+  ConvoHopProblem, parseConversation, parseCounter, parseCursor, parseId, parseMembership, parseMessage, operationCatalog, parsePage, parseObject, parseSearchHit, parseString,
   type OperationPayload, type PageOptions, type Conversation, type ConversationCursor, type Membership, type ConversationMessage, type ItemPage, type ProtocolObject,
   type RecoveryStorage, type ProjectRoute, type SearchHit, type SendReceipt, type SessionMetadata, type SessionBootstrap,
-  type SessionRefresh, type SessionRefreshState, type ConvoHopTransport,
+  type SessionRefresh, type SessionRefreshState, type ConvoHopTransport, type AsyncRecoveryStorage, type ConvoHopPlatform,
+  type PlatformWebSocket, type PlatformWebSocketConstructor,
 } from "@convohop/core";
 import {
-  authenticatedTransport, canonical, currentSession, eventPage, origin, route, sameSession, sessionExpiry, sessionMetadata,
-  timestamp, validateOutput, type TransportAuthentication,
+  authenticatedTransport, canonical, currentSession, eventPage, jsonClone, origin, parseURL, randomUUID, route, sameSession,
+  sessionExpiry, sessionMetadata, timestamp, validateOutput, validatePlatform, type TransportAuthentication,
 } from "@convohop/core/internal";
 import { ConversationHandle, LiveSessionHandle } from "./live.js";
+import { aggregateError, connectivityOf, lifecycleOf, listen } from "./platform.js";
+import { asError, pageLimit } from "./util.js";
 export interface ConvoHopClientOptions {
   baseUrl: string; projectId: string; sessionToken: string; incarnation: string; principalId: string;
-  recoveryStorage?: RecoveryStorage; fetch?: typeof fetch; sessionRefresh?: SessionRefresh;
+  /** Synchronous storage, such as `localStorage`, for mutation recovery records and replay cursors. Never tokens. */
+  recoveryStorage?: RecoveryStorage;
+  /**
+   * Asynchronous storage, such as React Native's AsyncStorage, used instead of `recoveryStorage`. Recovery records load
+   * before the first command; replay cursors load when a replay starts.
+   */
+  asyncRecoveryStorage?: AsyncRecoveryStorage;
+  fetch?: typeof fetch; sessionRefresh?: SessionRefresh;
+  /** Runtime services that replace missing browser globals, such as in React Native. See {@link ConvoHopPlatform}. */
+  platform?: ConvoHopPlatform;
+}
+/** One member's delivery and read progress, valid for its membership and visibility epochs. */
+export type ReadReceipt = NonNullable<OperationPayload<"communication.receipts">["result"]>["items"][number];
+/** One conversation in the user's inbox. */
+export type InboxItem = NonNullable<OperationPayload<"communication.inbox">["result"]>["items"][number];
+/** A page of the inbox. An incomplete page with no cursor carries `partialReason`, such as `INBOX_WINDOW_LIMIT`. */
+export type InboxPage = ItemPage<InboxItem> & { partialReason?: string };
+/** The project's features and limits, as `communication.capabilities` reports them. */
+export type ProjectCapabilities = NonNullable<OperationPayload<"communication.capabilities">["result"]>;
+export interface SessionRefreshSchedule {
+  /** How long before the session expires to renew it, in milliseconds. Default 60000. */
+  leadMs?: number;
+  onRefreshed?: (session: SessionMetadata) => void;
+  onError?: (error: Error) => void;
 }
 interface ReplayRefresh {
   suspend: () => Promise<void>;
@@ -21,6 +47,10 @@ const replayRefresh = new WeakMap<ConversationStream, ReplayRefresh>();
 export class ConvoHopClient {
   readonly projectId: string; readonly principalId: string; readonly http: ConvoHopTransport;
   #token: string; readonly storage: RecoveryStorage | undefined;
+  /** The configured `asyncRecoveryStorage`, if any. */
+  readonly asyncStorage: AsyncRecoveryStorage | undefined;
+  /** The validated `platform` option, frozen. Empty when every service comes from globals. */
+  readonly platform: Readonly<ConvoHopPlatform>;
   readonly #authentication: TransportAuthentication;
   readonly #sessionRefresh: SessionRefresh | undefined;
   #session: SessionMetadata | undefined;
@@ -34,15 +64,18 @@ export class ConvoHopClient {
     if (options.sessionRefresh !== undefined && typeof options.sessionRefresh !== "function")
       throw new TypeError("sessionRefresh must be an asynchronous backend renewal hook");
     this.projectId = parseId(options.projectId); this.principalId = parseId(options.principalId); this.#token = options.sessionToken; this.storage = options.recoveryStorage;
+    this.asyncStorage = options.asyncRecoveryStorage;
+    this.platform = validatePlatform(options.platform);
     this.#sessionRefresh = options.sessionRefresh;
     const { transport, authentication } = authenticatedTransport({ baseUrl: options.baseUrl, credential: options.sessionToken,
       namespace: options.projectId + ":" + options.principalId, incarnation: parseId(options.incarnation),
       ...(options.recoveryStorage ? { recoveryStorage: options.recoveryStorage } : {}),
-      ...(options.fetch ? { fetch: options.fetch } : {}) });
+      ...(options.asyncRecoveryStorage ? { asyncRecoveryStorage: options.asyncRecoveryStorage } : {}),
+      ...(options.fetch ? { fetch: options.fetch } : {}), platform: this.platform });
     this.http = transport; this.#authentication = authentication;
   }
   get sessionBinding(): Readonly<SessionMetadata> | undefined {
-    return this.#session === undefined ? undefined : structuredClone(this.#session);
+    return this.#session === undefined ? undefined : jsonClone(this.#session);
   }
   get sessionRefreshState(): SessionRefreshState {
     if (!this.#sessionRefresh) return "disabled";
@@ -52,9 +85,9 @@ export class ConvoHopClient {
   }
   #validateRoute(input: unknown): ProjectRoute {
     const value = route(input);
-    if (value.projectId !== this.projectId || value.incarnation !== this.http.incarnation) throw new ConvoHopProblem("INCARNATION_MISMATCH", crypto.randomUUID(), "rejected", 409, "Explicit session/route recovery required");
-    const socket = new URL(value.wssUrl), base = new URL(this.http.baseUrl);
-    if (origin(value.communicationBase) !== this.http.baseUrl || socket.host !== base.host ||
+    if (value.projectId !== this.projectId || value.incarnation !== this.http.incarnation) throw new ConvoHopProblem("INCARNATION_MISMATCH", randomUUID(this.platform), "rejected", 409, "Explicit session/route recovery required");
+    const socket = parseURL(value.wssUrl, this.platform), base = parseURL(this.http.baseUrl, this.platform);
+    if (origin(value.communicationBase, this.platform) !== this.http.baseUrl || socket.host !== base.host ||
         socket.protocol !== (base.protocol === "https:" ? "wss:" : "ws:") ||
         socket.pathname !== "/graphql" || socket.username || socket.password || socket.search || socket.hash)
       throw new TypeError("Route cannot redirect this client's credentials to another origin or an unsafe socket");
@@ -64,14 +97,16 @@ export class ConvoHopClient {
     const value = this.#validateRoute((await this.http.execute("communication.route", this.projectId, {})).result);
     this.http.servingEpoch = value.servingEpoch;
     if (this.#sessionRefresh) {
-      this.#sessionInitialization ??= this.http.execute("communication.currentSession", this.projectId, {}).then(proof => {
+      const enrollment = this.#sessionInitialization ??= this.http.execute("communication.currentSession", this.projectId, {}).then(proof => {
         const binding = currentSession(proof);
         if (binding.principalId !== this.principalId || binding.incarnation !== this.http.incarnation)
           throw new ConvoHopProblem("SESSION_REFRESH_REJECTED", proof.requestId, "rejected", 409,
             "Original session authority does not match this client's principal and incarnation");
         this.#session = binding;
       });
-      await this.#sessionInitialization;
+      // A failed enrollment binds nothing, so a later initialize() proves the bearer again instead of repeating the failure.
+      try { await enrollment; }
+      catch (error) { if (this.#sessionInitialization === enrollment) this.#sessionInitialization = undefined; throw error; }
     }
     this.http.servingEpoch = value.servingEpoch; this.#route = value; return value;
   }
@@ -80,13 +115,83 @@ export class ConvoHopClient {
     const hook = this.#sessionRefresh, binding = this.#session, currentRoute = this.#route;
     if (!hook || !binding || !currentRoute || sessionExpiry(binding) <= Date.now() ||
         binding.incarnation !== this.http.incarnation)
-      return Promise.reject(new ConvoHopProblem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+      return Promise.reject(new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform), "rejected", 409,
         "Configure sessionRefresh and initialize with the original valid bearer before renewal or expiry"));
-    const pending = this.#refreshSession(hook, structuredClone(binding), currentRoute).finally(() => {
+    const pending = this.#refreshSession(hook, jsonClone(binding), currentRoute).finally(() => {
       if (this.#refreshing === pending) this.#refreshing = undefined;
     });
     this.#refreshing = pending;
     return pending;
+  }
+  /**
+   * Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is
+   * called. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the
+   * `sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.
+   * Returning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'
+   * timers can fire late.
+   */
+  scheduleSessionRefresh(options: SessionRefreshSchedule = {}): () => void {
+    const lead = options.leadMs ?? 60000;
+    if (!Number.isSafeInteger(lead) || lead < 0) throw new RangeError("leadMs must be a non-negative safe integer");
+    if (!this.#sessionRefresh) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform), "rejected", 409,
+      "Configure sessionRefresh before scheduling renewal");
+    let timer: ReturnType<typeof setTimeout> | undefined, due = 0, disposed = false, failures = 0;
+    // One target per session revision: never earlier than halfway through the remaining lifetime, so short sessions don't renew in a loop.
+    let target: { revision: string; at: number } | undefined;
+    // A throwing callback must neither stop renewal nor surface as an unhandled rejection.
+    const report = (error: unknown) => {
+      if (disposed) return;
+      try { options.onError?.(asError(error, "Session refresh failed")); } catch { /* the app's own handler failed */ }
+    };
+    const arm = (delay: number) => {
+      if (disposed) return;
+      const wait = Math.min(Math.max(0, delay), 2147483647);
+      due = Date.now() + wait;
+      timer = setTimeout(run, wait);
+    };
+    const retry = (error: unknown) => {
+      report(error);
+      const binding = this.#session;
+      if (disposed || this.sessionRefreshState !== "ready" || !binding) return;
+      const remaining = sessionExpiry(binding) - Date.now();
+      if (remaining > 1000) arm(Math.min(1000 * 2 ** Math.min(failures++, 5), remaining - 1000));
+    };
+    const run = () => {
+      timer = undefined;
+      if (disposed) return;
+      const binding = this.#session;
+      if (!binding) {
+        this.initialize().then(() => { failures = 0; arm(0); }, error => {
+          report(error);
+          if (error instanceof ConvoHopProblem && [0, 429, 503].includes(error.status))
+            arm(Math.max(1000 * 2 ** Math.min(failures++, 5), (error.retryAfter ?? 0) * 1000));
+        });
+        return;
+      }
+      const now = Date.now();
+      if (target?.revision !== binding.sessionRevision) {
+        const remaining = sessionExpiry(binding) - now;
+        target = { revision: binding.sessionRevision, at: now + Math.max(remaining - lead, Math.floor(remaining / 2)) };
+      }
+      if (target.at > now) { arm(target.at - now); return; }
+      this.refreshSession().then(session => {
+        failures = 0;
+        if (!disposed) try { options.onRefreshed?.(session); } catch (error) { report(error); }
+        arm(0);
+      }, retry);
+    };
+    // Only a waiting timer is re-armed, against the wall clock; work in flight re-arms itself.
+    const unsubscribe = listen(lifecycleOf(this.platform), state => {
+      if (state !== "active" || disposed || timer === undefined) return;
+      clearTimeout(timer); timer = undefined;
+      arm(due - Date.now());
+    });
+    arm(0);
+    return () => {
+      disposed = true;
+      if (timer !== undefined) clearTimeout(timer);
+      try { unsubscribe(); } catch { /* the platform's own unsubscribe failed */ }
+    };
   }
   #suspendReplay(stream: ConversationStream): void {
     const quiescing = this.#quiescing, controls = replayRefresh.get(stream);
@@ -117,11 +222,11 @@ export class ConvoHopClient {
       const retired = await Promise.allSettled(quiescing.work);
       for (const result of retired) if (result.status === "rejected") throw result.reason;
       await drain();
-      if (sessionExpiry(binding) <= Date.now()) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(),
+      if (sessionExpiry(binding) <= Date.now()) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform),
         "rejected", 409, "Original bearer expired while work drained; explicitly retire and bootstrap a new client");
       let supplied: SessionBootstrap;
-      try { supplied = await hook(structuredClone(binding)); }
-      catch { throw new ConvoHopProblem("SESSION_REFRESH_FAILED", crypto.randomUUID(), "unknown", 0,
+      try { supplied = await hook(jsonClone(binding)); }
+      catch { throw new ConvoHopProblem("SESSION_REFRESH_FAILED", randomUUID(this.platform), "unknown", 0,
         "Session renewal hook failed; retain the original renewal request and verify its outcome"); }
       validateOutput(supplied, "SessionBootstrap!");
       const candidate = { session: sessionMetadata(supplied.session),
@@ -146,7 +251,7 @@ export class ConvoHopClient {
       this.http.servingEpoch = nextRoute.servingEpoch;
       authentication.blocked = false;
     } catch (error) {
-      failure = error instanceof ConvoHopProblem ? error : new ConvoHopProblem("SESSION_REFRESH_REJECTED", crypto.randomUUID(),
+      failure = error instanceof ConvoHopProblem ? error : new ConvoHopProblem("SESSION_REFRESH_REJECTED", randomUUID(this.platform),
         "unknown", 409, "Session replacement or application retirement could not be verified");
       await drain();
       authentication.blocked = true;
@@ -172,12 +277,12 @@ export class ConvoHopClient {
         controls.resume(replayRoute, this.#token)));
       const errors: unknown[] = failure ? [failure] : [];
       for (const result of resumed) if (result.status === "rejected") errors.push(result.reason);
-      if (errors.length > 1) throw new AggregateError(errors, "Session refresh or replay restoration failed");
+      if (errors.length > 1) throw aggregateError(errors, "Session refresh or replay restoration failed");
       if (errors.length) throw errors[0];
     }
     if (failure) throw failure;
     if (!replacement) throw new Error("Missing verified session replacement");
-    return structuredClone(replacement);
+    return jsonClone(replacement);
   }
   conversation(id: string): ConversationHandle { return new ConversationHandle(this, parseId(id)); }
   async getConversation(id: string): Promise<Conversation> {
@@ -196,12 +301,17 @@ export class ConvoHopClient {
     list: async (options: PageOptions = {}): Promise<OperationPayload<"communication.liveSessionAlerts">["result"]> =>
       (await this.http.execute("communication.liveSessionAlerts", this.projectId, options)).result,
   };
-  async messages(id: string, beforeSequence?: string): Promise<ItemPage<ConversationMessage>> {
-    return parsePage((await this.http.execute("communication.messages", this.projectId,
-      { conversationId: parseId(id), limit: 100, ...(beforeSequence === undefined ? {} : { beforeSequence: parseCounter(beforeSequence) }) })).result, parseMessage);
+  /** Up to `limit` (1..100, default 100) messages before `beforeSequence` or the newest, newest first. Pages can hold fewer. */
+  async messages(id: string, beforeSequence?: string, limit?: number): Promise<ItemPage<ConversationMessage>> {
+    const conversationId = parseId(id);
+    const page = parsePage((await this.http.execute("communication.messages", this.projectId,
+      { conversationId, limit: pageLimit(limit), ...(beforeSequence === undefined ? {} : { beforeSequence: parseCounter(beforeSequence) }) })).result, parseMessage);
+    if (page.items.some(message => message.conversationId !== conversationId)) throw new TypeError("Message is outside this conversation");
+    return page;
   }
-  async send(id: string, text: string, requestId?: string): Promise<SendReceipt> {
-    const result = (await this.http.execute("communication.sendMessage", this.projectId, { conversationId: parseId(id), text, props: {} }, requestId)).result;
+  async send(id: string, text: string, requestId?: string, props?: ProtocolObject): Promise<SendReceipt> {
+    const result = (await this.http.execute("communication.sendMessage", this.projectId,
+      { conversationId: parseId(id), text, props: props === undefined ? {} : parseObject(props) }, requestId)).result;
     if (!result) throw new TypeError("Missing send receipt");
     const cursor = parseCursor(result.cursor);
     if (result.status !== "sent" || result.conversationId !== id || cursor.conversationId !== id ||
@@ -221,19 +331,69 @@ export class ConvoHopClient {
       { conversationId: parseId(id), limit: 100, ...(after === undefined ? {} : { after }) })).result,
       this.http.incarnation, id, after);
   }
-  async reportRead(id: string, membership: Membership, throughSequence: string): Promise<ProtocolObject> {
-    return parseObject((await this.http.execute("communication.reportReceipt", this.projectId,
-      { conversationId: parseId(id), kind: "read", membershipEpoch: membership.membershipEpoch,
-        visibilityEpoch: membership.visibilityEpoch, throughSequence: parseCounter(throughSequence) })).result);
+  /** Reports reading through a message's sequence, which also covers its delivery. Returns the user's current receipt. */
+  async reportRead(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt> {
+    return this.#reportReceipt("read", id, membership, throughSequence);
   }
-  async receipts(id: string): Promise<ItemPage<ProtocolObject>> {
-    return parsePage((await this.http.execute("communication.receipts", this.projectId, { conversationId: parseId(id), limit: 100 })).result, parseObject);
+  /** Reports delivery through a message's sequence. Returns the user's current receipt. */
+  async reportDelivered(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt> {
+    return this.#reportReceipt("delivered", id, membership, throughSequence);
+  }
+  async #reportReceipt(kind: "delivered" | "read", id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt> {
+    const result = (await this.http.execute("communication.reportReceipt", this.projectId,
+      { conversationId: parseId(id), kind, membershipEpoch: membership.membershipEpoch,
+        visibilityEpoch: membership.visibilityEpoch, throughSequence: parseCounter(throughSequence) })).result;
+    if (!result || result.principalId !== this.principalId) throw new TypeError("Receipt does not belong to this user");
+    return result;
+  }
+  async receipts(id: string, cursor?: string): Promise<ItemPage<ReadReceipt>> {
+    return parsePage((await this.http.execute("communication.receipts", this.projectId,
+      { conversationId: parseId(id), limit: 100, ...(cursor === undefined ? {} : { cursor: parseString(cursor) }) })).result,
+      item => { validateOutput(item, "ReadReceipt!"); return item as ReadReceipt; });
+  }
+  async getMessage(id: string, messageId: string): Promise<ConversationMessage> {
+    const conversationId = parseId(id), wanted = parseId(messageId);
+    const message = parseMessage((await this.http.execute("communication.getMessage", this.projectId,
+      { conversationId, messageId: wanted })).result);
+    if (message.conversationId !== conversationId || message.messageId !== wanted) throw new TypeError("Message does not match the request");
+    return message;
+  }
+  async members(id: string, options: PageOptions = {}): Promise<ItemPage<Membership>> {
+    const conversationId = parseId(id);
+    const page = parsePage((await this.http.execute("communication.members", this.projectId,
+      { conversationId, limit: pageLimit(options.limit), ...(options.cursor === undefined ? {} : { cursor: parseString(options.cursor) }) })).result,
+      parseMembership);
+    if (page.items.some(member => member.conversationId !== conversationId)) throw new TypeError("Member is outside this conversation");
+    return page;
+  }
+  async inbox(options: PageOptions = {}): Promise<InboxPage> {
+    const result = (await this.http.execute("communication.inbox", this.projectId,
+      { limit: pageLimit(options.limit), ...(options.cursor === undefined ? {} : { cursor: parseString(options.cursor) }) })).result;
+    const page: InboxPage = parsePage(result, item => { validateOutput(item, "InboxItem!"); return item as InboxItem; });
+    if (result?.partialReason != null) page.partialReason = parseString(result.partialReason);
+    return page;
+  }
+  async capabilities(): Promise<ProjectCapabilities> {
+    const result = (await this.http.execute("communication.capabilities", this.projectId, {})).result;
+    if (!result) throw new TypeError("Missing project capabilities");
+    return result;
+  }
+  /**
+   * Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,
+   * retried or resolved. Check `features?.typing` in {@link capabilities} first.
+   */
+  async typing(id: string, isTyping: boolean): Promise<boolean> {
+    if (typeof isTyping !== "boolean") throw new TypeError("isTyping must be a boolean");
+    const result = (await this.http.execute("communication.typing", this.projectId, { conversationId: parseId(id), isTyping })).result;
+    if (!result) throw new TypeError("Missing typing status");
+    return result.accepted;
   }
   async search(query: string, conversationIds?: string[]): Promise<ItemPage<SearchHit>> {
     return parsePage((await this.http.execute("communication.search", this.projectId,
       { query, pageSize: 100, ...(conversationIds ? { scope: { conversationIds } } : {}) })).result, parseSearchHit);
   }
   async recoverPending(onError: (error: Error) => void): Promise<void> {
+    await this.http.initializeRecovery();
     for (const state of this.http.recoveryStates.filter(state => state.resolutionState === "pending" || state.resolutionState === "unknown").slice(0, 16)) {
       const transient = ["submitted", "TRANSPORT_UNKNOWN", "OUTCOME_UNKNOWN", "AUTHORITY_UNAVAILABLE", "RETRY_EXHAUSTED", "ADMISSION_LIMIT", "HTTP_FAILURE", "INVALID_RESPONSE"].includes(state.lastAttemptClassification);
       const now = Date.now();
@@ -255,7 +415,7 @@ export class ConvoHopClient {
   }
   #checkReplayAdmission(): void {
     if (this.#authentication.blocked || this.#quiescing)
-      throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+      throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform), "rejected", 409,
         "Session refresh holds replay admission; await verified refresh before opening or resynchronizing history");
   }
   async #openReplay(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>,
@@ -281,12 +441,17 @@ export class ConvoHopClient {
   }
 }
 export class ConversationStream {
-  #socket: WebSocket | undefined; #closed = false; #working: Promise<unknown> | undefined;
+  #socket: PlatformWebSocket | undefined; #closed = false; #working: Promise<unknown> | undefined;
   #round: { generation: number; result: Promise<boolean> } | undefined;
   #applying: Promise<boolean> | undefined;
   #paused = false;
   #started = false;
   #cursor: ConversationCursor | undefined; #timer: ReturnType<typeof setTimeout> | undefined;
+  /** With asynchronous storage, the saved cursor loads when the replay starts. */
+  #cursorLoaded: boolean;
+  /** Runs a waiting reconnection now; set only while `#retry`'s timer waits. */
+  #wakeReconnect: (() => void) | undefined;
+  #unsubscribe: (() => void)[] = [];
   #reconnectAttempts = 0;
   #pendingPages = 0;
   #queueGeneration = 0;
@@ -301,8 +466,23 @@ export class ConversationStream {
     replayRefresh.set(this, { suspend: () => this.#suspendSessionRefresh(),
       resume: (route, token) => this.#resumeSessionRefresh(route, token) });
     this.#storageKey = `convohop.cursor:${client.projectId}:${client.principalId}:${conversationId}`;
+    this.#cursorLoaded = !client.asyncStorage;
     const saved = client.storage?.getItem(this.#storageKey);
     if (saved) this.#cursor = parseCursor(JSON.parse(saved));
+  }
+  async #loadCursor(): Promise<void> {
+    const storage = this.client.asyncStorage;
+    if (!storage || this.#cursorLoaded) return;
+    const saved: unknown = await storage.getItem(this.#storageKey);
+    // An explicit resynchronization that started meanwhile replaced the cursor.
+    if (this.#cursorLoaded) return;
+    if (saved !== null && typeof saved !== "string") throw new TypeError("Stored replay cursor must be a string or null");
+    this.#cursorLoaded = true;
+    if (saved) this.#cursor = parseCursor(JSON.parse(saved));
+  }
+  async #saveCursor(cursor: ConversationCursor): Promise<void> {
+    this.client.storage?.setItem(this.#storageKey, JSON.stringify(cursor));
+    await this.client.asyncStorage?.setItem(this.#storageKey, JSON.stringify(cursor));
   }
   get cursor(): ConversationCursor | undefined { return this.#cursor; }
   get closed(): boolean { return this.#closed; }
@@ -313,6 +493,7 @@ export class ConversationStream {
   async #suspendSessionRefresh(): Promise<void> {
     this.#paused = true;
     if (this.#timer) { clearTimeout(this.#timer); this.#timer = undefined; }
+    this.#wakeReconnect = undefined;
     const socket = this.#socket; this.#socket = undefined;
     let closing: Error | undefined;
     try { socket?.close(1000); }
@@ -346,24 +527,31 @@ export class ConversationStream {
     this.#currentRoute = await this.client.initialize();
     await this.client.getConversation(this.conversationId);
     if (this.#closed) throw new Error("History resynchronization was superseded");
-    this.#cursor = undefined;
+    this.#cursor = undefined; this.#cursorLoaded = true;
     await this.start();
   }
   async start(): Promise<void> {
     if (this.#closed || this.#started) throw new Error("Replay is already started or closed");
     this.#started = true;
+    // Coming online or to the foreground reconnects a waiting stream at once; its backoff budget is unchanged.
+    this.#unsubscribe.push(listen(connectivityOf(this.client.platform), online => { if (online) this.#wakeReconnect?.(); }));
+    this.#unsubscribe.push(listen(lifecycleOf(this.client.platform), state => { if (state === "active") this.#wakeReconnect?.(); }));
+    await this.#loadCursor();
     await this.client.recoverPending(this.onError);
-    if (this.#paused) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+    if (this.#paused) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.client.platform), "rejected", 409,
       "Replay startup was paused by session refresh; open it after verified refresh");
     const more = await this.#reconcileRound();
-    if (this.#paused) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+    if (this.#paused) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.client.platform), "rejected", 409,
       "Replay startup was paused by session refresh; open it after verified refresh");
     this.#proceed(more);
   }
   #connect(): void {
     if (this.#closed || this.#paused || this.#socket) return;
-    const ws = new WebSocket(this.#currentRoute.wssUrl, "graphql-transport-ws"); this.#socket = ws;
-    const subscriptionId = crypto.randomUUID();
+    const Socket = this.client.platform?.WebSocket ??
+      (globalThis as { WebSocket?: PlatformWebSocketConstructor }).WebSocket;
+    if (typeof Socket !== "function") throw new TypeError("This runtime has no WebSocket; pass platform.WebSocket");
+    const ws = new Socket(this.#currentRoute.wssUrl, "graphql-transport-ws"); this.#socket = ws;
+    const subscriptionId = randomUUID(this.client.platform);
     ws.onopen = () => {
       if (this.#closed || this.#paused || this.#socket !== ws) { ws.close(1000); return; }
       ws.send(JSON.stringify({ type: "connection_init", payload: {
@@ -380,7 +568,7 @@ export class ConversationStream {
           const operation = operationCatalog["communication.conversationEvents"];
           ws.send(JSON.stringify({ type: "subscribe", id: subscriptionId, payload: {
             query: operation.query, operationName: operation.operationName,
-            variables: { context: { requestId: crypto.randomUUID(), projectId: this.client.projectId,
+            variables: { context: { requestId: randomUUID(this.client.platform), projectId: this.client.projectId,
               incarnation: this.#currentRoute.incarnation, observedServingEpoch: this.#currentRoute.servingEpoch },
             input: { conversationId: this.conversationId, limit: 50, ...(this.#cursor ? { after: this.#cursor } : {}) } },
           } }));
@@ -412,7 +600,7 @@ export class ConversationStream {
     };
   }
   #page(value: unknown): void {
-    if (this.#pendingPages >= 4) throw new ConvoHopProblem("ADMISSION_LIMIT", crypto.randomUUID(), "unknown", 503, "Application must resume from its applied cursor");
+    if (this.#pendingPages >= 4) throw new ConvoHopProblem("ADMISSION_LIMIT", randomUUID(this.client.platform), "unknown", 503, "Application must resume from its applied cursor");
     const page = eventPage(value, this.#currentRoute.incarnation, this.conversationId);
     if (page.refreshRequired) throw new Error("Explicit authorized history resynchronization required");
     const generation = this.#queueGeneration;
@@ -424,7 +612,7 @@ export class ConversationStream {
       const applied = await this.#apply(events);
       if (!applied || this.#closed || generation !== this.#queueGeneration) return;
       this.#cursor = page.nextCursor;
-      this.client.storage?.setItem(this.#storageKey, JSON.stringify(this.#cursor));
+      await this.#saveCursor(page.nextCursor);
     }).catch(error => { if (generation === this.#queueGeneration) this.#fail(error); }).finally(() => {
       this.#pendingPages--;
       if (this.#working === work) this.#working = undefined;
@@ -434,8 +622,10 @@ export class ConversationStream {
   #retry(): void {
     if (this.#closed || this.#paused || this.#timer) return;
     const delay = Math.min(1000 * 2 ** Math.min(this.#reconnectAttempts++, 4), 10000) + Math.floor(Math.random() * 500);
-    this.#timer = setTimeout(() => {
-      this.#timer = undefined;
+    const reconnect = () => {
+      clearTimeout(timer);
+      if (this.#timer !== timer) return;
+      this.#timer = undefined; this.#wakeReconnect = undefined;
       if (this.#closed || this.#paused) return;
       const generation = this.#queueGeneration;
       const current = () => !this.#closed && !this.#paused && generation === this.#queueGeneration;
@@ -446,7 +636,9 @@ export class ConversationStream {
       }).then(() => current() ? this.#reconcileRound() : false)
         .then(more => { if (current()) this.#proceed(more); })
         .catch(error => { if (current()) this.#fail(error); });
-    }, delay);
+    };
+    const timer = setTimeout(reconnect, delay);
+    this.#timer = timer; this.#wakeReconnect = reconnect;
   }
   // Managed catch-up keeps each round bounded and paces the next one instead of failing at the work limit.
   #proceed(more: boolean): void {
@@ -480,7 +672,7 @@ export class ConversationStream {
   // One bounded round of at most ten pages; resolves true only when the current replay has more work.
   #reconcileRound(): Promise<boolean> {
     if (this.#closed) return Promise.resolve(false);
-    if (this.#paused) return Promise.reject(new ConvoHopProblem("SESSION_REFRESH_REQUIRED", crypto.randomUUID(), "rejected", 409,
+    if (this.#paused) return Promise.reject(new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.client.platform), "rejected", 409,
       "Realtime application work is paused until session authority is verified"));
     const generation = this.#queueGeneration;
     // Rounds coalesce only within one stream generation; earlier queued or superseded work settles first.
@@ -499,7 +691,7 @@ export class ConversationStream {
         const applied = await this.#apply(result.items);
         if (!applied || superseded()) return false;
         this.#cursor = result.nextCursor;
-        this.client.storage?.setItem(this.#storageKey, JSON.stringify(this.#cursor));
+        await this.#saveCursor(result.nextCursor);
         if (result.complete) return false;
       }
       return !stale();
@@ -520,6 +712,10 @@ export class ConversationStream {
     if (this.#closed) return;
     this.#closed = true; this.#queueGeneration++;
     if (this.#timer) clearTimeout(this.#timer);
+    this.#timer = undefined; this.#wakeReconnect = undefined;
+    for (const unsubscribe of this.#unsubscribe.splice(0)) {
+      try { unsubscribe(); } catch { /* the platform's own unsubscribe failed */ }
+    }
     const socket = this.#socket; this.#socket = undefined; socket?.close(1000);
     if (!this.#applying) this.onClose?.();
   }

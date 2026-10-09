@@ -70,6 +70,9 @@ function resolvers(domain, routeTarget) {
       sendMessage: mutation("sendMessage"),
       editMessage: mutation("editMessage"),
       deleteMessage: mutation("deleteMessage"),
+      getMessage: query((actor, input) => domain.getMessage(actor, input)),
+      receipts: query((actor, input) => domain.readReceipts(actor, input)),
+      reportReceipt: mutation("reportReceipt"),
     },
     management: {
       issueBackendKey: mutation("issueBackendKey"),

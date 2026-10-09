@@ -10,7 +10,8 @@ import { buildIr } from "../lib/ir.mjs";
 import { formatJson } from "../lib/json.mjs";
 import { codeUnitCompare } from "../lib/naming.mjs";
 import { javaIdentifier, javaPattern, javaString, kotlinIdentifier, kotlinString, renderJava, scalarMapping, serverTypeNames } from "../emitters/java.mjs";
-import { operationTypeNames, scalarTsType } from "../emitters/typescript.mjs";
+import { coreOperationCatalog, operationTypeNames, scalarTsType } from "../emitters/typescript.mjs";
+import { operationCatalog } from "../lib/ir-model.mjs";
 import { REPO_ROOT, assertGoldenTree, fixtureSources, repoSources } from "./helpers.mjs";
 
 const render = sources => renderEmitters(buildIr(sources), config.emitters, { options: config.options });
@@ -62,6 +63,19 @@ test("TypeScript names and scalar types follow the graphql-codegen conventions t
   assert.throws(() => scalarTsType(scalar("Big", "bigint"), "output"), new EmitterError('typescript: scalar Big has unsupported representation "bigint"'));
 });
 
+test("the core TypeScript catalog adds each operation's idempotency class to the published catalog", () => {
+  const ir = buildIr(fixtureSources());
+  const published = operationCatalog(ir), core = coreOperationCatalog(ir);
+  assert.deepEqual(Object.keys(core), Object.keys(published));
+  for (const operation of ir.operations) {
+    const { idempotency, ...entry } = core[operation.id];
+    assert.equal(idempotency, operation.idempotency);
+    assert.deepEqual(entry, published[operation.id]);
+  }
+  assert.ok(ir.operations.some(operation => operation.idempotency === "ephemeral"), "the fixture covers ephemeral operations");
+  assert.ok(Object.values(published).every(entry => !("idempotency" in entry)), "schema/operations.json is unchanged");
+});
+
 const USAGE = `import type * as Generated from "./graphql-types.js";
 import { operationCatalog, outputShapes, type OperationTypes } from "./operations.js";
 
@@ -91,6 +105,7 @@ export const numeric: number = events.events.items[0]!.sequence;
 
 export const query: string = operationCatalog["alpha.items"].query;
 export const inputFields: readonly string[] = operationCatalog["beta.widgets"].inputFields;
+export const idempotency: string = operationCatalog["beta.widgets"].idempotency;
 export const shape = outputShapes["Fruit"]?.kind;
 // @ts-expect-error unknown operation keys are rejected
 export const unknownOperation = operationCatalog["alpha.missing"];

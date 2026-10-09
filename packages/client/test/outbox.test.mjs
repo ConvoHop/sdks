@@ -1,0 +1,507 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { ConvoHopClient, Outbox } from "@convohop/client";
+import { reply, resolution } from "../../../test/graphql-fixtures.mjs";
+import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
+
+const id = () => crypto.randomUUID();
+const turn = () => new Promise(resolve => setImmediate(resolve));
+async function until(predicate, message = "condition") {
+  for (let index = 0; index < 1000 && !predicate(); index++) await turn();
+  assert.ok(predicate(), "timed out waiting for " + message);
+}
+function deferred() {
+  let resolve;
+  const promise = new Promise(yes => { resolve = yes; });
+  return { promise, resolve };
+}
+function storage() {
+  const values = new Map();
+  return { values, getItem: key => values.get(key) ?? null, setItem: (key, value) => { values.set(key, value); },
+    removeItem: key => { values.delete(key); } };
+}
+function connectivity(online = true) {
+  const listeners = new Set();
+  return { listeners, get online() { return online; },
+    set(value) { online = value; for (const listener of listeners) listener(value); },
+    subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); } };
+}
+function lifecycle(state = "active") {
+  const listeners = new Set();
+  return { listeners, get state() { return state; },
+    set(value) { state = value; for (const listener of listeners) listener(value); },
+    subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); } };
+}
+function problem(code, status, outcome = "rejected", extra = {}) {
+  return Response.json({ errors: [{ message: "Fixture " + code, extensions: { code, outcome, status, ...extra } }] });
+}
+/**
+ * Clients of one fake authority that commits each request ID at most once. `onSend` and `onResolve` can answer a
+ * request first; when they return undefined the authority commits the send, or reports what it has committed.
+ */
+function authority({ recoveryStorage, projectId = id(), incarnation = id(), principalId = id(), clientOptions = {} } = {}) {
+  const setup = { projectId, incarnation, principalId, sends: [], resolves: [], committed: new Map(), sequence: 0,
+    onSend: undefined, onResolve: undefined };
+  setup.ack = conversationId => {
+    const sequence = String(++setup.sequence);
+    return { messageId: id(), conversationId, sequence, revision: "1", status: "sent", cursor: { incarnation, conversationId, sequence } };
+  };
+  setup.commit = request => {
+    const { requestId } = request.variables.context;
+    if (!setup.committed.has(requestId)) setup.committed.set(requestId, setup.ack(request.variables.input.conversationId));
+    return setup.committed.get(requestId);
+  };
+  setup.client = () => new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
+    sessionToken: "outbox-test-session", ...(recoveryStorage ? { recoveryStorage } : {}), ...clientOptions,
+    fetch: async (_url, options) => {
+      const request = JSON.parse(options.body);
+      if (request.operationName === "CommunicationSendMessage") {
+        setup.sends.push(request);
+        return (await setup.onSend?.(request)) ?? reply(request, { result: setup.commit(request) });
+      }
+      if (request.operationName === "CommunicationResolveRequest") {
+        setup.resolves.push(request);
+        const answer = await setup.onResolve?.(request);
+        if (answer) return answer;
+        const { requestId } = request.variables.input, ack = setup.committed.get(requestId);
+        return reply(request, { result: ack ? resolution(requestId, "committed", { messageAck: ack }) : resolution(requestId, "notObservedYet") });
+      }
+      throw new Error("Unexpected operation " + request.operationName);
+    } });
+  return setup;
+}
+function outbox(t, client, options = {}) {
+  const errors = [], value = new Outbox(client, { connectivity: connectivity(), onError: error => errors.push(error), ...options });
+  t.after(() => value.close());
+  return { outbox: value, errors };
+}
+const statuses = box => box.entries.map(entry => entry.status);
+const texts = requests => requests.map(request => request.variables.input.text);
+const sendIds = setup => setup.sends.map(request => request.variables.context.requestId);
+const sorted = values => [...values].sort();
+
+test("messages send in order per conversation with one request ID each", async t => {
+  const setup = authority(), client = setup.client(), { outbox: box } = outbox(t, client);
+  const first = id(), second = id(), held = deferred();
+  setup.onSend = async request => { if (request.variables.input.text === "a1") await held.promise; };
+  const a1 = box.send(first, "a1", { draft: 1 }), a2 = box.send(first, "a2"), b1 = box.send(second, "b1");
+  await until(() => setup.sends.length === 2 && box.entries[2].status === "sent", "b1 and the start of a1");
+  assert.deepEqual(sorted(texts(setup.sends)), ["a1", "b1"], "a2 waits for a1, b1 doesn't");
+  assert.deepEqual(statuses(box), ["sending", "queued", "sent"]);
+  held.resolve();
+  await box.flush();
+  assert.deepEqual(texts(setup.sends.slice(2)), ["a2"]);
+  assert.deepEqual(sorted(sendIds(setup)), sorted([a1.requestId, a2.requestId, b1.requestId]));
+  assert.deepEqual(setup.sends.find(request => request.variables.context.requestId === a1.requestId).variables.input.props, { draft: 1 });
+  assert.deepEqual(statuses(box), ["sent", "sent", "sent"]);
+  const [sent] = box.entries;
+  assert.equal(sent.messageId, setup.committed.get(a1.requestId).messageId);
+  assert.equal(sent.receipt.cursor.sequence, setup.committed.get(a1.requestId).sequence);
+  assert.ok(Object.isFrozen(box.entries) && Object.isFrozen(sent) && Object.isFrozen(sent.props));
+  assert.equal(box.entries, box.entries, "the snapshot is stable until something changes");
+
+  box.settle(a1.requestId); box.settle(id());
+  assert.deepEqual(box.entries.map(entry => entry.requestId), [a2.requestId, b1.requestId]);
+  assert.throws(() => box.send("not-a-uuid", "x"), TypeError);
+  assert.throws(() => box.send(first, 1), TypeError);
+});
+
+test("an uncertain send is recovered with its original request, never sent as a new message", async t => {
+  for (const committedFirst of [true, false]) {
+    const setup = authority(), client = setup.client(), { outbox: box, errors } = outbox(t, client);
+    let failing = true;
+    setup.onSend = request => {
+      if (!failing) return undefined;
+      failing = false;
+      if (committedFirst) setup.commit(request);
+      throw new Error("connection reset");
+    };
+    const entry = box.send(id(), "hello");
+    await box.flush();
+    assert.equal(box.entries[0].status, "unknown");
+    assert.equal(box.entries[0].error.code, "TRANSPORT_UNKNOWN");
+    assert.deepEqual(errors, [], "a recoverable outcome isn't reported as a failure");
+    await box.flush();
+    assert.equal(box.entries[0].status, "sent");
+    assert.equal(box.entries[0].messageId, setup.committed.get(entry.requestId).messageId);
+    assert.equal(box.entries[0].error, undefined);
+    assert.deepEqual(sendIds(setup), committedFirst ? [entry.requestId] : [entry.requestId, entry.requestId],
+      committedFirst ? "a committed request is never submitted again" : "an unobserved request is resent with its request ID");
+    assert.equal(client.http.recoveryStates[0].requestId, entry.requestId);
+  }
+});
+
+test("a refused message fails without being sent again until the app resends it as a new message", async t => {
+  const setup = authority(), client = setup.client(), { outbox: box, errors } = outbox(t, client);
+  setup.onSend = () => problem("FORBIDDEN", 403);
+  const conversationId = id(), entry = box.send(conversationId, "nope"), next = box.send(conversationId, "after");
+  await box.flush();
+  assert.deepEqual(statuses(box), ["failed", "failed"], "a failed entry doesn't hold back the next");
+  assert.equal(box.entries[0].error.code, "FORBIDDEN");
+  assert.equal(box.entries[0].unconfirmed, undefined, "a definitive rejection didn't deliver the message");
+  assert.deepEqual(errors.map(error => error.code), ["FORBIDDEN", "FORBIDDEN"]);
+  await box.flush();
+  assert.equal(setup.sends.length, 2);
+
+  setup.onSend = undefined;
+  const again = box.resend(entry.requestId);
+  assert.notEqual(again.requestId, entry.requestId);
+  await box.flush();
+  assert.deepEqual(box.entries.map(item => [item.text, item.status]), [["after", "failed"], ["nope", "sent"]],
+    "a resent message goes after the ones already waiting");
+  assert.equal(setup.sends.at(-1).variables.context.requestId, again.requestId);
+  assert.throws(() => box.resend(again.requestId), /Only a failed message/);
+  assert.throws(() => box.resend(id()), /Only a failed message/);
+  box.discard(next.requestId); box.discard(id());
+  assert.deepEqual(box.entries.map(item => item.text), ["nope"]);
+});
+
+test("a waiting rejection keeps the request and retries it after the authority's delay", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: Date.parse("2026-10-08T12:00:00Z") });
+  const setup = authority(), client = setup.client(), { outbox: box, errors } = outbox(t, client);
+  let limited = true;
+  setup.onSend = () => {
+    if (!limited) return undefined;
+    limited = false;
+    return problem("RATE_LIMITED", 429, "rejected", { retryAfter: 7 });
+  };
+  const entry = box.send(id(), "later");
+  await until(() => box.entries[0].status === "queued" && box.entries[0].error !== undefined, "the rate limit");
+  assert.equal(box.entries[0].error.code, "RATE_LIMITED");
+  assert.equal(box.entries[0].unconfirmed, undefined);
+  assert.deepEqual(errors, []);
+  t.mock.timers.tick(6999);
+  for (let index = 0; index < 20; index++) await turn();
+  assert.equal(setup.sends.length, 1, "nothing is sent before the authority's delay");
+  t.mock.timers.tick(1);
+  await until(() => box.entries[0].status === "sent", "the delayed retry");
+  assert.deepEqual(sendIds(setup), [entry.requestId, entry.requestId]);
+});
+
+test("offline messages wait for connectivity, and the outbox holds at most 100 unsent", async t => {
+  const network = connectivity(false), setup = authority(), client = setup.client();
+  const { outbox: box } = outbox(t, client, { connectivity: network });
+  const conversationId = id();
+  for (let index = 0; index < 100; index++) box.send(conversationId, "message " + index);
+  assert.throws(() => box.send(conversationId, "one too many"), RangeError);
+  await box.flush();
+  assert.equal(setup.sends.length, 0);
+  assert.ok(statuses(box).every(status => status === "queued"));
+  network.set(true);
+  await box.flush();
+  assert.ok(statuses(box).every(status => status === "sent"));
+  assert.deepEqual(texts(setup.sends), box.entries.map(entry => entry.text));
+  box.send(conversationId, "sent ones don't count");
+  await box.flush();
+
+  network.set(false);
+  const waiting = box.send(conversationId, "offline again");
+  await box.flush();
+  assert.equal(box.entries.find(entry => entry.requestId === waiting.requestId).status, "queued");
+  assert.equal(box.entries.length, 101, "at most 100 sent entries are kept, oldest first out");
+  assert.equal(box.entries.filter(entry => entry.status === "sent").length, 100);
+  assert.equal(box.entries[0].text, "message 1");
+});
+
+test("an exhausted retry budget is settled read-only and fails as unconfirmed when nothing committed", async t => {
+  const setup = authority(), client = setup.client(), { outbox: box, errors } = outbox(t, client);
+  setup.onSend = () => { throw new Error("connection reset"); };
+  const entry = box.send(id(), "lost");
+  for (let attempt = 0; attempt < 4; attempt++) await box.flush();
+  assert.equal(box.entries[0].status, "failed");
+  assert.equal(box.entries[0].unconfirmed, true, "an uncertain message may still have been delivered");
+  assert.equal(box.entries[0].error.code, "RESOLUTION_REQUIRED");
+  assert.deepEqual(sendIds(setup), [entry.requestId, entry.requestId, entry.requestId], "the transport's budget is three submissions");
+  assert.deepEqual(errors.map(error => error.code), ["RESOLUTION_REQUIRED"]);
+  const resolves = setup.resolves.length;
+  await box.flush();
+  assert.equal(setup.resolves.length, resolves, "a failed entry is left alone");
+});
+
+test("a commit found after the budget is spent is sent, and an invalid or withheld resolution is handled", async t => {
+  const setup = authority(), client = setup.client(), { outbox: box, errors: lateErrors } = outbox(t, client);
+  const conversationId = id();
+  let last, resolves = 0;
+  setup.onSend = request => { last = request; throw new Error("connection reset"); };
+  box.send(conversationId, "late");
+  for (let attempt = 0; attempt < 3; attempt++) await box.flush();
+  assert.equal(setup.sends.length, 3);
+  // The last submission commits after the retry's lookup, so only the read-only resolution can find it.
+  setup.onResolve = request => {
+    if (++resolves > 1) return undefined;
+    const answer = reply(request, { result: resolution(request.variables.input.requestId, "notObservedYet") });
+    setup.commit(last);
+    return answer;
+  };
+  await box.flush();
+  assert.equal(box.entries[0].status, "sent");
+  assert.equal(box.entries[0].messageId, setup.committed.get(last.variables.context.requestId).messageId);
+  assert.equal(setup.sends.length, 3);
+  assert.equal(resolves, 2);
+  assert.deepEqual(lateErrors, []);
+
+  for (const [name, change] of [["conversation", ack => ({ ...ack, conversationId: id() })],
+    ["cursor", ack => ({ ...ack, cursor: { ...ack.cursor, sequence: "99" } })], ["status", ack => ({ ...ack, status: "pending" })]]) {
+    const bad = authority(), { outbox: badBox, errors } = outbox(t, bad.client());
+    bad.onSend = request => {
+      bad.committed.set(request.variables.context.requestId, change(bad.ack(conversationId)));
+      throw new Error("connection reset");
+    };
+    badBox.send(conversationId, name);
+    await badBox.flush(); await badBox.flush();
+    assert.deepEqual([badBox.entries[0].status, badBox.entries[0].unconfirmed], ["failed", true], name);
+    assert.ok(badBox.entries[0].error instanceof TypeError, name);
+    assert.equal(errors.length, 1, name);
+    assert.equal(bad.sends.length, 1, name);
+  }
+
+  const withheld = authority(), { outbox: withheldBox } = outbox(t, withheld.client());
+  withheld.onSend = () => { throw new Error("connection reset"); };
+  withheld.onResolve = request => reply(request, { result: { ...resolution(request.variables.input.requestId, "committed"), resultWithheld: true } });
+  withheldBox.send(conversationId, "withheld");
+  await withheldBox.flush(); await withheldBox.flush();
+  assert.equal(withheldBox.entries[0].status, "sent");
+  assert.equal(withheldBox.entries[0].messageId, undefined, "a withheld result commits without the message's ID");
+});
+
+test("a persistent outbox restores unsent messages and recovers attempted ones without sending them again", async t => {
+  const saved = storage(), setup = authority({ recoveryStorage: saved }), network = connectivity(false);
+  assert.throws(() => new Outbox(authority().client(), { persist: true, connectivity: network }), /recoveryStorage/);
+  const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`, conversationId = id(), otherConversationId = id();
+  const { outbox: before } = outbox(t, setup.client(), { persist: true, connectivity: network });
+  const queued = before.send(conversationId, "queued while offline", { tag: "x" });
+  assert.deepEqual(JSON.parse(saved.values.get(key)).map(item => [item.text, item.attempted, item.props]),
+    [["queued while offline", false, { tag: "x" }]]);
+  before.close();
+
+  const { outbox: during } = outbox(t, setup.client(), { persist: true, connectivity: network });
+  assert.deepEqual(during.entries.map(entry => [entry.requestId, entry.status]), [[queued.requestId, "queued"]]);
+  setup.onSend = request => { setup.commit(request); throw new Error("the page unloaded mid-send"); };
+  const uncertain = during.send(otherConversationId, "may have committed");
+  network.set(true);
+  await until(() => during.entries.every(entry => entry.status === "unknown"), "both attempts");
+  during.close();
+  assert.deepEqual(JSON.parse(saved.values.get(key)).map(item => [item.requestId, item.attempted]),
+    [[queued.requestId, true], [uncertain.requestId, true]]);
+
+  setup.onSend = undefined;
+  const { outbox: after, errors } = outbox(t, setup.client(), { persist: true, connectivity: network });
+  assert.deepEqual(statuses(after), ["unknown", "unknown"], "attempted messages restore as uncertain");
+  assert.deepEqual(after.entries[0].props, { tag: "x" });
+  await after.flush();
+  assert.deepEqual(statuses(after), ["sent", "sent"]);
+  assert.deepEqual(sorted(sendIds(setup)), sorted([queued.requestId, uncertain.requestId]), "recovery never submits again");
+  assert.equal(saved.values.has(key), false, "sent messages aren't kept");
+  assert.deepEqual(errors, []);
+});
+
+test("a send recorded before the transport saved its request is resolved read-only after a reload", async t => {
+  const saved = storage(), setup = authority({ recoveryStorage: saved }), conversationId = id();
+  const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`, committedId = id(), missingId = id();
+  const createdAt = new Date().toISOString();
+  saved.setItem(key, JSON.stringify([
+    { requestId: committedId, conversationId, text: "committed", props: {}, createdAt, attempted: true },
+    { requestId: missingId, conversationId, text: "never arrived", props: {}, createdAt, attempted: true },
+  ]));
+  setup.commit({ variables: { context: { requestId: committedId }, input: { conversationId } } });
+  const { outbox: box, errors } = outbox(t, setup.client(), { persist: true });
+  await box.flush();
+  assert.deepEqual(box.entries.map(entry => [entry.text, entry.status, entry.unconfirmed]),
+    [["committed", "sent", undefined], ["never arrived", "failed", true]]);
+  assert.equal(box.entries[0].messageId, setup.committed.get(committedId).messageId);
+  assert.equal(box.entries[1].error.code, "RESOLUTION_REQUIRED");
+  assert.deepEqual(errors.map(error => error.code), ["RESOLUTION_REQUIRED"]);
+  assert.deepEqual(setup.sends, [], "an attempted message is never sent again without its recovery record");
+  assert.deepEqual(JSON.parse(saved.values.get(key)).map(item => [item.requestId, item.failed, item.unconfirmed]),
+    [[missingId, true, true]]);
+});
+
+test("unreadable saved entries are skipped, failed ones restore as failed, and storage failures are reported", async t => {
+  const saved = storage(), setup = authority({ recoveryStorage: saved });
+  const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`, conversationId = id(), failedId = id();
+  saved.setItem(key, JSON.stringify([
+    { requestId: failedId, conversationId, text: "failed", props: {}, createdAt: new Date().toISOString(), attempted: true, failed: true, unconfirmed: true },
+    { requestId: "bad", conversationId, text: "x", props: {}, createdAt: "", attempted: false },
+    { requestId: id(), conversationId, text: "missing attempted", props: {}, createdAt: "" },
+  ]));
+  const { outbox: box, errors } = outbox(t, setup.client(), { persist: true, connectivity: connectivity(false) });
+  assert.deepEqual(box.entries.map(entry => [entry.requestId, entry.status, entry.unconfirmed]), [[failedId, "failed", true]]);
+  assert.equal(errors.length, 2);
+  for (const value of ["{", JSON.stringify({ not: "a list" })]) {
+    saved.setItem(key, value);
+    const { outbox: unreadable, errors: reported } = outbox(t, setup.client(), { persist: true, connectivity: connectivity(false) });
+    assert.deepEqual(unreadable.entries, []);
+    assert.equal(reported.length, 1);
+  }
+
+  const outboxKey = name => name.startsWith("convohop.outbox:");
+  const failing = authority({ recoveryStorage: {
+    getItem: name => { if (outboxKey(name)) throw new Error("storage denied"); return null; },
+    setItem: name => { if (outboxKey(name)) throw new Error("quota"); },
+    removeItem: () => undefined,
+  } });
+  const { outbox: quota, errors: storageErrors } = outbox(t, failing.client(), { persist: true, connectivity: connectivity(false) });
+  quota.send(conversationId, "kept in memory");
+  assert.deepEqual(storageErrors.map(error => error.message), ["storage denied", "quota"]);
+  assert.equal(quota.entries.length, 1);
+});
+
+test("in-flight and uncertain messages can't be discarded, and closing stops sending", async t => {
+  const setup = authority(), client = setup.client(), { outbox: box } = outbox(t, client), held = deferred();
+  setup.onSend = async () => { await held.promise; throw new Error("connection reset"); };
+  const entry = box.send(id(), "in flight");
+  await until(() => setup.sends.length === 1, "the send");
+  assert.throws(() => box.discard(entry.requestId), /Wait for the message's outcome/);
+  held.resolve();
+  await box.flush();
+  assert.equal(box.entries[0].status, "unknown");
+  assert.throws(() => box.discard(entry.requestId), /Wait for the message's outcome/);
+  box.close(); box.close();
+  assert.throws(() => box.send(id(), "closed"), /closed/);
+  await box.flush();
+  assert.equal(setup.sends.length, 1);
+  assert.equal(box.entries[0].status, "unknown", "a closed outbox keeps its entries");
+});
+
+test("listener failures are reported without stopping other listeners", async t => {
+  const setup = authority(), { outbox: box, errors } = outbox(t, setup.client(), { connectivity: connectivity(false) });
+  let calls = 0;
+  const unsubscribe = box.subscribe(() => { throw new Error("listener"); });
+  box.subscribe(() => { calls++; });
+  box.send(id(), "x");
+  assert.equal(calls, 1);
+  assert.deepEqual(errors.map(error => error.message), ["listener"]);
+  unsubscribe();
+  box.send(id(), "y");
+  assert.equal(calls, 2);
+  assert.equal(errors.length, 1);
+});
+
+test("without an injected connectivity the outbox follows the browser's online events", async t => {
+  const previous = Object.getOwnPropertyDescriptor(globalThis, "navigator"), target = new EventTarget(), added = new Set();
+  let online = false;
+  Object.defineProperty(globalThis, "navigator", { configurable: true, value: { get onLine() { return online; } } });
+  globalThis.addEventListener = (type, listener) => { added.add(type); target.addEventListener(type, listener); };
+  globalThis.removeEventListener = (type, listener) => { added.delete(type); target.removeEventListener(type, listener); };
+  t.after(() => {
+    if (previous) Object.defineProperty(globalThis, "navigator", previous); else delete globalThis.navigator;
+    delete globalThis.addEventListener; delete globalThis.removeEventListener;
+  });
+  const setup = authority(), box = new Outbox(setup.client());
+  t.after(() => box.close());
+  assert.deepEqual(sorted(added), ["offline", "online"]);
+  box.send(id(), "x");
+  await box.flush();
+  assert.equal(setup.sends.length, 0);
+  online = true;
+  target.dispatchEvent(new Event("online"));
+  await until(() => box.entries[0]?.status === "sent", "the online event");
+  box.close();
+  assert.equal(added.size, 0, "closing removes the listeners");
+});
+
+test("an asynchronously stored outbox sends saved messages first and stores each attempt before submitting it", async t => {
+  const saved = asyncStorage(), setup = authority({ clientOptions: { asyncRecoveryStorage: saved } });
+  const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`, conversationId = id(), savedId = id(), storedFirst = [];
+  saved.values.set(key, JSON.stringify([
+    { requestId: savedId, conversationId, text: "saved", props: {}, createdAt: new Date().toISOString(), attempted: false },
+  ]));
+  setup.onSend = request => {
+    storedFirst.push(JSON.parse(saved.values.get(key)).find(item => item.requestId === request.variables.context.requestId)?.attempted);
+    return undefined;
+  };
+  const { outbox: box, errors } = outbox(t, setup.client(), { persist: true });
+  const added = box.send(conversationId, "added while loading");
+  assert.deepEqual(box.entries.map(entry => entry.text), ["added while loading"]);
+  assert.equal(setup.sends.length, 0, "nothing is sent until saved messages have loaded");
+  await box.flush();
+  assert.deepEqual(sendIds(setup), [savedId, added.requestId], "saved messages keep their place");
+  assert.deepEqual(storedFirst, [true, true], "each attempt is stored before its message is submitted");
+  assert.deepEqual(statuses(box), ["sent", "sent"]);
+  await until(() => !saved.values.has(key), "the sent outbox to be cleared");
+  assert.deepEqual(errors, []);
+});
+
+test("unreadable asynchronous outbox storage is reported and new messages still send", async t => {
+  for (const [stored, message] of [[undefined, "storage denied"], [42, "Stored outbox must be a string or null"]]) {
+    const saved = asyncStorage({ onRead: async key => {
+      if (stored === undefined && key.startsWith("convohop.outbox:")) throw new Error("storage denied");
+    } });
+    const setup = authority({ clientOptions: { asyncRecoveryStorage: saved } });
+    if (stored !== undefined) saved.values.set(`convohop.outbox:${setup.projectId}:${setup.principalId}`, stored);
+    const { outbox: box, errors } = outbox(t, setup.client(), { persist: true });
+    box.send(id(), "still sent");
+    await box.flush();
+    assert.deepEqual(statuses(box), ["sent"]);
+    assert.deepEqual(errors.map(error => error.message), [message]);
+  }
+});
+
+test("messages sent while a full asynchronous outbox loads are kept across a restart, and only a longer list is cut", async t => {
+  const saved = asyncStorage(), setup = authority({ clientOptions: { asyncRecoveryStorage: saved } });
+  const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`, conversationId = id(), network = connectivity(false);
+  const entries = (count, prefix) => Array.from({ length: count }, (_, index) => ({ requestId: id(), conversationId,
+    text: prefix + index, props: {}, createdAt: new Date().toISOString(), attempted: false }));
+  const full = entries(100, "saved ");
+  saved.values.set(key, JSON.stringify(full));
+  const first = outbox(t, setup.client(), { persist: true, connectivity: network });
+  const added = Array.from({ length: 100 }, (_, index) => first.outbox.send(conversationId, "added " + index));
+  assert.throws(() => first.outbox.send(conversationId, "one too many while loading"), RangeError);
+  await first.outbox.flush();
+  const order = [...full.map(entry => entry.text), ...added.map(entry => entry.text)];
+  assert.deepEqual(first.outbox.entries.map(entry => entry.text), order, "saved messages first, then those sent while loading");
+  assert.throws(() => first.outbox.send(conversationId, "one too many"), RangeError);
+  await until(() => JSON.parse(saved.values.get(key) ?? "[]").length === 200, "the merged outbox to be saved");
+  first.outbox.close();
+
+  const second = outbox(t, setup.client(), { persist: true, connectivity: network });
+  await second.outbox.flush();
+  assert.deepEqual(second.outbox.entries.map(entry => entry.text), order, "a restart loses none of them");
+  second.outbox.close();
+
+  const longer = entries(201, "longer ");
+  saved.values.set(key, JSON.stringify(longer));
+  const third = outbox(t, setup.client(), { persist: true, connectivity: network });
+  await third.outbox.flush();
+  assert.deepEqual(third.outbox.entries.map(entry => entry.text), longer.slice(0, 200).map(entry => entry.text));
+  assert.deepEqual([...first.errors, ...second.errors].map(error => error.message), []);
+  assert.deepEqual(third.errors.map(error => error.message),
+    ["Discarded 1 of 201 saved outbox entries, beyond the limit of 200"]);
+  assert.equal(setup.sends.length, 0, "nothing was sent offline");
+});
+
+test("waking for connectivity or the foreground skips backoff but keeps the authority's Retry-After", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: Date.parse("2026-10-08T12:00:00Z") });
+  const network = connectivity(), foreground = lifecycle();
+  const setup = authority({ clientOptions: { platform: { lifecycle: foreground } } });
+  const { outbox: box } = outbox(t, setup.client(), { connectivity: network });
+  const limits = [{ retryAfter: 7 }, {}];
+  setup.onSend = () => limits.length ? problem("RATE_LIMITED", 429, "rejected", limits.shift()) : undefined;
+  box.send(id(), "later");
+  await until(() => box.entries[0].error !== undefined, "the first rate limit");
+  network.set(false); network.set(true); foreground.set("background"); foreground.set("active");
+  for (let index = 0; index < 20; index++) await turn();
+  assert.equal(setup.sends.length, 1, "a wake never sends before the authority's delay");
+  t.mock.timers.tick(7000);
+  await until(() => setup.sends.length === 2 && box.entries[0].status === "queued", "the second rate limit");
+  network.set(true);
+  await until(() => box.entries[0].status === "sent", "a wake to skip ordinary backoff");
+  assert.equal(setup.sends.length, 3);
+});
+
+test("returning to the foreground sends due messages, and the platform's connectivity is the default", async t => {
+  let online = false;
+  const quiet = { get online() { return online; }, subscribe: () => () => undefined }, foreground = lifecycle("background");
+  const setup = authority({ clientOptions: { platform: { connectivity: quiet, lifecycle: foreground } } });
+  const { outbox: box } = outbox(t, setup.client(), { connectivity: undefined });
+  box.send(id(), "x");
+  await box.flush();
+  assert.equal(setup.sends.length, 0, "the platform's connectivity is offline");
+  online = true;
+  foreground.set("active");
+  await until(() => box.entries[0].status === "sent", "the foreground wake");
+  box.close();
+  assert.equal(foreground.listeners.size, 0, "closing unsubscribes");
+  assert.throws(() => new Outbox(setup.client(), { connectivity: { online: true, subscribe: () => undefined } }),
+    { name: "TypeError", message: "subscribe must return an unsubscribe function" });
+});

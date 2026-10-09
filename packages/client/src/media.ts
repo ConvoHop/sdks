@@ -1,100 +1,16 @@
-import { Room, RoomEvent, Track, type RemoteTrack } from "livekit-client";
-import { ConvoHopProblem, parseId, parseObject, parseString } from "@convohop/core";
-import type { LiveParticipationHandle, LiveConnectOptions, LiveConnectionGrant } from "./live.js";
+import type { RemoteTrack, Room } from "livekit-client";
+import { parseId, parseObject, parseString } from "@convohop/core";
+import { admitConnection } from "./admission.js";
+import type { LiveParticipationHandle, LiveConnectOptions, LiveConnectionAttempt } from "./live.js";
 
-type NativeGrant = LiveConnectionGrant;
-
-interface Admission {
-  grant: NativeGrant; attemptId: string; used: boolean;
-  resolve: (value: { admissionId: string; nativeConnectionId: string }) => void;
-  reject: (error: Error) => void;
-}
-const pending = new Map<string, Admission>();
-let originalConstructor: typeof WebSocket | undefined;
-let installedConstructor: typeof WebSocket | undefined;
-
-function register(grant: NativeGrant) {
-  const url = new URL(grant.livekitUrl);
-  if (url.search || url.hash || url.username || url.password ||
-      (url.protocol !== "wss:" && !(url.protocol === "ws:" && ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname)))) throw new TypeError("Invalid media origin");
-  if (Date.parse(grant.leaseExpiresAt) <= Date.now()) throw new Error("Fresh media credentials are required");
-  const bindingKey = url.origin + ":" + grant.transportToken;
-  if (pending.has(bindingKey)) throw new Error("A native admission can be attempted only once");
-  const admitted = new Promise<{ admissionId: string; nativeConnectionId: string }>((resolve, reject) => {
-    pending.set(bindingKey, { grant, attemptId: crypto.randomUUID(), used: false, resolve, reject });
-  });
-  if (!installedConstructor) {
-    const Native = globalThis.WebSocket; originalConstructor = Native;
-    // livekit-client 2.22.3 has no socket factory hook. Only registered /rtc
-    // connections are gated; ordinary browser/realtime sockets are unchanged.
-    class AdmissionSocket extends Native {
-      #gate: Admission | undefined; #admitted = false;
-      constructor(address: string | URL, protocols?: string | string[]) {
-        const target = new URL(address);
-        const gate = target.pathname === "/rtc" ? pending.get(target.origin + ":" + target.searchParams.get("access_token")) : undefined;
-        if (gate?.used) throw new Error("Native credential reuse is forbidden; request fresh reconnect credentials");
-        if (gate) gate.used = true;
-        super(address, protocols);
-        this.#gate = gate;
-        if (!gate) return;
-        const timer = setTimeout(() => {
-          gate.reject(new Error("Native admission timed out"));
-          Native.prototype.close.call(this, 1008, "Admission timed out");
-        }, 9500);
-        this.addEventListener("open", event => {
-          if (this.#admitted) return;
-          event.stopImmediatePropagation();
-          const prelude = JSON.stringify({ type: "convohop.admission", admissionAttemptId: gate.attemptId,
-            mode: gate.grant.admissionTicket.mode, ticket: gate.grant.admissionTicket, leaseProof: gate.grant.forwardingLease });
-          if (new TextEncoder().encode(prelude).length > 16384) {
-            gate.reject(new Error("Native admission exceeds the protocol bound"));
-            Native.prototype.close.call(this, 1008, "Admission too large"); return;
-          }
-          Native.prototype.send.call(this, prelude);
-        }, { capture: true });
-        this.addEventListener("message", event => {
-          if (this.#admitted) return;
-          event.stopImmediatePropagation();
-          try {
-            const frame = parseObject(JSON.parse(parseString(event.data)));
-            if (frame.type !== "convohop.admitted" || frame.leaseExpiresAt !== gate.grant.leaseExpiresAt) throw new Error("Native admission was not accepted");
-            if (frame.participationId !== gate.grant.participationId)
-              throw new Error("Native admission participation mismatch");
-            const value = { admissionId: parseId(frame.admissionId), nativeConnectionId: parseId(frame.nativeConnectionId) };
-            this.#admitted = true; clearTimeout(timer); gate.resolve(value);
-            this.dispatchEvent(new Event("open"));
-          } catch {
-            clearTimeout(timer); gate.reject(new Error("Native admission rejected; no signaling or media was authorized"));
-            Native.prototype.close.call(this, 1008, "Admission rejected");
-            this.dispatchEvent(new Event("error"));
-          }
-        }, { capture: true });
-        this.addEventListener("close", () => {
-          clearTimeout(timer);
-          if (!this.#admitted) gate.reject(new Error("Native admission connection closed"));
-        });
-        this.addEventListener("error", () => {
-          if (!this.#admitted) gate.reject(new Error("Native admission transport failed"));
-        });
-      }
-      override get readyState(): WebSocket["readyState"] {
-        if (this.#gate && !this.#admitted && super.readyState === WebSocket.OPEN) return WebSocket.CONNECTING;
-        return super.readyState;
-      }
-      override send(data: Parameters<WebSocket["send"]>[0]): void {
-        if (this.#gate && !this.#admitted) throw new Error("Native signaling cannot precede admission");
-        super.send(data);
-      }
-    }
-    installedConstructor = AdmissionSocket;
-    globalThis.WebSocket = AdmissionSocket;
-  }
-  return { admitted, release() {
-    pending.delete(bindingKey);
-    if (pending.size === 0 && installedConstructor && globalThis.WebSocket === installedConstructor && originalConstructor) {
-      globalThis.WebSocket = originalConstructor; installedConstructor = undefined; originalConstructor = undefined;
-    }
-  } };
+type LiveKit = typeof import("livekit-client");
+let livekit: Promise<LiveKit> | undefined;
+/**
+ * Loads `livekit-client` on first use. Evaluating it needs browser globals, such as `DOMException`, that other
+ * runtimes lack, so importing this SDK must not evaluate it.
+ */
+function loadLiveKit(): Promise<LiveKit> {
+  return livekit ??= import("livekit-client").catch((error: unknown) => { livekit = undefined; throw error; });
 }
 export interface RemoteMedia {
   trackId: string; participantIdentity: string; kind: "audio" | "video"; element: HTMLMediaElement;
@@ -104,7 +20,12 @@ export interface MediaOptions {
   localVideo?: HTMLVideoElement;
   onTrack?: (track: RemoteMedia) => void;
   onTrackRemoved?: (track: RemoteMedia) => void;
+  /** The media connection ended without `disconnect()`. Call `reconnect()` to connect again with fresh credentials. */
   onDisconnected?: () => void;
+  /** LiveKit lost the connection and is resuming it with the current or a server-refreshed token. */
+  onResuming?: () => void;
+  /** LiveKit resumed the same native connection. */
+  onResumed?: () => void;
   onAudioPlaybackBlocked?: () => void;
 }
 export interface MediaStats {
@@ -114,26 +35,24 @@ export interface MediaStats {
   transports?: { localCandidateType: string; remoteCandidateType: string; protocol: string; relayProtocol?: string }[];
 }
 export class MediaConnection {
+  readonly #kit: LiveKit;
   readonly #room: Room;
   readonly #tracks = new Map<string, { remote: RemoteMedia; track: RemoteTrack }>();
-  #registration: ReturnType<typeof register> | undefined;
   #closed = false;
   #left = false;
+  #resuming = false;
   #reconnecting: Promise<MediaConnection> | undefined;
   readonly #permissions: { microphone: boolean; camera: boolean };
   readonly options: MediaOptions;
-  admissionId: string | undefined;
+  /** The participation's `nativeConnectionId`: the LiveKit participant sid the media server assigned at admission. */
   nativeConnectionId: string | undefined;
-  private constructor(readonly participation: LiveParticipationHandle, options: LiveConnectOptions) {
+  private constructor(readonly participation: LiveParticipationHandle, options: LiveConnectOptions, kit: LiveKit) {
     const { requestId: _requestId, ...mediaOptions } = options;
+    const { Room, RoomEvent, Track } = this.#kit = kit;
     this.options = mediaOptions;
-    if (options.iceTransportPolicy !== undefined && options.iceTransportPolicy !== "all" && options.iceTransportPolicy !== "relay") {
-      throw new TypeError("ICE policy must be all or relay");
-    }
     this.#permissions = { ...participation.snapshot.permissions };
     this.#room = new Room({
       adaptiveStream: false, dynacast: false, singlePeerConnection: false,
-      reconnectPolicy: { nextRetryDelayInMs: () => null },
       videoCaptureDefaults: { resolution: { width: 320, height: 240, frameRate: 15 } },
       publishDefaults: { simulcast: false, videoCodec: "vp8", videoEncoding: { maxBitrate: 350000, maxFramerate: 15 } },
     });
@@ -157,37 +76,47 @@ export class MediaConnection {
       }
     });
     this.#room.on(RoomEvent.Disconnected, () => {
-      if (!this.#closed) { this.#closed = true; this.#registration?.release(); this.#cleanup(); options.onDisconnected?.(); }
+      this.#resuming = false;
+      if (!this.#closed) { this.#closed = true; this.#cleanup(); options.onDisconnected?.(); }
+    });
+    this.#room.on(RoomEvent.Reconnecting, () => {
+      if (this.#closed) return;
+      this.#resuming = true; options.onResuming?.();
+    });
+    this.#room.on(RoomEvent.Reconnected, () => {
+      this.#resuming = false;
+      if (this.#closed) return;
+      // A resume keeps the admitted connection. Any other identity was not admitted with this participation's grant.
+      if (this.#room.localParticipant.sid !== this.nativeConnectionId) {
+        void this.#close(false).catch(() => {}).finally(() => options.onDisconnected?.());
+        return;
+      }
+      options.onResumed?.();
     });
     this.#room.on(RoomEvent.AudioPlaybackStatusChanged, () => {
       if (!this.#room.canPlaybackAudio) options.onAudioPlaybackBlocked?.();
     });
   }
-  /** @internal Connect never starts capture. */
+  /** @internal Connect never starts capture. The room exists only once the attempt is admitted and marked. */
   static async connectParticipation(participation: LiveParticipationHandle, options: LiveConnectOptions): Promise<MediaConnection> {
-    const result = new MediaConnection(participation, options);
-    const { requestId, grant } = await participation.connectionGrant(options);
-    const ticket = parseObject(grant.admissionTicket), lease = parseObject(grant.forwardingLease);
-    if (ticket.participationId !== participation.participationId || lease.participationId !== participation.participationId)
-      throw new TypeError("Native proof is not participation-bound");
-    await participation.connectionAttempted();
-    await result.#open({ ...grant, admissionTicket: ticket, forwardingLease: lease }, requestId);
-    return result;
+    if (options.iceTransportPolicy !== undefined && options.iceTransportPolicy !== "all" && options.iceTransportPolicy !== "relay")
+      throw new TypeError("ICE policy must be all or relay");
+    const kit = await loadLiveKit();
+    return admitConnection(participation, options, async attempt => {
+      const result = new MediaConnection(participation, options, kit);
+      await result.#open(attempt);
+      return result;
+    }, participation.live.client.platform);
   }
-  async #open(grant: NativeGrant, requestId: string = crypto.randomUUID()): Promise<void> {
-    const result = this;
-    result.#registration = register(grant);
+  async #open(attempt: LiveConnectionAttempt): Promise<void> {
     try {
-      const [, admission] = await Promise.all([
-        result.#room.connect(grant.livekitUrl, grant.transportToken, { autoSubscribe: true, maxRetries: 0,
-          rtcConfig: { iceTransportPolicy: result.options.iceTransportPolicy ?? "all" } }),
-        result.#registration.admitted,
-      ]);
-      result.admissionId = admission.admissionId; result.nativeConnectionId = admission.nativeConnectionId;
-    } catch {
-      await result.disconnect();
-      throw new ConvoHopProblem("MEDIA_CONNECT_FAILED", requestId, "unknown", 0,
-        "Native connection failed. The participation reservation remains; resolve and retry connect, or explicitly leave.");
+      // One attempt: the token admits at most one new connection. LiveKit may later resume this connection.
+      await this.#room.connect(attempt.url, attempt.token, { autoSubscribe: true, maxRetries: 0,
+        rtcConfig: { iceTransportPolicy: this.options.iceTransportPolicy ?? "all" } });
+      this.nativeConnectionId = parseId(this.#room.localParticipant.sid);
+    } catch (error) {
+      await this.disconnect();
+      throw error;
     }
   }
   reconnect(): Promise<MediaConnection> {
@@ -204,6 +133,8 @@ export class MediaConnection {
     return this.#reconnecting.finally(() => { this.#reconnecting = undefined; });
   }
   get connected(): boolean { return !this.#closed && this.nativeConnectionId !== undefined; }
+  /** LiveKit is resuming this connection after a network interruption. */
+  get resuming(): boolean { return this.#resuming; }
   async microphone(enabled: boolean): Promise<void> {
     if (!this.connected || !this.#permissions.microphone) throw new Error("Microphone is not authorized for this participation");
     await this.#room.localParticipant.setMicrophoneEnabled(enabled);
@@ -211,7 +142,7 @@ export class MediaConnection {
   async camera(enabled: boolean): Promise<void> {
     if (!this.connected || !this.#permissions.camera) throw new Error("Camera is not authorized for this participation");
     await this.#room.localParticipant.setCameraEnabled(enabled);
-    const track = this.#room.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
+    const track = this.#room.localParticipant.getTrackPublication(this.#kit.Track.Source.Camera)?.track;
     if (enabled && track && this.options.localVideo) track.attach(this.options.localVideo);
   }
   async enableAudio(): Promise<void> { await this.#room.startAudio(); }
@@ -265,6 +196,6 @@ export class MediaConnection {
   async #close(deliberate: boolean): Promise<void> {
     this.#closed = true;
     this.#left ||= deliberate;
-    try { await this.#room.disconnect(true); } finally { this.#registration?.release(); this.#cleanup(); }
+    try { await this.#room.disconnect(true); } finally { this.#cleanup(); }
   }
 }

@@ -36,7 +36,8 @@ planned languages, push notifications, package names, versioning and support.
 
 | SDK | Package | Runtime | Covers |
 | --- | --- | --- | --- |
-| [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, and calls with explicit connect and capture |
+| [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, a conversation store with an offline outbox, typing and read receipts, push in a Web Push service worker, and calls through `livekit-client` with explicit connect and capture |
+| [React hooks](packages/react/README.md) | `@convohop/react`, not in a release yet | React 18 or later, with `@convohop/client` | Conversations with optimistic, offline-safe sends, typing, session renewal, live sessions and browser media |
 | [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and push payload builders |
 | [Java and Kotlin server](jvm/README.md) | `com.convohop:convohop-server`, `com.convohop:convohop-server-kotlin` | Java 11 or later. Kotlin coroutine extensions are optional. | User identities and sessions, conversations, membership and messages for your backend, generated APIs with paginators for every server operation, backend key issuance, webhook verification, and push payload builders |
 
@@ -58,7 +59,7 @@ package registry yet. [Install a release](#install-a-release) or
 | Layer | Languages and platforms |
 | --- | --- |
 | Server | Python, .NET, Go |
-| Client | React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter |
+| Client | iOS and macOS (Swift), Android (Kotlin), React Native, Flutter |
 
 ## Tools
 
@@ -142,6 +143,10 @@ for every pull request. On Node.js 24, it also packs `@convohop/core`,
 `@convohop/client` and `@convohop/server` and runs `npm publish --dry-run`.
 The [Conformance workflow](.github/workflows/conformance.yml) runs the
 scenarios on Node.js 24. Neither workflow publishes or deploys anything.
+
+The [Web workflow](.github/workflows/web.yml) runs the Web client's browser
+tests in headless Chromium, Firefox and WebKit, and the React hooks on
+React 18. See [Tests](CONTRIBUTING.md#tests).
 
 The Java and Kotlin SDK has its own Gradle build and
 [JVM workflow](.github/workflows/jvm.yml). See

@@ -1,5 +1,6 @@
 import { validateOutput, type OperationPayload } from "./graphql.js";
 import type { OperationKey } from "./generated/operations.js";
+import { hex, parseURL, sha256, utf8, type ConvoHopPlatform } from "./platform.js";
 export type ProtocolObject = Record<string, unknown>;
 export type ConversationCursor = NonNullable<NonNullable<OperationPayload<"communication.events">["result"]>["nextCursor"]>;
 export interface ItemPage<T> { items: T[]; complete: boolean; refreshRequired: boolean; nextCursor?: unknown }
@@ -176,8 +177,8 @@ export function sameSession(left: SessionMetadata, right: SessionMetadata): bool
   return left.sessionId === right.sessionId && left.principalId === right.principalId &&
     left.deviceId === right.deviceId && left.incarnation === right.incarnation;
 }
-export function origin(value: string): string {
-  const url = new URL(value);
+export function origin(value: string, platform?: ConvoHopPlatform): string {
+  const url = parseURL(value, platform);
   if (url.username || url.password || url.search || url.hash || url.pathname !== "/" ||
       (url.protocol !== "https:" && !(url.protocol === "http:" && ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname))))
     throw new TypeError("Use an HTTPS origin, or explicit loopback HTTP for local development");
@@ -194,7 +195,10 @@ export function canonical(value: unknown): string {
   if (result === undefined) throw new TypeError("JSON payload cannot contain undefined values");
   return result;
 }
-export async function fingerprint(value: unknown): Promise<string> {
-  const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canonical(value)));
-  return "sha256:" + [...new Uint8Array(bytes)].map(n => n.toString(16).padStart(2, "0")).join("");
+/** A deep copy through the protocol's canonical JSON form. Undefined values and unsafe numbers throw a TypeError. */
+export function jsonClone<T>(value: T): T {
+  return JSON.parse(canonical(value)) as T;
+}
+export async function fingerprint(value: unknown, platform?: ConvoHopPlatform): Promise<string> {
+  return "sha256:" + hex(await sha256(utf8(canonical(value)), platform));
 }

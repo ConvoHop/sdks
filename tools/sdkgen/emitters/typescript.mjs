@@ -171,6 +171,17 @@ export function outputShapes(ir) {
   return Object.fromEntries(ir.types.filter(type => type.kind !== "input").map(type => [type.name, shape(type)]));
 }
 
+/**
+ * The core runtime catalog: the published `operationCatalog` plus each
+ * operation's idempotency class, which the transport uses to decide whether a
+ * mutation is persisted for recovery.
+ */
+export function coreOperationCatalog(ir) {
+  const idempotency = new Map(ir.operations.map(operation => [operation.id, operation.idempotency]));
+  return Object.fromEntries(Object.entries(operationCatalog(ir)).map(([id, { plane, kind, ...rest }]) =>
+    [id, { plane, kind, idempotency: idempotency.get(id), ...rest }]));
+}
+
 /** The contents of operations.ts. */
 export function renderOperationCatalog(ir) {
   const types = ir.operations.map(operation => {
@@ -181,10 +192,10 @@ export function renderOperationCatalog(ir) {
     'import type * as Generated from "./graphql-types.js";\n' +
     `export interface OperationTypes {\n${types.join("\n")}\n}\n` +
     "export type OperationKey = keyof OperationTypes;\n" +
-    "export interface OperationCatalogEntry { plane: string; kind: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }\n" +
+    "export interface OperationCatalogEntry { plane: string; kind: string; idempotency: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }\n" +
     'export type OutputShape = { kind: "scalar" } | { kind: "enum"; values: readonly string[] } | { kind: "object"; fields: Readonly<Record<string, string>> };\n' +
     `export const outputShapes: Readonly<Record<string, OutputShape>> = ${JSON.stringify(outputShapes(ir), null, 2)};\n` +
-    `export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = ${JSON.stringify(operationCatalog(ir), null, 2)};\n`;
+    `export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = ${JSON.stringify(coreOperationCatalog(ir), null, 2)};\n`;
 }
 
 export default defineEmitter({

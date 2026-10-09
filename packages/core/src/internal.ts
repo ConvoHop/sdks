@@ -5,8 +5,9 @@
  * @internal
  */
 export {
-  canonical, currentSession, eventPage, origin, route, sameSession, sessionExpiry, sessionMetadata, timestamp,
+  canonical, currentSession, eventPage, jsonClone, origin, route, sameSession, sessionExpiry, sessionMetadata, timestamp,
 } from "./protocol.js";
+export { parseURL, randomUUID, validatePlatform } from "./platform.js";
 export { authenticatedTransport } from "./transport.js";
 export type { TransportAuthentication } from "./transport.js";
 export { validateOutput } from "./graphql.js";
