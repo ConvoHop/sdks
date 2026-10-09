@@ -32,9 +32,10 @@ npm test --workspace @convohop/client
   [conformance mock](../../spec/conformance/targets.md) on Node.js and in
   Playwright's headless Chromium, Firefox and WebKit, and the push service
   worker in Chromium. Calls aren't tested over real WebRTC.
-- **React Native:** intended, but not verified yet. Pass a `platform`
-  option with what the JavaScript engine lacks, such as `randomUUID`,
-  `sha256`, a WHATWG-conforming `URL`, `connectivity` and `lifecycle`.
+- **React Native:** run only by hand, on Hermes on an Android emulator and
+  an iOS simulator. Pass a `platform` option with what the JavaScript
+  engine lacks, such as `randomUUID`, `sha256`, a WHATWG-conforming `URL`,
+  `connectivity` and `lifecycle`.
   [`@convohop/react-native`](../react-native/README.md) provides one with
   `createPlatform()`, and adds push and calls in the system call UI; its
   README says what has been verified. Metro resolves package `exports` by

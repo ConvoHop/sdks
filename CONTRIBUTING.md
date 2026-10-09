@@ -134,7 +134,7 @@ of the docs projects.
 | `go/` | Go server SDK (`github.com/ConvoHop/sdks/go`), a Go module with no dependencies. Its conformance driver is a separate module in `conformance/drivers/go/` |
 | `android/` | Android client SDK (`com.convohop:convohop-android`, with `convohop-android-core` and `convohop-android-push`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/android/` and compiles the Kotlin generator's edge goldens |
 | `flutter/` | Flutter SDK (`convohop`, Dart): the package, its Android and iOS plugin code, tests and an example app. It isn't an npm workspace |
-| `packages/react-native` | React Native SDK (`@convohop/react-native`), in development: the client SDK's platform on Hermes, push, calls, media, the Codegen specs of its native modules and an example app's source. A private workspace, not in a release yet. Its conformance driver is in `conformance/drivers/react-native/` |
+| `packages/react-native` | React Native SDK (`@convohop/react-native`), in development: the client SDK's platform on Hermes, push, calls and media, with native modules for iOS and Android and their Codegen specs, and an example app. A private workspace, not in a release yet. Its conformance driver is in `conformance/drivers/react-native/` |
 | `swift/` | Swift client SDK for iOS and macOS (the `ConvoHop` Swift package and its products), a self-contained Swift package. Its conformance driver is a separate package in `conformance/drivers/swift/Driver/` |
 | `packages/cli` | The `convohop` command-line tool (`@convohop/cli`), built on `@convohop/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
 | `packages/mcp` | An MCP server (`@convohop/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
@@ -324,8 +324,11 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   Native, LiveKit's React Native SDK and the native modules, and run React
   Native's Codegen on the native module specs. They don't build or run
   native code. `npm run typecheck:example -w @convohop/react-native`
-  type-checks the example app. See
-  [Testing](docs/react-native.md#testing) for what isn't verified.
+  type-checks the example app. The
+  [React Native workflow](.github/workflows/react-native.yml) also runs the
+  Android modules' JVM tests and builds the example app for Android and the
+  iOS simulator. See [Testing](docs/react-native.md#testing) for what isn't
+  verified.
 - The docs pipeline's tests live in `tools/docgen/test/`. Run them with
   `npm run test:docgen`. Code in the docs is tested too: put it in a
   language's example code and include it by region, as

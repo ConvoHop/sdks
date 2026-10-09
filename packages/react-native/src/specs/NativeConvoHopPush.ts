@@ -23,7 +23,7 @@ export type PushRegistrationErrorEvent = {
 export type NotificationEvent = {
   /** `received` while the app runs, or `opened` when the user opened the notification. */
   action: string;
-  /** The push's ConvoHop payload as JSON text: the APNs `userInfo` or the FCM data map. */
+  /** The push's ConvoHop payload as JSON text: `{"convohop": …}` from the APNs `userInfo`, or the FCM data map. */
   payload: string;
 };
 
@@ -71,8 +71,11 @@ export interface Spec extends TurboModule {
    * before the first call. The native handlers drop every other ConvoHop push, including one that starts the app before
    * JavaScript runs, and emit nothing for it. iOS still reports a dropped VoIP push to CallKit and ends it at once.
    * It stores the two IDs and no credential. Resolves once they are stored.
+   *
+   * `recipient` is a {@link Recipient} or `null`. It's typed `Object` because Codegen's iOS bindings pass a typed
+   * object as a C++ reference, which can't be `null`.
    */
-  setRecipient(recipient: Recipient | null): Promise<void>;
+  setRecipient(recipient: Object | null): Promise<void>;
   /** The latest registration of each kind this process has seen, unless it was unregistered since. */
   getRegistrations(): Promise<ReadonlyArray<PushRegistrationEvent>>;
   /** The notification the user opened to launch the app, once. */

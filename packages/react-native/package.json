@@ -33,6 +33,8 @@
     "android",
     "!android/build",
     "!android/src/test",
+    "ios",
+    "ConvoHopReactNative.podspec",
     "NOTICE"
   ],
   "codegenConfig": {
@@ -41,6 +43,13 @@
     "jsSrcsDir": "src/specs",
     "android": {
       "javaPackageName": "com.convohop.reactnative"
+    },
+    "ios": {
+      "modulesProvider": {
+        "ConvoHopCalls": "ConvoHopCallsModule",
+        "ConvoHopPlatform": "ConvoHopPlatformModule",
+        "ConvoHopPush": "ConvoHopPushModule"
+      }
     }
   },
   "scripts": {
