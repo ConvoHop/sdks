@@ -112,7 +112,7 @@ test("the server lists every generated tool with its hints and operation annotat
 });
 
 test("each tool runs the SDK catalog operation with the same plane, kind and input fields", () => {
-  assert.equal(mcpTools.length, 60);
+  assert.equal(mcpTools.length, 61);
   for (const tool of mcpTools) {
     const entry = operationCatalog[tool.operation.id];
     assert.ok(entry, tool.operation.id);
@@ -124,7 +124,8 @@ test("each tool runs the SDK catalog operation with the same plane, kind and inp
     assert.equal(tool.annotations.destructiveHint, tool.operation.destructive);
   }
   assert.deepEqual(Object.keys(withheldOperations).sort(),
-    ["communication.issueSession", "communication.renewSession", "management.credentialPermit"]);
+    ["communication.issueSession", "communication.renewSession", "management.createBillingCheckoutSession",
+      "management.createBillingPortalSession", "management.credentialPermit"]);
   for (const id of Object.keys(withheldOperations)) {
     assert.ok(operationCatalog[id], id);
     assert.ok(!mcpTools.some(tool => tool.operation.id === id), id);

@@ -53,7 +53,9 @@ export const operationMetaKey = "com.convohop/operation";
 export const withheldOperations: Readonly<Record<string, string>> = {
   "communication.issueSession": "returns a user session token",
   "communication.renewSession": "returns a user session token",
-  "management.credentialPermit": "returns a credential delivery permit"
+  "management.credentialPermit": "returns a credential delivery permit",
+  "management.createBillingCheckoutSession": "returns a hosted billing link that grants access to whoever holds it",
+  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it"
 };
 export const mcpTools: readonly McpToolDefinition[] = [
   {

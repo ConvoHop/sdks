@@ -990,6 +990,16 @@
           ]
         },
         {
+          "name": "organizationBilling",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server#ManagementApi.organizationBilling",
+          "anchor": "managementapiorganizationbilling-method",
+          "signatures": [
+            "public OrganizationBillingReply organizationBilling(OrganizationBillingRequestInput input)"
+          ],
+          "docs": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+        },
+        {
           "name": "webhookEndpoints",
           "kind": "method",
           "ref": "com.convohop:convohop-server#ManagementApi.webhookEndpoints",
@@ -1200,6 +1210,28 @@
               "page": "../../operations/management/resumeOperation.md"
             }
           ]
+        },
+        {
+          "name": "createBillingCheckoutSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server#ManagementApi.createBillingCheckoutSession",
+          "anchor": "managementapicreatebillingcheckoutsession-method",
+          "signatures": [
+            "public CreateBillingCheckoutSessionReply createBillingCheckoutSession(CreateBillingCheckoutSessionRequestInput input)",
+            "public CreateBillingCheckoutSessionReply createBillingCheckoutSession(CreateBillingCheckoutSessionRequestInput input, @Nullable String requestId)"
+          ],
+          "docs": "Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.\n\nIdempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
+        },
+        {
+          "name": "createBillingPortalSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server#ManagementApi.createBillingPortalSession",
+          "anchor": "managementapicreatebillingportalsession-method",
+          "signatures": [
+            "public CreateBillingPortalSessionReply createBillingPortalSession(CreateBillingPortalSessionRequestInput input)",
+            "public CreateBillingPortalSessionReply createBillingPortalSession(CreateBillingPortalSessionRequestInput input, @Nullable String requestId)"
+          ],
+          "docs": "Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.\n\nIdempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.\n\nAuthorization: portalCredential (condition owner).\n\nParameters:\n\n- `input`: the operation input\n- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one\n\nReturns: the authority result\n\nThrows: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown"
         },
         {
           "name": "configureWebhook",
@@ -4137,6 +4169,22 @@
       "docs": "The `AlertLiveSessionPayload` result type.\n\nPackage: `com.convohop.server.model`."
     },
     {
+      "name": "BillingCheckoutSession",
+      "kind": "type",
+      "ref": "com.convohop:convohop-server#BillingCheckoutSession",
+      "anchor": "billingcheckoutsession-type",
+      "signatures": ["public final class BillingCheckoutSession"],
+      "docs": "The `BillingCheckoutSession` result type.\n\nPackage: `com.convohop.server.model`."
+    },
+    {
+      "name": "BillingPortalSession",
+      "kind": "type",
+      "ref": "com.convohop:convohop-server#BillingPortalSession",
+      "anchor": "billingportalsession-type",
+      "signatures": ["public final class BillingPortalSession"],
+      "docs": "The `BillingPortalSession` result type.\n\nPackage: `com.convohop.server.model`."
+    },
+    {
       "name": "BroadcastPermissionChanged",
       "kind": "type",
       "ref": "com.convohop:convohop-server#BroadcastPermissionChanged",
@@ -4223,6 +4271,38 @@
       "anchor": "conversationmutereply-type",
       "signatures": ["public final class ConversationMuteReply"],
       "docs": "The `ConversationMuteReply` result type.\n\nPackage: `com.convohop.server.model`."
+    },
+    {
+      "name": "CreateBillingCheckoutSessionReply",
+      "kind": "type",
+      "ref": "com.convohop:convohop-server#CreateBillingCheckoutSessionReply",
+      "anchor": "createbillingcheckoutsessionreply-type",
+      "signatures": ["public final class CreateBillingCheckoutSessionReply"],
+      "docs": "The `CreateBillingCheckoutSessionReply` result type.\n\nPackage: `com.convohop.server.model`."
+    },
+    {
+      "name": "CreateBillingCheckoutSessionRequestInput",
+      "kind": "type",
+      "ref": "com.convohop:convohop-server#CreateBillingCheckoutSessionRequestInput",
+      "anchor": "createbillingcheckoutsessionrequestinput-type",
+      "signatures": ["public final class CreateBillingCheckoutSessionRequestInput"],
+      "docs": "The `CreateBillingCheckoutSessionRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
+    },
+    {
+      "name": "CreateBillingPortalSessionReply",
+      "kind": "type",
+      "ref": "com.convohop:convohop-server#CreateBillingPortalSessionReply",
+      "anchor": "createbillingportalsessionreply-type",
+      "signatures": ["public final class CreateBillingPortalSessionReply"],
+      "docs": "The `CreateBillingPortalSessionReply` result type.\n\nPackage: `com.convohop.server.model`."
+    },
+    {
+      "name": "CreateBillingPortalSessionRequestInput",
+      "kind": "type",
+      "ref": "com.convohop:convohop-server#CreateBillingPortalSessionRequestInput",
+      "anchor": "createbillingportalsessionrequestinput-type",
+      "signatures": ["public final class CreateBillingPortalSessionRequestInput"],
+      "docs": "The `CreateBillingPortalSessionRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
     },
     {
       "name": "CreateConversationReply",
@@ -5063,6 +5143,30 @@
       "anchor": "organization-type",
       "signatures": ["public final class Organization"],
       "docs": "The `Organization` result type.\n\nPackage: `com.convohop.server.model`."
+    },
+    {
+      "name": "OrganizationBilling",
+      "kind": "type",
+      "ref": "com.convohop:convohop-server#OrganizationBilling",
+      "anchor": "organizationbilling-type",
+      "signatures": ["public final class OrganizationBilling"],
+      "docs": "The `OrganizationBilling` result type.\n\nPackage: `com.convohop.server.model`."
+    },
+    {
+      "name": "OrganizationBillingReply",
+      "kind": "type",
+      "ref": "com.convohop:convohop-server#OrganizationBillingReply",
+      "anchor": "organizationbillingreply-type",
+      "signatures": ["public final class OrganizationBillingReply"],
+      "docs": "The `OrganizationBillingReply` result type.\n\nPackage: `com.convohop.server.model`."
+    },
+    {
+      "name": "OrganizationBillingRequestInput",
+      "kind": "type",
+      "ref": "com.convohop:convohop-server#OrganizationBillingRequestInput",
+      "anchor": "organizationbillingrequestinput-type",
+      "signatures": ["public final class OrganizationBillingRequestInput"],
+      "docs": "The `OrganizationBillingRequestInput` input type.\n\nBuild instances with `builder()`. Fields without a value are omitted from the request.\n\nPackage: `com.convohop.server.model`."
     },
     {
       "name": "OrganizationPage",

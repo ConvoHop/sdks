@@ -1304,6 +1304,18 @@ Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new reques
 
 Sends [`management.organizationUsage`](../../operations/management/organizationUsage.md).
 
+#### `AsyncConvoHopManagement.organization_billing` method
+
+```python
+async def organization_billing(self, *, org_id: str) -> OrganizationBilling
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
 #### `AsyncConvoHopManagement.webhook_endpoints` method
 
 ```python
@@ -1605,6 +1617,49 @@ Parameters:
 - `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 Sends [`management.resumeOperation`](../../operations/management/resumeOperation.md).
+
+#### `AsyncConvoHopManagement.create_billing_checkout_session` method
+
+```python
+async def create_billing_checkout_session(
+    self,
+    *,
+    org_id: str,
+    plan_id: str,
+    request_id: str | None = None,
+) -> BillingCheckoutSession
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `AsyncConvoHopManagement.create_billing_portal_session` method
+
+```python
+async def create_billing_portal_session(
+    self,
+    *,
+    org_id: str,
+    request_id: str | None = None,
+) -> BillingPortalSession
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 #### `AsyncConvoHopManagement.configure_webhook` method
 
@@ -3026,6 +3081,18 @@ Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new reques
 
 Sends [`management.organizationUsage`](../../operations/management/organizationUsage.md).
 
+#### `ConvoHopManagement.organization_billing` method
+
+```python
+def organization_billing(self, *, org_id: str) -> OrganizationBilling
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
 #### `ConvoHopManagement.webhook_endpoints` method
 
 ```python
@@ -3327,6 +3394,49 @@ Parameters:
 - `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 Sends [`management.resumeOperation`](../../operations/management/resumeOperation.md).
+
+#### `ConvoHopManagement.create_billing_checkout_session` method
+
+```python
+def create_billing_checkout_session(
+    self,
+    *,
+    org_id: str,
+    plan_id: str,
+    request_id: str | None = None,
+) -> BillingCheckoutSession
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `ConvoHopManagement.create_billing_portal_session` method
+
+```python
+def create_billing_portal_session(
+    self,
+    *,
+    org_id: str,
+    request_id: str | None = None,
+) -> BillingPortalSession
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
 
 #### `ConvoHopManagement.configure_webhook` method
 

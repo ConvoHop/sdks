@@ -173,8 +173,9 @@ convohop never prints a portal token, backend key, webhook secret or redeemed
 credential, and redacts the credential fields of every reply, such as
 `sessionToken`, `connectToken` and `secret`. Its errors don't quote the URLs
 you give it, which can carry tokens. `call` doesn't run the operations whose
-results are credentials, such as `communication.issueSession`;
-`keys issue --out` and `redeem` write credentials only to a new file that only
+results are credentials, such as `communication.issueSession` and the hosted
+billing links of `management.createBillingCheckoutSession` and
+`management.createBillingPortalSession`; `keys issue --out` and `redeem` write credentials only to a new file that only
 you can read.
 
 ## What the schema doesn't offer yet

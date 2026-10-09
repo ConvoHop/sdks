@@ -277,6 +277,69 @@
         "retryable": true
       },
       {
+        "name": "BILLING_CATALOG_NOT_SYNCED",
+        "summary": "The billing provider's catalog does not match the configured price book yet. An operator must sync it.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "BILLING_CUSTOMER_MISSING",
+        "summary": "The organization has no billing account yet. Start a checkout first.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "BILLING_LINK_EXPIRED",
+        "summary": "The billing link of this request is no longer valid. Send a new request with a new requestId.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "BILLING_NOT_CONFIGURED",
+        "summary": "Billing is not configured in this environment.",
+        "origin": "server",
+        "status": 503,
+        "retryable": false
+      },
+      {
+        "name": "BILLING_PLAN_UNAVAILABLE",
+        "summary": "The plan is not offered for self-service checkout.",
+        "origin": "server",
+        "status": 400,
+        "retryable": false
+      },
+      {
+        "name": "BILLING_PROVIDER_CHANGED",
+        "summary": "The organization's billing account belongs to a different billing provider.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "BILLING_PROVIDER_REJECTED",
+        "summary": "The billing provider refused the request.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "BILLING_SUBSCRIPTION_ACTIVE",
+        "summary": "The organization already has a subscription. Change it in the billing portal.",
+        "origin": "server",
+        "status": 409,
+        "retryable": false
+      },
+      {
+        "name": "BILLING_SUSPENDED",
+        "summary": "The organization is suspended for an unpaid balance. Update its payment method in the billing portal.",
+        "origin": "server",
+        "status": 402,
+        "retryable": false
+      },
+      {
         "name": "CREDENTIAL_DELIVERY_EXPIRED",
         "summary": "The credential delivery expired or can no longer be redeemed.",
         "origin": "server",
@@ -1902,9 +1965,9 @@
       "input": {"argument": "input", "type": "ResolveRequestRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ResolveRequestReply", "nullable": false}},
       "document": {
-        "text": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
-        "bytes": 6284,
-        "selectedFields": 235,
+        "text": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+        "bytes": 6507,
+        "selectedFields": 244,
         "depth": 8
       },
       "idempotency": "safe",
@@ -5506,6 +5569,73 @@
       }
     },
     {
+      "id": "management.organizationBilling",
+      "plane": "management",
+      "kind": "query",
+      "field": "organizationBilling",
+      "operationName": "ManagementOrganizationBilling",
+      "summary": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {"kind": "input", "name": "OrganizationBillingRequestInput", "nullable": false}
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {"argument": "input", "type": "OrganizationBillingRequestInput", "required": true},
+      "result": {"type": {"kind": "object", "name": "OrganizationBillingReply", "nullable": false}},
+      "document": {
+        "text": "query ManagementOrganizationBilling($context: RequestContextInput!, $input: OrganizationBillingRequestInput!) {\n  organizationBilling(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      planId\n      standing\n      graceUntil\n      subscriptionStatus\n      currentPeriodEnd\n      cancelAtPeriodEnd\n      catalogVersion\n      configured\n      billed\n    }\n  }\n}",
+        "bytes": 576,
+        "selectedFields": 26,
+        "depth": 2
+      },
+      "idempotency": "safe",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "BILLING_NOT_CONFIGURED",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "REQUEST_TOO_LARGE",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
       "id": "management.webhookEndpoints",
       "plane": "management",
       "kind": "query",
@@ -5682,9 +5812,9 @@
       "input": {"argument": "input", "type": "ResolveRequestRequestInput", "required": true},
       "result": {"type": {"kind": "object", "name": "ResolveRequestReply", "nullable": false}},
       "document": {
-        "text": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
-        "bytes": 6281,
-        "selectedFields": 235,
+        "text": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+        "bytes": 6504,
+        "selectedFields": 244,
         "depth": 8
       },
       "idempotency": "safe",
@@ -5901,6 +6031,7 @@
           "ADMISSION_LIMIT",
           "ALREADY_EXISTS",
           "AUTHORITY_UNAVAILABLE",
+          "BILLING_SUSPENDED",
           "FEATURE_UNSUPPORTED",
           "FORBIDDEN",
           "GRAPHQL_ERROR",
@@ -5973,6 +6104,7 @@
           "ADMISSION_LIMIT",
           "ALREADY_EXISTS",
           "AUTHORITY_UNAVAILABLE",
+          "BILLING_SUSPENDED",
           "DEPLOYMENT_NOT_READY",
           "FEATURE_UNSUPPORTED",
           "FORBIDDEN",
@@ -6422,6 +6554,178 @@
           "RESPONSE_TOO_LARGE",
           "RETRY_EXHAUSTED",
           "REVISION_CONFLICT",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.createBillingCheckoutSession",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "createBillingCheckoutSession",
+      "operationName": "ManagementCreateBillingCheckoutSession",
+      "summary": "Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {
+            "kind": "input",
+            "name": "CreateBillingCheckoutSessionRequestInput",
+            "nullable": false
+          }
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {
+        "argument": "input",
+        "type": "CreateBillingCheckoutSessionRequestInput",
+        "required": true
+      },
+      "result": {
+        "type": {"kind": "object", "name": "CreateBillingCheckoutSessionReply", "nullable": false}
+      },
+      "document": {
+        "text": "mutation ManagementCreateBillingCheckoutSession($context: RequestContextInput!, $input: CreateBillingCheckoutSessionRequestInput!) {\n  createBillingCheckoutSession(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      planId\n      url\n      expiresAt\n    }\n  }\n}",
+        "bytes": 477,
+        "selectedFields": 20,
+        "depth": 2
+      },
+      "idempotency": "singleUse",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "BILLING_CATALOG_NOT_SYNCED",
+          "BILLING_LINK_EXPIRED",
+          "BILLING_NOT_CONFIGURED",
+          "BILLING_PLAN_UNAVAILABLE",
+          "BILLING_PROVIDER_CHANGED",
+          "BILLING_PROVIDER_REJECTED",
+          "BILLING_SUBSCRIPTION_ACTIVE",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "OUTCOME_UNKNOWN",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
+          "TRANSPORT_UNKNOWN",
+          "UNAUTHENTICATED"
+        ]
+      }
+    },
+    {
+      "id": "management.createBillingPortalSession",
+      "plane": "management",
+      "kind": "mutation",
+      "field": "createBillingPortalSession",
+      "operationName": "ManagementCreateBillingPortalSession",
+      "summary": "Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.",
+      "layer": "server",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "arguments": [
+        {
+          "name": "context",
+          "role": "context",
+          "type": {"kind": "input", "name": "RequestContextInput", "nullable": false}
+        },
+        {
+          "name": "input",
+          "role": "input",
+          "type": {
+            "kind": "input",
+            "name": "CreateBillingPortalSessionRequestInput",
+            "nullable": false
+          }
+        }
+      ],
+      "context": {
+        "argument": "context",
+        "type": "RequestContextInput",
+        "fields": [
+          {"name": "requestId", "use": "required"},
+          {"name": "projectId", "use": "forbidden"},
+          {"name": "incarnation", "use": "optional"},
+          {"name": "observedServingEpoch", "use": "optional"},
+          {"name": "credentialDeliveryPermit", "use": "forbidden"}
+        ]
+      },
+      "input": {
+        "argument": "input",
+        "type": "CreateBillingPortalSessionRequestInput",
+        "required": true
+      },
+      "result": {
+        "type": {"kind": "object", "name": "CreateBillingPortalSessionReply", "nullable": false}
+      },
+      "document": {
+        "text": "mutation ManagementCreateBillingPortalSession($context: RequestContextInput!, $input: CreateBillingPortalSessionRequestInput!) {\n  createBillingPortalSession(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      url\n      expiresAt\n    }\n  }\n}",
+        "bytes": 458,
+        "selectedFields": 19,
+        "depth": 2
+      },
+      "idempotency": "singleUse",
+      "pagination": {"style": "none"},
+      "realtime": {"mode": "none"},
+      "errors": {
+        "sets": ["request", "http", "mutation"],
+        "codes": [
+          "ADMISSION_LIMIT",
+          "AUTHORITY_UNAVAILABLE",
+          "BILLING_CUSTOMER_MISSING",
+          "BILLING_LINK_EXPIRED",
+          "BILLING_NOT_CONFIGURED",
+          "BILLING_PROVIDER_CHANGED",
+          "BILLING_PROVIDER_REJECTED",
+          "FEATURE_UNSUPPORTED",
+          "FORBIDDEN",
+          "GRAPHQL_ERROR",
+          "GRAPHQL_INVALID_REQUEST",
+          "GRAPHQL_QUERY_LIMIT",
+          "GRAPHQL_RESPONSE_LIMIT",
+          "HTTP_FAILURE",
+          "IDEMPOTENCY_CONFLICT",
+          "INVALID_REQUEST",
+          "INVALID_RESPONSE",
+          "NOT_FOUND",
+          "OUTCOME_UNKNOWN",
+          "RECOVERY_STORAGE_FAILURE",
+          "REQUEST_TOO_LARGE",
+          "RESOLUTION_REQUIRED",
+          "RESPONSE_TOO_LARGE",
+          "RETRY_EXHAUSTED",
           "TRANSPORT_UNKNOWN",
           "UNAUTHENTICATED"
         ]
@@ -6947,6 +7251,27 @@
         {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": false}},
         {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
         {"name": "result", "type": {"kind": "object", "name": "LiveAlertBatch", "nullable": false}}
+      ]
+    },
+    {
+      "name": "BillingCheckoutSession",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "planId", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "url", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "expiresAt", "type": {"kind": "scalar", "name": "String", "nullable": false}}
+      ]
+    },
+    {
+      "name": "BillingPortalSession",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "url", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "expiresAt", "type": {"kind": "scalar", "name": "String", "nullable": true}}
       ]
     },
     {
@@ -8762,6 +9087,29 @@
       ]
     },
     {
+      "name": "OrganizationBilling",
+      "kind": "object",
+      "planes": ["communication", "management"],
+      "fields": [
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "planId", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "standing", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "graceUntil", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {
+          "name": "subscriptionStatus",
+          "type": {"kind": "scalar", "name": "String", "nullable": true}
+        },
+        {"name": "currentPeriodEnd", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {
+          "name": "cancelAtPeriodEnd",
+          "type": {"kind": "scalar", "name": "Boolean", "nullable": false}
+        },
+        {"name": "catalogVersion", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "configured", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}},
+        {"name": "billed", "type": {"kind": "scalar", "name": "Boolean", "nullable": false}}
+      ]
+    },
+    {
       "name": "OrganizationPage",
       "kind": "object",
       "planes": ["communication", "management"],
@@ -9261,6 +9609,14 @@
       "planes": ["communication", "management"],
       "description": "Exactly one typed field contains the retained, currently authorized receipt result.",
       "fields": [
+        {
+          "name": "billingCheckoutSession",
+          "type": {"kind": "object", "name": "BillingCheckoutSession", "nullable": true}
+        },
+        {
+          "name": "billingPortalSession",
+          "type": {"kind": "object", "name": "BillingPortalSession", "nullable": true}
+        },
         {
           "name": "broadcastPermissionChanged",
           "type": {"kind": "object", "name": "BroadcastPermissionChanged", "nullable": true}
@@ -9892,6 +10248,59 @@
       ]
     },
     {
+      "name": "CreateBillingCheckoutSessionReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "BillingCheckoutSession", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "CreateBillingCheckoutSessionRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [
+        {"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "planId", "type": {"kind": "scalar", "name": "String", "nullable": false}}
+      ]
+    },
+    {
+      "name": "CreateBillingPortalSessionReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "BillingPortalSession", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "CreateBillingPortalSessionRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [{"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}}]
+    },
+    {
       "name": "CreateDeploymentReply",
       "kind": "object",
       "planes": ["management"],
@@ -10188,6 +10597,31 @@
         },
         {"name": "expiresAt", "type": {"kind": "scalar", "name": "String", "nullable": false}}
       ]
+    },
+    {
+      "name": "OrganizationBillingReply",
+      "kind": "object",
+      "planes": ["management"],
+      "fields": [
+        {"name": "status", "type": {"kind": "scalar", "name": "String", "nullable": false}},
+        {"name": "requestId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}},
+        {"name": "serverTime", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "receiptId", "type": {"kind": "scalar", "name": "UUID", "nullable": true}},
+        {"name": "committedAt", "type": {"kind": "scalar", "name": "String", "nullable": true}},
+        {"name": "replayed", "type": {"kind": "scalar", "name": "Boolean", "nullable": true}},
+        {"name": "operation", "type": {"kind": "object", "name": "OperationRef", "nullable": true}},
+        {"name": "resourceRef", "type": {"kind": "object", "name": "ResourceRef", "nullable": true}},
+        {
+          "name": "result",
+          "type": {"kind": "object", "name": "OrganizationBilling", "nullable": true}
+        }
+      ]
+    },
+    {
+      "name": "OrganizationBillingRequestInput",
+      "kind": "input",
+      "planes": ["management"],
+      "fields": [{"name": "orgId", "type": {"kind": "scalar", "name": "UUID", "nullable": false}}]
     },
     {
       "name": "OrganizationUsageReply",

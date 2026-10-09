@@ -96,6 +96,26 @@
       "docs": "The AlertLiveSessionPayload result."
     },
     {
+      "name": "BillingCheckoutSession",
+      "kind": "class",
+      "ref": "ConvoHop.Models#BillingCheckoutSession",
+      "anchor": "billingcheckoutsession-class",
+      "signatures": [
+        "public sealed class BillingCheckoutSession\n{\n    public BillingCheckoutSession();\n    public string OrgId { get; init; }\n    public string PlanId { get; init; }\n    public string Url { get; init; }\n    public string ExpiresAt { get; init; }\n}"
+      ],
+      "docs": "The BillingCheckoutSession result."
+    },
+    {
+      "name": "BillingPortalSession",
+      "kind": "class",
+      "ref": "ConvoHop.Models#BillingPortalSession",
+      "anchor": "billingportalsession-class",
+      "signatures": [
+        "public sealed class BillingPortalSession\n{\n    public BillingPortalSession();\n    public string OrgId { get; init; }\n    public string Url { get; init; }\n    public string? ExpiresAt { get; init; }\n}"
+      ],
+      "docs": "The BillingPortalSession result."
+    },
+    {
       "name": "BroadcastPermissionChanged",
       "kind": "class",
       "ref": "ConvoHop.Models#BroadcastPermissionChanged",
@@ -204,6 +224,46 @@
         "public sealed class ConversationMuteReply\n{\n    public ConversationMuteReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ServerTime { get; init; }\n    public ConversationMute Result { get; init; }\n}"
       ],
       "docs": "The ConversationMuteReply result."
+    },
+    {
+      "name": "CreateBillingCheckoutSessionReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateBillingCheckoutSessionReply",
+      "anchor": "createbillingcheckoutsessionreply-class",
+      "signatures": [
+        "public sealed class CreateBillingCheckoutSessionReply\n{\n    public CreateBillingCheckoutSessionReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public BillingCheckoutSession? Result { get; init; }\n}"
+      ],
+      "docs": "The CreateBillingCheckoutSessionReply result."
+    },
+    {
+      "name": "CreateBillingCheckoutSessionRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateBillingCheckoutSessionRequestInput",
+      "anchor": "createbillingcheckoutsessionrequestinput-class",
+      "signatures": [
+        "public sealed class CreateBillingCheckoutSessionRequestInput\n{\n    public CreateBillingCheckoutSessionRequestInput(string orgId, string planId);\n    public string OrgId { get; set; }\n    public string PlanId { get; set; }\n}"
+      ],
+      "docs": "The CreateBillingCheckoutSessionRequestInput input."
+    },
+    {
+      "name": "CreateBillingPortalSessionReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateBillingPortalSessionReply",
+      "anchor": "createbillingportalsessionreply-class",
+      "signatures": [
+        "public sealed class CreateBillingPortalSessionReply\n{\n    public CreateBillingPortalSessionReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public BillingPortalSession? Result { get; init; }\n}"
+      ],
+      "docs": "The CreateBillingPortalSessionReply result."
+    },
+    {
+      "name": "CreateBillingPortalSessionRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#CreateBillingPortalSessionRequestInput",
+      "anchor": "createbillingportalsessionrequestinput-class",
+      "signatures": [
+        "public sealed class CreateBillingPortalSessionRequestInput\n{\n    public CreateBillingPortalSessionRequestInput(string orgId);\n    public string OrgId { get; set; }\n}"
+      ],
+      "docs": "The CreateBillingPortalSessionRequestInput input."
     },
     {
       "name": "CreateConversationReply",
@@ -1256,6 +1316,36 @@
       "docs": "The Organization result."
     },
     {
+      "name": "OrganizationBilling",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationBilling",
+      "anchor": "organizationbilling-class",
+      "signatures": [
+        "public sealed class OrganizationBilling\n{\n    public OrganizationBilling();\n    public string OrgId { get; init; }\n    public string? PlanId { get; init; }\n    public string? Standing { get; init; }\n    public string? GraceUntil { get; init; }\n    public string? SubscriptionStatus { get; init; }\n    public string? CurrentPeriodEnd { get; init; }\n    public bool CancelAtPeriodEnd { get; init; }\n    public string CatalogVersion { get; init; }\n    public bool Configured { get; init; }\n    public bool Billed { get; init; }\n}"
+      ],
+      "docs": "The OrganizationBilling result."
+    },
+    {
+      "name": "OrganizationBillingReply",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationBillingReply",
+      "anchor": "organizationbillingreply-class",
+      "signatures": [
+        "public sealed class OrganizationBillingReply\n{\n    public OrganizationBillingReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OrganizationBilling? Result { get; init; }\n}"
+      ],
+      "docs": "The OrganizationBillingReply result."
+    },
+    {
+      "name": "OrganizationBillingRequestInput",
+      "kind": "class",
+      "ref": "ConvoHop.Models#OrganizationBillingRequestInput",
+      "anchor": "organizationbillingrequestinput-class",
+      "signatures": [
+        "public sealed class OrganizationBillingRequestInput\n{\n    public OrganizationBillingRequestInput(string orgId);\n    public string OrgId { get; set; }\n}"
+      ],
+      "docs": "The OrganizationBillingRequestInput input."
+    },
+    {
       "name": "OrganizationPage",
       "kind": "class",
       "ref": "ConvoHop.Models#OrganizationPage",
@@ -1571,7 +1661,7 @@
       "ref": "ConvoHop.Models#RetainedResult",
       "anchor": "retainedresult-class",
       "signatures": [
-        "public sealed class RetainedResult\n{\n    public RetainedResult();\n    public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }\n    public Conversation? Conversation { get; init; }\n    public ConversationMemberBatch? ConversationMemberBatch { get; init; }\n    public ConversationMute? ConversationMute { get; init; }\n    public CredentialDeliveryReceipt? CredentialDeliveryReceipt { get; init; }\n    public DeliveryAck? DeliveryAck { get; init; }\n    public LiveAlertBatch? LiveAlertBatch { get; init; }\n    public LiveCredentialIssuance? LiveCredentialIssuance { get; init; }\n    public LiveSessionEndRequested? LiveSessionEndRequested { get; init; }\n    public LiveSessionJoined? LiveSessionJoined { get; init; }\n    public LiveSessionLeft? LiveSessionLeft { get; init; }\n    public LiveSessionStarted? LiveSessionStarted { get; init; }\n    public Member? Member { get; init; }\n    public Message? Message { get; init; }\n    public MessageAck? MessageAck { get; init; }\n    public Organization? Organization { get; init; }\n    public Principal? Principal { get; init; }\n    public ReadReceipt? ReadReceipt { get; init; }\n    public SessionBootstrap? SessionBootstrap { get; init; }\n    public SessionRevocation? SessionRevocation { get; init; }\n    public JsonElement? SignedProof { get; init; }\n}"
+        "public sealed class RetainedResult\n{\n    public RetainedResult();\n    public BillingCheckoutSession? BillingCheckoutSession { get; init; }\n    public BillingPortalSession? BillingPortalSession { get; init; }\n    public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }\n    public Conversation? Conversation { get; init; }\n    public ConversationMemberBatch? ConversationMemberBatch { get; init; }\n    public ConversationMute? ConversationMute { get; init; }\n    public CredentialDeliveryReceipt? CredentialDeliveryReceipt { get; init; }\n    public DeliveryAck? DeliveryAck { get; init; }\n    public LiveAlertBatch? LiveAlertBatch { get; init; }\n    public LiveCredentialIssuance? LiveCredentialIssuance { get; init; }\n    public LiveSessionEndRequested? LiveSessionEndRequested { get; init; }\n    public LiveSessionJoined? LiveSessionJoined { get; init; }\n    public LiveSessionLeft? LiveSessionLeft { get; init; }\n    public LiveSessionStarted? LiveSessionStarted { get; init; }\n    public Member? Member { get; init; }\n    public Message? Message { get; init; }\n    public MessageAck? MessageAck { get; init; }\n    public Organization? Organization { get; init; }\n    public Principal? Principal { get; init; }\n    public ReadReceipt? ReadReceipt { get; init; }\n    public SessionBootstrap? SessionBootstrap { get; init; }\n    public SessionRevocation? SessionRevocation { get; init; }\n    public JsonElement? SignedProof { get; init; }\n}"
       ],
       "docs": "Exactly one typed field contains the retained, currently authorized receipt result."
     },

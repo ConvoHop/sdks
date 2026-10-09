@@ -1443,6 +1443,26 @@ Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is
 
 Sends [`management.organizationUsage`](../../operations/management/organizationUsage.md).
 
+#### `ManagementApi.organizationBilling` method
+
+```java
+public OrganizationBillingReply organizationBilling(OrganizationBillingRequestInput input)
+```
+
+Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
 #### `ManagementApi.webhookEndpoints` method
 
 ```java
@@ -1746,6 +1766,50 @@ Returns: the authority result
 Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.resumeOperation`](../../operations/management/resumeOperation.md).
+
+#### `ManagementApi.createBillingCheckoutSession` method
+
+```java
+public CreateBillingCheckoutSessionReply createBillingCheckoutSession(CreateBillingCheckoutSessionRequestInput input)
+public CreateBillingCheckoutSessionReply createBillingCheckoutSession(CreateBillingCheckoutSessionRequestInput input, @Nullable String requestId)
+```
+
+Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+
+#### `ManagementApi.createBillingPortalSession` method
+
+```java
+public CreateBillingPortalSessionReply createBillingPortalSession(CreateBillingPortalSessionRequestInput input)
+public CreateBillingPortalSessionReply createBillingPortalSession(CreateBillingPortalSessionRequestInput input, @Nullable String requestId)
+```
+
+Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+Authorization: portalCredential (condition owner).
+
+Parameters:
+
+- `input`: the operation input
+- `requestId`: the request ID to reuse for a retry with the same input, or `null` for a new one
+
+Returns: the authority result
+
+Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.configureWebhook` method
 
@@ -5283,6 +5347,26 @@ The `AlertLiveSessionPayload` result type.
 
 Package: `com.convohop.server.model`.
 
+### `BillingCheckoutSession` type
+
+```java
+public final class BillingCheckoutSession
+```
+
+The `BillingCheckoutSession` result type.
+
+Package: `com.convohop.server.model`.
+
+### `BillingPortalSession` type
+
+```java
+public final class BillingPortalSession
+```
+
+The `BillingPortalSession` result type.
+
+Package: `com.convohop.server.model`.
+
 ### `BroadcastPermissionChanged` type
 
 ```java
@@ -5396,6 +5480,50 @@ public final class ConversationMuteReply
 ```
 
 The `ConversationMuteReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `CreateBillingCheckoutSessionReply` type
+
+```java
+public final class CreateBillingCheckoutSessionReply
+```
+
+The `CreateBillingCheckoutSessionReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `CreateBillingCheckoutSessionRequestInput` type
+
+```java
+public final class CreateBillingCheckoutSessionRequestInput
+```
+
+The `CreateBillingCheckoutSessionRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
+
+Package: `com.convohop.server.model`.
+
+### `CreateBillingPortalSessionReply` type
+
+```java
+public final class CreateBillingPortalSessionReply
+```
+
+The `CreateBillingPortalSessionReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `CreateBillingPortalSessionRequestInput` type
+
+```java
+public final class CreateBillingPortalSessionRequestInput
+```
+
+The `CreateBillingPortalSessionRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
 
 Package: `com.convohop.server.model`.
 
@@ -6510,6 +6638,38 @@ public final class Organization
 ```
 
 The `Organization` result type.
+
+Package: `com.convohop.server.model`.
+
+### `OrganizationBilling` type
+
+```java
+public final class OrganizationBilling
+```
+
+The `OrganizationBilling` result type.
+
+Package: `com.convohop.server.model`.
+
+### `OrganizationBillingReply` type
+
+```java
+public final class OrganizationBillingReply
+```
+
+The `OrganizationBillingReply` result type.
+
+Package: `com.convohop.server.model`.
+
+### `OrganizationBillingRequestInput` type
+
+```java
+public final class OrganizationBillingRequestInput
+```
+
+The `OrganizationBillingRequestInput` input type.
+
+Build instances with `builder()`. Fields without a value are omitted from the request.
 
 Package: `com.convohop.server.model`.
 

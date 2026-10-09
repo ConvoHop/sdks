@@ -695,6 +695,17 @@ OPERATIONS: Mapping[str, OperationSpec] = {
             "          id\n"
             "        }\n"
             "        result {\n"
+            "          billingCheckoutSession {\n"
+            "            orgId\n"
+            "            planId\n"
+            "            url\n"
+            "            expiresAt\n"
+            "          }\n"
+            "          billingPortalSession {\n"
+            "            orgId\n"
+            "            url\n"
+            "            expiresAt\n"
+            "          }\n"
             "          broadcastPermissionChanged {\n"
             "            member {\n"
             "              conversationId\n"
@@ -2902,6 +2913,58 @@ OPERATIONS: Mapping[str, OperationSpec] = {
         long_running=None,
         errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "REQUEST_TOO_LARGE", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
     ),
+    "management.organizationBilling": OperationSpec(
+        id="management.organizationBilling",
+        plane="management",
+        kind="query",
+        field="organizationBilling",
+        operation_name="ManagementOrganizationBilling",
+        document=(
+            "query ManagementOrganizationBilling($context: RequestContextInput!, $input: OrganizationBillingRequestInput!) {\n"
+            "  organizationBilling(context: $context, input: $input) {\n"
+            "    status\n"
+            "    requestId\n"
+            "    serverTime\n"
+            "    receiptId\n"
+            "    committedAt\n"
+            "    replayed\n"
+            "    operation {\n"
+            "      operationId\n"
+            "      owner\n"
+            "      href\n"
+            "      state\n"
+            "    }\n"
+            "    resourceRef {\n"
+            "      kind\n"
+            "      id\n"
+            "    }\n"
+            "    result {\n"
+            "      orgId\n"
+            "      planId\n"
+            "      standing\n"
+            "      graceUntil\n"
+            "      subscriptionStatus\n"
+            "      currentPeriodEnd\n"
+            "      cancelAtPeriodEnd\n"
+            "      catalogVersion\n"
+            "      configured\n"
+            "      billed\n"
+            "    }\n"
+            "  }\n"
+            "}"
+        ),
+        input_type="OrganizationBillingRequestInput",
+        result_type="OrganizationBillingReply!",
+        returns="result",
+        idempotency="safe",
+        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
+        echo_path=("result",),
+        echo=("orgId",),
+        item_echo=(),
+        pagination=None,
+        long_running=None,
+        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "BILLING_NOT_CONFIGURED", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "REQUEST_TOO_LARGE", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
+    ),
     "management.webhookEndpoints": OperationSpec(
         id="management.webhookEndpoints",
         plane="management",
@@ -3076,6 +3139,17 @@ OPERATIONS: Mapping[str, OperationSpec] = {
             "          id\n"
             "        }\n"
             "        result {\n"
+            "          billingCheckoutSession {\n"
+            "            orgId\n"
+            "            planId\n"
+            "            url\n"
+            "            expiresAt\n"
+            "          }\n"
+            "          billingPortalSession {\n"
+            "            orgId\n"
+            "            url\n"
+            "            expiresAt\n"
+            "          }\n"
             "          broadcastPermissionChanged {\n"
             "            member {\n"
             "              conversationId\n"
@@ -3581,7 +3655,7 @@ OPERATIONS: Mapping[str, OperationSpec] = {
         item_echo=(),
         pagination=None,
         long_running="management.getOperation",
-        errors=("ADMISSION_LIMIT", "ALREADY_EXISTS", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
+        errors=("ADMISSION_LIMIT", "ALREADY_EXISTS", "AUTHORITY_UNAVAILABLE", "BILLING_SUSPENDED", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
     ),
     "management.createProject": OperationSpec(
         id="management.createProject",
@@ -3676,7 +3750,7 @@ OPERATIONS: Mapping[str, OperationSpec] = {
         item_echo=(),
         pagination=None,
         long_running="management.getOperation",
-        errors=("ADMISSION_LIMIT", "ALREADY_EXISTS", "AUTHORITY_UNAVAILABLE", "DEPLOYMENT_NOT_READY", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "PLAN_LIMIT_EXCEEDED", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
+        errors=("ADMISSION_LIMIT", "ALREADY_EXISTS", "AUTHORITY_UNAVAILABLE", "BILLING_SUSPENDED", "DEPLOYMENT_NOT_READY", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "PLAN_LIMIT_EXCEEDED", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
     ),
     "management.issueBackendKey": OperationSpec(
         id="management.issueBackendKey",
@@ -4228,6 +4302,97 @@ OPERATIONS: Mapping[str, OperationSpec] = {
         long_running=None,
         errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "REVISION_CONFLICT", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
     ),
+    "management.createBillingCheckoutSession": OperationSpec(
+        id="management.createBillingCheckoutSession",
+        plane="management",
+        kind="mutation",
+        field="createBillingCheckoutSession",
+        operation_name="ManagementCreateBillingCheckoutSession",
+        document=(
+            "mutation ManagementCreateBillingCheckoutSession($context: RequestContextInput!, $input: CreateBillingCheckoutSessionRequestInput!) {\n"
+            "  createBillingCheckoutSession(context: $context, input: $input) {\n"
+            "    status\n"
+            "    requestId\n"
+            "    serverTime\n"
+            "    receiptId\n"
+            "    committedAt\n"
+            "    replayed\n"
+            "    operation {\n"
+            "      operationId\n"
+            "      owner\n"
+            "      href\n"
+            "      state\n"
+            "    }\n"
+            "    resourceRef {\n"
+            "      kind\n"
+            "      id\n"
+            "    }\n"
+            "    result {\n"
+            "      orgId\n"
+            "      planId\n"
+            "      url\n"
+            "      expiresAt\n"
+            "    }\n"
+            "  }\n"
+            "}"
+        ),
+        input_type="CreateBillingCheckoutSessionRequestInput",
+        result_type="CreateBillingCheckoutSessionReply!",
+        returns="result",
+        idempotency="singleUse",
+        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
+        echo_path=("result",),
+        echo=("orgId", "planId"),
+        item_echo=(),
+        pagination=None,
+        long_running=None,
+        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "BILLING_CATALOG_NOT_SYNCED", "BILLING_LINK_EXPIRED", "BILLING_NOT_CONFIGURED", "BILLING_PLAN_UNAVAILABLE", "BILLING_PROVIDER_CHANGED", "BILLING_PROVIDER_REJECTED", "BILLING_SUBSCRIPTION_ACTIVE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
+    ),
+    "management.createBillingPortalSession": OperationSpec(
+        id="management.createBillingPortalSession",
+        plane="management",
+        kind="mutation",
+        field="createBillingPortalSession",
+        operation_name="ManagementCreateBillingPortalSession",
+        document=(
+            "mutation ManagementCreateBillingPortalSession($context: RequestContextInput!, $input: CreateBillingPortalSessionRequestInput!) {\n"
+            "  createBillingPortalSession(context: $context, input: $input) {\n"
+            "    status\n"
+            "    requestId\n"
+            "    serverTime\n"
+            "    receiptId\n"
+            "    committedAt\n"
+            "    replayed\n"
+            "    operation {\n"
+            "      operationId\n"
+            "      owner\n"
+            "      href\n"
+            "      state\n"
+            "    }\n"
+            "    resourceRef {\n"
+            "      kind\n"
+            "      id\n"
+            "    }\n"
+            "    result {\n"
+            "      orgId\n"
+            "      url\n"
+            "      expiresAt\n"
+            "    }\n"
+            "  }\n"
+            "}"
+        ),
+        input_type="CreateBillingPortalSessionRequestInput",
+        result_type="CreateBillingPortalSessionReply!",
+        returns="result",
+        idempotency="singleUse",
+        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
+        echo_path=("result",),
+        echo=("orgId",),
+        item_echo=(),
+        pagination=None,
+        long_running=None,
+        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "BILLING_CUSTOMER_MISSING", "BILLING_LINK_EXPIRED", "BILLING_NOT_CONFIGURED", "BILLING_PROVIDER_CHANGED", "BILLING_PROVIDER_REJECTED", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
+    ),
     "management.configureWebhook": OperationSpec(
         id="management.configureWebhook",
         plane="management",
@@ -4738,6 +4903,17 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "committedAt": "String!",
         "replayed": "Boolean!",
         "result": "LiveAlertBatch!",
+    },
+    "BillingCheckoutSession": {
+        "orgId": "UUID!",
+        "planId": "String!",
+        "url": "String!",
+        "expiresAt": "String!",
+    },
+    "BillingPortalSession": {
+        "orgId": "UUID!",
+        "url": "String!",
+        "expiresAt": "String",
     },
     "BroadcastPermissionChanged": {
         "member": "Member!",
@@ -5300,6 +5476,18 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "status": "String!",
         "revision": "Decimal!",
     },
+    "OrganizationBilling": {
+        "orgId": "UUID!",
+        "planId": "String",
+        "standing": "String",
+        "graceUntil": "String",
+        "subscriptionStatus": "String",
+        "currentPeriodEnd": "String",
+        "cancelAtPeriodEnd": "Boolean!",
+        "catalogVersion": "String!",
+        "configured": "Boolean!",
+        "billed": "Boolean!",
+    },
     "OrganizationPage": {
         "items": "[Organization!]!",
         "complete": "Boolean!",
@@ -5411,6 +5599,8 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "id": "String!",
     },
     "RetainedResult": {
+        "billingCheckoutSession": "BillingCheckoutSession",
+        "billingPortalSession": "BillingPortalSession",
         "broadcastPermissionChanged": "BroadcastPermissionChanged",
         "conversation": "Conversation",
         "conversationMemberBatch": "ConversationMemberBatch",
@@ -5623,6 +5813,28 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "resourceRef": "ResourceRef",
         "result": "OperationResult",
     },
+    "CreateBillingCheckoutSessionReply": {
+        "status": "String!",
+        "requestId": "UUID!",
+        "serverTime": "String",
+        "receiptId": "UUID",
+        "committedAt": "String",
+        "replayed": "Boolean",
+        "operation": "OperationRef",
+        "resourceRef": "ResourceRef",
+        "result": "BillingCheckoutSession",
+    },
+    "CreateBillingPortalSessionReply": {
+        "status": "String!",
+        "requestId": "UUID!",
+        "serverTime": "String",
+        "receiptId": "UUID",
+        "committedAt": "String",
+        "replayed": "Boolean",
+        "operation": "OperationRef",
+        "resourceRef": "ResourceRef",
+        "result": "BillingPortalSession",
+    },
     "CreateDeploymentReply": {
         "status": "String!",
         "requestId": "UUID!",
@@ -5743,6 +5955,17 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "operation": "OperationRef",
         "resourceRef": "ResourceRef",
         "result": "OperationResult",
+    },
+    "OrganizationBillingReply": {
+        "status": "String!",
+        "requestId": "UUID!",
+        "serverTime": "String",
+        "receiptId": "UUID",
+        "committedAt": "String",
+        "replayed": "Boolean",
+        "operation": "OperationRef",
+        "resourceRef": "ResourceRef",
+        "result": "OrganizationBilling",
     },
     "OrganizationUsageReply": {
         "status": "String!",
@@ -6082,6 +6305,13 @@ INPUTS: Mapping[str, Mapping[str, tuple[str, bool]]] = {
         "eventTypes": ("[String!]!", False),
         "consentRef": ("String!", False),
     },
+    "CreateBillingCheckoutSessionRequestInput": {
+        "orgId": ("UUID!", False),
+        "planId": ("String!", False),
+    },
+    "CreateBillingPortalSessionRequestInput": {
+        "orgId": ("UUID!", False),
+    },
     "CreateDeploymentRequestInput": {
         "orgId": ("UUID!", False),
         "offering": ("String!", False),
@@ -6131,6 +6361,9 @@ INPUTS: Mapping[str, Mapping[str, tuple[str, bool]]] = {
         "name": ("String!", False),
         "scopes": ("[String!]!", False),
         "expiresAt": ("String!", False),
+    },
+    "OrganizationBillingRequestInput": {
+        "orgId": ("UUID!", False),
     },
     "OrganizationUsageRequestInput": {
         "orgId": ("UUID!", False),
@@ -6226,6 +6459,15 @@ ERRORS: Mapping[str, ErrorSpec] = {
     "ALREADY_CONNECTED": ErrorSpec(summary="The participation already has an active media connection.", origin="server", status=409, retryable=False),
     "ALREADY_EXISTS": ErrorSpec(summary="A resource with the same unique key already exists.", origin="server", status=409, retryable=False),
     "AUTHORITY_UNAVAILABLE": ErrorSpec(summary="The authority is temporarily unavailable. Retry with the same requestId.", origin="both", status=503, retryable=True),
+    "BILLING_CATALOG_NOT_SYNCED": ErrorSpec(summary="The billing provider's catalog does not match the configured price book yet. An operator must sync it.", origin="server", status=409, retryable=False),
+    "BILLING_CUSTOMER_MISSING": ErrorSpec(summary="The organization has no billing account yet. Start a checkout first.", origin="server", status=409, retryable=False),
+    "BILLING_LINK_EXPIRED": ErrorSpec(summary="The billing link of this request is no longer valid. Send a new request with a new requestId.", origin="server", status=409, retryable=False),
+    "BILLING_NOT_CONFIGURED": ErrorSpec(summary="Billing is not configured in this environment.", origin="server", status=503, retryable=False),
+    "BILLING_PLAN_UNAVAILABLE": ErrorSpec(summary="The plan is not offered for self-service checkout.", origin="server", status=400, retryable=False),
+    "BILLING_PROVIDER_CHANGED": ErrorSpec(summary="The organization's billing account belongs to a different billing provider.", origin="server", status=409, retryable=False),
+    "BILLING_PROVIDER_REJECTED": ErrorSpec(summary="The billing provider refused the request.", origin="server", status=409, retryable=False),
+    "BILLING_SUBSCRIPTION_ACTIVE": ErrorSpec(summary="The organization already has a subscription. Change it in the billing portal.", origin="server", status=409, retryable=False),
+    "BILLING_SUSPENDED": ErrorSpec(summary="The organization is suspended for an unpaid balance. Update its payment method in the billing portal.", origin="server", status=402, retryable=False),
     "CREDENTIAL_DELIVERY_EXPIRED": ErrorSpec(summary="The credential delivery expired or can no longer be redeemed.", origin="server", status=409, retryable=False),
     "CREDENTIAL_EXPIRED": ErrorSpec(summary="The credential carried by the stored result has expired. Request a new one.", origin="server", status=409, retryable=False),
     "CREDENTIAL_REFRESH_REQUIRED": ErrorSpec(summary="The media credential must be refreshed before connecting.", origin="both", status=409, retryable=False),

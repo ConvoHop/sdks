@@ -835,6 +835,17 @@ abstract final class Operations {
         '          id\n'
         '        }\n'
         '        result {\n'
+        '          billingCheckoutSession {\n'
+        '            orgId\n'
+        '            planId\n'
+        '            url\n'
+        '            expiresAt\n'
+        '          }\n'
+        '          billingPortalSession {\n'
+        '            orgId\n'
+        '            url\n'
+        '            expiresAt\n'
+        '          }\n'
         '          broadcastPermissionChanged {\n'
         '            member {\n'
         '              conversationId\n'
@@ -2509,6 +2520,33 @@ abstract final class ErrorCodes {
   /// The authority is temporarily unavailable. Retry with the same requestId.
   static const String authorityUnavailable = 'AUTHORITY_UNAVAILABLE';
 
+  /// The billing provider's catalog does not match the configured price book yet. An operator must sync it.
+  static const String billingCatalogNotSynced = 'BILLING_CATALOG_NOT_SYNCED';
+
+  /// The organization has no billing account yet. Start a checkout first.
+  static const String billingCustomerMissing = 'BILLING_CUSTOMER_MISSING';
+
+  /// The billing link of this request is no longer valid. Send a new request with a new requestId.
+  static const String billingLinkExpired = 'BILLING_LINK_EXPIRED';
+
+  /// Billing is not configured in this environment.
+  static const String billingNotConfigured = 'BILLING_NOT_CONFIGURED';
+
+  /// The plan is not offered for self-service checkout.
+  static const String billingPlanUnavailable = 'BILLING_PLAN_UNAVAILABLE';
+
+  /// The organization's billing account belongs to a different billing provider.
+  static const String billingProviderChanged = 'BILLING_PROVIDER_CHANGED';
+
+  /// The billing provider refused the request.
+  static const String billingProviderRejected = 'BILLING_PROVIDER_REJECTED';
+
+  /// The organization already has a subscription. Change it in the billing portal.
+  static const String billingSubscriptionActive = 'BILLING_SUBSCRIPTION_ACTIVE';
+
+  /// The organization is suspended for an unpaid balance. Update its payment method in the billing portal.
+  static const String billingSuspended = 'BILLING_SUSPENDED';
+
   /// The credential delivery expired or can no longer be redeemed.
   static const String credentialDeliveryExpired = 'CREDENTIAL_DELIVERY_EXPIRED';
 
@@ -2717,6 +2755,15 @@ const Map<String, ErrorCodeSpec> errorCodes = <String, ErrorCodeSpec>{
   'ALREADY_CONNECTED': ErrorCodeSpec(code: 'ALREADY_CONNECTED', summary: 'The participation already has an active media connection.', origin: 'server', status: 409, retryable: false),
   'ALREADY_EXISTS': ErrorCodeSpec(code: 'ALREADY_EXISTS', summary: 'A resource with the same unique key already exists.', origin: 'server', status: 409, retryable: false),
   'AUTHORITY_UNAVAILABLE': ErrorCodeSpec(code: 'AUTHORITY_UNAVAILABLE', summary: 'The authority is temporarily unavailable. Retry with the same requestId.', origin: 'both', status: 503, retryable: true),
+  'BILLING_CATALOG_NOT_SYNCED': ErrorCodeSpec(code: 'BILLING_CATALOG_NOT_SYNCED', summary: 'The billing provider\'s catalog does not match the configured price book yet. An operator must sync it.', origin: 'server', status: 409, retryable: false),
+  'BILLING_CUSTOMER_MISSING': ErrorCodeSpec(code: 'BILLING_CUSTOMER_MISSING', summary: 'The organization has no billing account yet. Start a checkout first.', origin: 'server', status: 409, retryable: false),
+  'BILLING_LINK_EXPIRED': ErrorCodeSpec(code: 'BILLING_LINK_EXPIRED', summary: 'The billing link of this request is no longer valid. Send a new request with a new requestId.', origin: 'server', status: 409, retryable: false),
+  'BILLING_NOT_CONFIGURED': ErrorCodeSpec(code: 'BILLING_NOT_CONFIGURED', summary: 'Billing is not configured in this environment.', origin: 'server', status: 503, retryable: false),
+  'BILLING_PLAN_UNAVAILABLE': ErrorCodeSpec(code: 'BILLING_PLAN_UNAVAILABLE', summary: 'The plan is not offered for self-service checkout.', origin: 'server', status: 400, retryable: false),
+  'BILLING_PROVIDER_CHANGED': ErrorCodeSpec(code: 'BILLING_PROVIDER_CHANGED', summary: 'The organization\'s billing account belongs to a different billing provider.', origin: 'server', status: 409, retryable: false),
+  'BILLING_PROVIDER_REJECTED': ErrorCodeSpec(code: 'BILLING_PROVIDER_REJECTED', summary: 'The billing provider refused the request.', origin: 'server', status: 409, retryable: false),
+  'BILLING_SUBSCRIPTION_ACTIVE': ErrorCodeSpec(code: 'BILLING_SUBSCRIPTION_ACTIVE', summary: 'The organization already has a subscription. Change it in the billing portal.', origin: 'server', status: 409, retryable: false),
+  'BILLING_SUSPENDED': ErrorCodeSpec(code: 'BILLING_SUSPENDED', summary: 'The organization is suspended for an unpaid balance. Update its payment method in the billing portal.', origin: 'server', status: 402, retryable: false),
   'CREDENTIAL_DELIVERY_EXPIRED': ErrorCodeSpec(code: 'CREDENTIAL_DELIVERY_EXPIRED', summary: 'The credential delivery expired or can no longer be redeemed.', origin: 'server', status: 409, retryable: false),
   'CREDENTIAL_EXPIRED': ErrorCodeSpec(code: 'CREDENTIAL_EXPIRED', summary: 'The credential carried by the stored result has expired. Request a new one.', origin: 'server', status: 409, retryable: false),
   'CREDENTIAL_REFRESH_REQUIRED': ErrorCodeSpec(code: 'CREDENTIAL_REFRESH_REQUIRED', summary: 'The media credential must be refreshed before connecting.', origin: 'both', status: 409, retryable: false),

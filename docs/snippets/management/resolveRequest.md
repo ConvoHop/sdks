@@ -89,6 +89,17 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
           id
         }
         result {
+          billingCheckoutSession {
+            orgId
+            planId
+            url
+            expiresAt
+          }
+          billingPortalSession {
+            orgId
+            url
+            expiresAt
+          }
           broadcastPermissionChanged {
             member {
               conversationId

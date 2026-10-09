@@ -94,6 +94,29 @@ class AlertLiveSessionPayload:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `BillingCheckoutSession` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class BillingCheckoutSession:
+    org_id: str
+    plan_id: str
+    url: str
+    expires_at: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `BillingPortalSession` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class BillingPortalSession:
+    org_id: str
+    url: str
+    expires_at: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `BroadcastPermissionChanged` class
 
 ```python
@@ -234,6 +257,59 @@ class ConversationMuteReply:
     request_id: str
     server_time: str
     result: ConversationMute
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingCheckoutSessionReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingCheckoutSessionReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: BillingCheckoutSession | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingCheckoutSessionRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingCheckoutSessionRequestInput:
+    org_id: str
+    plan_id: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingPortalSessionReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingPortalSessionReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: BillingPortalSession | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `CreateBillingPortalSessionRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class CreateBillingPortalSessionRequestInput:
+    org_id: str
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
@@ -1636,6 +1712,50 @@ class Organization:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `OrganizationBilling` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBilling:
+    org_id: str
+    plan_id: str | None
+    standing: str | None
+    grace_until: str | None
+    subscription_status: str | None
+    current_period_end: str | None
+    cancel_at_period_end: bool
+    catalog_version: str
+    configured: bool
+    billed: bool
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `OrganizationBillingReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBillingReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: OrganizationBilling | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `OrganizationBillingRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationBillingRequestInput:
+    org_id: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `OrganizationPage` class
 
 ```python
@@ -2052,6 +2172,8 @@ class ResumeOperationRequestInput:
 ```python
 @dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
 class RetainedResult:
+    billing_checkout_session: BillingCheckoutSession | None
+    billing_portal_session: BillingPortalSession | None
     broadcast_permission_changed: BroadcastPermissionChanged | None
     conversation: Conversation | None
     conversation_member_batch: ConversationMemberBatch | None

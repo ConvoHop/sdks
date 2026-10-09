@@ -1,6 +1,6 @@
 # Python operation coverage
 
-The Python SDK members that send each API operation. 63 of the 65 operations that Python packages can send have a method.
+The Python SDK members that send each API operation. 63 of the 68 operations that Python packages can send have a method.
 
 ## Communication
 
@@ -62,6 +62,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](../../operations/management/deploymentUsage.md) | server | [`ConvoHopManagement.deployment_usage`](convohop.md#convohopmanagementdeployment_usage-method), [`AsyncConvoHopManagement.deployment_usage`](convohop.md#asyncconvohopmanagementdeployment_usage-method) |
 | [`management.projectUsage`](../../operations/management/projectUsage.md) | server | [`ConvoHopManagement.project_usage`](convohop.md#convohopmanagementproject_usage-method), [`AsyncConvoHopManagement.project_usage`](convohop.md#asyncconvohopmanagementproject_usage-method) |
 | [`management.organizationUsage`](../../operations/management/organizationUsage.md) | server | [`ConvoHopManagement.organization_usage`](convohop.md#convohopmanagementorganization_usage-method), [`AsyncConvoHopManagement.organization_usage`](convohop.md#asyncconvohopmanagementorganization_usage-method) |
+| [`management.organizationBilling`](../../operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](../../operations/management/webhookEndpoints.md) | server | [`ConvoHopManagement.webhook_endpoints`](convohop.md#convohopmanagementwebhook_endpoints-method), [`AsyncConvoHopManagement.webhook_endpoints`](convohop.md#asyncconvohopmanagementwebhook_endpoints-method) |
 | [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md) | server | [`ConvoHopManagement.webhook_deliveries`](convohop.md#convohopmanagementwebhook_deliveries-method), [`AsyncConvoHopManagement.webhook_deliveries`](convohop.md#asyncconvohopmanagementwebhook_deliveries-method) |
 | [`management.resolveRequest`](../../operations/management/resolveRequest.md) | server | [`ConvoHopManagement.resolve_request`](convohop.md#convohopmanagementresolve_request-method), [`ConvoHopManagement.retry_request`](convohop.md#convohopmanagementretry_request-method), [`AsyncConvoHopManagement.resolve_request`](convohop.md#asyncconvohopmanagementresolve_request-method), [`AsyncConvoHopManagement.retry_request`](convohop.md#asyncconvohopmanagementretry_request-method) |
@@ -75,6 +76,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](../../operations/management/credentialPermit.md) | server | [`ConvoHopManagement.credential_permit`](convohop.md#convohopmanagementcredential_permit-method), [`AsyncConvoHopManagement.credential_permit`](convohop.md#asyncconvohopmanagementcredential_permit-method) |
 | [`management.pauseOperation`](../../operations/management/pauseOperation.md) | server | [`ConvoHopManagement.pause_operation`](convohop.md#convohopmanagementpause_operation-method), [`AsyncConvoHopManagement.pause_operation`](convohop.md#asyncconvohopmanagementpause_operation-method) |
 | [`management.resumeOperation`](../../operations/management/resumeOperation.md) | server | [`ConvoHopManagement.resume_operation`](convohop.md#convohopmanagementresume_operation-method), [`AsyncConvoHopManagement.resume_operation`](convohop.md#asyncconvohopmanagementresume_operation-method) |
+| [`management.createBillingCheckoutSession`](../../operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](../../operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](../../operations/management/configureWebhook.md) | server | [`ConvoHopManagement.configure_webhook`](convohop.md#convohopmanagementconfigure_webhook-method), [`AsyncConvoHopManagement.configure_webhook`](convohop.md#asyncconvohopmanagementconfigure_webhook-method) |
 | [`management.updateWebhook`](../../operations/management/updateWebhook.md) | server | [`ConvoHopManagement.update_webhook`](convohop.md#convohopmanagementupdate_webhook-method), [`AsyncConvoHopManagement.update_webhook`](convohop.md#asyncconvohopmanagementupdate_webhook-method) |
 | [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md) | server | [`ConvoHopManagement.rotate_webhook_secret`](convohop.md#convohopmanagementrotate_webhook_secret-method), [`AsyncConvoHopManagement.rotate_webhook_secret`](convohop.md#asyncconvohopmanagementrotate_webhook_secret-method) |

@@ -20,6 +20,33 @@ namespace ConvoHop
         /// <summary>The authority is temporarily unavailable. Retry with the same requestId.</summary>
         public const string AuthorityUnavailable = "AUTHORITY_UNAVAILABLE";
 
+        /// <summary>The billing provider's catalog does not match the configured price book yet. An operator must sync it.</summary>
+        public const string BillingCatalogNotSynced = "BILLING_CATALOG_NOT_SYNCED";
+
+        /// <summary>The organization has no billing account yet. Start a checkout first.</summary>
+        public const string BillingCustomerMissing = "BILLING_CUSTOMER_MISSING";
+
+        /// <summary>The billing link of this request is no longer valid. Send a new request with a new requestId.</summary>
+        public const string BillingLinkExpired = "BILLING_LINK_EXPIRED";
+
+        /// <summary>Billing is not configured in this environment.</summary>
+        public const string BillingNotConfigured = "BILLING_NOT_CONFIGURED";
+
+        /// <summary>The plan is not offered for self-service checkout.</summary>
+        public const string BillingPlanUnavailable = "BILLING_PLAN_UNAVAILABLE";
+
+        /// <summary>The organization's billing account belongs to a different billing provider.</summary>
+        public const string BillingProviderChanged = "BILLING_PROVIDER_CHANGED";
+
+        /// <summary>The billing provider refused the request.</summary>
+        public const string BillingProviderRejected = "BILLING_PROVIDER_REJECTED";
+
+        /// <summary>The organization already has a subscription. Change it in the billing portal.</summary>
+        public const string BillingSubscriptionActive = "BILLING_SUBSCRIPTION_ACTIVE";
+
+        /// <summary>The organization is suspended for an unpaid balance. Update its payment method in the billing portal.</summary>
+        public const string BillingSuspended = "BILLING_SUSPENDED";
+
         /// <summary>The credential delivery expired or can no longer be redeemed.</summary>
         public const string CredentialDeliveryExpired = "CREDENTIAL_DELIVERY_EXPIRED";
 

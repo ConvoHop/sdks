@@ -5,6 +5,10 @@ import com.convohop.server.api.ManagementApi
 import com.convohop.server.model.CapabilitiesReply
 import com.convohop.server.model.ConfigureWebhookReply
 import com.convohop.server.model.ConfigureWebhookRequestInput
+import com.convohop.server.model.CreateBillingCheckoutSessionReply
+import com.convohop.server.model.CreateBillingCheckoutSessionRequestInput
+import com.convohop.server.model.CreateBillingPortalSessionReply
+import com.convohop.server.model.CreateBillingPortalSessionRequestInput
 import com.convohop.server.model.CreateDeploymentReply
 import com.convohop.server.model.CreateDeploymentRequestInput
 import com.convohop.server.model.CreateOrganizationReply
@@ -29,6 +33,8 @@ import com.convohop.server.model.GetProjectReply
 import com.convohop.server.model.GetProjectRequestInput
 import com.convohop.server.model.IssueBackendKeyReply
 import com.convohop.server.model.IssueBackendKeyRequestInput
+import com.convohop.server.model.OrganizationBillingReply
+import com.convohop.server.model.OrganizationBillingRequestInput
 import com.convohop.server.model.OrganizationUsageReply
 import com.convohop.server.model.OrganizationUsageRequestInput
 import com.convohop.server.model.OrganizationsReply
@@ -102,6 +108,10 @@ public class ManagementSuspendApi(
     public suspend fun organizationUsage(input: OrganizationUsageRequestInput): OrganizationUsageReply =
         interruptible(dispatcher) { api.organizationUsage(input) }
 
+    /** Suspending [ManagementApi.organizationBilling]. */
+    public suspend fun organizationBilling(input: OrganizationBillingRequestInput): OrganizationBillingReply =
+        interruptible(dispatcher) { api.organizationBilling(input) }
+
     /** Suspending [ManagementApi.webhookEndpoints]. */
     public suspend fun webhookEndpoints(input: WebhookEndpointsRequestInput): WebhookEndpointsReply =
         interruptible(dispatcher) { api.webhookEndpoints(input) }
@@ -153,6 +163,14 @@ public class ManagementSuspendApi(
     /** Suspending [ManagementApi.resumeOperation]. */
     public suspend fun resumeOperation(input: ResumeOperationRequestInput, requestId: String? = null): ResumeOperationReply =
         interruptible(dispatcher) { api.resumeOperation(input, requestId) }
+
+    /** Suspending [ManagementApi.createBillingCheckoutSession]. */
+    public suspend fun createBillingCheckoutSession(input: CreateBillingCheckoutSessionRequestInput, requestId: String? = null): CreateBillingCheckoutSessionReply =
+        interruptible(dispatcher) { api.createBillingCheckoutSession(input, requestId) }
+
+    /** Suspending [ManagementApi.createBillingPortalSession]. */
+    public suspend fun createBillingPortalSession(input: CreateBillingPortalSessionRequestInput, requestId: String? = null): CreateBillingPortalSessionReply =
+        interruptible(dispatcher) { api.createBillingPortalSession(input, requestId) }
 
     /** Suspending [ManagementApi.configureWebhook]. */
     public suspend fun configureWebhook(input: ConfigureWebhookRequestInput, requestId: String? = null): ConfigureWebhookReply =

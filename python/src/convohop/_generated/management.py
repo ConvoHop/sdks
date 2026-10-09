@@ -10,6 +10,8 @@ from typing import Any
 
 from .operations import OPERATIONS, AsyncInvoker, SyncInvoker
 from .types import (
+    BillingCheckoutSession,
+    BillingPortalSession,
     Capabilities,
     Deployment,
     DeploymentHealth,
@@ -17,6 +19,7 @@ from .types import (
     GetOperationRequestInput,
     Operation,
     Organization,
+    OrganizationBilling,
     OrganizationPage,
     OrganizationUsage,
     PolicyChangeInput,
@@ -28,6 +31,8 @@ from .types import (
     WebhookEndpointPage,
     ConfigureWebhookReply,
     ConfigureWebhookRequestInput,
+    CreateBillingCheckoutSessionRequestInput,
+    CreateBillingPortalSessionRequestInput,
     CreateDeploymentReply,
     CreateDeploymentRequestInput,
     CreateOrganizationRequestInput,
@@ -43,6 +48,7 @@ from .types import (
     GetProjectRequestInput,
     IssueBackendKeyReply,
     IssueBackendKeyRequestInput,
+    OrganizationBillingRequestInput,
     OrganizationUsageRequestInput,
     PauseOperationRequestInput,
     ProjectPolicyReply,
@@ -225,6 +231,23 @@ class ManagementOperations(SyncInvoker):
         ).to_dict()
         _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.organizationUsage"], _input, None)
         return OrganizationUsage._from_wire(_envelope["result"])
+
+    def organization_billing(
+        self,
+        *,
+        org_id: str,
+    ) -> OrganizationBilling:
+        """Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+        """
+        _input = OrganizationBillingRequestInput(
+            org_id=org_id,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.organizationBilling"], _input, None)
+        return OrganizationBilling._from_wire(_envelope["result"])
 
     def webhook_endpoints(
         self,
@@ -535,6 +558,50 @@ class ManagementOperations(SyncInvoker):
         _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.resumeOperation"], _input, request_id)
         return Operation._from_wire(_envelope["result"])
 
+    def create_billing_checkout_session(
+        self,
+        *,
+        org_id: str,
+        plan_id: str,
+        request_id: str | None = None,
+    ) -> BillingCheckoutSession:
+        """Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``singleUse``. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.
+        """
+        _input = CreateBillingCheckoutSessionRequestInput(
+            org_id=org_id,
+            plan_id=plan_id,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.createBillingCheckoutSession"], _input, request_id)
+        return BillingCheckoutSession._from_wire(_envelope["result"])
+
+    def create_billing_portal_session(
+        self,
+        *,
+        org_id: str,
+        request_id: str | None = None,
+    ) -> BillingPortalSession:
+        """Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``singleUse``. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.
+        """
+        _input = CreateBillingPortalSessionRequestInput(
+            org_id=org_id,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.createBillingPortalSession"], _input, request_id)
+        return BillingPortalSession._from_wire(_envelope["result"])
+
     def configure_webhook(
         self,
         *,
@@ -833,6 +900,23 @@ class AsyncManagementOperations(AsyncInvoker):
         ).to_dict()
         _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.organizationUsage"], _input, None)
         return OrganizationUsage._from_wire(_envelope["result"])
+
+    async def organization_billing(
+        self,
+        *,
+        org_id: str,
+    ) -> OrganizationBilling:
+        """Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+        """
+        _input = OrganizationBillingRequestInput(
+            org_id=org_id,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.organizationBilling"], _input, None)
+        return OrganizationBilling._from_wire(_envelope["result"])
 
     async def webhook_endpoints(
         self,
@@ -1142,6 +1226,50 @@ class AsyncManagementOperations(AsyncInvoker):
         ).to_dict()
         _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.resumeOperation"], _input, request_id)
         return Operation._from_wire(_envelope["result"])
+
+    async def create_billing_checkout_session(
+        self,
+        *,
+        org_id: str,
+        plan_id: str,
+        request_id: str | None = None,
+    ) -> BillingCheckoutSession:
+        """Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``singleUse``. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.
+        """
+        _input = CreateBillingCheckoutSessionRequestInput(
+            org_id=org_id,
+            plan_id=plan_id,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.createBillingCheckoutSession"], _input, request_id)
+        return BillingCheckoutSession._from_wire(_envelope["result"])
+
+    async def create_billing_portal_session(
+        self,
+        *,
+        org_id: str,
+        request_id: str | None = None,
+    ) -> BillingPortalSession:
+        """Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``singleUse``. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.
+        """
+        _input = CreateBillingPortalSessionRequestInput(
+            org_id=org_id,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.createBillingPortalSession"], _input, request_id)
+        return BillingPortalSession._from_wire(_envelope["result"])
 
     async def configure_webhook(
         self,

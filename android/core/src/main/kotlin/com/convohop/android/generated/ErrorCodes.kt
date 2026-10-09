@@ -27,6 +27,33 @@ public object ErrorCodes {
     /** The authority is temporarily unavailable. Retry with the same requestId. */
     public const val AUTHORITY_UNAVAILABLE: String = "AUTHORITY_UNAVAILABLE"
 
+    /** The billing provider's catalog does not match the configured price book yet. An operator must sync it. */
+    public const val BILLING_CATALOG_NOT_SYNCED: String = "BILLING_CATALOG_NOT_SYNCED"
+
+    /** The organization has no billing account yet. Start a checkout first. */
+    public const val BILLING_CUSTOMER_MISSING: String = "BILLING_CUSTOMER_MISSING"
+
+    /** The billing link of this request is no longer valid. Send a new request with a new requestId. */
+    public const val BILLING_LINK_EXPIRED: String = "BILLING_LINK_EXPIRED"
+
+    /** Billing is not configured in this environment. */
+    public const val BILLING_NOT_CONFIGURED: String = "BILLING_NOT_CONFIGURED"
+
+    /** The plan is not offered for self-service checkout. */
+    public const val BILLING_PLAN_UNAVAILABLE: String = "BILLING_PLAN_UNAVAILABLE"
+
+    /** The organization's billing account belongs to a different billing provider. */
+    public const val BILLING_PROVIDER_CHANGED: String = "BILLING_PROVIDER_CHANGED"
+
+    /** The billing provider refused the request. */
+    public const val BILLING_PROVIDER_REJECTED: String = "BILLING_PROVIDER_REJECTED"
+
+    /** The organization already has a subscription. Change it in the billing portal. */
+    public const val BILLING_SUBSCRIPTION_ACTIVE: String = "BILLING_SUBSCRIPTION_ACTIVE"
+
+    /** The organization is suspended for an unpaid balance. Update its payment method in the billing portal. */
+    public const val BILLING_SUSPENDED: String = "BILLING_SUSPENDED"
+
     /** The credential delivery expired or can no longer be redeemed. */
     public const val CREDENTIAL_DELIVERY_EXPIRED: String = "CREDENTIAL_DELIVERY_EXPIRED"
 
@@ -235,6 +262,15 @@ public object ErrorCodes {
             ErrorCodeInfo(ALREADY_CONNECTED, "The participation already has an active media connection.", "server", 409, false),
             ErrorCodeInfo(ALREADY_EXISTS, "A resource with the same unique key already exists.", "server", 409, false),
             ErrorCodeInfo(AUTHORITY_UNAVAILABLE, "The authority is temporarily unavailable. Retry with the same requestId.", "both", 503, true),
+            ErrorCodeInfo(BILLING_CATALOG_NOT_SYNCED, "The billing provider's catalog does not match the configured price book yet. An operator must sync it.", "server", 409, false),
+            ErrorCodeInfo(BILLING_CUSTOMER_MISSING, "The organization has no billing account yet. Start a checkout first.", "server", 409, false),
+            ErrorCodeInfo(BILLING_LINK_EXPIRED, "The billing link of this request is no longer valid. Send a new request with a new requestId.", "server", 409, false),
+            ErrorCodeInfo(BILLING_NOT_CONFIGURED, "Billing is not configured in this environment.", "server", 503, false),
+            ErrorCodeInfo(BILLING_PLAN_UNAVAILABLE, "The plan is not offered for self-service checkout.", "server", 400, false),
+            ErrorCodeInfo(BILLING_PROVIDER_CHANGED, "The organization's billing account belongs to a different billing provider.", "server", 409, false),
+            ErrorCodeInfo(BILLING_PROVIDER_REJECTED, "The billing provider refused the request.", "server", 409, false),
+            ErrorCodeInfo(BILLING_SUBSCRIPTION_ACTIVE, "The organization already has a subscription. Change it in the billing portal.", "server", 409, false),
+            ErrorCodeInfo(BILLING_SUSPENDED, "The organization is suspended for an unpaid balance. Update its payment method in the billing portal.", "server", 402, false),
             ErrorCodeInfo(CREDENTIAL_DELIVERY_EXPIRED, "The credential delivery expired or can no longer be redeemed.", "server", 409, false),
             ErrorCodeInfo(CREDENTIAL_EXPIRED, "The credential carried by the stored result has expired. Request a new one.", "server", 409, false),
             ErrorCodeInfo(CREDENTIAL_REFRESH_REQUIRED, "The media credential must be refreshed before connecting.", "both", 409, false),

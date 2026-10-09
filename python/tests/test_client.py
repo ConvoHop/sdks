@@ -1126,6 +1126,60 @@ def test_management_key_issuance_and_permits_never_store_result_secrets() -> Non
         assert ACCESS_TOKEN not in value
 
 
+def test_organization_billing_says_who_is_billed_and_billing_links_return_hosted_urls() -> None:
+    org, period_end, expires = uid(), "2026-11-01T00:00:00.000Z", "2026-10-10T12:30:00.000Z"
+    unbilled = {"orgId": org, "planId": "internal_demo", "cancelAtPeriodEnd": False, "catalogVersion": "draft"}
+    states = [
+        full("OrganizationBilling", unbilled | {"configured": False, "billed": False}),
+        full(
+            "OrganizationBilling",
+            unbilled
+            | {
+                "planId": "starter",
+                "standing": "grace",
+                "graceUntil": period_end,
+                "subscriptionStatus": "past_due",
+                "currentPeriodEnd": period_end,
+                "configured": True,
+                "billed": True,
+            },
+        ),
+        full("OrganizationBilling", unbilled | {"configured": False}),
+    ]
+    links = {
+        "management.createBillingCheckoutSession": full(
+            "BillingCheckoutSession",
+            {"orgId": org, "planId": "starter", "url": "https://checkout.example/c/1", "expiresAt": expires},
+        ),
+        "management.createBillingPortalSession": full(
+            "BillingPortalSession", {"orgId": org, "url": "https://billing.example/p/1"}
+        ),
+    }
+
+    def respond(request: Received) -> httpx.Response:
+        if request.key == "management.organizationBilling":
+            return reply(request, result=states[sum(r.key == request.key for r in authority.requests) - 1])
+        return reply(request, result=links[request.key])
+
+    authority = Authority(respond)
+    client = authority.management()
+    assert client.organization_billing(org_id=org).to_dict() == states[0]
+    billed = client.organization_billing(org_id=org)
+    assert (billed.billed, billed.plan_id, billed.standing) == (True, "starter", "grace")
+    rejects(lambda: client.organization_billing(org_id=org), "INVALID_RESPONSE")
+    checkout = client.create_billing_checkout_session(org_id=org, plan_id="starter")
+    assert checkout.to_dict() == links["management.createBillingCheckoutSession"]
+    portal = client.create_billing_portal_session(org_id=org)
+    assert portal.to_dict() == links["management.createBillingPortalSession"]
+    assert [request.input for request in authority.requests] == [
+        {"orgId": org},
+        {"orgId": org},
+        {"orgId": org},
+        {"orgId": org, "planId": "starter"},
+        {"orgId": org},
+    ]
+
+
 def test_usage_queries_keep_meter_quantities_as_decimal_strings() -> None:
     deployment, project, org = uid(), uid(), uid()
     start, end, reason = (

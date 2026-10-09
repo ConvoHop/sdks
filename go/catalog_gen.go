@@ -541,6 +541,17 @@ var operations = []operation{
           id
         }
         result {
+          billingCheckoutSession {
+            orgId
+            planId
+            url
+            expiresAt
+          }
+          billingPortalSession {
+            orgId
+            url
+            expiresAt
+          }
           broadcastPermissionChanged {
             member {
               conversationId
@@ -2729,6 +2740,54 @@ var operations = []operation{
 }`,
 	},
 	{
+		id:            "management.organizationBilling",
+		plane:         "management",
+		kind:          "query",
+		field:         "organizationBilling",
+		operationName: "ManagementOrganizationBilling",
+		result:        "OrganizationBillingReply!",
+		input:         "OrganizationBillingRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "portalCredential",
+		retry:         "repeat",
+		envelope:      true,
+		subject:       []string{"result"},
+		echo:          []string{"orgId"},
+		document: `query ManagementOrganizationBilling($context: RequestContextInput!, $input: OrganizationBillingRequestInput!) {
+  organizationBilling(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      planId
+      standing
+      graceUntil
+      subscriptionStatus
+      currentPeriodEnd
+      cancelAtPeriodEnd
+      catalogVersion
+      configured
+      billed
+    }
+  }
+}`,
+	},
+	{
 		id:            "management.webhookEndpoints",
 		plane:         "management",
 		kind:          "query",
@@ -2899,6 +2958,17 @@ var operations = []operation{
           id
         }
         result {
+          billingCheckoutSession {
+            orgId
+            planId
+            url
+            expiresAt
+          }
+          billingPortalSession {
+            orgId
+            url
+            expiresAt
+          }
           broadcastPermissionChanged {
             member {
               conversationId
@@ -4023,6 +4093,95 @@ var operations = []operation{
 }`,
 	},
 	{
+		id:            "management.createBillingCheckoutSession",
+		plane:         "management",
+		kind:          "mutation",
+		field:         "createBillingCheckoutSession",
+		operationName: "ManagementCreateBillingCheckoutSession",
+		result:        "CreateBillingCheckoutSessionReply!",
+		input:         "CreateBillingCheckoutSessionRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "portalCredential",
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		resolvable:    true,
+		envelope:      true,
+		subject:       []string{"result"},
+		echo:          []string{"orgId"},
+		document: `mutation ManagementCreateBillingCheckoutSession($context: RequestContextInput!, $input: CreateBillingCheckoutSessionRequestInput!) {
+  createBillingCheckoutSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      planId
+      url
+      expiresAt
+    }
+  }
+}`,
+	},
+	{
+		id:            "management.createBillingPortalSession",
+		plane:         "management",
+		kind:          "mutation",
+		field:         "createBillingPortalSession",
+		operationName: "ManagementCreateBillingPortalSession",
+		result:        "CreateBillingPortalSessionReply!",
+		input:         "CreateBillingPortalSessionRequestInput",
+		inputRequired: true,
+		context:       map[string]string{"incarnation": "optional", "observedServingEpoch": "optional", "requestId": "required"},
+		bearer:        "portalCredential",
+		retry:         "sameRequest",
+		maxAttempts:   3,
+		windowMs:      60000,
+		resolvable:    true,
+		envelope:      true,
+		subject:       []string{"result"},
+		echo:          []string{"orgId"},
+		document: `mutation ManagementCreateBillingPortalSession($context: RequestContextInput!, $input: CreateBillingPortalSessionRequestInput!) {
+  createBillingPortalSession(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      url
+      expiresAt
+    }
+  }
+}`,
+	},
+	{
 		id:            "management.configureWebhook",
 		plane:         "management",
 		kind:          "mutation",
@@ -4500,6 +4659,8 @@ var objectTypes = []objectType{
 	{"AddMemberReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "Member"}}},
 	{"AddMembersPayload", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"receiptId", "UUID!"}, {"committedAt", "String!"}, {"replayed", "Boolean!"}, {"result", "ConversationMemberBatch!"}}},
 	{"AlertLiveSessionPayload", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"receiptId", "UUID!"}, {"committedAt", "String!"}, {"replayed", "Boolean!"}, {"result", "LiveAlertBatch!"}}},
+	{"BillingCheckoutSession", []typeField{{"orgId", "UUID!"}, {"planId", "String!"}, {"url", "String!"}, {"expiresAt", "String!"}}},
+	{"BillingPortalSession", []typeField{{"orgId", "UUID!"}, {"url", "String!"}, {"expiresAt", "String"}}},
 	{"BroadcastPermissionChanged", []typeField{{"member", "Member!"}, {"mediaCutoff", "LiveMediaCutoff"}}},
 	{"Capabilities", []typeField{{"serverRelease", "String!"}, {"capabilityRevision", "Decimal!"}, {"limitsRevision", "Decimal!"}, {"features", "Features"}, {"limits", "[LimitEntry!]!"}, {"environment", "String!"}, {"productionQualified", "Boolean!"}, {"mediaPolicy", "MediaPolicy"}, {"geoControlAuthorityId", "String"}, {"offerings", "[String!]!"}, {"geos", "[String!]!"}, {"installationProfiles", "[String!]!"}, {"portalIdentity", "String"}}},
 	{"CapabilitiesReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "Capabilities"}}},
@@ -4508,6 +4669,8 @@ var objectTypes = []objectType{
 	{"ConversationMemberBatch", []typeField{{"items", "[Member!]!"}}},
 	{"ConversationMute", []typeField{{"conversationId", "UUID!"}, {"principalId", "UUID!"}, {"muted", "Boolean!"}, {"until", "String"}}},
 	{"ConversationMuteReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String!"}, {"result", "ConversationMute!"}}},
+	{"CreateBillingCheckoutSessionReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "BillingCheckoutSession"}}},
+	{"CreateBillingPortalSessionReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "BillingPortalSession"}}},
 	{"CreateConversationReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "Conversation"}}},
 	{"CreateDeploymentReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OperationResult"}}},
 	{"CreateOrganizationReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "Organization"}}},
@@ -4581,6 +4744,8 @@ var objectTypes = []objectType{
 	{"OperationResult", []typeField{{"projectId", "UUID"}, {"incarnation", "UUID"}, {"status", "String"}, {"backend", "String"}, {"environment", "String"}, {"policyRevision", "Decimal"}, {"expiresAt", "String"}, {"kind", "String"}, {"resourceRef", "ResourceRef"}, {"delivery", "CredentialDelivery"}, {"keyId", "String"}, {"endpointId", "UUID"}, {"enabled", "Boolean"}, {"liveSessionCompletion", "LiveSessionOperationCompletion"}, {"replayedDeliveries", "Int"}, {"skippedDeliveries", "Int"}, {"messagePreview", "Boolean"}}},
 	{"OperationStep", []typeField{{"stepId", "String!"}, {"state", "String!"}}},
 	{"Organization", []typeField{{"orgId", "UUID!"}, {"name", "String!"}, {"status", "String!"}, {"revision", "Decimal!"}}},
+	{"OrganizationBilling", []typeField{{"orgId", "UUID!"}, {"planId", "String"}, {"standing", "String"}, {"graceUntil", "String"}, {"subscriptionStatus", "String"}, {"currentPeriodEnd", "String"}, {"cancelAtPeriodEnd", "Boolean!"}, {"catalogVersion", "String!"}, {"configured", "Boolean!"}, {"billed", "Boolean!"}}},
+	{"OrganizationBillingReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OrganizationBilling"}}},
 	{"OrganizationPage", []typeField{{"items", "[Organization!]!"}, {"complete", "Boolean!"}, {"refreshRequired", "Boolean!"}, {"nextCursor", "String"}}},
 	{"OrganizationUsage", []typeField{{"orgId", "UUID!"}, {"source", "String!"}, {"observedAt", "String!"}, {"complete", "Boolean!"}, {"reason", "String!"}, {"from", "String!"}, {"to", "String!"}, {"meters", "[UsageMeter!]!"}, {"aggregatedThrough", "String"}}},
 	{"OrganizationUsageReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OrganizationUsage"}}},
@@ -4601,7 +4766,7 @@ var objectTypes = []objectType{
 	{"ResolvedReceipt", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "RetainedResult"}}},
 	{"ResourceRef", []typeField{{"kind", "String!"}, {"id", "String!"}}},
 	{"ResumeOperationReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "Operation"}}},
-	{"RetainedResult", []typeField{{"broadcastPermissionChanged", "BroadcastPermissionChanged"}, {"conversation", "Conversation"}, {"conversationMemberBatch", "ConversationMemberBatch"}, {"conversationMute", "ConversationMute"}, {"credentialDeliveryReceipt", "CredentialDeliveryReceipt"}, {"deliveryAck", "DeliveryAck"}, {"liveAlertBatch", "LiveAlertBatch"}, {"liveCredentialIssuance", "LiveCredentialIssuance"}, {"liveSessionEndRequested", "LiveSessionEndRequested"}, {"liveSessionJoined", "LiveSessionJoined"}, {"liveSessionLeft", "LiveSessionLeft"}, {"liveSessionStarted", "LiveSessionStarted"}, {"member", "Member"}, {"message", "Message"}, {"messageAck", "MessageAck"}, {"organization", "Organization"}, {"principal", "Principal"}, {"readReceipt", "ReadReceipt"}, {"sessionBootstrap", "SessionBootstrap"}, {"sessionRevocation", "SessionRevocation"}, {"signedProof", "SignedProof"}}},
+	{"RetainedResult", []typeField{{"billingCheckoutSession", "BillingCheckoutSession"}, {"billingPortalSession", "BillingPortalSession"}, {"broadcastPermissionChanged", "BroadcastPermissionChanged"}, {"conversation", "Conversation"}, {"conversationMemberBatch", "ConversationMemberBatch"}, {"conversationMute", "ConversationMute"}, {"credentialDeliveryReceipt", "CredentialDeliveryReceipt"}, {"deliveryAck", "DeliveryAck"}, {"liveAlertBatch", "LiveAlertBatch"}, {"liveCredentialIssuance", "LiveCredentialIssuance"}, {"liveSessionEndRequested", "LiveSessionEndRequested"}, {"liveSessionJoined", "LiveSessionJoined"}, {"liveSessionLeft", "LiveSessionLeft"}, {"liveSessionStarted", "LiveSessionStarted"}, {"member", "Member"}, {"message", "Message"}, {"messageAck", "MessageAck"}, {"organization", "Organization"}, {"principal", "Principal"}, {"readReceipt", "ReadReceipt"}, {"sessionBootstrap", "SessionBootstrap"}, {"sessionRevocation", "SessionRevocation"}, {"signedProof", "SignedProof"}}},
 	{"RevokeBackendKeyReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OperationResult"}}},
 	{"RevokeSessionReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "SessionRevocation"}}},
 	{"RotateWebhookSecretReply", []typeField{{"status", "String!"}, {"requestId", "UUID!"}, {"serverTime", "String"}, {"receiptId", "UUID"}, {"committedAt", "String"}, {"replayed", "Boolean"}, {"operation", "OperationRef"}, {"resourceRef", "ResourceRef"}, {"result", "OperationResult"}}},
@@ -4638,6 +4803,8 @@ var inputTypes = []inputType{
 	{"ConfigureWebhookRequestInput", []inputField{{"projectId", "UUID!", false}, {"url", "String!", false}, {"eventTypes", "[String!]!", false}, {"consentRef", "String!", false}}},
 	{"ConversationLiveInput", []inputField{{"conversationId", "UUID!", false}}},
 	{"ConversationMuteInput", []inputField{{"conversationId", "UUID!", false}, {"actAsPrincipalId", "UUID", false}}},
+	{"CreateBillingCheckoutSessionRequestInput", []inputField{{"orgId", "UUID!", false}, {"planId", "String!", false}}},
+	{"CreateBillingPortalSessionRequestInput", []inputField{{"orgId", "UUID!", false}}},
 	{"CreateConversationRequestInput", []inputField{{"title", "String!", false}, {"props", "Properties!", false}, {"members", "[MemberInputInput!]!", false}}},
 	{"CreateDeploymentRequestInput", []inputField{{"orgId", "UUID!", false}, {"offering", "String!", false}, {"geoId", "String!", false}, {"installationProfileId", "String!", false}, {"consentRef", "String!", false}}},
 	{"CreateOrganizationRequestInput", []inputField{{"name", "String!", false}, {"termsRef", "String!", false}}},
@@ -4670,6 +4837,7 @@ var inputTypes = []inputType{
 	{"MemberInputInput", []inputField{{"principalId", "UUID!", false}, {"role", "String!", false}}},
 	{"MembersRequestInput", []inputField{{"conversationId", "UUID!", false}, {"limit", "PageSize!", false}, {"cursor", "String", false}}},
 	{"MessagesRequestInput", []inputField{{"conversationId", "UUID!", false}, {"limit", "PageSize!", false}, {"beforeSequence", "Decimal", false}, {"actAsPrincipalId", "UUID", false}}},
+	{"OrganizationBillingRequestInput", []inputField{{"orgId", "UUID!", false}}},
 	{"OrganizationUsageRequestInput", []inputField{{"orgId", "UUID!", false}, {"from", "String", false}, {"to", "String", false}}},
 	{"PauseOperationRequestInput", []inputField{{"operationId", "UUID!", false}, {"expectedRevision", "Decimal!", false}}},
 	{"PolicyChangeInput", []inputField{{"kind", "String!", false}, {"reason", "String", false}, {"holdId", "String", false}}},

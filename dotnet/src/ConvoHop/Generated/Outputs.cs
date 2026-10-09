@@ -153,6 +153,42 @@ namespace ConvoHop.Models
         public LiveAlertBatch Result { get; init; } = default!;
     }
 
+    /// <summary>The BillingCheckoutSession result.</summary>
+    public sealed class BillingCheckoutSession
+    {
+        /// <summary>The <c>orgId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("orgId")]
+        public string OrgId { get; init; } = default!;
+
+        /// <summary>The <c>planId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("planId")]
+        public string PlanId { get; init; } = default!;
+
+        /// <summary>The <c>url</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("url")]
+        public string Url { get; init; } = default!;
+
+        /// <summary>The <c>expiresAt</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
+        public string ExpiresAt { get; init; } = default!;
+    }
+
+    /// <summary>The BillingPortalSession result.</summary>
+    public sealed class BillingPortalSession
+    {
+        /// <summary>The <c>orgId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("orgId")]
+        public string OrgId { get; init; } = default!;
+
+        /// <summary>The <c>url</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("url")]
+        public string Url { get; init; } = default!;
+
+        /// <summary>The <c>expiresAt</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
+        public string? ExpiresAt { get; init; }
+    }
+
     /// <summary>The BroadcastPermissionChanged result.</summary>
     public sealed class BroadcastPermissionChanged
     {
@@ -2161,6 +2197,50 @@ namespace ConvoHop.Models
         public string Revision { get; init; } = default!;
     }
 
+    /// <summary>The OrganizationBilling result.</summary>
+    public sealed class OrganizationBilling
+    {
+        /// <summary>The <c>orgId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("orgId")]
+        public string OrgId { get; init; } = default!;
+
+        /// <summary>The <c>planId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("planId")]
+        public string? PlanId { get; init; }
+
+        /// <summary>The <c>standing</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("standing")]
+        public string? Standing { get; init; }
+
+        /// <summary>The <c>graceUntil</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("graceUntil")]
+        public string? GraceUntil { get; init; }
+
+        /// <summary>The <c>subscriptionStatus</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("subscriptionStatus")]
+        public string? SubscriptionStatus { get; init; }
+
+        /// <summary>The <c>currentPeriodEnd</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("currentPeriodEnd")]
+        public string? CurrentPeriodEnd { get; init; }
+
+        /// <summary>The <c>cancelAtPeriodEnd</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("cancelAtPeriodEnd")]
+        public bool CancelAtPeriodEnd { get; init; }
+
+        /// <summary>The <c>catalogVersion</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("catalogVersion")]
+        public string CatalogVersion { get; init; } = default!;
+
+        /// <summary>The <c>configured</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("configured")]
+        public bool Configured { get; init; }
+
+        /// <summary>The <c>billed</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("billed")]
+        public bool Billed { get; init; }
+    }
+
     /// <summary>The OrganizationPage result.</summary>
     public sealed class OrganizationPage
     {
@@ -2596,6 +2676,14 @@ namespace ConvoHop.Models
     /// <summary>Exactly one typed field contains the retained, currently authorized receipt result.</summary>
     public sealed class RetainedResult
     {
+        /// <summary>The <c>billingCheckoutSession</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("billingCheckoutSession")]
+        public BillingCheckoutSession? BillingCheckoutSession { get; init; }
+
+        /// <summary>The <c>billingPortalSession</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("billingPortalSession")]
+        public BillingPortalSession? BillingPortalSession { get; init; }
+
         /// <summary>The <c>broadcastPermissionChanged</c> field.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("broadcastPermissionChanged")]
         public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }
@@ -3353,6 +3441,86 @@ namespace ConvoHop.Models
         public OperationResult? Result { get; init; }
     }
 
+    /// <summary>The CreateBillingCheckoutSessionReply result.</summary>
+    public sealed class CreateBillingCheckoutSessionReply
+    {
+        /// <summary>The <c>status</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+        public string Status { get; init; } = default!;
+
+        /// <summary>The <c>requestId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("requestId")]
+        public string RequestId { get; init; } = default!;
+
+        /// <summary>The <c>serverTime</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("serverTime")]
+        public string? ServerTime { get; init; }
+
+        /// <summary>The <c>receiptId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("receiptId")]
+        public string? ReceiptId { get; init; }
+
+        /// <summary>The <c>committedAt</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("committedAt")]
+        public string? CommittedAt { get; init; }
+
+        /// <summary>The <c>replayed</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("replayed")]
+        public bool? Replayed { get; init; }
+
+        /// <summary>The <c>operation</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("operation")]
+        public OperationRef? Operation { get; init; }
+
+        /// <summary>The <c>resourceRef</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("resourceRef")]
+        public ResourceRef? ResourceRef { get; init; }
+
+        /// <summary>The <c>result</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("result")]
+        public BillingCheckoutSession? Result { get; init; }
+    }
+
+    /// <summary>The CreateBillingPortalSessionReply result.</summary>
+    public sealed class CreateBillingPortalSessionReply
+    {
+        /// <summary>The <c>status</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+        public string Status { get; init; } = default!;
+
+        /// <summary>The <c>requestId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("requestId")]
+        public string RequestId { get; init; } = default!;
+
+        /// <summary>The <c>serverTime</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("serverTime")]
+        public string? ServerTime { get; init; }
+
+        /// <summary>The <c>receiptId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("receiptId")]
+        public string? ReceiptId { get; init; }
+
+        /// <summary>The <c>committedAt</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("committedAt")]
+        public string? CommittedAt { get; init; }
+
+        /// <summary>The <c>replayed</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("replayed")]
+        public bool? Replayed { get; init; }
+
+        /// <summary>The <c>operation</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("operation")]
+        public OperationRef? Operation { get; init; }
+
+        /// <summary>The <c>resourceRef</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("resourceRef")]
+        public ResourceRef? ResourceRef { get; init; }
+
+        /// <summary>The <c>result</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("result")]
+        public BillingPortalSession? Result { get; init; }
+    }
+
     /// <summary>The CreateDeploymentReply result.</summary>
     public sealed class CreateDeploymentReply
     {
@@ -3791,6 +3959,46 @@ namespace ConvoHop.Models
         /// <summary>The <c>result</c> field.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("result")]
         public OperationResult? Result { get; init; }
+    }
+
+    /// <summary>The OrganizationBillingReply result.</summary>
+    public sealed class OrganizationBillingReply
+    {
+        /// <summary>The <c>status</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+        public string Status { get; init; } = default!;
+
+        /// <summary>The <c>requestId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("requestId")]
+        public string RequestId { get; init; } = default!;
+
+        /// <summary>The <c>serverTime</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("serverTime")]
+        public string? ServerTime { get; init; }
+
+        /// <summary>The <c>receiptId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("receiptId")]
+        public string? ReceiptId { get; init; }
+
+        /// <summary>The <c>committedAt</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("committedAt")]
+        public string? CommittedAt { get; init; }
+
+        /// <summary>The <c>replayed</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("replayed")]
+        public bool? Replayed { get; init; }
+
+        /// <summary>The <c>operation</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("operation")]
+        public OperationRef? Operation { get; init; }
+
+        /// <summary>The <c>resourceRef</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("resourceRef")]
+        public ResourceRef? ResourceRef { get; init; }
+
+        /// <summary>The <c>result</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("result")]
+        public OrganizationBilling? Result { get; init; }
     }
 
     /// <summary>The OrganizationUsageReply result.</summary>

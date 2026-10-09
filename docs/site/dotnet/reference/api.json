@@ -833,6 +833,16 @@
           ]
         },
         {
+          "name": "OrganizationBillingAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.OrganizationBillingAsync",
+          "anchor": "managementapiorganizationbillingasync-method",
+          "signatures": [
+            "public Task<OrganizationBillingReply> OrganizationBillingAsync(OrganizationBillingRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner)."
+        },
+        {
           "name": "WebhookEndpointsAsync",
           "kind": "method",
           "ref": "ConvoHop.Api#ManagementApi.WebhookEndpointsAsync",
@@ -1036,6 +1046,26 @@
               "page": "../../operations/management/resumeOperation.md"
             }
           ]
+        },
+        {
+          "name": "CreateBillingCheckoutSessionAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.CreateBillingCheckoutSessionAsync",
+          "anchor": "managementapicreatebillingcheckoutsessionasync-method",
+          "signatures": [
+            "public Task<CreateBillingCheckoutSessionReply> CreateBillingCheckoutSessionAsync(CreateBillingCheckoutSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.\n\nAuthorization: portalCredential (condition owner)."
+        },
+        {
+          "name": "CreateBillingPortalSessionAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.CreateBillingPortalSessionAsync",
+          "anchor": "managementapicreatebillingportalsessionasync-method",
+          "signatures": [
+            "public Task<CreateBillingPortalSessionReply> CreateBillingPortalSessionAsync(CreateBillingPortalSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.\n\nAuthorization: portalCredential (condition owner)."
         },
         {
           "name": "ConfigureWebhookAsync",

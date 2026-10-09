@@ -829,6 +829,16 @@
           ]
         },
         {
+          "name": "organizationBilling",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizationBilling",
+          "anchor": "managementsuspendapiorganizationbilling-method",
+          "signatures": [
+            "public suspend fun organizationBilling(input: OrganizationBillingRequestInput): OrganizationBillingReply"
+          ],
+          "docs": "Suspending `ManagementApi.organizationBilling`."
+        },
+        {
           "name": "webhookEndpoints",
           "kind": "method",
           "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.webhookEndpoints",
@@ -1032,6 +1042,26 @@
               "page": "../../operations/management/resumeOperation.md"
             }
           ]
+        },
+        {
+          "name": "createBillingCheckoutSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createBillingCheckoutSession",
+          "anchor": "managementsuspendapicreatebillingcheckoutsession-method",
+          "signatures": [
+            "public suspend fun createBillingCheckoutSession(input: CreateBillingCheckoutSessionRequestInput, requestId: String? = null): CreateBillingCheckoutSessionReply"
+          ],
+          "docs": "Suspending `ManagementApi.createBillingCheckoutSession`."
+        },
+        {
+          "name": "createBillingPortalSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createBillingPortalSession",
+          "anchor": "managementsuspendapicreatebillingportalsession-method",
+          "signatures": [
+            "public suspend fun createBillingPortalSession(input: CreateBillingPortalSessionRequestInput, requestId: String? = null): CreateBillingPortalSessionReply"
+          ],
+          "docs": "Suspending `ManagementApi.createBillingPortalSession`."
         },
         {
           "name": "configureWebhook",

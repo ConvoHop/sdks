@@ -23,7 +23,7 @@ Reference documentation, quickstarts and tested examples for the ConvoHop SDKs.
 
 ## API operations
 
-The [operation reference](operations/index.md) documents each of the 76 GraphQL operations and the SDK members that send it.
+The [operation reference](operations/index.md) documents each of the 79 GraphQL operations and the SDK members that send it.
 
 ## For LLMs and agents
 

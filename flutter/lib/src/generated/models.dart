@@ -389,6 +389,77 @@ AlertLiveSessionPayload _decodeAlertLiveSessionPayload(Object? value, String pat
   );
 }
 
+final class BillingCheckoutSession {
+  const BillingCheckoutSession({
+    required this.orgId,
+    required this.planId,
+    required this.url,
+    required this.expiresAt,
+  });
+
+  /// Decodes and validates a GraphQL `BillingCheckoutSession`. Malformed values throw a [FormatException].
+  factory BillingCheckoutSession.fromJson(Object? json) => _decodeBillingCheckoutSession(json, r'$');
+
+  final String orgId;
+
+  final String planId;
+
+  final String url;
+
+  final String expiresAt;
+
+  /// The GraphQL JSON form, with every field.
+  Map<String, Object?> toJson() => <String, Object?>{
+        'orgId': orgId,
+        'planId': planId,
+        'url': url,
+        'expiresAt': expiresAt,
+      };
+}
+
+BillingCheckoutSession _decodeBillingCheckoutSession(Object? value, String path) {
+  final map = _object(value, path);
+  return BillingCheckoutSession(
+    orgId: _scalarUuid(_get(map, path, 'orgId'), '$path.orgId'),
+    planId: _scalarString(_get(map, path, 'planId'), '$path.planId'),
+    url: _scalarString(_get(map, path, 'url'), '$path.url'),
+    expiresAt: _scalarString(_get(map, path, 'expiresAt'), '$path.expiresAt'),
+  );
+}
+
+final class BillingPortalSession {
+  const BillingPortalSession({
+    required this.orgId,
+    required this.url,
+    this.expiresAt,
+  });
+
+  /// Decodes and validates a GraphQL `BillingPortalSession`. Malformed values throw a [FormatException].
+  factory BillingPortalSession.fromJson(Object? json) => _decodeBillingPortalSession(json, r'$');
+
+  final String orgId;
+
+  final String url;
+
+  final String? expiresAt;
+
+  /// The GraphQL JSON form, with every field.
+  Map<String, Object?> toJson() => <String, Object?>{
+        'orgId': orgId,
+        'url': url,
+        'expiresAt': expiresAt,
+      };
+}
+
+BillingPortalSession _decodeBillingPortalSession(Object? value, String path) {
+  final map = _object(value, path);
+  return BillingPortalSession(
+    orgId: _scalarUuid(_get(map, path, 'orgId'), '$path.orgId'),
+    url: _scalarString(_get(map, path, 'url'), '$path.url'),
+    expiresAt: _n(_get(map, path, 'expiresAt'), '$path.expiresAt', _scalarString),
+  );
+}
+
 final class BroadcastPermissionChanged {
   const BroadcastPermissionChanged({
     required this.member,
@@ -4277,6 +4348,8 @@ ResourceRef _decodeResourceRef(Object? value, String path) {
 /// Exactly one typed field contains the retained, currently authorized receipt result.
 final class RetainedResult {
   const RetainedResult({
+    this.billingCheckoutSession,
+    this.billingPortalSession,
     this.broadcastPermissionChanged,
     this.conversation,
     this.conversationMemberBatch,
@@ -4302,6 +4375,10 @@ final class RetainedResult {
 
   /// Decodes and validates a GraphQL `RetainedResult`. Malformed values throw a [FormatException].
   factory RetainedResult.fromJson(Object? json) => _decodeRetainedResult(json, r'$');
+
+  final BillingCheckoutSession? billingCheckoutSession;
+
+  final BillingPortalSession? billingPortalSession;
 
   final BroadcastPermissionChanged? broadcastPermissionChanged;
 
@@ -4347,6 +4424,8 @@ final class RetainedResult {
 
   /// The GraphQL JSON form, with every field.
   Map<String, Object?> toJson() => <String, Object?>{
+        'billingCheckoutSession': billingCheckoutSession?.toJson(),
+        'billingPortalSession': billingPortalSession?.toJson(),
         'broadcastPermissionChanged': broadcastPermissionChanged?.toJson(),
         'conversation': conversation?.toJson(),
         'conversationMemberBatch': conversationMemberBatch?.toJson(),
@@ -4374,6 +4453,8 @@ final class RetainedResult {
 RetainedResult _decodeRetainedResult(Object? value, String path) {
   final map = _object(value, path);
   return RetainedResult(
+    billingCheckoutSession: _n(_get(map, path, 'billingCheckoutSession'), '$path.billingCheckoutSession', _decodeBillingCheckoutSession),
+    billingPortalSession: _n(_get(map, path, 'billingPortalSession'), '$path.billingPortalSession', _decodeBillingPortalSession),
     broadcastPermissionChanged: _n(_get(map, path, 'broadcastPermissionChanged'), '$path.broadcastPermissionChanged', _decodeBroadcastPermissionChanged),
     conversation: _n(_get(map, path, 'conversation'), '$path.conversation', _decodeConversation),
     conversationMemberBatch: _n(_get(map, path, 'conversationMemberBatch'), '$path.conversationMemberBatch', _decodeConversationMemberBatch),

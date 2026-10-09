@@ -1,6 +1,6 @@
 # .NET operation coverage
 
-The .NET SDK members that send each API operation. 65 of the 65 operations that .NET packages can send have a method.
+The .NET SDK members that send each API operation. 65 of the 68 operations that .NET packages can send have a method.
 
 ## Communication
 
@@ -62,6 +62,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](../../operations/management/deploymentUsage.md) | server | [`ManagementApi.DeploymentUsageAsync`](api.md#managementapideploymentusageasync-method) |
 | [`management.projectUsage`](../../operations/management/projectUsage.md) | server | [`ManagementApi.ProjectUsageAsync`](api.md#managementapiprojectusageasync-method) |
 | [`management.organizationUsage`](../../operations/management/organizationUsage.md) | server | [`ManagementApi.OrganizationUsageAsync`](api.md#managementapiorganizationusageasync-method) |
+| [`management.organizationBilling`](../../operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](../../operations/management/webhookEndpoints.md) | server | [`ManagementApi.WebhookEndpointsAsync`](api.md#managementapiwebhookendpointsasync-method) |
 | [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md) | server | [`ManagementApi.WebhookDeliveriesAsync`](api.md#managementapiwebhookdeliveriesasync-method) |
 | [`management.resolveRequest`](../../operations/management/resolveRequest.md) | server | [`ConvoHopTransport.RetryAsync`](convohop.md#convohoptransportretryasync-method), [`ManagementApi.ResolveRequestAsync`](api.md#managementapiresolverequestasync-method) |
@@ -75,6 +76,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](../../operations/management/credentialPermit.md) | server | [`ConvoHopManagementClient.GetDeliveryPermitAsync`](convohop.md#convohopmanagementclientgetdeliverypermitasync-method), [`ManagementApi.CredentialPermitAsync`](api.md#managementapicredentialpermitasync-method) |
 | [`management.pauseOperation`](../../operations/management/pauseOperation.md) | server | [`ManagementApi.PauseOperationAsync`](api.md#managementapipauseoperationasync-method) |
 | [`management.resumeOperation`](../../operations/management/resumeOperation.md) | server | [`ManagementApi.ResumeOperationAsync`](api.md#managementapiresumeoperationasync-method) |
+| [`management.createBillingCheckoutSession`](../../operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](../../operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](../../operations/management/configureWebhook.md) | server | [`ManagementApi.ConfigureWebhookAsync`](api.md#managementapiconfigurewebhookasync-method) |
 | [`management.updateWebhook`](../../operations/management/updateWebhook.md) | server | [`ManagementApi.UpdateWebhookAsync`](api.md#managementapiupdatewebhookasync-method) |
 | [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md) | server | [`ManagementApi.RotateWebhookSecretAsync`](api.md#managementapirotatewebhooksecretasync-method) |

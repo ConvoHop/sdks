@@ -574,6 +574,83 @@
               "static": true
             },
             {
+              "name": "BillingCatalogNotSynced",
+              "kind": "property",
+              "signatures": [
+                "public const string BillingCatalogNotSynced = \"BILLING_CATALOG_NOT_SYNCED\";"
+              ],
+              "docs": "The billing provider's catalog does not match the configured price book yet. An operator must sync it.",
+              "static": true
+            },
+            {
+              "name": "BillingCustomerMissing",
+              "kind": "property",
+              "signatures": [
+                "public const string BillingCustomerMissing = \"BILLING_CUSTOMER_MISSING\";"
+              ],
+              "docs": "The organization has no billing account yet. Start a checkout first.",
+              "static": true
+            },
+            {
+              "name": "BillingLinkExpired",
+              "kind": "property",
+              "signatures": ["public const string BillingLinkExpired = \"BILLING_LINK_EXPIRED\";"],
+              "docs": "The billing link of this request is no longer valid. Send a new request with a new requestId.",
+              "static": true
+            },
+            {
+              "name": "BillingNotConfigured",
+              "kind": "property",
+              "signatures": [
+                "public const string BillingNotConfigured = \"BILLING_NOT_CONFIGURED\";"
+              ],
+              "docs": "Billing is not configured in this environment.",
+              "static": true
+            },
+            {
+              "name": "BillingPlanUnavailable",
+              "kind": "property",
+              "signatures": [
+                "public const string BillingPlanUnavailable = \"BILLING_PLAN_UNAVAILABLE\";"
+              ],
+              "docs": "The plan is not offered for self-service checkout.",
+              "static": true
+            },
+            {
+              "name": "BillingProviderChanged",
+              "kind": "property",
+              "signatures": [
+                "public const string BillingProviderChanged = \"BILLING_PROVIDER_CHANGED\";"
+              ],
+              "docs": "The organization's billing account belongs to a different billing provider.",
+              "static": true
+            },
+            {
+              "name": "BillingProviderRejected",
+              "kind": "property",
+              "signatures": [
+                "public const string BillingProviderRejected = \"BILLING_PROVIDER_REJECTED\";"
+              ],
+              "docs": "The billing provider refused the request.",
+              "static": true
+            },
+            {
+              "name": "BillingSubscriptionActive",
+              "kind": "property",
+              "signatures": [
+                "public const string BillingSubscriptionActive = \"BILLING_SUBSCRIPTION_ACTIVE\";"
+              ],
+              "docs": "The organization already has a subscription. Change it in the billing portal.",
+              "static": true
+            },
+            {
+              "name": "BillingSuspended",
+              "kind": "property",
+              "signatures": ["public const string BillingSuspended = \"BILLING_SUSPENDED\";"],
+              "docs": "The organization is suspended for an unpaid balance. Update its payment method in the billing portal.",
+              "static": true
+            },
+            {
               "name": "CredentialDeliveryExpired",
               "kind": "property",
               "signatures": [
@@ -1943,6 +2020,15 @@
               "static": true
             },
             {
+              "name": "OrganizationBilling",
+              "kind": "property",
+              "signatures": [
+                "public static readonly OperationDescriptor<OrganizationBillingRequestInput, OrganizationBillingReply> OrganizationBilling;"
+              ],
+              "docs": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.",
+              "static": true
+            },
+            {
               "name": "WebhookEndpoints",
               "kind": "property",
               "signatures": [
@@ -2057,6 +2143,24 @@
                 "public static readonly OperationDescriptor<ResumeOperationRequestInput, ResumeOperationReply> ResumeOperation;"
               ],
               "docs": "Resume a paused operation.",
+              "static": true
+            },
+            {
+              "name": "CreateBillingCheckoutSession",
+              "kind": "property",
+              "signatures": [
+                "public static readonly OperationDescriptor<CreateBillingCheckoutSessionRequestInput, CreateBillingCheckoutSessionReply> CreateBillingCheckoutSession;"
+              ],
+              "docs": "Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.",
+              "static": true
+            },
+            {
+              "name": "CreateBillingPortalSession",
+              "kind": "property",
+              "signatures": [
+                "public static readonly OperationDescriptor<CreateBillingPortalSessionRequestInput, CreateBillingPortalSessionReply> CreateBillingPortalSession;"
+              ],
+              "docs": "Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.",
               "static": true
             },
             {
@@ -4592,6 +4696,14 @@
               "docs": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner)."
             },
             {
+              "name": "OrganizationBillingAsync",
+              "kind": "method",
+              "signatures": [
+                "public Task<OrganizationBillingReply> OrganizationBillingAsync(OrganizationBillingRequestInput input, CancellationToken cancellationToken = default);"
+              ],
+              "docs": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner)."
+            },
+            {
               "name": "WebhookEndpointsAsync",
               "kind": "method",
               "signatures": [
@@ -4694,6 +4806,22 @@
                 "public Task<ResumeOperationReply> ResumeOperationAsync(ResumeOperationRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
               ],
               "docs": "Resume a paused operation.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner)."
+            },
+            {
+              "name": "CreateBillingCheckoutSessionAsync",
+              "kind": "method",
+              "signatures": [
+                "public Task<CreateBillingCheckoutSessionReply> CreateBillingCheckoutSessionAsync(CreateBillingCheckoutSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+              ],
+              "docs": "Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.\n\nAuthorization: portalCredential (condition owner)."
+            },
+            {
+              "name": "CreateBillingPortalSessionAsync",
+              "kind": "method",
+              "signatures": [
+                "public Task<CreateBillingPortalSessionReply> CreateBillingPortalSessionAsync(CreateBillingPortalSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+              ],
+              "docs": "Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.\n\nAuthorization: portalCredential (condition owner)."
             },
             {
               "name": "ConfigureWebhookAsync",
@@ -4815,6 +4943,22 @@
           "docs": "The AlertLiveSessionPayload result."
         },
         {
+          "name": "BillingCheckoutSession",
+          "kind": "class",
+          "signatures": [
+            "public sealed class BillingCheckoutSession\n{\n    public BillingCheckoutSession();\n    public string OrgId { get; init; }\n    public string PlanId { get; init; }\n    public string Url { get; init; }\n    public string ExpiresAt { get; init; }\n}"
+          ],
+          "docs": "The BillingCheckoutSession result."
+        },
+        {
+          "name": "BillingPortalSession",
+          "kind": "class",
+          "signatures": [
+            "public sealed class BillingPortalSession\n{\n    public BillingPortalSession();\n    public string OrgId { get; init; }\n    public string Url { get; init; }\n    public string? ExpiresAt { get; init; }\n}"
+          ],
+          "docs": "The BillingPortalSession result."
+        },
+        {
           "name": "BroadcastPermissionChanged",
           "kind": "class",
           "signatures": [
@@ -4901,6 +5045,38 @@
             "public sealed class ConversationMuteReply\n{\n    public ConversationMuteReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string ServerTime { get; init; }\n    public ConversationMute Result { get; init; }\n}"
           ],
           "docs": "The ConversationMuteReply result."
+        },
+        {
+          "name": "CreateBillingCheckoutSessionReply",
+          "kind": "class",
+          "signatures": [
+            "public sealed class CreateBillingCheckoutSessionReply\n{\n    public CreateBillingCheckoutSessionReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public BillingCheckoutSession? Result { get; init; }\n}"
+          ],
+          "docs": "The CreateBillingCheckoutSessionReply result."
+        },
+        {
+          "name": "CreateBillingCheckoutSessionRequestInput",
+          "kind": "class",
+          "signatures": [
+            "public sealed class CreateBillingCheckoutSessionRequestInput\n{\n    public CreateBillingCheckoutSessionRequestInput(string orgId, string planId);\n    public string OrgId { get; set; }\n    public string PlanId { get; set; }\n}"
+          ],
+          "docs": "The CreateBillingCheckoutSessionRequestInput input."
+        },
+        {
+          "name": "CreateBillingPortalSessionReply",
+          "kind": "class",
+          "signatures": [
+            "public sealed class CreateBillingPortalSessionReply\n{\n    public CreateBillingPortalSessionReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public BillingPortalSession? Result { get; init; }\n}"
+          ],
+          "docs": "The CreateBillingPortalSessionReply result."
+        },
+        {
+          "name": "CreateBillingPortalSessionRequestInput",
+          "kind": "class",
+          "signatures": [
+            "public sealed class CreateBillingPortalSessionRequestInput\n{\n    public CreateBillingPortalSessionRequestInput(string orgId);\n    public string OrgId { get; set; }\n}"
+          ],
+          "docs": "The CreateBillingPortalSessionRequestInput input."
         },
         {
           "name": "CreateConversationReply",
@@ -5827,6 +6003,30 @@
           "docs": "The Organization result."
         },
         {
+          "name": "OrganizationBilling",
+          "kind": "class",
+          "signatures": [
+            "public sealed class OrganizationBilling\n{\n    public OrganizationBilling();\n    public string OrgId { get; init; }\n    public string? PlanId { get; init; }\n    public string? Standing { get; init; }\n    public string? GraceUntil { get; init; }\n    public string? SubscriptionStatus { get; init; }\n    public string? CurrentPeriodEnd { get; init; }\n    public bool CancelAtPeriodEnd { get; init; }\n    public string CatalogVersion { get; init; }\n    public bool Configured { get; init; }\n    public bool Billed { get; init; }\n}"
+          ],
+          "docs": "The OrganizationBilling result."
+        },
+        {
+          "name": "OrganizationBillingReply",
+          "kind": "class",
+          "signatures": [
+            "public sealed class OrganizationBillingReply\n{\n    public OrganizationBillingReply();\n    public string Status { get; init; }\n    public string RequestId { get; init; }\n    public string? ServerTime { get; init; }\n    public string? ReceiptId { get; init; }\n    public string? CommittedAt { get; init; }\n    public bool? Replayed { get; init; }\n    public OperationRef? Operation { get; init; }\n    public ResourceRef? ResourceRef { get; init; }\n    public OrganizationBilling? Result { get; init; }\n}"
+          ],
+          "docs": "The OrganizationBillingReply result."
+        },
+        {
+          "name": "OrganizationBillingRequestInput",
+          "kind": "class",
+          "signatures": [
+            "public sealed class OrganizationBillingRequestInput\n{\n    public OrganizationBillingRequestInput(string orgId);\n    public string OrgId { get; set; }\n}"
+          ],
+          "docs": "The OrganizationBillingRequestInput input."
+        },
+        {
           "name": "OrganizationPage",
           "kind": "class",
           "signatures": [
@@ -6078,7 +6278,7 @@
           "name": "RetainedResult",
           "kind": "class",
           "signatures": [
-            "public sealed class RetainedResult\n{\n    public RetainedResult();\n    public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }\n    public Conversation? Conversation { get; init; }\n    public ConversationMemberBatch? ConversationMemberBatch { get; init; }\n    public ConversationMute? ConversationMute { get; init; }\n    public CredentialDeliveryReceipt? CredentialDeliveryReceipt { get; init; }\n    public DeliveryAck? DeliveryAck { get; init; }\n    public LiveAlertBatch? LiveAlertBatch { get; init; }\n    public LiveCredentialIssuance? LiveCredentialIssuance { get; init; }\n    public LiveSessionEndRequested? LiveSessionEndRequested { get; init; }\n    public LiveSessionJoined? LiveSessionJoined { get; init; }\n    public LiveSessionLeft? LiveSessionLeft { get; init; }\n    public LiveSessionStarted? LiveSessionStarted { get; init; }\n    public Member? Member { get; init; }\n    public Message? Message { get; init; }\n    public MessageAck? MessageAck { get; init; }\n    public Organization? Organization { get; init; }\n    public Principal? Principal { get; init; }\n    public ReadReceipt? ReadReceipt { get; init; }\n    public SessionBootstrap? SessionBootstrap { get; init; }\n    public SessionRevocation? SessionRevocation { get; init; }\n    public JsonElement? SignedProof { get; init; }\n}"
+            "public sealed class RetainedResult\n{\n    public RetainedResult();\n    public BillingCheckoutSession? BillingCheckoutSession { get; init; }\n    public BillingPortalSession? BillingPortalSession { get; init; }\n    public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }\n    public Conversation? Conversation { get; init; }\n    public ConversationMemberBatch? ConversationMemberBatch { get; init; }\n    public ConversationMute? ConversationMute { get; init; }\n    public CredentialDeliveryReceipt? CredentialDeliveryReceipt { get; init; }\n    public DeliveryAck? DeliveryAck { get; init; }\n    public LiveAlertBatch? LiveAlertBatch { get; init; }\n    public LiveCredentialIssuance? LiveCredentialIssuance { get; init; }\n    public LiveSessionEndRequested? LiveSessionEndRequested { get; init; }\n    public LiveSessionJoined? LiveSessionJoined { get; init; }\n    public LiveSessionLeft? LiveSessionLeft { get; init; }\n    public LiveSessionStarted? LiveSessionStarted { get; init; }\n    public Member? Member { get; init; }\n    public Message? Message { get; init; }\n    public MessageAck? MessageAck { get; init; }\n    public Organization? Organization { get; init; }\n    public Principal? Principal { get; init; }\n    public ReadReceipt? ReadReceipt { get; init; }\n    public SessionBootstrap? SessionBootstrap { get; init; }\n    public SessionRevocation? SessionRevocation { get; init; }\n    public JsonElement? SignedProof { get; init; }\n}"
           ],
           "docs": "Exactly one typed field contains the retained, currently authorized receipt result."
         },

@@ -73,6 +73,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](management/deploymentUsage.md) | query | server | Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days. |
 | [`management.projectUsage`](management/projectUsage.md) | query | server | Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days. |
 | [`management.organizationUsage`](management/organizationUsage.md) | query | server | Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days. |
+| [`management.organizationBilling`](management/organizationBilling.md) | query | server | Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription. |
 | [`management.webhookEndpoints`](management/webhookEndpoints.md) | query | server | List the webhook endpoints of a project with their status, signing-secret rotation and delivery health. |
 | [`management.webhookDeliveries`](management/webhookDeliveries.md) | query | server | List recent deliveries of a webhook endpoint. |
 | [`management.resolveRequest`](management/resolveRequest.md) | query | server | Look up the stored outcome of an earlier management mutation by its requestId. |
@@ -86,6 +87,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](management/credentialPermit.md) | mutation | server | Issue a signed permit that authorizes redeeming one credential delivery. |
 | [`management.pauseOperation`](management/pauseOperation.md) | mutation | server | Pause a long-running operation. |
 | [`management.resumeOperation`](management/resumeOperation.md) | mutation | server | Resume a paused operation. |
+| [`management.createBillingCheckoutSession`](management/createBillingCheckoutSession.md) | mutation | server | Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires. |
+| [`management.createBillingPortalSession`](management/createBillingPortalSession.md) | mutation | server | Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires. |
 | [`management.configureWebhook`](management/configureWebhook.md) | mutation | server | Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery. |
 | [`management.updateWebhook`](management/updateWebhook.md) | mutation | server | Change the event types of a webhook endpoint, or enable or disable it. |
 | [`management.rotateWebhookSecret`](management/rotateWebhookSecret.md) | mutation | server | Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery. |

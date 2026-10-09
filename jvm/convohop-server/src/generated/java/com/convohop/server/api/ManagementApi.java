@@ -6,6 +6,10 @@ import com.convohop.server.internal.Wire;
 import com.convohop.server.model.CapabilitiesReply;
 import com.convohop.server.model.ConfigureWebhookReply;
 import com.convohop.server.model.ConfigureWebhookRequestInput;
+import com.convohop.server.model.CreateBillingCheckoutSessionReply;
+import com.convohop.server.model.CreateBillingCheckoutSessionRequestInput;
+import com.convohop.server.model.CreateBillingPortalSessionReply;
+import com.convohop.server.model.CreateBillingPortalSessionRequestInput;
 import com.convohop.server.model.CreateDeploymentReply;
 import com.convohop.server.model.CreateDeploymentRequestInput;
 import com.convohop.server.model.CreateOrganizationReply;
@@ -30,6 +34,8 @@ import com.convohop.server.model.GetProjectReply;
 import com.convohop.server.model.GetProjectRequestInput;
 import com.convohop.server.model.IssueBackendKeyReply;
 import com.convohop.server.model.IssueBackendKeyRequestInput;
+import com.convohop.server.model.OrganizationBillingReply;
+import com.convohop.server.model.OrganizationBillingRequestInput;
 import com.convohop.server.model.OrganizationUsageReply;
 import com.convohop.server.model.OrganizationUsageRequestInput;
 import com.convohop.server.model.OrganizationsReply;
@@ -205,6 +211,21 @@ public final class ManagementApi {
    */
   public OrganizationUsageReply organizationUsage(OrganizationUsageRequestInput input) {
     return this.executor.execute(Operations.MANAGEMENT_ORGANIZATION_USAGE, Wire.nonNull(input, "input").toJson(), null, null);
+  }
+
+  /**
+   * Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+   *
+   * <p>Idempotency: <code>safe</code>. Read-only. Repeat freely; each attempt may use a new requestId.
+   *
+   * <p>Authorization: portalCredential (condition owner).
+   *
+   * @param input the operation input
+   * @return the authority result
+   * @throws com.convohop.server.ConvoHopProblem if the authority rejects the request or its outcome is unknown
+   */
+  public OrganizationBillingReply organizationBilling(OrganizationBillingRequestInput input) {
+    return this.executor.execute(Operations.MANAGEMENT_ORGANIZATION_BILLING, Wire.nonNull(input, "input").toJson(), null, null);
   }
 
   /**
@@ -544,6 +565,68 @@ public final class ManagementApi {
    */
   public ResumeOperationReply resumeOperation(ResumeOperationRequestInput input, @Nullable String requestId) {
     return this.executor.execute(Operations.MANAGEMENT_RESUME_OPERATION, Wire.nonNull(input, "input").toJson(), requestId, null);
+  }
+
+  /**
+   * Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+   *
+   * <p>Idempotency: <code>singleUse</code>. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+   *
+   * <p>Authorization: portalCredential (condition owner).
+   *
+   * @param input the operation input
+   * @return the authority result
+   * @throws com.convohop.server.ConvoHopProblem if the authority rejects the request or its outcome is unknown
+   */
+  public CreateBillingCheckoutSessionReply createBillingCheckoutSession(CreateBillingCheckoutSessionRequestInput input) {
+    return this.createBillingCheckoutSession(input, null);
+  }
+
+  /**
+   * Create a hosted checkout link that subscribes an active organization to a self-service plan. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+   *
+   * <p>Idempotency: <code>singleUse</code>. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+   *
+   * <p>Authorization: portalCredential (condition owner).
+   *
+   * @param input the operation input
+   * @param requestId the request ID to reuse for a retry with the same input, or {@code null} for a new one
+   * @return the authority result
+   * @throws com.convohop.server.ConvoHopProblem if the authority rejects the request or its outcome is unknown
+   */
+  public CreateBillingCheckoutSessionReply createBillingCheckoutSession(CreateBillingCheckoutSessionRequestInput input, @Nullable String requestId) {
+    return this.executor.execute(Operations.MANAGEMENT_CREATE_BILLING_CHECKOUT_SESSION, Wire.nonNull(input, "input").toJson(), requestId, null);
+  }
+
+  /**
+   * Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+   *
+   * <p>Idempotency: <code>singleUse</code>. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+   *
+   * <p>Authorization: portalCredential (condition owner).
+   *
+   * @param input the operation input
+   * @return the authority result
+   * @throws com.convohop.server.ConvoHopProblem if the authority rejects the request or its outcome is unknown
+   */
+  public CreateBillingPortalSessionReply createBillingPortalSession(CreateBillingPortalSessionRequestInput input) {
+    return this.createBillingPortalSession(input, null);
+  }
+
+  /**
+   * Create a hosted billing portal link where an organization manages its payment methods, invoices and subscription. The link grants access to whoever holds it; a retry with the same requestId returns the same link until it expires.
+   *
+   * <p>Idempotency: <code>singleUse</code>. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
+   *
+   * <p>Authorization: portalCredential (condition owner).
+   *
+   * @param input the operation input
+   * @param requestId the request ID to reuse for a retry with the same input, or {@code null} for a new one
+   * @return the authority result
+   * @throws com.convohop.server.ConvoHopProblem if the authority rejects the request or its outcome is unknown
+   */
+  public CreateBillingPortalSessionReply createBillingPortalSession(CreateBillingPortalSessionRequestInput input, @Nullable String requestId) {
+    return this.executor.execute(Operations.MANAGEMENT_CREATE_BILLING_PORTAL_SESSION, Wire.nonNull(input, "input").toJson(), requestId, null);
   }
 
   /**

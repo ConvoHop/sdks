@@ -10,6 +10,8 @@ import org.jspecify.annotations.Nullable;
 
 /** Exactly one typed field contains the retained, currently authorized receipt result. */
 public final class RetainedResult implements WireValue {
+  private final @Nullable BillingCheckoutSession billingCheckoutSession;
+  private final @Nullable BillingPortalSession billingPortalSession;
   private final @Nullable BroadcastPermissionChanged broadcastPermissionChanged;
   private final @Nullable Conversation conversation;
   private final @Nullable ConversationMemberBatch conversationMemberBatch;
@@ -33,6 +35,8 @@ public final class RetainedResult implements WireValue {
   private final @Nullable Map<String, @Nullable Object> signedProof;
 
   private RetainedResult(
+      @Nullable BillingCheckoutSession billingCheckoutSession,
+      @Nullable BillingPortalSession billingPortalSession,
       @Nullable BroadcastPermissionChanged broadcastPermissionChanged,
       @Nullable Conversation conversation,
       @Nullable ConversationMemberBatch conversationMemberBatch,
@@ -54,6 +58,8 @@ public final class RetainedResult implements WireValue {
       @Nullable SessionBootstrap sessionBootstrap,
       @Nullable SessionRevocation sessionRevocation,
       @Nullable Map<String, @Nullable Object> signedProof) {
+    this.billingCheckoutSession = billingCheckoutSession;
+    this.billingPortalSession = billingPortalSession;
     this.broadcastPermissionChanged = broadcastPermissionChanged;
     this.conversation = conversation;
     this.conversationMemberBatch = conversationMemberBatch;
@@ -99,6 +105,8 @@ public final class RetainedResult implements WireValue {
     Map<String, @Nullable Object> object = Wire.object(value, "RetainedResult");
     Wire.exactlyOneNonNull(object, "RetainedResult");
     return new RetainedResult(
+        Wire.field(object, "RetainedResult", "billingCheckoutSession", depth, Wire.optional(BillingCheckoutSession::decode)),
+        Wire.field(object, "RetainedResult", "billingPortalSession", depth, Wire.optional(BillingPortalSession::decode)),
         Wire.field(object, "RetainedResult", "broadcastPermissionChanged", depth, Wire.optional(BroadcastPermissionChanged::decode)),
         Wire.field(object, "RetainedResult", "conversation", depth, Wire.optional(Conversation::decode)),
         Wire.field(object, "RetainedResult", "conversationMemberBatch", depth, Wire.optional(ConversationMemberBatch::decode)),
@@ -120,6 +128,16 @@ public final class RetainedResult implements WireValue {
         Wire.field(object, "RetainedResult", "sessionBootstrap", depth, Wire.optional(SessionBootstrap::decode)),
         Wire.field(object, "RetainedResult", "sessionRevocation", depth, Wire.optional(SessionRevocation::decode)),
         Wire.field(object, "RetainedResult", "signedProof", depth, Wire.optional(Scalars.SIGNED_PROOF)));
+  }
+
+  /** The <code>billingCheckoutSession</code> field. */
+  public @Nullable BillingCheckoutSession getBillingCheckoutSession() {
+    return this.billingCheckoutSession;
+  }
+
+  /** The <code>billingPortalSession</code> field. */
+  public @Nullable BillingPortalSession getBillingPortalSession() {
+    return this.billingPortalSession;
   }
 
   /** The <code>broadcastPermissionChanged</code> field. */
@@ -231,6 +249,8 @@ public final class RetainedResult implements WireValue {
   @Override
   public Map<String, @Nullable Object> toJson() {
     Map<String, @Nullable Object> json = new LinkedHashMap<>();
+    json.put("billingCheckoutSession", Wire.json(this.billingCheckoutSession));
+    json.put("billingPortalSession", Wire.json(this.billingPortalSession));
     json.put("broadcastPermissionChanged", Wire.json(this.broadcastPermissionChanged));
     json.put("conversation", Wire.json(this.conversation));
     json.put("conversationMemberBatch", Wire.json(this.conversationMemberBatch));
@@ -264,7 +284,9 @@ public final class RetainedResult implements WireValue {
       return false;
     }
     RetainedResult that = (RetainedResult) other;
-    return Objects.equals(this.broadcastPermissionChanged, that.broadcastPermissionChanged)
+    return Objects.equals(this.billingCheckoutSession, that.billingCheckoutSession)
+        && Objects.equals(this.billingPortalSession, that.billingPortalSession)
+        && Objects.equals(this.broadcastPermissionChanged, that.broadcastPermissionChanged)
         && Objects.equals(this.conversation, that.conversation)
         && Objects.equals(this.conversationMemberBatch, that.conversationMemberBatch)
         && Objects.equals(this.conversationMute, that.conversationMute)
@@ -289,12 +311,14 @@ public final class RetainedResult implements WireValue {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.broadcastPermissionChanged, this.conversation, this.conversationMemberBatch, this.conversationMute, this.credentialDeliveryReceipt, this.deliveryAck, this.liveAlertBatch, this.liveCredentialIssuance, this.liveSessionEndRequested, this.liveSessionJoined, this.liveSessionLeft, this.liveSessionStarted, this.member, this.message, this.messageAck, this.organization, this.principal, this.readReceipt, this.sessionBootstrap, this.sessionRevocation, this.signedProof);
+    return Objects.hash(this.billingCheckoutSession, this.billingPortalSession, this.broadcastPermissionChanged, this.conversation, this.conversationMemberBatch, this.conversationMute, this.credentialDeliveryReceipt, this.deliveryAck, this.liveAlertBatch, this.liveCredentialIssuance, this.liveSessionEndRequested, this.liveSessionJoined, this.liveSessionLeft, this.liveSessionStarted, this.member, this.message, this.messageAck, this.organization, this.principal, this.readReceipt, this.sessionBootstrap, this.sessionRevocation, this.signedProof);
   }
 
   @Override
   public String toString() {
-    return "RetainedResult{broadcastPermissionChanged=" + this.broadcastPermissionChanged
+    return "RetainedResult{billingCheckoutSession=" + this.billingCheckoutSession
+        + ", billingPortalSession=" + this.billingPortalSession
+        + ", broadcastPermissionChanged=" + this.broadcastPermissionChanged
         + ", conversation=" + this.conversation
         + ", conversationMemberBatch=" + this.conversationMemberBatch
         + ", conversationMute=" + this.conversationMute

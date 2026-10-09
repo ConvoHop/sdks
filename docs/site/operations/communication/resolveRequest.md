@@ -91,6 +91,17 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
           id
         }
         result {
+          billingCheckoutSession {
+            orgId
+            planId
+            url
+            expiresAt
+          }
+          billingPortalSession {
+            orgId
+            url
+            expiresAt
+          }
           broadcastPermissionChanged {
             member {
               conversationId
