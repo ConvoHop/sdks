@@ -144,12 +144,10 @@ final class OutboxTests: XCTestCase {
             return Reply.ok(request, ["result": Fixture.messageAck(TestIDs.conversation, sequence: text == "one" ? "21" : "22")])
         }
         try await relaunched.start()
-        try await eventually { await h.http.count("communication.sendMessage") == 2 }
+        try await eventually { try await relaunched.items().map(\.state) == [.sent, .sent] }
 
         let requests = await h.http.requests("communication.sendMessage")
         XCTAssertEqual(requests.compactMap { $0.input?["text"]?.stringValue }, ["one", "two"])
-        let states = try await relaunched.items().map(\.state)
-        XCTAssertEqual(states, [.sent, .sent])
     }
 
     func testStopReturnsOnceTheAttemptInFlightAndItsSavesSettled() async throws {
