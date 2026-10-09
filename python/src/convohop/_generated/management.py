@@ -5,11 +5,20 @@ Typed ``management`` operations. Organizations, deployments, projects, backend k
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import AsyncIterator, Iterator, Sequence
 from typing import Any
 
 from .operations import OPERATIONS, AsyncInvoker, SyncInvoker
 from .types import (
+    AgentAuditEvent,
+    AgentAuditEventPage,
+    AgentGrant,
+    AgentGrantPage,
+    AgentKey,
+    AgentPayment,
+    AgentSignupReview,
+    AgentSignupStatus,
+    AgentSignupTicket,
     BillingCheckoutSession,
     BillingPortalSession,
     Capabilities,
@@ -21,6 +30,7 @@ from .types import (
     Organization,
     OrganizationBilling,
     OrganizationPage,
+    OrganizationSpend,
     OrganizationUsage,
     PolicyChangeInput,
     Project,
@@ -29,6 +39,11 @@ from .types import (
     ResolveRequestRequestInput,
     WebhookDeliveryPage,
     WebhookEndpointPage,
+    AgentAuditEventsRequestInput,
+    AgentCredentialPermitRequestInput,
+    AgentGrantsRequestInput,
+    AgentSignupForApprovalRequestInput,
+    ApproveAgentSignupRequestInput,
     ConfigureWebhookReply,
     ConfigureWebhookRequestInput,
     CreateBillingCheckoutSessionRequestInput,
@@ -46,21 +61,28 @@ from .types import (
     GetDeploymentRequestInput,
     GetOrganizationRequestInput,
     GetProjectRequestInput,
+    IssueAgentKeyRequestInput,
     IssueBackendKeyReply,
     IssueBackendKeyRequestInput,
     OrganizationBillingRequestInput,
+    OrganizationSpendRequestInput,
     OrganizationUsageRequestInput,
     PauseOperationRequestInput,
     ProjectPolicyReply,
     ProjectPolicyRequestInput,
     ProjectUsageRequestInput,
+    PurchaseAgentCreditsRequestInput,
+    RejectAgentSignupRequestInput,
     ReplayWebhookDeliveriesReply,
     ReplayWebhookDeliveriesRequestInput,
+    RequestAgentSignupRequestInput,
     ResumeOperationRequestInput,
+    RevokeAgentGrantRequestInput,
     RevokeBackendKeyReply,
     RevokeBackendKeyRequestInput,
     RotateWebhookSecretReply,
     RotateWebhookSecretRequestInput,
+    SetSpendControlsRequestInput,
     UpdateWebhookReply,
     UpdateWebhookRequestInput,
     WebhookDeliveriesRequestInput,
@@ -322,6 +344,148 @@ class ManagementOperations(SyncInvoker):
         ).to_dict()
         _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.getOperation"], _input, None)
         return Operation._from_wire(_envelope["result"])
+
+    def agent_signup_for_approval(
+        self,
+        *,
+        approval_token: str,
+    ) -> AgentSignupReview:
+        """Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+
+        Authorization: No credential (``anonymous``); the authority ignores the client's token, when ``approvalToken``: The input carries the approval token from the email sent to the request's named owner.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+        """
+        _input = AgentSignupForApprovalRequestInput(
+            approval_token=approval_token,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.agentSignupForApproval"], _input, None)
+        return AgentSignupReview._from_wire(_envelope["result"])
+
+    def agent_signup(self) -> AgentSignupStatus:
+        """Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+
+        Authorization: ``agentVerifier``, when ``ownSignup``: The verifier is the one whose digest the signup request carries.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+        """
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.agentSignup"], None, None)
+        return AgentSignupStatus._from_wire(_envelope["result"])
+
+    def agent_grants(
+        self,
+        *,
+        org_id: str,
+        limit: int | None = None,
+        cursor: str | None = None,
+    ) -> AgentGrantPage:
+        """List an organization's agent grants with their keys, newest first.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+
+        Pagination: ``cursor``. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. :meth:`iter_agent_grants` follows the cursor for you.
+
+        Args:
+            limit: Defaults to ``50`` on the server.
+        """
+        _input = AgentGrantsRequestInput(
+            org_id=org_id,
+            limit=limit,
+            cursor=cursor,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.agentGrants"], _input, None)
+        return AgentGrantPage._from_wire(_envelope["result"])
+
+    def iter_agent_grants(
+        self,
+        *,
+        org_id: str,
+        limit: int | None = None,
+        cursor: str | None = None,
+    ) -> Iterator[AgentGrant]:
+        """Iterate the ``items`` of :meth:`agent_grants` across pages.
+
+        Follows ``nextCursor`` until a page is ``complete``. A page that sets ``refreshRequired`` raises ``RESYNC_REQUIRED``; restart from the first page.
+
+        Args:
+            limit: Defaults to ``50`` on the server.
+        """
+        _input = AgentGrantsRequestInput(
+            org_id=org_id,
+            limit=limit,
+            cursor=cursor,
+        ).to_dict()
+        for _page in self._pages(OPERATIONS["management.agentGrants"], _input):
+            for _item in _page["items"]:
+                yield AgentGrant._from_wire(_item)
+
+    def agent_audit_events(
+        self,
+        *,
+        org_id: str,
+        limit: int | None = None,
+        cursor: str | None = None,
+    ) -> AgentAuditEventPage:
+        """List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+
+        Pagination: ``cursor``. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. :meth:`iter_agent_audit_events` follows the cursor for you.
+
+        Args:
+            limit: Defaults to ``50`` on the server.
+        """
+        _input = AgentAuditEventsRequestInput(
+            org_id=org_id,
+            limit=limit,
+            cursor=cursor,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.agentAuditEvents"], _input, None)
+        return AgentAuditEventPage._from_wire(_envelope["result"])
+
+    def iter_agent_audit_events(
+        self,
+        *,
+        org_id: str,
+        limit: int | None = None,
+        cursor: str | None = None,
+    ) -> Iterator[AgentAuditEvent]:
+        """Iterate the ``items`` of :meth:`agent_audit_events` across pages.
+
+        Follows ``nextCursor`` until a page is ``complete``. A page that sets ``refreshRequired`` raises ``RESYNC_REQUIRED``; restart from the first page.
+
+        Args:
+            limit: Defaults to ``50`` on the server.
+        """
+        _input = AgentAuditEventsRequestInput(
+            org_id=org_id,
+            limit=limit,
+            cursor=cursor,
+        ).to_dict()
+        for _page in self._pages(OPERATIONS["management.agentAuditEvents"], _input):
+            for _item in _page["items"]:
+                yield AgentAuditEvent._from_wire(_item)
+
+    def organization_spend(
+        self,
+        *,
+        org_id: str,
+    ) -> OrganizationSpend:
+        """Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+        """
+        _input = OrganizationSpendRequestInput(
+            org_id=org_id,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.organizationSpend"], _input, None)
+        return OrganizationSpend._from_wire(_envelope["result"])
 
     def create_organization(
         self,
@@ -742,6 +906,217 @@ class ManagementOperations(SyncInvoker):
         ).to_dict()
         return ReplayWebhookDeliveriesReply._from_wire(self._invoke(OPERATIONS["management.replayWebhookDeliveries"], _input, request_id))
 
+    def request_agent_signup(
+        self,
+        *,
+        owner_email: str,
+        poll_challenge: str,
+        organization_name: str,
+        agent_name: str,
+        suggested_scopes: Sequence[str],
+        purpose: str | None = None,
+        suggested_plan: str | None = None,
+        suggested_monthly_spend_cap: str | None = None,
+        request_id: str | None = None,
+    ) -> AgentSignupTicket:
+        """Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+
+        Authorization: No credential (``anonymous``); the authority ignores the client's token.
+
+        Idempotency: ``replayOnly``. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = RequestAgentSignupRequestInput(
+            owner_email=owner_email,
+            poll_challenge=poll_challenge,
+            organization_name=organization_name,
+            agent_name=agent_name,
+            suggested_scopes=suggested_scopes,
+            purpose=purpose,
+            suggested_plan=suggested_plan,
+            suggested_monthly_spend_cap=suggested_monthly_spend_cap,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.requestAgentSignup"], _input, request_id)
+        return AgentSignupTicket._from_wire(_envelope["result"])
+
+    def reject_agent_signup(
+        self,
+        *,
+        approval_token: str,
+        suppress_future_requests: bool,
+        request_id: str | None = None,
+    ) -> AgentSignupStatus:
+        """Reject a signup request from its approval link, optionally suppressing future requests to the email.
+
+        Authorization: No credential (``anonymous``); the authority ignores the client's token, when ``approvalToken``: The input carries the approval token from the email sent to the request's named owner.
+
+        Idempotency: ``replayOnly``. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = RejectAgentSignupRequestInput(
+            approval_token=approval_token,
+            suppress_future_requests=suppress_future_requests,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.rejectAgentSignup"], _input, request_id)
+        return AgentSignupStatus._from_wire(_envelope["result"])
+
+    def approve_agent_signup(
+        self,
+        *,
+        approval_token: str,
+        confirmation_code: str,
+        terms_ref: str,
+        plan: str,
+        scopes: Sequence[str],
+        monthly_spend_cap: str,
+        agent_purchase_limit: str | None = None,
+        grant_expires_at: str | None = None,
+        request_id: str | None = None,
+    ) -> AgentSignupStatus:
+        """Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+
+        Authorization: ``portalCredential``, when ``approvalToken``: The input carries the approval token from the email sent to the request's named owner.
+
+        Idempotency: ``idempotent``. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.
+        """
+        _input = ApproveAgentSignupRequestInput(
+            approval_token=approval_token,
+            confirmation_code=confirmation_code,
+            terms_ref=terms_ref,
+            plan=plan,
+            scopes=scopes,
+            monthly_spend_cap=monthly_spend_cap,
+            agent_purchase_limit=agent_purchase_limit,
+            grant_expires_at=grant_expires_at,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.approveAgentSignup"], _input, request_id)
+        return AgentSignupStatus._from_wire(_envelope["result"])
+
+    def issue_agent_key(
+        self,
+        *,
+        scopes: Sequence[str],
+        expires_at: str | None = None,
+        request_id: str | None = None,
+    ) -> AgentKey:
+        """Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+
+        Authorization: ``agentVerifier``, when ``activeGrant``: The agent's grant is neither revoked nor expired, and its organization is active.
+
+        Idempotency: ``replayOnly``. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = IssueAgentKeyRequestInput(
+            scopes=scopes,
+            expires_at=expires_at,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.issueAgentKey"], _input, request_id)
+        return AgentKey._from_wire(_envelope["result"])
+
+    def agent_credential_permit(
+        self,
+        *,
+        delivery_id: str,
+        redemption_request_id: str,
+        request_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Issue a permit that authorizes the agent to redeem one of its key deliveries.
+
+        Authorization: ``agentVerifier``, when ``activeGrant``: The agent's grant is neither revoked nor expired, and its organization is active.
+
+        Idempotency: ``replayOnly``. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = AgentCredentialPermitRequestInput(
+            delivery_id=delivery_id,
+            redemption_request_id=redemption_request_id,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.agentCredentialPermit"], _input, request_id)
+        _value: dict[str, Any] = _envelope["result"]
+        return _value
+
+    def revoke_agent_grant(
+        self,
+        *,
+        grant_id: str,
+        revoke_issued_sessions: bool,
+        request_id: str | None = None,
+    ) -> AgentGrant:
+        """Revoke an agent grant and every key issued under it.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``idempotent``. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.
+        """
+        _input = RevokeAgentGrantRequestInput(
+            grant_id=grant_id,
+            revoke_issued_sessions=revoke_issued_sessions,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.revokeAgentGrant"], _input, request_id)
+        return AgentGrant._from_wire(_envelope["result"])
+
+    def set_spend_controls(
+        self,
+        *,
+        org_id: str,
+        monthly_spend_cap: str,
+        agent_purchase_limit: str | None = None,
+        request_id: str | None = None,
+    ) -> OrganizationSpend:
+        """Set the organization's monthly spend cap and agent purchase limit.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``idempotent``. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.
+        """
+        _input = SetSpendControlsRequestInput(
+            org_id=org_id,
+            monthly_spend_cap=monthly_spend_cap,
+            agent_purchase_limit=agent_purchase_limit,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.setSpendControls"], _input, request_id)
+        return OrganizationSpend._from_wire(_envelope["result"])
+
+    def purchase_agent_credits(
+        self,
+        *,
+        amount: str,
+        shared_payment_token: str,
+        request_id: str | None = None,
+    ) -> AgentPayment:
+        """Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
+
+        Authorization: ``agentVerifier``, when ``activeGrant``: The agent's grant is neither revoked nor expired, and its organization is active.
+
+        Idempotency: ``replayOnly``. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = PurchaseAgentCreditsRequestInput(
+            amount=amount,
+            shared_payment_token=shared_payment_token,
+        ).to_dict()
+        _envelope: dict[str, Any] = self._invoke(OPERATIONS["management.purchaseAgentCredits"], _input, request_id)
+        return AgentPayment._from_wire(_envelope["result"])
+
 
 class AsyncManagementOperations(AsyncInvoker):
     """Asynchronous ``management`` operations. Organizations, deployments, projects, backend keys and webhooks."""
@@ -991,6 +1366,148 @@ class AsyncManagementOperations(AsyncInvoker):
         ).to_dict()
         _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.getOperation"], _input, None)
         return Operation._from_wire(_envelope["result"])
+
+    async def agent_signup_for_approval(
+        self,
+        *,
+        approval_token: str,
+    ) -> AgentSignupReview:
+        """Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+
+        Authorization: No credential (``anonymous``); the authority ignores the client's token, when ``approvalToken``: The input carries the approval token from the email sent to the request's named owner.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+        """
+        _input = AgentSignupForApprovalRequestInput(
+            approval_token=approval_token,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.agentSignupForApproval"], _input, None)
+        return AgentSignupReview._from_wire(_envelope["result"])
+
+    async def agent_signup(self) -> AgentSignupStatus:
+        """Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+
+        Authorization: ``agentVerifier``, when ``ownSignup``: The verifier is the one whose digest the signup request carries.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+        """
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.agentSignup"], None, None)
+        return AgentSignupStatus._from_wire(_envelope["result"])
+
+    async def agent_grants(
+        self,
+        *,
+        org_id: str,
+        limit: int | None = None,
+        cursor: str | None = None,
+    ) -> AgentGrantPage:
+        """List an organization's agent grants with their keys, newest first.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+
+        Pagination: ``cursor``. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. :meth:`iter_agent_grants` follows the cursor for you.
+
+        Args:
+            limit: Defaults to ``50`` on the server.
+        """
+        _input = AgentGrantsRequestInput(
+            org_id=org_id,
+            limit=limit,
+            cursor=cursor,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.agentGrants"], _input, None)
+        return AgentGrantPage._from_wire(_envelope["result"])
+
+    async def iter_agent_grants(
+        self,
+        *,
+        org_id: str,
+        limit: int | None = None,
+        cursor: str | None = None,
+    ) -> AsyncIterator[AgentGrant]:
+        """Iterate the ``items`` of :meth:`agent_grants` across pages.
+
+        Follows ``nextCursor`` until a page is ``complete``. A page that sets ``refreshRequired`` raises ``RESYNC_REQUIRED``; restart from the first page.
+
+        Args:
+            limit: Defaults to ``50`` on the server.
+        """
+        _input = AgentGrantsRequestInput(
+            org_id=org_id,
+            limit=limit,
+            cursor=cursor,
+        ).to_dict()
+        async for _page in self._pages(OPERATIONS["management.agentGrants"], _input):
+            for _item in _page["items"]:
+                yield AgentGrant._from_wire(_item)
+
+    async def agent_audit_events(
+        self,
+        *,
+        org_id: str,
+        limit: int | None = None,
+        cursor: str | None = None,
+    ) -> AgentAuditEventPage:
+        """List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+
+        Pagination: ``cursor``. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. :meth:`iter_agent_audit_events` follows the cursor for you.
+
+        Args:
+            limit: Defaults to ``50`` on the server.
+        """
+        _input = AgentAuditEventsRequestInput(
+            org_id=org_id,
+            limit=limit,
+            cursor=cursor,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.agentAuditEvents"], _input, None)
+        return AgentAuditEventPage._from_wire(_envelope["result"])
+
+    async def iter_agent_audit_events(
+        self,
+        *,
+        org_id: str,
+        limit: int | None = None,
+        cursor: str | None = None,
+    ) -> AsyncIterator[AgentAuditEvent]:
+        """Iterate the ``items`` of :meth:`agent_audit_events` across pages.
+
+        Follows ``nextCursor`` until a page is ``complete``. A page that sets ``refreshRequired`` raises ``RESYNC_REQUIRED``; restart from the first page.
+
+        Args:
+            limit: Defaults to ``50`` on the server.
+        """
+        _input = AgentAuditEventsRequestInput(
+            org_id=org_id,
+            limit=limit,
+            cursor=cursor,
+        ).to_dict()
+        async for _page in self._pages(OPERATIONS["management.agentAuditEvents"], _input):
+            for _item in _page["items"]:
+                yield AgentAuditEvent._from_wire(_item)
+
+    async def organization_spend(
+        self,
+        *,
+        org_id: str,
+    ) -> OrganizationSpend:
+        """Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``safe``. Read-only. Repeat freely; each attempt may use a new requestId.
+        """
+        _input = OrganizationSpendRequestInput(
+            org_id=org_id,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.organizationSpend"], _input, None)
+        return OrganizationSpend._from_wire(_envelope["result"])
 
     async def create_organization(
         self,
@@ -1410,3 +1927,214 @@ class AsyncManagementOperations(AsyncInvoker):
             until=until,
         ).to_dict()
         return ReplayWebhookDeliveriesReply._from_wire(await self._invoke(OPERATIONS["management.replayWebhookDeliveries"], _input, request_id))
+
+    async def request_agent_signup(
+        self,
+        *,
+        owner_email: str,
+        poll_challenge: str,
+        organization_name: str,
+        agent_name: str,
+        suggested_scopes: Sequence[str],
+        purpose: str | None = None,
+        suggested_plan: str | None = None,
+        suggested_monthly_spend_cap: str | None = None,
+        request_id: str | None = None,
+    ) -> AgentSignupTicket:
+        """Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+
+        Authorization: No credential (``anonymous``); the authority ignores the client's token.
+
+        Idempotency: ``replayOnly``. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = RequestAgentSignupRequestInput(
+            owner_email=owner_email,
+            poll_challenge=poll_challenge,
+            organization_name=organization_name,
+            agent_name=agent_name,
+            suggested_scopes=suggested_scopes,
+            purpose=purpose,
+            suggested_plan=suggested_plan,
+            suggested_monthly_spend_cap=suggested_monthly_spend_cap,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.requestAgentSignup"], _input, request_id)
+        return AgentSignupTicket._from_wire(_envelope["result"])
+
+    async def reject_agent_signup(
+        self,
+        *,
+        approval_token: str,
+        suppress_future_requests: bool,
+        request_id: str | None = None,
+    ) -> AgentSignupStatus:
+        """Reject a signup request from its approval link, optionally suppressing future requests to the email.
+
+        Authorization: No credential (``anonymous``); the authority ignores the client's token, when ``approvalToken``: The input carries the approval token from the email sent to the request's named owner.
+
+        Idempotency: ``replayOnly``. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = RejectAgentSignupRequestInput(
+            approval_token=approval_token,
+            suppress_future_requests=suppress_future_requests,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.rejectAgentSignup"], _input, request_id)
+        return AgentSignupStatus._from_wire(_envelope["result"])
+
+    async def approve_agent_signup(
+        self,
+        *,
+        approval_token: str,
+        confirmation_code: str,
+        terms_ref: str,
+        plan: str,
+        scopes: Sequence[str],
+        monthly_spend_cap: str,
+        agent_purchase_limit: str | None = None,
+        grant_expires_at: str | None = None,
+        request_id: str | None = None,
+    ) -> AgentSignupStatus:
+        """Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+
+        Authorization: ``portalCredential``, when ``approvalToken``: The input carries the approval token from the email sent to the request's named owner.
+
+        Idempotency: ``idempotent``. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.
+        """
+        _input = ApproveAgentSignupRequestInput(
+            approval_token=approval_token,
+            confirmation_code=confirmation_code,
+            terms_ref=terms_ref,
+            plan=plan,
+            scopes=scopes,
+            monthly_spend_cap=monthly_spend_cap,
+            agent_purchase_limit=agent_purchase_limit,
+            grant_expires_at=grant_expires_at,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.approveAgentSignup"], _input, request_id)
+        return AgentSignupStatus._from_wire(_envelope["result"])
+
+    async def issue_agent_key(
+        self,
+        *,
+        scopes: Sequence[str],
+        expires_at: str | None = None,
+        request_id: str | None = None,
+    ) -> AgentKey:
+        """Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+
+        Authorization: ``agentVerifier``, when ``activeGrant``: The agent's grant is neither revoked nor expired, and its organization is active.
+
+        Idempotency: ``replayOnly``. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = IssueAgentKeyRequestInput(
+            scopes=scopes,
+            expires_at=expires_at,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.issueAgentKey"], _input, request_id)
+        return AgentKey._from_wire(_envelope["result"])
+
+    async def agent_credential_permit(
+        self,
+        *,
+        delivery_id: str,
+        redemption_request_id: str,
+        request_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Issue a permit that authorizes the agent to redeem one of its key deliveries.
+
+        Authorization: ``agentVerifier``, when ``activeGrant``: The agent's grant is neither revoked nor expired, and its organization is active.
+
+        Idempotency: ``replayOnly``. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = AgentCredentialPermitRequestInput(
+            delivery_id=delivery_id,
+            redemption_request_id=redemption_request_id,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.agentCredentialPermit"], _input, request_id)
+        _value: dict[str, Any] = _envelope["result"]
+        return _value
+
+    async def revoke_agent_grant(
+        self,
+        *,
+        grant_id: str,
+        revoke_issued_sessions: bool,
+        request_id: str | None = None,
+    ) -> AgentGrant:
+        """Revoke an agent grant and every key issued under it.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``idempotent``. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.
+        """
+        _input = RevokeAgentGrantRequestInput(
+            grant_id=grant_id,
+            revoke_issued_sessions=revoke_issued_sessions,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.revokeAgentGrant"], _input, request_id)
+        return AgentGrant._from_wire(_envelope["result"])
+
+    async def set_spend_controls(
+        self,
+        *,
+        org_id: str,
+        monthly_spend_cap: str,
+        agent_purchase_limit: str | None = None,
+        request_id: str | None = None,
+    ) -> OrganizationSpend:
+        """Set the organization's monthly spend cap and agent purchase limit.
+
+        Authorization: ``portalCredential``, when ``owner``: The caller owns the organization, deployment or project.
+
+        Idempotency: ``idempotent``. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through ``retry_request``.
+        """
+        _input = SetSpendControlsRequestInput(
+            org_id=org_id,
+            monthly_spend_cap=monthly_spend_cap,
+            agent_purchase_limit=agent_purchase_limit,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.setSpendControls"], _input, request_id)
+        return OrganizationSpend._from_wire(_envelope["result"])
+
+    async def purchase_agent_credits(
+        self,
+        *,
+        amount: str,
+        shared_payment_token: str,
+        request_id: str | None = None,
+    ) -> AgentPayment:
+        """Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
+
+        Authorization: ``agentVerifier``, when ``activeGrant``: The agent's grant is neither revoked nor expired, and its organization is active.
+
+        Idempotency: ``replayOnly``. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+        Args:
+            request_id: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same ``request_id`` and input.
+        """
+        _input = PurchaseAgentCreditsRequestInput(
+            amount=amount,
+            shared_payment_token=shared_payment_token,
+        ).to_dict()
+        _envelope: dict[str, Any] = await self._invoke(OPERATIONS["management.purchaseAgentCredits"], _input, request_id)
+        return AgentPayment._from_wire(_envelope["result"])

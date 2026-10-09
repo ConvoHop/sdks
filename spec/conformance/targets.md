@@ -110,8 +110,10 @@ cursor, and 4401 to end a subscription's authorization, after which SDKs
 must report `UNAUTHENTICATED` and stop without reconnecting. They also
 send the service's reason-coded closes, such as 4429 with
 `RATE_LIMITED retryAfter=4` or `QUOTA_EXCEEDED retryAfter=60 meter=messages`,
-and 4403 with `PLAN_LIMIT_EXCEEDED planLimit=conversations`. SDKs classify
-those by the code in the reason (see
+4403 with `PLAN_LIMIT_EXCEEDED planLimit=conversations`, 4402 with
+`SPEND_CAP_REACHED meter=messages` and 4503 with
+`SPEND_UNVERIFIED retryAfter=4 meter=messages`. SDKs classify those by the
+code in the reason (see
 [realtime closes](../recovery/README.md#realtime-closes)).
 
 ### Log

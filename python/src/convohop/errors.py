@@ -14,10 +14,13 @@ from ._generated.operations import ERRORS
 
 __all__ = [
     "ConvoHopProblem",
+    "CreditsExhaustedProblem",
     "PlanLimitExceededProblem",
     "QuotaExceededProblem",
     "RateLimitedProblem",
     "ScopeRequiredProblem",
+    "SpendCapReachedProblem",
+    "SpendUnverifiedProblem",
 ]
 
 _SCOPE = re.compile(r"The backend key requires the current ([a-z][A-Za-z0-9]{0,63}) scope")
@@ -119,11 +122,37 @@ class PlanLimitExceededProblem(ConvoHopProblem):
     """``PLAN_LIMIT_EXCEEDED``: the plan does not permit the resource or feature."""
 
 
+class CreditsExhaustedProblem(ConvoHopProblem):
+    """``CREDITS_EXHAUSTED``: prepaid credits are spent and the monthly spend cap is zero (402, not retryable).
+
+    Billable usage beyond the plan's allowances is refused before any effect; usage within them continues. Add
+    credits or raise the cap, then send a new request.
+    """
+
+
+class SpendCapReachedProblem(ConvoHopProblem):
+    """``SPEND_CAP_REACHED``: the month's charges reached the organization's spend limit (402, not retryable).
+
+    Billable usage beyond the plan's allowances is refused before any effect; usage within them continues. Add
+    credits or raise the cap, then send a new request.
+    """
+
+
+class SpendUnverifiedProblem(ConvoHopProblem):
+    """``SPEND_UNVERIFIED``: current spend cannot be verified, so billable usage failed closed (503, retryable).
+
+    Wait ``retry_after`` seconds, then resend with the same request ID.
+    """
+
+
 _CLASSES: dict[str, type[ConvoHopProblem]] = {
     "SCOPE_REQUIRED": ScopeRequiredProblem,
     "RATE_LIMITED": RateLimitedProblem,
     "QUOTA_EXCEEDED": QuotaExceededProblem,
     "PLAN_LIMIT_EXCEEDED": PlanLimitExceededProblem,
+    "CREDITS_EXHAUSTED": CreditsExhaustedProblem,
+    "SPEND_CAP_REACHED": SpendCapReachedProblem,
+    "SPEND_UNVERIFIED": SpendUnverifiedProblem,
 }
 
 

@@ -17,7 +17,7 @@ test("the repository and fixture annotations cover every operation", () => {
   assert.equal(result.ok, true);
   assert.equal(result.operationCount, Object.keys(sources.annotations.operations).length);
 
-  assert.equal(formatAnnotationReport(check()), "Annotations OK: 14 operations across 2 planes are annotated in schema/annotations.json.");
+  assert.equal(formatAnnotationReport(check()), "Annotations OK: 16 operations across 2 planes are annotated in schema/annotations.json.");
 });
 
 test("the failure report lists missing, unknown, invalid and inconsistent entries in that order", () => {
@@ -52,8 +52,8 @@ check each default, then run \`npm run check:annotations\` again:
   "alpha.ping": {
     "summary": "<One sentence that says what the operation does.>",
     "layer": "<client|server|both>",
-    "auth": [{"credential": "<permit|serverKey|userToken>"}],
-    "idempotency": "<idempotent|singleUse|permitBound|ephemeral>",
+    "auth": [{"credential": "<permit|serverKey|userToken|anon|agentToken>"}],
+    "idempotency": "<idempotent|singleUse|permitBound|replayOnly|ephemeral>",
     "pagination": {"style": "none"},
     "realtime": {"mode": "none"},
     "errors": {"sets": ["request", "http"], "codes": []}
@@ -79,7 +79,7 @@ test("starter entries default what the schema implies and fail until every place
   assert.deepEqual(widgets, {
     summary: "<One sentence that says what the operation does.>",
     layer: "<client|server|both>",
-    auth: [{ credential: "<permit|serverKey|userToken>" }],
+    auth: [{ credential: "<permit|serverKey|userToken|anon|agentToken>" }],
     idempotency: "safe",
     pagination: { style: "<cursor|sequence|replay|bounded>", pagePath: ["result"] },
     realtime: { mode: "none" },
@@ -96,7 +96,7 @@ test("starter entries default what the schema implies and fail until every place
   assert.deepEqual(pasted.schemaErrors.map(error => [error.path, error.message.replace(/ \(got .*\)$/s, "")]), [
     ["/operations/alpha.ping/layer", 'must be one of "client", "server", "both"'],
     ["/operations/alpha.ping/auth/0/credential", "must match pattern ^[a-z][A-Za-z0-9]*$"],
-    ["/operations/alpha.ping/idempotency", 'must be one of "safe", "idempotent", "singleUse", "permitBound", "ephemeral"'],
+    ["/operations/alpha.ping/idempotency", 'must be one of "safe", "idempotent", "singleUse", "permitBound", "replayOnly", "ephemeral"'],
     ["/operations/beta.widgets/layer", 'must be one of "client", "server", "both"'],
     ["/operations/beta.widgets/auth/0/credential", "must match pattern ^[a-z][A-Za-z0-9]*$"],
     ["/operations/beta.widgets/pagination/style", 'must be one of "none", "cursor", "sequence", "replay", "bounded"'],
@@ -126,8 +126,11 @@ test("schema violations are reported without semantic checks", () => {
   });
   assert.deepEqual(result.schemaErrors, [{ path: "/operations/alpha.items/layer", message: 'must be one of "client", "server", "both" (got "edge")' }]);
   assert.deepEqual(result.problems, []);
+  const scopedAnonymous = check({ annotations: annotations => { annotations.credentials.anon.scoped = true; } });
+  assert.deepEqual(scopedAnonymous.schemaErrors.map(error => error.path), ["/credentials/anon/scoped"]);
+  assert.deepEqual(scopedAnonymous.problems, []);
   const malformed = check({ annotations: () => ({ $schema: "./other.schema.json" }) });
-  assert.equal(malformed.missing.length, 14);
+  assert.equal(malformed.missing.length, 16);
   assert.ok(malformed.schemaErrors.some(error => error.path === "/$schema" && error.message === 'must equal "./annotations.schema.json"'));
   assert.match(formatAnnotationReport(malformed), /\n {2}"alpha\.ping": \{\n {4}"summary": "<One sentence that says what the operation does\.>",\n {4}"layer"/);
 });
@@ -152,8 +155,8 @@ const SEMANTIC_CASES = [
   ]],
   ["context input type", { annotations: a => { a.planes.beta.context.input = "Widget"; } }, [
     ["/planes/beta/context/input", "Widget is not an input type in schema/beta.graphql"],
-    ...["query capabilities", "query resolveRequest", "query widgets", "mutation createWidget"]
-      .map(field => [`schema/beta.graphql ${field}`, "must take context: Widget!"]),
+    ...["query capabilities", "query resolveRequest", "query widgets", "mutation createWidget", "mutation requestAccess",
+      "mutation claimWidget"].map(field => [`schema/beta.graphql ${field}`, "must take context: Widget!"]),
   ]],
   ["context rule fields", { annotations: a => { a.planes.alpha.context.rules[1].fields.push("nope", "requestId"); } }, [
     ["/planes/alpha/context/rules/1/fields/1", 'ContextInput has no field "nope"'],
@@ -258,6 +261,22 @@ const SEMANTIC_CASES = [
     ["/operations/alpha.startJob/idempotency", '"permitBound" requires every auth entry to use a context-carried permit credential'],
     ["/operations/alpha.ping/idempotency", 'mutations cannot be "safe"'],
     ["/operations/alpha.redeem/idempotency", 'mutations authorized by a context-carried permit must be "permitBound"'],
+  ]],
+  ["a credential with carrier none excludes other credentials", {
+    annotations: a => { a.operations["beta.requestAccess"].auth.push({ credential: "serverKey", scopes: ["widgetWrite"] }); },
+  }, [
+    ["/operations/beta.requestAccess/auth", 'an operation that accepts a credential with carrier "none" accepts no other credential'],
+  ]],
+  ["resolvable classes need credentials the resolveOperation accepts", {
+    annotations: a => {
+      a.operations["beta.requestAccess"].idempotency = "singleUse";
+      a.operations["beta.claimWidget"].idempotency = "idempotent";
+    },
+  }, [
+    ["/operations/beta.requestAccess/auth/0/credential",
+      '"singleUse" outcomes are resolved with beta.resolveRequest, which does not accept anon; use a class whose outcomes are not resolvable'],
+    ["/operations/beta.claimWidget/auth/0/credential",
+      '"idempotent" outcomes are resolved with beta.resolveRequest, which does not accept agentToken; use a class whose outcomes are not resolvable'],
   ]],
   ["destructive marks only mutations", { annotations: a => { a.operations["alpha.items"].destructive = true; } }, [
     ["/operations/alpha.items/destructive", "query operations are read-only and cannot be destructive"],

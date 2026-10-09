@@ -187,6 +187,8 @@ Timelines reconnect on their own. After a dropped connection, they catch up over
 
 A problem that reconnecting can't fix, such as `NOT_FOUND`, `FORBIDDEN` or `QUOTA_EXCEEDED`, or a response that breaks the protocol, stops the timeline: `timeline.replay` becomes `CLOSED`, and the store's error callback gets the error. Open a new timeline to try again.
 
+When the organization's prepaid credits run out or it reaches its monthly spend cap, the timeline closes with a 402 `CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` problem; open a new one once the organization can pay again. While ConvoHop can't verify current spend, the timeline reports `SPEND_UNVERIFIED` and reconnects no sooner than its `retryAfter`, even if the network comes back sooner.
+
 ## Typing and read receipts
 
 ```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#typing

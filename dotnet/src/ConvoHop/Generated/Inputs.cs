@@ -995,6 +995,153 @@ namespace ConvoHop.Models
         public global::System.Text.Json.JsonElement? Props { get; set; }
     }
 
+    /// <summary>The AgentAuditEventsRequestInput input.</summary>
+    public sealed class AgentAuditEventsRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="orgId">The <c>orgId</c> field.</param>
+        public AgentAuditEventsRequestInput(string orgId)
+        {
+            this.OrgId = orgId;
+        }
+
+        /// <summary>The <c>orgId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("orgId")]
+        public string OrgId { get; set; }
+
+        /// <summary>The <c>limit</c> field.</summary>
+        /// <remarks>Omitted when null; the authority then applies the default <c>50</c>.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("limit")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public int? Limit { get; set; }
+
+        /// <summary>The <c>cursor</c> field.</summary>
+        /// <remarks>Omitted when null.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("cursor")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Cursor { get; set; }
+    }
+
+    /// <summary>The AgentCredentialPermitRequestInput input.</summary>
+    public sealed class AgentCredentialPermitRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="deliveryId">The <c>deliveryId</c> field.</param>
+        /// <param name="redemptionRequestId">The <c>redemptionRequestId</c> field.</param>
+        public AgentCredentialPermitRequestInput(string deliveryId, string redemptionRequestId)
+        {
+            this.DeliveryId = deliveryId;
+            this.RedemptionRequestId = redemptionRequestId;
+        }
+
+        /// <summary>The <c>deliveryId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("deliveryId")]
+        public string DeliveryId { get; set; }
+
+        /// <summary>The <c>redemptionRequestId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("redemptionRequestId")]
+        public string RedemptionRequestId { get; set; }
+    }
+
+    /// <summary>The AgentGrantsRequestInput input.</summary>
+    public sealed class AgentGrantsRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="orgId">The <c>orgId</c> field.</param>
+        public AgentGrantsRequestInput(string orgId)
+        {
+            this.OrgId = orgId;
+        }
+
+        /// <summary>The <c>orgId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("orgId")]
+        public string OrgId { get; set; }
+
+        /// <summary>The <c>limit</c> field.</summary>
+        /// <remarks>Omitted when null; the authority then applies the default <c>50</c>.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("limit")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public int? Limit { get; set; }
+
+        /// <summary>The <c>cursor</c> field.</summary>
+        /// <remarks>Omitted when null.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("cursor")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Cursor { get; set; }
+    }
+
+    /// <summary>The AgentSignupForApprovalRequestInput input.</summary>
+    public sealed class AgentSignupForApprovalRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="approvalToken">The <c>approvalToken</c> field.</param>
+        public AgentSignupForApprovalRequestInput(string approvalToken)
+        {
+            this.ApprovalToken = approvalToken;
+        }
+
+        /// <summary>The <c>approvalToken</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("approvalToken")]
+        public string ApprovalToken { get; set; }
+    }
+
+    /// <summary>The ApproveAgentSignupRequestInput input.</summary>
+    public sealed class ApproveAgentSignupRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="approvalToken">The <c>approvalToken</c> field.</param>
+        /// <param name="confirmationCode">The <c>confirmationCode</c> field.</param>
+        /// <param name="termsRef">The <c>termsRef</c> field.</param>
+        /// <param name="plan">The <c>plan</c> field.</param>
+        /// <param name="scopes">The <c>scopes</c> field.</param>
+        /// <param name="monthlySpendCap">The <c>monthlySpendCap</c> field.</param>
+        public ApproveAgentSignupRequestInput(string approvalToken, string confirmationCode, string termsRef, string plan, global::System.Collections.Generic.IReadOnlyList<string> scopes, string monthlySpendCap)
+        {
+            this.ApprovalToken = approvalToken;
+            this.ConfirmationCode = confirmationCode;
+            this.TermsRef = termsRef;
+            this.Plan = plan;
+            this.Scopes = scopes;
+            this.MonthlySpendCap = monthlySpendCap;
+        }
+
+        /// <summary>The <c>approvalToken</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("approvalToken")]
+        public string ApprovalToken { get; set; }
+
+        /// <summary>The <c>confirmationCode</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("confirmationCode")]
+        public string ConfirmationCode { get; set; }
+
+        /// <summary>The <c>termsRef</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("termsRef")]
+        public string TermsRef { get; set; }
+
+        /// <summary>The <c>plan</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("plan")]
+        public string Plan { get; set; }
+
+        /// <summary>The <c>scopes</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("scopes")]
+        public global::System.Collections.Generic.IReadOnlyList<string> Scopes { get; set; }
+
+        /// <summary>The <c>monthlySpendCap</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("monthlySpendCap")]
+        public string MonthlySpendCap { get; set; }
+
+        /// <summary>The <c>agentPurchaseLimit</c> field.</summary>
+        /// <remarks>Omitted when null.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("agentPurchaseLimit")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? AgentPurchaseLimit { get; set; }
+
+        /// <summary>The <c>grantExpiresAt</c> field.</summary>
+        /// <remarks>Omitted when null.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("grantExpiresAt")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? GrantExpiresAt { get; set; }
+    }
+
     /// <summary>The ConfigureWebhookRequestInput input.</summary>
     public sealed class ConfigureWebhookRequestInput
     {
@@ -1298,6 +1445,27 @@ namespace ConvoHop.Models
         public string ProjectId { get; set; }
     }
 
+    /// <summary>The IssueAgentKeyRequestInput input.</summary>
+    public sealed class IssueAgentKeyRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="scopes">The <c>scopes</c> field.</param>
+        public IssueAgentKeyRequestInput(global::System.Collections.Generic.IReadOnlyList<string> scopes)
+        {
+            this.Scopes = scopes;
+        }
+
+        /// <summary>The <c>scopes</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("scopes")]
+        public global::System.Collections.Generic.IReadOnlyList<string> Scopes { get; set; }
+
+        /// <summary>The <c>expiresAt</c> field.</summary>
+        /// <remarks>Omitted when null.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? ExpiresAt { get; set; }
+    }
+
     /// <summary>The IssueBackendKeyRequestInput input.</summary>
     public sealed class IssueBackendKeyRequestInput
     {
@@ -1337,6 +1505,21 @@ namespace ConvoHop.Models
         /// <summary>Creates the input from its required fields.</summary>
         /// <param name="orgId">The <c>orgId</c> field.</param>
         public OrganizationBillingRequestInput(string orgId)
+        {
+            this.OrgId = orgId;
+        }
+
+        /// <summary>The <c>orgId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("orgId")]
+        public string OrgId { get; set; }
+    }
+
+    /// <summary>The OrganizationSpendRequestInput input.</summary>
+    public sealed class OrganizationSpendRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="orgId">The <c>orgId</c> field.</param>
+        public OrganizationSpendRequestInput(string orgId)
         {
             this.OrgId = orgId;
         }
@@ -1448,6 +1631,48 @@ namespace ConvoHop.Models
         public string? To { get; set; }
     }
 
+    /// <summary>The PurchaseAgentCreditsRequestInput input.</summary>
+    public sealed class PurchaseAgentCreditsRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="amount">The <c>amount</c> field.</param>
+        /// <param name="sharedPaymentToken">The <c>sharedPaymentToken</c> field.</param>
+        public PurchaseAgentCreditsRequestInput(string amount, string sharedPaymentToken)
+        {
+            this.Amount = amount;
+            this.SharedPaymentToken = sharedPaymentToken;
+        }
+
+        /// <summary>The <c>amount</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public string Amount { get; set; }
+
+        /// <summary>The <c>sharedPaymentToken</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("sharedPaymentToken")]
+        public string SharedPaymentToken { get; set; }
+    }
+
+    /// <summary>The RejectAgentSignupRequestInput input.</summary>
+    public sealed class RejectAgentSignupRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="approvalToken">The <c>approvalToken</c> field.</param>
+        /// <param name="suppressFutureRequests">The <c>suppressFutureRequests</c> field.</param>
+        public RejectAgentSignupRequestInput(string approvalToken, bool suppressFutureRequests)
+        {
+            this.ApprovalToken = approvalToken;
+            this.SuppressFutureRequests = suppressFutureRequests;
+        }
+
+        /// <summary>The <c>approvalToken</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("approvalToken")]
+        public string ApprovalToken { get; set; }
+
+        /// <summary>The <c>suppressFutureRequests</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("suppressFutureRequests")]
+        public bool SuppressFutureRequests { get; set; }
+    }
+
     /// <summary>The ReplayWebhookDeliveriesRequestInput input.</summary>
     public sealed class ReplayWebhookDeliveriesRequestInput
     {
@@ -1487,6 +1712,63 @@ namespace ConvoHop.Models
         public string? Until { get; set; }
     }
 
+    /// <summary>The RequestAgentSignupRequestInput input.</summary>
+    public sealed class RequestAgentSignupRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="ownerEmail">The <c>ownerEmail</c> field.</param>
+        /// <param name="pollChallenge">The <c>pollChallenge</c> field.</param>
+        /// <param name="organizationName">The <c>organizationName</c> field.</param>
+        /// <param name="agentName">The <c>agentName</c> field.</param>
+        /// <param name="suggestedScopes">The <c>suggestedScopes</c> field.</param>
+        public RequestAgentSignupRequestInput(string ownerEmail, string pollChallenge, string organizationName, string agentName, global::System.Collections.Generic.IReadOnlyList<string> suggestedScopes)
+        {
+            this.OwnerEmail = ownerEmail;
+            this.PollChallenge = pollChallenge;
+            this.OrganizationName = organizationName;
+            this.AgentName = agentName;
+            this.SuggestedScopes = suggestedScopes;
+        }
+
+        /// <summary>The <c>ownerEmail</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("ownerEmail")]
+        public string OwnerEmail { get; set; }
+
+        /// <summary>The <c>pollChallenge</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("pollChallenge")]
+        public string PollChallenge { get; set; }
+
+        /// <summary>The <c>organizationName</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("organizationName")]
+        public string OrganizationName { get; set; }
+
+        /// <summary>The <c>agentName</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("agentName")]
+        public string AgentName { get; set; }
+
+        /// <summary>The <c>purpose</c> field.</summary>
+        /// <remarks>Omitted when null.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("purpose")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Purpose { get; set; }
+
+        /// <summary>The <c>suggestedPlan</c> field.</summary>
+        /// <remarks>Omitted when null.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("suggestedPlan")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? SuggestedPlan { get; set; }
+
+        /// <summary>The <c>suggestedScopes</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("suggestedScopes")]
+        public global::System.Collections.Generic.IReadOnlyList<string> SuggestedScopes { get; set; }
+
+        /// <summary>The <c>suggestedMonthlySpendCap</c> field.</summary>
+        /// <remarks>Omitted when null.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("suggestedMonthlySpendCap")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? SuggestedMonthlySpendCap { get; set; }
+    }
+
     /// <summary>The ResumeOperationRequestInput input.</summary>
     public sealed class ResumeOperationRequestInput
     {
@@ -1506,6 +1788,27 @@ namespace ConvoHop.Models
         /// <summary>The <c>expectedRevision</c> field.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("expectedRevision")]
         public string ExpectedRevision { get; set; }
+    }
+
+    /// <summary>The RevokeAgentGrantRequestInput input.</summary>
+    public sealed class RevokeAgentGrantRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="grantId">The <c>grantId</c> field.</param>
+        /// <param name="revokeIssuedSessions">The <c>revokeIssuedSessions</c> field.</param>
+        public RevokeAgentGrantRequestInput(string grantId, bool revokeIssuedSessions)
+        {
+            this.GrantId = grantId;
+            this.RevokeIssuedSessions = revokeIssuedSessions;
+        }
+
+        /// <summary>The <c>grantId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("grantId")]
+        public string GrantId { get; set; }
+
+        /// <summary>The <c>revokeIssuedSessions</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("revokeIssuedSessions")]
+        public bool RevokeIssuedSessions { get; set; }
     }
 
     /// <summary>The RevokeBackendKeyRequestInput input.</summary>
@@ -1566,6 +1869,33 @@ namespace ConvoHop.Models
         /// <summary>The <c>expectedRevision</c> field.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("expectedRevision")]
         public string ExpectedRevision { get; set; }
+    }
+
+    /// <summary>The SetSpendControlsRequestInput input.</summary>
+    public sealed class SetSpendControlsRequestInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="orgId">The <c>orgId</c> field.</param>
+        /// <param name="monthlySpendCap">The <c>monthlySpendCap</c> field.</param>
+        public SetSpendControlsRequestInput(string orgId, string monthlySpendCap)
+        {
+            this.OrgId = orgId;
+            this.MonthlySpendCap = monthlySpendCap;
+        }
+
+        /// <summary>The <c>orgId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("orgId")]
+        public string OrgId { get; set; }
+
+        /// <summary>The <c>monthlySpendCap</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("monthlySpendCap")]
+        public string MonthlySpendCap { get; set; }
+
+        /// <summary>The <c>agentPurchaseLimit</c> field.</summary>
+        /// <remarks>Omitted when null.</remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("agentPurchaseLimit")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? AgentPurchaseLimit { get; set; }
     }
 
     /// <summary>The UpdateWebhookRequestInput input.</summary>

@@ -1360,6 +1360,94 @@ public const string AdmissionLimit = "ADMISSION_LIMIT";
 
 A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId.
 
+#### `ErrorCodes.AgenticNotConfigured` static property
+
+```cs
+public const string AgenticNotConfigured = "AGENTIC_NOT_CONFIGURED";
+```
+
+Agent signup is not offered in this environment.
+
+#### `ErrorCodes.AgentConfirmationCodeInvalid` static property
+
+```cs
+public const string AgentConfirmationCodeInvalid = "AGENT_CONFIRMATION_CODE_INVALID";
+```
+
+The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.
+
+#### `ErrorCodes.AgentGrantExpired` static property
+
+```cs
+public const string AgentGrantExpired = "AGENT_GRANT_EXPIRED";
+```
+
+The agent's grant has expired. The agent needs a new signup request approved.
+
+#### `ErrorCodes.AgentGrantRevoked` static property
+
+```cs
+public const string AgentGrantRevoked = "AGENT_GRANT_REVOKED";
+```
+
+The owner revoked the agent's grant.
+
+#### `ErrorCodes.AgentKeyLimit` static property
+
+```cs
+public const string AgentKeyLimit = "AGENT_KEY_LIMIT";
+```
+
+The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.
+
+#### `ErrorCodes.AgentPurchaseLimitExceeded` static property
+
+```cs
+public const string AgentPurchaseLimitExceeded = "AGENT_PURCHASE_LIMIT_EXCEEDED";
+```
+
+The purchase would take this month's agent credit purchases beyond the limit the owner set.
+
+#### `ErrorCodes.AgentScopeNotGranted` static property
+
+```cs
+public const string AgentScopeNotGranted = "AGENT_SCOPE_NOT_GRANTED";
+```
+
+A requested scope is outside the agent's grant.
+
+#### `ErrorCodes.AgentSignupClosed` static property
+
+```cs
+public const string AgentSignupClosed = "AGENT_SIGNUP_CLOSED";
+```
+
+The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.
+
+#### `ErrorCodes.AgentSignupEmailRejected` static property
+
+```cs
+public const string AgentSignupEmailRejected = "AGENT_SIGNUP_EMAIL_REJECTED";
+```
+
+The owner's email address is refused, for example for a disposable domain.
+
+#### `ErrorCodes.AgentSignupNotReady` static property
+
+```cs
+public const string AgentSignupNotReady = "AGENT_SIGNUP_NOT_READY";
+```
+
+The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.
+
+#### `ErrorCodes.AgentSignupSuppressed` static property
+
+```cs
+public const string AgentSignupSuppressed = "AGENT_SIGNUP_SUPPRESSED";
+```
+
+The owner opted out of agent signup requests to this email address.
+
 #### `ErrorCodes.AlreadyConnected` static property
 
 ```cs
@@ -1495,6 +1583,38 @@ public const string CredentialRequired = "CREDENTIAL_REQUIRED";
 ```
 
 Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.
+
+#### `ErrorCodes.CreditsExhausted` static property
+
+```cs
+public const string CreditsExhausted = "CREDITS_EXHAUSTED";
+```
+
+Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+
+#### `ErrorCodes.CreditsRequireMeteredPlan` static property
+
+```cs
+public const string CreditsRequireMeteredPlan = "CREDITS_REQUIRE_METERED_PLAN";
+```
+
+Credits apply only to a billed subscription, and none is in force.
+
+#### `ErrorCodes.CreditAmountOutOfRange` static property
+
+```cs
+public const string CreditAmountOutOfRange = "CREDIT_AMOUNT_OUT_OF_RANGE";
+```
+
+The credit amount is outside the allowed purchase range.
+
+#### `ErrorCodes.CreditGrantLimitReached` static property
+
+```cs
+public const string CreditGrantLimitReached = "CREDIT_GRANT_LIMIT_REACHED";
+```
+
+Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.
 
 #### `ErrorCodes.CursorAhead` static property
 
@@ -1784,6 +1904,22 @@ public const string ParticipationMismatch = "PARTICIPATION_MISMATCH";
 
 The participation does not belong to the caller or the current live session generation.
 
+#### `ErrorCodes.PaymentDeclined` static property
+
+```cs
+public const string PaymentDeclined = "PAYMENT_DECLINED";
+```
+
+The payment rail declined the payment. Nothing was charged.
+
+#### `ErrorCodes.PaymentRailNotConfigured` static property
+
+```cs
+public const string PaymentRailNotConfigured = "PAYMENT_RAIL_NOT_CONFIGURED";
+```
+
+No payment rail is enabled in this environment.
+
 #### `ErrorCodes.PermitExpired` static property
 
 ```cs
@@ -1943,6 +2079,22 @@ public const string SessionRefreshUnverified = "SESSION_REFRESH_UNVERIFIED";
 ```
 
 The refreshed session could not be verified.
+
+#### `ErrorCodes.SpendCapReached` static property
+
+```cs
+public const string SpendCapReached = "SPEND_CAP_REACHED";
+```
+
+The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+
+#### `ErrorCodes.SpendUnverified` static property
+
+```cs
+public const string SpendUnverified = "SPEND_UNVERIFIED";
+```
+
+Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.
 
 #### `ErrorCodes.TransportUnknown` static property
 
@@ -2261,7 +2413,7 @@ The request-context fields and how the operation uses them.
 public string Idempotency { get; }
 ```
 
-The idempotency class: `safe`, `idempotent` or `permitBound`.
+The idempotency class, such as `safe`, `idempotent`, `permitBound` or `replayOnly`.
 
 #### `OperationDescriptor.Layer` property
 
@@ -2460,7 +2612,7 @@ Inherited from `OperationDescriptor`.
 public string Idempotency { get; }
 ```
 
-The idempotency class: `safe`, `idempotent` or `permitBound`.
+The idempotency class, such as `safe`, `idempotent`, `permitBound` or `replayOnly`.
 
 Inherited from `OperationDescriptor`.
 
@@ -2956,6 +3108,46 @@ public static readonly OperationDescriptor<GetOperationRequestInput, GetOperatio
 
 Read the state of a long-running management operation.
 
+#### `Operations.Management.AgentSignupForApproval` static property
+
+```cs
+public static readonly OperationDescriptor<AgentSignupForApprovalRequestInput, AgentSignupForApprovalReply> AgentSignupForApproval;
+```
+
+Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+
+#### `Operations.Management.AgentSignup` static property
+
+```cs
+public static readonly OperationDescriptor<NoInput, AgentSignupReply> AgentSignup;
+```
+
+Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+
+#### `Operations.Management.AgentGrants` static property
+
+```cs
+public static readonly OperationDescriptor<AgentGrantsRequestInput, AgentGrantsReply> AgentGrants;
+```
+
+List an organization's agent grants with their keys, newest first.
+
+#### `Operations.Management.AgentAuditEvents` static property
+
+```cs
+public static readonly OperationDescriptor<AgentAuditEventsRequestInput, AgentAuditEventsReply> AgentAuditEvents;
+```
+
+List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+
+#### `Operations.Management.OrganizationSpend` static property
+
+```cs
+public static readonly OperationDescriptor<OrganizationSpendRequestInput, OrganizationSpendReply> OrganizationSpend;
+```
+
+Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+
 #### `Operations.Management.CreateOrganization` static property
 
 ```cs
@@ -3083,6 +3275,70 @@ public static readonly OperationDescriptor<ReplayWebhookDeliveriesRequestInput, 
 ```
 
 Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.
+
+#### `Operations.Management.RequestAgentSignup` static property
+
+```cs
+public static readonly OperationDescriptor<RequestAgentSignupRequestInput, RequestAgentSignupReply> RequestAgentSignup;
+```
+
+Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+
+#### `Operations.Management.RejectAgentSignup` static property
+
+```cs
+public static readonly OperationDescriptor<RejectAgentSignupRequestInput, RejectAgentSignupReply> RejectAgentSignup;
+```
+
+Reject a signup request from its approval link, optionally suppressing future requests to the email.
+
+#### `Operations.Management.ApproveAgentSignup` static property
+
+```cs
+public static readonly OperationDescriptor<ApproveAgentSignupRequestInput, ApproveAgentSignupReply> ApproveAgentSignup;
+```
+
+Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+
+#### `Operations.Management.IssueAgentKey` static property
+
+```cs
+public static readonly OperationDescriptor<IssueAgentKeyRequestInput, IssueAgentKeyReply> IssueAgentKey;
+```
+
+Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+
+#### `Operations.Management.AgentCredentialPermit` static property
+
+```cs
+public static readonly OperationDescriptor<AgentCredentialPermitRequestInput, AgentCredentialPermitReply> AgentCredentialPermit;
+```
+
+Issue a permit that authorizes the agent to redeem one of its key deliveries.
+
+#### `Operations.Management.RevokeAgentGrant` static property
+
+```cs
+public static readonly OperationDescriptor<RevokeAgentGrantRequestInput, RevokeAgentGrantReply> RevokeAgentGrant;
+```
+
+Revoke an agent grant and every key issued under it.
+
+#### `Operations.Management.SetSpendControls` static property
+
+```cs
+public static readonly OperationDescriptor<SetSpendControlsRequestInput, SetSpendControlsReply> SetSpendControls;
+```
+
+Set the organization's monthly spend cap and agent purchase limit.
+
+#### `Operations.Management.PurchaseAgentCredits` static property
+
+```cs
+public static readonly OperationDescriptor<PurchaseAgentCreditsRequestInput, PurchaseAgentCreditsReply> PurchaseAgentCredits;
+```
+
+Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
 
 ### `ProjectOptions` class
 
@@ -7966,6 +8222,176 @@ Authorization: portalCredential (condition owner).
 
 Sends [`management.getOperation`](../operations/management/getOperation.md).
 
+#### `ManagementApi.AgentSignupForApprovalAsync` method
+
+```cs
+public Task<AgentSignupForApprovalReply> AgentSignupForApprovalAsync(AgentSignupForApprovalRequestInput input, CancellationToken cancellationToken = default);
+```
+
+Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+
+Parameters:
+
+- `input`: The operation input.
+- `cancellationToken`: Stops waiting.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: anonymous (condition approvalToken).
+
+#### `ManagementApi.AgentSignupAsync` method
+
+```cs
+public Task<AgentSignupReply> AgentSignupAsync(CancellationToken cancellationToken = default);
+```
+
+Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+
+Parameters:
+
+- `cancellationToken`: Stops waiting.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: agentVerifier (condition ownSignup).
+
+#### `ManagementApi.AgentGrantsAsync` method
+
+```cs
+public Task<AgentGrantsReply> AgentGrantsAsync(AgentGrantsRequestInput input, CancellationToken cancellationToken = default);
+```
+
+List an organization's agent grants with their keys, newest first.
+
+Parameters:
+
+- `input`: The operation input.
+- `cancellationToken`: Stops waiting.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: portalCredential (condition owner).
+
+#### `ManagementApi.AgentGrantsPagesAsync` method
+
+```cs
+public IAsyncEnumerable<AgentGrantPage> AgentGrantsPagesAsync(AgentGrantsRequestInput input, CancellationToken cancellationToken = default);
+```
+
+The pages of `AgentGrantsAsync`, requested lazily.
+
+Parameters:
+
+- `input`: The first page's input.
+- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.
+
+Returns: The pages, in order.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ArgumentException`: The input's `cursor` is not a valid cursor.
+
+Each page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
+
+Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+
+#### `ManagementApi.AgentAuditEventsAsync` method
+
+```cs
+public Task<AgentAuditEventsReply> AgentAuditEventsAsync(AgentAuditEventsRequestInput input, CancellationToken cancellationToken = default);
+```
+
+List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+
+Parameters:
+
+- `input`: The operation input.
+- `cancellationToken`: Stops waiting.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: portalCredential (condition owner).
+
+#### `ManagementApi.AgentAuditEventsPagesAsync` method
+
+```cs
+public IAsyncEnumerable<AgentAuditEventPage> AgentAuditEventsPagesAsync(AgentAuditEventsRequestInput input, CancellationToken cancellationToken = default);
+```
+
+The pages of `AgentAuditEventsAsync`, requested lazily.
+
+Parameters:
+
+- `input`: The first page's input.
+- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.
+
+Returns: The pages, in order.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ArgumentException`: The input's `cursor` is not a valid cursor.
+
+Each page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
+
+Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+
+#### `ManagementApi.OrganizationSpendAsync` method
+
+```cs
+public Task<OrganizationSpendReply> OrganizationSpendAsync(OrganizationSpendRequestInput input, CancellationToken cancellationToken = default);
+```
+
+Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+
+Parameters:
+
+- `input`: The operation input.
+- `cancellationToken`: Stops waiting.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Authorization: portalCredential (condition owner).
+
 #### `ManagementApi.CreateOrganizationAsync` method
 
 ```cs
@@ -8402,6 +8828,208 @@ Authorization: portalCredential (condition owner).
 
 Sends [`management.replayWebhookDeliveries`](../operations/management/replayWebhookDeliveries.md).
 
+#### `ManagementApi.RequestAgentSignupAsync` method
+
+```cs
+public Task<RequestAgentSignupReply> RequestAgentSignupAsync(RequestAgentSignupRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Authorization: anonymous.
+
+#### `ManagementApi.RejectAgentSignupAsync` method
+
+```cs
+public Task<RejectAgentSignupReply> RejectAgentSignupAsync(RejectAgentSignupRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Reject a signup request from its approval link, optionally suppressing future requests to the email.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Authorization: anonymous (condition approvalToken).
+
+#### `ManagementApi.ApproveAgentSignupAsync` method
+
+```cs
+public Task<ApproveAgentSignupReply> ApproveAgentSignupAsync(ApproveAgentSignupRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Authorization: portalCredential (condition approvalToken).
+
+#### `ManagementApi.IssueAgentKeyAsync` method
+
+```cs
+public Task<IssueAgentKeyReply> IssueAgentKeyAsync(IssueAgentKeyRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Authorization: agentVerifier (condition activeGrant).
+
+#### `ManagementApi.AgentCredentialPermitAsync` method
+
+```cs
+public Task<AgentCredentialPermitReply> AgentCredentialPermitAsync(AgentCredentialPermitRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Issue a permit that authorizes the agent to redeem one of its key deliveries.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Authorization: agentVerifier (condition activeGrant).
+
+#### `ManagementApi.RevokeAgentGrantAsync` method
+
+```cs
+public Task<RevokeAgentGrantReply> RevokeAgentGrantAsync(RevokeAgentGrantRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Revoke an agent grant and every key issued under it.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Authorization: portalCredential (condition owner).
+
+Destructive: it deletes, revokes, removes, disables or ends something.
+
+#### `ManagementApi.SetSpendControlsAsync` method
+
+```cs
+public Task<SetSpendControlsReply> SetSpendControlsAsync(SetSpendControlsRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Set the organization's monthly spend cap and agent purchase limit.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Authorization: portalCredential (condition owner).
+
+#### `ManagementApi.PurchaseAgentCreditsAsync` method
+
+```cs
+public Task<PurchaseAgentCreditsReply> PurchaseAgentCreditsAsync(PurchaseAgentCreditsRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
+
+Parameters:
+
+- `input`: The operation input.
+- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The authority result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null.
+- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Authorization: agentVerifier (condition activeGrant).
+
 # `ConvoHop.Models`
 
 Generated input and result models of the ConvoHop GraphQL API.
@@ -8520,6 +9148,320 @@ public sealed class AddMembersPayload
 
 The AddMembersPayload result.
 
+### `AgentAuditEvent` class
+
+```cs
+public sealed class AgentAuditEvent
+{
+    public AgentAuditEvent();
+    public string EventId { get; init; }
+    public string OrgId { get; init; }
+    public string? GrantId { get; init; }
+    public string ActorKind { get; init; }
+    public string? ActorId { get; init; }
+    public string Kind { get; init; }
+    public JsonElement? Details { get; init; }
+    public string OccurredAt { get; init; }
+}
+```
+
+The AgentAuditEvent result.
+
+### `AgentAuditEventPage` class
+
+```cs
+public sealed class AgentAuditEventPage
+{
+    public AgentAuditEventPage();
+    public IReadOnlyList<AgentAuditEvent> Items { get; init; }
+    public bool Complete { get; init; }
+    public bool RefreshRequired { get; init; }
+    public string? NextCursor { get; init; }
+}
+```
+
+The AgentAuditEventPage result.
+
+### `AgentAuditEventsReply` class
+
+```cs
+public sealed class AgentAuditEventsReply
+{
+    public AgentAuditEventsReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentAuditEventPage? Result { get; init; }
+}
+```
+
+The AgentAuditEventsReply result.
+
+### `AgentAuditEventsRequestInput` class
+
+```cs
+public sealed class AgentAuditEventsRequestInput
+{
+    public AgentAuditEventsRequestInput(string orgId);
+    public string OrgId { get; set; }
+    public int? Limit { get; set; }
+    public string? Cursor { get; set; }
+}
+```
+
+The AgentAuditEventsRequestInput input.
+
+### `AgentCredentialPermitReply` class
+
+```cs
+public sealed class AgentCredentialPermitReply
+{
+    public AgentCredentialPermitReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public JsonElement? Result { get; init; }
+}
+```
+
+The AgentCredentialPermitReply result.
+
+### `AgentCredentialPermitRequestInput` class
+
+```cs
+public sealed class AgentCredentialPermitRequestInput
+{
+    public AgentCredentialPermitRequestInput(string deliveryId, string redemptionRequestId);
+    public string DeliveryId { get; set; }
+    public string RedemptionRequestId { get; set; }
+}
+```
+
+The AgentCredentialPermitRequestInput input.
+
+### `AgentGrant` class
+
+```cs
+public sealed class AgentGrant
+{
+    public AgentGrant();
+    public string GrantId { get; init; }
+    public string OrgId { get; init; }
+    public string SignupId { get; init; }
+    public string AgentActorId { get; init; }
+    public string? ProjectId { get; init; }
+    public IReadOnlyList<string> Scopes { get; init; }
+    public string ExpiresAt { get; init; }
+    public string? RevokedAt { get; init; }
+    public string CreatedAt { get; init; }
+    public IReadOnlyList<AgentKey> Keys { get; init; }
+}
+```
+
+The AgentGrant result.
+
+### `AgentGrantPage` class
+
+```cs
+public sealed class AgentGrantPage
+{
+    public AgentGrantPage();
+    public IReadOnlyList<AgentGrant> Items { get; init; }
+    public bool Complete { get; init; }
+    public bool RefreshRequired { get; init; }
+    public string? NextCursor { get; init; }
+}
+```
+
+The AgentGrantPage result.
+
+### `AgentGrantsReply` class
+
+```cs
+public sealed class AgentGrantsReply
+{
+    public AgentGrantsReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentGrantPage? Result { get; init; }
+}
+```
+
+The AgentGrantsReply result.
+
+### `AgentGrantsRequestInput` class
+
+```cs
+public sealed class AgentGrantsRequestInput
+{
+    public AgentGrantsRequestInput(string orgId);
+    public string OrgId { get; set; }
+    public int? Limit { get; set; }
+    public string? Cursor { get; set; }
+}
+```
+
+The AgentGrantsRequestInput input.
+
+### `AgentKey` class
+
+```cs
+public sealed class AgentKey
+{
+    public AgentKey();
+    public string OperationId { get; init; }
+    public string State { get; init; }
+    public IReadOnlyList<string> Scopes { get; init; }
+    public string ExpiresAt { get; init; }
+    public string? KeyId { get; init; }
+    public string? DeliveryId { get; init; }
+    public string? DeliveryExpiresAt { get; init; }
+}
+```
+
+The AgentKey result.
+
+### `AgentPayment` class
+
+```cs
+public sealed class AgentPayment
+{
+    public AgentPayment();
+    public string PaymentId { get; init; }
+    public string Amount { get; init; }
+    public string Currency { get; init; }
+    public string State { get; init; }
+}
+```
+
+The AgentPayment result.
+
+### `AgentSignupForApprovalReply` class
+
+```cs
+public sealed class AgentSignupForApprovalReply
+{
+    public AgentSignupForApprovalReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentSignupReview? Result { get; init; }
+}
+```
+
+The AgentSignupForApprovalReply result.
+
+### `AgentSignupForApprovalRequestInput` class
+
+```cs
+public sealed class AgentSignupForApprovalRequestInput
+{
+    public AgentSignupForApprovalRequestInput(string approvalToken);
+    public string ApprovalToken { get; set; }
+}
+```
+
+The AgentSignupForApprovalRequestInput input.
+
+### `AgentSignupReply` class
+
+```cs
+public sealed class AgentSignupReply
+{
+    public AgentSignupReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentSignupStatus? Result { get; init; }
+}
+```
+
+The AgentSignupReply result.
+
+### `AgentSignupReview` class
+
+```cs
+public sealed class AgentSignupReview
+{
+    public AgentSignupReview();
+    public string SignupId { get; init; }
+    public string OwnerEmail { get; init; }
+    public string OrganizationName { get; init; }
+    public string AgentName { get; init; }
+    public string? Purpose { get; init; }
+    public string? SuggestedPlan { get; init; }
+    public IReadOnlyList<string> SuggestedScopes { get; init; }
+    public string? SuggestedMonthlySpendCap { get; init; }
+    public string Currency { get; init; }
+    public string ExpiresAt { get; init; }
+}
+```
+
+The AgentSignupReview result.
+
+### `AgentSignupStatus` class
+
+```cs
+public sealed class AgentSignupStatus
+{
+    public AgentSignupStatus();
+    public string SignupId { get; init; }
+    public string State { get; init; }
+    public string? OrgId { get; init; }
+    public string? DeploymentId { get; init; }
+    public string? ProjectId { get; init; }
+    public string? NextStep { get; init; }
+    public IReadOnlyList<string> Scopes { get; init; }
+    public string? GrantExpiresAt { get; init; }
+    public IReadOnlyList<AgentKey> Keys { get; init; }
+    public string? Incarnation { get; init; }
+    public string? ServingEpoch { get; init; }
+}
+```
+
+The AgentSignupStatus result.
+
+### `AgentSignupTicket` class
+
+```cs
+public sealed class AgentSignupTicket
+{
+    public AgentSignupTicket();
+    public string SignupId { get; init; }
+    public string ConfirmationCode { get; init; }
+    public string ExpiresAt { get; init; }
+    public int PollAfterSeconds { get; init; }
+}
+```
+
+The AgentSignupTicket result.
+
 ### `AlertLiveSessionInput` class
 
 ```cs
@@ -8550,6 +9492,45 @@ public sealed class AlertLiveSessionPayload
 ```
 
 The AlertLiveSessionPayload result.
+
+### `ApproveAgentSignupReply` class
+
+```cs
+public sealed class ApproveAgentSignupReply
+{
+    public ApproveAgentSignupReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentSignupStatus? Result { get; init; }
+}
+```
+
+The ApproveAgentSignupReply result.
+
+### `ApproveAgentSignupRequestInput` class
+
+```cs
+public sealed class ApproveAgentSignupRequestInput
+{
+    public ApproveAgentSignupRequestInput(string approvalToken, string confirmationCode, string termsRef, string plan, IReadOnlyList<string> scopes, string monthlySpendCap);
+    public string ApprovalToken { get; set; }
+    public string ConfirmationCode { get; set; }
+    public string TermsRef { get; set; }
+    public string Plan { get; set; }
+    public IReadOnlyList<string> Scopes { get; set; }
+    public string MonthlySpendCap { get; set; }
+    public string? AgentPurchaseLimit { get; set; }
+    public string? GrantExpiresAt { get; set; }
+}
+```
+
+The ApproveAgentSignupRequestInput input.
 
 ### `BillingCheckoutSession` class
 
@@ -9772,6 +10753,39 @@ public sealed class InboxRequestInput
 
 The InboxRequestInput input.
 
+### `IssueAgentKeyReply` class
+
+```cs
+public sealed class IssueAgentKeyReply
+{
+    public IssueAgentKeyReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentKey? Result { get; init; }
+}
+```
+
+The IssueAgentKeyReply result.
+
+### `IssueAgentKeyRequestInput` class
+
+```cs
+public sealed class IssueAgentKeyRequestInput
+{
+    public IssueAgentKeyRequestInput(IReadOnlyList<string> scopes);
+    public IReadOnlyList<string> Scopes { get; set; }
+    public string? ExpiresAt { get; set; }
+}
+```
+
+The IssueAgentKeyRequestInput input.
+
 ### `IssueBackendKeyReply` class
 
 ```cs
@@ -10619,6 +11633,69 @@ public sealed class OrganizationPage
 
 The OrganizationPage result.
 
+### `OrganizationSpend` class
+
+```cs
+public sealed class OrganizationSpend
+{
+    public OrganizationSpend();
+    public string OrgId { get; init; }
+    public string PlanId { get; init; }
+    public string Currency { get; init; }
+    public string CatalogVersion { get; init; }
+    public string? MonthlySpendCap { get; init; }
+    public string? AgentPurchaseLimit { get; init; }
+    public string? UpdatedAt { get; init; }
+    public string? MonthlyMinimum { get; init; }
+    public string? PeriodStart { get; init; }
+    public string? PeriodEnd { get; init; }
+    public string? Credits { get; init; }
+    public string? Charges { get; init; }
+    public string? Margin { get; init; }
+    public string? Stop { get; init; }
+    public IReadOnlyList<string> RefusedMeters { get; init; }
+    public string? EvaluatedAt { get; init; }
+    public string? UsageThrough { get; init; }
+    public string? ValidUntil { get; init; }
+    public string? MinimumCredit { get; init; }
+    public string? ChargeLimit { get; init; }
+}
+```
+
+The OrganizationSpend result.
+
+### `OrganizationSpendReply` class
+
+```cs
+public sealed class OrganizationSpendReply
+{
+    public OrganizationSpendReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public OrganizationSpend? Result { get; init; }
+}
+```
+
+The OrganizationSpendReply result.
+
+### `OrganizationSpendRequestInput` class
+
+```cs
+public sealed class OrganizationSpendRequestInput
+{
+    public OrganizationSpendRequestInput(string orgId);
+    public string OrgId { get; set; }
+}
+```
+
+The OrganizationSpendRequestInput input.
+
 ### `OrganizationUsage` class
 
 ```cs
@@ -10865,6 +11942,39 @@ public sealed class ProjectUsageRequestInput
 
 The ProjectUsageRequestInput input.
 
+### `PurchaseAgentCreditsReply` class
+
+```cs
+public sealed class PurchaseAgentCreditsReply
+{
+    public PurchaseAgentCreditsReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentPayment? Result { get; init; }
+}
+```
+
+The PurchaseAgentCreditsReply result.
+
+### `PurchaseAgentCreditsRequestInput` class
+
+```cs
+public sealed class PurchaseAgentCreditsRequestInput
+{
+    public PurchaseAgentCreditsRequestInput(string amount, string sharedPaymentToken);
+    public string Amount { get; set; }
+    public string SharedPaymentToken { get; set; }
+}
+```
+
+The PurchaseAgentCreditsRequestInput input.
+
 ### `ReadReceipt` class
 
 ```cs
@@ -10913,6 +12023,39 @@ public sealed class RedeemCredentialRequestInput
 ```
 
 The RedeemCredentialRequestInput input.
+
+### `RejectAgentSignupReply` class
+
+```cs
+public sealed class RejectAgentSignupReply
+{
+    public RejectAgentSignupReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentSignupStatus? Result { get; init; }
+}
+```
+
+The RejectAgentSignupReply result.
+
+### `RejectAgentSignupRequestInput` class
+
+```cs
+public sealed class RejectAgentSignupRequestInput
+{
+    public RejectAgentSignupRequestInput(string approvalToken, bool suppressFutureRequests);
+    public string ApprovalToken { get; set; }
+    public bool SuppressFutureRequests { get; set; }
+}
+```
+
+The RejectAgentSignupRequestInput input.
 
 ### `RemoveMemberReply` class
 
@@ -11019,6 +12162,45 @@ public sealed class ReplayWebhookDeliveriesRequestInput
 ```
 
 The ReplayWebhookDeliveriesRequestInput input.
+
+### `RequestAgentSignupReply` class
+
+```cs
+public sealed class RequestAgentSignupReply
+{
+    public RequestAgentSignupReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentSignupTicket? Result { get; init; }
+}
+```
+
+The RequestAgentSignupReply result.
+
+### `RequestAgentSignupRequestInput` class
+
+```cs
+public sealed class RequestAgentSignupRequestInput
+{
+    public RequestAgentSignupRequestInput(string ownerEmail, string pollChallenge, string organizationName, string agentName, IReadOnlyList<string> suggestedScopes);
+    public string OwnerEmail { get; set; }
+    public string PollChallenge { get; set; }
+    public string OrganizationName { get; set; }
+    public string AgentName { get; set; }
+    public string? Purpose { get; set; }
+    public string? SuggestedPlan { get; set; }
+    public IReadOnlyList<string> SuggestedScopes { get; set; }
+    public string? SuggestedMonthlySpendCap { get; set; }
+}
+```
+
+The RequestAgentSignupRequestInput input.
 
 ### `RequestResolution` class
 
@@ -11140,6 +12322,8 @@ The ResumeOperationRequestInput input.
 public sealed class RetainedResult
 {
     public RetainedResult();
+    public AgentGrant? AgentGrant { get; init; }
+    public AgentSignupStatus? AgentSignupStatus { get; init; }
     public BillingCheckoutSession? BillingCheckoutSession { get; init; }
     public BillingPortalSession? BillingPortalSession { get; init; }
     public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }
@@ -11158,6 +12342,7 @@ public sealed class RetainedResult
     public Message? Message { get; init; }
     public MessageAck? MessageAck { get; init; }
     public Organization? Organization { get; init; }
+    public OrganizationSpend? OrganizationSpend { get; init; }
     public Principal? Principal { get; init; }
     public ReadReceipt? ReadReceipt { get; init; }
     public SessionBootstrap? SessionBootstrap { get; init; }
@@ -11167,6 +12352,39 @@ public sealed class RetainedResult
 ```
 
 Exactly one typed field contains the retained, currently authorized receipt result.
+
+### `RevokeAgentGrantReply` class
+
+```cs
+public sealed class RevokeAgentGrantReply
+{
+    public RevokeAgentGrantReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentGrant? Result { get; init; }
+}
+```
+
+The RevokeAgentGrantReply result.
+
+### `RevokeAgentGrantRequestInput` class
+
+```cs
+public sealed class RevokeAgentGrantRequestInput
+{
+    public RevokeAgentGrantRequestInput(string grantId, bool revokeIssuedSessions);
+    public string GrantId { get; set; }
+    public bool RevokeIssuedSessions { get; set; }
+}
+```
+
+The RevokeAgentGrantRequestInput input.
 
 ### `RevokeBackendKeyReply` class
 
@@ -11584,6 +12802,40 @@ public sealed class SetConversationMutePayload
 
 The SetConversationMutePayload result.
 
+### `SetSpendControlsReply` class
+
+```cs
+public sealed class SetSpendControlsReply
+{
+    public SetSpendControlsReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public OrganizationSpend? Result { get; init; }
+}
+```
+
+The SetSpendControlsReply result.
+
+### `SetSpendControlsRequestInput` class
+
+```cs
+public sealed class SetSpendControlsRequestInput
+{
+    public SetSpendControlsRequestInput(string orgId, string monthlySpendCap);
+    public string OrgId { get; set; }
+    public string MonthlySpendCap { get; set; }
+    public string? AgentPurchaseLimit { get; set; }
+}
+```
+
+The SetSpendControlsRequestInput input.
+
 ### `UpdateConversationReply` class
 
 ```cs
@@ -11977,7 +13229,7 @@ The LiveSessionState enum.
 
 # .NET operation coverage
 
-The .NET SDK members that send each API operation. 65 of the 68 operations that .NET packages can send have a method.
+The .NET SDK members that send each API operation. 65 of the 81 operations that .NET packages can send have a method.
 
 ## Communication
 
@@ -12044,6 +13296,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.webhookDeliveries`](../operations/management/webhookDeliveries.md) | server | [`ManagementApi.WebhookDeliveriesAsync`](reference/api.md#managementapiwebhookdeliveriesasync-method) |
 | [`management.resolveRequest`](../operations/management/resolveRequest.md) | server | [`ConvoHopTransport.RetryAsync`](reference/convohop.md#convohoptransportretryasync-method), [`ManagementApi.ResolveRequestAsync`](reference/api.md#managementapiresolverequestasync-method) |
 | [`management.getOperation`](../operations/management/getOperation.md) | server | [`ConvoHopManagementClient.GetOperationAsync`](reference/convohop.md#convohopmanagementclientgetoperationasync-method), [`ManagementApi.GetOperationAsync`](reference/api.md#managementapigetoperationasync-method) |
+| [`management.agentSignupForApproval`](../operations/management/agentSignupForApproval.md) | server | Not wrapped by a method |
+| [`management.agentSignup`](../operations/management/agentSignup.md) | server | Not wrapped by a method |
+| [`management.agentGrants`](../operations/management/agentGrants.md) | server | Not wrapped by a method |
+| [`management.agentAuditEvents`](../operations/management/agentAuditEvents.md) | server | Not wrapped by a method |
+| [`management.organizationSpend`](../operations/management/organizationSpend.md) | server | Not wrapped by a method |
 | [`management.createOrganization`](../operations/management/createOrganization.md) | server | [`ConvoHopManagementClient.CreateOrganizationAsync`](reference/convohop.md#convohopmanagementclientcreateorganizationasync-method), [`ManagementApi.CreateOrganizationAsync`](reference/api.md#managementapicreateorganizationasync-method) |
 | [`management.createDeployment`](../operations/management/createDeployment.md) | server | [`ConvoHopManagementClient.CreateDeploymentAsync`](reference/convohop.md#convohopmanagementclientcreatedeploymentasync-method), [`ManagementApi.CreateDeploymentAsync`](reference/api.md#managementapicreatedeploymentasync-method) |
 | [`management.createProject`](../operations/management/createProject.md) | server | [`ConvoHopManagementClient.CreateProjectAsync`](reference/convohop.md#convohopmanagementclientcreateprojectasync-method), [`ManagementApi.CreateProjectAsync`](reference/api.md#managementapicreateprojectasync-method) |
@@ -12060,3 +13317,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.rotateWebhookSecret`](../operations/management/rotateWebhookSecret.md) | server | [`ManagementApi.RotateWebhookSecretAsync`](reference/api.md#managementapirotatewebhooksecretasync-method) |
 | [`management.disableWebhook`](../operations/management/disableWebhook.md) | server | [`ManagementApi.DisableWebhookAsync`](reference/api.md#managementapidisablewebhookasync-method) |
 | [`management.replayWebhookDeliveries`](../operations/management/replayWebhookDeliveries.md) | server | [`ManagementApi.ReplayWebhookDeliveriesAsync`](reference/api.md#managementapireplaywebhookdeliveriesasync-method) |
+| [`management.requestAgentSignup`](../operations/management/requestAgentSignup.md) | server | Not wrapped by a method |
+| [`management.rejectAgentSignup`](../operations/management/rejectAgentSignup.md) | server | Not wrapped by a method |
+| [`management.approveAgentSignup`](../operations/management/approveAgentSignup.md) | server | Not wrapped by a method |
+| [`management.issueAgentKey`](../operations/management/issueAgentKey.md) | server | Not wrapped by a method |
+| [`management.agentCredentialPermit`](../operations/management/agentCredentialPermit.md) | server | Not wrapped by a method |
+| [`management.revokeAgentGrant`](../operations/management/revokeAgentGrant.md) | server | Not wrapped by a method |
+| [`management.setSpendControls`](../operations/management/setSpendControls.md) | server | Not wrapped by a method |
+| [`management.purchaseAgentCredits`](../operations/management/purchaseAgentCredits.md) | server | Not wrapped by a method |

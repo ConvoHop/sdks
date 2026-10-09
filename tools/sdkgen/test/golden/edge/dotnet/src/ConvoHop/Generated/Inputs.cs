@@ -128,6 +128,42 @@ namespace ConvoHop.Models
         public global::System.Collections.Generic.IReadOnlyList<int> Sides { get; set; }
     }
 
+    /// <summary>The RequestAccessInput input.</summary>
+    public sealed class RequestAccessInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="email">The <c>email</c> field.</param>
+        /// <param name="challenge">The <c>challenge</c> field.</param>
+        public RequestAccessInput(string email, string challenge)
+        {
+            this.Email = email;
+            this.Challenge = challenge;
+        }
+
+        /// <summary>The <c>email</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("email")]
+        public string Email { get; set; }
+
+        /// <summary>The <c>challenge</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("challenge")]
+        public string Challenge { get; set; }
+    }
+
+    /// <summary>The ClaimWidgetInput input.</summary>
+    public sealed class ClaimWidgetInput
+    {
+        /// <summary>Creates the input from its required fields.</summary>
+        /// <param name="widgetId">The <c>widgetId</c> field.</param>
+        public ClaimWidgetInput(string widgetId)
+        {
+            this.WidgetId = widgetId;
+        }
+
+        /// <summary>The <c>widgetId</c> field.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("widgetId")]
+        public string WidgetId { get; set; }
+    }
+
     /// <summary>The CreateWidgetInput input.</summary>
     public sealed class CreateWidgetInput
     {

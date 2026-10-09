@@ -9,10 +9,13 @@ from .async_client import AsyncConvoHop, AsyncConvoHopManagement
 from .client import ConvoHop, ConvoHopManagement
 from .errors import (
     ConvoHopProblem,
+    CreditsExhaustedProblem,
     PlanLimitExceededProblem,
     QuotaExceededProblem,
     RateLimitedProblem,
     ScopeRequiredProblem,
+    SpendCapReachedProblem,
+    SpendUnverifiedProblem,
 )
 from .push import PushPayloadError
 from .recovery import AsyncRecoveryStorage, MemoryStorage, RecoveryState, RecoveryStorage
@@ -25,6 +28,7 @@ __all__ = [
     "ConvoHop",
     "ConvoHopManagement",
     "ConvoHopProblem",
+    "CreditsExhaustedProblem",
     "MemoryStorage",
     "PlanLimitExceededProblem",
     "PushPayloadError",
@@ -33,6 +37,8 @@ __all__ = [
     "RecoveryState",
     "RecoveryStorage",
     "ScopeRequiredProblem",
+    "SpendCapReachedProblem",
+    "SpendUnverifiedProblem",
     "WebhookVerificationError",
     "__version__",
     "push",

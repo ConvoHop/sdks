@@ -126,6 +126,9 @@ extension GraphQLIdempotency {
     /// Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.
     public static let permitBound = GraphQLIdempotency(
         name: "permitBound", retry: .sameRequest, resolvable: false, retryBudget: GraphQLRetryBudget(maxAttempts: 3, windowMs: 60000))
+    /// Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+    public static let replayOnly = GraphQLIdempotency(
+        name: "replayOnly", retry: .sameRequest, resolvable: false, retryBudget: GraphQLRetryBudget(maxAttempts: 3, windowMs: 60000))
     /// Read-only. Repeat freely; each attempt may use a new requestId.
     public static let safe = GraphQLIdempotency(
         name: "safe", retry: .`repeat`, resolvable: false, retryBudget: nil)
@@ -920,6 +923,47 @@ enum GraphQLCatalog {
                       id
                     }
                     result {
+                      agentGrant {
+                        grantId
+                        orgId
+                        signupId
+                        agentActorId
+                        projectId
+                        scopes
+                        expiresAt
+                        revokedAt
+                        createdAt
+                        keys {
+                          operationId
+                          state
+                          scopes
+                          expiresAt
+                          keyId
+                          deliveryId
+                          deliveryExpiresAt
+                        }
+                      }
+                      agentSignupStatus {
+                        signupId
+                        state
+                        orgId
+                        deploymentId
+                        projectId
+                        nextStep
+                        scopes
+                        grantExpiresAt
+                        keys {
+                          operationId
+                          state
+                          scopes
+                          expiresAt
+                          keyId
+                          deliveryId
+                          deliveryExpiresAt
+                        }
+                        incarnation
+                        servingEpoch
+                      }
                       billingCheckoutSession {
                         orgId
                         planId
@@ -1124,6 +1168,28 @@ enum GraphQLCatalog {
                         name
                         status
                         revision
+                      }
+                      organizationSpend {
+                        orgId
+                        planId
+                        currency
+                        catalogVersion
+                        monthlySpendCap
+                        agentPurchaseLimit
+                        updatedAt
+                        monthlyMinimum
+                        periodStart
+                        periodEnd
+                        credits
+                        charges
+                        margin
+                        stop
+                        refusedMeters
+                        evaluatedAt
+                        usageThrough
+                        validUntil
+                        minimumCredit
+                        chargeLimit
                       }
                       principal {
                         principalId
@@ -2440,6 +2506,40 @@ enum GraphQLCatalog {
             GraphQLOutputField(name: "tenantId", type: "String!"),
             GraphQLOutputField(name: "objectId", type: "String!"),
         ]),
+        "AgentGrant": .object([
+            GraphQLOutputField(name: "grantId", type: "UUID!"),
+            GraphQLOutputField(name: "orgId", type: "UUID!"),
+            GraphQLOutputField(name: "signupId", type: "UUID!"),
+            GraphQLOutputField(name: "agentActorId", type: "UUID!"),
+            GraphQLOutputField(name: "projectId", type: "UUID"),
+            GraphQLOutputField(name: "scopes", type: "[String!]!"),
+            GraphQLOutputField(name: "expiresAt", type: "String!"),
+            GraphQLOutputField(name: "revokedAt", type: "String"),
+            GraphQLOutputField(name: "createdAt", type: "String!"),
+            GraphQLOutputField(name: "keys", type: "[AgentKey!]!"),
+        ]),
+        "AgentKey": .object([
+            GraphQLOutputField(name: "operationId", type: "UUID!"),
+            GraphQLOutputField(name: "state", type: "String!"),
+            GraphQLOutputField(name: "scopes", type: "[String!]!"),
+            GraphQLOutputField(name: "expiresAt", type: "String!"),
+            GraphQLOutputField(name: "keyId", type: "String"),
+            GraphQLOutputField(name: "deliveryId", type: "UUID"),
+            GraphQLOutputField(name: "deliveryExpiresAt", type: "String"),
+        ]),
+        "AgentSignupStatus": .object([
+            GraphQLOutputField(name: "signupId", type: "UUID!"),
+            GraphQLOutputField(name: "state", type: "String!"),
+            GraphQLOutputField(name: "orgId", type: "UUID"),
+            GraphQLOutputField(name: "deploymentId", type: "UUID"),
+            GraphQLOutputField(name: "projectId", type: "UUID"),
+            GraphQLOutputField(name: "nextStep", type: "String"),
+            GraphQLOutputField(name: "scopes", type: "[String!]!"),
+            GraphQLOutputField(name: "grantExpiresAt", type: "String"),
+            GraphQLOutputField(name: "keys", type: "[AgentKey!]!"),
+            GraphQLOutputField(name: "incarnation", type: "UUID"),
+            GraphQLOutputField(name: "servingEpoch", type: "Decimal"),
+        ]),
         "AlertLiveSessionPayload": .object([
             GraphQLOutputField(name: "status", type: "String!"),
             GraphQLOutputField(name: "requestId", type: "UUID!"),
@@ -3047,6 +3147,28 @@ enum GraphQLCatalog {
             GraphQLOutputField(name: "status", type: "String!"),
             GraphQLOutputField(name: "revision", type: "Decimal!"),
         ]),
+        "OrganizationSpend": .object([
+            GraphQLOutputField(name: "orgId", type: "UUID!"),
+            GraphQLOutputField(name: "planId", type: "String!"),
+            GraphQLOutputField(name: "currency", type: "String!"),
+            GraphQLOutputField(name: "catalogVersion", type: "String!"),
+            GraphQLOutputField(name: "monthlySpendCap", type: "String"),
+            GraphQLOutputField(name: "agentPurchaseLimit", type: "String"),
+            GraphQLOutputField(name: "updatedAt", type: "String"),
+            GraphQLOutputField(name: "monthlyMinimum", type: "String"),
+            GraphQLOutputField(name: "periodStart", type: "String"),
+            GraphQLOutputField(name: "periodEnd", type: "String"),
+            GraphQLOutputField(name: "credits", type: "String"),
+            GraphQLOutputField(name: "charges", type: "String"),
+            GraphQLOutputField(name: "margin", type: "String"),
+            GraphQLOutputField(name: "stop", type: "String"),
+            GraphQLOutputField(name: "refusedMeters", type: "[String!]!"),
+            GraphQLOutputField(name: "evaluatedAt", type: "String"),
+            GraphQLOutputField(name: "usageThrough", type: "String"),
+            GraphQLOutputField(name: "validUntil", type: "String"),
+            GraphQLOutputField(name: "minimumCredit", type: "String"),
+            GraphQLOutputField(name: "chargeLimit", type: "String"),
+        ]),
         "Principal": .object([
             GraphQLOutputField(name: "principalId", type: "UUID!"),
             GraphQLOutputField(name: "externalUserId", type: "String!"),
@@ -3124,6 +3246,8 @@ enum GraphQLCatalog {
             GraphQLOutputField(name: "id", type: "String!"),
         ]),
         "RetainedResult": .object([
+            GraphQLOutputField(name: "agentGrant", type: "AgentGrant"),
+            GraphQLOutputField(name: "agentSignupStatus", type: "AgentSignupStatus"),
             GraphQLOutputField(name: "billingCheckoutSession", type: "BillingCheckoutSession"),
             GraphQLOutputField(name: "billingPortalSession", type: "BillingPortalSession"),
             GraphQLOutputField(name: "broadcastPermissionChanged", type: "BroadcastPermissionChanged"),
@@ -3142,6 +3266,7 @@ enum GraphQLCatalog {
             GraphQLOutputField(name: "message", type: "Message"),
             GraphQLOutputField(name: "messageAck", type: "MessageAck"),
             GraphQLOutputField(name: "organization", type: "Organization"),
+            GraphQLOutputField(name: "organizationSpend", type: "OrganizationSpend"),
             GraphQLOutputField(name: "principal", type: "Principal"),
             GraphQLOutputField(name: "readReceipt", type: "ReadReceipt"),
             GraphQLOutputField(name: "sessionBootstrap", type: "SessionBootstrap"),
@@ -3298,6 +3423,8 @@ extension ConvoHopErrorCode {
     public static let credentialRefreshRequired = ConvoHopErrorCode(rawValue: "CREDENTIAL_REFRESH_REQUIRED")
     /// Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.
     public static let credentialRequired = ConvoHopErrorCode(rawValue: "CREDENTIAL_REQUIRED")
+    /// Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+    public static let creditsExhausted = ConvoHopErrorCode(rawValue: "CREDITS_EXHAUSTED")
     /// The cursor is ahead of the committed events of the conversation.
     public static let cursorAhead = ConvoHopErrorCode(rawValue: "CURSOR_AHEAD")
     /// The cursor is older than retained history. Resynchronize from current state; never reset the cursor silently.
@@ -3392,6 +3519,10 @@ extension ConvoHopErrorCode {
     public static let sessionRefreshRequired = ConvoHopErrorCode(rawValue: "SESSION_REFRESH_REQUIRED")
     /// The refreshed session could not be verified.
     public static let sessionRefreshUnverified = ConvoHopErrorCode(rawValue: "SESSION_REFRESH_UNVERIFIED")
+    /// The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+    public static let spendCapReached = ConvoHopErrorCode(rawValue: "SPEND_CAP_REACHED")
+    /// Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.
+    public static let spendUnverified = ConvoHopErrorCode(rawValue: "SPEND_UNVERIFIED")
     /// The transport failed after the request may have been sent. Resolve or retry the original request.
     public static let transportUnknown = ConvoHopErrorCode(rawValue: "TRANSPORT_UNKNOWN")
     /// The credential is missing, invalid or expired.
@@ -3403,6 +3534,17 @@ extension ConvoHopErrorCode {
     /// only server operations return.
     static let catalog: [String: (status: Int?, retryable: Bool)] = [
         "ADMISSION_LIMIT": (status: 429, retryable: true),
+        "AGENTIC_NOT_CONFIGURED": (status: 503, retryable: false),
+        "AGENT_CONFIRMATION_CODE_INVALID": (status: 403, retryable: false),
+        "AGENT_GRANT_EXPIRED": (status: 403, retryable: false),
+        "AGENT_GRANT_REVOKED": (status: 403, retryable: false),
+        "AGENT_KEY_LIMIT": (status: 409, retryable: false),
+        "AGENT_PURCHASE_LIMIT_EXCEEDED": (status: 402, retryable: false),
+        "AGENT_SCOPE_NOT_GRANTED": (status: 403, retryable: false),
+        "AGENT_SIGNUP_CLOSED": (status: 409, retryable: false),
+        "AGENT_SIGNUP_EMAIL_REJECTED": (status: 400, retryable: false),
+        "AGENT_SIGNUP_NOT_READY": (status: 409, retryable: false),
+        "AGENT_SIGNUP_SUPPRESSED": (status: 403, retryable: false),
         "ALREADY_CONNECTED": (status: 409, retryable: false),
         "ALREADY_EXISTS": (status: 409, retryable: false),
         "AUTHORITY_UNAVAILABLE": (status: 503, retryable: true),
@@ -3420,6 +3562,10 @@ extension ConvoHopErrorCode {
         "CREDENTIAL_EXPIRED": (status: 409, retryable: false),
         "CREDENTIAL_REFRESH_REQUIRED": (status: 409, retryable: false),
         "CREDENTIAL_REQUIRED": (status: 409, retryable: false),
+        "CREDITS_EXHAUSTED": (status: 402, retryable: false),
+        "CREDITS_REQUIRE_METERED_PLAN": (status: 409, retryable: false),
+        "CREDIT_AMOUNT_OUT_OF_RANGE": (status: 400, retryable: false),
+        "CREDIT_GRANT_LIMIT_REACHED": (status: 409, retryable: false),
         "CURSOR_AHEAD": (status: 409, retryable: false),
         "CURSOR_EXPIRED": (status: 409, retryable: false),
         "CURSOR_INVALID": (status: 409, retryable: false),
@@ -3456,6 +3602,8 @@ extension ConvoHopErrorCode {
         "OUTCOME_UNKNOWN": (status: 503, retryable: true),
         "PAGE_ITEM_TOO_LARGE": (status: 413, retryable: false),
         "PARTICIPATION_MISMATCH": (status: 409, retryable: false),
+        "PAYMENT_DECLINED": (status: 402, retryable: false),
+        "PAYMENT_RAIL_NOT_CONFIGURED": (status: 503, retryable: false),
         "PERMIT_EXPIRED": (status: 409, retryable: false),
         "PLAN_LIMIT_EXCEEDED": (status: 403, retryable: false),
         "QUOTA_EXCEEDED": (status: 429, retryable: false),
@@ -3476,6 +3624,8 @@ extension ConvoHopErrorCode {
         "SESSION_REFRESH_REJECTED": (status: 409, retryable: false),
         "SESSION_REFRESH_REQUIRED": (status: 409, retryable: false),
         "SESSION_REFRESH_UNVERIFIED": (status: nil, retryable: false),
+        "SPEND_CAP_REACHED": (status: 402, retryable: false),
+        "SPEND_UNVERIFIED": (status: 503, retryable: true),
         "TRANSPORT_UNKNOWN": (status: nil, retryable: true),
         "UNAUTHENTICATED": (status: 401, retryable: false),
         "WEBHOOK_DESTINATION_DENIED": (status: 400, retryable: false),

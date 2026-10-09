@@ -341,6 +341,56 @@ namespace ConvoHop
                 idempotency: "singleUse",
                 layer: "server",
                 pagination: "none");
+
+            /// <summary>Ask for access without a credential.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.RequestAccessInput, global::ConvoHop.Models.Receipt> RequestAccess = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.RequestAccessInput, global::ConvoHop.Models.Receipt>(
+                id: "beta.requestAccess",
+                plane: "beta",
+                kind: global::ConvoHop.OperationKind.Mutation,
+                field: "requestAccess",
+                operationName: "BetaRequestAccess",
+                document: "mutation BetaRequestAccess($context: ContextInput!, $input: RequestAccessInput!) {\n  requestAccess(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
+                resultType: "Receipt!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "email", "challenge" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("tenant", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("attempt", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("permit", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("tags", global::ConvoHop.ContextFieldUse.Optional),
+                },
+                idempotency: "replayOnly",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>Claim a widget for an agent.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.ClaimWidgetInput, global::ConvoHop.Models.Widget> ClaimWidget = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.ClaimWidgetInput, global::ConvoHop.Models.Widget>(
+                id: "beta.claimWidget",
+                plane: "beta",
+                kind: global::ConvoHop.OperationKind.Mutation,
+                field: "claimWidget",
+                operationName: "BetaClaimWidget",
+                document: "mutation BetaClaimWidget($context: ContextInput!, $input: ClaimWidgetInput!) {\n  claimWidget(context: $context, input: $input) {\n    id\n    label\n    state\n    revision\n  }\n}",
+                resultType: "Widget!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "widgetId" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("tenant", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("attempt", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("permit", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("tags", global::ConvoHop.ContextFieldUse.Optional),
+                },
+                idempotency: "replayOnly",
+                layer: "server",
+                pagination: "none");
         }
 
         /// <summary>Every operation descriptor, in schema order.</summary>
@@ -359,6 +409,8 @@ namespace ConvoHop
             Beta.ResolveRequest,
             Beta.Widgets,
             Beta.CreateWidget,
+            Beta.RequestAccess,
+            Beta.ClaimWidget,
         };
 
         /// <summary>The operation that resolves a request ID on a plane, or null when the plane has none.</summary>

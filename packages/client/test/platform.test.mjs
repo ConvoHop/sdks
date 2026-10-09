@@ -99,6 +99,22 @@ test("a replay opens platform.WebSocket and keeps its cursor in asynchronous sto
     { name: "TypeError", message: "This runtime has no WebSocket; pass platform.WebSocket" });
 });
 
+test("coming online or to the foreground does not cut short a wait the authority asked for", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  t.mock.method(Math, "random", () => 0);
+  const { Socket, opened } = sockets(), network = source("online", true), app = source("state", "active");
+  const setup = replay({ platform: { WebSocket: Socket, connectivity: network, lifecycle: app } }), errors = [];
+  const stream = await setup.client.watch(setup.conversationId, async () => {}, error => errors.push(error));
+  t.after(() => stream.close());
+  opened[0].onclose({ code: 4503, reason: "SPEND_UNVERIFIED retryAfter=30 meter=mau" });
+  network.set(false); network.set(true); app.set("background"); app.set("active");
+  await settle();
+  assert.equal(opened.length, 1, "a wake leaves the requested wait in place");
+  assert.deepEqual(errors.map(error => error.code), ["SPEND_UNVERIFIED"]);
+  t.mock.timers.tick(30000);
+  await until(() => opened.length === 2, "the reconnect after the requested wait");
+});
+
 test("a replay whose cursor can't be saved closes instead of following on without a resume position", async t => {
   const { Socket, opened } = sockets();
   const refused = asyncStorage({ onWrite: () => { throw new Error("storage full"); } });

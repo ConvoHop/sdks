@@ -69,6 +69,266 @@ class AddMembersPayload:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `AgentAuditEvent` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEvent:
+    event_id: str
+    org_id: str
+    grant_id: str | None
+    actor_kind: str
+    actor_id: str | None
+    kind: str
+    details: dict[str, Any] | None
+    occurred_at: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentAuditEventPage` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEventPage:
+    items: tuple[AgentAuditEvent, ...]
+    complete: bool
+    refresh_required: bool
+    next_cursor: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentAuditEventsReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEventsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentAuditEventPage | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentAuditEventsRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEventsRequestInput:
+    org_id: str
+    limit: int | None = None
+    cursor: str | None = None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentCredentialPermitReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentCredentialPermitReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: dict[str, Any] | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentCredentialPermitRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentCredentialPermitRequestInput:
+    delivery_id: str
+    redemption_request_id: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentGrant` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrant:
+    grant_id: str
+    org_id: str
+    signup_id: str
+    agent_actor_id: str
+    project_id: str | None
+    scopes: tuple[str, ...]
+    expires_at: str
+    revoked_at: str | None
+    created_at: str
+    keys: tuple[AgentKey, ...]
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentGrantPage` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrantPage:
+    items: tuple[AgentGrant, ...]
+    complete: bool
+    refresh_required: bool
+    next_cursor: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentGrantsReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrantsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentGrantPage | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentGrantsRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrantsRequestInput:
+    org_id: str
+    limit: int | None = None
+    cursor: str | None = None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentKey` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentKey:
+    operation_id: str
+    state: str
+    scopes: tuple[str, ...]
+    expires_at: str
+    key_id: str | None
+    delivery_id: str | None
+    delivery_expires_at: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentPayment` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentPayment:
+    payment_id: str
+    amount: str
+    currency: str
+    state: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupForApprovalReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupForApprovalReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupReview | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupForApprovalRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupForApprovalRequestInput:
+    approval_token: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupStatus | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupReview` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupReview:
+    signup_id: str
+    owner_email: str
+    organization_name: str
+    agent_name: str
+    purpose: str | None
+    suggested_plan: str | None
+    suggested_scopes: tuple[str, ...]
+    suggested_monthly_spend_cap: str | None
+    currency: str
+    expires_at: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupStatus` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupStatus:
+    signup_id: str
+    state: str
+    org_id: str | None
+    deployment_id: str | None
+    project_id: str | None
+    next_step: str | None
+    scopes: tuple[str, ...]
+    grant_expires_at: str | None
+    keys: tuple[AgentKey, ...]
+    incarnation: str | None
+    serving_epoch: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupTicket` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupTicket:
+    signup_id: str
+    confirmation_code: str
+    expires_at: str
+    poll_after_seconds: int
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `AlertLiveSessionInput` class
 
 ```python
@@ -91,6 +351,39 @@ class AlertLiveSessionPayload:
     committed_at: str
     replayed: bool
     result: LiveAlertBatch
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `ApproveAgentSignupReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class ApproveAgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupStatus | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `ApproveAgentSignupRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class ApproveAgentSignupRequestInput:
+    approval_token: str
+    confirmation_code: str
+    terms_ref: str
+    plan: str
+    scopes: Sequence[str]
+    monthly_spend_cap: str
+    agent_purchase_limit: str | None = None
+    grant_expires_at: str | None = None
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
@@ -1077,6 +1370,33 @@ class InboxRequestInput:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `IssueAgentKeyReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class IssueAgentKeyReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentKey | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `IssueAgentKeyRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class IssueAgentKeyRequestInput:
+    scopes: Sequence[str]
+    expires_at: str | None = None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `IssueBackendKeyReply` class
 
 ```python
@@ -1768,6 +2088,60 @@ class OrganizationPage:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `OrganizationSpend` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationSpend:
+    org_id: str
+    plan_id: str
+    currency: str
+    catalog_version: str
+    monthly_spend_cap: str | None
+    agent_purchase_limit: str | None
+    updated_at: str | None
+    monthly_minimum: str | None
+    period_start: str | None
+    period_end: str | None
+    credits: str | None
+    charges: str | None
+    margin: str | None
+    stop: str | None
+    refused_meters: tuple[str, ...]
+    evaluated_at: str | None
+    usage_through: str | None
+    valid_until: str | None
+    minimum_credit: str | None
+    charge_limit: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `OrganizationSpendReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationSpendReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: OrganizationSpend | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `OrganizationSpendRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationSpendRequestInput:
+    org_id: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `OrganizationUsage` class
 
 ```python
@@ -1972,6 +2346,33 @@ class ProjectUsageRequestInput:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `PurchaseAgentCreditsReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class PurchaseAgentCreditsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentPayment | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `PurchaseAgentCreditsRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class PurchaseAgentCreditsRequestInput:
+    amount: str
+    shared_payment_token: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `ReadReceipt` class
 
 ```python
@@ -1983,6 +2384,33 @@ class ReadReceipt:
     delivered_through_sequence: str | None
     read_through_sequence: str | None
     updated_at: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `RejectAgentSignupReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RejectAgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupStatus | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `RejectAgentSignupRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RejectAgentSignupRequestInput:
+    approval_token: str
+    suppress_future_requests: bool
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
@@ -2071,6 +2499,39 @@ class ReplayWebhookDeliveriesRequestInput:
     effect_id: str | None = None
     since: str | None = None
     until: str | None = None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `RequestAgentSignupReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RequestAgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupTicket | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `RequestAgentSignupRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RequestAgentSignupRequestInput:
+    owner_email: str
+    poll_challenge: str
+    organization_name: str
+    agent_name: str
+    purpose: str | None = None
+    suggested_plan: str | None = None
+    suggested_scopes: Sequence[str]
+    suggested_monthly_spend_cap: str | None = None
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
@@ -2172,6 +2633,8 @@ class ResumeOperationRequestInput:
 ```python
 @dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
 class RetainedResult:
+    agent_grant: AgentGrant | None
+    agent_signup_status: AgentSignupStatus | None
     billing_checkout_session: BillingCheckoutSession | None
     billing_portal_session: BillingPortalSession | None
     broadcast_permission_changed: BroadcastPermissionChanged | None
@@ -2190,6 +2653,7 @@ class RetainedResult:
     message: Message | None
     message_ack: MessageAck | None
     organization: Organization | None
+    organization_spend: OrganizationSpend | None
     principal: Principal | None
     read_receipt: ReadReceipt | None
     session_bootstrap: SessionBootstrap | None
@@ -2199,6 +2663,33 @@ class RetainedResult:
 ```
 
 Exactly one typed field contains the retained, currently authorized receipt result.
+
+### `RevokeAgentGrantReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RevokeAgentGrantReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentGrant | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `RevokeAgentGrantRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RevokeAgentGrantRequestInput:
+    grant_id: str
+    revoke_issued_sessions: bool
+    def to_dict(self) -> dict[str, Any]: ...
+```
 
 ### `RevokeBackendKeyReply` class
 
@@ -2535,6 +3026,34 @@ class SetConversationMutePayload:
     committed_at: str
     replayed: bool
     result: ConversationMute
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `SetSpendControlsReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class SetSpendControlsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: OrganizationSpend | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `SetSpendControlsRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class SetSpendControlsRequestInput:
+    org_id: str
+    monthly_spend_cap: str
+    agent_purchase_limit: str | None = None
     def to_dict(self) -> dict[str, Any]: ...
 ```
 

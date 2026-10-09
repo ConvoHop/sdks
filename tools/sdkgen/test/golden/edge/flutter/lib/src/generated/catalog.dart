@@ -61,6 +61,15 @@ abstract final class IdempotencyClasses {
     windowMs: 60000,
   );
 
+  /// Replay with the same requestId and input; resolveRequest cannot read the outcome.
+  static const replayOnly = IdempotencySpec(
+    name: 'replayOnly',
+    retry: 'sameRequest',
+    resolvable: false,
+    maxAttempts: 3,
+    windowMs: 60000,
+  );
+
   /// Read-only. Repeat freely.
   static const safe = IdempotencySpec(
     name: 'safe',

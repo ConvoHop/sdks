@@ -477,6 +477,9 @@ export class ConvoHopTransport {
     if (state.operation === "communication.redeemCredential" || state.operation === "communication.acknowledgeCredential")
       throw new ConvoHopProblem("CREDENTIAL_REQUIRED", requestId, "unknown", 409,
         "Delivery permits cannot authorize request lookup; obtain a current permit and submit the same delivery identity explicitly");
+    if (operationCatalog[state.operation].idempotency === "replayOnly")
+      throw new ConvoHopProblem("INVALID_REQUEST", requestId, "unknown", 400,
+        "The operation's requests cannot be looked up; send the same request ID and payload again explicitly");
     const key = operationCatalog[state.operation].plane === "management" ? "management.resolveRequest" : "communication.resolveRequest";
     const resolution = (await this.#execute(key, state.projectId, { requestId }, randomUUID(this.#platform),
       undefined, this.incarnation, credential)).result;

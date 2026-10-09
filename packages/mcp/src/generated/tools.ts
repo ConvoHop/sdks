@@ -55,7 +55,9 @@ export const withheldOperations: Readonly<Record<string, string>> = {
   "communication.renewSession": "returns a user session token",
   "management.credentialPermit": "returns a credential delivery permit",
   "management.createBillingCheckoutSession": "returns a hosted billing link that grants access to whoever holds it",
-  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it"
+  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it",
+  "management.agentCredentialPermit": "returns a credential delivery permit",
+  "management.approveAgentSignup": "records an owner's consent to an agent signup; the owner gives it from the emailed approval link"
 };
 export const mcpTools: readonly McpToolDefinition[] = [
   {
@@ -2060,6 +2062,138 @@ export const mcpTools: readonly McpToolDefinition[] = [
     }
   },
   {
+    "name": "management_agent_grants",
+    "title": "Management: agent grants",
+    "description": "List an organization's agent grants with their keys, newest first.\n\nOperation management.agentGrants (query).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nRead-only and safe to repeat.\nPaged (cursor): Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. Uses cursor input cursor and page size input limit.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "orgId": {
+          "type": "string",
+          "description": "Canonical lowercase UUID. The nil UUID is rejected.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "not": {"enum": ["00000000-0000-0000-0000-000000000000"]}
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Requested page size.",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 50
+        },
+        "cursor": {"type": ["string", "null"]}
+      },
+      "required": ["orgId"],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "operation": {
+      "id": "management.agentGrants",
+      "plane": "management",
+      "kind": "query",
+      "credential": "portalCredential",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "destructive": false,
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": ["result"],
+        "pageType": "AgentGrantPage",
+        "itemType": "AgentGrant"
+      }
+    }
+  },
+  {
+    "name": "management_agent_audit_events",
+    "title": "Management: agent audit events",
+    "description": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.\n\nOperation management.agentAuditEvents (query).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nRead-only and safe to repeat.\nPaged (cursor): Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. Uses cursor input cursor and page size input limit.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "orgId": {
+          "type": "string",
+          "description": "Canonical lowercase UUID. The nil UUID is rejected.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "not": {"enum": ["00000000-0000-0000-0000-000000000000"]}
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Requested page size.",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 50
+        },
+        "cursor": {"type": ["string", "null"]}
+      },
+      "required": ["orgId"],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "operation": {
+      "id": "management.agentAuditEvents",
+      "plane": "management",
+      "kind": "query",
+      "credential": "portalCredential",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "destructive": false,
+      "pagination": {
+        "style": "cursor",
+        "limitField": "limit",
+        "cursorField": "cursor",
+        "pagePath": ["result"],
+        "pageType": "AgentAuditEventPage",
+        "itemType": "AgentAuditEvent"
+      }
+    }
+  },
+  {
+    "name": "management_organization_spend",
+    "title": "Management: organization spend",
+    "description": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.\n\nOperation management.organizationSpend (query).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nRead-only and safe to repeat.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "orgId": {
+          "type": "string",
+          "description": "Canonical lowercase UUID. The nil UUID is rejected.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "not": {"enum": ["00000000-0000-0000-0000-000000000000"]}
+        }
+      },
+      "required": ["orgId"],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "operation": {
+      "id": "management.organizationSpend",
+      "plane": "management",
+      "kind": "query",
+      "credential": "portalCredential",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "safe",
+      "destructive": false,
+      "pagination": {"style": "none"}
+    }
+  },
+  {
     "name": "management_create_organization",
     "title": "Management: create organization",
     "description": "Create an organization.\n\nOperation management.createOrganization (mutation).\nRequires portalCredential.\nEach call is a new request. Results and errors carry its requestId. When the outcome is unknown, call retry_request with that requestId instead of calling this tool again.",
@@ -2636,6 +2770,77 @@ export const mcpTools: readonly McpToolDefinition[] = [
         "refField": "operation",
         "tool": "management_get_operation"
       }
+    }
+  },
+  {
+    "name": "management_revoke_agent_grant",
+    "title": "Management: revoke agent grant",
+    "description": "Revoke an agent grant and every key issued under it.\n\nOperation management.revokeAgentGrant (mutation).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nEach call is a new request. Results and errors carry its requestId. When the outcome is unknown, call retry_request with that requestId instead of calling this tool again.\nDestructive: it deletes, revokes, removes, disables or ends something. Confirm with the user before calling it.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "grantId": {
+          "type": "string",
+          "description": "Canonical lowercase UUID. The nil UUID is rejected.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "not": {"enum": ["00000000-0000-0000-0000-000000000000"]}
+        },
+        "revokeIssuedSessions": {"type": "boolean"}
+      },
+      "required": ["grantId", "revokeIssuedSessions"],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "operation": {
+      "id": "management.revokeAgentGrant",
+      "plane": "management",
+      "kind": "mutation",
+      "credential": "portalCredential",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "destructive": true,
+      "pagination": {"style": "none"}
+    }
+  },
+  {
+    "name": "management_set_spend_controls",
+    "title": "Management: set spend controls",
+    "description": "Set the organization's monthly spend cap and agent purchase limit.\n\nOperation management.setSpendControls (mutation).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nEach call is a new request. Results and errors carry its requestId. When the outcome is unknown, call retry_request with that requestId instead of calling this tool again.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "orgId": {
+          "type": "string",
+          "description": "Canonical lowercase UUID. The nil UUID is rejected.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "not": {"enum": ["00000000-0000-0000-0000-000000000000"]}
+        },
+        "monthlySpendCap": {"type": "string"},
+        "agentPurchaseLimit": {"type": ["string", "null"]}
+      },
+      "required": ["orgId", "monthlySpendCap"],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "operation": {
+      "id": "management.setSpendControls",
+      "plane": "management",
+      "kind": "mutation",
+      "credential": "portalCredential",
+      "auth": [{"credential": "portalCredential", "condition": "owner"}],
+      "idempotency": "idempotent",
+      "destructive": false,
+      "pagination": {"style": "none"}
     }
   }
 ];

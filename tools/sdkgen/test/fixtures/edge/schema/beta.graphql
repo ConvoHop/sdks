@@ -73,6 +73,15 @@ input ShapeInput {
   sides: [Int!]!
 }
 
+input RequestAccessInput {
+  email: String!
+  challenge: String!
+}
+
+input ClaimWidgetInput {
+  widgetId: ID!
+}
+
 input CreateWidgetInput {
   label: String!
   state: WidgetState = ACTIVE
@@ -90,4 +99,6 @@ type Query {
 
 type Mutation {
   createWidget(context: ContextInput!, input: CreateWidgetInput!): Widget!
+  requestAccess(context: ContextInput!, input: RequestAccessInput!): Receipt!
+  claimWidget(context: ContextInput!, input: ClaimWidgetInput!): Widget!
 }

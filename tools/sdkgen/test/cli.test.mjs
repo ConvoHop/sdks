@@ -12,7 +12,7 @@ import { loadSources } from "../lib/sources.mjs";
 import { REPO_ROOT, capture, copyFixture, listTree } from "./helpers.mjs";
 
 const REGENERATE = "Run npm run generate:graphql and commit the result.";
-const SUMMARY = "14 typed GraphQL operations validated against both exported schemas.";
+const SUMMARY = "16 typed GraphQL operations validated against both exported schemas.";
 
 function cli(...argv) {
   const { out, err, io } = capture();
@@ -32,7 +32,7 @@ function editAnnotations(root, edit) {
 test("generate writes every generated file once, and --check then passes", t => {
   const root = copyFixture(t);
   const paths = generatedPaths(root);
-  assert.equal(paths.length, 82);
+  assert.equal(paths.length, 86);
   const first = cli("generate", "--root", root);
   assert.deepEqual(first, { status: 0, out: [...paths.map(path => `wrote ${path}`), SUMMARY].join("\n"), err: "" });
   for (const path of paths) assert.ok(existsSync(join(root, path)), path);
@@ -123,7 +123,7 @@ test("check-annotations lists missing and unknown operations, and generation ref
   const root = copyFixture(t);
   assert.deepEqual(cli("check-annotations", "--root", root), {
     status: 0,
-    out: "Annotations OK: 14 operations across 2 planes are annotated in schema/annotations.json.",
+    out: "Annotations OK: 16 operations across 2 planes are annotated in schema/annotations.json.",
     err: "",
   });
   editAnnotations(root, annotations => {

@@ -12,6 +12,28 @@ export interface ErrorCodeDefinition {
 export const errorCodes: Readonly<Record<string, ErrorCodeDefinition>> = {
   /** A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId. */
   ADMISSION_LIMIT: { origin: "both", status: 429, retryable: true },
+  /** Agent signup is not offered in this environment. */
+  AGENTIC_NOT_CONFIGURED: { origin: "server", status: 503, retryable: false },
+  /** The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request. */
+  AGENT_CONFIRMATION_CODE_INVALID: { origin: "server", status: 403, retryable: false },
+  /** The agent's grant has expired. The agent needs a new signup request approved. */
+  AGENT_GRANT_EXPIRED: { origin: "server", status: 403, retryable: false },
+  /** The owner revoked the agent's grant. */
+  AGENT_GRANT_REVOKED: { origin: "server", status: 403, retryable: false },
+  /** The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one. */
+  AGENT_KEY_LIMIT: { origin: "server", status: 409, retryable: false },
+  /** The purchase would take this month's agent credit purchases beyond the limit the owner set. */
+  AGENT_PURCHASE_LIMIT_EXCEEDED: { origin: "server", status: 402, retryable: false },
+  /** A requested scope is outside the agent's grant. */
+  AGENT_SCOPE_NOT_GRANTED: { origin: "server", status: 403, retryable: false },
+  /** The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired. */
+  AGENT_SIGNUP_CLOSED: { origin: "server", status: 409, retryable: false },
+  /** The owner's email address is refused, for example for a disposable domain. */
+  AGENT_SIGNUP_EMAIL_REJECTED: { origin: "server", status: 400, retryable: false },
+  /** The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready. */
+  AGENT_SIGNUP_NOT_READY: { origin: "server", status: 409, retryable: false },
+  /** The owner opted out of agent signup requests to this email address. */
+  AGENT_SIGNUP_SUPPRESSED: { origin: "server", status: 403, retryable: false },
   /** The participation already has an active media connection. */
   ALREADY_CONNECTED: { origin: "server", status: 409, retryable: false },
   /** A resource with the same unique key already exists. */
@@ -46,6 +68,14 @@ export const errorCodes: Readonly<Record<string, ErrorCodeDefinition>> = {
   CREDENTIAL_REFRESH_REQUIRED: { origin: "both", status: 409, retryable: false },
   /** Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly. */
   CREDENTIAL_REQUIRED: { origin: "sdk", status: 409, retryable: false },
+  /** Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap. */
+  CREDITS_EXHAUSTED: { origin: "server", status: 402, retryable: false },
+  /** Credits apply only to a billed subscription, and none is in force. */
+  CREDITS_REQUIRE_METERED_PLAN: { origin: "server", status: 409, retryable: false },
+  /** The credit amount is outside the allowed purchase range. */
+  CREDIT_AMOUNT_OUT_OF_RANGE: { origin: "server", status: 400, retryable: false },
+  /** Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some. */
+  CREDIT_GRANT_LIMIT_REACHED: { origin: "server", status: 409, retryable: false },
   /** The cursor is ahead of the committed events of the conversation. */
   CURSOR_AHEAD: { origin: "server", status: 409, retryable: false },
   /** The cursor is older than retained history. Resynchronize from current state; never reset the cursor silently. */
@@ -118,6 +148,10 @@ export const errorCodes: Readonly<Record<string, ErrorCodeDefinition>> = {
   PAGE_ITEM_TOO_LARGE: { origin: "server", status: 413, retryable: false },
   /** The participation does not belong to the caller or the current live session generation. */
   PARTICIPATION_MISMATCH: { origin: "both", status: 409, retryable: false },
+  /** The payment rail declined the payment. Nothing was charged. */
+  PAYMENT_DECLINED: { origin: "server", status: 402, retryable: false },
+  /** No payment rail is enabled in this environment. */
+  PAYMENT_RAIL_NOT_CONFIGURED: { origin: "server", status: 503, retryable: false },
   /** The stored delivery permit has expired. Request a new permit. */
   PERMIT_EXPIRED: { origin: "server", status: 409, retryable: false },
   /** The plan does not permit the resource or feature. extensions.planLimit names the limit and extensions.limit holds the plan's value. Change the plan or the limit before trying again. */
@@ -158,6 +192,10 @@ export const errorCodes: Readonly<Record<string, ErrorCodeDefinition>> = {
   SESSION_REFRESH_REQUIRED: { origin: "sdk", status: 409, retryable: false },
   /** The refreshed session could not be verified. */
   SESSION_REFRESH_UNVERIFIED: { origin: "sdk", retryable: false },
+  /** The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap. */
+  SPEND_CAP_REACHED: { origin: "server", status: 402, retryable: false },
+  /** Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed. */
+  SPEND_UNVERIFIED: { origin: "server", status: 503, retryable: true },
   /** The transport failed after the request may have been sent. Resolve or retry the original request. */
   TRANSPORT_UNKNOWN: { origin: "sdk", retryable: true },
   /** The credential is missing, invalid or expired. */

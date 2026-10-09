@@ -1230,6 +1230,119 @@
           "static": true
         },
         {
+          "name": "AGENTIC_NOT_CONFIGURED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENTIC_NOT_CONFIGURED:static",
+          "anchor": "errorcodesagentic_not_configured-static-property",
+          "signatures": [
+            "public const val AGENTIC_NOT_CONFIGURED: String = \"AGENTIC_NOT_CONFIGURED\""
+          ],
+          "docs": "Agent signup is not offered in this environment.",
+          "static": true
+        },
+        {
+          "name": "AGENT_CONFIRMATION_CODE_INVALID",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENT_CONFIRMATION_CODE_INVALID:static",
+          "anchor": "errorcodesagent_confirmation_code_invalid-static-property",
+          "signatures": [
+            "public const val AGENT_CONFIRMATION_CODE_INVALID: String = \"AGENT_CONFIRMATION_CODE_INVALID\""
+          ],
+          "docs": "The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.",
+          "static": true
+        },
+        {
+          "name": "AGENT_GRANT_EXPIRED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENT_GRANT_EXPIRED:static",
+          "anchor": "errorcodesagent_grant_expired-static-property",
+          "signatures": ["public const val AGENT_GRANT_EXPIRED: String = \"AGENT_GRANT_EXPIRED\""],
+          "docs": "The agent's grant has expired. The agent needs a new signup request approved.",
+          "static": true
+        },
+        {
+          "name": "AGENT_GRANT_REVOKED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENT_GRANT_REVOKED:static",
+          "anchor": "errorcodesagent_grant_revoked-static-property",
+          "signatures": ["public const val AGENT_GRANT_REVOKED: String = \"AGENT_GRANT_REVOKED\""],
+          "docs": "The owner revoked the agent's grant.",
+          "static": true
+        },
+        {
+          "name": "AGENT_KEY_LIMIT",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENT_KEY_LIMIT:static",
+          "anchor": "errorcodesagent_key_limit-static-property",
+          "signatures": ["public const val AGENT_KEY_LIMIT: String = \"AGENT_KEY_LIMIT\""],
+          "docs": "The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.",
+          "static": true
+        },
+        {
+          "name": "AGENT_PURCHASE_LIMIT_EXCEEDED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENT_PURCHASE_LIMIT_EXCEEDED:static",
+          "anchor": "errorcodesagent_purchase_limit_exceeded-static-property",
+          "signatures": [
+            "public const val AGENT_PURCHASE_LIMIT_EXCEEDED: String = \"AGENT_PURCHASE_LIMIT_EXCEEDED\""
+          ],
+          "docs": "The purchase would take this month's agent credit purchases beyond the limit the owner set.",
+          "static": true
+        },
+        {
+          "name": "AGENT_SCOPE_NOT_GRANTED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENT_SCOPE_NOT_GRANTED:static",
+          "anchor": "errorcodesagent_scope_not_granted-static-property",
+          "signatures": [
+            "public const val AGENT_SCOPE_NOT_GRANTED: String = \"AGENT_SCOPE_NOT_GRANTED\""
+          ],
+          "docs": "A requested scope is outside the agent's grant.",
+          "static": true
+        },
+        {
+          "name": "AGENT_SIGNUP_CLOSED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENT_SIGNUP_CLOSED:static",
+          "anchor": "errorcodesagent_signup_closed-static-property",
+          "signatures": ["public const val AGENT_SIGNUP_CLOSED: String = \"AGENT_SIGNUP_CLOSED\""],
+          "docs": "The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.",
+          "static": true
+        },
+        {
+          "name": "AGENT_SIGNUP_EMAIL_REJECTED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENT_SIGNUP_EMAIL_REJECTED:static",
+          "anchor": "errorcodesagent_signup_email_rejected-static-property",
+          "signatures": [
+            "public const val AGENT_SIGNUP_EMAIL_REJECTED: String = \"AGENT_SIGNUP_EMAIL_REJECTED\""
+          ],
+          "docs": "The owner's email address is refused, for example for a disposable domain.",
+          "static": true
+        },
+        {
+          "name": "AGENT_SIGNUP_NOT_READY",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENT_SIGNUP_NOT_READY:static",
+          "anchor": "errorcodesagent_signup_not_ready-static-property",
+          "signatures": [
+            "public const val AGENT_SIGNUP_NOT_READY: String = \"AGENT_SIGNUP_NOT_READY\""
+          ],
+          "docs": "The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.",
+          "static": true
+        },
+        {
+          "name": "AGENT_SIGNUP_SUPPRESSED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.AGENT_SIGNUP_SUPPRESSED:static",
+          "anchor": "errorcodesagent_signup_suppressed-static-property",
+          "signatures": [
+            "public const val AGENT_SIGNUP_SUPPRESSED: String = \"AGENT_SIGNUP_SUPPRESSED\""
+          ],
+          "docs": "The owner opted out of agent signup requests to this email address.",
+          "static": true
+        },
+        {
           "name": "ALREADY_CONNECTED",
           "kind": "property",
           "ref": "com.convohop:convohop-android-core#ErrorCodes.ALREADY_CONNECTED:static",
@@ -1402,6 +1515,48 @@
           "anchor": "errorcodescredential_required-static-property",
           "signatures": ["public const val CREDENTIAL_REQUIRED: String = \"CREDENTIAL_REQUIRED\""],
           "docs": "Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.",
+          "static": true
+        },
+        {
+          "name": "CREDITS_EXHAUSTED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.CREDITS_EXHAUSTED:static",
+          "anchor": "errorcodescredits_exhausted-static-property",
+          "signatures": ["public const val CREDITS_EXHAUSTED: String = \"CREDITS_EXHAUSTED\""],
+          "docs": "Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+          "static": true
+        },
+        {
+          "name": "CREDITS_REQUIRE_METERED_PLAN",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.CREDITS_REQUIRE_METERED_PLAN:static",
+          "anchor": "errorcodescredits_require_metered_plan-static-property",
+          "signatures": [
+            "public const val CREDITS_REQUIRE_METERED_PLAN: String = \"CREDITS_REQUIRE_METERED_PLAN\""
+          ],
+          "docs": "Credits apply only to a billed subscription, and none is in force.",
+          "static": true
+        },
+        {
+          "name": "CREDIT_AMOUNT_OUT_OF_RANGE",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.CREDIT_AMOUNT_OUT_OF_RANGE:static",
+          "anchor": "errorcodescredit_amount_out_of_range-static-property",
+          "signatures": [
+            "public const val CREDIT_AMOUNT_OUT_OF_RANGE: String = \"CREDIT_AMOUNT_OUT_OF_RANGE\""
+          ],
+          "docs": "The credit amount is outside the allowed purchase range.",
+          "static": true
+        },
+        {
+          "name": "CREDIT_GRANT_LIMIT_REACHED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.CREDIT_GRANT_LIMIT_REACHED:static",
+          "anchor": "errorcodescredit_grant_limit_reached-static-property",
+          "signatures": [
+            "public const val CREDIT_GRANT_LIMIT_REACHED: String = \"CREDIT_GRANT_LIMIT_REACHED\""
+          ],
+          "docs": "Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.",
           "static": true
         },
         {
@@ -1743,6 +1898,26 @@
           "static": true
         },
         {
+          "name": "PAYMENT_DECLINED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.PAYMENT_DECLINED:static",
+          "anchor": "errorcodespayment_declined-static-property",
+          "signatures": ["public const val PAYMENT_DECLINED: String = \"PAYMENT_DECLINED\""],
+          "docs": "The payment rail declined the payment. Nothing was charged.",
+          "static": true
+        },
+        {
+          "name": "PAYMENT_RAIL_NOT_CONFIGURED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.PAYMENT_RAIL_NOT_CONFIGURED:static",
+          "anchor": "errorcodespayment_rail_not_configured-static-property",
+          "signatures": [
+            "public const val PAYMENT_RAIL_NOT_CONFIGURED: String = \"PAYMENT_RAIL_NOT_CONFIGURED\""
+          ],
+          "docs": "No payment rail is enabled in this environment.",
+          "static": true
+        },
+        {
           "name": "PERMIT_EXPIRED",
           "kind": "property",
           "ref": "com.convohop:convohop-android-core#ErrorCodes.PERMIT_EXPIRED:static",
@@ -1937,6 +2112,24 @@
           "static": true
         },
         {
+          "name": "SPEND_CAP_REACHED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.SPEND_CAP_REACHED:static",
+          "anchor": "errorcodesspend_cap_reached-static-property",
+          "signatures": ["public const val SPEND_CAP_REACHED: String = \"SPEND_CAP_REACHED\""],
+          "docs": "The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+          "static": true
+        },
+        {
+          "name": "SPEND_UNVERIFIED",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#ErrorCodes.SPEND_UNVERIFIED:static",
+          "anchor": "errorcodesspend_unverified-static-property",
+          "signatures": ["public const val SPEND_UNVERIFIED: String = \"SPEND_UNVERIFIED\""],
+          "docs": "Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.",
+          "static": true
+        },
+        {
           "name": "TRANSPORT_UNKNOWN",
           "kind": "property",
           "ref": "com.convohop:convohop-android-core#ErrorCodes.TRANSPORT_UNKNOWN:static",
@@ -2122,6 +2315,15 @@
           "anchor": "idempotencypermitbound-static-property",
           "signatures": ["public val permitBound: IdempotencyClass"],
           "docs": "Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.",
+          "static": true
+        },
+        {
+          "name": "replayOnly",
+          "kind": "property",
+          "ref": "com.convohop:convohop-android-core#Idempotency.replayOnly:static",
+          "anchor": "idempotencyreplayonly-static-property",
+          "signatures": ["public val replayOnly: IdempotencyClass"],
+          "docs": "Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.",
           "static": true
         },
         {
@@ -5920,6 +6122,36 @@
       "docs": "Package: `com.convohop.android.generated`."
     },
     {
+      "name": "AgentGrant",
+      "kind": "type",
+      "ref": "com.convohop:convohop-android-core#AgentGrant",
+      "anchor": "agentgrant-type",
+      "signatures": [
+        "public data class AgentGrant(\n    public val grantId: String,\n    public val orgId: String,\n    public val signupId: String,\n    public val agentActorId: String,\n    public val projectId: String? = null,\n    public val scopes: List<String>,\n    public val expiresAt: String,\n    public val revokedAt: String? = null,\n    public val createdAt: String,\n    public val keys: List<AgentKey>,\n)"
+      ],
+      "docs": "Package: `com.convohop.android.generated`."
+    },
+    {
+      "name": "AgentKey",
+      "kind": "type",
+      "ref": "com.convohop:convohop-android-core#AgentKey",
+      "anchor": "agentkey-type",
+      "signatures": [
+        "public data class AgentKey(\n    public val operationId: String,\n    public val state: String,\n    public val scopes: List<String>,\n    public val expiresAt: String,\n    public val keyId: String? = null,\n    public val deliveryId: String? = null,\n    public val deliveryExpiresAt: String? = null,\n)"
+      ],
+      "docs": "Package: `com.convohop.android.generated`."
+    },
+    {
+      "name": "AgentSignupStatus",
+      "kind": "type",
+      "ref": "com.convohop:convohop-android-core#AgentSignupStatus",
+      "anchor": "agentsignupstatus-type",
+      "signatures": [
+        "public data class AgentSignupStatus(\n    public val signupId: String,\n    public val state: String,\n    public val orgId: String? = null,\n    public val deploymentId: String? = null,\n    public val projectId: String? = null,\n    public val nextStep: String? = null,\n    public val scopes: List<String>,\n    public val grantExpiresAt: String? = null,\n    public val keys: List<AgentKey>,\n    public val incarnation: String? = null,\n    public val servingEpoch: String? = null,\n)"
+      ],
+      "docs": "Package: `com.convohop.android.generated`."
+    },
+    {
       "name": "AlertLiveSessionInput",
       "kind": "type",
       "ref": "com.convohop:convohop-android-core#AlertLiveSessionInput",
@@ -6868,6 +7100,16 @@
       "docs": "Package: `com.convohop.android.generated`."
     },
     {
+      "name": "OrganizationSpend",
+      "kind": "type",
+      "ref": "com.convohop:convohop-android-core#OrganizationSpend",
+      "anchor": "organizationspend-type",
+      "signatures": [
+        "public data class OrganizationSpend(\n    public val orgId: String,\n    public val planId: String,\n    public val currency: String,\n    public val catalogVersion: String,\n    public val monthlySpendCap: String? = null,\n    public val agentPurchaseLimit: String? = null,\n    public val updatedAt: String? = null,\n    public val monthlyMinimum: String? = null,\n    public val periodStart: String? = null,\n    public val periodEnd: String? = null,\n    public val credits: String? = null,\n    public val charges: String? = null,\n    public val margin: String? = null,\n    public val stop: String? = null,\n    public val refusedMeters: List<String>,\n    public val evaluatedAt: String? = null,\n    public val usageThrough: String? = null,\n    public val validUntil: String? = null,\n    public val minimumCredit: String? = null,\n    public val chargeLimit: String? = null,\n)"
+      ],
+      "docs": "Package: `com.convohop.android.generated`."
+    },
+    {
       "name": "Principal",
       "kind": "type",
       "ref": "com.convohop:convohop-android-core#Principal",
@@ -7001,7 +7243,7 @@
       "ref": "com.convohop:convohop-android-core#RetainedResult",
       "anchor": "retainedresult-type",
       "signatures": [
-        "public data class RetainedResult(\n    public val billingCheckoutSession: BillingCheckoutSession? = null,\n    public val billingPortalSession: BillingPortalSession? = null,\n    public val broadcastPermissionChanged: BroadcastPermissionChanged? = null,\n    public val conversation: Conversation? = null,\n    public val conversationMemberBatch: ConversationMemberBatch? = null,\n    public val conversationMute: ConversationMute? = null,\n    public val credentialDeliveryReceipt: CredentialDeliveryReceipt? = null,\n    public val deliveryAck: DeliveryAck? = null,\n    public val liveAlertBatch: LiveAlertBatch? = null,\n    public val liveCredentialIssuance: LiveCredentialIssuance? = null,\n    public val liveSessionEndRequested: LiveSessionEndRequested? = null,\n    public val liveSessionJoined: LiveSessionJoined? = null,\n    public val liveSessionLeft: LiveSessionLeft? = null,\n    public val liveSessionStarted: LiveSessionStarted? = null,\n    public val member: Member? = null,\n    public val message: Message? = null,\n    public val messageAck: MessageAck? = null,\n    public val organization: Organization? = null,\n    public val principal: Principal? = null,\n    public val readReceipt: ReadReceipt? = null,\n    public val sessionBootstrap: SessionBootstrap? = null,\n    public val sessionRevocation: SessionRevocation? = null,\n    public val signedProof: JsonObject? = null,\n)"
+        "public data class RetainedResult(\n    public val agentGrant: AgentGrant? = null,\n    public val agentSignupStatus: AgentSignupStatus? = null,\n    public val billingCheckoutSession: BillingCheckoutSession? = null,\n    public val billingPortalSession: BillingPortalSession? = null,\n    public val broadcastPermissionChanged: BroadcastPermissionChanged? = null,\n    public val conversation: Conversation? = null,\n    public val conversationMemberBatch: ConversationMemberBatch? = null,\n    public val conversationMute: ConversationMute? = null,\n    public val credentialDeliveryReceipt: CredentialDeliveryReceipt? = null,\n    public val deliveryAck: DeliveryAck? = null,\n    public val liveAlertBatch: LiveAlertBatch? = null,\n    public val liveCredentialIssuance: LiveCredentialIssuance? = null,\n    public val liveSessionEndRequested: LiveSessionEndRequested? = null,\n    public val liveSessionJoined: LiveSessionJoined? = null,\n    public val liveSessionLeft: LiveSessionLeft? = null,\n    public val liveSessionStarted: LiveSessionStarted? = null,\n    public val member: Member? = null,\n    public val message: Message? = null,\n    public val messageAck: MessageAck? = null,\n    public val organization: Organization? = null,\n    public val organizationSpend: OrganizationSpend? = null,\n    public val principal: Principal? = null,\n    public val readReceipt: ReadReceipt? = null,\n    public val sessionBootstrap: SessionBootstrap? = null,\n    public val sessionRevocation: SessionRevocation? = null,\n    public val signedProof: JsonObject? = null,\n)"
       ],
       "docs": "Exactly one typed field contains the retained, currently authorized receipt result.\n\nPackage: `com.convohop.android.generated`."
     },

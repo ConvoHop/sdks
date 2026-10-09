@@ -1,6 +1,6 @@
 # Python operation coverage
 
-The Python SDK members that send each API operation. 63 of the 68 operations that Python packages can send have a method.
+The Python SDK members that send each API operation. 63 of the 81 operations that Python packages can send have a method.
 
 ## Communication
 
@@ -67,6 +67,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md) | server | [`ConvoHopManagement.webhook_deliveries`](convohop.md#convohopmanagementwebhook_deliveries-method), [`AsyncConvoHopManagement.webhook_deliveries`](convohop.md#asyncconvohopmanagementwebhook_deliveries-method) |
 | [`management.resolveRequest`](../../operations/management/resolveRequest.md) | server | [`ConvoHopManagement.resolve_request`](convohop.md#convohopmanagementresolve_request-method), [`ConvoHopManagement.retry_request`](convohop.md#convohopmanagementretry_request-method), [`AsyncConvoHopManagement.resolve_request`](convohop.md#asyncconvohopmanagementresolve_request-method), [`AsyncConvoHopManagement.retry_request`](convohop.md#asyncconvohopmanagementretry_request-method) |
 | [`management.getOperation`](../../operations/management/getOperation.md) | server | [`ConvoHopManagement.get_operation`](convohop.md#convohopmanagementget_operation-method), [`AsyncConvoHopManagement.get_operation`](convohop.md#asyncconvohopmanagementget_operation-method) |
+| [`management.agentSignupForApproval`](../../operations/management/agentSignupForApproval.md) | server | Not wrapped by a method |
+| [`management.agentSignup`](../../operations/management/agentSignup.md) | server | Not wrapped by a method |
+| [`management.agentGrants`](../../operations/management/agentGrants.md) | server | Not wrapped by a method |
+| [`management.agentAuditEvents`](../../operations/management/agentAuditEvents.md) | server | Not wrapped by a method |
+| [`management.organizationSpend`](../../operations/management/organizationSpend.md) | server | Not wrapped by a method |
 | [`management.createOrganization`](../../operations/management/createOrganization.md) | server | [`ConvoHopManagement.create_organization`](convohop.md#convohopmanagementcreate_organization-method), [`AsyncConvoHopManagement.create_organization`](convohop.md#asyncconvohopmanagementcreate_organization-method) |
 | [`management.createDeployment`](../../operations/management/createDeployment.md) | server | [`ConvoHopManagement.create_deployment`](convohop.md#convohopmanagementcreate_deployment-method), [`AsyncConvoHopManagement.create_deployment`](convohop.md#asyncconvohopmanagementcreate_deployment-method) |
 | [`management.createProject`](../../operations/management/createProject.md) | server | [`ConvoHopManagement.create_project`](convohop.md#convohopmanagementcreate_project-method), [`AsyncConvoHopManagement.create_project`](convohop.md#asyncconvohopmanagementcreate_project-method) |
@@ -83,3 +88,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md) | server | [`ConvoHopManagement.rotate_webhook_secret`](convohop.md#convohopmanagementrotate_webhook_secret-method), [`AsyncConvoHopManagement.rotate_webhook_secret`](convohop.md#asyncconvohopmanagementrotate_webhook_secret-method) |
 | [`management.disableWebhook`](../../operations/management/disableWebhook.md) | server | [`ConvoHopManagement.disable_webhook`](convohop.md#convohopmanagementdisable_webhook-method), [`AsyncConvoHopManagement.disable_webhook`](convohop.md#asyncconvohopmanagementdisable_webhook-method) |
 | [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md) | server | [`ConvoHopManagement.replay_webhook_deliveries`](convohop.md#convohopmanagementreplay_webhook_deliveries-method), [`AsyncConvoHopManagement.replay_webhook_deliveries`](convohop.md#asyncconvohopmanagementreplay_webhook_deliveries-method) |
+| [`management.requestAgentSignup`](../../operations/management/requestAgentSignup.md) | server | Not wrapped by a method |
+| [`management.rejectAgentSignup`](../../operations/management/rejectAgentSignup.md) | server | Not wrapped by a method |
+| [`management.approveAgentSignup`](../../operations/management/approveAgentSignup.md) | server | Not wrapped by a method |
+| [`management.issueAgentKey`](../../operations/management/issueAgentKey.md) | server | Not wrapped by a method |
+| [`management.agentCredentialPermit`](../../operations/management/agentCredentialPermit.md) | server | Not wrapped by a method |
+| [`management.revokeAgentGrant`](../../operations/management/revokeAgentGrant.md) | server | Not wrapped by a method |
+| [`management.setSpendControls`](../../operations/management/setSpendControls.md) | server | Not wrapped by a method |
+| [`management.purchaseAgentCredits`](../../operations/management/purchaseAgentCredits.md) | server | Not wrapped by a method |

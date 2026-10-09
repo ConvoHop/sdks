@@ -3,7 +3,7 @@ import { byName, namedTypeRef, printTypeRef, requireType } from "../lib/ir-model
 import { formatJson } from "../lib/json.mjs";
 import { codeUnitCompare } from "../lib/naming.mjs";
 import {
-  CREDENTIAL_OPERATIONS, authText, oneLine, paginationText, serverCredential, serverOperations,
+  WITHHELD_OPERATIONS, authText, oneLine, paginationText, serverCredential, serverOperations,
 } from "../lib/server-operations.mjs";
 
 /**
@@ -11,7 +11,7 @@ import {
  *
  * Lists the operations the MCP tools expose: each query and mutation that a
  * server bearer credential can call, without subscriptions, client-only,
- * deprecated and credential-returning operations. Each entry carries the
+ * deprecated, credential-returning and consent operations. Each entry carries the
  * operation's text and annotations (credential, authorization, idempotency,
  * destructiveness, pagination and polling) and names its input type.
  * cliTypes describes every input type, enum and custom scalar that those
@@ -20,8 +20,8 @@ import {
  * check and explain them.
  */
 export const DIRECTORY = "packages/cli/src/generated";
-/** Operations whose results are credentials. `convohop call` never runs them. */
-export const WITHHELD = CREDENTIAL_OPERATIONS;
+/** Operations whose results are credentials or that record a person's consent. `convohop call` never runs them. */
+export const WITHHELD = WITHHELD_OPERATIONS;
 
 const EMITTER = "cli-operations";
 const NOTICE = "// Generated from the current unversioned GraphQL schemas. Run npm run generate:graphql.\n";
@@ -147,7 +147,7 @@ export interface CliOperation {
 export function renderOperations(ir) {
   const operations = cliOperationList(ir);
   return NOTICE + DECLARATIONS +
-    `/** Operations \`convohop call\` never runs, because their results are credentials. */\n` +
+    `/** Operations \`convohop call\` never runs, because their results are credentials or they record a person's consent. */\n` +
     `export const withheldOperations: Readonly<Record<string, string>> = ${formatJson(WITHHELD).trimEnd()};\n` +
     `/** The scopes a backend key can grant, by wire name, with what each allows. */\n` +
     `export const cliScopes: Readonly<Record<string, string>> = ${formatJson(cliScopeEntries(ir)).trimEnd()};\n` +

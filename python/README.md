@@ -128,6 +128,11 @@ catalog allows resending the same request ID.
   names it. Grant the scope instead of retrying.
 - `RateLimitedProblem`, `QuotaExceededProblem` and
   `PlanLimitExceededProblem` carry the authority's limit details.
+- `CreditsExhaustedProblem` and `SpendCapReachedProblem` (402): the
+  organization's prepaid credits or monthly spend cap stop billable usage
+  beyond the plan's allowances. Add credits or raise the cap instead of
+  retrying. `SpendUnverifiedProblem` (503): current spend can't be verified;
+  resend after `retry_after`.
 - `retry_after` is the number of whole seconds the authority asks you to wait
   before resending, from its `retryAfter` extension or an HTTP `Retry-After`
   header. The SDK never waits or resends on its own.

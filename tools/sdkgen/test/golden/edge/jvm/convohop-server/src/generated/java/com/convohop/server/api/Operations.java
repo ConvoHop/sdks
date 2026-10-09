@@ -282,6 +282,57 @@ public final class Operations {
               + "}")
           .build();
 
+  /** <code>beta.requestAccess</code>: Ask for access without a credential. */
+  public static final OperationDescriptor<Receipt> BETA_REQUEST_ACCESS =
+      OperationDescriptor.builder("beta.requestAccess", Wire.required(Receipt::decode))
+          .plane("beta")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("requestAccess")
+          .operationName("BetaRequestAccess")
+          .resultType("Receipt!")
+          .inputFields(List.of("email", "challenge"))
+          .idempotency("replayOnly", OperationDescriptor.Retry.SAME_REQUEST, false, 3, 60000L)
+          .context("tenant", OperationDescriptor.Use.OPTIONAL)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("attempt", OperationDescriptor.Use.OPTIONAL)
+          .context("permit", OperationDescriptor.Use.FORBIDDEN)
+          .context("tags", OperationDescriptor.Use.OPTIONAL)
+          .document(
+              "mutation BetaRequestAccess($context: ContextInput!, $input: RequestAccessInput!) {\n"
+              + "  requestAccess(context: $context, input: $input) {\n"
+              + "    requestId\n"
+              + "    committed\n"
+              + "    sequence\n"
+              + "  }\n"
+              + "}")
+          .build();
+
+  /** <code>beta.claimWidget</code>: Claim a widget for an agent. */
+  public static final OperationDescriptor<Widget> BETA_CLAIM_WIDGET =
+      OperationDescriptor.builder("beta.claimWidget", Wire.required(Widget::decode))
+          .plane("beta")
+          .kind(OperationDescriptor.Kind.MUTATION)
+          .field("claimWidget")
+          .operationName("BetaClaimWidget")
+          .resultType("Widget!")
+          .inputFields(List.of("widgetId"))
+          .idempotency("replayOnly", OperationDescriptor.Retry.SAME_REQUEST, false, 3, 60000L)
+          .context("tenant", OperationDescriptor.Use.OPTIONAL)
+          .context("requestId", OperationDescriptor.Use.REQUIRED)
+          .context("attempt", OperationDescriptor.Use.OPTIONAL)
+          .context("permit", OperationDescriptor.Use.FORBIDDEN)
+          .context("tags", OperationDescriptor.Use.OPTIONAL)
+          .document(
+              "mutation BetaClaimWidget($context: ContextInput!, $input: ClaimWidgetInput!) {\n"
+              + "  claimWidget(context: $context, input: $input) {\n"
+              + "    id\n"
+              + "    label\n"
+              + "    state\n"
+              + "    revision\n"
+              + "  }\n"
+              + "}")
+          .build();
+
   private static final OperationCatalog CATALOG = new OperationCatalog(
       List.of(ALPHA_CAPABILITIES,
           ALPHA_RESOLVE_REQUEST,
@@ -292,7 +343,9 @@ public final class Operations {
           BETA_CAPABILITIES,
           BETA_RESOLVE_REQUEST,
           BETA_WIDGETS,
-          BETA_CREATE_WIDGET),
+          BETA_CREATE_WIDGET,
+          BETA_REQUEST_ACCESS,
+          BETA_CLAIM_WIDGET),
       Map.ofEntries(Map.entry("alpha", "alpha.resolveRequest"),
           Map.entry("beta", "beta.resolveRequest")),
       Map.ofEntries(Map.entry("CURSOR_EXPIRED", false),

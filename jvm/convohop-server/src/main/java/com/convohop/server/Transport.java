@@ -277,6 +277,10 @@ final class Transport implements OperationExecutor {
           "Delivery permits cannot authorize request lookup; obtain a current permit and submit the same delivery "
               + "identity explicitly");
     }
+    if (!operation.resolvable()) {
+      throw new ConvoHopProblem("INVALID_REQUEST", requestId, "unknown", 400,
+          "The operation's requests cannot be looked up; send the same request ID and payload again explicitly");
+    }
     RequestResolution resolution = resolve(operation.plane(), requestId);
     if (resolution.getState().equals("committed") || resolution.getState().equals("accepted")) {
       return resolution;

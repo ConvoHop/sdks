@@ -3,8 +3,10 @@ package com.convohop.server.kotlin
 
 import com.convohop.server.api.BetaApi
 import com.convohop.server.model.Capabilities
+import com.convohop.server.model.ClaimWidgetInput
 import com.convohop.server.model.CreateWidgetInput
 import com.convohop.server.model.Receipt
+import com.convohop.server.model.RequestAccessInput
 import com.convohop.server.model.ResolveInput
 import com.convohop.server.model.Widget
 import com.convohop.server.model.WidgetsInput
@@ -36,6 +38,14 @@ public class BetaSuspendApi(
     /** Suspending [BetaApi.createWidget]. */
     public suspend fun createWidget(input: CreateWidgetInput, requestId: String? = null): Widget =
         interruptible(dispatcher) { api.createWidget(input, requestId) }
+
+    /** Suspending [BetaApi.requestAccess]. */
+    public suspend fun requestAccess(input: RequestAccessInput, requestId: String? = null): Receipt =
+        interruptible(dispatcher) { api.requestAccess(input, requestId) }
+
+    /** Suspending [BetaApi.claimWidget]. */
+    public suspend fun claimWidget(input: ClaimWidgetInput, requestId: String? = null): Widget =
+        interruptible(dispatcher) { api.claimWidget(input, requestId) }
 }
 
 /** A suspending view of this plane API whose calls run on [dispatcher]. */

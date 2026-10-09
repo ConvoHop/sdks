@@ -260,6 +260,13 @@ goes to the store's error callback. Open a new timeline to try again. A
 session problem stops it too when the client has no `SessionRefresh` to
 renew the session.
 
+When the organization's prepaid credits run out or it reaches its monthly
+spend cap, the replay closes with a 402 `CREDITS_EXHAUSTED` or
+`SPEND_CAP_REACHED` problem and doesn't reconnect; open a new timeline once
+the organization can pay again. While ConvoHop can't verify current spend,
+the replay reports `SPEND_UNVERIFIED` and reconnects no sooner than its
+`retryAfter`. Coming back online doesn't cut that wait short.
+
 Without the store, `client.watch(conversationId, apply, onError)` replays a
 conversation's events from the cursor in recovery storage, then follows it
 live. Batches reach `apply` in order, and the cursor advances only after

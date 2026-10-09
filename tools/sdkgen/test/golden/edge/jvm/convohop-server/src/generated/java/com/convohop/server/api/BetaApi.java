@@ -4,8 +4,10 @@ package com.convohop.server.api;
 import com.convohop.server.internal.OperationExecutor;
 import com.convohop.server.internal.Wire;
 import com.convohop.server.model.Capabilities;
+import com.convohop.server.model.ClaimWidgetInput;
 import com.convohop.server.model.CreateWidgetInput;
 import com.convohop.server.model.Receipt;
+import com.convohop.server.model.RequestAccessInput;
 import com.convohop.server.model.ResolveInput;
 import com.convohop.server.model.Widget;
 import com.convohop.server.model.WidgetsInput;
@@ -118,5 +120,67 @@ public final class BetaApi {
    */
   public Widget createWidget(CreateWidgetInput input, @Nullable String requestId) {
     return this.executor.execute(Operations.BETA_CREATE_WIDGET, Wire.nonNull(input, "input").toJson(), requestId, null);
+  }
+
+  /**
+   * Ask for access without a credential.
+   *
+   * <p>Idempotency: <code>replayOnly</code>. Replay with the same requestId and input; resolveRequest cannot read the outcome.
+   *
+   * <p>Authorization: anon (condition challenge).
+   *
+   * @param input the operation input
+   * @return the authority result
+   * @throws com.convohop.server.ConvoHopProblem if the authority rejects the request or its outcome is unknown
+   */
+  public Receipt requestAccess(RequestAccessInput input) {
+    return this.requestAccess(input, null);
+  }
+
+  /**
+   * Ask for access without a credential.
+   *
+   * <p>Idempotency: <code>replayOnly</code>. Replay with the same requestId and input; resolveRequest cannot read the outcome.
+   *
+   * <p>Authorization: anon (condition challenge).
+   *
+   * @param input the operation input
+   * @param requestId the request ID to reuse for a retry with the same input, or {@code null} for a new one
+   * @return the authority result
+   * @throws com.convohop.server.ConvoHopProblem if the authority rejects the request or its outcome is unknown
+   */
+  public Receipt requestAccess(RequestAccessInput input, @Nullable String requestId) {
+    return this.executor.execute(Operations.BETA_REQUEST_ACCESS, Wire.nonNull(input, "input").toJson(), requestId, null);
+  }
+
+  /**
+   * Claim a widget for an agent.
+   *
+   * <p>Idempotency: <code>replayOnly</code>. Replay with the same requestId and input; resolveRequest cannot read the outcome.
+   *
+   * <p>Authorization: agentToken.
+   *
+   * @param input the operation input
+   * @return the authority result
+   * @throws com.convohop.server.ConvoHopProblem if the authority rejects the request or its outcome is unknown
+   */
+  public Widget claimWidget(ClaimWidgetInput input) {
+    return this.claimWidget(input, null);
+  }
+
+  /**
+   * Claim a widget for an agent.
+   *
+   * <p>Idempotency: <code>replayOnly</code>. Replay with the same requestId and input; resolveRequest cannot read the outcome.
+   *
+   * <p>Authorization: agentToken.
+   *
+   * @param input the operation input
+   * @param requestId the request ID to reuse for a retry with the same input, or {@code null} for a new one
+   * @return the authority result
+   * @throws com.convohop.server.ConvoHopProblem if the authority rejects the request or its outcome is unknown
+   */
+  public Widget claimWidget(ClaimWidgetInput input, @Nullable String requestId) {
+    return this.executor.execute(Operations.BETA_CLAIM_WIDGET, Wire.nonNull(input, "input").toJson(), requestId, null);
   }
 }

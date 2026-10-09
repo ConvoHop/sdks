@@ -273,6 +273,11 @@ class Engine:
         if state["incarnation"] != self.incarnation:
             raise _incarnation(request_id)
         operation = OPERATIONS[state["operation"]]
+        if operation.idempotency == "replayOnly":
+            message = (
+                "The operation's requests cannot be looked up; send the same request ID and payload again explicitly"
+            )
+            raise _problem("INVALID_REQUEST", request_id, "unknown", 400, message)
         resolver = PLANES.get(operation.plane)
         if resolver is None:
             raise RuntimeError(f"The generated catalog has no resolve operation for the {operation.plane} plane")

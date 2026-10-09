@@ -341,6 +341,200 @@ ActorRef _decodeActorRef(Object? value, String path) {
   );
 }
 
+final class AgentGrant {
+  const AgentGrant({
+    required this.grantId,
+    required this.orgId,
+    required this.signupId,
+    required this.agentActorId,
+    this.projectId,
+    required this.scopes,
+    required this.expiresAt,
+    this.revokedAt,
+    required this.createdAt,
+    required this.keys,
+  });
+
+  /// Decodes and validates a GraphQL `AgentGrant`. Malformed values throw a [FormatException].
+  factory AgentGrant.fromJson(Object? json) => _decodeAgentGrant(json, r'$');
+
+  final String grantId;
+
+  final String orgId;
+
+  final String signupId;
+
+  final String agentActorId;
+
+  final String? projectId;
+
+  final List<String> scopes;
+
+  final String expiresAt;
+
+  final String? revokedAt;
+
+  final String createdAt;
+
+  final List<AgentKey> keys;
+
+  /// The GraphQL JSON form, with every field.
+  Map<String, Object?> toJson() => <String, Object?>{
+        'grantId': grantId,
+        'orgId': orgId,
+        'signupId': signupId,
+        'agentActorId': agentActorId,
+        'projectId': projectId,
+        'scopes': scopes,
+        'expiresAt': expiresAt,
+        'revokedAt': revokedAt,
+        'createdAt': createdAt,
+        'keys': keys.map((e0) => e0.toJson()).toList(),
+      };
+}
+
+AgentGrant _decodeAgentGrant(Object? value, String path) {
+  final map = _object(value, path);
+  return AgentGrant(
+    grantId: _scalarUuid(_get(map, path, 'grantId'), '$path.grantId'),
+    orgId: _scalarUuid(_get(map, path, 'orgId'), '$path.orgId'),
+    signupId: _scalarUuid(_get(map, path, 'signupId'), '$path.signupId'),
+    agentActorId: _scalarUuid(_get(map, path, 'agentActorId'), '$path.agentActorId'),
+    projectId: _n(_get(map, path, 'projectId'), '$path.projectId', _scalarUuid),
+    scopes: _list(_get(map, path, 'scopes'), '$path.scopes', _scalarString),
+    expiresAt: _scalarString(_get(map, path, 'expiresAt'), '$path.expiresAt'),
+    revokedAt: _n(_get(map, path, 'revokedAt'), '$path.revokedAt', _scalarString),
+    createdAt: _scalarString(_get(map, path, 'createdAt'), '$path.createdAt'),
+    keys: _list(_get(map, path, 'keys'), '$path.keys', _decodeAgentKey),
+  );
+}
+
+final class AgentKey {
+  const AgentKey({
+    required this.operationId,
+    required this.state,
+    required this.scopes,
+    required this.expiresAt,
+    this.keyId,
+    this.deliveryId,
+    this.deliveryExpiresAt,
+  });
+
+  /// Decodes and validates a GraphQL `AgentKey`. Malformed values throw a [FormatException].
+  factory AgentKey.fromJson(Object? json) => _decodeAgentKey(json, r'$');
+
+  final String operationId;
+
+  final String state;
+
+  final List<String> scopes;
+
+  final String expiresAt;
+
+  final String? keyId;
+
+  final String? deliveryId;
+
+  final String? deliveryExpiresAt;
+
+  /// The GraphQL JSON form, with every field.
+  Map<String, Object?> toJson() => <String, Object?>{
+        'operationId': operationId,
+        'state': state,
+        'scopes': scopes,
+        'expiresAt': expiresAt,
+        'keyId': keyId,
+        'deliveryId': deliveryId,
+        'deliveryExpiresAt': deliveryExpiresAt,
+      };
+}
+
+AgentKey _decodeAgentKey(Object? value, String path) {
+  final map = _object(value, path);
+  return AgentKey(
+    operationId: _scalarUuid(_get(map, path, 'operationId'), '$path.operationId'),
+    state: _scalarString(_get(map, path, 'state'), '$path.state'),
+    scopes: _list(_get(map, path, 'scopes'), '$path.scopes', _scalarString),
+    expiresAt: _scalarString(_get(map, path, 'expiresAt'), '$path.expiresAt'),
+    keyId: _n(_get(map, path, 'keyId'), '$path.keyId', _scalarString),
+    deliveryId: _n(_get(map, path, 'deliveryId'), '$path.deliveryId', _scalarUuid),
+    deliveryExpiresAt: _n(_get(map, path, 'deliveryExpiresAt'), '$path.deliveryExpiresAt', _scalarString),
+  );
+}
+
+final class AgentSignupStatus {
+  const AgentSignupStatus({
+    required this.signupId,
+    required this.state,
+    this.orgId,
+    this.deploymentId,
+    this.projectId,
+    this.nextStep,
+    required this.scopes,
+    this.grantExpiresAt,
+    required this.keys,
+    this.incarnation,
+    this.servingEpoch,
+  });
+
+  /// Decodes and validates a GraphQL `AgentSignupStatus`. Malformed values throw a [FormatException].
+  factory AgentSignupStatus.fromJson(Object? json) => _decodeAgentSignupStatus(json, r'$');
+
+  final String signupId;
+
+  final String state;
+
+  final String? orgId;
+
+  final String? deploymentId;
+
+  final String? projectId;
+
+  final String? nextStep;
+
+  final List<String> scopes;
+
+  final String? grantExpiresAt;
+
+  final List<AgentKey> keys;
+
+  final String? incarnation;
+
+  final String? servingEpoch;
+
+  /// The GraphQL JSON form, with every field.
+  Map<String, Object?> toJson() => <String, Object?>{
+        'signupId': signupId,
+        'state': state,
+        'orgId': orgId,
+        'deploymentId': deploymentId,
+        'projectId': projectId,
+        'nextStep': nextStep,
+        'scopes': scopes,
+        'grantExpiresAt': grantExpiresAt,
+        'keys': keys.map((e0) => e0.toJson()).toList(),
+        'incarnation': incarnation,
+        'servingEpoch': servingEpoch,
+      };
+}
+
+AgentSignupStatus _decodeAgentSignupStatus(Object? value, String path) {
+  final map = _object(value, path);
+  return AgentSignupStatus(
+    signupId: _scalarUuid(_get(map, path, 'signupId'), '$path.signupId'),
+    state: _scalarString(_get(map, path, 'state'), '$path.state'),
+    orgId: _n(_get(map, path, 'orgId'), '$path.orgId', _scalarUuid),
+    deploymentId: _n(_get(map, path, 'deploymentId'), '$path.deploymentId', _scalarUuid),
+    projectId: _n(_get(map, path, 'projectId'), '$path.projectId', _scalarUuid),
+    nextStep: _n(_get(map, path, 'nextStep'), '$path.nextStep', _scalarString),
+    scopes: _list(_get(map, path, 'scopes'), '$path.scopes', _scalarString),
+    grantExpiresAt: _n(_get(map, path, 'grantExpiresAt'), '$path.grantExpiresAt', _scalarString),
+    keys: _list(_get(map, path, 'keys'), '$path.keys', _decodeAgentKey),
+    incarnation: _n(_get(map, path, 'incarnation'), '$path.incarnation', _scalarUuid),
+    servingEpoch: _n(_get(map, path, 'servingEpoch'), '$path.servingEpoch', _scalarDecimal),
+  );
+}
+
 final class AlertLiveSessionPayload {
   const AlertLiveSessionPayload({
     required this.status,
@@ -3898,6 +4092,124 @@ Organization _decodeOrganization(Object? value, String path) {
   );
 }
 
+final class OrganizationSpend {
+  const OrganizationSpend({
+    required this.orgId,
+    required this.planId,
+    required this.currency,
+    required this.catalogVersion,
+    this.monthlySpendCap,
+    this.agentPurchaseLimit,
+    this.updatedAt,
+    this.monthlyMinimum,
+    this.periodStart,
+    this.periodEnd,
+    this.credits,
+    this.charges,
+    this.margin,
+    this.stop,
+    required this.refusedMeters,
+    this.evaluatedAt,
+    this.usageThrough,
+    this.validUntil,
+    this.minimumCredit,
+    this.chargeLimit,
+  });
+
+  /// Decodes and validates a GraphQL `OrganizationSpend`. Malformed values throw a [FormatException].
+  factory OrganizationSpend.fromJson(Object? json) => _decodeOrganizationSpend(json, r'$');
+
+  final String orgId;
+
+  final String planId;
+
+  final String currency;
+
+  final String catalogVersion;
+
+  final String? monthlySpendCap;
+
+  final String? agentPurchaseLimit;
+
+  final String? updatedAt;
+
+  final String? monthlyMinimum;
+
+  final String? periodStart;
+
+  final String? periodEnd;
+
+  final String? credits;
+
+  final String? charges;
+
+  final String? margin;
+
+  final String? stop;
+
+  final List<String> refusedMeters;
+
+  final String? evaluatedAt;
+
+  final String? usageThrough;
+
+  final String? validUntil;
+
+  final String? minimumCredit;
+
+  final String? chargeLimit;
+
+  /// The GraphQL JSON form, with every field.
+  Map<String, Object?> toJson() => <String, Object?>{
+        'orgId': orgId,
+        'planId': planId,
+        'currency': currency,
+        'catalogVersion': catalogVersion,
+        'monthlySpendCap': monthlySpendCap,
+        'agentPurchaseLimit': agentPurchaseLimit,
+        'updatedAt': updatedAt,
+        'monthlyMinimum': monthlyMinimum,
+        'periodStart': periodStart,
+        'periodEnd': periodEnd,
+        'credits': credits,
+        'charges': charges,
+        'margin': margin,
+        'stop': stop,
+        'refusedMeters': refusedMeters,
+        'evaluatedAt': evaluatedAt,
+        'usageThrough': usageThrough,
+        'validUntil': validUntil,
+        'minimumCredit': minimumCredit,
+        'chargeLimit': chargeLimit,
+      };
+}
+
+OrganizationSpend _decodeOrganizationSpend(Object? value, String path) {
+  final map = _object(value, path);
+  return OrganizationSpend(
+    orgId: _scalarUuid(_get(map, path, 'orgId'), '$path.orgId'),
+    planId: _scalarString(_get(map, path, 'planId'), '$path.planId'),
+    currency: _scalarString(_get(map, path, 'currency'), '$path.currency'),
+    catalogVersion: _scalarString(_get(map, path, 'catalogVersion'), '$path.catalogVersion'),
+    monthlySpendCap: _n(_get(map, path, 'monthlySpendCap'), '$path.monthlySpendCap', _scalarString),
+    agentPurchaseLimit: _n(_get(map, path, 'agentPurchaseLimit'), '$path.agentPurchaseLimit', _scalarString),
+    updatedAt: _n(_get(map, path, 'updatedAt'), '$path.updatedAt', _scalarString),
+    monthlyMinimum: _n(_get(map, path, 'monthlyMinimum'), '$path.monthlyMinimum', _scalarString),
+    periodStart: _n(_get(map, path, 'periodStart'), '$path.periodStart', _scalarString),
+    periodEnd: _n(_get(map, path, 'periodEnd'), '$path.periodEnd', _scalarString),
+    credits: _n(_get(map, path, 'credits'), '$path.credits', _scalarString),
+    charges: _n(_get(map, path, 'charges'), '$path.charges', _scalarString),
+    margin: _n(_get(map, path, 'margin'), '$path.margin', _scalarString),
+    stop: _n(_get(map, path, 'stop'), '$path.stop', _scalarString),
+    refusedMeters: _list(_get(map, path, 'refusedMeters'), '$path.refusedMeters', _scalarString),
+    evaluatedAt: _n(_get(map, path, 'evaluatedAt'), '$path.evaluatedAt', _scalarString),
+    usageThrough: _n(_get(map, path, 'usageThrough'), '$path.usageThrough', _scalarString),
+    validUntil: _n(_get(map, path, 'validUntil'), '$path.validUntil', _scalarString),
+    minimumCredit: _n(_get(map, path, 'minimumCredit'), '$path.minimumCredit', _scalarString),
+    chargeLimit: _n(_get(map, path, 'chargeLimit'), '$path.chargeLimit', _scalarString),
+  );
+}
+
 final class Principal {
   const Principal({
     required this.principalId,
@@ -4348,6 +4660,8 @@ ResourceRef _decodeResourceRef(Object? value, String path) {
 /// Exactly one typed field contains the retained, currently authorized receipt result.
 final class RetainedResult {
   const RetainedResult({
+    this.agentGrant,
+    this.agentSignupStatus,
     this.billingCheckoutSession,
     this.billingPortalSession,
     this.broadcastPermissionChanged,
@@ -4366,6 +4680,7 @@ final class RetainedResult {
     this.message,
     this.messageAck,
     this.organization,
+    this.organizationSpend,
     this.principal,
     this.readReceipt,
     this.sessionBootstrap,
@@ -4375,6 +4690,10 @@ final class RetainedResult {
 
   /// Decodes and validates a GraphQL `RetainedResult`. Malformed values throw a [FormatException].
   factory RetainedResult.fromJson(Object? json) => _decodeRetainedResult(json, r'$');
+
+  final AgentGrant? agentGrant;
+
+  final AgentSignupStatus? agentSignupStatus;
 
   final BillingCheckoutSession? billingCheckoutSession;
 
@@ -4412,6 +4731,8 @@ final class RetainedResult {
 
   final Organization? organization;
 
+  final OrganizationSpend? organizationSpend;
+
   final Principal? principal;
 
   final ReadReceipt? readReceipt;
@@ -4424,6 +4745,8 @@ final class RetainedResult {
 
   /// The GraphQL JSON form, with every field.
   Map<String, Object?> toJson() => <String, Object?>{
+        'agentGrant': agentGrant?.toJson(),
+        'agentSignupStatus': agentSignupStatus?.toJson(),
         'billingCheckoutSession': billingCheckoutSession?.toJson(),
         'billingPortalSession': billingPortalSession?.toJson(),
         'broadcastPermissionChanged': broadcastPermissionChanged?.toJson(),
@@ -4442,6 +4765,7 @@ final class RetainedResult {
         'message': message?.toJson(),
         'messageAck': messageAck?.toJson(),
         'organization': organization?.toJson(),
+        'organizationSpend': organizationSpend?.toJson(),
         'principal': principal?.toJson(),
         'readReceipt': readReceipt?.toJson(),
         'sessionBootstrap': sessionBootstrap?.toJson(),
@@ -4453,6 +4777,8 @@ final class RetainedResult {
 RetainedResult _decodeRetainedResult(Object? value, String path) {
   final map = _object(value, path);
   return RetainedResult(
+    agentGrant: _n(_get(map, path, 'agentGrant'), '$path.agentGrant', _decodeAgentGrant),
+    agentSignupStatus: _n(_get(map, path, 'agentSignupStatus'), '$path.agentSignupStatus', _decodeAgentSignupStatus),
     billingCheckoutSession: _n(_get(map, path, 'billingCheckoutSession'), '$path.billingCheckoutSession', _decodeBillingCheckoutSession),
     billingPortalSession: _n(_get(map, path, 'billingPortalSession'), '$path.billingPortalSession', _decodeBillingPortalSession),
     broadcastPermissionChanged: _n(_get(map, path, 'broadcastPermissionChanged'), '$path.broadcastPermissionChanged', _decodeBroadcastPermissionChanged),
@@ -4471,6 +4797,7 @@ RetainedResult _decodeRetainedResult(Object? value, String path) {
     message: _n(_get(map, path, 'message'), '$path.message', _decodeMessage),
     messageAck: _n(_get(map, path, 'messageAck'), '$path.messageAck', _decodeMessageAck),
     organization: _n(_get(map, path, 'organization'), '$path.organization', _decodeOrganization),
+    organizationSpend: _n(_get(map, path, 'organizationSpend'), '$path.organizationSpend', _decodeOrganizationSpend),
     principal: _n(_get(map, path, 'principal'), '$path.principal', _decodePrincipal),
     readReceipt: _n(_get(map, path, 'readReceipt'), '$path.readReceipt', _decodeReadReceipt),
     sessionBootstrap: _n(_get(map, path, 'sessionBootstrap'), '$path.sessionBootstrap', _decodeSessionBootstrap),

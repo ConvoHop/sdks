@@ -17,7 +17,7 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [@convohop/client](typescript/reference/client.md): Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.
 - [@convohop/client/push](typescript/reference/client-push.md): Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK.
 - [@convohop/react](typescript/reference/react.md): React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.
-- [TypeScript operation coverage](typescript/reference/operations.md): The TypeScript SDK members that send each API operation. 53 of the 79 operations that TypeScript packages can send have a method.
+- [TypeScript operation coverage](typescript/reference/operations.md): The TypeScript SDK members that send each API operation. 53 of the 92 operations that TypeScript packages can send have a method.
 
 ## Python
 
@@ -30,7 +30,7 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [convohop.webhooks](python/reference/webhooks.md): Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.
 - [convohop.push](python/reference/push.md): Builds APNs, FCM and Web Push requests from ConvoHop push notification events.
 - [convohop.types](python/reference/types.md): Generated request and response models of the ConvoHop GraphQL API, as frozen dataclasses.
-- [Python operation coverage](python/reference/operations.md): The Python SDK members that send each API operation. 63 of the 68 operations that Python packages can send have a method.
+- [Python operation coverage](python/reference/operations.md): The Python SDK members that send each API operation. 63 of the 81 operations that Python packages can send have a method.
 
 ## .NET
 
@@ -42,7 +42,7 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [ConvoHop](dotnet/reference/convohop.md): Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders.
 - [ConvoHop.Api](dotnet/reference/api.md): Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones.
 - [ConvoHop.Models](dotnet/reference/models.md): Generated input and result models of the ConvoHop GraphQL API.
-- [.NET operation coverage](dotnet/reference/operations.md): The .NET SDK members that send each API operation. 65 of the 68 operations that .NET packages can send have a method.
+- [.NET operation coverage](dotnet/reference/operations.md): The .NET SDK members that send each API operation. 65 of the 81 operations that .NET packages can send have a method.
 
 ## Java and Kotlin
 
@@ -53,7 +53,7 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [Java and Kotlin reference](jvm/reference/index.md): The public API of each Java and Kotlin package, generated from its declarations.
 - [com.convohop:convohop-server](jvm/reference/server.md): Java server SDK for trusted JVM backends: backend-key data-plane calls, management, webhook verification and push requests.
 - [com.convohop:convohop-server-kotlin](jvm/reference/server-kotlin.md): Kotlin coroutine extensions for the Java server SDK: suspending APIs, page flows and interruptible blocking calls.
-- [Java and Kotlin operation coverage](jvm/reference/operations.md): The Java and Kotlin SDK members that send each API operation. 65 of the 68 operations that Java and Kotlin packages can send have a method.
+- [Java and Kotlin operation coverage](jvm/reference/operations.md): The Java and Kotlin SDK members that send each API operation. 65 of the 81 operations that Java and Kotlin packages can send have a method.
 
 ## Go
 
@@ -65,7 +65,7 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [github.com/ConvoHop/sdks/go](go/reference/convohop.md): Server SDK for trusted Go backends: backend-key data-plane calls and operator management calls, with typed problems, request retries and recovery storage.
 - [github.com/ConvoHop/sdks/go/webhooks](go/reference/webhooks.md): Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.
 - [github.com/ConvoHop/sdks/go/push](go/reference/push.md): Builds APNs, FCM and Web Push requests from ConvoHop push notification events.
-- [Go operation coverage](go/reference/operations.md): The Go SDK members that send each API operation. 65 of the 68 operations that Go packages can send have a method.
+- [Go operation coverage](go/reference/operations.md): The Go SDK members that send each API operation. 65 of the 81 operations that Go packages can send have a method.
 
 ## Swift
 
@@ -185,6 +185,11 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [management.webhookDeliveries](operations/management/webhookDeliveries.md): List recent deliveries of a webhook endpoint.
 - [management.resolveRequest](operations/management/resolveRequest.md): Look up the stored outcome of an earlier management mutation by its requestId.
 - [management.getOperation](operations/management/getOperation.md): Read the state of a long-running management operation.
+- [management.agentSignupForApproval](operations/management/agentSignupForApproval.md): Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+- [management.agentSignup](operations/management/agentSignup.md): Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+- [management.agentGrants](operations/management/agentGrants.md): List an organization's agent grants with their keys, newest first.
+- [management.agentAuditEvents](operations/management/agentAuditEvents.md): List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+- [management.organizationSpend](operations/management/organizationSpend.md): Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
 - [management.createOrganization](operations/management/createOrganization.md): Create an organization.
 - [management.createDeployment](operations/management/createDeployment.md): Create a deployment in an organization. Completes asynchronously.
 - [management.createProject](operations/management/createProject.md): Create a project in a ready deployment. Completes asynchronously.
@@ -201,6 +206,14 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [management.rotateWebhookSecret](operations/management/rotateWebhookSecret.md): Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.
 - [management.disableWebhook](operations/management/disableWebhook.md): Disable a webhook endpoint.
 - [management.replayWebhookDeliveries](operations/management/replayWebhookDeliveries.md): Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.
+- [management.requestAgentSignup](operations/management/requestAgentSignup.md): Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+- [management.rejectAgentSignup](operations/management/rejectAgentSignup.md): Reject a signup request from its approval link, optionally suppressing future requests to the email.
+- [management.approveAgentSignup](operations/management/approveAgentSignup.md): Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+- [management.issueAgentKey](operations/management/issueAgentKey.md): Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+- [management.agentCredentialPermit](operations/management/agentCredentialPermit.md): Issue a permit that authorizes the agent to redeem one of its key deliveries.
+- [management.revokeAgentGrant](operations/management/revokeAgentGrant.md): Revoke an agent grant and every key issued under it.
+- [management.setSpendControls](operations/management/setSpendControls.md): Set the organization's monthly spend cap and agent purchase limit.
+- [management.purchaseAgentCredits](operations/management/purchaseAgentCredits.md): Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
 
 ## Optional
 

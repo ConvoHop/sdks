@@ -494,6 +494,47 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
           id
         }
         result {
+          agentGrant {
+            grantId
+            orgId
+            signupId
+            agentActorId
+            projectId
+            scopes
+            expiresAt
+            revokedAt
+            createdAt
+            keys {
+              operationId
+              state
+              scopes
+              expiresAt
+              keyId
+              deliveryId
+              deliveryExpiresAt
+            }
+          }
+          agentSignupStatus {
+            signupId
+            state
+            orgId
+            deploymentId
+            projectId
+            nextStep
+            scopes
+            grantExpiresAt
+            keys {
+              operationId
+              state
+              scopes
+              expiresAt
+              keyId
+              deliveryId
+              deliveryExpiresAt
+            }
+            incarnation
+            servingEpoch
+          }
           billingCheckoutSession {
             orgId
             planId
@@ -698,6 +739,28 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
             name
             status
             revision
+          }
+          organizationSpend {
+            orgId
+            planId
+            currency
+            catalogVersion
+            monthlySpendCap
+            agentPurchaseLimit
+            updatedAt
+            monthlyMinimum
+            periodStart
+            periodEnd
+            credits
+            charges
+            margin
+            stop
+            refusedMeters
+            evaluatedAt
+            usageThrough
+            validUntil
+            minimumCredit
+            chargeLimit
           }
           principal {
             principalId
@@ -2482,6 +2545,47 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
           id
         }
         result {
+          agentGrant {
+            grantId
+            orgId
+            signupId
+            agentActorId
+            projectId
+            scopes
+            expiresAt
+            revokedAt
+            createdAt
+            keys {
+              operationId
+              state
+              scopes
+              expiresAt
+              keyId
+              deliveryId
+              deliveryExpiresAt
+            }
+          }
+          agentSignupStatus {
+            signupId
+            state
+            orgId
+            deploymentId
+            projectId
+            nextStep
+            scopes
+            grantExpiresAt
+            keys {
+              operationId
+              state
+              scopes
+              expiresAt
+              keyId
+              deliveryId
+              deliveryExpiresAt
+            }
+            incarnation
+            servingEpoch
+          }
           billingCheckoutSession {
             orgId
             planId
@@ -2687,6 +2791,28 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
             status
             revision
           }
+          organizationSpend {
+            orgId
+            planId
+            currency
+            catalogVersion
+            monthlySpendCap
+            agentPurchaseLimit
+            updatedAt
+            monthlyMinimum
+            periodStart
+            periodEnd
+            credits
+            charges
+            margin
+            stop
+            refusedMeters
+            evaluatedAt
+            usageThrough
+            validUntil
+            minimumCredit
+            chargeLimit
+          }
           principal {
             principalId
             externalUserId
@@ -2824,6 +2950,206 @@ query ManagementGetOperation($context: RequestContextInput!, $input: GetOperatio
         messagePreview
       }
       blockedReason
+    }
+  }
+}
+
+query ManagementAgentSignupForApproval($context: RequestContextInput!, $input: AgentSignupForApprovalRequestInput!) {
+  agentSignupForApproval(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      signupId
+      ownerEmail
+      organizationName
+      agentName
+      purpose
+      suggestedPlan
+      suggestedScopes
+      suggestedMonthlySpendCap
+      currency
+      expiresAt
+    }
+  }
+}
+
+query ManagementAgentSignup($context: RequestContextInput!) {
+  agentSignup(context: $context) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      signupId
+      state
+      orgId
+      deploymentId
+      projectId
+      nextStep
+      scopes
+      grantExpiresAt
+      keys {
+        operationId
+        state
+        scopes
+        expiresAt
+        keyId
+        deliveryId
+        deliveryExpiresAt
+      }
+      incarnation
+      servingEpoch
+    }
+  }
+}
+
+query ManagementAgentGrants($context: RequestContextInput!, $input: AgentGrantsRequestInput!) {
+  agentGrants(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        grantId
+        orgId
+        signupId
+        agentActorId
+        projectId
+        scopes
+        expiresAt
+        revokedAt
+        createdAt
+        keys {
+          operationId
+          state
+          scopes
+          expiresAt
+          keyId
+          deliveryId
+          deliveryExpiresAt
+        }
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}
+
+query ManagementAgentAuditEvents($context: RequestContextInput!, $input: AgentAuditEventsRequestInput!) {
+  agentAuditEvents(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      items {
+        eventId
+        orgId
+        grantId
+        actorKind
+        actorId
+        kind
+        details
+        occurredAt
+      }
+      complete
+      refreshRequired
+      nextCursor
+    }
+  }
+}
+
+query ManagementOrganizationSpend($context: RequestContextInput!, $input: OrganizationSpendRequestInput!) {
+  organizationSpend(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      planId
+      currency
+      catalogVersion
+      monthlySpendCap
+      agentPurchaseLimit
+      updatedAt
+      monthlyMinimum
+      periodStart
+      periodEnd
+      credits
+      charges
+      margin
+      stop
+      refusedMeters
+      evaluatedAt
+      usageThrough
+      validUntil
+      minimumCredit
+      chargeLimit
     }
   }
 }
@@ -3872,6 +4198,280 @@ mutation ManagementReplayWebhookDeliveries($context: RequestContextInput!, $inpu
       replayedDeliveries
       skippedDeliveries
       messagePreview
+    }
+  }
+}
+
+mutation ManagementRequestAgentSignup($context: RequestContextInput!, $input: RequestAgentSignupRequestInput!) {
+  requestAgentSignup(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      signupId
+      confirmationCode
+      expiresAt
+      pollAfterSeconds
+    }
+  }
+}
+
+mutation ManagementRejectAgentSignup($context: RequestContextInput!, $input: RejectAgentSignupRequestInput!) {
+  rejectAgentSignup(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      signupId
+      state
+      orgId
+      deploymentId
+      projectId
+      nextStep
+      scopes
+      grantExpiresAt
+      keys {
+        operationId
+        state
+        scopes
+        expiresAt
+        keyId
+        deliveryId
+        deliveryExpiresAt
+      }
+      incarnation
+      servingEpoch
+    }
+  }
+}
+
+mutation ManagementApproveAgentSignup($context: RequestContextInput!, $input: ApproveAgentSignupRequestInput!) {
+  approveAgentSignup(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      signupId
+      state
+      orgId
+      deploymentId
+      projectId
+      nextStep
+      scopes
+      grantExpiresAt
+      keys {
+        operationId
+        state
+        scopes
+        expiresAt
+        keyId
+        deliveryId
+        deliveryExpiresAt
+      }
+      incarnation
+      servingEpoch
+    }
+  }
+}
+
+mutation ManagementIssueAgentKey($context: RequestContextInput!, $input: IssueAgentKeyRequestInput!) {
+  issueAgentKey(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      operationId
+      state
+      scopes
+      expiresAt
+      keyId
+      deliveryId
+      deliveryExpiresAt
+    }
+  }
+}
+
+mutation ManagementAgentCredentialPermit($context: RequestContextInput!, $input: AgentCredentialPermitRequestInput!) {
+  agentCredentialPermit(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result
+  }
+}
+
+mutation ManagementRevokeAgentGrant($context: RequestContextInput!, $input: RevokeAgentGrantRequestInput!) {
+  revokeAgentGrant(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      grantId
+      orgId
+      signupId
+      agentActorId
+      projectId
+      scopes
+      expiresAt
+      revokedAt
+      createdAt
+      keys {
+        operationId
+        state
+        scopes
+        expiresAt
+        keyId
+        deliveryId
+        deliveryExpiresAt
+      }
+    }
+  }
+}
+
+mutation ManagementSetSpendControls($context: RequestContextInput!, $input: SetSpendControlsRequestInput!) {
+  setSpendControls(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      orgId
+      planId
+      currency
+      catalogVersion
+      monthlySpendCap
+      agentPurchaseLimit
+      updatedAt
+      monthlyMinimum
+      periodStart
+      periodEnd
+      credits
+      charges
+      margin
+      stop
+      refusedMeters
+      evaluatedAt
+      usageThrough
+      validUntil
+      minimumCredit
+      chargeLimit
+    }
+  }
+}
+
+mutation ManagementPurchaseAgentCredits($context: RequestContextInput!, $input: PurchaseAgentCreditsRequestInput!) {
+  purchaseAgentCredits(context: $context, input: $input) {
+    status
+    requestId
+    serverTime
+    receiptId
+    committedAt
+    replayed
+    operation {
+      operationId
+      owner
+      href
+      state
+    }
+    resourceRef {
+      kind
+      id
+    }
+    result {
+      paymentId
+      amount
+      currency
+      state
     }
   }
 }

@@ -126,6 +126,9 @@ extension GraphQLIdempotency {
     /// Authorized by a single-use permit. Retry with the same requestId and permit.
     public static let permitBound = GraphQLIdempotency(
         name: "permitBound", retry: .sameRequest, resolvable: false, retryBudget: GraphQLRetryBudget(maxAttempts: 3, windowMs: 60000))
+    /// Replay with the same requestId and input; resolveRequest cannot read the outcome.
+    public static let replayOnly = GraphQLIdempotency(
+        name: "replayOnly", retry: .sameRequest, resolvable: false, retryBudget: GraphQLRetryBudget(maxAttempts: 3, windowMs: 60000))
     /// Read-only. Repeat freely.
     public static let safe = GraphQLIdempotency(
         name: "safe", retry: .`repeat`, resolvable: false, retryBudget: nil)

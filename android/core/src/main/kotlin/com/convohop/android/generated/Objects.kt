@@ -32,6 +32,147 @@ public data class ActorRef(
     }
 }
 
+public data class AgentGrant(
+    public val grantId: String,
+    public val orgId: String,
+    public val signupId: String,
+    public val agentActorId: String,
+    public val projectId: String? = null,
+    public val scopes: List<String>,
+    public val expiresAt: String,
+    public val revokedAt: String? = null,
+    public val createdAt: String,
+    public val keys: List<AgentKey>,
+) {
+    /** The JSON form, with every field and explicit nulls. */
+    public fun toJson(): JsonObject =
+        JsonObject(
+            linkedMapOf<String, JsonElement>(
+                "grantId" to Scalars.encodeUUID(this.grantId),
+                "orgId" to Scalars.encodeUUID(this.orgId),
+                "signupId" to Scalars.encodeUUID(this.signupId),
+                "agentActorId" to Scalars.encodeUUID(this.agentActorId),
+                "projectId" to (this.projectId?.let { v0 -> Scalars.encodeUUID(v0) } ?: JsonNull),
+                "scopes" to JsonArray(this.scopes.map { v0 -> JsonPrimitive(v0) }),
+                "expiresAt" to JsonPrimitive(this.expiresAt),
+                "revokedAt" to (this.revokedAt?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "createdAt" to JsonPrimitive(this.createdAt),
+                "keys" to JsonArray(this.keys.map { v0 -> v0.toJson() }),
+            ),
+        )
+
+    public companion object {
+        /** Decodes [element], throwing [ShapeException] when it does not match AgentGrant. Unknown fields are ignored. */
+        public fun fromJson(element: JsonElement, path: String = "AgentGrant"): AgentGrant {
+            val obj = element.asObject(path)
+            return AgentGrant(
+                grantId = Scalars.decodeUUID(obj.field("grantId", path), "${path}.grantId"),
+                orgId = Scalars.decodeUUID(obj.field("orgId", path), "${path}.orgId"),
+                signupId = Scalars.decodeUUID(obj.field("signupId", path), "${path}.signupId"),
+                agentActorId = Scalars.decodeUUID(obj.field("agentActorId", path), "${path}.agentActorId"),
+                projectId = obj.field("projectId", path).decodeNullable("${path}.projectId") { v0, p0 -> Scalars.decodeUUID(v0, p0) },
+                scopes = obj.field("scopes", path).decodeList("${path}.scopes") { v0, p0 -> v0.asString(p0) },
+                expiresAt = obj.field("expiresAt", path).asString("${path}.expiresAt"),
+                revokedAt = obj.field("revokedAt", path).decodeNullable("${path}.revokedAt") { v0, p0 -> v0.asString(p0) },
+                createdAt = obj.field("createdAt", path).asString("${path}.createdAt"),
+                keys = obj.field("keys", path).decodeList("${path}.keys") { v0, p0 -> AgentKey.fromJson(v0, p0) },
+            )
+        }
+    }
+}
+
+public data class AgentKey(
+    public val operationId: String,
+    public val state: String,
+    public val scopes: List<String>,
+    public val expiresAt: String,
+    public val keyId: String? = null,
+    public val deliveryId: String? = null,
+    public val deliveryExpiresAt: String? = null,
+) {
+    /** The JSON form, with every field and explicit nulls. */
+    public fun toJson(): JsonObject =
+        JsonObject(
+            linkedMapOf<String, JsonElement>(
+                "operationId" to Scalars.encodeUUID(this.operationId),
+                "state" to JsonPrimitive(this.state),
+                "scopes" to JsonArray(this.scopes.map { v0 -> JsonPrimitive(v0) }),
+                "expiresAt" to JsonPrimitive(this.expiresAt),
+                "keyId" to (this.keyId?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "deliveryId" to (this.deliveryId?.let { v0 -> Scalars.encodeUUID(v0) } ?: JsonNull),
+                "deliveryExpiresAt" to (this.deliveryExpiresAt?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+            ),
+        )
+
+    public companion object {
+        /** Decodes [element], throwing [ShapeException] when it does not match AgentKey. Unknown fields are ignored. */
+        public fun fromJson(element: JsonElement, path: String = "AgentKey"): AgentKey {
+            val obj = element.asObject(path)
+            return AgentKey(
+                operationId = Scalars.decodeUUID(obj.field("operationId", path), "${path}.operationId"),
+                state = obj.field("state", path).asString("${path}.state"),
+                scopes = obj.field("scopes", path).decodeList("${path}.scopes") { v0, p0 -> v0.asString(p0) },
+                expiresAt = obj.field("expiresAt", path).asString("${path}.expiresAt"),
+                keyId = obj.field("keyId", path).decodeNullable("${path}.keyId") { v0, p0 -> v0.asString(p0) },
+                deliveryId = obj.field("deliveryId", path).decodeNullable("${path}.deliveryId") { v0, p0 -> Scalars.decodeUUID(v0, p0) },
+                deliveryExpiresAt = obj.field("deliveryExpiresAt", path).decodeNullable("${path}.deliveryExpiresAt") { v0, p0 -> v0.asString(p0) },
+            )
+        }
+    }
+}
+
+public data class AgentSignupStatus(
+    public val signupId: String,
+    public val state: String,
+    public val orgId: String? = null,
+    public val deploymentId: String? = null,
+    public val projectId: String? = null,
+    public val nextStep: String? = null,
+    public val scopes: List<String>,
+    public val grantExpiresAt: String? = null,
+    public val keys: List<AgentKey>,
+    public val incarnation: String? = null,
+    public val servingEpoch: String? = null,
+) {
+    /** The JSON form, with every field and explicit nulls. */
+    public fun toJson(): JsonObject =
+        JsonObject(
+            linkedMapOf<String, JsonElement>(
+                "signupId" to Scalars.encodeUUID(this.signupId),
+                "state" to JsonPrimitive(this.state),
+                "orgId" to (this.orgId?.let { v0 -> Scalars.encodeUUID(v0) } ?: JsonNull),
+                "deploymentId" to (this.deploymentId?.let { v0 -> Scalars.encodeUUID(v0) } ?: JsonNull),
+                "projectId" to (this.projectId?.let { v0 -> Scalars.encodeUUID(v0) } ?: JsonNull),
+                "nextStep" to (this.nextStep?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "scopes" to JsonArray(this.scopes.map { v0 -> JsonPrimitive(v0) }),
+                "grantExpiresAt" to (this.grantExpiresAt?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "keys" to JsonArray(this.keys.map { v0 -> v0.toJson() }),
+                "incarnation" to (this.incarnation?.let { v0 -> Scalars.encodeUUID(v0) } ?: JsonNull),
+                "servingEpoch" to (this.servingEpoch?.let { v0 -> Scalars.encodeDecimal(v0) } ?: JsonNull),
+            ),
+        )
+
+    public companion object {
+        /** Decodes [element], throwing [ShapeException] when it does not match AgentSignupStatus. Unknown fields are ignored. */
+        public fun fromJson(element: JsonElement, path: String = "AgentSignupStatus"): AgentSignupStatus {
+            val obj = element.asObject(path)
+            return AgentSignupStatus(
+                signupId = Scalars.decodeUUID(obj.field("signupId", path), "${path}.signupId"),
+                state = obj.field("state", path).asString("${path}.state"),
+                orgId = obj.field("orgId", path).decodeNullable("${path}.orgId") { v0, p0 -> Scalars.decodeUUID(v0, p0) },
+                deploymentId = obj.field("deploymentId", path).decodeNullable("${path}.deploymentId") { v0, p0 -> Scalars.decodeUUID(v0, p0) },
+                projectId = obj.field("projectId", path).decodeNullable("${path}.projectId") { v0, p0 -> Scalars.decodeUUID(v0, p0) },
+                nextStep = obj.field("nextStep", path).decodeNullable("${path}.nextStep") { v0, p0 -> v0.asString(p0) },
+                scopes = obj.field("scopes", path).decodeList("${path}.scopes") { v0, p0 -> v0.asString(p0) },
+                grantExpiresAt = obj.field("grantExpiresAt", path).decodeNullable("${path}.grantExpiresAt") { v0, p0 -> v0.asString(p0) },
+                keys = obj.field("keys", path).decodeList("${path}.keys") { v0, p0 -> AgentKey.fromJson(v0, p0) },
+                incarnation = obj.field("incarnation", path).decodeNullable("${path}.incarnation") { v0, p0 -> Scalars.decodeUUID(v0, p0) },
+                servingEpoch = obj.field("servingEpoch", path).decodeNullable("${path}.servingEpoch") { v0, p0 -> Scalars.decodeDecimal(v0, p0) },
+            )
+        }
+    }
+}
+
 public data class AlertLiveSessionPayload(
     public val status: String,
     public val requestId: String,
@@ -2791,6 +2932,85 @@ public data class Organization(
     }
 }
 
+public data class OrganizationSpend(
+    public val orgId: String,
+    public val planId: String,
+    public val currency: String,
+    public val catalogVersion: String,
+    public val monthlySpendCap: String? = null,
+    public val agentPurchaseLimit: String? = null,
+    public val updatedAt: String? = null,
+    public val monthlyMinimum: String? = null,
+    public val periodStart: String? = null,
+    public val periodEnd: String? = null,
+    public val credits: String? = null,
+    public val charges: String? = null,
+    public val margin: String? = null,
+    public val stop: String? = null,
+    public val refusedMeters: List<String>,
+    public val evaluatedAt: String? = null,
+    public val usageThrough: String? = null,
+    public val validUntil: String? = null,
+    public val minimumCredit: String? = null,
+    public val chargeLimit: String? = null,
+) {
+    /** The JSON form, with every field and explicit nulls. */
+    public fun toJson(): JsonObject =
+        JsonObject(
+            linkedMapOf<String, JsonElement>(
+                "orgId" to Scalars.encodeUUID(this.orgId),
+                "planId" to JsonPrimitive(this.planId),
+                "currency" to JsonPrimitive(this.currency),
+                "catalogVersion" to JsonPrimitive(this.catalogVersion),
+                "monthlySpendCap" to (this.monthlySpendCap?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "agentPurchaseLimit" to (this.agentPurchaseLimit?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "updatedAt" to (this.updatedAt?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "monthlyMinimum" to (this.monthlyMinimum?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "periodStart" to (this.periodStart?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "periodEnd" to (this.periodEnd?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "credits" to (this.credits?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "charges" to (this.charges?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "margin" to (this.margin?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "stop" to (this.stop?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "refusedMeters" to JsonArray(this.refusedMeters.map { v0 -> JsonPrimitive(v0) }),
+                "evaluatedAt" to (this.evaluatedAt?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "usageThrough" to (this.usageThrough?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "validUntil" to (this.validUntil?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "minimumCredit" to (this.minimumCredit?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+                "chargeLimit" to (this.chargeLimit?.let { v0 -> JsonPrimitive(v0) } ?: JsonNull),
+            ),
+        )
+
+    public companion object {
+        /** Decodes [element], throwing [ShapeException] when it does not match OrganizationSpend. Unknown fields are ignored. */
+        public fun fromJson(element: JsonElement, path: String = "OrganizationSpend"): OrganizationSpend {
+            val obj = element.asObject(path)
+            return OrganizationSpend(
+                orgId = Scalars.decodeUUID(obj.field("orgId", path), "${path}.orgId"),
+                planId = obj.field("planId", path).asString("${path}.planId"),
+                currency = obj.field("currency", path).asString("${path}.currency"),
+                catalogVersion = obj.field("catalogVersion", path).asString("${path}.catalogVersion"),
+                monthlySpendCap = obj.field("monthlySpendCap", path).decodeNullable("${path}.monthlySpendCap") { v0, p0 -> v0.asString(p0) },
+                agentPurchaseLimit = obj.field("agentPurchaseLimit", path).decodeNullable("${path}.agentPurchaseLimit") { v0, p0 -> v0.asString(p0) },
+                updatedAt = obj.field("updatedAt", path).decodeNullable("${path}.updatedAt") { v0, p0 -> v0.asString(p0) },
+                monthlyMinimum = obj.field("monthlyMinimum", path).decodeNullable("${path}.monthlyMinimum") { v0, p0 -> v0.asString(p0) },
+                periodStart = obj.field("periodStart", path).decodeNullable("${path}.periodStart") { v0, p0 -> v0.asString(p0) },
+                periodEnd = obj.field("periodEnd", path).decodeNullable("${path}.periodEnd") { v0, p0 -> v0.asString(p0) },
+                credits = obj.field("credits", path).decodeNullable("${path}.credits") { v0, p0 -> v0.asString(p0) },
+                charges = obj.field("charges", path).decodeNullable("${path}.charges") { v0, p0 -> v0.asString(p0) },
+                margin = obj.field("margin", path).decodeNullable("${path}.margin") { v0, p0 -> v0.asString(p0) },
+                stop = obj.field("stop", path).decodeNullable("${path}.stop") { v0, p0 -> v0.asString(p0) },
+                refusedMeters = obj.field("refusedMeters", path).decodeList("${path}.refusedMeters") { v0, p0 -> v0.asString(p0) },
+                evaluatedAt = obj.field("evaluatedAt", path).decodeNullable("${path}.evaluatedAt") { v0, p0 -> v0.asString(p0) },
+                usageThrough = obj.field("usageThrough", path).decodeNullable("${path}.usageThrough") { v0, p0 -> v0.asString(p0) },
+                validUntil = obj.field("validUntil", path).decodeNullable("${path}.validUntil") { v0, p0 -> v0.asString(p0) },
+                minimumCredit = obj.field("minimumCredit", path).decodeNullable("${path}.minimumCredit") { v0, p0 -> v0.asString(p0) },
+                chargeLimit = obj.field("chargeLimit", path).decodeNullable("${path}.chargeLimit") { v0, p0 -> v0.asString(p0) },
+            )
+        }
+    }
+}
+
 public data class Principal(
     public val principalId: String,
     public val externalUserId: String,
@@ -3135,6 +3355,8 @@ public data class ResourceRef(
 
 /** Exactly one typed field contains the retained, currently authorized receipt result. */
 public data class RetainedResult(
+    public val agentGrant: AgentGrant? = null,
+    public val agentSignupStatus: AgentSignupStatus? = null,
     public val billingCheckoutSession: BillingCheckoutSession? = null,
     public val billingPortalSession: BillingPortalSession? = null,
     public val broadcastPermissionChanged: BroadcastPermissionChanged? = null,
@@ -3153,6 +3375,7 @@ public data class RetainedResult(
     public val message: Message? = null,
     public val messageAck: MessageAck? = null,
     public val organization: Organization? = null,
+    public val organizationSpend: OrganizationSpend? = null,
     public val principal: Principal? = null,
     public val readReceipt: ReadReceipt? = null,
     public val sessionBootstrap: SessionBootstrap? = null,
@@ -3163,6 +3386,8 @@ public data class RetainedResult(
     public fun toJson(): JsonObject =
         JsonObject(
             linkedMapOf<String, JsonElement>(
+                "agentGrant" to (this.agentGrant?.let { v0 -> v0.toJson() } ?: JsonNull),
+                "agentSignupStatus" to (this.agentSignupStatus?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "billingCheckoutSession" to (this.billingCheckoutSession?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "billingPortalSession" to (this.billingPortalSession?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "broadcastPermissionChanged" to (this.broadcastPermissionChanged?.let { v0 -> v0.toJson() } ?: JsonNull),
@@ -3181,6 +3406,7 @@ public data class RetainedResult(
                 "message" to (this.message?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "messageAck" to (this.messageAck?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "organization" to (this.organization?.let { v0 -> v0.toJson() } ?: JsonNull),
+                "organizationSpend" to (this.organizationSpend?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "principal" to (this.principal?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "readReceipt" to (this.readReceipt?.let { v0 -> v0.toJson() } ?: JsonNull),
                 "sessionBootstrap" to (this.sessionBootstrap?.let { v0 -> v0.toJson() } ?: JsonNull),
@@ -3194,6 +3420,8 @@ public data class RetainedResult(
         public fun fromJson(element: JsonElement, path: String = "RetainedResult"): RetainedResult {
             val obj = element.asObject(path)
             return RetainedResult(
+                agentGrant = obj.field("agentGrant", path).decodeNullable("${path}.agentGrant") { v0, p0 -> AgentGrant.fromJson(v0, p0) },
+                agentSignupStatus = obj.field("agentSignupStatus", path).decodeNullable("${path}.agentSignupStatus") { v0, p0 -> AgentSignupStatus.fromJson(v0, p0) },
                 billingCheckoutSession = obj.field("billingCheckoutSession", path).decodeNullable("${path}.billingCheckoutSession") { v0, p0 -> BillingCheckoutSession.fromJson(v0, p0) },
                 billingPortalSession = obj.field("billingPortalSession", path).decodeNullable("${path}.billingPortalSession") { v0, p0 -> BillingPortalSession.fromJson(v0, p0) },
                 broadcastPermissionChanged = obj.field("broadcastPermissionChanged", path).decodeNullable("${path}.broadcastPermissionChanged") { v0, p0 -> BroadcastPermissionChanged.fromJson(v0, p0) },
@@ -3212,6 +3440,7 @@ public data class RetainedResult(
                 message = obj.field("message", path).decodeNullable("${path}.message") { v0, p0 -> Message.fromJson(v0, p0) },
                 messageAck = obj.field("messageAck", path).decodeNullable("${path}.messageAck") { v0, p0 -> MessageAck.fromJson(v0, p0) },
                 organization = obj.field("organization", path).decodeNullable("${path}.organization") { v0, p0 -> Organization.fromJson(v0, p0) },
+                organizationSpend = obj.field("organizationSpend", path).decodeNullable("${path}.organizationSpend") { v0, p0 -> OrganizationSpend.fromJson(v0, p0) },
                 principal = obj.field("principal", path).decodeNullable("${path}.principal") { v0, p0 -> Principal.fromJson(v0, p0) },
                 readReceipt = obj.field("readReceipt", path).decodeNullable("${path}.readReceipt") { v0, p0 -> ReadReceipt.fromJson(v0, p0) },
                 sessionBootstrap = obj.field("sessionBootstrap", path).decodeNullable("${path}.sessionBootstrap") { v0, p0 -> SessionBootstrap.fromJson(v0, p0) },
@@ -3224,6 +3453,8 @@ public data class RetainedResult(
     /** Redacts credentials so logs and crash reports never carry them. */
     override fun toString(): String =
         "RetainedResult(" +
+        "agentGrant=${this.agentGrant}, " +
+        "agentSignupStatus=${this.agentSignupStatus}, " +
         "billingCheckoutSession=${this.billingCheckoutSession}, " +
         "billingPortalSession=${this.billingPortalSession}, " +
         "broadcastPermissionChanged=${this.broadcastPermissionChanged}, " +
@@ -3242,6 +3473,7 @@ public data class RetainedResult(
         "message=${this.message}, " +
         "messageAck=${this.messageAck}, " +
         "organization=${this.organization}, " +
+        "organizationSpend=${this.organizationSpend}, " +
         "principal=${this.principal}, " +
         "readReceipt=${this.readReceipt}, " +
         "sessionBootstrap=${this.sessionBootstrap}, " +

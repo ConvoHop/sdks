@@ -17,7 +17,11 @@ const typing = { conversationId: crypto.randomUUID(), isTyping: true };
 
 test("the core catalog carries every operation's idempotency class", () => {
   const classes = new Set(Object.values(operationCatalog).map(entry => entry.idempotency));
-  assert.deepEqual([...classes].sort(), ["ephemeral", "idempotent", "permitBound", "safe", "singleUse"]);
+  assert.deepEqual([...classes].sort(), ["ephemeral", "idempotent", "permitBound", "replayOnly", "safe", "singleUse"]);
+  assert.deepEqual(Object.keys(operationCatalog).filter(id => operationCatalog[id].idempotency === "replayOnly").sort(), [
+    "management.agentCredentialPermit", "management.issueAgentKey", "management.purchaseAgentCredits",
+    "management.rejectAgentSignup", "management.requestAgentSignup",
+  ], "only agent-signup operations whose requests the authority cannot look up are replay-only");
   assert.equal(operationCatalog["communication.typing"].kind, "mutation");
   assert.equal(operationCatalog["communication.typing"].idempotency, "ephemeral");
   for (const entry of Object.values(operationCatalog)) if (entry.kind !== "mutation") assert.equal(entry.idempotency, "safe");

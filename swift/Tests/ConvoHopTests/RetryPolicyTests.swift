@@ -133,6 +133,37 @@ final class RetryPolicyTests: XCTestCase {
         }
     }
 
+    /// Spend stops end realtime; unverified spend reconnects like `RATE_LIMITED`, waiting at least its `retryAfter`.
+    func testSpendStopsEndAndUnverifiedSpendRetries() throws {
+        XCTAssertFalse(RetryPolicy.retryableCode("CREDITS_EXHAUSTED"))
+        XCTAssertFalse(RetryPolicy.retryableCode("SPEND_CAP_REACHED"))
+        XCTAssertTrue(RetryPolicy.retryableCode("SPEND_UNVERIFIED"))
+
+        let stops: [(String, ConvoHopErrorCode)] = [
+            ("CREDITS_EXHAUSTED meter=messages", .creditsExhausted), ("SPEND_CAP_REACHED meter=mau", .spendCapReached),
+        ]
+        for (reason, code) in stops {
+            let stop = try XCTUnwrap(RetryPolicy.closeProblem(code: 4402, reason: reason, requestId: "r"), reason)
+            XCTAssertEqual(stop.code, code, reason)
+            XCTAssertEqual(stop.status, 402, reason)
+            XCTAssertNil(stop.retryAfter, reason)
+            XCTAssertEqual(RetryPolicy.reconnectAction(stop), .stop, reason)
+            XCTAssertEqual(RetryPolicy.reconnectAction(Self.problem(code, status: 402)), .stop, reason)
+        }
+
+        let unverified = try XCTUnwrap(
+            RetryPolicy.closeProblem(code: 4503, reason: "SPEND_UNVERIFIED retryAfter=30 meter=mau", requestId: "r"))
+        XCTAssertEqual(unverified.code, .spendUnverified)
+        XCTAssertEqual(unverified.status, 503)
+        XCTAssertEqual(unverified.retryAfter, 30)
+        XCTAssertEqual(RetryPolicy.reconnectAction(unverified), .retry)
+        XCTAssertEqual(RetryPolicy.reconnectAction(Self.problem(.spendUnverified, status: 503, retryAfter: 5)), .retry)
+
+        // Without a reason, neither close code names a problem, so the stream reconnects with backoff.
+        XCTAssertNil(RetryPolicy.closeProblem(code: 4402, reason: "", requestId: "r"))
+        XCTAssertNil(RetryPolicy.closeProblem(code: 4503, reason: "", requestId: "r"))
+    }
+
     func testAnAuthorizationCloseWithoutACodeIsUnauthenticated() throws {
         for code in [4400, 4401, 4403, 4408, 4409] {
             for reason in ["", "Forbidden", "rate_limited"] {

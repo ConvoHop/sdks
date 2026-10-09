@@ -166,6 +166,29 @@
         "nested",
         "shape"
       ]
+    },
+    "beta.requestAccess": {
+      "plane": "beta",
+      "kind": "mutation",
+      "field": "requestAccess",
+      "operationName": "BetaRequestAccess",
+      "query": "mutation BetaRequestAccess($context: ContextInput!, $input: RequestAccessInput!) {\n  requestAccess(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
+      "resultType": "Receipt!",
+      "inputFields": [
+        "email",
+        "challenge"
+      ]
+    },
+    "beta.claimWidget": {
+      "plane": "beta",
+      "kind": "mutation",
+      "field": "claimWidget",
+      "operationName": "BetaClaimWidget",
+      "query": "mutation BetaClaimWidget($context: ContextInput!, $input: ClaimWidgetInput!) {\n  claimWidget(context: $context, input: $input) {\n    id\n    label\n    state\n    revision\n  }\n}",
+      "resultType": "Widget!",
+      "inputFields": [
+        "widgetId"
+      ]
     }
   }
 }

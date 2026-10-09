@@ -18,6 +18,95 @@ final class ActorRef {
 }
 ```
 
+### `AgentGrant` class
+
+```dart
+final class AgentGrant {
+  const AgentGrant({
+    required String grantId,
+    required String orgId,
+    required String signupId,
+    required String agentActorId,
+    String? projectId,
+    required List<String> scopes,
+    required String expiresAt,
+    String? revokedAt,
+    required String createdAt,
+    required List<AgentKey> keys,
+  });
+  factory AgentGrant.fromJson(Object? json);
+  final String grantId;
+  final String orgId;
+  final String signupId;
+  final String agentActorId;
+  final String? projectId;
+  final List<String> scopes;
+  final String expiresAt;
+  final String? revokedAt;
+  final String createdAt;
+  final List<AgentKey> keys;
+  Map<String, Object?> toJson();
+}
+```
+
+### `AgentKey` class
+
+```dart
+final class AgentKey {
+  const AgentKey({
+    required String operationId,
+    required String state,
+    required List<String> scopes,
+    required String expiresAt,
+    String? keyId,
+    String? deliveryId,
+    String? deliveryExpiresAt,
+  });
+  factory AgentKey.fromJson(Object? json);
+  final String operationId;
+  final String state;
+  final List<String> scopes;
+  final String expiresAt;
+  final String? keyId;
+  final String? deliveryId;
+  final String? deliveryExpiresAt;
+  Map<String, Object?> toJson();
+}
+```
+
+### `AgentSignupStatus` class
+
+```dart
+final class AgentSignupStatus {
+  const AgentSignupStatus({
+    required String signupId,
+    required String state,
+    String? orgId,
+    String? deploymentId,
+    String? projectId,
+    String? nextStep,
+    required List<String> scopes,
+    String? grantExpiresAt,
+    required List<AgentKey> keys,
+    String? incarnation,
+    String? servingEpoch,
+  });
+  factory AgentSignupStatus.fromJson(Object? json);
+  final String signupId;
+  final String state;
+  final String? orgId;
+  final String? deploymentId;
+  final String? projectId;
+  final String? nextStep;
+  final List<String> scopes;
+  final String? grantExpiresAt;
+  final List<AgentKey> keys;
+  final String? incarnation;
+  final String? servingEpoch;
+  Map<String, Object?> toJson();
+}
+```
+
 ### `AggregateFailure` class
 
 ```dart
@@ -1537,7 +1626,9 @@ Future<void> reconnect()
 
 Reconnects now, for example when connectivity returns, instead of
 waiting for the backoff. After `ConversationStoreStatus.failed`, tries
-again.
+again. It never reconnects sooner than the authority's `retryAfter`:
+until that has passed, it does nothing and the scheduled reconnect
+stands.
 
 Sends [`communication.getConversation`](../../operations/communication/getConversation.md), [`communication.messages`](../../operations/communication/messages.md), [`communication.getMessage`](../../operations/communication/getMessage.md), [`communication.events`](../../operations/communication/events.md), [`communication.receipts`](../../operations/communication/receipts.md), [`communication.resolveRequest`](../../operations/communication/resolveRequest.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
 
@@ -2868,6 +2959,17 @@ An error code and how to handle it.
 ```dart
 abstract final class ErrorCodes {
   static const String admissionLimit;
+  static const String agenticNotConfigured;
+  static const String agentConfirmationCodeInvalid;
+  static const String agentGrantExpired;
+  static const String agentGrantRevoked;
+  static const String agentKeyLimit;
+  static const String agentPurchaseLimitExceeded;
+  static const String agentScopeNotGranted;
+  static const String agentSignupClosed;
+  static const String agentSignupEmailRejected;
+  static const String agentSignupNotReady;
+  static const String agentSignupSuppressed;
   static const String alreadyConnected;
   static const String alreadyExists;
   static const String authorityUnavailable;
@@ -2885,6 +2987,10 @@ abstract final class ErrorCodes {
   static const String credentialExpired;
   static const String credentialRefreshRequired;
   static const String credentialRequired;
+  static const String creditsExhausted;
+  static const String creditsRequireMeteredPlan;
+  static const String creditAmountOutOfRange;
+  static const String creditGrantLimitReached;
   static const String cursorAhead;
   static const String cursorExpired;
   static const String cursorInvalid;
@@ -2921,6 +3027,8 @@ abstract final class ErrorCodes {
   static const String outcomeUnknown;
   static const String pageItemTooLarge;
   static const String participationMismatch;
+  static const String paymentDeclined;
+  static const String paymentRailNotConfigured;
   static const String permitExpired;
   static const String planLimitExceeded;
   static const String quotaExceeded;
@@ -2941,6 +3049,8 @@ abstract final class ErrorCodes {
   static const String sessionRefreshRejected;
   static const String sessionRefreshRequired;
   static const String sessionRefreshUnverified;
+  static const String spendCapReached;
+  static const String spendUnverified;
   static const String transportUnknown;
   static const String unauthenticated;
   static const String webhookDestinationDenied;
@@ -3295,6 +3405,7 @@ abstract final class IdempotencyClasses {
   static const IdempotencySpec ephemeral;
   static const IdempotencySpec idempotent;
   static const IdempotencySpec permitBound;
+  static const IdempotencySpec replayOnly;
   static const IdempotencySpec safe;
   static const IdempotencySpec singleUse;
 }
@@ -5305,6 +5416,57 @@ final class Organization {
 }
 ```
 
+### `OrganizationSpend` class
+
+```dart
+final class OrganizationSpend {
+  const OrganizationSpend({
+    required String orgId,
+    required String planId,
+    required String currency,
+    required String catalogVersion,
+    String? monthlySpendCap,
+    String? agentPurchaseLimit,
+    String? updatedAt,
+    String? monthlyMinimum,
+    String? periodStart,
+    String? periodEnd,
+    String? credits,
+    String? charges,
+    String? margin,
+    String? stop,
+    required List<String> refusedMeters,
+    String? evaluatedAt,
+    String? usageThrough,
+    String? validUntil,
+    String? minimumCredit,
+    String? chargeLimit,
+  });
+  factory OrganizationSpend.fromJson(Object? json);
+  final String orgId;
+  final String planId;
+  final String currency;
+  final String catalogVersion;
+  final String? monthlySpendCap;
+  final String? agentPurchaseLimit;
+  final String? updatedAt;
+  final String? monthlyMinimum;
+  final String? periodStart;
+  final String? periodEnd;
+  final String? credits;
+  final String? charges;
+  final String? margin;
+  final String? stop;
+  final List<String> refusedMeters;
+  final String? evaluatedAt;
+  final String? usageThrough;
+  final String? validUntil;
+  final String? minimumCredit;
+  final String? chargeLimit;
+  Map<String, Object?> toJson();
+}
+```
+
 ### `OutboxItem` class
 
 ```dart
@@ -5882,6 +6044,8 @@ final class ResourceRef {
 ```dart
 final class RetainedResult {
   const RetainedResult({
+    AgentGrant? agentGrant,
+    AgentSignupStatus? agentSignupStatus,
     BillingCheckoutSession? billingCheckoutSession,
     BillingPortalSession? billingPortalSession,
     BroadcastPermissionChanged? broadcastPermissionChanged,
@@ -5900,6 +6064,7 @@ final class RetainedResult {
     Message? message,
     MessageAck? messageAck,
     Organization? organization,
+    OrganizationSpend? organizationSpend,
     Principal? principal,
     ReadReceipt? readReceipt,
     SessionBootstrap? sessionBootstrap,
@@ -5907,6 +6072,8 @@ final class RetainedResult {
     Map<String, Object?>? signedProof,
   });
   factory RetainedResult.fromJson(Object? json);
+  final AgentGrant? agentGrant;
+  final AgentSignupStatus? agentSignupStatus;
   final BillingCheckoutSession? billingCheckoutSession;
   final BillingPortalSession? billingPortalSession;
   final BroadcastPermissionChanged? broadcastPermissionChanged;
@@ -5925,6 +6092,7 @@ final class RetainedResult {
   final Message? message;
   final MessageAck? messageAck;
   final Organization? organization;
+  final OrganizationSpend? organizationSpend;
   final Principal? principal;
   final ReadReceipt? readReceipt;
   final SessionBootstrap? sessionBootstrap;

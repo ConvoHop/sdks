@@ -21,6 +21,8 @@ namespace ConvoHop.Generated
     [global::System.Text.Json.Serialization.JsonSerializable(typeof(global::ConvoHop.Models.WidgetsPayload))]
     [global::System.Text.Json.Serialization.JsonSerializable(typeof(global::ConvoHop.Models.WidgetsInput))]
     [global::System.Text.Json.Serialization.JsonSerializable(typeof(global::ConvoHop.Models.ShapeInput))]
+    [global::System.Text.Json.Serialization.JsonSerializable(typeof(global::ConvoHop.Models.RequestAccessInput))]
+    [global::System.Text.Json.Serialization.JsonSerializable(typeof(global::ConvoHop.Models.ClaimWidgetInput))]
     [global::System.Text.Json.Serialization.JsonSerializable(typeof(global::ConvoHop.Models.CreateWidgetInput))]
     [global::System.Text.Json.Serialization.JsonSerializable(typeof(int?))]
     internal sealed partial class ConvoHopJsonContext : global::System.Text.Json.Serialization.JsonSerializerContext

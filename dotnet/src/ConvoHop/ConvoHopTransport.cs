@@ -178,6 +178,11 @@ namespace ConvoHop
                 throw new ConvoHopException(ErrorCodes.CredentialRequired, requestId, "unknown", 409,
                     "Delivery permits cannot authorize request lookup; obtain a current permit and submit the same delivery identity explicitly");
             }
+            if (state.Operation.Idempotency == "replayOnly")
+            {
+                throw new ConvoHopException(ErrorCodes.InvalidRequest, requestId, "unknown", 400,
+                    "The operation's requests cannot be looked up; send the same request ID and payload again explicitly");
+            }
 
             RequestResolution resolution = await ResolveAsync(state, cancellationToken).ConfigureAwait(false);
             if (resolution.State == "committed" || resolution.State == "accepted") return resolution;

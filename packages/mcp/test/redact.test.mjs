@@ -7,6 +7,9 @@ const ir = JSON.parse(readFileSync(new URL("../../../schema/ir.json", import.met
 const credentialLike = /token|secret|key|permit|ticket|password|credential|lease|proof|signature/i;
 // Result fields that look like credentials but aren't, each with the reason tool results may carry them.
 const notCredentials = {
+  "AgentGrant.keys": "key summaries whose own fields are checked",
+  "AgentKey.keyId": "identifies the key, which is not a secret",
+  "AgentSignupStatus.keys": "key summaries whose own fields are checked",
   "Capabilities.serverRelease": "a release name",
   "CredentialCapsule.keyId": "identifies the key, which is not a secret",
   "CredentialCapsule.secretVersion": "a rotation version",
@@ -24,7 +27,9 @@ const notCredentials = {
   "SessionBootstrap.tokenExpiresAt": "a timestamp",
   "WebhookEndpoint.secretVersion": "a rotation version",
   "CredentialPermitReply.result": "only management.credentialPermit returns it, and no tool runs that operation",
+  "AgentCredentialPermitReply.result": "only management.agentCredentialPermit returns it, and no tool runs that operation",
 };
+const permitReplies = ["CredentialPermitReply", "AgentCredentialPermitReply"];
 const typeName = type => (type.kind === "list" ? typeName(type.ofType) : type.name);
 
 test("every credential, secret or signed proof that a result can carry is redacted", () => {
@@ -41,8 +46,10 @@ test("every credential, secret or signed proof that a result can carry is redact
   assert.deepEqual(Object.keys(notCredentials).filter(name => !found.includes(name)), [], "stale allowlist entries");
   const fieldNames = new Set(ir.types.filter(value => value.kind === "object").flatMap(type => type.fields.map(field => field.name)));
   assert.deepEqual(redactedFields.filter(name => !fieldNames.has(name)), [], "redactedFields names no result field");
-  assert.deepEqual(ir.operations.filter(operation => typeName(operation.result.type) === "CredentialPermitReply")
-    .map(operation => operation.id).filter(id => !Object.hasOwn(withheldOperations, id)), []);
+  const permits = ir.operations.filter(operation => permitReplies.includes(typeName(operation.result.type)));
+  assert.deepEqual(permits.map(operation => operation.id).sort(),
+    ["management.agentCredentialPermit", "management.credentialPermit"]);
+  assert.deepEqual(permits.map(operation => operation.id).filter(id => !Object.hasOwn(withheldOperations, id)), []);
 });
 
 test("redaction replaces credential fields at any depth and keeps null ones", () => {

@@ -15,6 +15,8 @@ export interface OperationTypes {
   "beta.resolveRequest": { variables: Generated.BetaResolveRequestQueryVariables; result: Generated.BetaResolveRequestQuery };
   "beta.widgets": { variables: Generated.BetaWidgetsQueryVariables; result: Generated.BetaWidgetsQuery };
   "beta.createWidget": { variables: Generated.BetaCreateWidgetMutationVariables; result: Generated.BetaCreateWidgetMutation };
+  "beta.requestAccess": { variables: Generated.BetaRequestAccessMutationVariables; result: Generated.BetaRequestAccessMutation };
+  "beta.claimWidget": { variables: Generated.BetaClaimWidgetMutationVariables; result: Generated.BetaClaimWidgetMutation };
 }
 export type OperationKey = keyof OperationTypes;
 export interface OperationCatalogEntry { plane: string; kind: string; idempotency: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }
@@ -376,6 +378,31 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
       "ratio",
       "nested",
       "shape"
+    ]
+  },
+  "beta.requestAccess": {
+    "plane": "beta",
+    "kind": "mutation",
+    "idempotency": "replayOnly",
+    "field": "requestAccess",
+    "operationName": "BetaRequestAccess",
+    "query": "mutation BetaRequestAccess($context: ContextInput!, $input: RequestAccessInput!) {\n  requestAccess(context: $context, input: $input) {\n    requestId\n    committed\n    sequence\n  }\n}",
+    "resultType": "Receipt!",
+    "inputFields": [
+      "email",
+      "challenge"
+    ]
+  },
+  "beta.claimWidget": {
+    "plane": "beta",
+    "kind": "mutation",
+    "idempotency": "replayOnly",
+    "field": "claimWidget",
+    "operationName": "BetaClaimWidget",
+    "query": "mutation BetaClaimWidget($context: ContextInput!, $input: ClaimWidgetInput!) {\n  claimWidget(context: $context, input: $input) {\n    id\n    label\n    state\n    revision\n  }\n}",
+    "resultType": "Widget!",
+    "inputFields": [
+      "widgetId"
     ]
   }
 };

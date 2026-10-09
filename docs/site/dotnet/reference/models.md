@@ -116,6 +116,320 @@ public sealed class AddMembersPayload
 
 The AddMembersPayload result.
 
+### `AgentAuditEvent` class
+
+```cs
+public sealed class AgentAuditEvent
+{
+    public AgentAuditEvent();
+    public string EventId { get; init; }
+    public string OrgId { get; init; }
+    public string? GrantId { get; init; }
+    public string ActorKind { get; init; }
+    public string? ActorId { get; init; }
+    public string Kind { get; init; }
+    public JsonElement? Details { get; init; }
+    public string OccurredAt { get; init; }
+}
+```
+
+The AgentAuditEvent result.
+
+### `AgentAuditEventPage` class
+
+```cs
+public sealed class AgentAuditEventPage
+{
+    public AgentAuditEventPage();
+    public IReadOnlyList<AgentAuditEvent> Items { get; init; }
+    public bool Complete { get; init; }
+    public bool RefreshRequired { get; init; }
+    public string? NextCursor { get; init; }
+}
+```
+
+The AgentAuditEventPage result.
+
+### `AgentAuditEventsReply` class
+
+```cs
+public sealed class AgentAuditEventsReply
+{
+    public AgentAuditEventsReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentAuditEventPage? Result { get; init; }
+}
+```
+
+The AgentAuditEventsReply result.
+
+### `AgentAuditEventsRequestInput` class
+
+```cs
+public sealed class AgentAuditEventsRequestInput
+{
+    public AgentAuditEventsRequestInput(string orgId);
+    public string OrgId { get; set; }
+    public int? Limit { get; set; }
+    public string? Cursor { get; set; }
+}
+```
+
+The AgentAuditEventsRequestInput input.
+
+### `AgentCredentialPermitReply` class
+
+```cs
+public sealed class AgentCredentialPermitReply
+{
+    public AgentCredentialPermitReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public JsonElement? Result { get; init; }
+}
+```
+
+The AgentCredentialPermitReply result.
+
+### `AgentCredentialPermitRequestInput` class
+
+```cs
+public sealed class AgentCredentialPermitRequestInput
+{
+    public AgentCredentialPermitRequestInput(string deliveryId, string redemptionRequestId);
+    public string DeliveryId { get; set; }
+    public string RedemptionRequestId { get; set; }
+}
+```
+
+The AgentCredentialPermitRequestInput input.
+
+### `AgentGrant` class
+
+```cs
+public sealed class AgentGrant
+{
+    public AgentGrant();
+    public string GrantId { get; init; }
+    public string OrgId { get; init; }
+    public string SignupId { get; init; }
+    public string AgentActorId { get; init; }
+    public string? ProjectId { get; init; }
+    public IReadOnlyList<string> Scopes { get; init; }
+    public string ExpiresAt { get; init; }
+    public string? RevokedAt { get; init; }
+    public string CreatedAt { get; init; }
+    public IReadOnlyList<AgentKey> Keys { get; init; }
+}
+```
+
+The AgentGrant result.
+
+### `AgentGrantPage` class
+
+```cs
+public sealed class AgentGrantPage
+{
+    public AgentGrantPage();
+    public IReadOnlyList<AgentGrant> Items { get; init; }
+    public bool Complete { get; init; }
+    public bool RefreshRequired { get; init; }
+    public string? NextCursor { get; init; }
+}
+```
+
+The AgentGrantPage result.
+
+### `AgentGrantsReply` class
+
+```cs
+public sealed class AgentGrantsReply
+{
+    public AgentGrantsReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentGrantPage? Result { get; init; }
+}
+```
+
+The AgentGrantsReply result.
+
+### `AgentGrantsRequestInput` class
+
+```cs
+public sealed class AgentGrantsRequestInput
+{
+    public AgentGrantsRequestInput(string orgId);
+    public string OrgId { get; set; }
+    public int? Limit { get; set; }
+    public string? Cursor { get; set; }
+}
+```
+
+The AgentGrantsRequestInput input.
+
+### `AgentKey` class
+
+```cs
+public sealed class AgentKey
+{
+    public AgentKey();
+    public string OperationId { get; init; }
+    public string State { get; init; }
+    public IReadOnlyList<string> Scopes { get; init; }
+    public string ExpiresAt { get; init; }
+    public string? KeyId { get; init; }
+    public string? DeliveryId { get; init; }
+    public string? DeliveryExpiresAt { get; init; }
+}
+```
+
+The AgentKey result.
+
+### `AgentPayment` class
+
+```cs
+public sealed class AgentPayment
+{
+    public AgentPayment();
+    public string PaymentId { get; init; }
+    public string Amount { get; init; }
+    public string Currency { get; init; }
+    public string State { get; init; }
+}
+```
+
+The AgentPayment result.
+
+### `AgentSignupForApprovalReply` class
+
+```cs
+public sealed class AgentSignupForApprovalReply
+{
+    public AgentSignupForApprovalReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentSignupReview? Result { get; init; }
+}
+```
+
+The AgentSignupForApprovalReply result.
+
+### `AgentSignupForApprovalRequestInput` class
+
+```cs
+public sealed class AgentSignupForApprovalRequestInput
+{
+    public AgentSignupForApprovalRequestInput(string approvalToken);
+    public string ApprovalToken { get; set; }
+}
+```
+
+The AgentSignupForApprovalRequestInput input.
+
+### `AgentSignupReply` class
+
+```cs
+public sealed class AgentSignupReply
+{
+    public AgentSignupReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentSignupStatus? Result { get; init; }
+}
+```
+
+The AgentSignupReply result.
+
+### `AgentSignupReview` class
+
+```cs
+public sealed class AgentSignupReview
+{
+    public AgentSignupReview();
+    public string SignupId { get; init; }
+    public string OwnerEmail { get; init; }
+    public string OrganizationName { get; init; }
+    public string AgentName { get; init; }
+    public string? Purpose { get; init; }
+    public string? SuggestedPlan { get; init; }
+    public IReadOnlyList<string> SuggestedScopes { get; init; }
+    public string? SuggestedMonthlySpendCap { get; init; }
+    public string Currency { get; init; }
+    public string ExpiresAt { get; init; }
+}
+```
+
+The AgentSignupReview result.
+
+### `AgentSignupStatus` class
+
+```cs
+public sealed class AgentSignupStatus
+{
+    public AgentSignupStatus();
+    public string SignupId { get; init; }
+    public string State { get; init; }
+    public string? OrgId { get; init; }
+    public string? DeploymentId { get; init; }
+    public string? ProjectId { get; init; }
+    public string? NextStep { get; init; }
+    public IReadOnlyList<string> Scopes { get; init; }
+    public string? GrantExpiresAt { get; init; }
+    public IReadOnlyList<AgentKey> Keys { get; init; }
+    public string? Incarnation { get; init; }
+    public string? ServingEpoch { get; init; }
+}
+```
+
+The AgentSignupStatus result.
+
+### `AgentSignupTicket` class
+
+```cs
+public sealed class AgentSignupTicket
+{
+    public AgentSignupTicket();
+    public string SignupId { get; init; }
+    public string ConfirmationCode { get; init; }
+    public string ExpiresAt { get; init; }
+    public int PollAfterSeconds { get; init; }
+}
+```
+
+The AgentSignupTicket result.
+
 ### `AlertLiveSessionInput` class
 
 ```cs
@@ -146,6 +460,45 @@ public sealed class AlertLiveSessionPayload
 ```
 
 The AlertLiveSessionPayload result.
+
+### `ApproveAgentSignupReply` class
+
+```cs
+public sealed class ApproveAgentSignupReply
+{
+    public ApproveAgentSignupReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentSignupStatus? Result { get; init; }
+}
+```
+
+The ApproveAgentSignupReply result.
+
+### `ApproveAgentSignupRequestInput` class
+
+```cs
+public sealed class ApproveAgentSignupRequestInput
+{
+    public ApproveAgentSignupRequestInput(string approvalToken, string confirmationCode, string termsRef, string plan, IReadOnlyList<string> scopes, string monthlySpendCap);
+    public string ApprovalToken { get; set; }
+    public string ConfirmationCode { get; set; }
+    public string TermsRef { get; set; }
+    public string Plan { get; set; }
+    public IReadOnlyList<string> Scopes { get; set; }
+    public string MonthlySpendCap { get; set; }
+    public string? AgentPurchaseLimit { get; set; }
+    public string? GrantExpiresAt { get; set; }
+}
+```
+
+The ApproveAgentSignupRequestInput input.
 
 ### `BillingCheckoutSession` class
 
@@ -1368,6 +1721,39 @@ public sealed class InboxRequestInput
 
 The InboxRequestInput input.
 
+### `IssueAgentKeyReply` class
+
+```cs
+public sealed class IssueAgentKeyReply
+{
+    public IssueAgentKeyReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentKey? Result { get; init; }
+}
+```
+
+The IssueAgentKeyReply result.
+
+### `IssueAgentKeyRequestInput` class
+
+```cs
+public sealed class IssueAgentKeyRequestInput
+{
+    public IssueAgentKeyRequestInput(IReadOnlyList<string> scopes);
+    public IReadOnlyList<string> Scopes { get; set; }
+    public string? ExpiresAt { get; set; }
+}
+```
+
+The IssueAgentKeyRequestInput input.
+
 ### `IssueBackendKeyReply` class
 
 ```cs
@@ -2215,6 +2601,69 @@ public sealed class OrganizationPage
 
 The OrganizationPage result.
 
+### `OrganizationSpend` class
+
+```cs
+public sealed class OrganizationSpend
+{
+    public OrganizationSpend();
+    public string OrgId { get; init; }
+    public string PlanId { get; init; }
+    public string Currency { get; init; }
+    public string CatalogVersion { get; init; }
+    public string? MonthlySpendCap { get; init; }
+    public string? AgentPurchaseLimit { get; init; }
+    public string? UpdatedAt { get; init; }
+    public string? MonthlyMinimum { get; init; }
+    public string? PeriodStart { get; init; }
+    public string? PeriodEnd { get; init; }
+    public string? Credits { get; init; }
+    public string? Charges { get; init; }
+    public string? Margin { get; init; }
+    public string? Stop { get; init; }
+    public IReadOnlyList<string> RefusedMeters { get; init; }
+    public string? EvaluatedAt { get; init; }
+    public string? UsageThrough { get; init; }
+    public string? ValidUntil { get; init; }
+    public string? MinimumCredit { get; init; }
+    public string? ChargeLimit { get; init; }
+}
+```
+
+The OrganizationSpend result.
+
+### `OrganizationSpendReply` class
+
+```cs
+public sealed class OrganizationSpendReply
+{
+    public OrganizationSpendReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public OrganizationSpend? Result { get; init; }
+}
+```
+
+The OrganizationSpendReply result.
+
+### `OrganizationSpendRequestInput` class
+
+```cs
+public sealed class OrganizationSpendRequestInput
+{
+    public OrganizationSpendRequestInput(string orgId);
+    public string OrgId { get; set; }
+}
+```
+
+The OrganizationSpendRequestInput input.
+
 ### `OrganizationUsage` class
 
 ```cs
@@ -2461,6 +2910,39 @@ public sealed class ProjectUsageRequestInput
 
 The ProjectUsageRequestInput input.
 
+### `PurchaseAgentCreditsReply` class
+
+```cs
+public sealed class PurchaseAgentCreditsReply
+{
+    public PurchaseAgentCreditsReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentPayment? Result { get; init; }
+}
+```
+
+The PurchaseAgentCreditsReply result.
+
+### `PurchaseAgentCreditsRequestInput` class
+
+```cs
+public sealed class PurchaseAgentCreditsRequestInput
+{
+    public PurchaseAgentCreditsRequestInput(string amount, string sharedPaymentToken);
+    public string Amount { get; set; }
+    public string SharedPaymentToken { get; set; }
+}
+```
+
+The PurchaseAgentCreditsRequestInput input.
+
 ### `ReadReceipt` class
 
 ```cs
@@ -2509,6 +2991,39 @@ public sealed class RedeemCredentialRequestInput
 ```
 
 The RedeemCredentialRequestInput input.
+
+### `RejectAgentSignupReply` class
+
+```cs
+public sealed class RejectAgentSignupReply
+{
+    public RejectAgentSignupReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentSignupStatus? Result { get; init; }
+}
+```
+
+The RejectAgentSignupReply result.
+
+### `RejectAgentSignupRequestInput` class
+
+```cs
+public sealed class RejectAgentSignupRequestInput
+{
+    public RejectAgentSignupRequestInput(string approvalToken, bool suppressFutureRequests);
+    public string ApprovalToken { get; set; }
+    public bool SuppressFutureRequests { get; set; }
+}
+```
+
+The RejectAgentSignupRequestInput input.
 
 ### `RemoveMemberReply` class
 
@@ -2615,6 +3130,45 @@ public sealed class ReplayWebhookDeliveriesRequestInput
 ```
 
 The ReplayWebhookDeliveriesRequestInput input.
+
+### `RequestAgentSignupReply` class
+
+```cs
+public sealed class RequestAgentSignupReply
+{
+    public RequestAgentSignupReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentSignupTicket? Result { get; init; }
+}
+```
+
+The RequestAgentSignupReply result.
+
+### `RequestAgentSignupRequestInput` class
+
+```cs
+public sealed class RequestAgentSignupRequestInput
+{
+    public RequestAgentSignupRequestInput(string ownerEmail, string pollChallenge, string organizationName, string agentName, IReadOnlyList<string> suggestedScopes);
+    public string OwnerEmail { get; set; }
+    public string PollChallenge { get; set; }
+    public string OrganizationName { get; set; }
+    public string AgentName { get; set; }
+    public string? Purpose { get; set; }
+    public string? SuggestedPlan { get; set; }
+    public IReadOnlyList<string> SuggestedScopes { get; set; }
+    public string? SuggestedMonthlySpendCap { get; set; }
+}
+```
+
+The RequestAgentSignupRequestInput input.
 
 ### `RequestResolution` class
 
@@ -2736,6 +3290,8 @@ The ResumeOperationRequestInput input.
 public sealed class RetainedResult
 {
     public RetainedResult();
+    public AgentGrant? AgentGrant { get; init; }
+    public AgentSignupStatus? AgentSignupStatus { get; init; }
     public BillingCheckoutSession? BillingCheckoutSession { get; init; }
     public BillingPortalSession? BillingPortalSession { get; init; }
     public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }
@@ -2754,6 +3310,7 @@ public sealed class RetainedResult
     public Message? Message { get; init; }
     public MessageAck? MessageAck { get; init; }
     public Organization? Organization { get; init; }
+    public OrganizationSpend? OrganizationSpend { get; init; }
     public Principal? Principal { get; init; }
     public ReadReceipt? ReadReceipt { get; init; }
     public SessionBootstrap? SessionBootstrap { get; init; }
@@ -2763,6 +3320,39 @@ public sealed class RetainedResult
 ```
 
 Exactly one typed field contains the retained, currently authorized receipt result.
+
+### `RevokeAgentGrantReply` class
+
+```cs
+public sealed class RevokeAgentGrantReply
+{
+    public RevokeAgentGrantReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public AgentGrant? Result { get; init; }
+}
+```
+
+The RevokeAgentGrantReply result.
+
+### `RevokeAgentGrantRequestInput` class
+
+```cs
+public sealed class RevokeAgentGrantRequestInput
+{
+    public RevokeAgentGrantRequestInput(string grantId, bool revokeIssuedSessions);
+    public string GrantId { get; set; }
+    public bool RevokeIssuedSessions { get; set; }
+}
+```
+
+The RevokeAgentGrantRequestInput input.
 
 ### `RevokeBackendKeyReply` class
 
@@ -3179,6 +3769,40 @@ public sealed class SetConversationMutePayload
 ```
 
 The SetConversationMutePayload result.
+
+### `SetSpendControlsReply` class
+
+```cs
+public sealed class SetSpendControlsReply
+{
+    public SetSpendControlsReply();
+    public string Status { get; init; }
+    public string RequestId { get; init; }
+    public string? ServerTime { get; init; }
+    public string? ReceiptId { get; init; }
+    public string? CommittedAt { get; init; }
+    public bool? Replayed { get; init; }
+    public OperationRef? Operation { get; init; }
+    public ResourceRef? ResourceRef { get; init; }
+    public OrganizationSpend? Result { get; init; }
+}
+```
+
+The SetSpendControlsReply result.
+
+### `SetSpendControlsRequestInput` class
+
+```cs
+public sealed class SetSpendControlsRequestInput
+{
+    public SetSpendControlsRequestInput(string orgId, string monthlySpendCap);
+    public string OrgId { get; set; }
+    public string MonthlySpendCap { get; set; }
+    public string? AgentPurchaseLimit { get; set; }
+}
+```
+
+The SetSpendControlsRequestInput input.
 
 ### `UpdateConversationReply` class
 

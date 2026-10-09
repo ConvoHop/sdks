@@ -844,6 +844,8 @@ final class ConversationStream {
   bool _started = false;
   Cursor? _cursor;
   Timer? _timer;
+  // Runs while the authority's retryAfter for the scheduled reconnect hasn't passed.
+  Timer? _hold;
   int _reconnectAttempts = 0;
   int _pendingPages = 0;
   int _queueGeneration = 0;
@@ -875,6 +877,8 @@ final class ConversationStream {
     _paused = true;
     _timer?.cancel();
     _timer = null;
+    _hold?.cancel();
+    _hold = null;
     final socket = _dropSocket();
     Object? closing;
     try {
@@ -1143,8 +1147,13 @@ final class ConversationStream {
   void _retry([int? retryAfter]) {
     if (_closed || _paused || _timer != null) return;
     final delay = reconnectDelay(_reconnectAttempts++, retryAfter, _jitter);
+    final hold = min((retryAfter ?? 0) * 1000, maxTimerDelayMs);
+    _hold?.cancel();
+    _hold = hold > 0 ? Timer(Duration(milliseconds: hold), () => _hold = null) : null;
     _timer = Timer(Duration(milliseconds: delay), () {
       _timer = null;
+      _hold?.cancel();
+      _hold = null;
       if (_closed || _paused) return;
       unawaited(_reconnect());
     });
@@ -1269,7 +1278,14 @@ final class ConversationStream {
     _queueGeneration++;
     _timer?.cancel();
     _timer = null;
+    _hold?.cancel();
+    _hold = null;
     _dropSocket()?.close(1000);
     if (_applying == null) _removed();
   }
 }
+
+/// Whether [stream] is waiting out the authority's `retryAfter` before it
+/// reconnects. The library doesn't export it; the conversation store uses it
+/// so that reconnecting on demand can't cut that wait short.
+bool waitsOutRetryAfter(ConversationStream stream) => stream._hold != null;

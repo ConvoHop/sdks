@@ -92,6 +92,8 @@ class _AsyncClient(AsyncInvoker):
         Returns the authority's resolution: ``committed`` or ``accepted`` once it has the request, else
         ``notObservedYet`` after a resend whose effect is not yet visible. A request the client observed committing,
         or one past its retry budget, raises ``RESOLUTION_REQUIRED``; resolve it read-only with ``resolve_request``.
+        A ``replayOnly`` operation cannot be looked up and raises ``INVALID_REQUEST``; call the operation again with
+        the same ``request_id`` and input instead.
 
         Raises:
             LookupError: This client has no recovery record for the request.

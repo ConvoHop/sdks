@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.convohop.server.api.Operations;
+import com.convohop.server.model.IssueAgentKeyReply;
+import com.convohop.server.model.IssueAgentKeyRequestInput;
 import com.convohop.server.model.IssueBackendKeyReply;
 import com.convohop.server.model.ProjectUsage;
 import com.convohop.server.model.ProjectUsageRequestInput;
@@ -124,6 +126,46 @@ class ManagementClientTest {
     for (Map.Entry<String, String> write : storage.writes()) {
       assertEquals(key, write.getKey());
       assertFalse(write.getValue().contains("fixture-"));
+    }
+  }
+
+  @Test
+  void anUnknownReplayOnlyRequestIsNeverLookedUpAndSettlesOnlyByAnExplicitResend() {
+    String requestId = id(), expiresAt = "2026-12-01T00:00:00.000Z";
+    List<String> scopes = Collections.singletonList("messageRead");
+    AtomicBoolean lose = new AtomicBoolean(true);
+    try (FakeAuthority authority = new FakeAuthority(exchange -> lose.getAndSet(false) ? Response.drop()
+        : Response.json(reply(exchange.request(), map("replayed", true, "result", full("AgentKey",
+            map("operationId", id(), "state", "pending", "scopes", scopes, "expiresAt", expiresAt))))))) {
+      ManagementClient client = ManagementClient.builder().baseUrl(authority.baseUrl()).actorId(id())
+          .accessToken("fixture-agent-verifier").build();
+      IssueAgentKeyRequestInput input = IssueAgentKeyRequestInput.builder().scopes(scopes).expiresAt(expiresAt).build();
+      assertEquals("replayOnly", Operations.MANAGEMENT_ISSUE_AGENT_KEY.idempotency());
+      assertFalse(Operations.MANAGEMENT_ISSUE_AGENT_KEY.resolvable());
+      assertEquals("TRANSPORT_UNKNOWN", assertThrows(ConvoHopProblem.class,
+          () -> client.management().issueAgentKey(input, requestId)).getCode());
+
+      ConvoHopProblem refused = assertThrows(ConvoHopProblem.class, () -> client.requests().retry(requestId));
+      assertEquals("INVALID_REQUEST", refused.getCode());
+      assertEquals(requestId, refused.getRequestId());
+      assertEquals("unknown", refused.getOutcome());
+      assertEquals(400, refused.getStatus());
+      assertEquals("The operation's requests cannot be looked up; send the same request ID and payload again "
+          + "explicitly", refused.getMessage());
+      assertEquals(Collections.singletonList("ManagementIssueAgentKey"), operations(authority));
+
+      IssueAgentKeyRequestInput changed = IssueAgentKeyRequestInput.builder()
+          .scopes(Collections.singletonList("callRead")).expiresAt(expiresAt).build();
+      assertEquals("IDEMPOTENCY_CONFLICT", assertThrows(ConvoHopProblem.class,
+          () -> client.management().issueAgentKey(changed, requestId)).getCode());
+      IssueAgentKeyReply settled = client.management().issueAgentKey(input, requestId);
+      assertEquals("committed", settled.getStatus());
+      assertEquals("pending", Objects.requireNonNull(settled.getResult()).getState());
+      assertEquals(Arrays.asList("ManagementIssueAgentKey", "ManagementIssueAgentKey"), operations(authority));
+      for (Exchange exchange : authority.exchanges()) {
+        assertEquals(requestId, requestId(exchange.request()));
+        assertEquals(input(authority.exchanges().get(0).request()), input(exchange.request()));
+      }
     }
   }
 

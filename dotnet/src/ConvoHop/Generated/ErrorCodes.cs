@@ -11,6 +11,39 @@ namespace ConvoHop
         /// <summary>A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId.</summary>
         public const string AdmissionLimit = "ADMISSION_LIMIT";
 
+        /// <summary>Agent signup is not offered in this environment.</summary>
+        public const string AgenticNotConfigured = "AGENTIC_NOT_CONFIGURED";
+
+        /// <summary>The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.</summary>
+        public const string AgentConfirmationCodeInvalid = "AGENT_CONFIRMATION_CODE_INVALID";
+
+        /// <summary>The agent's grant has expired. The agent needs a new signup request approved.</summary>
+        public const string AgentGrantExpired = "AGENT_GRANT_EXPIRED";
+
+        /// <summary>The owner revoked the agent's grant.</summary>
+        public const string AgentGrantRevoked = "AGENT_GRANT_REVOKED";
+
+        /// <summary>The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.</summary>
+        public const string AgentKeyLimit = "AGENT_KEY_LIMIT";
+
+        /// <summary>The purchase would take this month's agent credit purchases beyond the limit the owner set.</summary>
+        public const string AgentPurchaseLimitExceeded = "AGENT_PURCHASE_LIMIT_EXCEEDED";
+
+        /// <summary>A requested scope is outside the agent's grant.</summary>
+        public const string AgentScopeNotGranted = "AGENT_SCOPE_NOT_GRANTED";
+
+        /// <summary>The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.</summary>
+        public const string AgentSignupClosed = "AGENT_SIGNUP_CLOSED";
+
+        /// <summary>The owner's email address is refused, for example for a disposable domain.</summary>
+        public const string AgentSignupEmailRejected = "AGENT_SIGNUP_EMAIL_REJECTED";
+
+        /// <summary>The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.</summary>
+        public const string AgentSignupNotReady = "AGENT_SIGNUP_NOT_READY";
+
+        /// <summary>The owner opted out of agent signup requests to this email address.</summary>
+        public const string AgentSignupSuppressed = "AGENT_SIGNUP_SUPPRESSED";
+
         /// <summary>The participation already has an active media connection.</summary>
         public const string AlreadyConnected = "ALREADY_CONNECTED";
 
@@ -61,6 +94,18 @@ namespace ConvoHop
 
         /// <summary>Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.</summary>
         public const string CredentialRequired = "CREDENTIAL_REQUIRED";
+
+        /// <summary>Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.</summary>
+        public const string CreditsExhausted = "CREDITS_EXHAUSTED";
+
+        /// <summary>Credits apply only to a billed subscription, and none is in force.</summary>
+        public const string CreditsRequireMeteredPlan = "CREDITS_REQUIRE_METERED_PLAN";
+
+        /// <summary>The credit amount is outside the allowed purchase range.</summary>
+        public const string CreditAmountOutOfRange = "CREDIT_AMOUNT_OUT_OF_RANGE";
+
+        /// <summary>Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.</summary>
+        public const string CreditGrantLimitReached = "CREDIT_GRANT_LIMIT_REACHED";
 
         /// <summary>The cursor is ahead of the committed events of the conversation.</summary>
         public const string CursorAhead = "CURSOR_AHEAD";
@@ -170,6 +215,12 @@ namespace ConvoHop
         /// <summary>The participation does not belong to the caller or the current live session generation.</summary>
         public const string ParticipationMismatch = "PARTICIPATION_MISMATCH";
 
+        /// <summary>The payment rail declined the payment. Nothing was charged.</summary>
+        public const string PaymentDeclined = "PAYMENT_DECLINED";
+
+        /// <summary>No payment rail is enabled in this environment.</summary>
+        public const string PaymentRailNotConfigured = "PAYMENT_RAIL_NOT_CONFIGURED";
+
         /// <summary>The stored delivery permit has expired. Request a new permit.</summary>
         public const string PermitExpired = "PERMIT_EXPIRED";
 
@@ -230,6 +281,12 @@ namespace ConvoHop
         /// <summary>The refreshed session could not be verified.</summary>
         public const string SessionRefreshUnverified = "SESSION_REFRESH_UNVERIFIED";
 
+        /// <summary>The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.</summary>
+        public const string SpendCapReached = "SPEND_CAP_REACHED";
+
+        /// <summary>Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.</summary>
+        public const string SpendUnverified = "SPEND_UNVERIFIED";
+
         /// <summary>The transport failed after the request may have been sent. Resolve or retry the original request.</summary>
         public const string TransportUnknown = "TRANSPORT_UNKNOWN";
 
@@ -266,8 +323,20 @@ namespace ConvoHop
                 case OutcomeUnknown:
                 case RateLimited:
                 case RetryExhausted:
+                case SpendUnverified:
                 case TransportUnknown:
                     return true;
+                case AgenticNotConfigured:
+                case AgentConfirmationCodeInvalid:
+                case AgentGrantExpired:
+                case AgentGrantRevoked:
+                case AgentKeyLimit:
+                case AgentPurchaseLimitExceeded:
+                case AgentScopeNotGranted:
+                case AgentSignupClosed:
+                case AgentSignupEmailRejected:
+                case AgentSignupNotReady:
+                case AgentSignupSuppressed:
                 case AlreadyConnected:
                 case AlreadyExists:
                 case BillingCatalogConflict:
@@ -284,6 +353,10 @@ namespace ConvoHop
                 case CredentialExpired:
                 case CredentialRefreshRequired:
                 case CredentialRequired:
+                case CreditsExhausted:
+                case CreditsRequireMeteredPlan:
+                case CreditAmountOutOfRange:
+                case CreditGrantLimitReached:
                 case CursorAhead:
                 case CursorExpired:
                 case CursorInvalid:
@@ -317,6 +390,8 @@ namespace ConvoHop
                 case NotFound:
                 case PageItemTooLarge:
                 case ParticipationMismatch:
+                case PaymentDeclined:
+                case PaymentRailNotConfigured:
                 case PermitExpired:
                 case PlanLimitExceeded:
                 case QuotaExceeded:
@@ -335,6 +410,7 @@ namespace ConvoHop
                 case SessionRefreshRejected:
                 case SessionRefreshRequired:
                 case SessionRefreshUnverified:
+                case SpendCapReached:
                 case Unauthenticated:
                 case WebhookDestinationDenied:
                 case WebhookEndpointDisabled:

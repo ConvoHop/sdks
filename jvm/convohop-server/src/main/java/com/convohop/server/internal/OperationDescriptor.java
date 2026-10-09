@@ -164,7 +164,7 @@ public final class OperationDescriptor<T extends @Nullable Object> {
   /**
    * The idempotency class from the annotations.
    *
-   * @return such as {@code safe}, {@code idempotent} or {@code permitBound}
+   * @return such as {@code safe}, {@code idempotent}, {@code permitBound} or {@code replayOnly}
    */
   public String idempotency() {
     return idempotency;

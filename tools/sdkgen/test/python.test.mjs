@@ -34,10 +34,10 @@ test("the edge fixture with every client operation opened renders to the Python 
   assertGoldenTree("python", emit(openIr()));
 });
 
-test("the emitter covers the server queries and mutations a bearer credential authorizes", () => {
+test("the emitter covers the server queries and mutations a bearer credential authorizes or that need no credential", () => {
   assert.deepEqual(includedOperations(edgeIr()).map(operation => operation.id), [
     "alpha.capabilities", "alpha.resolveRequest", "alpha.job", "alpha.fetchHTTPStatus", "alpha.startJob",
-    "beta.capabilities", "beta.resolveRequest", "beta.widgets", "beta.createWidget",
+    "beta.capabilities", "beta.resolveRequest", "beta.widgets", "beta.createWidget", "beta.requestAccess", "beta.claimWidget",
   ], "client-only operations, subscriptions and permit-authorized operations stay out");
   const ids = includedOperations(buildIr(repoSources())).map(operation => operation.id);
   assert.ok(ids.includes("communication.sendMessage") && ids.includes("management.createProject"));

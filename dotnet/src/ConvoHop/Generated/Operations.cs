@@ -244,7 +244,7 @@ namespace ConvoHop
                 kind: global::ConvoHop.OperationKind.Query,
                 field: "resolveRequest",
                 operationName: "CommunicationResolveRequest",
-                document: "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+                document: "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          agentGrant {\n            grantId\n            orgId\n            signupId\n            agentActorId\n            projectId\n            scopes\n            expiresAt\n            revokedAt\n            createdAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n          }\n          agentSignupStatus {\n            signupId\n            state\n            orgId\n            deploymentId\n            projectId\n            nextStep\n            scopes\n            grantExpiresAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n            incarnation\n            servingEpoch\n          }\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          organizationSpend {\n            orgId\n            planId\n            currency\n            catalogVersion\n            monthlySpendCap\n            agentPurchaseLimit\n            updatedAt\n            monthlyMinimum\n            periodStart\n            periodEnd\n            credits\n            charges\n            margin\n            stop\n            refusedMeters\n            evaluatedAt\n            usageThrough\n            validUntil\n            minimumCredit\n            chargeLimit\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
                 resultType: "ResolveRequestReply!",
                 contextArgument: "context",
                 inputArgument: "input",
@@ -1273,7 +1273,7 @@ namespace ConvoHop
                 kind: global::ConvoHop.OperationKind.Query,
                 field: "resolveRequest",
                 operationName: "ManagementResolveRequest",
-                document: "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+                document: "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          agentGrant {\n            grantId\n            orgId\n            signupId\n            agentActorId\n            projectId\n            scopes\n            expiresAt\n            revokedAt\n            createdAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n          }\n          agentSignupStatus {\n            signupId\n            state\n            orgId\n            deploymentId\n            projectId\n            nextStep\n            scopes\n            grantExpiresAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n            incarnation\n            servingEpoch\n          }\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          organizationSpend {\n            orgId\n            planId\n            currency\n            catalogVersion\n            monthlySpendCap\n            agentPurchaseLimit\n            updatedAt\n            monthlyMinimum\n            periodStart\n            periodEnd\n            credits\n            charges\n            margin\n            stop\n            refusedMeters\n            evaluatedAt\n            usageThrough\n            validUntil\n            minimumCredit\n            chargeLimit\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
                 resultType: "ResolveRequestReply!",
                 contextArgument: "context",
                 inputArgument: "input",
@@ -1304,6 +1304,131 @@ namespace ConvoHop
                 inputArgument: "input",
                 inputRequired: true,
                 inputFields: new string[] { "operationId" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "safe",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.AgentSignupForApprovalRequestInput, global::ConvoHop.Models.AgentSignupForApprovalReply> AgentSignupForApproval = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.AgentSignupForApprovalRequestInput, global::ConvoHop.Models.AgentSignupForApprovalReply>(
+                id: "management.agentSignupForApproval",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Query,
+                field: "agentSignupForApproval",
+                operationName: "ManagementAgentSignupForApproval",
+                document: "query ManagementAgentSignupForApproval($context: RequestContextInput!, $input: AgentSignupForApprovalRequestInput!) {\n  agentSignupForApproval(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      ownerEmail\n      organizationName\n      agentName\n      purpose\n      suggestedPlan\n      suggestedScopes\n      suggestedMonthlySpendCap\n      currency\n      expiresAt\n    }\n  }\n}",
+                resultType: "AgentSignupForApprovalReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "approvalToken" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "safe",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.NoInput, global::ConvoHop.Models.AgentSignupReply> AgentSignup = new global::ConvoHop.OperationDescriptor<global::ConvoHop.NoInput, global::ConvoHop.Models.AgentSignupReply>(
+                id: "management.agentSignup",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Query,
+                field: "agentSignup",
+                operationName: "ManagementAgentSignup",
+                document: "query ManagementAgentSignup($context: RequestContextInput!) {\n  agentSignup(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      state\n      orgId\n      deploymentId\n      projectId\n      nextStep\n      scopes\n      grantExpiresAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n      incarnation\n      servingEpoch\n    }\n  }\n}",
+                resultType: "AgentSignupReply!",
+                contextArgument: "context",
+                inputArgument: null,
+                inputRequired: false,
+                inputFields: global::System.Array.Empty<string>(),
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "safe",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>List an organization's agent grants with their keys, newest first.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.AgentGrantsRequestInput, global::ConvoHop.Models.AgentGrantsReply> AgentGrants = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.AgentGrantsRequestInput, global::ConvoHop.Models.AgentGrantsReply>(
+                id: "management.agentGrants",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Query,
+                field: "agentGrants",
+                operationName: "ManagementAgentGrants",
+                document: "query ManagementAgentGrants($context: RequestContextInput!, $input: AgentGrantsRequestInput!) {\n  agentGrants(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        grantId\n        orgId\n        signupId\n        agentActorId\n        projectId\n        scopes\n        expiresAt\n        revokedAt\n        createdAt\n        keys {\n          operationId\n          state\n          scopes\n          expiresAt\n          keyId\n          deliveryId\n          deliveryExpiresAt\n        }\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
+                resultType: "AgentGrantsReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "orgId", "limit", "cursor" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "safe",
+                layer: "server",
+                pagination: "cursor");
+
+            /// <summary>List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.AgentAuditEventsRequestInput, global::ConvoHop.Models.AgentAuditEventsReply> AgentAuditEvents = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.AgentAuditEventsRequestInput, global::ConvoHop.Models.AgentAuditEventsReply>(
+                id: "management.agentAuditEvents",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Query,
+                field: "agentAuditEvents",
+                operationName: "ManagementAgentAuditEvents",
+                document: "query ManagementAgentAuditEvents($context: RequestContextInput!, $input: AgentAuditEventsRequestInput!) {\n  agentAuditEvents(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        eventId\n        orgId\n        grantId\n        actorKind\n        actorId\n        kind\n        details\n        occurredAt\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
+                resultType: "AgentAuditEventsReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "orgId", "limit", "cursor" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "safe",
+                layer: "server",
+                pagination: "cursor");
+
+            /// <summary>Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.OrganizationSpendRequestInput, global::ConvoHop.Models.OrganizationSpendReply> OrganizationSpend = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.OrganizationSpendRequestInput, global::ConvoHop.Models.OrganizationSpendReply>(
+                id: "management.organizationSpend",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Query,
+                field: "organizationSpend",
+                operationName: "ManagementOrganizationSpend",
+                document: "query ManagementOrganizationSpend($context: RequestContextInput!, $input: OrganizationSpendRequestInput!) {\n  organizationSpend(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      planId\n      currency\n      catalogVersion\n      monthlySpendCap\n      agentPurchaseLimit\n      updatedAt\n      monthlyMinimum\n      periodStart\n      periodEnd\n      credits\n      charges\n      margin\n      stop\n      refusedMeters\n      evaluatedAt\n      usageThrough\n      validUntil\n      minimumCredit\n      chargeLimit\n    }\n  }\n}",
+                resultType: "OrganizationSpendReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "orgId" },
                 contextFields: new global::ConvoHop.ContextField[]
                 {
                     new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
@@ -1715,6 +1840,206 @@ namespace ConvoHop
                 idempotency: "idempotent",
                 layer: "server",
                 pagination: "none");
+
+            /// <summary>Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.RequestAgentSignupRequestInput, global::ConvoHop.Models.RequestAgentSignupReply> RequestAgentSignup = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.RequestAgentSignupRequestInput, global::ConvoHop.Models.RequestAgentSignupReply>(
+                id: "management.requestAgentSignup",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Mutation,
+                field: "requestAgentSignup",
+                operationName: "ManagementRequestAgentSignup",
+                document: "mutation ManagementRequestAgentSignup($context: RequestContextInput!, $input: RequestAgentSignupRequestInput!) {\n  requestAgentSignup(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      confirmationCode\n      expiresAt\n      pollAfterSeconds\n    }\n  }\n}",
+                resultType: "RequestAgentSignupReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "ownerEmail", "pollChallenge", "organizationName", "agentName", "purpose", "suggestedPlan", "suggestedScopes", "suggestedMonthlySpendCap" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "replayOnly",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>Reject a signup request from its approval link, optionally suppressing future requests to the email.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.RejectAgentSignupRequestInput, global::ConvoHop.Models.RejectAgentSignupReply> RejectAgentSignup = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.RejectAgentSignupRequestInput, global::ConvoHop.Models.RejectAgentSignupReply>(
+                id: "management.rejectAgentSignup",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Mutation,
+                field: "rejectAgentSignup",
+                operationName: "ManagementRejectAgentSignup",
+                document: "mutation ManagementRejectAgentSignup($context: RequestContextInput!, $input: RejectAgentSignupRequestInput!) {\n  rejectAgentSignup(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      state\n      orgId\n      deploymentId\n      projectId\n      nextStep\n      scopes\n      grantExpiresAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n      incarnation\n      servingEpoch\n    }\n  }\n}",
+                resultType: "RejectAgentSignupReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "approvalToken", "suppressFutureRequests" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "replayOnly",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.ApproveAgentSignupRequestInput, global::ConvoHop.Models.ApproveAgentSignupReply> ApproveAgentSignup = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.ApproveAgentSignupRequestInput, global::ConvoHop.Models.ApproveAgentSignupReply>(
+                id: "management.approveAgentSignup",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Mutation,
+                field: "approveAgentSignup",
+                operationName: "ManagementApproveAgentSignup",
+                document: "mutation ManagementApproveAgentSignup($context: RequestContextInput!, $input: ApproveAgentSignupRequestInput!) {\n  approveAgentSignup(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      state\n      orgId\n      deploymentId\n      projectId\n      nextStep\n      scopes\n      grantExpiresAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n      incarnation\n      servingEpoch\n    }\n  }\n}",
+                resultType: "ApproveAgentSignupReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "approvalToken", "confirmationCode", "termsRef", "plan", "scopes", "monthlySpendCap", "agentPurchaseLimit", "grantExpiresAt" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "idempotent",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.IssueAgentKeyRequestInput, global::ConvoHop.Models.IssueAgentKeyReply> IssueAgentKey = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.IssueAgentKeyRequestInput, global::ConvoHop.Models.IssueAgentKeyReply>(
+                id: "management.issueAgentKey",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Mutation,
+                field: "issueAgentKey",
+                operationName: "ManagementIssueAgentKey",
+                document: "mutation ManagementIssueAgentKey($context: RequestContextInput!, $input: IssueAgentKeyRequestInput!) {\n  issueAgentKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      state\n      scopes\n      expiresAt\n      keyId\n      deliveryId\n      deliveryExpiresAt\n    }\n  }\n}",
+                resultType: "IssueAgentKeyReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "scopes", "expiresAt" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "replayOnly",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>Issue a permit that authorizes the agent to redeem one of its key deliveries.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.AgentCredentialPermitRequestInput, global::ConvoHop.Models.AgentCredentialPermitReply> AgentCredentialPermit = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.AgentCredentialPermitRequestInput, global::ConvoHop.Models.AgentCredentialPermitReply>(
+                id: "management.agentCredentialPermit",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Mutation,
+                field: "agentCredentialPermit",
+                operationName: "ManagementAgentCredentialPermit",
+                document: "mutation ManagementAgentCredentialPermit($context: RequestContextInput!, $input: AgentCredentialPermitRequestInput!) {\n  agentCredentialPermit(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result\n  }\n}",
+                resultType: "AgentCredentialPermitReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "deliveryId", "redemptionRequestId" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "replayOnly",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>Revoke an agent grant and every key issued under it.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.RevokeAgentGrantRequestInput, global::ConvoHop.Models.RevokeAgentGrantReply> RevokeAgentGrant = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.RevokeAgentGrantRequestInput, global::ConvoHop.Models.RevokeAgentGrantReply>(
+                id: "management.revokeAgentGrant",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Mutation,
+                field: "revokeAgentGrant",
+                operationName: "ManagementRevokeAgentGrant",
+                document: "mutation ManagementRevokeAgentGrant($context: RequestContextInput!, $input: RevokeAgentGrantRequestInput!) {\n  revokeAgentGrant(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      grantId\n      orgId\n      signupId\n      agentActorId\n      projectId\n      scopes\n      expiresAt\n      revokedAt\n      createdAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n    }\n  }\n}",
+                resultType: "RevokeAgentGrantReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "grantId", "revokeIssuedSessions" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "idempotent",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>Set the organization's monthly spend cap and agent purchase limit.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.SetSpendControlsRequestInput, global::ConvoHop.Models.SetSpendControlsReply> SetSpendControls = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.SetSpendControlsRequestInput, global::ConvoHop.Models.SetSpendControlsReply>(
+                id: "management.setSpendControls",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Mutation,
+                field: "setSpendControls",
+                operationName: "ManagementSetSpendControls",
+                document: "mutation ManagementSetSpendControls($context: RequestContextInput!, $input: SetSpendControlsRequestInput!) {\n  setSpendControls(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      planId\n      currency\n      catalogVersion\n      monthlySpendCap\n      agentPurchaseLimit\n      updatedAt\n      monthlyMinimum\n      periodStart\n      periodEnd\n      credits\n      charges\n      margin\n      stop\n      refusedMeters\n      evaluatedAt\n      usageThrough\n      validUntil\n      minimumCredit\n      chargeLimit\n    }\n  }\n}",
+                resultType: "SetSpendControlsReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "orgId", "monthlySpendCap", "agentPurchaseLimit" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "idempotent",
+                layer: "server",
+                pagination: "none");
+
+            /// <summary>Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.</summary>
+            public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.PurchaseAgentCreditsRequestInput, global::ConvoHop.Models.PurchaseAgentCreditsReply> PurchaseAgentCredits = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.PurchaseAgentCreditsRequestInput, global::ConvoHop.Models.PurchaseAgentCreditsReply>(
+                id: "management.purchaseAgentCredits",
+                plane: "management",
+                kind: global::ConvoHop.OperationKind.Mutation,
+                field: "purchaseAgentCredits",
+                operationName: "ManagementPurchaseAgentCredits",
+                document: "mutation ManagementPurchaseAgentCredits($context: RequestContextInput!, $input: PurchaseAgentCreditsRequestInput!) {\n  purchaseAgentCredits(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      paymentId\n      amount\n      currency\n      state\n    }\n  }\n}",
+                resultType: "PurchaseAgentCreditsReply!",
+                contextArgument: "context",
+                inputArgument: "input",
+                inputRequired: true,
+                inputFields: new string[] { "amount", "sharedPaymentToken" },
+                contextFields: new global::ConvoHop.ContextField[]
+                {
+                    new global::ConvoHop.ContextField("requestId", global::ConvoHop.ContextFieldUse.Required),
+                    new global::ConvoHop.ContextField("projectId", global::ConvoHop.ContextFieldUse.Forbidden),
+                    new global::ConvoHop.ContextField("incarnation", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("observedServingEpoch", global::ConvoHop.ContextFieldUse.Optional),
+                    new global::ConvoHop.ContextField("credentialDeliveryPermit", global::ConvoHop.ContextFieldUse.Forbidden),
+                },
+                idempotency: "replayOnly",
+                layer: "server",
+                pagination: "none");
         }
 
         /// <summary>Every operation descriptor, in schema order.</summary>
@@ -1772,6 +2097,11 @@ namespace ConvoHop
             Management.WebhookDeliveries,
             Management.ResolveRequest,
             Management.GetOperation,
+            Management.AgentSignupForApproval,
+            Management.AgentSignup,
+            Management.AgentGrants,
+            Management.AgentAuditEvents,
+            Management.OrganizationSpend,
             Management.CreateOrganization,
             Management.CreateDeployment,
             Management.CreateProject,
@@ -1788,6 +2118,14 @@ namespace ConvoHop
             Management.RotateWebhookSecret,
             Management.DisableWebhook,
             Management.ReplayWebhookDeliveries,
+            Management.RequestAgentSignup,
+            Management.RejectAgentSignup,
+            Management.ApproveAgentSignup,
+            Management.IssueAgentKey,
+            Management.AgentCredentialPermit,
+            Management.RevokeAgentGrant,
+            Management.SetSpendControls,
+            Management.PurchaseAgentCredits,
         };
 
         /// <summary>The operation that resolves a request ID on a plane, or null when the plane has none.</summary>

@@ -78,6 +78,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.webhookDeliveries`](management/webhookDeliveries.md) | query | server | List recent deliveries of a webhook endpoint. |
 | [`management.resolveRequest`](management/resolveRequest.md) | query | server | Look up the stored outcome of an earlier management mutation by its requestId. |
 | [`management.getOperation`](management/getOperation.md) | query | server | Read the state of a long-running management operation. |
+| [`management.agentSignupForApproval`](management/agentSignupForApproval.md) | query | server | Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap. |
+| [`management.agentSignup`](management/agentSignup.md) | query | server | Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds. |
+| [`management.agentGrants`](management/agentGrants.md) | query | server | List an organization's agent grants with their keys, newest first. |
+| [`management.agentAuditEvents`](management/agentAuditEvents.md) | query | server | List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases. |
+| [`management.organizationSpend`](management/organizationSpend.md) | query | server | Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage. |
 | [`management.createOrganization`](management/createOrganization.md) | mutation | server | Create an organization. |
 | [`management.createDeployment`](management/createDeployment.md) | mutation | server | Create a deployment in an organization. Completes asynchronously. |
 | [`management.createProject`](management/createProject.md) | mutation | server | Create a project in a ready deployment. Completes asynchronously. |
@@ -94,3 +99,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.rotateWebhookSecret`](management/rotateWebhookSecret.md) | mutation | server | Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery. |
 | [`management.disableWebhook`](management/disableWebhook.md) | mutation | server | Disable a webhook endpoint. |
 | [`management.replayWebhookDeliveries`](management/replayWebhookDeliveries.md) | mutation | server | Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs. |
+| [`management.requestAgentSignup`](management/requestAgentSignup.md) | mutation | server | Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval. |
+| [`management.rejectAgentSignup`](management/rejectAgentSignup.md) | mutation | server | Reject a signup request from its approval link, optionally suppressing future requests to the email. |
+| [`management.approveAgentSignup`](management/approveAgentSignup.md) | mutation | server | Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner. |
+| [`management.issueAgentKey`](management/issueAgentKey.md) | mutation | server | Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit. |
+| [`management.agentCredentialPermit`](management/agentCredentialPermit.md) | mutation | server | Issue a permit that authorizes the agent to redeem one of its key deliveries. |
+| [`management.revokeAgentGrant`](management/revokeAgentGrant.md) | mutation | server | Revoke an agent grant and every key issued under it. |
+| [`management.setSpendControls`](management/setSpendControls.md) | mutation | server | Set the organization's monthly spend cap and agent purchase limit. |
+| [`management.purchaseAgentCredits`](management/purchaseAgentCredits.md) | mutation | server | Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit. |

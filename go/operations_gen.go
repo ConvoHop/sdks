@@ -598,6 +598,8 @@ func (c *ProjectClient) AcknowledgeCredential(ctx context.Context, permit Signed
 // Organizations, deployments, projects, backend keys and webhooks.
 //
 // Bearer credential: portalCredential. Operator credential for the management plane. Server runtimes only.
+// Anonymous credential: anonymous. No credential. The edge limits the caller by its network address, and the operation's input carries the capability.
+// Bearer credential: agentVerifier. Secret verifier an agent generates before requestAgentSignup: ag_ followed by 32 random bytes in base64url, whose base64url SHA-256 digest is the request's pollChallenge. It authenticates the agent to its own signup and grant on the management plane only; the communication plane refuses it. Server runtimes only.
 type ManagementClient struct {
 	t *transport
 }
@@ -756,6 +758,105 @@ func (c *ManagementClient) ResolveRequest(ctx context.Context, input ResolveRequ
 func (c *ManagementClient) GetOperation(ctx context.Context, input GetOperationRequestInput, opts ...CallOption) (*GetOperationReply, error) {
 	var out *GetOperationReply
 	err := c.t.call(ctx, "management.getOperation", input, nil, &out, opts)
+	return out, err
+}
+
+// AgentSignupForApproval calls the management.agentSignupForApproval query.
+// Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+//
+// Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId.
+// Sent without a bearer token as anonymous (condition: approvalToken).
+func (c *ManagementClient) AgentSignupForApproval(ctx context.Context, input AgentSignupForApprovalRequestInput, opts ...CallOption) (*AgentSignupForApprovalReply, error) {
+	var out *AgentSignupForApprovalReply
+	err := c.t.call(ctx, "management.agentSignupForApproval", input, nil, &out, opts)
+	return out, err
+}
+
+// AgentSignup calls the management.agentSignup query.
+// Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+//
+// Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId.
+// Authorized by agentVerifier (condition: ownSignup).
+func (c *ManagementClient) AgentSignup(ctx context.Context, opts ...CallOption) (*AgentSignupReply, error) {
+	var out *AgentSignupReply
+	err := c.t.call(ctx, "management.agentSignup", nil, nil, &out, opts)
+	return out, err
+}
+
+// AgentGrants calls the management.agentGrants query.
+// List an organization's agent grants with their keys, newest first.
+//
+// Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId.
+// Pagination: cursor. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. [ManagementClient.AgentGrantsPages] iterates over the pages.
+// Authorized by portalCredential (condition: owner).
+func (c *ManagementClient) AgentGrants(ctx context.Context, input AgentGrantsRequestInput, opts ...CallOption) (*AgentGrantsReply, error) {
+	var out *AgentGrantsReply
+	err := c.t.call(ctx, "management.agentGrants", input, nil, &out, opts)
+	return out, err
+}
+
+// AgentGrantsPages iterates over the pages of [ManagementClient.AgentGrants], starting at input.Cursor.
+// Each page is a new request with a new request ID.
+// Iteration stops after the complete page or at the first error.
+// A page that requires a refresh yields [ErrRefreshRequired] and stops.
+// An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE [Problem] in place of the page and stops.
+func (c *ManagementClient) AgentGrantsPages(ctx context.Context, input AgentGrantsRequestInput) iter.Seq2[*AgentGrantPage, error] {
+	return paginate(input.Cursor, pageCursor{"String", serverOrder}, func(cursor *string) (*AgentGrantPage, pageState, error) {
+		request := input
+		request.Cursor = cursor
+		out, err := c.AgentGrants(ctx, request)
+		if err != nil {
+			return nil, pageState{}, err
+		}
+		if out.Result == nil {
+			return nil, pageState{}, missingPage()
+		}
+		page := out.Result
+		return page, pageState{page.Complete, page.RefreshRequired, page.NextCursor}, nil
+	})
+}
+
+// AgentAuditEvents calls the management.agentAuditEvents query.
+// List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+//
+// Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId.
+// Pagination: cursor. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. [ManagementClient.AgentAuditEventsPages] iterates over the pages.
+// Authorized by portalCredential (condition: owner).
+func (c *ManagementClient) AgentAuditEvents(ctx context.Context, input AgentAuditEventsRequestInput, opts ...CallOption) (*AgentAuditEventsReply, error) {
+	var out *AgentAuditEventsReply
+	err := c.t.call(ctx, "management.agentAuditEvents", input, nil, &out, opts)
+	return out, err
+}
+
+// AgentAuditEventsPages iterates over the pages of [ManagementClient.AgentAuditEvents], starting at input.Cursor.
+// Each page is a new request with a new request ID.
+// Iteration stops after the complete page or at the first error.
+// A page that requires a refresh yields [ErrRefreshRequired] and stops.
+// An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE [Problem] in place of the page and stops.
+func (c *ManagementClient) AgentAuditEventsPages(ctx context.Context, input AgentAuditEventsRequestInput) iter.Seq2[*AgentAuditEventPage, error] {
+	return paginate(input.Cursor, pageCursor{"String", serverOrder}, func(cursor *string) (*AgentAuditEventPage, pageState, error) {
+		request := input
+		request.Cursor = cursor
+		out, err := c.AgentAuditEvents(ctx, request)
+		if err != nil {
+			return nil, pageState{}, err
+		}
+		if out.Result == nil {
+			return nil, pageState{}, missingPage()
+		}
+		page := out.Result
+		return page, pageState{page.Complete, page.RefreshRequired, page.NextCursor}, nil
+	})
+}
+
+// OrganizationSpend calls the management.organizationSpend query.
+// Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+//
+// Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId.
+// Authorized by portalCredential (condition: owner).
+func (c *ManagementClient) OrganizationSpend(ctx context.Context, input OrganizationSpendRequestInput, opts ...CallOption) (*OrganizationSpendReply, error) {
+	var out *OrganizationSpendReply
+	err := c.t.call(ctx, "management.organizationSpend", input, nil, &out, opts)
 	return out, err
 }
 
@@ -958,5 +1059,101 @@ func (c *ManagementClient) DisableWebhook(ctx context.Context, input DisableWebh
 func (c *ManagementClient) ReplayWebhookDeliveries(ctx context.Context, input ReplayWebhookDeliveriesRequestInput, opts ...CallOption) (*ReplayWebhookDeliveriesReply, error) {
 	var out *ReplayWebhookDeliveriesReply
 	err := c.t.call(ctx, "management.replayWebhookDeliveries", input, nil, &out, opts)
+	return out, err
+}
+
+// RequestAgentSignup calls the management.requestAgentSignup mutation.
+// Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+//
+// Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+// Retry budget: 3 attempts within 60 seconds.
+// Sent without a bearer token as anonymous.
+func (c *ManagementClient) RequestAgentSignup(ctx context.Context, input RequestAgentSignupRequestInput, opts ...CallOption) (*RequestAgentSignupReply, error) {
+	var out *RequestAgentSignupReply
+	err := c.t.call(ctx, "management.requestAgentSignup", input, nil, &out, opts)
+	return out, err
+}
+
+// RejectAgentSignup calls the management.rejectAgentSignup mutation.
+// Reject a signup request from its approval link, optionally suppressing future requests to the email.
+//
+// Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+// Retry budget: 3 attempts within 60 seconds.
+// Sent without a bearer token as anonymous (condition: approvalToken).
+func (c *ManagementClient) RejectAgentSignup(ctx context.Context, input RejectAgentSignupRequestInput, opts ...CallOption) (*RejectAgentSignupReply, error) {
+	var out *RejectAgentSignupReply
+	err := c.t.call(ctx, "management.rejectAgentSignup", input, nil, &out, opts)
+	return out, err
+}
+
+// ApproveAgentSignup calls the management.approveAgentSignup mutation.
+// Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+//
+// Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+// Retry budget: 3 attempts within 60 seconds.
+// Authorized by portalCredential (condition: approvalToken).
+func (c *ManagementClient) ApproveAgentSignup(ctx context.Context, input ApproveAgentSignupRequestInput, opts ...CallOption) (*ApproveAgentSignupReply, error) {
+	var out *ApproveAgentSignupReply
+	err := c.t.call(ctx, "management.approveAgentSignup", input, nil, &out, opts)
+	return out, err
+}
+
+// IssueAgentKey calls the management.issueAgentKey mutation.
+// Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+//
+// Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+// Retry budget: 3 attempts within 60 seconds.
+// Authorized by agentVerifier (condition: activeGrant).
+func (c *ManagementClient) IssueAgentKey(ctx context.Context, input IssueAgentKeyRequestInput, opts ...CallOption) (*IssueAgentKeyReply, error) {
+	var out *IssueAgentKeyReply
+	err := c.t.call(ctx, "management.issueAgentKey", input, nil, &out, opts)
+	return out, err
+}
+
+// AgentCredentialPermit calls the management.agentCredentialPermit mutation.
+// Issue a permit that authorizes the agent to redeem one of its key deliveries.
+//
+// Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+// Retry budget: 3 attempts within 60 seconds.
+// Authorized by agentVerifier (condition: activeGrant).
+func (c *ManagementClient) AgentCredentialPermit(ctx context.Context, input AgentCredentialPermitRequestInput, opts ...CallOption) (*AgentCredentialPermitReply, error) {
+	var out *AgentCredentialPermitReply
+	err := c.t.call(ctx, "management.agentCredentialPermit", input, nil, &out, opts)
+	return out, err
+}
+
+// RevokeAgentGrant calls the management.revokeAgentGrant mutation.
+// Revoke an agent grant and every key issued under it.
+//
+// Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+// Retry budget: 3 attempts within 60 seconds.
+// Authorized by portalCredential (condition: owner).
+func (c *ManagementClient) RevokeAgentGrant(ctx context.Context, input RevokeAgentGrantRequestInput, opts ...CallOption) (*RevokeAgentGrantReply, error) {
+	var out *RevokeAgentGrantReply
+	err := c.t.call(ctx, "management.revokeAgentGrant", input, nil, &out, opts)
+	return out, err
+}
+
+// SetSpendControls calls the management.setSpendControls mutation.
+// Set the organization's monthly spend cap and agent purchase limit.
+//
+// Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+// Retry budget: 3 attempts within 60 seconds.
+// Authorized by portalCredential (condition: owner).
+func (c *ManagementClient) SetSpendControls(ctx context.Context, input SetSpendControlsRequestInput, opts ...CallOption) (*SetSpendControlsReply, error) {
+	var out *SetSpendControlsReply
+	err := c.t.call(ctx, "management.setSpendControls", input, nil, &out, opts)
+	return out, err
+}
+
+// PurchaseAgentCredits calls the management.purchaseAgentCredits mutation.
+// Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
+//
+// Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+// Retry budget: 3 attempts within 60 seconds.
+// Authorized by agentVerifier (condition: activeGrant).
+func (c *ManagementClient) PurchaseAgentCredits(ctx context.Context, input PurchaseAgentCreditsRequestInput, opts ...CallOption) (*PurchaseAgentCreditsReply, error) {
+	var out *PurchaseAgentCreditsReply
+	err := c.t.call(ctx, "management.purchaseAgentCredits", input, nil, &out, opts)
 	return out, err
 }

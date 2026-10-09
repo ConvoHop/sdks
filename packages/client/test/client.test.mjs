@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopTransport, ConvoHopClient, ConversationStream, ConvoHopProblem, parseId, parseCounter, parseMessage, parseMembership, parseConversation, parseSearchHit } from "@convohop/client";
+import { ConvoHopTransport, ConvoHopClient, ConversationStream, ConvoHopProblem, operationCatalog, parseId, parseCounter, parseMessage, parseMembership, parseConversation, parseSearchHit } from "@convohop/client";
 import { event, full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID();
@@ -698,6 +698,12 @@ for (const [name, end, expected] of [
   ["a quota error", (socket, subscription) => socket.onmessage({ data: JSON.stringify({ type: "error", id: subscription.id,
     payload: [{ message: "Fixture quota", extensions: { ...quota, requestId: id() } }] }) }), ["QUOTA_EXCEEDED", 429, 60]],
   ["a plan-limit close", socket => socket.close(4403, "PLAN_LIMIT_EXCEEDED planLimit=conversations"), ["PLAN_LIMIT_EXCEEDED", 403, undefined]],
+  ["a spend-cap close", socket => socket.close(4402, "SPEND_CAP_REACHED meter=mau"), ["SPEND_CAP_REACHED", 402, undefined]],
+  ["an exhausted-credits close", socket => socket.close(4402, "CREDITS_EXHAUSTED meter=messages"), ["CREDITS_EXHAUSTED", 402, undefined]],
+  ["an exhausted-credits error", (socket, subscription) => socket.onmessage({ data: JSON.stringify({ type: "next", id: subscription.id,
+    payload: { errors: [{ message: "Prepaid credits are exhausted; add credits or raise the spend cap",
+      extensions: { code: "CREDITS_EXHAUSTED", outcome: "rejected", status: 402, meter: "mau", requestId: id() } }] } }) }),
+  ["CREDITS_EXHAUSTED", 402, undefined]],
   ["an authorization close", socket => socket.close(4408), ["UNAUTHENTICATED", 401, undefined]],
 ]) {
   test(`${name} stops realtime and reports its problem instead of reconnecting`, async t => {
@@ -732,6 +738,42 @@ test("a rate-limited close reconnects after its retryAfter even when connectivit
   assert.equal(setup.initialized, 2);
   assert.equal(sockets.length, 3);
   assert.equal(errors.length, 1);
+  assert.equal(replay.closed, false);
+});
+
+test("an unverified-spend close or error reconnects no sooner than its retryAfter, without a cap", async t => {
+  const setup = replayFixture(t, 0, { date: true }), { replay, sockets, errors } = setup;
+  await replay.start();
+  sockets[0].subscribe();
+  sockets[0].close(4503, "SPEND_UNVERIFIED retryAfter=30 meter=mau");
+  assert.deepEqual(errors.map(error => [error.code, error.status, error.outcome, error.retryAfter]), [["SPEND_UNVERIFIED", 503, "rejected", 30]]);
+  t.mock.timers.tick(20000); await drain();
+  setup.online(); await drain();
+  t.mock.timers.tick(9999); await drain();
+  assert.equal(setup.initialized, 0);
+  t.mock.timers.tick(1); await drain();
+  assert.deepEqual([setup.initialized, sockets.length], [1, 2]);
+  // The same refusal as a subscription error carries retryAfter as an extension.
+  const subscription = sockets[1].subscribe();
+  sockets[1].onmessage({ data: JSON.stringify({ type: "next", id: subscription.id, payload: { errors: [{ message: "Current spend cannot be verified",
+    extensions: { code: "SPEND_UNVERIFIED", outcome: "rejected", status: 503, retryAfter: 600, meter: "mau", requestId: id() } }] } }) });
+  assert.deepEqual(errors.map(error => [error.code, error.retryAfter]).at(-1), ["SPEND_UNVERIFIED", 600]);
+  assert.equal(sockets[1].closedWith, 4000);
+  // The floor is the authority's, beyond the 10 s backoff ceiling.
+  t.mock.timers.tick(599999); await drain();
+  assert.equal(setup.initialized, 1);
+  t.mock.timers.tick(1); await drain();
+  assert.deepEqual([setup.initialized, sockets.length], [2, 3]);
+  // A 4503 or 4402 whose reason names no listed code reconnects after the usual backoff.
+  sockets[2].subscribe();
+  sockets[2].close(4402, "");
+  t.mock.timers.tick(1000); await drain();
+  assert.equal(sockets.length, 4);
+  sockets[3].subscribe();
+  sockets[3].close(4503, "MAINTENANCE window=1");
+  t.mock.timers.tick(1000); await drain();
+  assert.equal(sockets.length, 5);
+  assert.equal(errors.length, 2);
   assert.equal(replay.closed, false);
 });
 
@@ -863,6 +905,31 @@ test(`unknown ${operation} needs a fresh permit without unauthorized request loo
   await assert.rejects(transport.retry(requestId), { code: "CREDENTIAL_REQUIRED", requestId });
   assert.equal(writes, 1);
   assert.ok([...saved.values.values()].every(value => !value.includes("never-persist")));
+});
+
+test("an unknown replay-only request is never looked up; only an explicit resend of the same request settles it", async () => {
+  const requestId = id(), sent = [], input = { scopes: ["messageRead"], expiresAt: "2026-12-01T00:00:00.000Z" };
+  let lose = true;
+  const transport = new ConvoHopTransport({ baseUrl: "http://localhost:18080", credential: "fixture-agent-verifier",
+    namespace: "replay-only", recoveryStorage: storage(),
+    fetch: async (_url, options) => {
+      const request = JSON.parse(options.body);
+      sent.push([request.operationName, request.variables.context.requestId]);
+      if (lose) { lose = false; throw new Error("response lost"); }
+      return response("committed", { operationId: id(), state: "pending", scopes: input.scopes, expiresAt: input.expiresAt,
+        keyId: null, deliveryId: null, deliveryExpiresAt: null }, options, { replayed: true });
+    } });
+  assert.equal(operationCatalog["management.issueAgentKey"].idempotency, "replayOnly");
+  await assert.rejects(transport.execute("management.issueAgentKey", undefined, input, requestId), { code: "TRANSPORT_UNKNOWN", requestId });
+  await assert.rejects(transport.retry(requestId), { code: "INVALID_REQUEST", requestId, outcome: "unknown", status: 400,
+    message: /cannot be looked up; send the same request ID and payload again explicitly/ });
+  assert.deepEqual(sent, [["ManagementIssueAgentKey", requestId]], "retry sends no request lookup");
+  await assert.rejects(transport.execute("management.issueAgentKey", undefined, { ...input, scopes: ["callRead"] }, requestId),
+    { code: "IDEMPOTENCY_CONFLICT", requestId });
+  const settled = await transport.execute("management.issueAgentKey", undefined, input, requestId);
+  assert.equal(settled.status, "committed");
+  assert.equal(settled.result.state, "pending");
+  assert.deepEqual(sent, [["ManagementIssueAgentKey", requestId], ["ManagementIssueAgentKey", requestId]]);
 });
 
 test("missing committed receipt metadata stays unknown despite a complete result object", async () => {

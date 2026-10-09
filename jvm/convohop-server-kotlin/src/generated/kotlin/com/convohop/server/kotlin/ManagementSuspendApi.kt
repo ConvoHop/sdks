@@ -2,6 +2,19 @@
 package com.convohop.server.kotlin
 
 import com.convohop.server.api.ManagementApi
+import com.convohop.server.model.AgentAuditEventPage
+import com.convohop.server.model.AgentAuditEventsReply
+import com.convohop.server.model.AgentAuditEventsRequestInput
+import com.convohop.server.model.AgentCredentialPermitReply
+import com.convohop.server.model.AgentCredentialPermitRequestInput
+import com.convohop.server.model.AgentGrantPage
+import com.convohop.server.model.AgentGrantsReply
+import com.convohop.server.model.AgentGrantsRequestInput
+import com.convohop.server.model.AgentSignupForApprovalReply
+import com.convohop.server.model.AgentSignupForApprovalRequestInput
+import com.convohop.server.model.AgentSignupReply
+import com.convohop.server.model.ApproveAgentSignupReply
+import com.convohop.server.model.ApproveAgentSignupRequestInput
 import com.convohop.server.model.CapabilitiesReply
 import com.convohop.server.model.ConfigureWebhookReply
 import com.convohop.server.model.ConfigureWebhookRequestInput
@@ -31,10 +44,14 @@ import com.convohop.server.model.GetOrganizationReply
 import com.convohop.server.model.GetOrganizationRequestInput
 import com.convohop.server.model.GetProjectReply
 import com.convohop.server.model.GetProjectRequestInput
+import com.convohop.server.model.IssueAgentKeyReply
+import com.convohop.server.model.IssueAgentKeyRequestInput
 import com.convohop.server.model.IssueBackendKeyReply
 import com.convohop.server.model.IssueBackendKeyRequestInput
 import com.convohop.server.model.OrganizationBillingReply
 import com.convohop.server.model.OrganizationBillingRequestInput
+import com.convohop.server.model.OrganizationSpendReply
+import com.convohop.server.model.OrganizationSpendRequestInput
 import com.convohop.server.model.OrganizationUsageReply
 import com.convohop.server.model.OrganizationUsageRequestInput
 import com.convohop.server.model.OrganizationsReply
@@ -44,16 +61,26 @@ import com.convohop.server.model.ProjectPolicyReply
 import com.convohop.server.model.ProjectPolicyRequestInput
 import com.convohop.server.model.ProjectUsageReply
 import com.convohop.server.model.ProjectUsageRequestInput
+import com.convohop.server.model.PurchaseAgentCreditsReply
+import com.convohop.server.model.PurchaseAgentCreditsRequestInput
+import com.convohop.server.model.RejectAgentSignupReply
+import com.convohop.server.model.RejectAgentSignupRequestInput
 import com.convohop.server.model.ReplayWebhookDeliveriesReply
 import com.convohop.server.model.ReplayWebhookDeliveriesRequestInput
+import com.convohop.server.model.RequestAgentSignupReply
+import com.convohop.server.model.RequestAgentSignupRequestInput
 import com.convohop.server.model.ResolveRequestReply
 import com.convohop.server.model.ResolveRequestRequestInput
 import com.convohop.server.model.ResumeOperationReply
 import com.convohop.server.model.ResumeOperationRequestInput
+import com.convohop.server.model.RevokeAgentGrantReply
+import com.convohop.server.model.RevokeAgentGrantRequestInput
 import com.convohop.server.model.RevokeBackendKeyReply
 import com.convohop.server.model.RevokeBackendKeyRequestInput
 import com.convohop.server.model.RotateWebhookSecretReply
 import com.convohop.server.model.RotateWebhookSecretRequestInput
+import com.convohop.server.model.SetSpendControlsReply
+import com.convohop.server.model.SetSpendControlsRequestInput
 import com.convohop.server.model.UpdateWebhookReply
 import com.convohop.server.model.UpdateWebhookRequestInput
 import com.convohop.server.model.WebhookDeliveriesReply
@@ -62,6 +89,7 @@ import com.convohop.server.model.WebhookEndpointsReply
 import com.convohop.server.model.WebhookEndpointsRequestInput
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Suspending view of [ManagementApi]. Each call runs on [dispatcher]. Cancelling the calling
@@ -128,6 +156,40 @@ public class ManagementSuspendApi(
     public suspend fun getOperation(input: GetOperationRequestInput): GetOperationReply =
         interruptible(dispatcher) { api.getOperation(input) }
 
+    /** Suspending [ManagementApi.agentSignupForApproval]. */
+    public suspend fun agentSignupForApproval(input: AgentSignupForApprovalRequestInput): AgentSignupForApprovalReply =
+        interruptible(dispatcher) { api.agentSignupForApproval(input) }
+
+    /** Suspending [ManagementApi.agentSignup]. */
+    public suspend fun agentSignup(): AgentSignupReply =
+        interruptible(dispatcher) { api.agentSignup() }
+
+    /** Suspending [ManagementApi.agentGrants]. */
+    public suspend fun agentGrants(input: AgentGrantsRequestInput): AgentGrantsReply =
+        interruptible(dispatcher) { api.agentGrants(input) }
+
+    /**
+     * [ManagementApi.agentGrantsPages] as a cold flow. Each collection starts again from [input], and each page is requested
+     * on [dispatcher] when the collector is ready for it.
+     */
+    public fun agentGrantsPages(input: AgentGrantsRequestInput): Flow<AgentGrantPage> =
+        pageFlow(dispatcher, api.agentGrantsPages(input))
+
+    /** Suspending [ManagementApi.agentAuditEvents]. */
+    public suspend fun agentAuditEvents(input: AgentAuditEventsRequestInput): AgentAuditEventsReply =
+        interruptible(dispatcher) { api.agentAuditEvents(input) }
+
+    /**
+     * [ManagementApi.agentAuditEventsPages] as a cold flow. Each collection starts again from [input], and each page is requested
+     * on [dispatcher] when the collector is ready for it.
+     */
+    public fun agentAuditEventsPages(input: AgentAuditEventsRequestInput): Flow<AgentAuditEventPage> =
+        pageFlow(dispatcher, api.agentAuditEventsPages(input))
+
+    /** Suspending [ManagementApi.organizationSpend]. */
+    public suspend fun organizationSpend(input: OrganizationSpendRequestInput): OrganizationSpendReply =
+        interruptible(dispatcher) { api.organizationSpend(input) }
+
     /** Suspending [ManagementApi.createOrganization]. */
     public suspend fun createOrganization(input: CreateOrganizationRequestInput, requestId: String? = null): CreateOrganizationReply =
         interruptible(dispatcher) { api.createOrganization(input, requestId) }
@@ -191,6 +253,38 @@ public class ManagementSuspendApi(
     /** Suspending [ManagementApi.replayWebhookDeliveries]. */
     public suspend fun replayWebhookDeliveries(input: ReplayWebhookDeliveriesRequestInput, requestId: String? = null): ReplayWebhookDeliveriesReply =
         interruptible(dispatcher) { api.replayWebhookDeliveries(input, requestId) }
+
+    /** Suspending [ManagementApi.requestAgentSignup]. */
+    public suspend fun requestAgentSignup(input: RequestAgentSignupRequestInput, requestId: String? = null): RequestAgentSignupReply =
+        interruptible(dispatcher) { api.requestAgentSignup(input, requestId) }
+
+    /** Suspending [ManagementApi.rejectAgentSignup]. */
+    public suspend fun rejectAgentSignup(input: RejectAgentSignupRequestInput, requestId: String? = null): RejectAgentSignupReply =
+        interruptible(dispatcher) { api.rejectAgentSignup(input, requestId) }
+
+    /** Suspending [ManagementApi.approveAgentSignup]. */
+    public suspend fun approveAgentSignup(input: ApproveAgentSignupRequestInput, requestId: String? = null): ApproveAgentSignupReply =
+        interruptible(dispatcher) { api.approveAgentSignup(input, requestId) }
+
+    /** Suspending [ManagementApi.issueAgentKey]. */
+    public suspend fun issueAgentKey(input: IssueAgentKeyRequestInput, requestId: String? = null): IssueAgentKeyReply =
+        interruptible(dispatcher) { api.issueAgentKey(input, requestId) }
+
+    /** Suspending [ManagementApi.agentCredentialPermit]. */
+    public suspend fun agentCredentialPermit(input: AgentCredentialPermitRequestInput, requestId: String? = null): AgentCredentialPermitReply =
+        interruptible(dispatcher) { api.agentCredentialPermit(input, requestId) }
+
+    /** Suspending [ManagementApi.revokeAgentGrant]. */
+    public suspend fun revokeAgentGrant(input: RevokeAgentGrantRequestInput, requestId: String? = null): RevokeAgentGrantReply =
+        interruptible(dispatcher) { api.revokeAgentGrant(input, requestId) }
+
+    /** Suspending [ManagementApi.setSpendControls]. */
+    public suspend fun setSpendControls(input: SetSpendControlsRequestInput, requestId: String? = null): SetSpendControlsReply =
+        interruptible(dispatcher) { api.setSpendControls(input, requestId) }
+
+    /** Suspending [ManagementApi.purchaseAgentCredits]. */
+    public suspend fun purchaseAgentCredits(input: PurchaseAgentCreditsRequestInput, requestId: String? = null): PurchaseAgentCreditsReply =
+        interruptible(dispatcher) { api.purchaseAgentCredits(input, requestId) }
 }
 
 /** A suspending view of this plane API whose calls run on [dispatcher]. */

@@ -5,6 +5,10 @@ import Foundation
 /// Each batch reaches `apply` once and in order. The cursor advances, and is stored, only after `apply` returns.
 /// When the realtime connection drops, the stream fills the gap from history before it reconnects. Close the stream
 /// when you no longer need it.
+///
+/// When the organization runs out of prepaid credits or reaches its monthly spend cap, the stream closes and reports
+/// `CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` with status 402. `SPEND_UNVERIFIED` goes to `onError` and the stream
+/// reconnects as it does after `RATE_LIMITED`, waiting at least its `retryAfter`.
 public actor ConversationStream {
     public nonisolated let conversationId: String
     private let client: ConvoHopClient

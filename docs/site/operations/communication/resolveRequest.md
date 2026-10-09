@@ -91,6 +91,47 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
           id
         }
         result {
+          agentGrant {
+            grantId
+            orgId
+            signupId
+            agentActorId
+            projectId
+            scopes
+            expiresAt
+            revokedAt
+            createdAt
+            keys {
+              operationId
+              state
+              scopes
+              expiresAt
+              keyId
+              deliveryId
+              deliveryExpiresAt
+            }
+          }
+          agentSignupStatus {
+            signupId
+            state
+            orgId
+            deploymentId
+            projectId
+            nextStep
+            scopes
+            grantExpiresAt
+            keys {
+              operationId
+              state
+              scopes
+              expiresAt
+              keyId
+              deliveryId
+              deliveryExpiresAt
+            }
+            incarnation
+            servingEpoch
+          }
           billingCheckoutSession {
             orgId
             planId
@@ -295,6 +336,28 @@ query CommunicationResolveRequest($context: RequestContextInput!, $input: Resolv
             name
             status
             revision
+          }
+          organizationSpend {
+            orgId
+            planId
+            currency
+            catalogVersion
+            monthlySpendCap
+            agentPurchaseLimit
+            updatedAt
+            monthlyMinimum
+            periodStart
+            periodEnd
+            credits
+            charges
+            margin
+            stop
+            refusedMeters
+            evaluatedAt
+            usageThrough
+            validUntil
+            minimumCredit
+            chargeLimit
           }
           principal {
             principalId

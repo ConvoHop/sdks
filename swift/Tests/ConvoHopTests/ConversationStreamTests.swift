@@ -582,6 +582,148 @@ final class ConversationStreamRealtimeTests: XCTestCase {
         }
     }
 
+    func testASpendStopCloseEndsTheStreamWithA402AndNeverReconnects() async throws {
+        let stops: [(Int, String, ConvoHopErrorCode, String)] = [
+            (4402, "SPEND_CAP_REACHED meter=mau", .spendCapReached, "SPEND_CAP_REACHED meter=mau"),
+            (4402, "CREDITS_EXHAUSTED meter=messages", .creditsExhausted, "CREDITS_EXHAUSTED meter=messages"),
+            // The reason's code decides, whatever the close code.
+            (4000, "  SPEND_CAP_REACHED   meter=mau ", .spendCapReached, "SPEND_CAP_REACHED meter=mau"),
+            (4402, "CREDITS_EXHAUSTED meter=", .creditsExhausted, "CREDITS_EXHAUSTED meter="),
+        ]
+        for (closeCode, reason, code, words) in stops {
+            let h = try await Harness.make()
+            await EventLog(events: 1).serve(h.http)
+            let delivery = Delivery()
+            let stream = try await delivery.watch(h.client)
+            let socket = try await h.sockets.connection(0)
+            let subscription = try await subscribe(socket, stream)
+
+            socket.deliver(.closed(code: closeCode, reason: reason))
+            try await eventually("closed by \(reason)") { await stream.isClosed }
+            XCTAssertEqual(delivery.errors.count, 1, reason)
+            let problem = try XCTUnwrap(delivery.problems.first, reason)
+            XCTAssertEqual(problem.code, code, reason)
+            XCTAssertEqual(problem.status, 402, reason)
+            XCTAssertEqual(problem.outcome, .rejected, reason)
+            XCTAssertEqual(problem.requestId, subscription.id, reason)
+            XCTAssertNil(problem.retryAfter, reason)
+            XCTAssertEqual(problem.message, "Realtime connection closed: \(words)", reason)
+            XCTAssertEqual(h.clock.pendingSleeps, 0, reason)
+            XCTAssertEqual(h.sockets.connections.count, 1, reason)
+        }
+    }
+
+    func testACloseWhoseReasonNamesNoSpendCodeReconnectsAfterTheBackoff() async throws {
+        let closes: [(Int, String)] = [
+            (4402, ""), (4402, "Payment required"), (4402, "spend_cap_reached meter=mau"),
+            (4402, "SPEND_CAP_REACHEDX meter=mau"), (4503, ""), (4503, "MAINTENANCE window=1"),
+        ]
+        for (closeCode, reason) in closes {
+            let name = "\(closeCode) \"\(reason)\""
+            let h = try await Harness.make()
+            await EventLog(events: 1).serve(h.http)
+            let delivery = Delivery()
+            let stream = try await delivery.watch(h.client)
+            let first = try await h.sockets.connection(0)
+            _ = try await subscribe(first, stream)
+
+            first.deliver(.closed(code: closeCode, reason: reason))
+            try await eventually("reconnect timer after \(name)") { h.clock.pendingSleeps == 1 }
+            XCTAssertEqual(h.clock.deadlines, [h.clock.now + 1000], name)
+            // The SDK never invents a spend code the authority didn't send.
+            XCTAssertTrue(delivery.errors.isEmpty, name)
+            h.clock.advance(by: 1000)
+            _ = try await h.sockets.connection(1)
+            let closed = await stream.isClosed
+            XCTAssertFalse(closed, name)
+            await stream.close()
+        }
+    }
+
+    func testUnverifiedSpendReconnectsNoSoonerThanItsRetryAfter() async throws {
+        let h = try await Harness.make()
+        await EventLog(events: 1).serve(h.http)
+        let delivery = Delivery()
+        let stream = try await delivery.watch(h.client)
+        let first = try await h.sockets.connection(0)
+        let subscription = try await subscribe(first, stream)
+
+        first.deliver(.closed(code: 4503, reason: "SPEND_UNVERIFIED retryAfter=30 meter=mau"))
+        try await eventually("reconnect timer") { h.clock.pendingSleeps == 1 }
+        XCTAssertEqual(h.clock.deadlines, [h.clock.now + 30_000])
+        let unverified = try XCTUnwrap(delivery.problems.first)
+        XCTAssertEqual(unverified.code, .spendUnverified)
+        XCTAssertEqual(unverified.status, 503)
+        XCTAssertEqual(unverified.outcome, .rejected)
+        XCTAssertEqual(unverified.requestId, subscription.id)
+        XCTAssertEqual(unverified.retryAfter, 30)
+        XCTAssertEqual(unverified.message, "Realtime connection closed: SPEND_UNVERIFIED retryAfter=30 meter=mau")
+        let closed = await stream.isClosed
+        XCTAssertFalse(closed)
+
+        h.clock.advance(by: 30_000)
+        let second = try await h.sockets.connection(1)
+        _ = try await subscribe(second, stream)
+        second.deliver(.closed(code: 4503, reason: "SPEND_UNVERIFIED meter=mau"))
+        try await eventually("usual backoff") { h.clock.pendingSleeps == 1 }
+        XCTAssertNil(delivery.problems.last?.retryAfter, "The SDK never invents a retryAfter")
+        XCTAssertEqual(h.clock.deadlines, [h.clock.now + 1000])
+
+        h.clock.advance(by: 1000)
+        let third = try await h.sockets.connection(2)
+        _ = try await subscribe(third, stream)
+        third.deliver(.closed(code: 4402, reason: "SPEND_UNVERIFIED retryAfter=400 meter=mau"))
+        try await eventually("long wait") { h.clock.pendingSleeps == 1 }
+        XCTAssertEqual(delivery.problems.last?.status, 503, "The reason's code decides, whatever the close code")
+        XCTAssertEqual(h.clock.deadlines, [h.clock.now + 400_000], "The 10 s backoff ceiling doesn't shorten it")
+        XCTAssertEqual(delivery.problems.count, 3)
+        XCTAssertEqual(h.sockets.connections.count, 3)
+        await stream.close()
+    }
+
+    func testAnErrorFramesRetryAfterDelaysTheReconnectAndASpendStopEndsTheStream() async throws {
+        let h = try await Harness.make()
+        await EventLog(events: 1).serve(h.http)
+        let delivery = Delivery()
+        let stream = try await delivery.watch(h.client)
+        let first = try await h.sockets.connection(0)
+        let subscription = try await subscribe(first, stream)
+
+        first.receive([
+            "type": "error", "id": .string(subscription.id),
+            "payload": [problem("SPEND_UNVERIFIED", status: 503, retryAfter: 20)],
+        ])
+        try await eventually("authority wait") { h.clock.pendingSleeps == 1 }
+        XCTAssertEqual(h.clock.deadlines, [h.clock.now + 20_000])
+        XCTAssertEqual(delivery.problems.last?.code, .spendUnverified)
+        XCTAssertEqual(delivery.problems.last?.retryAfter, 20)
+        XCTAssertEqual(first.closedByClient, 4000)
+
+        h.clock.advance(by: 20_000)
+        let second = try await h.sockets.connection(1)
+        let moved = try await subscribe(second, stream)
+        second.receive([
+            "type": "error", "id": .string(moved.id), "payload": [problem("WRONG_REGION", status: nil, retryAfter: 15)],
+        ])
+        try await eventually("region wait") { h.clock.pendingSleeps == 1 }
+        XCTAssertEqual(h.clock.deadlines, [h.clock.now + 15_000], "A terminal WRONG_REGION also honors retryAfter")
+        XCTAssertEqual(delivery.problems.last?.code, .wrongRegion)
+
+        h.clock.advance(by: 15_000)
+        let third = try await h.sockets.connection(2)
+        let stopped = try await subscribe(third, stream)
+        third.receive([
+            "type": "next", "id": .string(stopped.id),
+            "payload": ["errors": [problem("CREDITS_EXHAUSTED", status: 402)]],
+        ])
+        try await eventually("closed") { await stream.isClosed }
+        XCTAssertEqual(delivery.problems.last?.code, .creditsExhausted)
+        XCTAssertEqual(delivery.problems.last?.status, 402)
+        XCTAssertNil(delivery.problems.last?.retryAfter)
+        XCTAssertEqual(h.clock.pendingSleeps, 0)
+        XCTAssertEqual(h.sockets.connections.count, 3)
+    }
+
     func testResubscribesWhenTheAuthorityCompletesTheSubscription() async throws {
         let h = try await Harness.make()
         await EventLog(events: 1).serve(h.http)

@@ -186,5 +186,39 @@ namespace ConvoHop.Api
             if (input is null) throw new global::System.ArgumentNullException(nameof(input));
             return _executor.ExecuteAsync(global::ConvoHop.Operations.Beta.CreateWidget, input, requestId, null, cancellationToken);
         }
+
+        /// <summary>Ask for access without a credential.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>replayOnly</c>. Replay with the same requestId and input; resolveRequest cannot read the outcome.</para>
+        /// <para>Authorization: anon (condition challenge).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.Receipt> RequestAccessAsync(global::ConvoHop.Models.RequestAccessInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Beta.RequestAccess, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Claim a widget for an agent.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>replayOnly</c>. Replay with the same requestId and input; resolveRequest cannot read the outcome.</para>
+        /// <para>Authorization: agentToken.</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.Widget> ClaimWidgetAsync(global::ConvoHop.Models.ClaimWidgetInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Beta.ClaimWidget, input, requestId, null, cancellationToken);
+        }
     }
 }

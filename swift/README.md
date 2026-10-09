@@ -217,6 +217,14 @@ start of the history this user may see.
 The first time a device watches a conversation, the replay starts from the
 beginning of the conversation.
 
+When the organization's prepaid credits run out or it reaches its monthly
+spend cap, the stream closes with a 402 `CREDITS_EXHAUSTED` or
+`SPEND_CAP_REACHED` `ConvoHopError` and doesn't reconnect;
+`ConvoHopConversationModel` is `.failed` until you call `start()` once the
+organization can pay again. While ConvoHop can't verify current spend, the
+stream reports `SPEND_UNVERIFIED` to `onError` and reconnects as it does after
+`RATE_LIMITED`, waiting at least its `retryAfter`.
+
 ## Offline: cache, outbox and conversation model
 
 For a chat screen, `ConvoHopConversationModel` puts the pieces together. It is

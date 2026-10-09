@@ -18,6 +18,10 @@ public enum ConvoHopWebSocketEvent: Sendable, Equatable {
 }
 
 /// One realtime connection. Implementations deliver events in order and finish `events` after `closed`.
+///
+/// Pass the server's close reason to `closed`. Without it, a close that should end the stream, such as a 4402
+/// `SPEND_CAP_REACHED` stop, looks like a dropped connection and the stream reconnects with backoff, and a close loses
+/// its `retryAfter`.
 public protocol ConvoHopWebSocket: AnyObject, Sendable {
     var events: AsyncStream<ConvoHopWebSocketEvent> { get }
     func send(_ text: String)

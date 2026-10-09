@@ -1,6 +1,6 @@
 # Java and Kotlin operation coverage
 
-The Java and Kotlin SDK members that send each API operation. 65 of the 68 operations that Java and Kotlin packages can send have a method.
+The Java and Kotlin SDK members that send each API operation. 65 of the 81 operations that Java and Kotlin packages can send have a method.
 
 ## Communication
 
@@ -67,6 +67,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md) | server | [`ManagementApi.webhookDeliveries`](server.md#managementapiwebhookdeliveries-method), [`ManagementSuspendApi.webhookDeliveries`](server-kotlin.md#managementsuspendapiwebhookdeliveries-method) |
 | [`management.resolveRequest`](../../operations/management/resolveRequest.md) | server | [`Requests.resolve`](server.md#requestsresolve-method), [`Requests.retry`](server.md#requestsretry-method), [`ManagementApi.resolveRequest`](server.md#managementapiresolverequest-method), [`ManagementSuspendApi.resolveRequest`](server-kotlin.md#managementsuspendapiresolverequest-method) |
 | [`management.getOperation`](../../operations/management/getOperation.md) | server | [`ManagementApi.getOperation`](server.md#managementapigetoperation-method), [`ManagementSuspendApi.getOperation`](server-kotlin.md#managementsuspendapigetoperation-method) |
+| [`management.agentSignupForApproval`](../../operations/management/agentSignupForApproval.md) | server | Not wrapped by a method |
+| [`management.agentSignup`](../../operations/management/agentSignup.md) | server | Not wrapped by a method |
+| [`management.agentGrants`](../../operations/management/agentGrants.md) | server | Not wrapped by a method |
+| [`management.agentAuditEvents`](../../operations/management/agentAuditEvents.md) | server | Not wrapped by a method |
+| [`management.organizationSpend`](../../operations/management/organizationSpend.md) | server | Not wrapped by a method |
 | [`management.createOrganization`](../../operations/management/createOrganization.md) | server | [`ManagementApi.createOrganization`](server.md#managementapicreateorganization-method), [`ManagementSuspendApi.createOrganization`](server-kotlin.md#managementsuspendapicreateorganization-method) |
 | [`management.createDeployment`](../../operations/management/createDeployment.md) | server | [`ManagementApi.createDeployment`](server.md#managementapicreatedeployment-method), [`ManagementSuspendApi.createDeployment`](server-kotlin.md#managementsuspendapicreatedeployment-method) |
 | [`management.createProject`](../../operations/management/createProject.md) | server | [`ManagementApi.createProject`](server.md#managementapicreateproject-method), [`ManagementSuspendApi.createProject`](server-kotlin.md#managementsuspendapicreateproject-method) |
@@ -83,3 +88,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md) | server | [`ManagementApi.rotateWebhookSecret`](server.md#managementapirotatewebhooksecret-method), [`ManagementSuspendApi.rotateWebhookSecret`](server-kotlin.md#managementsuspendapirotatewebhooksecret-method) |
 | [`management.disableWebhook`](../../operations/management/disableWebhook.md) | server | [`ManagementApi.disableWebhook`](server.md#managementapidisablewebhook-method), [`ManagementSuspendApi.disableWebhook`](server-kotlin.md#managementsuspendapidisablewebhook-method) |
 | [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md) | server | [`ManagementApi.replayWebhookDeliveries`](server.md#managementapireplaywebhookdeliveries-method), [`ManagementSuspendApi.replayWebhookDeliveries`](server-kotlin.md#managementsuspendapireplaywebhookdeliveries-method) |
+| [`management.requestAgentSignup`](../../operations/management/requestAgentSignup.md) | server | Not wrapped by a method |
+| [`management.rejectAgentSignup`](../../operations/management/rejectAgentSignup.md) | server | Not wrapped by a method |
+| [`management.approveAgentSignup`](../../operations/management/approveAgentSignup.md) | server | Not wrapped by a method |
+| [`management.issueAgentKey`](../../operations/management/issueAgentKey.md) | server | Not wrapped by a method |
+| [`management.agentCredentialPermit`](../../operations/management/agentCredentialPermit.md) | server | Not wrapped by a method |
+| [`management.revokeAgentGrant`](../../operations/management/revokeAgentGrant.md) | server | Not wrapped by a method |
+| [`management.setSpendControls`](../../operations/management/setSpendControls.md) | server | Not wrapped by a method |
+| [`management.purchaseAgentCredits`](../../operations/management/purchaseAgentCredits.md) | server | Not wrapped by a method |

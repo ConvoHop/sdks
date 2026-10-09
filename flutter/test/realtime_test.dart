@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:convohop/convohop.dart';
+import 'package:convohop/src/client.dart' show waitsOutRetryAfter;
+import 'package:convohop/src/failures.dart' show maxTimerDelayMs;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -258,10 +260,12 @@ void main() {
       });
     });
 
-    test('quota, plan-limit and authorization closes stop the stream and report their problem', () {
+    test('quota, plan-limit, spend and authorization closes stop the stream and report their problem', () {
       for (final (code, reason, expected) in <(int, String, Matcher)>[
         (4429, 'QUOTA_EXCEEDED retryAfter=60 meter=messages', _problem('QUOTA_EXCEEDED', 429, retryAfter: 60)),
         (4403, 'PLAN_LIMIT_EXCEEDED planLimit=participants', _problem('PLAN_LIMIT_EXCEEDED', 403)),
+        (4402, 'CREDITS_EXHAUSTED meter=mau', _problem('CREDITS_EXHAUSTED', 402)),
+        (4402, 'SPEND_CAP_REACHED meter=mau', _problem('SPEND_CAP_REACHED', 402)),
         (4401, '', _problem('UNAUTHENTICATED', 401)),
         (4408, 'NEWLY_INVENTED retryAfter=1', _problem('UNAUTHENTICATED', 401)),
         (4409, 'session revoked', _problem('UNAUTHENTICATED', 401)),
@@ -279,6 +283,37 @@ void main() {
           expect(async.pendingTimers, isEmpty);
         });
       }
+    });
+
+    test('an unverified-spend close waits out its retryAfter, clamped to the longest timer, then reconnects', () {
+      fakeAsync((async) {
+        final setup = _Realtime(async)..acknowledge();
+        final since = setup.now;
+        setup.serverClose(4503, 'SPEND_UNVERIFIED retryAfter=5 meter=mau');
+        expect(setup.errors, <Matcher>[_problem('SPEND_UNVERIFIED', 503, retryAfter: 5)]);
+        expect((setup.stream.closed, waitsOutRetryAfter(setup.stream)), (false, true));
+        async.elapse(const Duration(milliseconds: 4999));
+        expect((waitsOutRetryAfter(setup.stream), setup.connector.sockets.length), (true, 1));
+        async.elapse(const Duration(milliseconds: 1));
+        expect(waitsOutRetryAfter(setup.stream), isFalse);
+        async.elapse(const Duration(milliseconds: 500));
+        expect(setup.routedAfter(since), inInclusiveRange(5000, 5499));
+        expect(setup.connector.sockets, hasLength(2));
+
+        // A retryAfter longer than a timer can wait holds for the longest one.
+        setup.acknowledge();
+        setup.serverClose(4503, 'SPEND_UNVERIFIED retryAfter=9999999999 meter=mau');
+        expect(setup.errors.last, _problem('SPEND_UNVERIFIED', 503, retryAfter: 9999999999));
+        expect(waitsOutRetryAfter(setup.stream), isTrue);
+        expect(async.pendingTimers.map((timer) => timer.duration), <Duration>[
+          const Duration(milliseconds: maxTimerDelayMs),
+          const Duration(milliseconds: maxTimerDelayMs),
+        ]);
+
+        setup.close();
+        expect(waitsOutRetryAfter(setup.stream), isFalse);
+        expect(async.pendingTimers, isEmpty);
+      });
     });
 
     test('a refused upgrade reconnects after backoff unless its connector reports a problem that stops', () {

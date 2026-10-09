@@ -644,6 +644,8 @@ Resolves a recorded mutation, resending it with its original identity only if th
 Returns the authority's resolution: `committed` or `accepted` once it has the request, else
 `notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,
 or one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.
+A `replayOnly` operation cannot be looked up and raises `INVALID_REQUEST`; call the operation again with
+the same `request_id` and input instead.
 
 Raises:
 
@@ -1675,6 +1677,8 @@ Resolves a recorded mutation, resending it with its original identity only if th
 Returns the authority's resolution: `committed` or `accepted` once it has the request, else
 `notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,
 or one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.
+A `replayOnly` operation cannot be looked up and raises `INVALID_REQUEST`; call the operation again with
+the same `request_id` and input instead.
 
 Raises:
 
@@ -1922,6 +1926,130 @@ Authorization: `portalCredential`, when `owner`: The caller owns the organizatio
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
 Sends [`management.getOperation`](../operations/management/getOperation.md).
+
+#### `AsyncConvoHopManagement.agent_signup_for_approval` method
+
+```python
+async def agent_signup_for_approval(self, *, approval_token: str) -> AgentSignupReview
+```
+
+Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+#### `AsyncConvoHopManagement.agent_signup` method
+
+```python
+async def agent_signup(self) -> AgentSignupStatus
+```
+
+Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+
+Authorization: `agentVerifier`, when `ownSignup`: The verifier is the one whose digest the signup request carries.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+#### `AsyncConvoHopManagement.agent_grants` method
+
+```python
+async def agent_grants(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AgentGrantPage
+```
+
+List an organization's agent grants with their keys, newest first.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_grants()` follows the cursor for you.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `AsyncConvoHopManagement.iter_agent_grants` method
+
+```python
+async def iter_agent_grants(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AsyncIterator[AgentGrant]
+```
+
+Iterate the `items` of `agent_grants()` across pages.
+
+Follows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `AsyncConvoHopManagement.agent_audit_events` method
+
+```python
+async def agent_audit_events(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AgentAuditEventPage
+```
+
+List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_audit_events()` follows the cursor for you.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `AsyncConvoHopManagement.iter_agent_audit_events` method
+
+```python
+async def iter_agent_audit_events(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AsyncIterator[AgentAuditEvent]
+```
+
+Iterate the `items` of `agent_audit_events()` across pages.
+
+Follows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `AsyncConvoHopManagement.organization_spend` method
+
+```python
+async def organization_spend(self, *, org_id: str) -> OrganizationSpend
+```
+
+Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
 #### `AsyncConvoHopManagement.create_organization` method
 
@@ -2343,6 +2471,195 @@ Parameters:
 
 Sends [`management.replayWebhookDeliveries`](../operations/management/replayWebhookDeliveries.md).
 
+#### `AsyncConvoHopManagement.request_agent_signup` method
+
+```python
+async def request_agent_signup(
+    self,
+    *,
+    owner_email: str,
+    poll_challenge: str,
+    organization_name: str,
+    agent_name: str,
+    suggested_scopes: Sequence[str],
+    purpose: str | None = None,
+    suggested_plan: str | None = None,
+    suggested_monthly_spend_cap: str | None = None,
+    request_id: str | None = None,
+) -> AgentSignupTicket
+```
+
+Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `AsyncConvoHopManagement.reject_agent_signup` method
+
+```python
+async def reject_agent_signup(
+    self,
+    *,
+    approval_token: str,
+    suppress_future_requests: bool,
+    request_id: str | None = None,
+) -> AgentSignupStatus
+```
+
+Reject a signup request from its approval link, optionally suppressing future requests to the email.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `AsyncConvoHopManagement.approve_agent_signup` method
+
+```python
+async def approve_agent_signup(
+    self,
+    *,
+    approval_token: str,
+    confirmation_code: str,
+    terms_ref: str,
+    plan: str,
+    scopes: Sequence[str],
+    monthly_spend_cap: str,
+    agent_purchase_limit: str | None = None,
+    grant_expires_at: str | None = None,
+    request_id: str | None = None,
+) -> AgentSignupStatus
+```
+
+Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+
+Authorization: `portalCredential`, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `AsyncConvoHopManagement.issue_agent_key` method
+
+```python
+async def issue_agent_key(
+    self,
+    *,
+    scopes: Sequence[str],
+    expires_at: str | None = None,
+    request_id: str | None = None,
+) -> AgentKey
+```
+
+Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `AsyncConvoHopManagement.agent_credential_permit` method
+
+```python
+async def agent_credential_permit(
+    self,
+    *,
+    delivery_id: str,
+    redemption_request_id: str,
+    request_id: str | None = None,
+) -> dict[str, Any]
+```
+
+Issue a permit that authorizes the agent to redeem one of its key deliveries.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `AsyncConvoHopManagement.revoke_agent_grant` method
+
+```python
+async def revoke_agent_grant(
+    self,
+    *,
+    grant_id: str,
+    revoke_issued_sessions: bool,
+    request_id: str | None = None,
+) -> AgentGrant
+```
+
+Revoke an agent grant and every key issued under it.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `AsyncConvoHopManagement.set_spend_controls` method
+
+```python
+async def set_spend_controls(
+    self,
+    *,
+    org_id: str,
+    monthly_spend_cap: str,
+    agent_purchase_limit: str | None = None,
+    request_id: str | None = None,
+) -> OrganizationSpend
+```
+
+Set the organization's monthly spend cap and agent purchase limit.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `AsyncConvoHopManagement.purchase_agent_credits` method
+
+```python
+async def purchase_agent_credits(
+    self,
+    *,
+    amount: str,
+    shared_payment_token: str,
+    request_id: str | None = None,
+) -> AgentPayment
+```
+
+Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
 ### `ConvoHop` class
 
 ```python
@@ -2431,6 +2748,8 @@ Resolves a recorded mutation, resending it with its original identity only if th
 Returns the authority's resolution: `committed` or `accepted` once it has the request, else
 `notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,
 or one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.
+A `replayOnly` operation cannot be looked up and raises `INVALID_REQUEST`; call the operation again with
+the same `request_id` and input instead.
 
 Raises:
 
@@ -3452,6 +3771,8 @@ Resolves a recorded mutation, resending it with its original identity only if th
 Returns the authority's resolution: `committed` or `accepted` once it has the request, else
 `notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,
 or one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.
+A `replayOnly` operation cannot be looked up and raises `INVALID_REQUEST`; call the operation again with
+the same `request_id` and input instead.
 
 Raises:
 
@@ -3699,6 +4020,130 @@ Authorization: `portalCredential`, when `owner`: The caller owns the organizatio
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
 Sends [`management.getOperation`](../operations/management/getOperation.md).
+
+#### `ConvoHopManagement.agent_signup_for_approval` method
+
+```python
+def agent_signup_for_approval(self, *, approval_token: str) -> AgentSignupReview
+```
+
+Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+#### `ConvoHopManagement.agent_signup` method
+
+```python
+def agent_signup(self) -> AgentSignupStatus
+```
+
+Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
+
+Authorization: `agentVerifier`, when `ownSignup`: The verifier is the one whose digest the signup request carries.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+#### `ConvoHopManagement.agent_grants` method
+
+```python
+def agent_grants(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AgentGrantPage
+```
+
+List an organization's agent grants with their keys, newest first.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_grants()` follows the cursor for you.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `ConvoHopManagement.iter_agent_grants` method
+
+```python
+def iter_agent_grants(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> Iterator[AgentGrant]
+```
+
+Iterate the `items` of `agent_grants()` across pages.
+
+Follows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `ConvoHopManagement.agent_audit_events` method
+
+```python
+def agent_audit_events(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> AgentAuditEventPage
+```
+
+List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
+
+Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_agent_audit_events()` follows the cursor for you.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `ConvoHopManagement.iter_agent_audit_events` method
+
+```python
+def iter_agent_audit_events(
+    self,
+    *,
+    org_id: str,
+    limit: int | None = None,
+    cursor: str | None = None,
+) -> Iterator[AgentAuditEvent]
+```
+
+Iterate the `items` of `agent_audit_events()` across pages.
+
+Follows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.
+
+Parameters:
+
+- `limit`: Defaults to `50` on the server.
+
+#### `ConvoHopManagement.organization_spend` method
+
+```python
+def organization_spend(self, *, org_id: str) -> OrganizationSpend
+```
+
+Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
 #### `ConvoHopManagement.create_organization` method
 
@@ -4120,6 +4565,195 @@ Parameters:
 
 Sends [`management.replayWebhookDeliveries`](../operations/management/replayWebhookDeliveries.md).
 
+#### `ConvoHopManagement.request_agent_signup` method
+
+```python
+def request_agent_signup(
+    self,
+    *,
+    owner_email: str,
+    poll_challenge: str,
+    organization_name: str,
+    agent_name: str,
+    suggested_scopes: Sequence[str],
+    purpose: str | None = None,
+    suggested_plan: str | None = None,
+    suggested_monthly_spend_cap: str | None = None,
+    request_id: str | None = None,
+) -> AgentSignupTicket
+```
+
+Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `ConvoHopManagement.reject_agent_signup` method
+
+```python
+def reject_agent_signup(
+    self,
+    *,
+    approval_token: str,
+    suppress_future_requests: bool,
+    request_id: str | None = None,
+) -> AgentSignupStatus
+```
+
+Reject a signup request from its approval link, optionally suppressing future requests to the email.
+
+Authorization: No credential (`anonymous`); the authority ignores the client's token, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `ConvoHopManagement.approve_agent_signup` method
+
+```python
+def approve_agent_signup(
+    self,
+    *,
+    approval_token: str,
+    confirmation_code: str,
+    terms_ref: str,
+    plan: str,
+    scopes: Sequence[str],
+    monthly_spend_cap: str,
+    agent_purchase_limit: str | None = None,
+    grant_expires_at: str | None = None,
+    request_id: str | None = None,
+) -> AgentSignupStatus
+```
+
+Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
+
+Authorization: `portalCredential`, when `approvalToken`: The input carries the approval token from the email sent to the request's named owner.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `ConvoHopManagement.issue_agent_key` method
+
+```python
+def issue_agent_key(
+    self,
+    *,
+    scopes: Sequence[str],
+    expires_at: str | None = None,
+    request_id: str | None = None,
+) -> AgentKey
+```
+
+Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `ConvoHopManagement.agent_credential_permit` method
+
+```python
+def agent_credential_permit(
+    self,
+    *,
+    delivery_id: str,
+    redemption_request_id: str,
+    request_id: str | None = None,
+) -> dict[str, Any]
+```
+
+Issue a permit that authorizes the agent to redeem one of its key deliveries.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
+#### `ConvoHopManagement.revoke_agent_grant` method
+
+```python
+def revoke_agent_grant(
+    self,
+    *,
+    grant_id: str,
+    revoke_issued_sessions: bool,
+    request_id: str | None = None,
+) -> AgentGrant
+```
+
+Revoke an agent grant and every key issued under it.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `ConvoHopManagement.set_spend_controls` method
+
+```python
+def set_spend_controls(
+    self,
+    *,
+    org_id: str,
+    monthly_spend_cap: str,
+    agent_purchase_limit: str | None = None,
+    request_id: str | None = None,
+) -> OrganizationSpend
+```
+
+Set the organization's monthly spend cap and agent purchase limit.
+
+Authorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.
+
+Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.
+
+#### `ConvoHopManagement.purchase_agent_credits` method
+
+```python
+def purchase_agent_credits(
+    self,
+    *,
+    amount: str,
+    shared_payment_token: str,
+    request_id: str | None = None,
+) -> AgentPayment
+```
+
+Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
+
+Authorization: `agentVerifier`, when `activeGrant`: The agent's grant is neither revoked nor expired, and its organization is active.
+
+Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
+
+Parameters:
+
+- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; to settle an unknown outcome, call again with the same `request_id` and input.
+
 ### `ConvoHopProblem` class
 
 ```python
@@ -4200,6 +4834,106 @@ def retryable(self) -> bool
 ```
 
 Whether the error catalog marks the code as retryable with the same request ID.
+
+### `CreditsExhaustedProblem` class
+
+```python
+class CreditsExhaustedProblem(ConvoHopProblem)
+```
+
+`CREDITS_EXHAUSTED`: prepaid credits are spent and the monthly spend cap is zero (402, not retryable).
+
+Billable usage beyond the plan's allowances is refused before any effect; usage within them continues. Add
+credits or raise the cap, then send a new request.
+
+#### `CreditsExhaustedProblem.code` property
+
+```python
+code: str
+```
+
+The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.request_id` property
+
+```python
+request_id: str
+```
+
+The request the problem belongs to.
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.outcome` property
+
+```python
+outcome: str
+```
+
+`rejected`, `committed`, `accepted` or `unknown`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.status` property
+
+```python
+status: int
+```
+
+The HTTP status, or 0 when no response was received or storage failed.
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.retry_after` property
+
+```python
+retry_after: int | None
+```
+
+Whole seconds to wait before resending the same request, when the authority sent a delay
+(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or
+resends on its own because of it.
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem` constructor
+
+```python
+def __init__(
+    self,
+    code: str,
+    request_id: str,
+    outcome: str,
+    status: int,
+    message: str,
+    *,
+    retry_after: int | None = None,
+) -> None
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.message` property
+
+```python
+@property
+def message(self) -> str
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.retryable` property
+
+```python
+@property
+def retryable(self) -> bool
+```
+
+Whether the error catalog marks the code as retryable with the same request ID.
+
+Inherited from `ConvoHopProblem`.
 
 ### `MemoryStorage` class
 
@@ -4791,6 +5525,205 @@ def message(self) -> str
 Inherited from `ConvoHopProblem`.
 
 #### `ScopeRequiredProblem.retryable` property
+
+```python
+@property
+def retryable(self) -> bool
+```
+
+Whether the error catalog marks the code as retryable with the same request ID.
+
+Inherited from `ConvoHopProblem`.
+
+### `SpendCapReachedProblem` class
+
+```python
+class SpendCapReachedProblem(ConvoHopProblem)
+```
+
+`SPEND_CAP_REACHED`: the month's charges reached the organization's spend limit (402, not retryable).
+
+Billable usage beyond the plan's allowances is refused before any effect; usage within them continues. Add
+credits or raise the cap, then send a new request.
+
+#### `SpendCapReachedProblem.code` property
+
+```python
+code: str
+```
+
+The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.request_id` property
+
+```python
+request_id: str
+```
+
+The request the problem belongs to.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.outcome` property
+
+```python
+outcome: str
+```
+
+`rejected`, `committed`, `accepted` or `unknown`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.status` property
+
+```python
+status: int
+```
+
+The HTTP status, or 0 when no response was received or storage failed.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.retry_after` property
+
+```python
+retry_after: int | None
+```
+
+Whole seconds to wait before resending the same request, when the authority sent a delay
+(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or
+resends on its own because of it.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem` constructor
+
+```python
+def __init__(
+    self,
+    code: str,
+    request_id: str,
+    outcome: str,
+    status: int,
+    message: str,
+    *,
+    retry_after: int | None = None,
+) -> None
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.message` property
+
+```python
+@property
+def message(self) -> str
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.retryable` property
+
+```python
+@property
+def retryable(self) -> bool
+```
+
+Whether the error catalog marks the code as retryable with the same request ID.
+
+Inherited from `ConvoHopProblem`.
+
+### `SpendUnverifiedProblem` class
+
+```python
+class SpendUnverifiedProblem(ConvoHopProblem)
+```
+
+`SPEND_UNVERIFIED`: current spend cannot be verified, so billable usage failed closed (503, retryable).
+
+Wait `retry_after` seconds, then resend with the same request ID.
+
+#### `SpendUnverifiedProblem.code` property
+
+```python
+code: str
+```
+
+The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.request_id` property
+
+```python
+request_id: str
+```
+
+The request the problem belongs to.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.outcome` property
+
+```python
+outcome: str
+```
+
+`rejected`, `committed`, `accepted` or `unknown`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.status` property
+
+```python
+status: int
+```
+
+The HTTP status, or 0 when no response was received or storage failed.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.retry_after` property
+
+```python
+retry_after: int | None
+```
+
+Whole seconds to wait before resending the same request, when the authority sent a delay
+(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or
+resends on its own because of it.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem` constructor
+
+```python
+def __init__(
+    self,
+    code: str,
+    request_id: str,
+    outcome: str,
+    status: int,
+    message: str,
+    *,
+    retry_after: int | None = None,
+) -> None
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.message` property
+
+```python
+@property
+def message(self) -> str
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.retryable` property
 
 ```python
 @property
@@ -6481,6 +7414,266 @@ class AddMembersPayload:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `AgentAuditEvent` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEvent:
+    event_id: str
+    org_id: str
+    grant_id: str | None
+    actor_kind: str
+    actor_id: str | None
+    kind: str
+    details: dict[str, Any] | None
+    occurred_at: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentAuditEventPage` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEventPage:
+    items: tuple[AgentAuditEvent, ...]
+    complete: bool
+    refresh_required: bool
+    next_cursor: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentAuditEventsReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEventsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentAuditEventPage | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentAuditEventsRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentAuditEventsRequestInput:
+    org_id: str
+    limit: int | None = None
+    cursor: str | None = None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentCredentialPermitReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentCredentialPermitReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: dict[str, Any] | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentCredentialPermitRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentCredentialPermitRequestInput:
+    delivery_id: str
+    redemption_request_id: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentGrant` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrant:
+    grant_id: str
+    org_id: str
+    signup_id: str
+    agent_actor_id: str
+    project_id: str | None
+    scopes: tuple[str, ...]
+    expires_at: str
+    revoked_at: str | None
+    created_at: str
+    keys: tuple[AgentKey, ...]
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentGrantPage` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrantPage:
+    items: tuple[AgentGrant, ...]
+    complete: bool
+    refresh_required: bool
+    next_cursor: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentGrantsReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrantsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentGrantPage | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentGrantsRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentGrantsRequestInput:
+    org_id: str
+    limit: int | None = None
+    cursor: str | None = None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentKey` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentKey:
+    operation_id: str
+    state: str
+    scopes: tuple[str, ...]
+    expires_at: str
+    key_id: str | None
+    delivery_id: str | None
+    delivery_expires_at: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentPayment` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentPayment:
+    payment_id: str
+    amount: str
+    currency: str
+    state: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupForApprovalReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupForApprovalReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupReview | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupForApprovalRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupForApprovalRequestInput:
+    approval_token: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupStatus | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupReview` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupReview:
+    signup_id: str
+    owner_email: str
+    organization_name: str
+    agent_name: str
+    purpose: str | None
+    suggested_plan: str | None
+    suggested_scopes: tuple[str, ...]
+    suggested_monthly_spend_cap: str | None
+    currency: str
+    expires_at: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupStatus` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupStatus:
+    signup_id: str
+    state: str
+    org_id: str | None
+    deployment_id: str | None
+    project_id: str | None
+    next_step: str | None
+    scopes: tuple[str, ...]
+    grant_expires_at: str | None
+    keys: tuple[AgentKey, ...]
+    incarnation: str | None
+    serving_epoch: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `AgentSignupTicket` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class AgentSignupTicket:
+    signup_id: str
+    confirmation_code: str
+    expires_at: str
+    poll_after_seconds: int
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `AlertLiveSessionInput` class
 
 ```python
@@ -6503,6 +7696,39 @@ class AlertLiveSessionPayload:
     committed_at: str
     replayed: bool
     result: LiveAlertBatch
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `ApproveAgentSignupReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class ApproveAgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupStatus | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `ApproveAgentSignupRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class ApproveAgentSignupRequestInput:
+    approval_token: str
+    confirmation_code: str
+    terms_ref: str
+    plan: str
+    scopes: Sequence[str]
+    monthly_spend_cap: str
+    agent_purchase_limit: str | None = None
+    grant_expires_at: str | None = None
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
@@ -7489,6 +8715,33 @@ class InboxRequestInput:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `IssueAgentKeyReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class IssueAgentKeyReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentKey | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `IssueAgentKeyRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class IssueAgentKeyRequestInput:
+    scopes: Sequence[str]
+    expires_at: str | None = None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `IssueBackendKeyReply` class
 
 ```python
@@ -8180,6 +9433,60 @@ class OrganizationPage:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `OrganizationSpend` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationSpend:
+    org_id: str
+    plan_id: str
+    currency: str
+    catalog_version: str
+    monthly_spend_cap: str | None
+    agent_purchase_limit: str | None
+    updated_at: str | None
+    monthly_minimum: str | None
+    period_start: str | None
+    period_end: str | None
+    credits: str | None
+    charges: str | None
+    margin: str | None
+    stop: str | None
+    refused_meters: tuple[str, ...]
+    evaluated_at: str | None
+    usage_through: str | None
+    valid_until: str | None
+    minimum_credit: str | None
+    charge_limit: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `OrganizationSpendReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationSpendReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: OrganizationSpend | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `OrganizationSpendRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class OrganizationSpendRequestInput:
+    org_id: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `OrganizationUsage` class
 
 ```python
@@ -8384,6 +9691,33 @@ class ProjectUsageRequestInput:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `PurchaseAgentCreditsReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class PurchaseAgentCreditsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentPayment | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `PurchaseAgentCreditsRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class PurchaseAgentCreditsRequestInput:
+    amount: str
+    shared_payment_token: str
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `ReadReceipt` class
 
 ```python
@@ -8395,6 +9729,33 @@ class ReadReceipt:
     delivered_through_sequence: str | None
     read_through_sequence: str | None
     updated_at: str | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `RejectAgentSignupReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RejectAgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupStatus | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `RejectAgentSignupRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RejectAgentSignupRequestInput:
+    approval_token: str
+    suppress_future_requests: bool
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
@@ -8483,6 +9844,39 @@ class ReplayWebhookDeliveriesRequestInput:
     effect_id: str | None = None
     since: str | None = None
     until: str | None = None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `RequestAgentSignupReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RequestAgentSignupReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentSignupTicket | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `RequestAgentSignupRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RequestAgentSignupRequestInput:
+    owner_email: str
+    poll_challenge: str
+    organization_name: str
+    agent_name: str
+    purpose: str | None = None
+    suggested_plan: str | None = None
+    suggested_scopes: Sequence[str]
+    suggested_monthly_spend_cap: str | None = None
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
@@ -8584,6 +9978,8 @@ class ResumeOperationRequestInput:
 ```python
 @dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
 class RetainedResult:
+    agent_grant: AgentGrant | None
+    agent_signup_status: AgentSignupStatus | None
     billing_checkout_session: BillingCheckoutSession | None
     billing_portal_session: BillingPortalSession | None
     broadcast_permission_changed: BroadcastPermissionChanged | None
@@ -8602,6 +9998,7 @@ class RetainedResult:
     message: Message | None
     message_ack: MessageAck | None
     organization: Organization | None
+    organization_spend: OrganizationSpend | None
     principal: Principal | None
     read_receipt: ReadReceipt | None
     session_bootstrap: SessionBootstrap | None
@@ -8611,6 +10008,33 @@ class RetainedResult:
 ```
 
 Exactly one typed field contains the retained, currently authorized receipt result.
+
+### `RevokeAgentGrantReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RevokeAgentGrantReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: AgentGrant | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `RevokeAgentGrantRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class RevokeAgentGrantRequestInput:
+    grant_id: str
+    revoke_issued_sessions: bool
+    def to_dict(self) -> dict[str, Any]: ...
+```
 
 ### `RevokeBackendKeyReply` class
 
@@ -8950,6 +10374,34 @@ class SetConversationMutePayload:
     def to_dict(self) -> dict[str, Any]: ...
 ```
 
+### `SetSpendControlsReply` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class SetSpendControlsReply:
+    status: str
+    request_id: str
+    server_time: str | None
+    receipt_id: str | None
+    committed_at: str | None
+    replayed: bool | None
+    operation: OperationRef | None
+    resource_ref: ResourceRef | None
+    result: OrganizationSpend | None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
+### `SetSpendControlsRequestInput` class
+
+```python
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+class SetSpendControlsRequestInput:
+    org_id: str
+    monthly_spend_cap: str
+    agent_purchase_limit: str | None = None
+    def to_dict(self) -> dict[str, Any]: ...
+```
+
 ### `UpdateConversationReply` class
 
 ```python
@@ -9271,7 +10723,7 @@ LiveSessionState: TypeAlias = Literal[
 
 # Python operation coverage
 
-The Python SDK members that send each API operation. 63 of the 68 operations that Python packages can send have a method.
+The Python SDK members that send each API operation. 63 of the 81 operations that Python packages can send have a method.
 
 ## Communication
 
@@ -9338,6 +10790,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.webhookDeliveries`](../operations/management/webhookDeliveries.md) | server | [`ConvoHopManagement.webhook_deliveries`](reference/convohop.md#convohopmanagementwebhook_deliveries-method), [`AsyncConvoHopManagement.webhook_deliveries`](reference/convohop.md#asyncconvohopmanagementwebhook_deliveries-method) |
 | [`management.resolveRequest`](../operations/management/resolveRequest.md) | server | [`ConvoHopManagement.resolve_request`](reference/convohop.md#convohopmanagementresolve_request-method), [`ConvoHopManagement.retry_request`](reference/convohop.md#convohopmanagementretry_request-method), [`AsyncConvoHopManagement.resolve_request`](reference/convohop.md#asyncconvohopmanagementresolve_request-method), [`AsyncConvoHopManagement.retry_request`](reference/convohop.md#asyncconvohopmanagementretry_request-method) |
 | [`management.getOperation`](../operations/management/getOperation.md) | server | [`ConvoHopManagement.get_operation`](reference/convohop.md#convohopmanagementget_operation-method), [`AsyncConvoHopManagement.get_operation`](reference/convohop.md#asyncconvohopmanagementget_operation-method) |
+| [`management.agentSignupForApproval`](../operations/management/agentSignupForApproval.md) | server | Not wrapped by a method |
+| [`management.agentSignup`](../operations/management/agentSignup.md) | server | Not wrapped by a method |
+| [`management.agentGrants`](../operations/management/agentGrants.md) | server | Not wrapped by a method |
+| [`management.agentAuditEvents`](../operations/management/agentAuditEvents.md) | server | Not wrapped by a method |
+| [`management.organizationSpend`](../operations/management/organizationSpend.md) | server | Not wrapped by a method |
 | [`management.createOrganization`](../operations/management/createOrganization.md) | server | [`ConvoHopManagement.create_organization`](reference/convohop.md#convohopmanagementcreate_organization-method), [`AsyncConvoHopManagement.create_organization`](reference/convohop.md#asyncconvohopmanagementcreate_organization-method) |
 | [`management.createDeployment`](../operations/management/createDeployment.md) | server | [`ConvoHopManagement.create_deployment`](reference/convohop.md#convohopmanagementcreate_deployment-method), [`AsyncConvoHopManagement.create_deployment`](reference/convohop.md#asyncconvohopmanagementcreate_deployment-method) |
 | [`management.createProject`](../operations/management/createProject.md) | server | [`ConvoHopManagement.create_project`](reference/convohop.md#convohopmanagementcreate_project-method), [`AsyncConvoHopManagement.create_project`](reference/convohop.md#asyncconvohopmanagementcreate_project-method) |
@@ -9354,3 +10811,11 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.rotateWebhookSecret`](../operations/management/rotateWebhookSecret.md) | server | [`ConvoHopManagement.rotate_webhook_secret`](reference/convohop.md#convohopmanagementrotate_webhook_secret-method), [`AsyncConvoHopManagement.rotate_webhook_secret`](reference/convohop.md#asyncconvohopmanagementrotate_webhook_secret-method) |
 | [`management.disableWebhook`](../operations/management/disableWebhook.md) | server | [`ConvoHopManagement.disable_webhook`](reference/convohop.md#convohopmanagementdisable_webhook-method), [`AsyncConvoHopManagement.disable_webhook`](reference/convohop.md#asyncconvohopmanagementdisable_webhook-method) |
 | [`management.replayWebhookDeliveries`](../operations/management/replayWebhookDeliveries.md) | server | [`ConvoHopManagement.replay_webhook_deliveries`](reference/convohop.md#convohopmanagementreplay_webhook_deliveries-method), [`AsyncConvoHopManagement.replay_webhook_deliveries`](reference/convohop.md#asyncconvohopmanagementreplay_webhook_deliveries-method) |
+| [`management.requestAgentSignup`](../operations/management/requestAgentSignup.md) | server | Not wrapped by a method |
+| [`management.rejectAgentSignup`](../operations/management/rejectAgentSignup.md) | server | Not wrapped by a method |
+| [`management.approveAgentSignup`](../operations/management/approveAgentSignup.md) | server | Not wrapped by a method |
+| [`management.issueAgentKey`](../operations/management/issueAgentKey.md) | server | Not wrapped by a method |
+| [`management.agentCredentialPermit`](../operations/management/agentCredentialPermit.md) | server | Not wrapped by a method |
+| [`management.revokeAgentGrant`](../operations/management/revokeAgentGrant.md) | server | Not wrapped by a method |
+| [`management.setSpendControls`](../operations/management/setSpendControls.md) | server | Not wrapped by a method |
+| [`management.purchaseAgentCredits`](../operations/management/purchaseAgentCredits.md) | server | Not wrapped by a method |

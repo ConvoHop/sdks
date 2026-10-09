@@ -151,6 +151,8 @@ test("Go page iterators check next cursors against the cursor scalar, and in the
     SearchPages: opaque,
     LiveSessionsPages: opaque,
     LiveSessionParticipantsPages: opaque,
+    AgentGrantsPages: opaque,
+    AgentAuditEventsPages: opaque,
   });
   assert.equal(iterators(reordered("sequence", "ascending")).MessagesPages, "Decimal ascendingOrder");
   assert.equal(iterators(reordered("cursor", "descending")).InboxPages, opaque, "string cursors stay opaque in an ordered style");

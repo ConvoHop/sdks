@@ -55,7 +55,9 @@ export const withheldOperations: Readonly<Record<string, string>> = {
   "communication.renewSession": "returns a user session token",
   "management.credentialPermit": "returns a credential delivery permit",
   "management.createBillingCheckoutSession": "returns a hosted billing link that grants access to whoever holds it",
-  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it"
+  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it",
+  "management.agentCredentialPermit": "returns a credential delivery permit",
+  "management.approveAgentSignup": "records an owner's consent to an agent signup; the owner gives it from the emailed approval link"
 };
 export const mcpTools: readonly McpToolDefinition[] = [
   {

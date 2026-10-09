@@ -626,6 +626,64 @@ Suspending `ManagementApi.getOperation`.
 
 Sends [`management.getOperation`](../../operations/management/getOperation.md).
 
+#### `ManagementSuspendApi.agentSignupForApproval` method
+
+```java
+public suspend fun agentSignupForApproval(input: AgentSignupForApprovalRequestInput): AgentSignupForApprovalReply
+```
+
+Suspending `ManagementApi.agentSignupForApproval`.
+
+#### `ManagementSuspendApi.agentSignup` method
+
+```java
+public suspend fun agentSignup(): AgentSignupReply
+```
+
+Suspending `ManagementApi.agentSignup`.
+
+#### `ManagementSuspendApi.agentGrants` method
+
+```java
+public suspend fun agentGrants(input: AgentGrantsRequestInput): AgentGrantsReply
+```
+
+Suspending `ManagementApi.agentGrants`.
+
+#### `ManagementSuspendApi.agentGrantsPages` method
+
+```java
+public fun agentGrantsPages(input: AgentGrantsRequestInput): Flow<AgentGrantPage>
+```
+
+`ManagementApi.agentGrantsPages` as a cold flow. Each collection starts again from `input`, and each page is requested
+on `dispatcher` when the collector is ready for it.
+
+#### `ManagementSuspendApi.agentAuditEvents` method
+
+```java
+public suspend fun agentAuditEvents(input: AgentAuditEventsRequestInput): AgentAuditEventsReply
+```
+
+Suspending `ManagementApi.agentAuditEvents`.
+
+#### `ManagementSuspendApi.agentAuditEventsPages` method
+
+```java
+public fun agentAuditEventsPages(input: AgentAuditEventsRequestInput): Flow<AgentAuditEventPage>
+```
+
+`ManagementApi.agentAuditEventsPages` as a cold flow. Each collection starts again from `input`, and each page is requested
+on `dispatcher` when the collector is ready for it.
+
+#### `ManagementSuspendApi.organizationSpend` method
+
+```java
+public suspend fun organizationSpend(input: OrganizationSpendRequestInput): OrganizationSpendReply
+```
+
+Suspending `ManagementApi.organizationSpend`.
+
 #### `ManagementSuspendApi.createOrganization` method
 
 ```java
@@ -781,6 +839,70 @@ public suspend fun replayWebhookDeliveries(input: ReplayWebhookDeliveriesRequest
 Suspending `ManagementApi.replayWebhookDeliveries`.
 
 Sends [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md).
+
+#### `ManagementSuspendApi.requestAgentSignup` method
+
+```java
+public suspend fun requestAgentSignup(input: RequestAgentSignupRequestInput, requestId: String? = null): RequestAgentSignupReply
+```
+
+Suspending `ManagementApi.requestAgentSignup`.
+
+#### `ManagementSuspendApi.rejectAgentSignup` method
+
+```java
+public suspend fun rejectAgentSignup(input: RejectAgentSignupRequestInput, requestId: String? = null): RejectAgentSignupReply
+```
+
+Suspending `ManagementApi.rejectAgentSignup`.
+
+#### `ManagementSuspendApi.approveAgentSignup` method
+
+```java
+public suspend fun approveAgentSignup(input: ApproveAgentSignupRequestInput, requestId: String? = null): ApproveAgentSignupReply
+```
+
+Suspending `ManagementApi.approveAgentSignup`.
+
+#### `ManagementSuspendApi.issueAgentKey` method
+
+```java
+public suspend fun issueAgentKey(input: IssueAgentKeyRequestInput, requestId: String? = null): IssueAgentKeyReply
+```
+
+Suspending `ManagementApi.issueAgentKey`.
+
+#### `ManagementSuspendApi.agentCredentialPermit` method
+
+```java
+public suspend fun agentCredentialPermit(input: AgentCredentialPermitRequestInput, requestId: String? = null): AgentCredentialPermitReply
+```
+
+Suspending `ManagementApi.agentCredentialPermit`.
+
+#### `ManagementSuspendApi.revokeAgentGrant` method
+
+```java
+public suspend fun revokeAgentGrant(input: RevokeAgentGrantRequestInput, requestId: String? = null): RevokeAgentGrantReply
+```
+
+Suspending `ManagementApi.revokeAgentGrant`.
+
+#### `ManagementSuspendApi.setSpendControls` method
+
+```java
+public suspend fun setSpendControls(input: SetSpendControlsRequestInput, requestId: String? = null): SetSpendControlsReply
+```
+
+Suspending `ManagementApi.setSpendControls`.
+
+#### `ManagementSuspendApi.purchaseAgentCredits` method
+
+```java
+public suspend fun purchaseAgentCredits(input: PurchaseAgentCreditsRequestInput, requestId: String? = null): PurchaseAgentCreditsReply
+```
+
+Suspending `ManagementApi.purchaseAgentCredits`.
 
 ## Functions
 

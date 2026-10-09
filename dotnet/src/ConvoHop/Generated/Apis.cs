@@ -1000,6 +1000,123 @@ namespace ConvoHop.Api
             return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.GetOperation, input, null, null, cancellationToken);
         }
 
+        /// <summary>Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>safe</c>. Read-only. Repeat freely; each attempt may use a new requestId.</para>
+        /// <para>Authorization: anonymous (condition approvalToken).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="cancellationToken">Stops waiting.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.AgentSignupForApprovalReply> AgentSignupForApprovalAsync(global::ConvoHop.Models.AgentSignupForApprovalRequestInput input, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.AgentSignupForApproval, input, null, null, cancellationToken);
+        }
+
+        /// <summary>Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>safe</c>. Read-only. Repeat freely; each attempt may use a new requestId.</para>
+        /// <para>Authorization: agentVerifier (condition ownSignup).</para>
+        /// </remarks>
+        /// <param name="cancellationToken">Stops waiting.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.AgentSignupReply> AgentSignupAsync(global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.AgentSignup, global::ConvoHop.NoInput.Value, null, null, cancellationToken);
+        }
+
+        /// <summary>List an organization's agent grants with their keys, newest first.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>safe</c>. Read-only. Repeat freely; each attempt may use a new requestId.</para>
+        /// <para>Authorization: portalCredential (condition owner).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="cancellationToken">Stops waiting.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.AgentGrantsReply> AgentGrantsAsync(global::ConvoHop.Models.AgentGrantsRequestInput input, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.AgentGrants, input, null, null, cancellationToken);
+        }
+
+        /// <summary>The pages of <see cref="AgentGrantsAsync"/>, requested lazily.</summary>
+        /// <remarks>
+        /// <para>Each page is requested when enumeration reaches it. Later requests set <c>cursor</c> to the previous page's <c>nextCursor</c>, and enumeration ends after the page whose <c>complete</c> is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.</para>
+        /// <para>Pagination: <c>cursor</c>. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.</para>
+        /// <para>Enumeration throws <see cref="T:ConvoHop.ConvoHopException"/> if the authority rejects a request or a page is malformed or does not advance, and <see cref="System.InvalidOperationException"/> if a page reports <c>refreshRequired</c>: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call <c>MoveNextAsync</c> again to repeat it; <c>await foreach</c> stops at the first exception.</para>
+        /// </remarks>
+        /// <param name="input">The first page's input.</param>
+        /// <param name="cancellationToken">Stops waiting for a page, together with any token passed to <c>WithCancellation</c>.</param>
+        /// <returns>The pages, in order.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="System.ArgumentException">The input's <c>cursor</c> is not a valid cursor.</exception>
+        public global::System.Collections.Generic.IAsyncEnumerable<global::ConvoHop.Models.AgentGrantPage> AgentGrantsPagesAsync(global::ConvoHop.Models.AgentGrantsRequestInput input, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            return global::ConvoHop.Internal.PageSequence.Create<global::ConvoHop.Models.AgentGrantsRequestInput, global::ConvoHop.Models.AgentGrantsReply, global::ConvoHop.Models.AgentGrantPage>(
+                _executor, global::ConvoHop.Operations.Management.AgentGrants, input, "cursor",
+                global::ConvoHop.Generated.GeneratedSchema.Types["String"], global::ConvoHop.Internal.PageOrder.Opaque,
+                reply => reply.Result, page => page.Complete, page => page.RefreshRequired, page => page.NextCursor,
+                cancellationToken);
+        }
+
+        /// <summary>List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>safe</c>. Read-only. Repeat freely; each attempt may use a new requestId.</para>
+        /// <para>Authorization: portalCredential (condition owner).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="cancellationToken">Stops waiting.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.AgentAuditEventsReply> AgentAuditEventsAsync(global::ConvoHop.Models.AgentAuditEventsRequestInput input, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.AgentAuditEvents, input, null, null, cancellationToken);
+        }
+
+        /// <summary>The pages of <see cref="AgentAuditEventsAsync"/>, requested lazily.</summary>
+        /// <remarks>
+        /// <para>Each page is requested when enumeration reaches it. Later requests set <c>cursor</c> to the previous page's <c>nextCursor</c>, and enumeration ends after the page whose <c>complete</c> is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.</para>
+        /// <para>Pagination: <c>cursor</c>. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.</para>
+        /// <para>Enumeration throws <see cref="T:ConvoHop.ConvoHopException"/> if the authority rejects a request or a page is malformed or does not advance, and <see cref="System.InvalidOperationException"/> if a page reports <c>refreshRequired</c>: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call <c>MoveNextAsync</c> again to repeat it; <c>await foreach</c> stops at the first exception.</para>
+        /// </remarks>
+        /// <param name="input">The first page's input.</param>
+        /// <param name="cancellationToken">Stops waiting for a page, together with any token passed to <c>WithCancellation</c>.</param>
+        /// <returns>The pages, in order.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="System.ArgumentException">The input's <c>cursor</c> is not a valid cursor.</exception>
+        public global::System.Collections.Generic.IAsyncEnumerable<global::ConvoHop.Models.AgentAuditEventPage> AgentAuditEventsPagesAsync(global::ConvoHop.Models.AgentAuditEventsRequestInput input, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            return global::ConvoHop.Internal.PageSequence.Create<global::ConvoHop.Models.AgentAuditEventsRequestInput, global::ConvoHop.Models.AgentAuditEventsReply, global::ConvoHop.Models.AgentAuditEventPage>(
+                _executor, global::ConvoHop.Operations.Management.AgentAuditEvents, input, "cursor",
+                global::ConvoHop.Generated.GeneratedSchema.Types["String"], global::ConvoHop.Internal.PageOrder.Opaque,
+                reply => reply.Result, page => page.Complete, page => page.RefreshRequired, page => page.NextCursor,
+                cancellationToken);
+        }
+
+        /// <summary>Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>safe</c>. Read-only. Repeat freely; each attempt may use a new requestId.</para>
+        /// <para>Authorization: portalCredential (condition owner).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="cancellationToken">Stops waiting.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.OrganizationSpendReply> OrganizationSpendAsync(global::ConvoHop.Models.OrganizationSpendRequestInput input, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.OrganizationSpend, input, null, null, cancellationToken);
+        }
+
         /// <summary>Create an organization.</summary>
         /// <remarks>
         /// <para>Idempotency: <c>idempotent</c>. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.</para>
@@ -1274,6 +1391,143 @@ namespace ConvoHop.Api
         {
             if (input is null) throw new global::System.ArgumentNullException(nameof(input));
             return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.ReplayWebhookDeliveries, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>replayOnly</c>. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.</para>
+        /// <para>Authorization: anonymous.</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.RequestAgentSignupReply> RequestAgentSignupAsync(global::ConvoHop.Models.RequestAgentSignupRequestInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.RequestAgentSignup, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Reject a signup request from its approval link, optionally suppressing future requests to the email.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>replayOnly</c>. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.</para>
+        /// <para>Authorization: anonymous (condition approvalToken).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.RejectAgentSignupReply> RejectAgentSignupAsync(global::ConvoHop.Models.RejectAgentSignupRequestInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.RejectAgentSignup, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>idempotent</c>. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.</para>
+        /// <para>Authorization: portalCredential (condition approvalToken).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.ApproveAgentSignupReply> ApproveAgentSignupAsync(global::ConvoHop.Models.ApproveAgentSignupRequestInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.ApproveAgentSignup, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>replayOnly</c>. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.</para>
+        /// <para>Authorization: agentVerifier (condition activeGrant).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.IssueAgentKeyReply> IssueAgentKeyAsync(global::ConvoHop.Models.IssueAgentKeyRequestInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.IssueAgentKey, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Issue a permit that authorizes the agent to redeem one of its key deliveries.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>replayOnly</c>. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.</para>
+        /// <para>Authorization: agentVerifier (condition activeGrant).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.AgentCredentialPermitReply> AgentCredentialPermitAsync(global::ConvoHop.Models.AgentCredentialPermitRequestInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.AgentCredentialPermit, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Revoke an agent grant and every key issued under it.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>idempotent</c>. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.</para>
+        /// <para>Authorization: portalCredential (condition owner).</para>
+        /// <para>Destructive: it deletes, revokes, removes, disables or ends something.</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.RevokeAgentGrantReply> RevokeAgentGrantAsync(global::ConvoHop.Models.RevokeAgentGrantRequestInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.RevokeAgentGrant, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Set the organization's monthly spend cap and agent purchase limit.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>idempotent</c>. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.</para>
+        /// <para>Authorization: portalCredential (condition owner).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.SetSpendControlsReply> SetSpendControlsAsync(global::ConvoHop.Models.SetSpendControlsRequestInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.SetSpendControls, input, requestId, null, cancellationToken);
+        }
+
+        /// <summary>Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.</summary>
+        /// <remarks>
+        /// <para>Idempotency: <c>replayOnly</c>. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.</para>
+        /// <para>Authorization: agentVerifier (condition activeGrant).</para>
+        /// </remarks>
+        /// <param name="input">The operation input.</param>
+        /// <param name="requestId">The request ID of an earlier attempt to retry with the same input, or null for a new one.</param>
+        /// <param name="cancellationToken">Stops waiting. A cancelled mutation has an unknown outcome.</param>
+        /// <returns>The authority result.</returns>
+        /// <exception cref="System.ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="T:ConvoHop.ConvoHopException">The request was invalid, the authority rejected it, or its outcome is unknown.</exception>
+        public global::System.Threading.Tasks.Task<global::ConvoHop.Models.PurchaseAgentCreditsReply> PurchaseAgentCreditsAsync(global::ConvoHop.Models.PurchaseAgentCreditsRequestInput input, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            if (input is null) throw new global::System.ArgumentNullException(nameof(input));
+            return _executor.ExecuteAsync(global::ConvoHop.Operations.Management.PurchaseAgentCredits, input, requestId, null, cancellationToken);
         }
     }
 }

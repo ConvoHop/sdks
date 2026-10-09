@@ -51,6 +51,96 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("replayed", "Boolean!"),
                     new global::ConvoHop.Internal.FieldShape("result", "ConversationMemberBatch!"),
                 }),
+            ["AgentAuditEvent"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("eventId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("orgId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("grantId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("actorKind", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("actorId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("kind", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("details", "Properties"),
+                    new global::ConvoHop.Internal.FieldShape("occurredAt", "String!"),
+                }),
+            ["AgentAuditEventPage"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("items", "[AgentAuditEvent!]!"),
+                    new global::ConvoHop.Internal.FieldShape("complete", "Boolean!"),
+                    new global::ConvoHop.Internal.FieldShape("refreshRequired", "Boolean!"),
+                    new global::ConvoHop.Internal.FieldShape("nextCursor", "String"),
+                }),
+            ["AgentGrant"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("grantId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("orgId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("signupId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("agentActorId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("projectId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("scopes", "[String!]!"),
+                    new global::ConvoHop.Internal.FieldShape("expiresAt", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("revokedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("createdAt", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("keys", "[AgentKey!]!"),
+                }),
+            ["AgentGrantPage"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("items", "[AgentGrant!]!"),
+                    new global::ConvoHop.Internal.FieldShape("complete", "Boolean!"),
+                    new global::ConvoHop.Internal.FieldShape("refreshRequired", "Boolean!"),
+                    new global::ConvoHop.Internal.FieldShape("nextCursor", "String"),
+                }),
+            ["AgentKey"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("operationId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("state", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("scopes", "[String!]!"),
+                    new global::ConvoHop.Internal.FieldShape("expiresAt", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("keyId", "String"),
+                    new global::ConvoHop.Internal.FieldShape("deliveryId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("deliveryExpiresAt", "String"),
+                }),
+            ["AgentPayment"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("paymentId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("amount", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("currency", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("state", "String!"),
+                }),
+            ["AgentSignupReview"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("signupId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("ownerEmail", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("organizationName", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("agentName", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("purpose", "String"),
+                    new global::ConvoHop.Internal.FieldShape("suggestedPlan", "String"),
+                    new global::ConvoHop.Internal.FieldShape("suggestedScopes", "[String!]!"),
+                    new global::ConvoHop.Internal.FieldShape("suggestedMonthlySpendCap", "String"),
+                    new global::ConvoHop.Internal.FieldShape("currency", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("expiresAt", "String!"),
+                }),
+            ["AgentSignupStatus"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("signupId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("state", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("orgId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("deploymentId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("projectId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("nextStep", "String"),
+                    new global::ConvoHop.Internal.FieldShape("scopes", "[String!]!"),
+                    new global::ConvoHop.Internal.FieldShape("grantExpiresAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("keys", "[AgentKey!]!"),
+                    new global::ConvoHop.Internal.FieldShape("incarnation", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("servingEpoch", "Decimal"),
+                }),
+            ["AgentSignupTicket"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("signupId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("confirmationCode", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("expiresAt", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("pollAfterSeconds", "Int!"),
+                }),
+            ["Int"] = global::ConvoHop.Internal.TypeShape.Scalar("integer"),
             ["AlertLiveSessionPayload"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {
                     new global::ConvoHop.Internal.FieldShape("status", "String!"),
@@ -713,7 +803,6 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("skippedDeliveries", "Int"),
                     new global::ConvoHop.Internal.FieldShape("messagePreview", "Boolean"),
                 }),
-            ["Int"] = global::ConvoHop.Internal.TypeShape.Scalar("integer"),
             ["OperationStep"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {
                     new global::ConvoHop.Internal.FieldShape("stepId", "String!"),
@@ -745,6 +834,29 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("complete", "Boolean!"),
                     new global::ConvoHop.Internal.FieldShape("refreshRequired", "Boolean!"),
                     new global::ConvoHop.Internal.FieldShape("nextCursor", "String"),
+                }),
+            ["OrganizationSpend"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("orgId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("planId", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("currency", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("catalogVersion", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("monthlySpendCap", "String"),
+                    new global::ConvoHop.Internal.FieldShape("agentPurchaseLimit", "String"),
+                    new global::ConvoHop.Internal.FieldShape("updatedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("monthlyMinimum", "String"),
+                    new global::ConvoHop.Internal.FieldShape("periodStart", "String"),
+                    new global::ConvoHop.Internal.FieldShape("periodEnd", "String"),
+                    new global::ConvoHop.Internal.FieldShape("credits", "String"),
+                    new global::ConvoHop.Internal.FieldShape("charges", "String"),
+                    new global::ConvoHop.Internal.FieldShape("margin", "String"),
+                    new global::ConvoHop.Internal.FieldShape("stop", "String"),
+                    new global::ConvoHop.Internal.FieldShape("refusedMeters", "[String!]!"),
+                    new global::ConvoHop.Internal.FieldShape("evaluatedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("usageThrough", "String"),
+                    new global::ConvoHop.Internal.FieldShape("validUntil", "String"),
+                    new global::ConvoHop.Internal.FieldShape("minimumCredit", "String"),
+                    new global::ConvoHop.Internal.FieldShape("chargeLimit", "String"),
                 }),
             ["OrganizationUsage"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {
@@ -877,6 +989,8 @@ namespace ConvoHop.Generated
                 }),
             ["RetainedResult"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {
+                    new global::ConvoHop.Internal.FieldShape("agentGrant", "AgentGrant"),
+                    new global::ConvoHop.Internal.FieldShape("agentSignupStatus", "AgentSignupStatus"),
                     new global::ConvoHop.Internal.FieldShape("billingCheckoutSession", "BillingCheckoutSession"),
                     new global::ConvoHop.Internal.FieldShape("billingPortalSession", "BillingPortalSession"),
                     new global::ConvoHop.Internal.FieldShape("broadcastPermissionChanged", "BroadcastPermissionChanged"),
@@ -895,6 +1009,7 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("message", "Message"),
                     new global::ConvoHop.Internal.FieldShape("messageAck", "MessageAck"),
                     new global::ConvoHop.Internal.FieldShape("organization", "Organization"),
+                    new global::ConvoHop.Internal.FieldShape("organizationSpend", "OrganizationSpend"),
                     new global::ConvoHop.Internal.FieldShape("principal", "Principal"),
                     new global::ConvoHop.Internal.FieldShape("readReceipt", "ReadReceipt"),
                     new global::ConvoHop.Internal.FieldShape("sessionBootstrap", "SessionBootstrap"),
@@ -1103,6 +1218,78 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("observedAt", "String"),
                     new global::ConvoHop.Internal.FieldShape("partialReason", "String"),
                 }),
+            ["AgentAuditEventsReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "AgentAuditEventPage"),
+                }),
+            ["AgentCredentialPermitReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "SignedProof"),
+                }),
+            ["AgentGrantsReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "AgentGrantPage"),
+                }),
+            ["AgentSignupForApprovalReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "AgentSignupReview"),
+                }),
+            ["AgentSignupReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "AgentSignupStatus"),
+                }),
+            ["ApproveAgentSignupReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "AgentSignupStatus"),
+                }),
             ["ConfigureWebhookReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {
                     new global::ConvoHop.Internal.FieldShape("status", "String!"),
@@ -1259,6 +1446,18 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::ConvoHop.Internal.FieldShape("result", "Project"),
                 }),
+            ["IssueAgentKeyReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "AgentKey"),
+                }),
             ["IssueBackendKeyReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {
                     new global::ConvoHop.Internal.FieldShape("status", "String!"),
@@ -1282,6 +1481,18 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
                     new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::ConvoHop.Internal.FieldShape("result", "OrganizationBilling"),
+                }),
+            ["OrganizationSpendReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "OrganizationSpend"),
                 }),
             ["OrganizationUsageReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {
@@ -1343,6 +1554,30 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::ConvoHop.Internal.FieldShape("result", "ProjectUsage"),
                 }),
+            ["PurchaseAgentCreditsReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "AgentPayment"),
+                }),
+            ["RejectAgentSignupReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "AgentSignupStatus"),
+                }),
             ["ReplayWebhookDeliveriesReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {
                     new global::ConvoHop.Internal.FieldShape("status", "String!"),
@@ -1355,6 +1590,18 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::ConvoHop.Internal.FieldShape("result", "OperationResult"),
                 }),
+            ["RequestAgentSignupReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "AgentSignupTicket"),
+                }),
             ["ResumeOperationReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {
                     new global::ConvoHop.Internal.FieldShape("status", "String!"),
@@ -1366,6 +1613,18 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
                     new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::ConvoHop.Internal.FieldShape("result", "Operation"),
+                }),
+            ["RevokeAgentGrantReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "AgentGrant"),
                 }),
             ["RevokeBackendKeyReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {
@@ -1390,6 +1649,18 @@ namespace ConvoHop.Generated
                     new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
                     new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::ConvoHop.Internal.FieldShape("result", "OperationResult"),
+                }),
+            ["SetSpendControlsReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
+                {
+                    new global::ConvoHop.Internal.FieldShape("status", "String!"),
+                    new global::ConvoHop.Internal.FieldShape("requestId", "UUID!"),
+                    new global::ConvoHop.Internal.FieldShape("serverTime", "String"),
+                    new global::ConvoHop.Internal.FieldShape("receiptId", "UUID"),
+                    new global::ConvoHop.Internal.FieldShape("committedAt", "String"),
+                    new global::ConvoHop.Internal.FieldShape("replayed", "Boolean"),
+                    new global::ConvoHop.Internal.FieldShape("operation", "OperationRef"),
+                    new global::ConvoHop.Internal.FieldShape("resourceRef", "ResourceRef"),
+                    new global::ConvoHop.Internal.FieldShape("result", "OrganizationSpend"),
                 }),
             ["UpdateWebhookReply"] = global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]
                 {

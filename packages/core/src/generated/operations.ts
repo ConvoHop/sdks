@@ -64,6 +64,11 @@ export interface OperationTypes {
   "management.webhookDeliveries": { variables: Generated.ManagementWebhookDeliveriesQueryVariables; result: Generated.ManagementWebhookDeliveriesQuery };
   "management.resolveRequest": { variables: Generated.ManagementResolveRequestQueryVariables; result: Generated.ManagementResolveRequestQuery };
   "management.getOperation": { variables: Generated.ManagementGetOperationQueryVariables; result: Generated.ManagementGetOperationQuery };
+  "management.agentSignupForApproval": { variables: Generated.ManagementAgentSignupForApprovalQueryVariables; result: Generated.ManagementAgentSignupForApprovalQuery };
+  "management.agentSignup": { variables: Generated.ManagementAgentSignupQueryVariables; result: Generated.ManagementAgentSignupQuery };
+  "management.agentGrants": { variables: Generated.ManagementAgentGrantsQueryVariables; result: Generated.ManagementAgentGrantsQuery };
+  "management.agentAuditEvents": { variables: Generated.ManagementAgentAuditEventsQueryVariables; result: Generated.ManagementAgentAuditEventsQuery };
+  "management.organizationSpend": { variables: Generated.ManagementOrganizationSpendQueryVariables; result: Generated.ManagementOrganizationSpendQuery };
   "management.createOrganization": { variables: Generated.ManagementCreateOrganizationMutationVariables; result: Generated.ManagementCreateOrganizationMutation };
   "management.createDeployment": { variables: Generated.ManagementCreateDeploymentMutationVariables; result: Generated.ManagementCreateDeploymentMutation };
   "management.createProject": { variables: Generated.ManagementCreateProjectMutationVariables; result: Generated.ManagementCreateProjectMutation };
@@ -80,6 +85,14 @@ export interface OperationTypes {
   "management.rotateWebhookSecret": { variables: Generated.ManagementRotateWebhookSecretMutationVariables; result: Generated.ManagementRotateWebhookSecretMutation };
   "management.disableWebhook": { variables: Generated.ManagementDisableWebhookMutationVariables; result: Generated.ManagementDisableWebhookMutation };
   "management.replayWebhookDeliveries": { variables: Generated.ManagementReplayWebhookDeliveriesMutationVariables; result: Generated.ManagementReplayWebhookDeliveriesMutation };
+  "management.requestAgentSignup": { variables: Generated.ManagementRequestAgentSignupMutationVariables; result: Generated.ManagementRequestAgentSignupMutation };
+  "management.rejectAgentSignup": { variables: Generated.ManagementRejectAgentSignupMutationVariables; result: Generated.ManagementRejectAgentSignupMutation };
+  "management.approveAgentSignup": { variables: Generated.ManagementApproveAgentSignupMutationVariables; result: Generated.ManagementApproveAgentSignupMutation };
+  "management.issueAgentKey": { variables: Generated.ManagementIssueAgentKeyMutationVariables; result: Generated.ManagementIssueAgentKeyMutation };
+  "management.agentCredentialPermit": { variables: Generated.ManagementAgentCredentialPermitMutationVariables; result: Generated.ManagementAgentCredentialPermitMutation };
+  "management.revokeAgentGrant": { variables: Generated.ManagementRevokeAgentGrantMutationVariables; result: Generated.ManagementRevokeAgentGrantMutation };
+  "management.setSpendControls": { variables: Generated.ManagementSetSpendControlsMutationVariables; result: Generated.ManagementSetSpendControlsMutation };
+  "management.purchaseAgentCredits": { variables: Generated.ManagementPurchaseAgentCreditsMutationVariables; result: Generated.ManagementPurchaseAgentCreditsMutation };
 }
 export type OperationKey = keyof OperationTypes;
 export interface OperationCatalogEntry { plane: string; kind: string; idempotency: string; field: string; operationName: string; query: string; resultType: string; inputFields: readonly string[] }
@@ -136,6 +149,116 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "replayed": "Boolean!",
       "result": "ConversationMemberBatch!"
     }
+  },
+  "AgentAuditEvent": {
+    "kind": "object",
+    "fields": {
+      "eventId": "UUID!",
+      "orgId": "UUID!",
+      "grantId": "UUID",
+      "actorKind": "String!",
+      "actorId": "UUID",
+      "kind": "String!",
+      "details": "Properties",
+      "occurredAt": "String!"
+    }
+  },
+  "AgentAuditEventPage": {
+    "kind": "object",
+    "fields": {
+      "items": "[AgentAuditEvent!]!",
+      "complete": "Boolean!",
+      "refreshRequired": "Boolean!",
+      "nextCursor": "String"
+    }
+  },
+  "AgentGrant": {
+    "kind": "object",
+    "fields": {
+      "grantId": "UUID!",
+      "orgId": "UUID!",
+      "signupId": "UUID!",
+      "agentActorId": "UUID!",
+      "projectId": "UUID",
+      "scopes": "[String!]!",
+      "expiresAt": "String!",
+      "revokedAt": "String",
+      "createdAt": "String!",
+      "keys": "[AgentKey!]!"
+    }
+  },
+  "AgentGrantPage": {
+    "kind": "object",
+    "fields": {
+      "items": "[AgentGrant!]!",
+      "complete": "Boolean!",
+      "refreshRequired": "Boolean!",
+      "nextCursor": "String"
+    }
+  },
+  "AgentKey": {
+    "kind": "object",
+    "fields": {
+      "operationId": "UUID!",
+      "state": "String!",
+      "scopes": "[String!]!",
+      "expiresAt": "String!",
+      "keyId": "String",
+      "deliveryId": "UUID",
+      "deliveryExpiresAt": "String"
+    }
+  },
+  "AgentPayment": {
+    "kind": "object",
+    "fields": {
+      "paymentId": "UUID!",
+      "amount": "String!",
+      "currency": "String!",
+      "state": "String!"
+    }
+  },
+  "AgentSignupReview": {
+    "kind": "object",
+    "fields": {
+      "signupId": "UUID!",
+      "ownerEmail": "String!",
+      "organizationName": "String!",
+      "agentName": "String!",
+      "purpose": "String",
+      "suggestedPlan": "String",
+      "suggestedScopes": "[String!]!",
+      "suggestedMonthlySpendCap": "String",
+      "currency": "String!",
+      "expiresAt": "String!"
+    }
+  },
+  "AgentSignupStatus": {
+    "kind": "object",
+    "fields": {
+      "signupId": "UUID!",
+      "state": "String!",
+      "orgId": "UUID",
+      "deploymentId": "UUID",
+      "projectId": "UUID",
+      "nextStep": "String",
+      "scopes": "[String!]!",
+      "grantExpiresAt": "String",
+      "keys": "[AgentKey!]!",
+      "incarnation": "UUID",
+      "servingEpoch": "Decimal"
+    }
+  },
+  "AgentSignupTicket": {
+    "kind": "object",
+    "fields": {
+      "signupId": "UUID!",
+      "confirmationCode": "String!",
+      "expiresAt": "String!",
+      "pollAfterSeconds": "Int!"
+    }
+  },
+  "Int": {
+    "kind": "scalar"
   },
   "AlertLiveSessionPayload": {
     "kind": "object",
@@ -297,6 +420,18 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
     "kind": "object",
     "fields": {
       "deliveryId": "UUID!"
+    }
+  },
+  "CreditsExhaustedProblem": {
+    "kind": "object",
+    "fields": {
+      "code": "String!",
+      "status": "Int!",
+      "requestId": "UUID!",
+      "outcome": "String!",
+      "retryable": "Boolean!",
+      "meter": "String!",
+      "periodEnd": "String!"
     }
   },
   "CurrentLiveSessionReply": {
@@ -1181,9 +1316,6 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "messagePreview": "Boolean"
     }
   },
-  "Int": {
-    "kind": "scalar"
-  },
   "OperationStep": {
     "kind": "object",
     "fields": {
@@ -1222,6 +1354,31 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "complete": "Boolean!",
       "refreshRequired": "Boolean!",
       "nextCursor": "String"
+    }
+  },
+  "OrganizationSpend": {
+    "kind": "object",
+    "fields": {
+      "orgId": "UUID!",
+      "planId": "String!",
+      "currency": "String!",
+      "catalogVersion": "String!",
+      "monthlySpendCap": "String",
+      "agentPurchaseLimit": "String",
+      "updatedAt": "String",
+      "monthlyMinimum": "String",
+      "periodStart": "String",
+      "periodEnd": "String",
+      "credits": "String",
+      "charges": "String",
+      "margin": "String",
+      "stop": "String",
+      "refusedMeters": "[String!]!",
+      "evaluatedAt": "String",
+      "usageThrough": "String",
+      "validUntil": "String",
+      "minimumCredit": "String",
+      "chargeLimit": "String"
     }
   },
   "OrganizationUsage": {
@@ -1458,6 +1615,8 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
   "RetainedResult": {
     "kind": "object",
     "fields": {
+      "agentGrant": "AgentGrant",
+      "agentSignupStatus": "AgentSignupStatus",
       "billingCheckoutSession": "BillingCheckoutSession",
       "billingPortalSession": "BillingPortalSession",
       "broadcastPermissionChanged": "BroadcastPermissionChanged",
@@ -1476,6 +1635,7 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "message": "Message",
       "messageAck": "MessageAck",
       "organization": "Organization",
+      "organizationSpend": "OrganizationSpend",
       "principal": "Principal",
       "readReceipt": "ReadReceipt",
       "sessionBootstrap": "SessionBootstrap",
@@ -1645,6 +1805,31 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
   "SignedProof": {
     "kind": "scalar"
   },
+  "SpendCapReachedProblem": {
+    "kind": "object",
+    "fields": {
+      "code": "String!",
+      "status": "Int!",
+      "requestId": "UUID!",
+      "outcome": "String!",
+      "retryable": "Boolean!",
+      "meter": "String!",
+      "periodEnd": "String!"
+    }
+  },
+  "SpendUnverifiedProblem": {
+    "kind": "object",
+    "fields": {
+      "code": "String!",
+      "status": "Int!",
+      "requestId": "UUID!",
+      "outcome": "String!",
+      "retryable": "Boolean!",
+      "retryAfter": "Int!",
+      "meter": "String!",
+      "periodEnd": "String!"
+    }
+  },
   "StartLiveSessionPayload": {
     "kind": "object",
     "fields": {
@@ -1761,6 +1946,90 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "nextCursor": "String",
       "observedAt": "String",
       "partialReason": "String"
+    }
+  },
+  "AgentAuditEventsReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "AgentAuditEventPage"
+    }
+  },
+  "AgentCredentialPermitReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "SignedProof"
+    }
+  },
+  "AgentGrantsReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "AgentGrantPage"
+    }
+  },
+  "AgentSignupForApprovalReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "AgentSignupReview"
+    }
+  },
+  "AgentSignupReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "AgentSignupStatus"
+    }
+  },
+  "ApproveAgentSignupReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "AgentSignupStatus"
     }
   },
   "ConfigureWebhookReply": {
@@ -1945,6 +2214,20 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "result": "Project"
     }
   },
+  "IssueAgentKeyReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "AgentKey"
+    }
+  },
   "IssueBackendKeyReply": {
     "kind": "object",
     "fields": {
@@ -1971,6 +2254,20 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "operation": "OperationRef",
       "resourceRef": "ResourceRef",
       "result": "OrganizationBilling"
+    }
+  },
+  "OrganizationSpendReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "OrganizationSpend"
     }
   },
   "OrganizationUsageReply": {
@@ -2043,6 +2340,34 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "result": "ProjectUsage"
     }
   },
+  "PurchaseAgentCreditsReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "AgentPayment"
+    }
+  },
+  "RejectAgentSignupReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "AgentSignupStatus"
+    }
+  },
   "ReplayWebhookDeliveriesReply": {
     "kind": "object",
     "fields": {
@@ -2057,6 +2382,20 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "result": "OperationResult"
     }
   },
+  "RequestAgentSignupReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "AgentSignupTicket"
+    }
+  },
   "ResumeOperationReply": {
     "kind": "object",
     "fields": {
@@ -2069,6 +2408,20 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "operation": "OperationRef",
       "resourceRef": "ResourceRef",
       "result": "Operation"
+    }
+  },
+  "RevokeAgentGrantReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "AgentGrant"
     }
   },
   "RevokeBackendKeyReply": {
@@ -2097,6 +2450,20 @@ export const outputShapes: Readonly<Record<string, OutputShape>> = {
       "operation": "OperationRef",
       "resourceRef": "ResourceRef",
       "result": "OperationResult"
+    }
+  },
+  "SetSpendControlsReply": {
+    "kind": "object",
+    "fields": {
+      "status": "String!",
+      "requestId": "UUID!",
+      "serverTime": "String",
+      "receiptId": "UUID",
+      "committedAt": "String",
+      "replayed": "Boolean",
+      "operation": "OperationRef",
+      "resourceRef": "ResourceRef",
+      "result": "OrganizationSpend"
     }
   },
   "UpdateWebhookReply": {
@@ -2304,7 +2671,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
     "idempotency": "safe",
     "field": "resolveRequest",
     "operationName": "CommunicationResolveRequest",
-    "query": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+    "query": "query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          agentGrant {\n            grantId\n            orgId\n            signupId\n            agentActorId\n            projectId\n            scopes\n            expiresAt\n            revokedAt\n            createdAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n          }\n          agentSignupStatus {\n            signupId\n            state\n            orgId\n            deploymentId\n            projectId\n            nextStep\n            scopes\n            grantExpiresAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n            incarnation\n            servingEpoch\n          }\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          organizationSpend {\n            orgId\n            planId\n            currency\n            catalogVersion\n            monthlySpendCap\n            agentPurchaseLimit\n            updatedAt\n            monthlyMinimum\n            periodStart\n            periodEnd\n            credits\n            charges\n            margin\n            stop\n            refusedMeters\n            evaluatedAt\n            usageThrough\n            validUntil\n            minimumCredit\n            chargeLimit\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
     "resultType": "ResolveRequestReply!",
     "inputFields": [
       "requestId"
@@ -2959,7 +3326,7 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
     "idempotency": "safe",
     "field": "resolveRequest",
     "operationName": "ManagementResolveRequest",
-    "query": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
+    "query": "query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {\n  resolveRequest(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      state\n      requestId\n      checkedAt\n      resultWithheld\n      receipt {\n        status\n        requestId\n        serverTime\n        receiptId\n        committedAt\n        replayed\n        operation {\n          operationId\n          owner\n          href\n          state\n        }\n        resourceRef {\n          kind\n          id\n        }\n        result {\n          agentGrant {\n            grantId\n            orgId\n            signupId\n            agentActorId\n            projectId\n            scopes\n            expiresAt\n            revokedAt\n            createdAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n          }\n          agentSignupStatus {\n            signupId\n            state\n            orgId\n            deploymentId\n            projectId\n            nextStep\n            scopes\n            grantExpiresAt\n            keys {\n              operationId\n              state\n              scopes\n              expiresAt\n              keyId\n              deliveryId\n              deliveryExpiresAt\n            }\n            incarnation\n            servingEpoch\n          }\n          billingCheckoutSession {\n            orgId\n            planId\n            url\n            expiresAt\n          }\n          billingPortalSession {\n            orgId\n            url\n            expiresAt\n          }\n          broadcastPermissionChanged {\n            member {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          conversation {\n            conversationId\n            revision\n            title\n            props\n            latestSequence\n            membership {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMemberBatch {\n            items {\n              conversationId\n              principalId\n              role\n              status\n              membershipEpoch\n              visibilityEpoch\n              revision\n              visibleFromSequence\n              canStartBroadcast\n            }\n          }\n          conversationMute {\n            conversationId\n            principalId\n            muted\n            until\n          }\n          credentialDeliveryReceipt {\n            deliveryId\n          }\n          deliveryAck {\n            deliveryId\n            acknowledged\n          }\n          liveAlertBatch {\n            liveSessionId\n            created\n            suppressed\n          }\n          liveCredentialIssuance {\n            liveSessionId\n            participationId\n            generation\n            leaseId\n            grantOrdinal\n            admissionExpiresAt\n            leaseExpiresAt\n          }\n          liveSessionEndRequested {\n            liveSessionId\n            operationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionJoined {\n            liveSessionId\n            generation\n            participation {\n              participationId\n              principalId\n              membershipEpoch\n              role\n              state\n              permissions {\n                microphone\n                camera\n                subscribe\n              }\n              reservationExpiresAt\n              nativeConnectionId\n              mediaCutoff {\n                state\n                scope {\n                  kind\n                  liveSessionId\n                  generation\n                  participationId\n                }\n                evidence\n                enforcedAt\n                operationId\n              }\n            }\n          }\n          liveSessionLeft {\n            liveSessionId\n            participationId\n            mediaCutoff {\n              state\n              scope {\n                kind\n                liveSessionId\n                generation\n                participationId\n              }\n              evidence\n              enforcedAt\n              operationId\n            }\n          }\n          liveSessionStarted {\n            liveSessionId\n            conversationId\n            kind\n            mediaProfile\n            operationId\n          }\n          member {\n            conversationId\n            principalId\n            role\n            status\n            membershipEpoch\n            visibilityEpoch\n            revision\n            visibleFromSequence\n            canStartBroadcast\n          }\n          message {\n            messageId\n            conversationId\n            authorId\n            sequence\n            revision\n            revisionSequence\n            createdAt\n            deleted\n            text\n            props\n            editedAt\n          }\n          messageAck {\n            messageId\n            conversationId\n            sequence\n            revision\n            status\n            cursor {\n              incarnation\n              conversationId\n              sequence\n            }\n          }\n          organization {\n            orgId\n            name\n            status\n            revision\n          }\n          organizationSpend {\n            orgId\n            planId\n            currency\n            catalogVersion\n            monthlySpendCap\n            agentPurchaseLimit\n            updatedAt\n            monthlyMinimum\n            periodStart\n            periodEnd\n            credits\n            charges\n            margin\n            stop\n            refusedMeters\n            evaluatedAt\n            usageThrough\n            validUntil\n            minimumCredit\n            chargeLimit\n          }\n          principal {\n            principalId\n            externalUserId\n            status\n            revision\n          }\n          readReceipt {\n            principalId\n            membershipEpoch\n            visibilityEpoch\n            deliveredThroughSequence\n            readThroughSequence\n            updatedAt\n          }\n          sessionBootstrap {\n            session {\n              sessionId\n              principalId\n              deviceId\n              incarnation\n              sessionRevision\n              expiresAt\n              status\n            }\n            tokenExpiresAt\n            sessionToken\n          }\n          sessionRevocation {\n            sessionId\n            status\n            mediaCutoff {\n              state\n              scope {\n                kind\n                principalId\n                sessionId\n                deviceId\n                callId\n              }\n            }\n          }\n          signedProof\n        }\n      }\n    }\n  }\n}",
     "resultType": "ResolveRequestReply!",
     "inputFields": [
       "requestId"
@@ -2975,6 +3342,68 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
     "resultType": "GetOperationReply!",
     "inputFields": [
       "operationId"
+    ]
+  },
+  "management.agentSignupForApproval": {
+    "plane": "management",
+    "kind": "query",
+    "idempotency": "safe",
+    "field": "agentSignupForApproval",
+    "operationName": "ManagementAgentSignupForApproval",
+    "query": "query ManagementAgentSignupForApproval($context: RequestContextInput!, $input: AgentSignupForApprovalRequestInput!) {\n  agentSignupForApproval(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      ownerEmail\n      organizationName\n      agentName\n      purpose\n      suggestedPlan\n      suggestedScopes\n      suggestedMonthlySpendCap\n      currency\n      expiresAt\n    }\n  }\n}",
+    "resultType": "AgentSignupForApprovalReply!",
+    "inputFields": [
+      "approvalToken"
+    ]
+  },
+  "management.agentSignup": {
+    "plane": "management",
+    "kind": "query",
+    "idempotency": "safe",
+    "field": "agentSignup",
+    "operationName": "ManagementAgentSignup",
+    "query": "query ManagementAgentSignup($context: RequestContextInput!) {\n  agentSignup(context: $context) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      state\n      orgId\n      deploymentId\n      projectId\n      nextStep\n      scopes\n      grantExpiresAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n      incarnation\n      servingEpoch\n    }\n  }\n}",
+    "resultType": "AgentSignupReply!",
+    "inputFields": []
+  },
+  "management.agentGrants": {
+    "plane": "management",
+    "kind": "query",
+    "idempotency": "safe",
+    "field": "agentGrants",
+    "operationName": "ManagementAgentGrants",
+    "query": "query ManagementAgentGrants($context: RequestContextInput!, $input: AgentGrantsRequestInput!) {\n  agentGrants(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        grantId\n        orgId\n        signupId\n        agentActorId\n        projectId\n        scopes\n        expiresAt\n        revokedAt\n        createdAt\n        keys {\n          operationId\n          state\n          scopes\n          expiresAt\n          keyId\n          deliveryId\n          deliveryExpiresAt\n        }\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
+    "resultType": "AgentGrantsReply!",
+    "inputFields": [
+      "orgId",
+      "limit",
+      "cursor"
+    ]
+  },
+  "management.agentAuditEvents": {
+    "plane": "management",
+    "kind": "query",
+    "idempotency": "safe",
+    "field": "agentAuditEvents",
+    "operationName": "ManagementAgentAuditEvents",
+    "query": "query ManagementAgentAuditEvents($context: RequestContextInput!, $input: AgentAuditEventsRequestInput!) {\n  agentAuditEvents(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      items {\n        eventId\n        orgId\n        grantId\n        actorKind\n        actorId\n        kind\n        details\n        occurredAt\n      }\n      complete\n      refreshRequired\n      nextCursor\n    }\n  }\n}",
+    "resultType": "AgentAuditEventsReply!",
+    "inputFields": [
+      "orgId",
+      "limit",
+      "cursor"
+    ]
+  },
+  "management.organizationSpend": {
+    "plane": "management",
+    "kind": "query",
+    "idempotency": "safe",
+    "field": "organizationSpend",
+    "operationName": "ManagementOrganizationSpend",
+    "query": "query ManagementOrganizationSpend($context: RequestContextInput!, $input: OrganizationSpendRequestInput!) {\n  organizationSpend(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      planId\n      currency\n      catalogVersion\n      monthlySpendCap\n      agentPurchaseLimit\n      updatedAt\n      monthlyMinimum\n      periodStart\n      periodEnd\n      credits\n      charges\n      margin\n      stop\n      refusedMeters\n      evaluatedAt\n      usageThrough\n      validUntil\n      minimumCredit\n      chargeLimit\n    }\n  }\n}",
+    "resultType": "OrganizationSpendReply!",
+    "inputFields": [
+      "orgId"
     ]
   },
   "management.createOrganization": {
@@ -3203,6 +3632,123 @@ export const operationCatalog: Record<OperationKey, OperationCatalogEntry> = {
       "effectId",
       "since",
       "until"
+    ]
+  },
+  "management.requestAgentSignup": {
+    "plane": "management",
+    "kind": "mutation",
+    "idempotency": "replayOnly",
+    "field": "requestAgentSignup",
+    "operationName": "ManagementRequestAgentSignup",
+    "query": "mutation ManagementRequestAgentSignup($context: RequestContextInput!, $input: RequestAgentSignupRequestInput!) {\n  requestAgentSignup(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      confirmationCode\n      expiresAt\n      pollAfterSeconds\n    }\n  }\n}",
+    "resultType": "RequestAgentSignupReply!",
+    "inputFields": [
+      "ownerEmail",
+      "pollChallenge",
+      "organizationName",
+      "agentName",
+      "purpose",
+      "suggestedPlan",
+      "suggestedScopes",
+      "suggestedMonthlySpendCap"
+    ]
+  },
+  "management.rejectAgentSignup": {
+    "plane": "management",
+    "kind": "mutation",
+    "idempotency": "replayOnly",
+    "field": "rejectAgentSignup",
+    "operationName": "ManagementRejectAgentSignup",
+    "query": "mutation ManagementRejectAgentSignup($context: RequestContextInput!, $input: RejectAgentSignupRequestInput!) {\n  rejectAgentSignup(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      state\n      orgId\n      deploymentId\n      projectId\n      nextStep\n      scopes\n      grantExpiresAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n      incarnation\n      servingEpoch\n    }\n  }\n}",
+    "resultType": "RejectAgentSignupReply!",
+    "inputFields": [
+      "approvalToken",
+      "suppressFutureRequests"
+    ]
+  },
+  "management.approveAgentSignup": {
+    "plane": "management",
+    "kind": "mutation",
+    "idempotency": "idempotent",
+    "field": "approveAgentSignup",
+    "operationName": "ManagementApproveAgentSignup",
+    "query": "mutation ManagementApproveAgentSignup($context: RequestContextInput!, $input: ApproveAgentSignupRequestInput!) {\n  approveAgentSignup(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      signupId\n      state\n      orgId\n      deploymentId\n      projectId\n      nextStep\n      scopes\n      grantExpiresAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n      incarnation\n      servingEpoch\n    }\n  }\n}",
+    "resultType": "ApproveAgentSignupReply!",
+    "inputFields": [
+      "approvalToken",
+      "confirmationCode",
+      "termsRef",
+      "plan",
+      "scopes",
+      "monthlySpendCap",
+      "agentPurchaseLimit",
+      "grantExpiresAt"
+    ]
+  },
+  "management.issueAgentKey": {
+    "plane": "management",
+    "kind": "mutation",
+    "idempotency": "replayOnly",
+    "field": "issueAgentKey",
+    "operationName": "ManagementIssueAgentKey",
+    "query": "mutation ManagementIssueAgentKey($context: RequestContextInput!, $input: IssueAgentKeyRequestInput!) {\n  issueAgentKey(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      operationId\n      state\n      scopes\n      expiresAt\n      keyId\n      deliveryId\n      deliveryExpiresAt\n    }\n  }\n}",
+    "resultType": "IssueAgentKeyReply!",
+    "inputFields": [
+      "scopes",
+      "expiresAt"
+    ]
+  },
+  "management.agentCredentialPermit": {
+    "plane": "management",
+    "kind": "mutation",
+    "idempotency": "replayOnly",
+    "field": "agentCredentialPermit",
+    "operationName": "ManagementAgentCredentialPermit",
+    "query": "mutation ManagementAgentCredentialPermit($context: RequestContextInput!, $input: AgentCredentialPermitRequestInput!) {\n  agentCredentialPermit(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result\n  }\n}",
+    "resultType": "AgentCredentialPermitReply!",
+    "inputFields": [
+      "deliveryId",
+      "redemptionRequestId"
+    ]
+  },
+  "management.revokeAgentGrant": {
+    "plane": "management",
+    "kind": "mutation",
+    "idempotency": "idempotent",
+    "field": "revokeAgentGrant",
+    "operationName": "ManagementRevokeAgentGrant",
+    "query": "mutation ManagementRevokeAgentGrant($context: RequestContextInput!, $input: RevokeAgentGrantRequestInput!) {\n  revokeAgentGrant(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      grantId\n      orgId\n      signupId\n      agentActorId\n      projectId\n      scopes\n      expiresAt\n      revokedAt\n      createdAt\n      keys {\n        operationId\n        state\n        scopes\n        expiresAt\n        keyId\n        deliveryId\n        deliveryExpiresAt\n      }\n    }\n  }\n}",
+    "resultType": "RevokeAgentGrantReply!",
+    "inputFields": [
+      "grantId",
+      "revokeIssuedSessions"
+    ]
+  },
+  "management.setSpendControls": {
+    "plane": "management",
+    "kind": "mutation",
+    "idempotency": "idempotent",
+    "field": "setSpendControls",
+    "operationName": "ManagementSetSpendControls",
+    "query": "mutation ManagementSetSpendControls($context: RequestContextInput!, $input: SetSpendControlsRequestInput!) {\n  setSpendControls(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      orgId\n      planId\n      currency\n      catalogVersion\n      monthlySpendCap\n      agentPurchaseLimit\n      updatedAt\n      monthlyMinimum\n      periodStart\n      periodEnd\n      credits\n      charges\n      margin\n      stop\n      refusedMeters\n      evaluatedAt\n      usageThrough\n      validUntil\n      minimumCredit\n      chargeLimit\n    }\n  }\n}",
+    "resultType": "SetSpendControlsReply!",
+    "inputFields": [
+      "orgId",
+      "monthlySpendCap",
+      "agentPurchaseLimit"
+    ]
+  },
+  "management.purchaseAgentCredits": {
+    "plane": "management",
+    "kind": "mutation",
+    "idempotency": "replayOnly",
+    "field": "purchaseAgentCredits",
+    "operationName": "ManagementPurchaseAgentCredits",
+    "query": "mutation ManagementPurchaseAgentCredits($context: RequestContextInput!, $input: PurchaseAgentCreditsRequestInput!) {\n  purchaseAgentCredits(context: $context, input: $input) {\n    status\n    requestId\n    serverTime\n    receiptId\n    committedAt\n    replayed\n    operation {\n      operationId\n      owner\n      href\n      state\n    }\n    resourceRef {\n      kind\n      id\n    }\n    result {\n      paymentId\n      amount\n      currency\n      state\n    }\n  }\n}",
+    "resultType": "PurchaseAgentCreditsReply!",
+    "inputFields": [
+      "amount",
+      "sharedPaymentToken"
     ]
   }
 };

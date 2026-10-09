@@ -32,6 +32,222 @@
           ]
         },
         {
+          "name": "AgentGrant",
+          "kind": "struct",
+          "signatures": ["public struct AgentGrant: Codable, Hashable, Sendable"],
+          "docs": "",
+          "members": [
+            {
+              "name": "grantId",
+              "kind": "property",
+              "signatures": ["public var grantId: String"],
+              "docs": ""
+            },
+            {
+              "name": "orgId",
+              "kind": "property",
+              "signatures": ["public var orgId: String"],
+              "docs": ""
+            },
+            {
+              "name": "signupId",
+              "kind": "property",
+              "signatures": ["public var signupId: String"],
+              "docs": ""
+            },
+            {
+              "name": "agentActorId",
+              "kind": "property",
+              "signatures": ["public var agentActorId: String"],
+              "docs": ""
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["public var projectId: String?"],
+              "docs": ""
+            },
+            {
+              "name": "scopes",
+              "kind": "property",
+              "signatures": ["public var scopes: [String]"],
+              "docs": ""
+            },
+            {
+              "name": "expiresAt",
+              "kind": "property",
+              "signatures": ["public var expiresAt: String"],
+              "docs": ""
+            },
+            {
+              "name": "revokedAt",
+              "kind": "property",
+              "signatures": ["public var revokedAt: String?"],
+              "docs": ""
+            },
+            {
+              "name": "createdAt",
+              "kind": "property",
+              "signatures": ["public var createdAt: String"],
+              "docs": ""
+            },
+            {
+              "name": "keys",
+              "kind": "property",
+              "signatures": ["public var keys: [AgentKey]"],
+              "docs": ""
+            },
+            {
+              "name": "init",
+              "kind": "constructor",
+              "signatures": [
+                "public init(\n    grantId: String,\n    orgId: String,\n    signupId: String,\n    agentActorId: String,\n    projectId: String? = nil,\n    scopes: [String],\n    expiresAt: String,\n    revokedAt: String? = nil,\n    createdAt: String,\n    keys: [AgentKey]\n)"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "AgentKey",
+          "kind": "struct",
+          "signatures": ["public struct AgentKey: Codable, Hashable, Sendable"],
+          "docs": "",
+          "members": [
+            {
+              "name": "operationId",
+              "kind": "property",
+              "signatures": ["public var operationId: String"],
+              "docs": ""
+            },
+            {
+              "name": "state",
+              "kind": "property",
+              "signatures": ["public var state: String"],
+              "docs": ""
+            },
+            {
+              "name": "scopes",
+              "kind": "property",
+              "signatures": ["public var scopes: [String]"],
+              "docs": ""
+            },
+            {
+              "name": "expiresAt",
+              "kind": "property",
+              "signatures": ["public var expiresAt: String"],
+              "docs": ""
+            },
+            {
+              "name": "keyId",
+              "kind": "property",
+              "signatures": ["public var keyId: String?"],
+              "docs": ""
+            },
+            {
+              "name": "deliveryId",
+              "kind": "property",
+              "signatures": ["public var deliveryId: String?"],
+              "docs": ""
+            },
+            {
+              "name": "deliveryExpiresAt",
+              "kind": "property",
+              "signatures": ["public var deliveryExpiresAt: String?"],
+              "docs": ""
+            },
+            {
+              "name": "init",
+              "kind": "constructor",
+              "signatures": [
+                "public init(\n    operationId: String,\n    state: String,\n    scopes: [String],\n    expiresAt: String,\n    keyId: String? = nil,\n    deliveryId: String? = nil,\n    deliveryExpiresAt: String? = nil\n)"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "AgentSignupStatus",
+          "kind": "struct",
+          "signatures": ["public struct AgentSignupStatus: Codable, Hashable, Sendable"],
+          "docs": "",
+          "members": [
+            {
+              "name": "signupId",
+              "kind": "property",
+              "signatures": ["public var signupId: String"],
+              "docs": ""
+            },
+            {
+              "name": "state",
+              "kind": "property",
+              "signatures": ["public var state: String"],
+              "docs": ""
+            },
+            {
+              "name": "orgId",
+              "kind": "property",
+              "signatures": ["public var orgId: String?"],
+              "docs": ""
+            },
+            {
+              "name": "deploymentId",
+              "kind": "property",
+              "signatures": ["public var deploymentId: String?"],
+              "docs": ""
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["public var projectId: String?"],
+              "docs": ""
+            },
+            {
+              "name": "nextStep",
+              "kind": "property",
+              "signatures": ["public var nextStep: String?"],
+              "docs": ""
+            },
+            {
+              "name": "scopes",
+              "kind": "property",
+              "signatures": ["public var scopes: [String]"],
+              "docs": ""
+            },
+            {
+              "name": "grantExpiresAt",
+              "kind": "property",
+              "signatures": ["public var grantExpiresAt: String?"],
+              "docs": ""
+            },
+            {
+              "name": "keys",
+              "kind": "property",
+              "signatures": ["public var keys: [AgentKey]"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["public var incarnation: String?"],
+              "docs": ""
+            },
+            {
+              "name": "servingEpoch",
+              "kind": "property",
+              "signatures": ["public var servingEpoch: String?"],
+              "docs": ""
+            },
+            {
+              "name": "init",
+              "kind": "constructor",
+              "signatures": [
+                "public init(\n    signupId: String,\n    state: String,\n    orgId: String? = nil,\n    deploymentId: String? = nil,\n    projectId: String? = nil,\n    nextStep: String? = nil,\n    scopes: [String],\n    grantExpiresAt: String? = nil,\n    keys: [AgentKey],\n    incarnation: String? = nil,\n    servingEpoch: String? = nil\n)"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
           "name": "AlertLiveSessionInput",
           "kind": "struct",
           "signatures": ["public struct AlertLiveSessionInput: Codable, Hashable, Sendable"],
@@ -947,7 +1163,7 @@
           "name": "ConversationStream",
           "kind": "class",
           "signatures": ["public actor ConversationStream"],
-          "docs": "Replays one conversation's events from a cursor, then follows new events in real time.\n\nEach batch reaches `apply` once and in order. The cursor advances, and is stored, only after `apply` returns.\nWhen the realtime connection drops, the stream fills the gap from history before it reconnects. Close the stream\nwhen you no longer need it.",
+          "docs": "Replays one conversation's events from a cursor, then follows new events in real time.\n\nEach batch reaches `apply` once and in order. The cursor advances, and is stored, only after `apply` returns.\nWhen the realtime connection drops, the stream fills the gap from history before it reconnects. Close the stream\nwhen you no longer need it.\n\nWhen the organization runs out of prepaid credits or reaches its monthly spend cap, the stream closes and reports\n`CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` with status 402. `SPEND_UNVERIFIED` goes to `onError` and the stream\nreconnects as it does after `RATE_LIMITED`, waiting at least its `retryAfter`.",
           "members": [
             {
               "name": "conversationId",
@@ -1860,6 +2076,15 @@
               "static": true
             },
             {
+              "name": "creditsExhausted",
+              "kind": "property",
+              "signatures": [
+                "public static let creditsExhausted = ConvoHopErrorCode(rawValue: \"CREDITS_EXHAUSTED\")"
+              ],
+              "docs": "Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+              "static": true
+            },
+            {
               "name": "cursorAhead",
               "kind": "property",
               "signatures": [
@@ -2280,6 +2505,24 @@
                 "public static let sessionRefreshUnverified = ConvoHopErrorCode(rawValue: \"SESSION_REFRESH_UNVERIFIED\")"
               ],
               "docs": "The refreshed session could not be verified.",
+              "static": true
+            },
+            {
+              "name": "spendCapReached",
+              "kind": "property",
+              "signatures": [
+                "public static let spendCapReached = ConvoHopErrorCode(rawValue: \"SPEND_CAP_REACHED\")"
+              ],
+              "docs": "The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+              "static": true
+            },
+            {
+              "name": "spendUnverified",
+              "kind": "property",
+              "signatures": [
+                "public static let spendUnverified = ConvoHopErrorCode(rawValue: \"SPEND_UNVERIFIED\")"
+              ],
+              "docs": "Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.",
               "static": true
             },
             {
@@ -3914,7 +4157,7 @@
           "name": "ConvoHopWebSocket",
           "kind": "interface",
           "signatures": ["public protocol ConvoHopWebSocket: AnyObject, Sendable"],
-          "docs": "One realtime connection. Implementations deliver events in order and finish `events` after `closed`.",
+          "docs": "One realtime connection. Implementations deliver events in order and finish `events` after `closed`.\n\nPass the server's close reason to `closed`. Without it, a close that should end the stream, such as a 4402\n`SPEND_CAP_REACHED` stop, looks like a dropped connection and the stream reconnects with backoff, and a close loses\nits `retryAfter`.",
           "members": [
             {
               "name": "events",
@@ -5408,6 +5651,15 @@
                 "public static let permitBound = GraphQLIdempotency(name: \"permitBound\", retry: .sameRequest, resolvable: false, retryBudget: GraphQLRetryBudget(maxAttempts: 3, windowMs: 60000))"
               ],
               "docs": "Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.",
+              "static": true
+            },
+            {
+              "name": "replayOnly",
+              "kind": "property",
+              "signatures": [
+                "public static let replayOnly = GraphQLIdempotency(name: \"replayOnly\", retry: .sameRequest, resolvable: false, retryBudget: GraphQLRetryBudget(maxAttempts: 3, windowMs: 60000))"
+              ],
+              "docs": "Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.",
               "static": true
             },
             {
@@ -9055,6 +9307,142 @@
           ]
         },
         {
+          "name": "OrganizationSpend",
+          "kind": "struct",
+          "signatures": ["public struct OrganizationSpend: Codable, Hashable, Sendable"],
+          "docs": "",
+          "members": [
+            {
+              "name": "orgId",
+              "kind": "property",
+              "signatures": ["public var orgId: String"],
+              "docs": ""
+            },
+            {
+              "name": "planId",
+              "kind": "property",
+              "signatures": ["public var planId: String"],
+              "docs": ""
+            },
+            {
+              "name": "currency",
+              "kind": "property",
+              "signatures": ["public var currency: String"],
+              "docs": ""
+            },
+            {
+              "name": "catalogVersion",
+              "kind": "property",
+              "signatures": ["public var catalogVersion: String"],
+              "docs": ""
+            },
+            {
+              "name": "monthlySpendCap",
+              "kind": "property",
+              "signatures": ["public var monthlySpendCap: String?"],
+              "docs": ""
+            },
+            {
+              "name": "agentPurchaseLimit",
+              "kind": "property",
+              "signatures": ["public var agentPurchaseLimit: String?"],
+              "docs": ""
+            },
+            {
+              "name": "updatedAt",
+              "kind": "property",
+              "signatures": ["public var updatedAt: String?"],
+              "docs": ""
+            },
+            {
+              "name": "monthlyMinimum",
+              "kind": "property",
+              "signatures": ["public var monthlyMinimum: String?"],
+              "docs": ""
+            },
+            {
+              "name": "periodStart",
+              "kind": "property",
+              "signatures": ["public var periodStart: String?"],
+              "docs": ""
+            },
+            {
+              "name": "periodEnd",
+              "kind": "property",
+              "signatures": ["public var periodEnd: String?"],
+              "docs": ""
+            },
+            {
+              "name": "credits",
+              "kind": "property",
+              "signatures": ["public var credits: String?"],
+              "docs": ""
+            },
+            {
+              "name": "charges",
+              "kind": "property",
+              "signatures": ["public var charges: String?"],
+              "docs": ""
+            },
+            {
+              "name": "margin",
+              "kind": "property",
+              "signatures": ["public var margin: String?"],
+              "docs": ""
+            },
+            {
+              "name": "stop",
+              "kind": "property",
+              "signatures": ["public var stop: String?"],
+              "docs": ""
+            },
+            {
+              "name": "refusedMeters",
+              "kind": "property",
+              "signatures": ["public var refusedMeters: [String]"],
+              "docs": ""
+            },
+            {
+              "name": "evaluatedAt",
+              "kind": "property",
+              "signatures": ["public var evaluatedAt: String?"],
+              "docs": ""
+            },
+            {
+              "name": "usageThrough",
+              "kind": "property",
+              "signatures": ["public var usageThrough: String?"],
+              "docs": ""
+            },
+            {
+              "name": "validUntil",
+              "kind": "property",
+              "signatures": ["public var validUntil: String?"],
+              "docs": ""
+            },
+            {
+              "name": "minimumCredit",
+              "kind": "property",
+              "signatures": ["public var minimumCredit: String?"],
+              "docs": ""
+            },
+            {
+              "name": "chargeLimit",
+              "kind": "property",
+              "signatures": ["public var chargeLimit: String?"],
+              "docs": ""
+            },
+            {
+              "name": "init",
+              "kind": "constructor",
+              "signatures": [
+                "public init(\n    orgId: String,\n    planId: String,\n    currency: String,\n    catalogVersion: String,\n    monthlySpendCap: String? = nil,\n    agentPurchaseLimit: String? = nil,\n    updatedAt: String? = nil,\n    monthlyMinimum: String? = nil,\n    periodStart: String? = nil,\n    periodEnd: String? = nil,\n    credits: String? = nil,\n    charges: String? = nil,\n    margin: String? = nil,\n    stop: String? = nil,\n    refusedMeters: [String],\n    evaluatedAt: String? = nil,\n    usageThrough: String? = nil,\n    validUntil: String? = nil,\n    minimumCredit: String? = nil,\n    chargeLimit: String? = nil\n)"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
           "name": "Principal",
           "kind": "struct",
           "signatures": ["public struct Principal: Codable, Hashable, Sendable"],
@@ -9876,6 +10264,18 @@
           "docs": "Exactly one typed field contains the retained, currently authorized receipt result.",
           "members": [
             {
+              "name": "agentGrant",
+              "kind": "property",
+              "signatures": ["public var agentGrant: AgentGrant?"],
+              "docs": ""
+            },
+            {
+              "name": "agentSignupStatus",
+              "kind": "property",
+              "signatures": ["public var agentSignupStatus: AgentSignupStatus?"],
+              "docs": ""
+            },
+            {
               "name": "billingCheckoutSession",
               "kind": "property",
               "signatures": ["public var billingCheckoutSession: BillingCheckoutSession?"],
@@ -9984,6 +10384,12 @@
               "docs": ""
             },
             {
+              "name": "organizationSpend",
+              "kind": "property",
+              "signatures": ["public var organizationSpend: OrganizationSpend?"],
+              "docs": ""
+            },
+            {
               "name": "principal",
               "kind": "property",
               "signatures": ["public var principal: Principal?"],
@@ -10017,7 +10423,7 @@
               "name": "init",
               "kind": "constructor",
               "signatures": [
-                "public init(\n    billingCheckoutSession: BillingCheckoutSession? = nil,\n    billingPortalSession: BillingPortalSession? = nil,\n    broadcastPermissionChanged: BroadcastPermissionChanged? = nil,\n    conversation: Conversation? = nil,\n    conversationMemberBatch: ConversationMemberBatch? = nil,\n    conversationMute: ConversationMute? = nil,\n    credentialDeliveryReceipt: CredentialDeliveryReceipt? = nil,\n    deliveryAck: DeliveryAck? = nil,\n    liveAlertBatch: LiveAlertBatch? = nil,\n    liveCredentialIssuance: LiveCredentialIssuance? = nil,\n    liveSessionEndRequested: LiveSessionEndRequested? = nil,\n    liveSessionJoined: LiveSessionJoined? = nil,\n    liveSessionLeft: LiveSessionLeft? = nil,\n    liveSessionStarted: LiveSessionStarted? = nil,\n    member: Member? = nil,\n    message: Message? = nil,\n    messageAck: MessageAck? = nil,\n    organization: Organization? = nil,\n    principal: Principal? = nil,\n    readReceipt: ReadReceipt? = nil,\n    sessionBootstrap: SessionBootstrap? = nil,\n    sessionRevocation: SessionRevocation? = nil,\n    signedProof: JSONObject? = nil\n)"
+                "public init(\n    agentGrant: AgentGrant? = nil,\n    agentSignupStatus: AgentSignupStatus? = nil,\n    billingCheckoutSession: BillingCheckoutSession? = nil,\n    billingPortalSession: BillingPortalSession? = nil,\n    broadcastPermissionChanged: BroadcastPermissionChanged? = nil,\n    conversation: Conversation? = nil,\n    conversationMemberBatch: ConversationMemberBatch? = nil,\n    conversationMute: ConversationMute? = nil,\n    credentialDeliveryReceipt: CredentialDeliveryReceipt? = nil,\n    deliveryAck: DeliveryAck? = nil,\n    liveAlertBatch: LiveAlertBatch? = nil,\n    liveCredentialIssuance: LiveCredentialIssuance? = nil,\n    liveSessionEndRequested: LiveSessionEndRequested? = nil,\n    liveSessionJoined: LiveSessionJoined? = nil,\n    liveSessionLeft: LiveSessionLeft? = nil,\n    liveSessionStarted: LiveSessionStarted? = nil,\n    member: Member? = nil,\n    message: Message? = nil,\n    messageAck: MessageAck? = nil,\n    organization: Organization? = nil,\n    organizationSpend: OrganizationSpend? = nil,\n    principal: Principal? = nil,\n    readReceipt: ReadReceipt? = nil,\n    sessionBootstrap: SessionBootstrap? = nil,\n    sessionRevocation: SessionRevocation? = nil,\n    signedProof: JSONObject? = nil\n)"
               ],
               "docs": ""
             }

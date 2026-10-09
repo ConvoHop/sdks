@@ -724,6 +724,111 @@
           "static": true
         },
         {
+          "name": "AgenticNotConfigured",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgenticNotConfigured:static",
+          "anchor": "errorcodesagenticnotconfigured-static-property",
+          "signatures": ["public const string AgenticNotConfigured = \"AGENTIC_NOT_CONFIGURED\";"],
+          "docs": "Agent signup is not offered in this environment.",
+          "static": true
+        },
+        {
+          "name": "AgentConfirmationCodeInvalid",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgentConfirmationCodeInvalid:static",
+          "anchor": "errorcodesagentconfirmationcodeinvalid-static-property",
+          "signatures": [
+            "public const string AgentConfirmationCodeInvalid = \"AGENT_CONFIRMATION_CODE_INVALID\";"
+          ],
+          "docs": "The confirmation code differs from the one the agent shows. The fifth wrong code closes the signup request.",
+          "static": true
+        },
+        {
+          "name": "AgentGrantExpired",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgentGrantExpired:static",
+          "anchor": "errorcodesagentgrantexpired-static-property",
+          "signatures": ["public const string AgentGrantExpired = \"AGENT_GRANT_EXPIRED\";"],
+          "docs": "The agent's grant has expired. The agent needs a new signup request approved.",
+          "static": true
+        },
+        {
+          "name": "AgentGrantRevoked",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgentGrantRevoked:static",
+          "anchor": "errorcodesagentgrantrevoked-static-property",
+          "signatures": ["public const string AgentGrantRevoked = \"AGENT_GRANT_REVOKED\";"],
+          "docs": "The owner revoked the agent's grant.",
+          "static": true
+        },
+        {
+          "name": "AgentKeyLimit",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgentKeyLimit:static",
+          "anchor": "errorcodesagentkeylimit-static-property",
+          "signatures": ["public const string AgentKeyLimit = \"AGENT_KEY_LIMIT\";"],
+          "docs": "The grant already has as many active keys as it allows. Issue another after one expires or the owner revokes one.",
+          "static": true
+        },
+        {
+          "name": "AgentPurchaseLimitExceeded",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgentPurchaseLimitExceeded:static",
+          "anchor": "errorcodesagentpurchaselimitexceeded-static-property",
+          "signatures": [
+            "public const string AgentPurchaseLimitExceeded = \"AGENT_PURCHASE_LIMIT_EXCEEDED\";"
+          ],
+          "docs": "The purchase would take this month's agent credit purchases beyond the limit the owner set.",
+          "static": true
+        },
+        {
+          "name": "AgentScopeNotGranted",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgentScopeNotGranted:static",
+          "anchor": "errorcodesagentscopenotgranted-static-property",
+          "signatures": ["public const string AgentScopeNotGranted = \"AGENT_SCOPE_NOT_GRANTED\";"],
+          "docs": "A requested scope is outside the agent's grant.",
+          "static": true
+        },
+        {
+          "name": "AgentSignupClosed",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgentSignupClosed:static",
+          "anchor": "errorcodesagentsignupclosed-static-property",
+          "signatures": ["public const string AgentSignupClosed = \"AGENT_SIGNUP_CLOSED\";"],
+          "docs": "The signup request is no longer pending: it was approved, rejected, locked by wrong confirmation codes, or has expired.",
+          "static": true
+        },
+        {
+          "name": "AgentSignupEmailRejected",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgentSignupEmailRejected:static",
+          "anchor": "errorcodesagentsignupemailrejected-static-property",
+          "signatures": [
+            "public const string AgentSignupEmailRejected = \"AGENT_SIGNUP_EMAIL_REJECTED\";"
+          ],
+          "docs": "The owner's email address is refused, for example for a disposable domain.",
+          "static": true
+        },
+        {
+          "name": "AgentSignupNotReady",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgentSignupNotReady:static",
+          "anchor": "errorcodesagentsignupnotready-static-property",
+          "signatures": ["public const string AgentSignupNotReady = \"AGENT_SIGNUP_NOT_READY\";"],
+          "docs": "The signup is not approved, or its organization and project are still being provisioned. Poll agentSignup until it is ready.",
+          "static": true
+        },
+        {
+          "name": "AgentSignupSuppressed",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.AgentSignupSuppressed:static",
+          "anchor": "errorcodesagentsignupsuppressed-static-property",
+          "signatures": ["public const string AgentSignupSuppressed = \"AGENT_SIGNUP_SUPPRESSED\";"],
+          "docs": "The owner opted out of agent signup requests to this email address.",
+          "static": true
+        },
+        {
           "name": "AlreadyConnected",
           "kind": "property",
           "ref": "ConvoHop#ErrorCodes.AlreadyConnected:static",
@@ -892,6 +997,48 @@
           "anchor": "errorcodescredentialrequired-static-property",
           "signatures": ["public const string CredentialRequired = \"CREDENTIAL_REQUIRED\";"],
           "docs": "Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.",
+          "static": true
+        },
+        {
+          "name": "CreditsExhausted",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.CreditsExhausted:static",
+          "anchor": "errorcodescreditsexhausted-static-property",
+          "signatures": ["public const string CreditsExhausted = \"CREDITS_EXHAUSTED\";"],
+          "docs": "Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+          "static": true
+        },
+        {
+          "name": "CreditsRequireMeteredPlan",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.CreditsRequireMeteredPlan:static",
+          "anchor": "errorcodescreditsrequiremeteredplan-static-property",
+          "signatures": [
+            "public const string CreditsRequireMeteredPlan = \"CREDITS_REQUIRE_METERED_PLAN\";"
+          ],
+          "docs": "Credits apply only to a billed subscription, and none is in force.",
+          "static": true
+        },
+        {
+          "name": "CreditAmountOutOfRange",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.CreditAmountOutOfRange:static",
+          "anchor": "errorcodescreditamountoutofrange-static-property",
+          "signatures": [
+            "public const string CreditAmountOutOfRange = \"CREDIT_AMOUNT_OUT_OF_RANGE\";"
+          ],
+          "docs": "The credit amount is outside the allowed purchase range.",
+          "static": true
+        },
+        {
+          "name": "CreditGrantLimitReached",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.CreditGrantLimitReached:static",
+          "anchor": "errorcodescreditgrantlimitreached-static-property",
+          "signatures": [
+            "public const string CreditGrantLimitReached = \"CREDIT_GRANT_LIMIT_REACHED\";"
+          ],
+          "docs": "Too many of the organization's credit grants are unconsumed, counting purchases still in progress. Buy more after invoices consume some.",
           "static": true
         },
         {
@@ -1221,6 +1368,26 @@
           "static": true
         },
         {
+          "name": "PaymentDeclined",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.PaymentDeclined:static",
+          "anchor": "errorcodespaymentdeclined-static-property",
+          "signatures": ["public const string PaymentDeclined = \"PAYMENT_DECLINED\";"],
+          "docs": "The payment rail declined the payment. Nothing was charged.",
+          "static": true
+        },
+        {
+          "name": "PaymentRailNotConfigured",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.PaymentRailNotConfigured:static",
+          "anchor": "errorcodespaymentrailnotconfigured-static-property",
+          "signatures": [
+            "public const string PaymentRailNotConfigured = \"PAYMENT_RAIL_NOT_CONFIGURED\";"
+          ],
+          "docs": "No payment rail is enabled in this environment.",
+          "static": true
+        },
+        {
           "name": "PermitExpired",
           "kind": "property",
           "ref": "ConvoHop#ErrorCodes.PermitExpired:static",
@@ -1408,6 +1575,24 @@
             "public const string SessionRefreshUnverified = \"SESSION_REFRESH_UNVERIFIED\";"
           ],
           "docs": "The refreshed session could not be verified.",
+          "static": true
+        },
+        {
+          "name": "SpendCapReached",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.SpendCapReached:static",
+          "anchor": "errorcodesspendcapreached-static-property",
+          "signatures": ["public const string SpendCapReached = \"SPEND_CAP_REACHED\";"],
+          "docs": "The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+          "static": true
+        },
+        {
+          "name": "SpendUnverified",
+          "kind": "property",
+          "ref": "ConvoHop#ErrorCodes.SpendUnverified:static",
+          "anchor": "errorcodesspendunverified-static-property",
+          "signatures": ["public const string SpendUnverified = \"SPEND_UNVERIFIED\";"],
+          "docs": "Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.",
           "static": true
         },
         {
@@ -1743,7 +1928,7 @@
           "ref": "ConvoHop#OperationDescriptor.Idempotency",
           "anchor": "operationdescriptoridempotency-property",
           "signatures": ["public string Idempotency { get; }"],
-          "docs": "The idempotency class: `safe`, `idempotent` or `permitBound`."
+          "docs": "The idempotency class, such as `safe`, `idempotent`, `permitBound` or `replayOnly`."
         },
         {
           "name": "Layer",
@@ -1927,7 +2112,7 @@
           "ref": "ConvoHop#OperationDescriptor<TInput, TResult>.Idempotency",
           "anchor": "operationdescriptortinput-tresultidempotency-property",
           "signatures": ["public string Idempotency { get; }"],
-          "docs": "The idempotency class: `safe`, `idempotent` or `permitBound`.",
+          "docs": "The idempotency class, such as `safe`, `idempotent`, `permitBound` or `replayOnly`.",
           "inherited": "OperationDescriptor"
         },
         {
@@ -2576,6 +2761,61 @@
           "static": true
         },
         {
+          "name": "AgentSignupForApproval",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.AgentSignupForApproval:static",
+          "anchor": "operationsmanagementagentsignupforapproval-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<AgentSignupForApprovalRequestInput, AgentSignupForApprovalReply> AgentSignupForApproval;"
+          ],
+          "docs": "Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.",
+          "static": true
+        },
+        {
+          "name": "AgentSignup",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.AgentSignup:static",
+          "anchor": "operationsmanagementagentsignup-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<NoInput, AgentSignupReply> AgentSignup;"
+          ],
+          "docs": "Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.",
+          "static": true
+        },
+        {
+          "name": "AgentGrants",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.AgentGrants:static",
+          "anchor": "operationsmanagementagentgrants-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<AgentGrantsRequestInput, AgentGrantsReply> AgentGrants;"
+          ],
+          "docs": "List an organization's agent grants with their keys, newest first.",
+          "static": true
+        },
+        {
+          "name": "AgentAuditEvents",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.AgentAuditEvents:static",
+          "anchor": "operationsmanagementagentauditevents-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<AgentAuditEventsRequestInput, AgentAuditEventsReply> AgentAuditEvents;"
+          ],
+          "docs": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.",
+          "static": true
+        },
+        {
+          "name": "OrganizationSpend",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.OrganizationSpend:static",
+          "anchor": "operationsmanagementorganizationspend-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<OrganizationSpendRequestInput, OrganizationSpendReply> OrganizationSpend;"
+          ],
+          "docs": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.",
+          "static": true
+        },
+        {
           "name": "CreateOrganization",
           "kind": "property",
           "ref": "ConvoHop#Operations.Management.CreateOrganization:static",
@@ -2749,6 +2989,94 @@
             "public static readonly OperationDescriptor<ReplayWebhookDeliveriesRequestInput, ReplayWebhookDeliveriesReply> ReplayWebhookDeliveries;"
           ],
           "docs": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.",
+          "static": true
+        },
+        {
+          "name": "RequestAgentSignup",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.RequestAgentSignup:static",
+          "anchor": "operationsmanagementrequestagentsignup-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<RequestAgentSignupRequestInput, RequestAgentSignupReply> RequestAgentSignup;"
+          ],
+          "docs": "Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.",
+          "static": true
+        },
+        {
+          "name": "RejectAgentSignup",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.RejectAgentSignup:static",
+          "anchor": "operationsmanagementrejectagentsignup-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<RejectAgentSignupRequestInput, RejectAgentSignupReply> RejectAgentSignup;"
+          ],
+          "docs": "Reject a signup request from its approval link, optionally suppressing future requests to the email.",
+          "static": true
+        },
+        {
+          "name": "ApproveAgentSignup",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.ApproveAgentSignup:static",
+          "anchor": "operationsmanagementapproveagentsignup-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<ApproveAgentSignupRequestInput, ApproveAgentSignupReply> ApproveAgentSignup;"
+          ],
+          "docs": "Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.",
+          "static": true
+        },
+        {
+          "name": "IssueAgentKey",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.IssueAgentKey:static",
+          "anchor": "operationsmanagementissueagentkey-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<IssueAgentKeyRequestInput, IssueAgentKeyReply> IssueAgentKey;"
+          ],
+          "docs": "Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.",
+          "static": true
+        },
+        {
+          "name": "AgentCredentialPermit",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.AgentCredentialPermit:static",
+          "anchor": "operationsmanagementagentcredentialpermit-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<AgentCredentialPermitRequestInput, AgentCredentialPermitReply> AgentCredentialPermit;"
+          ],
+          "docs": "Issue a permit that authorizes the agent to redeem one of its key deliveries.",
+          "static": true
+        },
+        {
+          "name": "RevokeAgentGrant",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.RevokeAgentGrant:static",
+          "anchor": "operationsmanagementrevokeagentgrant-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<RevokeAgentGrantRequestInput, RevokeAgentGrantReply> RevokeAgentGrant;"
+          ],
+          "docs": "Revoke an agent grant and every key issued under it.",
+          "static": true
+        },
+        {
+          "name": "SetSpendControls",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.SetSpendControls:static",
+          "anchor": "operationsmanagementsetspendcontrols-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<SetSpendControlsRequestInput, SetSpendControlsReply> SetSpendControls;"
+          ],
+          "docs": "Set the organization's monthly spend cap and agent purchase limit.",
+          "static": true
+        },
+        {
+          "name": "PurchaseAgentCredits",
+          "kind": "property",
+          "ref": "ConvoHop#Operations.Management.PurchaseAgentCredits:static",
+          "anchor": "operationsmanagementpurchaseagentcredits-static-property",
+          "signatures": [
+            "public static readonly OperationDescriptor<PurchaseAgentCreditsRequestInput, PurchaseAgentCreditsReply> PurchaseAgentCredits;"
+          ],
+          "docs": "Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.",
           "static": true
         }
       ]

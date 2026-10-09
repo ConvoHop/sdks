@@ -177,10 +177,19 @@ store.changes.listen((snapshot) {
 `store.loadOlder()` loads earlier pages while `snapshot.hasOlder`, and
 `store.events` reports each event it applied, such as `live.*` events for a
 call UI. Use one store per conversation and client, and call
-`store.reconnect()` when connectivity returns to skip the backoff. Without a
+`store.reconnect()` when connectivity returns to skip the backoff; it never
+reconnects sooner than a `retryAfter` from ConvoHop. Without a
 store, `client.watch(conversationId, apply, onError)` replays a
 conversation's events from the stored cursor through your own `apply` and
 follows them over realtime.
+
+When the organization's prepaid credits run out or it reaches its monthly
+spend cap, the stream closes with a 402 `CREDITS_EXHAUSTED` or
+`SPEND_CAP_REACHED` problem and doesn't reconnect: the store is `failed`
+until you call `store.reconnect()` once the organization can pay again.
+While ConvoHop can't verify current spend, the store reports
+`SPEND_UNVERIFIED` and reconnects no sooner than its `retryAfter`;
+`store.reconnect()` doesn't cut that wait short.
 
 ## Offline queue and optimistic sends
 
