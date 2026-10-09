@@ -42,6 +42,32 @@ final class Shared<Value>: @unchecked Sendable {
     }
 }
 
+/// Holds callers until it opens.
+final class Gate: @unchecked Sendable {
+    private let lock = NSLock()
+    private var isOpen = false
+    private var waiting: [CheckedContinuation<Void, Never>] = []
+
+    func wait() async {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            let proceed = lock.locked { () -> Bool in
+                if !isOpen { waiting.append(continuation) }
+                return isOpen
+            }
+            if proceed { continuation.resume() }
+        }
+    }
+
+    func open() {
+        let waiters = lock.locked { () -> [CheckedContinuation<Void, Never>] in
+            isOpen = true
+            defer { waiting = [] }
+            return waiting
+        }
+        for waiter in waiters { waiter.resume() }
+    }
+}
+
 /// A new canonical lowercase UUID.
 func uuid() -> String { UUID().uuidString.lowercased() }
 
@@ -150,8 +176,12 @@ enum Reply {
     }
 
     /// A non-2xx response with a top-level error body.
-    static func failure(status: Int, code: String, outcome: String = "rejected") -> ConvoHopHTTPResponse {
-        json(["code": .string(code), "outcome": .string(outcome), "message": "Failed"], status: status)
+    static func failure(
+        status: Int, code: String, outcome: String = "rejected", retryAfter: Int? = nil
+    ) -> ConvoHopHTTPResponse {
+        var body: JSONObject = ["code": .string(code), "outcome": .string(outcome), "message": "Failed"]
+        if let retryAfter { body["retryAfter"] = .number(Double(retryAfter)) }
+        return json(.object(body), status: status)
     }
 
     static func json(_ value: JSONValue, status: Int = 200) -> ConvoHopHTTPResponse {
@@ -384,6 +414,7 @@ final class TestClock: @unchecked Sendable {
     private var current: Int
     private var sleepers: [Sleeper] = []
     private var cancelled: Set<UUID> = []
+    private var wallClockWaits = 0
 
     init(now: Int = 1_800_000_000_000) {
         current = now
@@ -394,15 +425,28 @@ final class TestClock: @unchecked Sendable {
     var pendingSleeps: Int { lock.locked { sleepers.count } }
     /// The deadlines of unfinished sleeps, soonest first.
     var deadlines: [Int] { lock.locked { sleepers.map(\.deadline).sorted() } }
+    /// Calls to `sleep(until:)`, the environment's wall-clock wait.
+    var wallClockSleeps: Int { lock.locked { wallClockWaits } }
 
     func sleep(_ milliseconds: Int) async throws {
+        try await sleep { now in milliseconds > 0 ? now + milliseconds : nil }
+    }
+
+    /// Sleeps until the clock reads `deadline`, like the live wall-clock timer.
+    func sleep(until deadline: Int) async throws {
+        lock.locked { wallClockWaits += 1 }
+        try await sleep { now in deadline > now ? deadline : nil }
+    }
+
+    /// Sleeps until the deadline that `deadline` computes from the current time. `nil` means it's already due.
+    private func sleep(_ deadline: (_ now: Int) -> Int?) async throws {
         let id = UUID()
         try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
                 let outcome: Result<Void, any Error>? = lock.locked {
                     if cancelled.remove(id) != nil { return .failure(CancellationError()) }
-                    if milliseconds <= 0 { return .success(()) }
-                    sleepers.append(Sleeper(id: id, deadline: current + milliseconds, continuation: continuation))
+                    guard let due = deadline(current) else { return .success(()) }
+                    sleepers.append(Sleeper(id: id, deadline: due, continuation: continuation))
                     return nil
                 }
                 if let outcome { continuation.resume(with: outcome) }
@@ -439,7 +483,8 @@ final class TestClock: @unchecked Sendable {
 
     var environment: ConvoHopEnvironment {
         ConvoHopEnvironment(
-            now: { self.now }, sleep: { milliseconds in try await self.sleep(milliseconds) }, random: { _ in 0 })
+            now: { self.now }, sleep: { milliseconds in try await self.sleep(milliseconds) }, random: { _ in 0 },
+            sleepUntil: { deadline in try await self.sleep(until: deadline) })
     }
 }
 

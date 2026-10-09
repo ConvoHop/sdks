@@ -46,11 +46,14 @@ struct ConvoHopEnvironment: Sendable {
     var now: @Sendable () -> Int
     var sleep: @Sendable (_ milliseconds: Int) async throws -> Void
     var random: @Sendable (_ upperBound: Int) -> Int
+    /// Waits until `now()` reaches `deadline`. Unlike `sleep`, it keeps counting while the device sleeps.
+    var sleepUntil: @Sendable (_ deadline: Int) async throws -> Void
 
     static let live = ConvoHopEnvironment(
-        now: { Int((Date().timeIntervalSince1970 * 1000).rounded(.down)) },
+        now: { WallClock.now() },
         sleep: { milliseconds in try await Task.sleep(nanoseconds: UInt64(max(0, milliseconds)) * 1_000_000) },
-        random: { upperBound in upperBound > 0 ? Int.random(in: 0..<upperBound) : 0 })
+        random: { upperBound in upperBound > 0 ? Int.random(in: 0..<upperBound) : 0 },
+        sleepUntil: { deadline in try await WallClock.sleep(until: deadline) })
 }
 
 /// A replay that can't continue as requested.
@@ -139,7 +142,7 @@ public actor ConvoHopClient {
     let storage: (any RecoveryStorage)?
     let environment: ConvoHopEnvironment
     let webSocketFactory: any ConvoHopWebSocketFactory
-    private let refreshHook: ConvoHopSessionRefresh?
+    let refreshHook: ConvoHopSessionRefresh?
     private(set) var token: String
     private var session: Session?
     private var sessionInitialization: Task<Session, Error>?

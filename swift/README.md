@@ -94,15 +94,35 @@ try await client.initialize()
 `initialize()` checks the project route and, with a refresh callback, binds the
 current session. Create one client per signed-in user and session.
 
-**Renewal.** Call `try await client.refreshSession()` before the session
+**Renewal.** Keep the session renewed with a schedule:
+
+```swift
+let renewal = try client.scheduleSessionRefresh(
+    onError: { error in print("ConvoHop renewal failed: \(error)") }
+)
+// Keep `renewal` as long as the user is signed in. Call renewal.cancel(), or
+// release it, to stop.
+```
+
+The schedule renews a minute before expiry (set `lead:` in seconds), but
+never earlier than halfway through the session's remaining life, then again
+after each renewal. Called before `initialize()`, it initializes the client
+first, retrying network failures, 429 and 503 and honoring `retryAfter`. A
+renewal that fails while the current session is still verified is retried
+with backoff until a second before expiry; any other failure stops the
+schedule. Every failure reaches `onError`, and `onRefreshed` receives each new
+session. Both run on a background task. The schedule waits on the wall clock,
+so a renewal that fell due while the app was suspended runs as soon as the app
+runs again.
+
+To renew yourself, call `try await client.refreshSession()` before the session
 expires: `client.sessionBinding?.expiresAt` says when. The authority drops the
-fraction of a second from the expiry, so renew at least a second early, for
-example a minute before expiry and whenever the app returns to the foreground.
-The SDK has no renewal timer. It pauses requests and replays while it calls
-your callback, verifies the new session with the authority, then resumes them
-with the new token. When renewal fails and the old session can't be confirmed,
-requests fail with `SESSION_REFRESH_REQUIRED`: sign the user in again and
-create a new client with the same recovery storage.
+fraction of a second from the expiry, so renew at least a second early.
+Renewal pauses requests and replays while it calls your callback, verifies the
+new session with the authority, then resumes them with the new token. When
+renewal fails and the old session can't be confirmed, requests fail with
+`SESSION_REFRESH_REQUIRED`: sign the user in again and create a new client
+with the same recovery storage.
 
 Without a refresh callback, create a new client when the session expires.
 
