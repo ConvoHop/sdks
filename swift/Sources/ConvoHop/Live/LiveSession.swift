@@ -43,7 +43,11 @@ public actor LiveSessionHandle {
     public nonisolated let liveSessionId: String
     public nonisolated let generation: String
     public nonisolated let conversationId: String
-    private var endRequest: String?
+    private var endRequest: String? {
+        didSet { retainer.hold(endRequest.map { [$0] } ?? []) }
+    }
+    /// Keeps the record of the end request, which holds its original revision, while the app keeps this handle.
+    private let retainer = RecoveryRetainer()
 
     init(client: ConvoHopClient, snapshot: LiveSession) throws {
         guard ProtocolChecks.isCanonicalUUID(snapshot.liveSessionId),
@@ -55,6 +59,7 @@ public actor LiveSessionHandle {
         liveSessionId = snapshot.liveSessionId
         generation = snapshot.generation
         conversationId = snapshot.conversationId
+        client.transport.retention.add(retainer)
     }
 
     static func load(client: ConvoHopClient, liveSessionId: String) async throws -> LiveSessionHandle {
@@ -199,16 +204,29 @@ public actor LiveParticipationHandle {
         var used: Bool
     }
 
-    private var attempt: CredentialAttempt?
+    private var attempt: CredentialAttempt? {
+        didSet { retain() }
+    }
     private var connection: MediaConnection?
     private var connecting: Task<MediaConnection, any Error>?
-    private var leaveRequest: String?
+    private var leaveRequest: String? {
+        didSet { retain() }
+    }
+    /// Keeps the records of the leave request and the current credential attempt while the app keeps this handle: the
+    /// handle reads the attempt's record again for its budget and native admission.
+    private let retainer = RecoveryRetainer()
 
     private init(live: LiveSessionHandle, snapshot: LiveParticipation, leaveRequest: String?) {
         self.live = live
         self.snapshot = snapshot
         participationId = snapshot.participationId
         self.leaveRequest = leaveRequest
+        retainer.hold(leaveRequest.map { [$0] } ?? [])
+        live.client.transport.retention.add(retainer)
+    }
+
+    private func retain() {
+        retainer.hold([leaveRequest, attempt?.requestId].compactMap { $0 })
     }
 
     static func load(live: LiveSessionHandle, snapshot: LiveParticipation) async throws -> LiveParticipationHandle {

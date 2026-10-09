@@ -185,6 +185,110 @@ final class OutboxTests: XCTestCase {
         XCTAssertEqual(items.map(\.state), [.sent])
     }
 
+    // MARK: Retry policy
+
+    func testARateLimitWaitsForItsRetryAfterAndAnExhaustedQuotaFailsTheMessage() async throws {
+        let network = FakeNetworkMonitor(reachable: true)
+        let (h, outbox) = try await outbox(network: network)
+        let attempts = Shared(0)
+        await h.http.on("communication.sendMessage") { _ in
+            attempts.update({ $0 += 1; return $0 }) == 1
+                ? Reply.graphQLError(code: "RATE_LIMITED", status: 429, retryAfter: 9)
+                : Reply.graphQLError(code: "QUOTA_EXCEEDED", status: 429, retryAfter: 60)
+        }
+        try await outbox.start()
+        _ = try await outbox.enqueue("limited", to: TestIDs.conversation)
+
+        try await eventually { h.clock.pendingSleeps == 1 }
+        // The authority's retryAfter outranks the outbox's one-second backoff.
+        XCTAssertEqual(h.clock.deadlines, [h.clock.now + 9_000])
+        let waiting = try await outbox.items().first
+        XCTAssertEqual(waiting?.state, .queued)
+        XCTAssertEqual(waiting?.failure?.code, .rateLimited)
+
+        // An exhausted quota doesn't clear by waiting, so the message fails instead of waiting for its retryAfter.
+        h.clock.advanceToNextDeadline()
+        try await eventually { try await outbox.items().first?.state == .failed }
+        let failed = try await outbox.items().first
+        XCTAssertEqual(failed?.failure?.code, .quotaExceeded)
+        let pauseReason = await outbox.pauseReason
+        XCTAssertNil(pauseReason)
+        let requests = await h.http.requests("communication.sendMessage")
+        XCTAssertEqual(requests.count, 2)
+        XCTAssertEqual(Set(requests.map(\.requestId)).count, 1)
+        XCTAssertEqual(h.clock.pendingSleeps, 0)
+    }
+
+    func testAFullRecoveryJournalHoldsTheMessageUntilARecordIsFinal() async throws {
+        // Sends with unknown outcomes, which may be resent under their request IDs for a minute.
+        let seeded = (0..<ConvoHopTransport.maximumRecords).map { _ in uuid() }
+        let storage = try await Fixture.recoveryStorage(seeded.map { try Fixture.recoveryRecord($0) })
+        let network = FakeNetworkMonitor(reachable: true)
+        let (h, outbox) = try await outbox(network: network, storage: storage)
+        await h.http.on("communication.sendMessage") { request in
+            Reply.ok(request, ["result": Fixture.messageAck(TestIDs.conversation, sequence: "41")])
+        }
+        try await outbox.start()
+        let item = try await outbox.enqueue("waits", to: TestIDs.conversation)
+
+        // The transport refused to record the request, so nothing was sent and the message waits without pausing.
+        try await eventually { h.clock.pendingSleeps == 1 }
+        let waiting = try await outbox.items().first
+        XCTAssertEqual(waiting?.state, .queued)
+        XCTAssertEqual(waiting?.failure?.code, .recoveryLimit)
+        let pauseReason = await outbox.pauseReason
+        XCTAssertNil(pauseReason)
+        var sent = await h.http.count("communication.sendMessage")
+        XCTAssertEqual(sent, 0)
+
+        // Once their retry window closes, the seeded records are final, and the oldest makes room.
+        h.clock.advance(by: 60_001)
+        try await eventually { try await outbox.items().first?.state == .sent }
+        sent = await h.http.count("communication.sendMessage")
+        XCTAssertEqual(sent, 1)
+        let journal = try await Fixture.journal(storage)
+        XCTAssertEqual(journal, Array(seeded.dropFirst()) + [item.requestId])
+    }
+
+    func testTheRecoveryJournalKeepsTheRecordsOfQueuedMessages() async throws {
+        let network = FakeNetworkMonitor(reachable: false)
+        let (h, outbox) = try await outbox(network: network)
+        let sequence = Shared(50)
+        await h.http.on("communication.sendMessage") { request in
+            let next = sequence.update { $0 += 1; return $0 }
+            return Reply.ok(request, ["result": Fixture.messageAck(TestIDs.conversation, sequence: String(next))])
+        }
+        try await outbox.start()
+        let first = try await outbox.enqueue("one", to: TestIDs.conversation)
+        let second = try await outbox.enqueue("two", to: TestIDs.conversation)
+        let retention = await h.client.transport.retention
+        XCTAssertEqual(retention.requestIds, [first.requestId, second.requestId])
+
+        network.set(true)
+        try await eventually { try await outbox.items().map(\.state) == [.sent, .sent] }
+        try await eventually { retention.requestIds.isEmpty }
+    }
+
+    func testWrongRegionRoutesAgainAndResendsUnderTheSameRequestId() async throws {
+        let network = FakeNetworkMonitor(reachable: true)
+        let (h, outbox) = try await outbox(network: network)
+        let attempts = Shared(0)
+        await h.http.on("communication.sendMessage") { request in
+            if attempts.update({ $0 += 1; return $0 }) == 1 { return Reply.graphQLError(code: "WRONG_REGION") }
+            return Reply.ok(request, ["result": Fixture.messageAck(TestIDs.conversation, sequence: "61")])
+        }
+        try await outbox.start()
+        _ = try await outbox.enqueue("moved", to: TestIDs.conversation)
+
+        try await eventually { h.clock.pendingSleeps == 1 }
+        h.clock.advanceToNextDeadline()
+        try await eventually { try await outbox.items().first?.state == .sent }
+        let keys = await h.http.requests.map(\.key)
+        XCTAssertEqual(keys, ["communication.sendMessage", "communication.route", "communication.sendMessage"])
+        let sends = await h.http.requests("communication.sendMessage")
+        XCTAssertEqual(Set(sends.map(\.requestId)).count, 1)
+    }
+
     // MARK: Apps that die
 
     func testAnAppThatDiesAtAnyStepStillSendsTheMessageOnce() async throws {

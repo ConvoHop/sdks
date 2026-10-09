@@ -491,14 +491,13 @@ fails on any other skip. It runs on Node.js, not Hermes, with a fake of the
 native platform module.
 
 The Swift driver also declares only the user role and no `webhooks.verify`
-feature. It passes 33 scenarios against the mock and skips 44: those that
-use only backend or management clients, those that verify webhooks, and the
-10 that need `recovery.eviction`, `recovery.spentBudget` or
-`realtime.reconnectPolicy` with a user client, until its SDK follows the
-[recovery and reconnect rules](../recovery/README.md). On Linux it doesn't
-declare `realtime`, because Ubuntu's libcurl has no WebSocket support. There
-it passes 24 scenarios and also skips the 9 realtime ones. Its
-[workflow](../../.github/workflows/swift.yml) fails on any other skip.
+feature. It declares `recovery.eviction`, `recovery.spentBudget` and
+`realtime.reconnectPolicy`, so it passes 43 scenarios against the mock and
+skips 34: those that use only backend or management clients, and those that
+verify webhooks. On Linux it doesn't declare `realtime` or
+`realtime.reconnectPolicy`, because Ubuntu's libcurl has no WebSocket
+support. There it passes 27 scenarios and also skips the 16 realtime ones.
+Its [workflow](../../.github/workflows/swift.yml) fails on any other skip.
 
 Passing against the mock shows that the SDK, driver and scenarios agree on
 the public contract. It does not certify a real deployment; for that, run

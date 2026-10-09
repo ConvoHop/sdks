@@ -1163,7 +1163,7 @@
           "name": "ConversationStream",
           "kind": "class",
           "signatures": ["public actor ConversationStream"],
-          "docs": "Replays one conversation's events from a cursor, then follows new events in real time.\n\nEach batch reaches `apply` once and in order. The cursor advances, and is stored, only after `apply` returns.\nWhen the realtime connection drops, the stream fills the gap from history before it reconnects. Close the stream\nwhen you no longer need it.\n\nWhen the organization runs out of prepaid credits or reaches its monthly spend cap, the stream closes and reports\n`CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` with status 402. `SPEND_UNVERIFIED` goes to `onError` and the stream\nreconnects no sooner than its `retryAfter`.",
+          "docs": "Replays one conversation's events from a cursor, then follows new events in real time.\n\nEach batch reaches `apply` once and in order. The cursor advances, and is stored, only after `apply` returns.\nWhen the realtime connection drops, the stream fills the gap from history before it reconnects. Close the stream\nwhen you no longer need it.\n\nWhen the organization runs out of prepaid credits or reaches its monthly spend cap, the stream closes and reports\n`CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` with status 402. `SPEND_UNVERIFIED` goes to `onError` and the stream\nreconnects as it does after `RATE_LIMITED`, waiting at least its `retryAfter`.",
           "members": [
             {
               "name": "conversationId",
@@ -1625,7 +1625,7 @@
               "signatures": [
                 "public nonisolated func scheduleSessionRefresh(\n    lead: TimeInterval = 60,\n    onRefreshed: (@Sendable (Session) -> Void)? = nil,\n    onError: (@Sendable (any Error) -> Void)? = nil\n) throws -> ConvoHopSessionRefreshSchedule"
               ],
-              "docs": "Renews the session `lead` seconds before it expires, and again after each renewal, until you cancel or\nrelease the returned schedule.\n\nA renewal is never due earlier than halfway through the session's remaining life, so a session shorter than\n`lead` doesn't renew in a loop. On a client that isn't initialized, the schedule calls `initialize()` first\nand retries network failures, rate limits (429) and outages (503) with backoff, honoring the authority's\n`retryAfter`. A renewal that fails while the current session is still verified is retried with backoff, from\n1 second doubling to 32, until a second before expiry. Any other failure stops the schedule. Every failure\ngoes to `onError`.\n\nThe schedule waits on the wall clock, so a renewal that fell due while the app was suspended or the device\nslept runs as soon as the app runs again. Callbacks run on a background task. Cancelling suppresses later\ncallbacks, including those of a renewal in progress, which still completes.\n\nParameters:\n\n- `lead`: How long before expiry to renew, in seconds.\n- `onRefreshed`: Receives each verified replacement session.\n- `onError`: Receives each failure.\n\nThrows: `SESSION_REFRESH_REQUIRED` without a `ConvoHopConfiguration.refreshSession` callback, or\n`ConvoHopUsageError` when `lead` is negative or not finite."
+              "docs": "Renews the session `lead` seconds before it expires, and again after each renewal, until you cancel or\nrelease the returned schedule.\n\nA renewal is never due earlier than halfway through the session's remaining life, so a session shorter than\n`lead` doesn't renew in a loop. On a client that isn't initialized, the schedule calls `initialize()` first\nand retries the failures that the SDK's shared classifier retries, such as network failures, timeouts,\n`RATE_LIMITED` and 5xx outages, with backoff and never sooner than the authority's `retryAfter`. It routes again\nafter `WRONG_REGION`. A renewal that fails while the current session is still verified is retried with backoff,\nfrom 1 second doubling to 32, until a second before expiry. Any other failure stops the schedule. Every failure\ngoes to `onError`.\n\nThe schedule waits on the wall clock, so a renewal that fell due while the app was suspended or the device\nslept runs as soon as the app runs again. Callbacks run on a background task. Cancelling suppresses later\ncallbacks, including those of a renewal in progress, which still completes.\n\nParameters:\n\n- `lead`: How long before expiry to renew, in seconds.\n- `onRefreshed`: Receives each verified replacement session.\n- `onError`: Receives each failure.\n\nThrows: `SESSION_REFRESH_REQUIRED` without a `ConvoHopConfiguration.refreshSession` callback, or\n`ConvoHopUsageError` when `lead` is negative or not finite."
             }
           ]
         },
@@ -1961,7 +1961,7 @@
               "name": "retryAfter",
               "kind": "property",
               "signatures": ["public let retryAfter: Int?"],
-              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). The SDK never waits or resends on its own because of it."
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). The SDK never resends a call you made, but the work it retries by itself waits at least this\nlong: stream reconnects, a renewal schedule's initialization and queued messages."
             },
             {
               "name": "underlyingError",
@@ -4157,7 +4157,7 @@
           "name": "ConvoHopWebSocket",
           "kind": "interface",
           "signatures": ["public protocol ConvoHopWebSocket: AnyObject, Sendable"],
-          "docs": "One realtime connection. Implementations deliver events in order and finish `events` after `closed`.\n\nPass the server's close reason to `closed`, because the stream reads spend codes from it. Without the reason, a\n4402 spend stop looks like a dropped connection and the stream reconnects with backoff, and a 4503\n`SPEND_UNVERIFIED` close loses its `retryAfter`.",
+          "docs": "One realtime connection. Implementations deliver events in order and finish `events` after `closed`.\n\nPass the server's close reason to `closed`. Without it, a close that should end the stream, such as a 4402\n`SPEND_CAP_REACHED` stop, looks like a dropped connection and the stream reconnects with backoff, and a close loses\nits `retryAfter`.",
           "members": [
             {
               "name": "events",
@@ -4202,8 +4202,8 @@
             {
               "name": "closed",
               "kind": "case",
-              "signatures": ["case closed(code: Int, reason: String? = nil)"],
-              "docs": "The connection ended. `reason` is the close reason the server sent, if any. ConvoHop puts details there, such as\n`SPEND_UNVERIFIED retryAfter=5 meter=mau`."
+              "signatures": ["case closed(code: Int, reason: String = \"\")"],
+              "docs": "The connection ended with a close code and the reason the peer sent, empty without one. A socket should pass\nthe reason on: the stream classifies a close by the error code that starts it, such as `QUOTA_EXCEEDED`."
             }
           ]
         },
@@ -9831,6 +9831,12 @@
               "kind": "case",
               "signatures": ["case unknown"],
               "docs": "Sent without a receipt. Resolve or retry it with the same request ID."
+            },
+            {
+              "name": "rejected",
+              "kind": "case",
+              "signatures": ["case rejected"],
+              "docs": "The authority refused every attempt. A retryable refusal, such as `RATE_LIMITED`, can still be retried with\nthe same request ID while the retry budget lasts."
             },
             {"name": "committed", "kind": "case", "signatures": ["case committed"], "docs": ""},
             {"name": "accepted", "kind": "case", "signatures": ["case accepted"], "docs": ""}

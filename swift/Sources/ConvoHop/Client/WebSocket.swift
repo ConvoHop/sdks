@@ -12,16 +12,16 @@ public enum ConvoHopWebSocketEvent: Sendable, Equatable {
     case binary(Data)
     /// The transport failed. A `closed` event follows.
     case failed
-    /// The connection ended. `reason` is the close reason the server sent, if any. ConvoHop puts details there, such as
-    /// `SPEND_UNVERIFIED retryAfter=5 meter=mau`.
-    case closed(code: Int, reason: String? = nil)
+    /// The connection ended with a close code and the reason the peer sent, empty without one. A socket should pass
+    /// the reason on: the stream classifies a close by the error code that starts it, such as `QUOTA_EXCEEDED`.
+    case closed(code: Int, reason: String = "")
 }
 
 /// One realtime connection. Implementations deliver events in order and finish `events` after `closed`.
 ///
-/// Pass the server's close reason to `closed`, because the stream reads spend codes from it. Without the reason, a
-/// 4402 spend stop looks like a dropped connection and the stream reconnects with backoff, and a 4503
-/// `SPEND_UNVERIFIED` close loses its `retryAfter`.
+/// Pass the server's close reason to `closed`. Without it, a close that should end the stream, such as a 4402
+/// `SPEND_CAP_REACHED` stop, looks like a dropped connection and the stream reconnects with backoff, and a close loses
+/// its `retryAfter`.
 public protocol ConvoHopWebSocket: AnyObject, Sendable {
     var events: AsyncStream<ConvoHopWebSocketEvent> { get }
     func send(_ text: String)
@@ -124,6 +124,11 @@ final class URLSessionWebSocketConnection: NSObject, ConvoHopWebSocket, URLSessi
         if !finished { continuation.yield(event) }
     }
 
+    /// A close frame's reason as text. Invalid UTF-8 becomes replacement characters.
+    private static func text(_ reason: Data?) -> String {
+        reason.map { String(decoding: $0, as: UTF8.self) } ?? ""
+    }
+
     private func fail() {
         lock.lock()
         let task = finished ? nil : task
@@ -160,11 +165,6 @@ final class URLSessionWebSocketConnection: NSObject, ConvoHopWebSocket, URLSessi
         didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?
     ) {
         finish(.closed(code: closeCode.rawValue, reason: Self.text(reason)))
-    }
-
-    /// A close reason as text. Reasons that aren't UTF-8 are dropped.
-    private static func text(_ reason: Data?) -> String? {
-        reason.flatMap { String(data: $0, encoding: .utf8) }
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {

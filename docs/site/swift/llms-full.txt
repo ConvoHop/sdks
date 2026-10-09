@@ -833,7 +833,7 @@ when you no longer need it.
 
 When the organization runs out of prepaid credits or reaches its monthly spend cap, the stream closes and reports
 `CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` with status 402. `SPEND_UNVERIFIED` goes to `onError` and the stream
-reconnects no sooner than its `retryAfter`.
+reconnects as it does after `RATE_LIMITED`, waiting at least its `retryAfter`.
 
 #### `ConversationStream.conversationId` property
 
@@ -1291,9 +1291,10 @@ release the returned schedule.
 
 A renewal is never due earlier than halfway through the session's remaining life, so a session shorter than
 `lead` doesn't renew in a loop. On a client that isn't initialized, the schedule calls `initialize()` first
-and retries network failures, rate limits (429) and outages (503) with backoff, honoring the authority's
-`retryAfter`. A renewal that fails while the current session is still verified is retried with backoff, from
-1 second doubling to 32, until a second before expiry. Any other failure stops the schedule. Every failure
+and retries the failures that the SDK's shared classifier retries, such as network failures, timeouts,
+`RATE_LIMITED` and 5xx outages, with backoff and never sooner than the authority's `retryAfter`. It routes again
+after `WRONG_REGION`. A renewal that fails while the current session is still verified is retried with backoff,
+from 1 second doubling to 32, until a second before expiry. Any other failure stops the schedule. Every failure
 goes to `onError`.
 
 The schedule waits on the wall clock, so a renewal that fell due while the app was suspended or the device
@@ -3871,7 +3872,8 @@ public let retryAfter: Int?
 ```
 
 Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
-`RATE_LIMITED`). The SDK never waits or resends on its own because of it.
+`RATE_LIMITED`). The SDK never resends a call you made, but the work it retries by itself waits at least this
+long: stream reconnects, a renewal schedule's initialization and queued messages.
 
 #### `ConvoHopError.underlyingError` property
 
@@ -11726,9 +11728,9 @@ public protocol ConvoHopWebSocket: AnyObject, Sendable
 
 One realtime connection. Implementations deliver events in order and finish `events` after `closed`.
 
-Pass the server's close reason to `closed`, because the stream reads spend codes from it. Without the reason, a
-4402 spend stop looks like a dropped connection and the stream reconnects with backoff, and a 4503
-`SPEND_UNVERIFIED` close loses its `retryAfter`.
+Pass the server's close reason to `closed`. Without it, a close that should end the stream, such as a 4402
+`SPEND_CAP_REACHED` stop, looks like a dropped connection and the stream reconnects with backoff, and a close loses
+its `retryAfter`.
 
 #### `ConvoHopWebSocket.events` property
 
@@ -12707,11 +12709,11 @@ The transport failed. A `closed` event follows.
 #### `ConvoHopWebSocketEvent.closed` case
 
 ```swift
-case closed(code: Int, reason: String? = nil)
+case closed(code: Int, reason: String = "")
 ```
 
-The connection ended. `reason` is the close reason the server sent, if any. ConvoHop puts details there, such as
-`SPEND_UNVERIFIED retryAfter=5 meter=mau`.
+The connection ended with a close code and the reason the peer sent, empty without one. A socket should pass
+the reason on: the stream classifies a close by the error code that starts it, such as `QUOTA_EXCEEDED`.
 
 ### `GraphQLContextUse` enum
 
@@ -13283,6 +13285,15 @@ case unknown
 ```
 
 Sent without a receipt. Resolve or retry it with the same request ID.
+
+#### `RecoveryState.Resolution.rejected` case
+
+```swift
+case rejected
+```
+
+The authority refused every attempt. A retryable refusal, such as `RATE_LIMITED`, can still be retried with
+the same request ID while the retry budget lasts.
 
 #### `RecoveryState.Resolution.committed` case
 

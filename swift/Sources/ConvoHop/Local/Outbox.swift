@@ -126,6 +126,8 @@ public actor ConvoHopOutbox {
     private var recheckTask: (id: UUID, task: Task<Void, Never>)?
     private var writes: Task<Void, any Error>?
     private var observers: [UUID: AsyncStream<Snapshot>.Continuation] = [:]
+    /// The request IDs of queued and sending items, which a full recovery journal never evicts.
+    private let retainer = RecoveryRetainer()
 
     static let sentRetention = 60_000
     static let maximumRotations = 2
@@ -133,7 +135,19 @@ public actor ConvoHopOutbox {
         .unauthenticated, .sessionRefreshFailed, .sessionRefreshRejected, .sessionRefreshRequired,
         .sessionRefreshUnverified,
     ]
+    /// Refusals that clear without changing the message, so the message waits rather than fails. `RECOVERY_LIMIT`
+    /// means the recovery journal holds no record it may forget, so nothing was sent: the message waits until one
+    /// becomes final.
+    static let waitingCodes: Set<ConvoHopErrorCode> = [
+        .unauthenticated, .sessionRefreshRequired, .rateLimited, .recoveryLimit,
+    ]
     static let unconfirmed = "ConvoHop couldn't confirm whether this message was sent"
+
+    /// Whether a refused message waits and tries again: after a refusal that clears without changing the message, or
+    /// one the SDK's shared classifier retries. Any other refusal, such as `QUOTA_EXCEEDED`, fails the message.
+    static func retryable(_ error: ConvoHopError) -> Bool {
+        waitingCodes.contains(error.code) || RetryPolicy.reconnectAction(error) != .stop
+    }
 
     /// An outbox for `client`'s user. `capacity` must be 1...10000.
     ///
@@ -151,6 +165,7 @@ public actor ConvoHopOutbox {
         environment = client.environment
         incarnation = client.incarnation
         storageKey = "convohop.outbox:" + client.projectId + ":" + client.principalId
+        client.transport.retention.add(retainer)
     }
 
     deinit {
@@ -432,6 +447,8 @@ public actor ConvoHopOutbox {
             }
         } catch {
             sendFailed(id, error)
+            // After WRONG_REGION, route again so the next attempt uses the current route.
+            if RetryPolicy.reconnectAction(error) == .reroute { _ = try? await client.initialize() }
         }
         await transport.forgetSubmissionHook(requestId, token: hook)
         emit()
@@ -472,9 +489,6 @@ public actor ConvoHopOutbox {
             } else if error.outcome == .committed || error.outcome == .accepted {
                 entry.uncertain = true
                 entry.mustResolve = true
-            } else if error.code == .resolutionRequired, error.outcome == .rejected {
-                // The transport holds too many unresolved requests to record another one; nothing was sent.
-                pauseReason = error
             } else if error.code == .resolutionRequired || error.code == .requestExpired {
                 entry.mustResolve = true
             } else if error.code == .idempotencyConflict || error.code == .incarnationMismatch {
@@ -483,19 +497,18 @@ public actor ConvoHopOutbox {
                 if error.outcome != .rejected { entry.uncertain = true }
                 backoff(&entry, uncertain: false)
             } else if error.outcome == .rejected {
-                if error.isRetryable {
+                if Self.retryable(error) {
                     backoff(&entry, minimum: Self.retryDelay(error), uncertain: false)
                 } else {
                     entry.state = .failed
                 }
             } else {
+                // An unknown outcome is never a refusal. The outbox resends under the same request ID while the
+                // transport's retry budget lasts; then the transport answers RESOLUTION_REQUIRED and the outbox looks
+                // the request up.
                 entry.uncertain = true
                 forced = false
-                if error.isRetryable {
-                    backoff(&entry, minimum: Self.retryDelay(error), uncertain: true)
-                } else {
-                    entry.mustResolve = true
-                }
+                backoff(&entry, minimum: Self.retryDelay(error), uncertain: true)
             }
         default:
             entry.uncertain = true
@@ -515,6 +528,7 @@ public actor ConvoHopOutbox {
             resolution = try await client.resolveRequest(requestId)
         } catch {
             resolveFailed(id, requestId: requestId, error)
+            if RetryPolicy.reconnectAction(error) == .reroute { _ = try? await client.initialize() }
             emit()
             try? await persist()
             return
@@ -560,7 +574,7 @@ public actor ConvoHopOutbox {
                 pauseReason = error
             } else if error.code == .incarnationMismatch || error.code == .resolutionRequired
                 || error.code == .idempotencyConflict
-                || (error.outcome == .rejected && !error.isRetryable && error.code != .recoveryStorageFailure)
+                || (error.outcome == .rejected && !Self.retryable(error) && error.code != .recoveryStorageFailure)
             {
                 entry.state = .unresolved
             } else {
@@ -648,8 +662,9 @@ public actor ConvoHopOutbox {
         entry.notBefore = environment.now() + delay + environment.random(delay / 5 + 1)
     }
 
+    /// The authority's `retryAfter`, a floor on the next attempt's delay.
     private static func retryDelay(_ error: ConvoHopError) -> Int {
-        min(max(error.retryAfter ?? 0, 0), 3_600) * 1_000
+        RetryPolicy.retryAfterMilliseconds(error.retryAfter)
     }
 
     // MARK: Storage
@@ -779,6 +794,7 @@ public actor ConvoHopOutbox {
     }
 
     private func emit() {
+        retainer.hold(entries.lazy.filter { $0.state == .queued || $0.state == .sending }.map(\.requestId))
         guard !observers.isEmpty else { return }
         let snapshot = self.snapshot
         for observer in observers.values { observer.yield(snapshot) }

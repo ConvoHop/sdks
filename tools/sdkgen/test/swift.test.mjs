@@ -105,6 +105,25 @@ test("output shapes cover exactly the output types, and error codes cover the cl
   assert.match(operations, /enum GraphQLRealtime \{[\s\S]*static let eventStream = GraphQLRealtimeChannel\([\s\S]*connectionInit: \["tenant", "token"\],[\s\S]*jitterMs: 0,\n {8}terminalCloseCodes: \[4401, 4403\]\n/);
 });
 
+test("the internal error catalog lists every code in the IR, with its status and retryability", () => {
+  const ir = edgeIr({
+    annotations: annotations => {
+      annotations.errorCodes.JOBS_PAUSED = { summary: "Jobs are paused.", origin: "server", status: 503, retryable: false };
+      annotations.operations["alpha.startJob"].errors.codes.push("JOBS_PAUSED");
+    },
+  });
+  const operations = renderSwiftOperations(ir);
+  const catalog = /\n {4}static let catalog: \[String: \(status: Int\?, retryable: Bool\)\] = \[\n([\s\S]*?),\n {4}\]\n/.exec(operations)[1];
+  const listed = catalog.split(",\n").map(line => {
+    const [, name, status, retryable] = /^ {8}"(\w+)": \(status: (\d+|nil), retryable: (true|false)\)$/.exec(line);
+    return [name, status === "nil" ? undefined : Number(status), retryable === "true"];
+  });
+  const expected = ir.errors.codes.map(code => [code.name, code.status, code.retryable]).sort(([a], [b]) => codeUnitCompare(a, b));
+  assert.deepEqual(listed, expected);
+  assert.ok(listed.some(([name]) => name === "JOBS_PAUSED"), "a code that only server operations return is classified by its own retryable flag");
+  assert.ok(!operations.includes('rawValue: "JOBS_PAUSED"'), "but it gets no public member");
+});
+
 test("keyword fields are escaped and reserved type names are prefixed throughout", () => {
   const ir = edgeIr({
     planes: { alpha: text => replaceOnce(text, "input PingInput {\n  note: String\n}", "input PingInput {\n  repeat: Int\n}").replaceAll(/\bReceipt\b/g, "Result") },
