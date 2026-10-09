@@ -154,6 +154,25 @@ updates:
           - minor
           - patch
 
+  # Tested Python docs snippets (docs/languages/python/examples). They install
+  # the SDK from python/. Major updates stay ungrouped so each one is checked
+  # against its quickstart, for example the form of firebase-admin's Android
+  # options.
+  - package-ecosystem: uv
+    directory: /docs/languages/python/examples
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: docs
+      include: scope
+    groups:
+      docs-python-examples:
+        update-types:
+          - minor
+          - patch
+
   # The Swift client SDK (swift/). SwiftPM has no development dependency type,
   # so test-only updates get the fix prefix too.
   - package-ecosystem: swift

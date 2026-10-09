@@ -1,0 +1,2025 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "python",
+  "package": "convohop.types",
+  "layer": "server",
+  "page": "types.md",
+  "symbols": [
+    {
+      "name": "ActorRef",
+      "kind": "class",
+      "ref": "convohop.types#ActorRef",
+      "anchor": "actorref-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ActorRef:\n    tenant_id: str\n    object_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "AddMemberReply",
+      "kind": "class",
+      "ref": "convohop.types#AddMemberReply",
+      "anchor": "addmemberreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AddMemberReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Member | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "AddMemberRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#AddMemberRequestInput",
+      "anchor": "addmemberrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AddMemberRequestInput:\n    conversation_id: str\n    principal_id: str\n    role: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "AddMembersInput",
+      "kind": "class",
+      "ref": "convohop.types#AddMembersInput",
+      "anchor": "addmembersinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AddMembersInput:\n    conversation_id: str\n    members: Sequence[MemberBatchEntryInput]\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "AddMembersPayload",
+      "kind": "class",
+      "ref": "convohop.types#AddMembersPayload",
+      "anchor": "addmemberspayload-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AddMembersPayload:\n    status: str\n    request_id: str\n    receipt_id: str\n    committed_at: str\n    replayed: bool\n    result: ConversationMemberBatch\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "AlertLiveSessionInput",
+      "kind": "class",
+      "ref": "convohop.types#AlertLiveSessionInput",
+      "anchor": "alertlivesessioninput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AlertLiveSessionInput:\n    live_session_id: str\n    expected_generation: str\n    principal_ids: Sequence[str]\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "AlertLiveSessionPayload",
+      "kind": "class",
+      "ref": "convohop.types#AlertLiveSessionPayload",
+      "anchor": "alertlivesessionpayload-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass AlertLiveSessionPayload:\n    status: str\n    request_id: str\n    receipt_id: str\n    committed_at: str\n    replayed: bool\n    result: LiveAlertBatch\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "BroadcastPermissionChanged",
+      "kind": "class",
+      "ref": "convohop.types#BroadcastPermissionChanged",
+      "anchor": "broadcastpermissionchanged-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass BroadcastPermissionChanged:\n    member: Member\n    media_cutoff: LiveMediaCutoff | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Capabilities",
+      "kind": "class",
+      "ref": "convohop.types#Capabilities",
+      "anchor": "capabilities-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Capabilities:\n    server_release: str\n    capability_revision: str\n    limits_revision: str\n    features: Features | None\n    limits: tuple[LimitEntry, ...]\n    environment: str\n    production_qualified: bool\n    media_policy: MediaPolicy | None\n    geo_control_authority_id: str | None\n    offerings: tuple[str, ...]\n    geos: tuple[str, ...]\n    installation_profiles: tuple[str, ...]\n    portal_identity: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CapabilitiesReply",
+      "kind": "class",
+      "ref": "convohop.types#CapabilitiesReply",
+      "anchor": "capabilitiesreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CapabilitiesReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Capabilities | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ConfigureWebhookReply",
+      "kind": "class",
+      "ref": "convohop.types#ConfigureWebhookReply",
+      "anchor": "configurewebhookreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ConfigureWebhookReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OperationResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ConfigureWebhookRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#ConfigureWebhookRequestInput",
+      "anchor": "configurewebhookrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ConfigureWebhookRequestInput:\n    project_id: str\n    url: str\n    event_types: Sequence[str]\n    consent_ref: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Conversation",
+      "kind": "class",
+      "ref": "convohop.types#Conversation",
+      "anchor": "conversation-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Conversation:\n    conversation_id: str\n    revision: str\n    title: str\n    props: dict[str, Any] | None\n    latest_sequence: str\n    membership: Member | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ConversationLiveInput",
+      "kind": "class",
+      "ref": "convohop.types#ConversationLiveInput",
+      "anchor": "conversationliveinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ConversationLiveInput:\n    conversation_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ConversationMemberBatch",
+      "kind": "class",
+      "ref": "convohop.types#ConversationMemberBatch",
+      "anchor": "conversationmemberbatch-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ConversationMemberBatch:\n    items: tuple[Member, ...]\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ConversationMute",
+      "kind": "class",
+      "ref": "convohop.types#ConversationMute",
+      "anchor": "conversationmute-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ConversationMute:\n    conversation_id: str\n    principal_id: str\n    muted: bool\n    until: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ConversationMuteInput",
+      "kind": "class",
+      "ref": "convohop.types#ConversationMuteInput",
+      "anchor": "conversationmuteinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ConversationMuteInput:\n    conversation_id: str\n    act_as_principal_id: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ConversationMuteReply",
+      "kind": "class",
+      "ref": "convohop.types#ConversationMuteReply",
+      "anchor": "conversationmutereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ConversationMuteReply:\n    status: str\n    request_id: str\n    server_time: str\n    result: ConversationMute\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateConversationReply",
+      "kind": "class",
+      "ref": "convohop.types#CreateConversationReply",
+      "anchor": "createconversationreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateConversationReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Conversation | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateConversationRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#CreateConversationRequestInput",
+      "anchor": "createconversationrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateConversationRequestInput:\n    title: str\n    props: Mapping[str, Any]\n    members: Sequence[MemberInputInput]\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateDeploymentReply",
+      "kind": "class",
+      "ref": "convohop.types#CreateDeploymentReply",
+      "anchor": "createdeploymentreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateDeploymentReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OperationResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateDeploymentRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#CreateDeploymentRequestInput",
+      "anchor": "createdeploymentrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateDeploymentRequestInput:\n    org_id: str\n    offering: str\n    geo_id: str\n    installation_profile_id: str\n    consent_ref: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateOrganizationReply",
+      "kind": "class",
+      "ref": "convohop.types#CreateOrganizationReply",
+      "anchor": "createorganizationreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateOrganizationReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Organization | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateOrganizationRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#CreateOrganizationRequestInput",
+      "anchor": "createorganizationrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateOrganizationRequestInput:\n    name: str\n    terms_ref: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreatePrincipalReply",
+      "kind": "class",
+      "ref": "convohop.types#CreatePrincipalReply",
+      "anchor": "createprincipalreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreatePrincipalReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Principal | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreatePrincipalRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#CreatePrincipalRequestInput",
+      "anchor": "createprincipalrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreatePrincipalRequestInput:\n    external_user_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateProjectReply",
+      "kind": "class",
+      "ref": "convohop.types#CreateProjectReply",
+      "anchor": "createprojectreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateProjectReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OperationResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CreateProjectRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#CreateProjectRequestInput",
+      "anchor": "createprojectrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CreateProjectRequestInput:\n    deployment_id: str\n    name: str\n    environment: str\n    backend_principal_name: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CredentialDelivery",
+      "kind": "class",
+      "ref": "convohop.types#CredentialDelivery",
+      "anchor": "credentialdelivery-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CredentialDelivery:\n    delivery_id: str\n    kind: str\n    project_id: str\n    installation_id: str\n    resource_ref: ResourceRef | None\n    expires_at: str\n    payload_digest: str\n    recipient_actor_ref: ActorRef | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CredentialDeliveryReceipt",
+      "kind": "class",
+      "ref": "convohop.types#CredentialDeliveryReceipt",
+      "anchor": "credentialdeliveryreceipt-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CredentialDeliveryReceipt:\n    delivery_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CredentialPermitReply",
+      "kind": "class",
+      "ref": "convohop.types#CredentialPermitReply",
+      "anchor": "credentialpermitreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CredentialPermitReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: dict[str, Any] | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CredentialPermitRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#CredentialPermitRequestInput",
+      "anchor": "credentialpermitrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CredentialPermitRequestInput:\n    project_id: str\n    delivery_id: str\n    redemption_request_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CurrentLiveSessionReply",
+      "kind": "class",
+      "ref": "convohop.types#CurrentLiveSessionReply",
+      "anchor": "currentlivesessionreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CurrentLiveSessionReply:\n    status: str\n    request_id: str\n    server_time: str\n    result: LiveSession | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Cursor",
+      "kind": "class",
+      "ref": "convohop.types#Cursor",
+      "anchor": "cursor-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Cursor:\n    incarnation: str\n    conversation_id: str\n    sequence: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "CutoffScope",
+      "kind": "class",
+      "ref": "convohop.types#CutoffScope",
+      "anchor": "cutoffscope-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass CutoffScope:\n    kind: str\n    principal_id: str | None\n    session_id: str | None\n    device_id: str | None\n    call_id: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DeleteMessageReply",
+      "kind": "class",
+      "ref": "convohop.types#DeleteMessageReply",
+      "anchor": "deletemessagereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DeleteMessageReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Message | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DeleteMessageRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#DeleteMessageRequestInput",
+      "anchor": "deletemessagerequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DeleteMessageRequestInput:\n    conversation_id: str\n    message_id: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DeliveryAck",
+      "kind": "class",
+      "ref": "convohop.types#DeliveryAck",
+      "anchor": "deliveryack-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DeliveryAck:\n    delivery_id: str\n    acknowledged: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Deployment",
+      "kind": "class",
+      "ref": "convohop.types#Deployment",
+      "anchor": "deployment-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Deployment:\n    deployment_id: str\n    org_id: str\n    offering: str\n    geo_id: str\n    installation_id: str\n    resource_owner: str\n    approved_regions: tuple[str, ...]\n    readiness: str\n    revision: str\n    consent_ref: str\n    environment: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DeploymentHealth",
+      "kind": "class",
+      "ref": "convohop.types#DeploymentHealth",
+      "anchor": "deploymenthealth-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DeploymentHealth:\n    deployment_id: str\n    readiness: str\n    observed_at: str\n    services: tuple[ServiceObservation, ...]\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DeploymentHealthReply",
+      "kind": "class",
+      "ref": "convohop.types#DeploymentHealthReply",
+      "anchor": "deploymenthealthreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DeploymentHealthReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: DeploymentHealth | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DeploymentHealthRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#DeploymentHealthRequestInput",
+      "anchor": "deploymenthealthrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DeploymentHealthRequestInput:\n    deployment_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DeploymentUsage",
+      "kind": "class",
+      "ref": "convohop.types#DeploymentUsage",
+      "anchor": "deploymentusage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DeploymentUsage:\n    deployment_id: str\n    source: str\n    observed_at: str\n    complete: bool\n    reason: str\n    from_: str\n    to: str\n    meters: tuple[UsageMeter, ...]\n    aggregated_through: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DeploymentUsageReply",
+      "kind": "class",
+      "ref": "convohop.types#DeploymentUsageReply",
+      "anchor": "deploymentusagereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DeploymentUsageReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: DeploymentUsage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DeploymentUsageRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#DeploymentUsageRequestInput",
+      "anchor": "deploymentusagerequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DeploymentUsageRequestInput:\n    deployment_id: str\n    from_: str | None = None\n    to: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DisablePrincipalReply",
+      "kind": "class",
+      "ref": "convohop.types#DisablePrincipalReply",
+      "anchor": "disableprincipalreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DisablePrincipalReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Principal | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DisablePrincipalRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#DisablePrincipalRequestInput",
+      "anchor": "disableprincipalrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DisablePrincipalRequestInput:\n    principal_id: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DisableWebhookReply",
+      "kind": "class",
+      "ref": "convohop.types#DisableWebhookReply",
+      "anchor": "disablewebhookreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DisableWebhookReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OperationResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "DisableWebhookRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#DisableWebhookRequestInput",
+      "anchor": "disablewebhookrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass DisableWebhookRequestInput:\n    project_id: str\n    endpoint_id: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "EditMessageReply",
+      "kind": "class",
+      "ref": "convohop.types#EditMessageReply",
+      "anchor": "editmessagereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass EditMessageReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Message | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "EditMessageRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#EditMessageRequestInput",
+      "anchor": "editmessagerequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass EditMessageRequestInput:\n    conversation_id: str\n    message_id: str\n    expected_revision: str\n    text: str | None = None\n    props: Mapping[str, Any] | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "EndLiveSessionInput",
+      "kind": "class",
+      "ref": "convohop.types#EndLiveSessionInput",
+      "anchor": "endlivesessioninput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass EndLiveSessionInput:\n    live_session_id: str\n    expected_generation: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "EndLiveSessionPayload",
+      "kind": "class",
+      "ref": "convohop.types#EndLiveSessionPayload",
+      "anchor": "endlivesessionpayload-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass EndLiveSessionPayload:\n    status: str\n    request_id: str\n    receipt_id: str\n    committed_at: str\n    replayed: bool\n    operation: OperationRef\n    result: LiveSessionEndRequested\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Features",
+      "kind": "class",
+      "ref": "convohop.types#Features",
+      "anchor": "features-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Features:\n    chat: bool\n    inbox: bool\n    lexical_search: bool\n    typing: bool\n    webhooks: bool\n    live_sessions: bool\n    live_broadcast: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetConversationReply",
+      "kind": "class",
+      "ref": "convohop.types#GetConversationReply",
+      "anchor": "getconversationreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetConversationReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Conversation | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetConversationRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#GetConversationRequestInput",
+      "anchor": "getconversationrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetConversationRequestInput:\n    conversation_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetDeploymentReply",
+      "kind": "class",
+      "ref": "convohop.types#GetDeploymentReply",
+      "anchor": "getdeploymentreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetDeploymentReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Deployment | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetDeploymentRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#GetDeploymentRequestInput",
+      "anchor": "getdeploymentrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetDeploymentRequestInput:\n    deployment_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetMessageReply",
+      "kind": "class",
+      "ref": "convohop.types#GetMessageReply",
+      "anchor": "getmessagereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetMessageReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Message | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetMessageRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#GetMessageRequestInput",
+      "anchor": "getmessagerequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetMessageRequestInput:\n    conversation_id: str\n    message_id: str\n    act_as_principal_id: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetOperationReply",
+      "kind": "class",
+      "ref": "convohop.types#GetOperationReply",
+      "anchor": "getoperationreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetOperationReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Operation | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetOperationRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#GetOperationRequestInput",
+      "anchor": "getoperationrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetOperationRequestInput:\n    operation_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetOrganizationReply",
+      "kind": "class",
+      "ref": "convohop.types#GetOrganizationReply",
+      "anchor": "getorganizationreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetOrganizationReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Organization | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetOrganizationRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#GetOrganizationRequestInput",
+      "anchor": "getorganizationrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetOrganizationRequestInput:\n    org_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetPrincipalReply",
+      "kind": "class",
+      "ref": "convohop.types#GetPrincipalReply",
+      "anchor": "getprincipalreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetPrincipalReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Principal | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetPrincipalRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#GetPrincipalRequestInput",
+      "anchor": "getprincipalrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetPrincipalRequestInput:\n    principal_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetProjectReply",
+      "kind": "class",
+      "ref": "convohop.types#GetProjectReply",
+      "anchor": "getprojectreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetProjectReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Project | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "GetProjectRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#GetProjectRequestInput",
+      "anchor": "getprojectrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass GetProjectRequestInput:\n    project_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "HistoryGrantReply",
+      "kind": "class",
+      "ref": "convohop.types#HistoryGrantReply",
+      "anchor": "historygrantreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass HistoryGrantReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Member | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "HistoryGrantRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#HistoryGrantRequestInput",
+      "anchor": "historygrantrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass HistoryGrantRequestInput:\n    conversation_id: str\n    principal_id: str\n    membership_epoch: str\n    expected_revision: str\n    from_sequence: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "InboxItem",
+      "kind": "class",
+      "ref": "convohop.types#InboxItem",
+      "anchor": "inboxitem-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass InboxItem:\n    conversation_id: str\n    title: str\n    activity_at: str | None\n    visibility_epoch: str\n    latest_visible_message: Message | None\n    has_unread: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "InboxPage",
+      "kind": "class",
+      "ref": "convohop.types#InboxPage",
+      "anchor": "inboxpage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass InboxPage:\n    items: tuple[InboxItem, ...]\n    complete: bool\n    refresh_required: bool\n    next_cursor: str | None\n    partial_reason: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "InboxReply",
+      "kind": "class",
+      "ref": "convohop.types#InboxReply",
+      "anchor": "inboxreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass InboxReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: InboxPage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "InboxRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#InboxRequestInput",
+      "anchor": "inboxrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass InboxRequestInput:\n    limit: int\n    cursor: str | None = None\n    act_as_principal_id: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "IssueBackendKeyReply",
+      "kind": "class",
+      "ref": "convohop.types#IssueBackendKeyReply",
+      "anchor": "issuebackendkeyreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass IssueBackendKeyReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OperationResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "IssueBackendKeyRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#IssueBackendKeyRequestInput",
+      "anchor": "issuebackendkeyrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass IssueBackendKeyRequestInput:\n    project_id: str\n    name: str\n    scopes: Sequence[str]\n    expires_at: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "IssueSessionReply",
+      "kind": "class",
+      "ref": "convohop.types#IssueSessionReply",
+      "anchor": "issuesessionreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass IssueSessionReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: SessionBootstrap | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "IssueSessionRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#IssueSessionRequestInput",
+      "anchor": "issuesessionrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass IssueSessionRequestInput:\n    principal_id: str\n    device_id: str\n    requested_ttl_ms: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Limit",
+      "kind": "class",
+      "ref": "convohop.types#Limit",
+      "anchor": "limit-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Limit:\n    maximum: str | None\n    unit: str | None\n    scope: str | None\n    milliseconds: str | None\n    policy_id: str | None\n    revision: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LimitEntry",
+      "kind": "class",
+      "ref": "convohop.types#LimitEntry",
+      "anchor": "limitentry-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LimitEntry:\n    key: str\n    value: Limit\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveAlertBatch",
+      "kind": "class",
+      "ref": "convohop.types#LiveAlertBatch",
+      "anchor": "livealertbatch-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveAlertBatch:\n    live_session_id: str\n    created: str\n    suppressed: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveCredentialIssuance",
+      "kind": "class",
+      "ref": "convohop.types#LiveCredentialIssuance",
+      "anchor": "livecredentialissuance-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveCredentialIssuance:\n    live_session_id: str\n    participation_id: str\n    generation: str\n    lease_id: str\n    grant_ordinal: str\n    admission_expires_at: str\n    lease_expires_at: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveCutoffScope",
+      "kind": "class",
+      "ref": "convohop.types#LiveCutoffScope",
+      "anchor": "livecutoffscope-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveCutoffScope:\n    kind: LiveCutoffScopeKind\n    live_session_id: str\n    generation: str\n    participation_id: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveMediaCutoff",
+      "kind": "class",
+      "ref": "convohop.types#LiveMediaCutoff",
+      "anchor": "livemediacutoff-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveMediaCutoff:\n    state: LiveCutoffState\n    scope: LiveCutoffScope\n    evidence: LiveCutoffEvidence | None\n    enforced_at: str | None\n    operation_id: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveMediaPermissions",
+      "kind": "class",
+      "ref": "convohop.types#LiveMediaPermissions",
+      "anchor": "livemediapermissions-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveMediaPermissions:\n    microphone: bool\n    camera: bool\n    subscribe: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveOperationFailure",
+      "kind": "class",
+      "ref": "convohop.types#LiveOperationFailure",
+      "anchor": "liveoperationfailure-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveOperationFailure:\n    code: LiveErrorCode\n    message: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveParticipantPage",
+      "kind": "class",
+      "ref": "convohop.types#LiveParticipantPage",
+      "anchor": "liveparticipantpage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveParticipantPage:\n    items: tuple[LiveParticipation, ...]\n    next_cursor: str | None\n    complete: bool\n    partial_reason: str | None\n    refresh_required: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveParticipantPageReply",
+      "kind": "class",
+      "ref": "convohop.types#LiveParticipantPageReply",
+      "anchor": "liveparticipantpagereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveParticipantPageReply:\n    status: str\n    request_id: str\n    server_time: str\n    result: LiveParticipantPage\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveParticipantsInput",
+      "kind": "class",
+      "ref": "convohop.types#LiveParticipantsInput",
+      "anchor": "liveparticipantsinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveParticipantsInput:\n    live_session_id: str\n    limit: int | None = None\n    cursor: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveParticipation",
+      "kind": "class",
+      "ref": "convohop.types#LiveParticipation",
+      "anchor": "liveparticipation-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveParticipation:\n    participation_id: str\n    principal_id: str\n    membership_epoch: str\n    role: LiveRole\n    state: LiveParticipationState\n    permissions: LiveMediaPermissions\n    reservation_expires_at: str | None\n    native_connection_id: str | None\n    media_cutoff: LiveMediaCutoff | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSession",
+      "kind": "class",
+      "ref": "convohop.types#LiveSession",
+      "anchor": "livesession-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSession:\n    live_session_id: str\n    conversation_id: str\n    creator_id: str\n    kind: LiveSessionKind\n    media_profile: LiveMediaProfile\n    state: LiveSessionState\n    generation: str\n    revision: str\n    created_at: str\n    expires_at: str\n    my_participation: LiveParticipation | None\n    media_cutoff: LiveMediaCutoff | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionEndRequested",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionEndRequested",
+      "anchor": "livesessionendrequested-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionEndRequested:\n    live_session_id: str\n    operation_id: str\n    media_cutoff: LiveMediaCutoff\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionInput",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionInput",
+      "anchor": "livesessioninput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionInput:\n    live_session_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionJoined",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionJoined",
+      "anchor": "livesessionjoined-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionJoined:\n    live_session_id: str\n    generation: str\n    participation: LiveParticipation\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionLeft",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionLeft",
+      "anchor": "livesessionleft-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionLeft:\n    live_session_id: str\n    participation_id: str\n    media_cutoff: LiveMediaCutoff\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionOperation",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionOperation",
+      "anchor": "livesessionoperation-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionOperation:\n    operation_id: str\n    request_id: str\n    live_session_id: str\n    kind: LiveOperationKind\n    state: LiveOperationState\n    revision: str\n    requested_at: str\n    completed_at: str | None\n    completion: LiveSessionOperationCompletion | None\n    failure: LiveOperationFailure | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionOperationCompletion",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionOperationCompletion",
+      "anchor": "livesessionoperationcompletion-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionOperationCompletion:\n    live_session_id: str\n    generation: str\n    state: LiveSessionState\n    revision: str\n    completed_at: str\n    media_cutoff: LiveMediaCutoff | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionOperationInput",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionOperationInput",
+      "anchor": "livesessionoperationinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionOperationInput:\n    operation_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionOperationReply",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionOperationReply",
+      "anchor": "livesessionoperationreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionOperationReply:\n    status: str\n    request_id: str\n    server_time: str\n    result: LiveSessionOperation\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionPage",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionPage",
+      "anchor": "livesessionpage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionPage:\n    items: tuple[LiveSession, ...]\n    next_cursor: str | None\n    complete: bool\n    partial_reason: str | None\n    refresh_required: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionPageReply",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionPageReply",
+      "anchor": "livesessionpagereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionPageReply:\n    status: str\n    request_id: str\n    server_time: str\n    result: LiveSessionPage\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionReply",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionReply",
+      "anchor": "livesessionreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionReply:\n    status: str\n    request_id: str\n    server_time: str\n    result: LiveSession\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionStarted",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionStarted",
+      "anchor": "livesessionstarted-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionStarted:\n    live_session_id: str\n    conversation_id: str\n    kind: LiveSessionKind\n    media_profile: LiveMediaProfile\n    operation_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionsInput",
+      "kind": "class",
+      "ref": "convohop.types#LiveSessionsInput",
+      "anchor": "livesessionsinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass LiveSessionsInput:\n    conversation_id: str\n    limit: int | None = None\n    cursor: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MediaCutoff",
+      "kind": "class",
+      "ref": "convohop.types#MediaCutoff",
+      "anchor": "mediacutoff-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MediaCutoff:\n    state: str\n    scope: CutoffScope | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MediaPolicy",
+      "kind": "class",
+      "ref": "convohop.types#MediaPolicy",
+      "anchor": "mediapolicy-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MediaPolicy:\n    lease_policy_id: str\n    max_lease_ms: str\n    renew_attempt_ms: str\n    prelude_max_bytes: str\n    prelude_timeout_ms: str\n    clock_profile_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Member",
+      "kind": "class",
+      "ref": "convohop.types#Member",
+      "anchor": "member-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Member:\n    conversation_id: str\n    principal_id: str\n    role: str\n    status: str\n    membership_epoch: str\n    visibility_epoch: str\n    revision: str\n    visible_from_sequence: str\n    can_start_broadcast: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MemberBatchEntryInput",
+      "kind": "class",
+      "ref": "convohop.types#MemberBatchEntryInput",
+      "anchor": "memberbatchentryinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MemberBatchEntryInput:\n    principal_id: str\n    role: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MemberInputInput",
+      "kind": "class",
+      "ref": "convohop.types#MemberInputInput",
+      "anchor": "memberinputinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MemberInputInput:\n    principal_id: str\n    role: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MemberPage",
+      "kind": "class",
+      "ref": "convohop.types#MemberPage",
+      "anchor": "memberpage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MemberPage:\n    items: tuple[Member, ...]\n    complete: bool\n    refresh_required: bool\n    next_cursor: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MembersReply",
+      "kind": "class",
+      "ref": "convohop.types#MembersReply",
+      "anchor": "membersreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MembersReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: MemberPage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MembersRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#MembersRequestInput",
+      "anchor": "membersrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MembersRequestInput:\n    conversation_id: str\n    limit: int\n    cursor: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Message",
+      "kind": "class",
+      "ref": "convohop.types#Message",
+      "anchor": "message-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Message:\n    message_id: str\n    conversation_id: str\n    author_id: str\n    sequence: str\n    revision: str\n    revision_sequence: str\n    created_at: str\n    deleted: bool\n    text: str | None\n    props: dict[str, Any] | None\n    edited_at: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MessageAck",
+      "kind": "class",
+      "ref": "convohop.types#MessageAck",
+      "anchor": "messageack-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MessageAck:\n    message_id: str\n    conversation_id: str\n    sequence: str\n    revision: str\n    status: str\n    cursor: Cursor | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MessagePage",
+      "kind": "class",
+      "ref": "convohop.types#MessagePage",
+      "anchor": "messagepage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MessagePage:\n    items: tuple[Message, ...]\n    complete: bool\n    refresh_required: bool\n    next_cursor: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MessagesReply",
+      "kind": "class",
+      "ref": "convohop.types#MessagesReply",
+      "anchor": "messagesreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MessagesReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: MessagePage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "MessagesRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#MessagesRequestInput",
+      "anchor": "messagesrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass MessagesRequestInput:\n    conversation_id: str\n    limit: int\n    before_sequence: str | None = None\n    act_as_principal_id: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Operation",
+      "kind": "class",
+      "ref": "convohop.types#Operation",
+      "anchor": "operation-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Operation:\n    operation_id: str\n    kind: str\n    target_ref: ResourceRef | None\n    state: str\n    revision: str\n    requested_at: str\n    updated_at: str\n    steps: tuple[OperationStep, ...]\n    result: OperationResult | None\n    blocked_reason: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "OperationRef",
+      "kind": "class",
+      "ref": "convohop.types#OperationRef",
+      "anchor": "operationref-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OperationRef:\n    operation_id: str\n    owner: str\n    href: str\n    state: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "OperationResult",
+      "kind": "class",
+      "ref": "convohop.types#OperationResult",
+      "anchor": "operationresult-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OperationResult:\n    project_id: str | None\n    incarnation: str | None\n    status: str | None\n    backend: str | None\n    environment: str | None\n    policy_revision: str | None\n    expires_at: str | None\n    kind: str | None\n    resource_ref: ResourceRef | None\n    delivery: CredentialDelivery | None\n    key_id: str | None\n    endpoint_id: str | None\n    enabled: bool | None\n    live_session_completion: LiveSessionOperationCompletion | None\n    replayed_deliveries: int | None\n    skipped_deliveries: int | None\n    message_preview: bool | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "OperationStep",
+      "kind": "class",
+      "ref": "convohop.types#OperationStep",
+      "anchor": "operationstep-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OperationStep:\n    step_id: str\n    state: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Organization",
+      "kind": "class",
+      "ref": "convohop.types#Organization",
+      "anchor": "organization-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Organization:\n    org_id: str\n    name: str\n    status: str\n    revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "OrganizationPage",
+      "kind": "class",
+      "ref": "convohop.types#OrganizationPage",
+      "anchor": "organizationpage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationPage:\n    items: tuple[Organization, ...]\n    complete: bool\n    refresh_required: bool\n    next_cursor: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "OrganizationUsage",
+      "kind": "class",
+      "ref": "convohop.types#OrganizationUsage",
+      "anchor": "organizationusage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationUsage:\n    org_id: str\n    source: str\n    observed_at: str\n    complete: bool\n    reason: str\n    from_: str\n    to: str\n    meters: tuple[UsageMeter, ...]\n    aggregated_through: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "OrganizationUsageReply",
+      "kind": "class",
+      "ref": "convohop.types#OrganizationUsageReply",
+      "anchor": "organizationusagereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationUsageReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OrganizationUsage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "OrganizationUsageRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#OrganizationUsageRequestInput",
+      "anchor": "organizationusagerequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationUsageRequestInput:\n    org_id: str\n    from_: str | None = None\n    to: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "OrganizationsReply",
+      "kind": "class",
+      "ref": "convohop.types#OrganizationsReply",
+      "anchor": "organizationsreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass OrganizationsReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OrganizationPage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "PauseOperationReply",
+      "kind": "class",
+      "ref": "convohop.types#PauseOperationReply",
+      "anchor": "pauseoperationreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass PauseOperationReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Operation | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "PauseOperationRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#PauseOperationRequestInput",
+      "anchor": "pauseoperationrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass PauseOperationRequestInput:\n    operation_id: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "PolicyChangeInput",
+      "kind": "class",
+      "ref": "convohop.types#PolicyChangeInput",
+      "anchor": "policychangeinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass PolicyChangeInput:\n    kind: str\n    reason: str | None = None\n    hold_id: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Principal",
+      "kind": "class",
+      "ref": "convohop.types#Principal",
+      "anchor": "principal-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Principal:\n    principal_id: str\n    external_user_id: str\n    status: str\n    revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Project",
+      "kind": "class",
+      "ref": "convohop.types#Project",
+      "anchor": "project-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Project:\n    project_id: str\n    deployment_id: str\n    name: str\n    environment: str\n    incarnation: str\n    serving_region: str\n    serving_epoch: str\n    status: str\n    revision: str\n    policy_revision: str\n    message_preview: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ProjectPolicyReply",
+      "kind": "class",
+      "ref": "convohop.types#ProjectPolicyReply",
+      "anchor": "projectpolicyreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ProjectPolicyReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OperationResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ProjectPolicyRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#ProjectPolicyRequestInput",
+      "anchor": "projectpolicyrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ProjectPolicyRequestInput:\n    project_id: str\n    expected_revision: str\n    change: PolicyChangeInput\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ProjectUsage",
+      "kind": "class",
+      "ref": "convohop.types#ProjectUsage",
+      "anchor": "projectusage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ProjectUsage:\n    project_id: str\n    source: str\n    observed_at: str\n    complete: bool\n    reason: str\n    from_: str\n    to: str\n    meters: tuple[UsageMeter, ...]\n    aggregated_through: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ProjectUsageReply",
+      "kind": "class",
+      "ref": "convohop.types#ProjectUsageReply",
+      "anchor": "projectusagereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ProjectUsageReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: ProjectUsage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ProjectUsageRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#ProjectUsageRequestInput",
+      "anchor": "projectusagerequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ProjectUsageRequestInput:\n    project_id: str\n    from_: str | None = None\n    to: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ReadReceipt",
+      "kind": "class",
+      "ref": "convohop.types#ReadReceipt",
+      "anchor": "readreceipt-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ReadReceipt:\n    principal_id: str\n    membership_epoch: str\n    visibility_epoch: str\n    delivered_through_sequence: str | None\n    read_through_sequence: str | None\n    updated_at: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RemoveMemberReply",
+      "kind": "class",
+      "ref": "convohop.types#RemoveMemberReply",
+      "anchor": "removememberreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RemoveMemberReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Member | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RemoveMemberRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#RemoveMemberRequestInput",
+      "anchor": "removememberrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RemoveMemberRequestInput:\n    conversation_id: str\n    principal_id: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RenewSessionReply",
+      "kind": "class",
+      "ref": "convohop.types#RenewSessionReply",
+      "anchor": "renewsessionreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RenewSessionReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: SessionBootstrap | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RenewSessionRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#RenewSessionRequestInput",
+      "anchor": "renewsessionrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RenewSessionRequestInput:\n    session_id: str\n    principal_id: str\n    device_id: str\n    expected_revision: str\n    requested_ttl_ms: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ReplayWebhookDeliveriesReply",
+      "kind": "class",
+      "ref": "convohop.types#ReplayWebhookDeliveriesReply",
+      "anchor": "replaywebhookdeliveriesreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ReplayWebhookDeliveriesReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OperationResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ReplayWebhookDeliveriesRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#ReplayWebhookDeliveriesRequestInput",
+      "anchor": "replaywebhookdeliveriesrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ReplayWebhookDeliveriesRequestInput:\n    project_id: str\n    endpoint_id: str\n    effect_id: str | None = None\n    since: str | None = None\n    until: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RequestResolution",
+      "kind": "class",
+      "ref": "convohop.types#RequestResolution",
+      "anchor": "requestresolution-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RequestResolution:\n    state: str\n    request_id: str\n    checked_at: str\n    result_withheld: bool\n    receipt: ResolvedReceipt | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ResolveRequestReply",
+      "kind": "class",
+      "ref": "convohop.types#ResolveRequestReply",
+      "anchor": "resolverequestreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ResolveRequestReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: RequestResolution | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ResolveRequestRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#ResolveRequestRequestInput",
+      "anchor": "resolverequestrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ResolveRequestRequestInput:\n    request_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ResolvedReceipt",
+      "kind": "class",
+      "ref": "convohop.types#ResolvedReceipt",
+      "anchor": "resolvedreceipt-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ResolvedReceipt:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: RetainedResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ResourceRef",
+      "kind": "class",
+      "ref": "convohop.types#ResourceRef",
+      "anchor": "resourceref-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ResourceRef:\n    kind: str\n    id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ResumeOperationReply",
+      "kind": "class",
+      "ref": "convohop.types#ResumeOperationReply",
+      "anchor": "resumeoperationreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ResumeOperationReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Operation | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ResumeOperationRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#ResumeOperationRequestInput",
+      "anchor": "resumeoperationrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ResumeOperationRequestInput:\n    operation_id: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RetainedResult",
+      "kind": "class",
+      "ref": "convohop.types#RetainedResult",
+      "anchor": "retainedresult-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RetainedResult:\n    broadcast_permission_changed: BroadcastPermissionChanged | None\n    conversation: Conversation | None\n    conversation_member_batch: ConversationMemberBatch | None\n    conversation_mute: ConversationMute | None\n    credential_delivery_receipt: CredentialDeliveryReceipt | None\n    delivery_ack: DeliveryAck | None\n    live_alert_batch: LiveAlertBatch | None\n    live_credential_issuance: LiveCredentialIssuance | None\n    live_session_end_requested: LiveSessionEndRequested | None\n    live_session_joined: LiveSessionJoined | None\n    live_session_left: LiveSessionLeft | None\n    live_session_started: LiveSessionStarted | None\n    member: Member | None\n    message: Message | None\n    message_ack: MessageAck | None\n    organization: Organization | None\n    principal: Principal | None\n    read_receipt: ReadReceipt | None\n    session_bootstrap: SessionBootstrap | None\n    session_revocation: SessionRevocation | None\n    signed_proof: dict[str, Any] | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": "Exactly one typed field contains the retained, currently authorized receipt result."
+    },
+    {
+      "name": "RevokeBackendKeyReply",
+      "kind": "class",
+      "ref": "convohop.types#RevokeBackendKeyReply",
+      "anchor": "revokebackendkeyreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RevokeBackendKeyReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OperationResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RevokeBackendKeyRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#RevokeBackendKeyRequestInput",
+      "anchor": "revokebackendkeyrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RevokeBackendKeyRequestInput:\n    project_id: str\n    key_id: str\n    expected_revision: str\n    revoke_issued_sessions: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RevokeSessionReply",
+      "kind": "class",
+      "ref": "convohop.types#RevokeSessionReply",
+      "anchor": "revokesessionreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RevokeSessionReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: SessionRevocation | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RevokeSessionRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#RevokeSessionRequestInput",
+      "anchor": "revokesessionrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RevokeSessionRequestInput:\n    session_id: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RotateWebhookSecretReply",
+      "kind": "class",
+      "ref": "convohop.types#RotateWebhookSecretReply",
+      "anchor": "rotatewebhooksecretreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RotateWebhookSecretReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OperationResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RotateWebhookSecretRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#RotateWebhookSecretRequestInput",
+      "anchor": "rotatewebhooksecretrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RotateWebhookSecretRequestInput:\n    project_id: str\n    endpoint_id: str\n    expected_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "RouteReply",
+      "kind": "class",
+      "ref": "convohop.types#RouteReply",
+      "anchor": "routereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RouteReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: dict[str, Any] | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SearchHit",
+      "kind": "class",
+      "ref": "convohop.types#SearchHit",
+      "anchor": "searchhit-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SearchHit:\n    conversation_id: str\n    message: Message | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SearchPage",
+      "kind": "class",
+      "ref": "convohop.types#SearchPage",
+      "anchor": "searchpage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SearchPage:\n    items: tuple[SearchHit, ...]\n    complete: bool\n    refresh_required: bool\n    next_cursor: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SearchReply",
+      "kind": "class",
+      "ref": "convohop.types#SearchReply",
+      "anchor": "searchreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SearchReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: SearchPage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SearchRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#SearchRequestInput",
+      "anchor": "searchrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SearchRequestInput:\n    query: str\n    page_size: int\n    scope: SearchScopeInput | None = None\n    cursor: str | None = None\n    act_as_principal_id: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SearchScopeInput",
+      "kind": "class",
+      "ref": "convohop.types#SearchScopeInput",
+      "anchor": "searchscopeinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SearchScopeInput:\n    conversation_ids: Sequence[str]\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SendMessageReply",
+      "kind": "class",
+      "ref": "convohop.types#SendMessageReply",
+      "anchor": "sendmessagereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SendMessageReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: MessageAck | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SendMessageRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#SendMessageRequestInput",
+      "anchor": "sendmessagerequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SendMessageRequestInput:\n    conversation_id: str\n    text: str\n    props: Mapping[str, Any]\n    act_as_principal_id: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ServiceDetails",
+      "kind": "class",
+      "ref": "convohop.types#ServiceDetails",
+      "anchor": "servicedetails-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ServiceDetails:\n    status: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ServiceObservation",
+      "kind": "class",
+      "ref": "convohop.types#ServiceObservation",
+      "anchor": "serviceobservation-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass ServiceObservation:\n    role: str\n    observed_at: str\n    details: ServiceDetails | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Session",
+      "kind": "class",
+      "ref": "convohop.types#Session",
+      "anchor": "session-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass Session:\n    session_id: str\n    principal_id: str\n    device_id: str\n    incarnation: str\n    session_revision: str\n    expires_at: str\n    status: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SessionBootstrap",
+      "kind": "class",
+      "ref": "convohop.types#SessionBootstrap",
+      "anchor": "sessionbootstrap-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SessionBootstrap:\n    session: Session | None\n    token_expires_at: str\n    session_token: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SessionRequestOutcome",
+      "kind": "class",
+      "ref": "convohop.types#SessionRequestOutcome",
+      "anchor": "sessionrequestoutcome-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SessionRequestOutcome:\n    state: str\n    request_id: str\n    checked_at: str\n    operation: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    original_session: Session | None\n    current_session: Session | None\n    current_state: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SessionRequestOutcomeReply",
+      "kind": "class",
+      "ref": "convohop.types#SessionRequestOutcomeReply",
+      "anchor": "sessionrequestoutcomereply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SessionRequestOutcomeReply:\n    status: str\n    request_id: str\n    server_time: str\n    result: SessionRequestOutcome\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SessionRequestOutcomeRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#SessionRequestOutcomeRequestInput",
+      "anchor": "sessionrequestoutcomerequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SessionRequestOutcomeRequestInput:\n    request_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SessionRevocation",
+      "kind": "class",
+      "ref": "convohop.types#SessionRevocation",
+      "anchor": "sessionrevocation-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SessionRevocation:\n    session_id: str\n    status: str\n    media_cutoff: MediaCutoff | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SetBroadcastPermissionInput",
+      "kind": "class",
+      "ref": "convohop.types#SetBroadcastPermissionInput",
+      "anchor": "setbroadcastpermissioninput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SetBroadcastPermissionInput:\n    conversation_id: str\n    principal_id: str\n    allowed: bool\n    expected_membership_revision: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SetBroadcastPermissionPayload",
+      "kind": "class",
+      "ref": "convohop.types#SetBroadcastPermissionPayload",
+      "anchor": "setbroadcastpermissionpayload-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SetBroadcastPermissionPayload:\n    status: str\n    request_id: str\n    receipt_id: str\n    committed_at: str\n    replayed: bool\n    result: BroadcastPermissionChanged\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SetConversationMuteInput",
+      "kind": "class",
+      "ref": "convohop.types#SetConversationMuteInput",
+      "anchor": "setconversationmuteinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SetConversationMuteInput:\n    conversation_id: str\n    muted: bool\n    until: str | None = None\n    act_as_principal_id: str | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "SetConversationMutePayload",
+      "kind": "class",
+      "ref": "convohop.types#SetConversationMutePayload",
+      "anchor": "setconversationmutepayload-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass SetConversationMutePayload:\n    status: str\n    request_id: str\n    receipt_id: str\n    committed_at: str\n    replayed: bool\n    result: ConversationMute\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "UpdateConversationReply",
+      "kind": "class",
+      "ref": "convohop.types#UpdateConversationReply",
+      "anchor": "updateconversationreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass UpdateConversationReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: Conversation | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "UpdateConversationRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#UpdateConversationRequestInput",
+      "anchor": "updateconversationrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass UpdateConversationRequestInput:\n    conversation_id: str\n    expected_revision: str\n    title: str | None = None\n    props: Mapping[str, Any] | None = None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "UpdateWebhookReply",
+      "kind": "class",
+      "ref": "convohop.types#UpdateWebhookReply",
+      "anchor": "updatewebhookreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass UpdateWebhookReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: OperationResult | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "UpdateWebhookRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#UpdateWebhookRequestInput",
+      "anchor": "updatewebhookrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass UpdateWebhookRequestInput:\n    project_id: str\n    endpoint_id: str\n    expected_revision: str\n    event_types: Sequence[str]\n    enabled: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "UsageMeter",
+      "kind": "class",
+      "ref": "convohop.types#UsageMeter",
+      "anchor": "usagemeter-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass UsageMeter:\n    meter: str\n    unit: str\n    quantity: str\n    emitted: bool\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "WebhookDeliveriesReply",
+      "kind": "class",
+      "ref": "convohop.types#WebhookDeliveriesReply",
+      "anchor": "webhookdeliveriesreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookDeliveriesReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: WebhookDeliveryPage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "WebhookDeliveriesRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#WebhookDeliveriesRequestInput",
+      "anchor": "webhookdeliveriesrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookDeliveriesRequestInput:\n    project_id: str\n    endpoint_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "WebhookDelivery",
+      "kind": "class",
+      "ref": "convohop.types#WebhookDelivery",
+      "anchor": "webhookdelivery-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookDelivery:\n    effect_id: str\n    event_id: str\n    state: str\n    attempts: str\n    last_outcome: str | None\n    next_attempt_at: str\n    event_type: str | None\n    created_at: str | None\n    replayed_at: str | None\n    last_attempt_at: str | None\n    last_http_status: int | None\n    last_latency_ms: int | None\n    last_error_code: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "WebhookDeliveryPage",
+      "kind": "class",
+      "ref": "convohop.types#WebhookDeliveryPage",
+      "anchor": "webhookdeliverypage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookDeliveryPage:\n    items: tuple[WebhookDelivery, ...]\n    complete: bool\n    refresh_required: bool\n    next_cursor: str | None\n    observed_at: str | None\n    partial_reason: str | None\n    source_revision: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "WebhookEndpoint",
+      "kind": "class",
+      "ref": "convohop.types#WebhookEndpoint",
+      "anchor": "webhookendpoint-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookEndpoint:\n    endpoint_id: str\n    url: str\n    event_types: tuple[str, ...]\n    enabled: bool\n    status: str\n    disabled_reason: str | None\n    revision: str\n    secret_version: str\n    rotation_pending: bool\n    rotation_overlap_until: str | None\n    consecutive_failures: int\n    failing_since: str | None\n    last_success_at: str | None\n    last_failure_at: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "WebhookEndpointPage",
+      "kind": "class",
+      "ref": "convohop.types#WebhookEndpointPage",
+      "anchor": "webhookendpointpage-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookEndpointPage:\n    items: tuple[WebhookEndpoint, ...]\n    complete: bool\n    refresh_required: bool\n    next_cursor: str | None\n    observed_at: str | None\n    partial_reason: str | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "WebhookEndpointsReply",
+      "kind": "class",
+      "ref": "convohop.types#WebhookEndpointsReply",
+      "anchor": "webhookendpointsreply-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookEndpointsReply:\n    status: str\n    request_id: str\n    server_time: str | None\n    receipt_id: str | None\n    committed_at: str | None\n    replayed: bool | None\n    operation: OperationRef | None\n    resource_ref: ResourceRef | None\n    result: WebhookEndpointPage | None\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "WebhookEndpointsRequestInput",
+      "kind": "class",
+      "ref": "convohop.types#WebhookEndpointsRequestInput",
+      "anchor": "webhookendpointsrequestinput-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookEndpointsRequestInput:\n    project_id: str\n    def to_dict(self) -> dict[str, Any]: ..."
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveCutoffEvidence",
+      "kind": "type",
+      "ref": "convohop.types#LiveCutoffEvidence",
+      "anchor": "livecutoffevidence-type",
+      "signatures": [
+        "LiveCutoffEvidence: TypeAlias = Literal[\n    \"NATIVE_FENCE\",\n    \"MONOTONIC_BOOT_RETIREMENT\",\n    \"NO_GRANTS_ISSUED\",\n]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveCutoffScopeKind",
+      "kind": "type",
+      "ref": "convohop.types#LiveCutoffScopeKind",
+      "anchor": "livecutoffscopekind-type",
+      "signatures": [
+        "LiveCutoffScopeKind: TypeAlias = Literal[\n    \"PARTICIPATION\",\n    \"GENERATION\",\n]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveCutoffState",
+      "kind": "type",
+      "ref": "convohop.types#LiveCutoffState",
+      "anchor": "livecutoffstate-type",
+      "signatures": [
+        "LiveCutoffState: TypeAlias = Literal[\n    \"PENDING\",\n    \"ENFORCED\",\n    \"UNKNOWN\",\n]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveErrorCode",
+      "kind": "type",
+      "ref": "convohop.types#LiveErrorCode",
+      "anchor": "liveerrorcode-type",
+      "signatures": [
+        "LiveErrorCode: TypeAlias = Literal[\n    \"LIVE_SESSION_EXISTS\",\n    \"LIVE_SESSION_CLOSED\",\n    \"LIVE_SESSION_INTERRUPTED\",\n    \"LIVE_SESSION_CAPACITY\",\n    \"LIVE_ALERT_LIMIT\",\n    \"JOINED_ELSEWHERE\",\n    \"PARTICIPATION_DRAINING\",\n    \"PARTICIPATION_MISMATCH\",\n    \"GENERATION_CONFLICT\",\n    \"MEDIA_NOT_READY\",\n    \"CREDENTIAL_REFRESH_REQUIRED\",\n    \"LIVE_START_CANCELLED\",\n    \"LIVE_PREPARATION_FAILED\",\n]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveMediaProfile",
+      "kind": "type",
+      "ref": "convohop.types#LiveMediaProfile",
+      "anchor": "livemediaprofile-type",
+      "signatures": [
+        "LiveMediaProfile: TypeAlias = Literal[\n    \"AUDIO_ONLY\",\n    \"AUDIO_VIDEO\",\n]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveOperationKind",
+      "kind": "type",
+      "ref": "convohop.types#LiveOperationKind",
+      "anchor": "liveoperationkind-type",
+      "signatures": ["LiveOperationKind: TypeAlias = Literal[\n    \"START\",\n    \"END\",\n]"],
+      "docs": ""
+    },
+    {
+      "name": "LiveOperationState",
+      "kind": "type",
+      "ref": "convohop.types#LiveOperationState",
+      "anchor": "liveoperationstate-type",
+      "signatures": [
+        "LiveOperationState: TypeAlias = Literal[\n    \"RUNNING\",\n    \"COMPLETED\",\n    \"FAILED\",\n]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveParticipationState",
+      "kind": "type",
+      "ref": "convohop.types#LiveParticipationState",
+      "anchor": "liveparticipationstate-type",
+      "signatures": [
+        "LiveParticipationState: TypeAlias = Literal[\n    \"JOINED\",\n    \"CONNECTING\",\n    \"CONNECTED\",\n    \"DISCONNECTED\",\n    \"LEAVING\",\n    \"LEFT\",\n]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveRole",
+      "kind": "type",
+      "ref": "convohop.types#LiveRole",
+      "anchor": "liverole-type",
+      "signatures": ["LiveRole: TypeAlias = Literal[\n    \"PUBLISHER\",\n    \"VIEWER\",\n]"],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionKind",
+      "kind": "type",
+      "ref": "convohop.types#LiveSessionKind",
+      "anchor": "livesessionkind-type",
+      "signatures": [
+        "LiveSessionKind: TypeAlias = Literal[\n    \"INTERACTIVE\",\n    \"BROADCAST\",\n]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSessionState",
+      "kind": "type",
+      "ref": "convohop.types#LiveSessionState",
+      "anchor": "livesessionstate-type",
+      "signatures": [
+        "LiveSessionState: TypeAlias = Literal[\n    \"PREPARING\",\n    \"READY\",\n    \"ACTIVE\",\n    \"DRAINING\",\n    \"ENDED\",\n    \"FAILED\",\n]"
+      ],
+      "docs": ""
+    }
+  ]
+}

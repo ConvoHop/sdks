@@ -93,3 +93,4 @@ query ManagementOrganizationUsage($context: RequestContextInput!, $input: Organi
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.organization_usage`](../../python/reference/convohop.md#convohopmanagementorganization_usage-method), [`AsyncConvoHopManagement.organization_usage`](../../python/reference/convohop.md#asyncconvohopmanagementorganization_usage-method) |

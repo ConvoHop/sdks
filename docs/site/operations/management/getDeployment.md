@@ -88,3 +88,4 @@ query ManagementGetDeployment($context: RequestContextInput!, $input: GetDeploym
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_deployment`](../../python/reference/convohop.md#convohopmanagementget_deployment-method), [`AsyncConvoHopManagement.get_deployment`](../../python/reference/convohop.md#asyncconvohopmanagementget_deployment-method) |

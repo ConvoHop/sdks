@@ -135,3 +135,4 @@ mutation ManagementReplayWebhookDeliveries($context: RequestContextInput!, $inpu
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.replay_webhook_deliveries`](../../python/reference/convohop.md#convohopmanagementreplay_webhook_deliveries-method), [`AsyncConvoHopManagement.replay_webhook_deliveries`](../../python/reference/convohop.md#asyncconvohopmanagementreplay_webhook_deliveries-method) |

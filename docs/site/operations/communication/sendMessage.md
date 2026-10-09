@@ -94,3 +94,4 @@ mutation CommunicationSendMessage($context: RequestContextInput!, $input: SendMe
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.messages.send`](../../typescript/reference/server.md#serverconversationmessagessend-method), [`ConvoHopClient.send`](../../typescript/reference/client.md#convohopclientsend-method), [`ConversationHandle.messages.send`](../../typescript/reference/client.md#conversationhandlemessagessend-property) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.send_message`](../../python/reference/convohop.md#convohopsend_message-method), [`AsyncConvoHop.send_message`](../../python/reference/convohop.md#asyncconvohopsend_message-method) |

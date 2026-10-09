@@ -111,3 +111,4 @@ query CommunicationCapabilities($context: RequestContextInput!) {
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.capabilities`](../../typescript/reference/server.md#projectserverclientcapabilities-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.capabilities`](../../python/reference/convohop.md#convohopcapabilities-method), [`AsyncConvoHop.capabilities`](../../python/reference/convohop.md#asyncconvohopcapabilities-method) |

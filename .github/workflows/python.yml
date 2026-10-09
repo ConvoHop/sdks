@@ -1,8 +1,10 @@
 # Builds and tests the Python server SDK in python/: its generated code and
 # generator goldens, ruff and mypy, the tests on Python 3.11, 3.12, 3.13 and
-# 3.14, a dry-run build of the sdist and wheel checked with twine, and the
+# 3.14, a dry-run build of the sdist and wheel checked with twine, the
 # conformance scenarios through the Python driver with the sync and the async
-# clients. Nothing is uploaded to a package registry. See python/README.md.
+# clients, and the Python docs' API surface and tested snippets (see
+# docs/docs-pipeline.md). Nothing is uploaded to a package registry. See
+# python/README.md.
 name: Python
 
 on:
@@ -11,18 +13,22 @@ on:
     paths:
       - .github/workflows/python.yml
       - conformance/**
+      - docs/languages/python/**
       - python/**
       - schema/**
       - spec/**
+      - tools/docgen/**
       - tools/sdkgen/**
   pull_request:
     branches: [main]
     paths:
       - .github/workflows/python.yml
       - conformance/**
+      - docs/languages/python/**
       - python/**
       - schema/**
       - spec/**
+      - tools/docgen/**
       - tools/sdkgen/**
 
 permissions: {}
@@ -67,17 +73,21 @@ jobs:
         run: uv sync --locked --python "$PYTHON_PATH"
       - name: Lint and check the formatting
         working-directory: python
+        # The docs extractor and examples have their own ruff settings, which extend the SDK's.
         run: |
-          .venv/bin/ruff check --output-format github src tests ../conformance/drivers/python
-          .venv/bin/ruff format --check src tests ../conformance/drivers/python
+          paths=(src tests ../conformance/drivers/python ../tools/docgen/extractors ../docs/languages/python/examples)
+          .venv/bin/ruff check --output-format github "${paths[@]}"
+          .venv/bin/ruff format --check "${paths[@]}"
       # The test job runs the tests on every supported Python version; type
       # checking for the oldest and the newest covers the version-gated stubs.
-      - name: Type-check the SDK, its tests and the driver for Python 3.11 and 3.14
+      # The docs job type-checks the docs examples with each Python it tests.
+      - name: Type-check the SDK, its tests, the driver and the docs extractor for Python 3.11 and 3.14
         working-directory: python
         run: |
           for version in 3.11 3.14; do
             .venv/bin/mypy --python-version "$version"
             .venv/bin/mypy --python-version "$version" ../conformance/drivers/python
+            .venv/bin/mypy --python-version "$version" ../tools/docgen/extractors/python.py
           done
       - name: Type-check the generator golden files
         working-directory: python
@@ -194,6 +204,48 @@ jobs:
       - name: Run the tests
         working-directory: python
         run: .venv/bin/pytest
+
+  # Checks the Python docs as docs/docs-pipeline.md describes: the extractor's
+  # tests, that docs/languages/python/surface.json matches the SDK's source,
+  # and the snippets the quickstarts include, which run against the
+  # conformance mock. The Docs workflow checks the generated pages.
+  docs:
+    name: Docs (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        # The oldest and the newest supported Python: the surface must not depend on the version.
+        python: ["3.11", "3.14"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      # The snippets' tests start the conformance mock, which imports graphql.
+      - run: npm ci --no-audit --no-fund
+      - id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: latest-known
+          cache-dependency-glob: docs/languages/python/examples/uv.lock
+      - name: Test the Python extractor
+        run: node --test tools/docgen/test/python.test.mjs
+      - name: Check that the Python surface matches the SDK
+        run: node tools/docgen/cli.mjs extract --check python
+      - name: Type-check and run the Python snippets
+        env:
+          UV_PYTHON: ${{ steps.python.outputs.python-path }}
+        run: node tools/docgen/cli.mjs test --install python
 
   conformance:
     name: Python driver (mock target)

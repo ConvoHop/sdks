@@ -93,3 +93,4 @@ query ManagementDeploymentUsage($context: RequestContextInput!, $input: Deployme
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.deployment_usage`](../../python/reference/convohop.md#convohopmanagementdeployment_usage-method), [`AsyncConvoHopManagement.deployment_usage`](../../python/reference/convohop.md#asyncconvohopmanagementdeployment_usage-method) |

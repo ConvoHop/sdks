@@ -81,3 +81,4 @@ query ManagementOrganizations($context: RequestContextInput!) {
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.organizations`](../../python/reference/convohop.md#convohopmanagementorganizations-method), [`AsyncConvoHopManagement.organizations`](../../python/reference/convohop.md#asyncconvohopmanagementorganizations-method) |

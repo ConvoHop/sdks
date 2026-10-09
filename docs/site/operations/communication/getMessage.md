@@ -92,3 +92,4 @@ query CommunicationGetMessage($context: RequestContextInput!, $input: GetMessage
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.messages.get`](../../typescript/reference/server.md#serverconversationmessagesget-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.get_message`](../../python/reference/convohop.md#convohopget_message-method), [`AsyncConvoHop.get_message`](../../python/reference/convohop.md#asyncconvohopget_message-method) |

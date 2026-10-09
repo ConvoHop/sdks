@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../spec/docs/language.schema.json",
+  "id": "python",
+  "name": "Python",
+  "order": 20,
+  "status": "preview",
+  "codeFence": "python",
+  "regionComment": "#",
+  "testedFences": ["python", "py", "python3", "pycon"],
+  "snippetRoots": ["examples/src"],
+  "packages": [
+    {
+      "name": "convohop",
+      "slug": "convohop",
+      "layer": "server",
+      "summary": "Server SDK for trusted Python backends: sync and async clients for backend-key data-plane calls and management, with typed problems and recovery storage.",
+      "runtime": "Python 3.11 or later",
+      "source": "python/src/convohop"
+    },
+    {
+      "name": "convohop.webhooks",
+      "slug": "webhooks",
+      "layer": "server",
+      "summary": "Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.",
+      "runtime": "Python 3.11 or later",
+      "source": "python/src/convohop"
+    },
+    {
+      "name": "convohop.push",
+      "slug": "push",
+      "layer": "server",
+      "summary": "Builds APNs, FCM and Web Push requests from ConvoHop push notification events.",
+      "runtime": "Python 3.11 or later",
+      "source": "python/src/convohop"
+    },
+    {
+      "name": "convohop.types",
+      "slug": "types",
+      "layer": "server",
+      "summary": "Generated request and response models of the ConvoHop GraphQL API, as frozen dataclasses.",
+      "runtime": "Python 3.11 or later",
+      "source": "python/src/convohop"
+    }
+  ],
+  "quickstarts": ["server", "webhooks", "push"],
+  "operations": "operations.json",
+  "extract": {
+    "command": ["python3", "tools/docgen/extractors/python.py", "docs/languages/python/language.json"]
+  },
+  "test": {
+    "install": ["uv", "sync", "--locked", "--directory", "docs/languages/python/examples"],
+    "command": ["uv", "run", "--locked", "--directory", "docs/languages/python/examples", "pytest"]
+  }
+}

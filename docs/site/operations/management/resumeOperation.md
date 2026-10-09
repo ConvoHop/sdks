@@ -148,3 +148,4 @@ mutation ManagementResumeOperation($context: RequestContextInput!, $input: Resum
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.resume_operation`](../../python/reference/convohop.md#convohopmanagementresume_operation-method), [`AsyncConvoHopManagement.resume_operation`](../../python/reference/convohop.md#asyncconvohopmanagementresume_operation-method) |

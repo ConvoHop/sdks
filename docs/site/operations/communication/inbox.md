@@ -106,3 +106,4 @@ query CommunicationInbox($context: RequestContextInput!, $input: InboxRequestInp
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.inbox`](../../typescript/reference/server.md#projectserverclientinbox-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.inbox`](../../python/reference/convohop.md#convohopinbox-method), [`ConvoHop.iter_inbox`](../../python/reference/convohop.md#convohopiter_inbox-method), [`AsyncConvoHop.inbox`](../../python/reference/convohop.md#asyncconvohopinbox-method), [`AsyncConvoHop.iter_inbox`](../../python/reference/convohop.md#asyncconvohopiter_inbox-method) |

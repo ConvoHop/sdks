@@ -99,3 +99,4 @@ query CommunicationMessages($context: RequestContextInput!, $input: MessagesRequ
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.messages.list`](../../typescript/reference/server.md#serverconversationmessageslist-method), [`ConvoHopClient.messages`](../../typescript/reference/client.md#convohopclientmessages-method), [`ConversationHandle.messages.list`](../../typescript/reference/client.md#conversationhandlemessageslist-property) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.messages`](../../python/reference/convohop.md#convohopmessages-method), [`ConvoHop.iter_messages`](../../python/reference/convohop.md#convohopiter_messages-method), [`AsyncConvoHop.messages`](../../python/reference/convohop.md#asyncconvohopmessages-method), [`AsyncConvoHop.iter_messages`](../../python/reference/convohop.md#asyncconvohopiter_messages-method) |

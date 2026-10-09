@@ -1,0 +1,965 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "python",
+  "package": "convohop.webhooks",
+  "layer": "server",
+  "page": "webhooks.md",
+  "symbols": [
+    {
+      "name": "WebhookCallCancelledNotificationEvent",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent",
+      "anchor": "webhookcallcancellednotificationevent-class",
+      "signatures": [
+        "@dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookCallCancelledNotificationEvent"
+      ],
+      "docs": "A ring that stopped for the recipient. Only recipients of the ring's `notification.call` get it.\n\n`reason` `answered` and `declined` (by the recipient, on any device) only stop the ringing. `ended` (the\ncall ended or stopped ringing before the recipient answered) and `expired` (nobody answered by `expires_at`)\nare missed calls. Treat an unknown reason as stop ringing, without a missed-call alert.",
+      "members": [
+        {
+          "name": "known",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.known:static",
+          "anchor": "webhookcallcancellednotificationeventknown-static-property",
+          "signatures": ["known: ClassVar[bool] = True"],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "event_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.event_id",
+          "anchor": "webhookcallcancellednotificationeventevent_id-property",
+          "signatures": ["event_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "event_type",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.event_type",
+          "anchor": "webhookcallcancellednotificationeventevent_type-property",
+          "signatures": [
+            "event_type: Literal[\"notification.callCancelled\"] = \"notification.callCancelled\""
+          ],
+          "docs": ""
+        },
+        {
+          "name": "occurred_at",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.occurred_at",
+          "anchor": "webhookcallcancellednotificationeventoccurred_at-property",
+          "signatures": ["occurred_at: str"],
+          "docs": ""
+        },
+        {
+          "name": "project_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.project_id",
+          "anchor": "webhookcallcancellednotificationeventproject_id-property",
+          "signatures": ["project_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "subject_ref",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.subject_ref",
+          "anchor": "webhookcallcancellednotificationeventsubject_ref-property",
+          "signatures": ["subject_ref: WebhookSubjectRef"],
+          "docs": ""
+        },
+        {
+          "name": "recipient_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.recipient_id",
+          "anchor": "webhookcallcancellednotificationeventrecipient_id-property",
+          "signatures": ["recipient_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "conversation_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.conversation_id",
+          "anchor": "webhookcallcancellednotificationeventconversation_id-property",
+          "signatures": ["conversation_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "sender_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.sender_id",
+          "anchor": "webhookcallcancellednotificationeventsender_id-property",
+          "signatures": ["sender_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "connected",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.connected",
+          "anchor": "webhookcallcancellednotificationeventconnected-property",
+          "signatures": ["connected: bool"],
+          "docs": ""
+        },
+        {
+          "name": "live_session_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.live_session_id",
+          "anchor": "webhookcallcancellednotificationeventlive_session_id-property",
+          "signatures": ["live_session_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "alert_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.alert_id",
+          "anchor": "webhookcallcancellednotificationeventalert_id-property",
+          "signatures": ["alert_id: str"],
+          "docs": "The `alert_id` of the ring that stopped."
+        },
+        {
+          "name": "expires_at",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.expires_at",
+          "anchor": "webhookcallcancellednotificationeventexpires_at-property",
+          "signatures": ["expires_at: str"],
+          "docs": "The stopped ring's original deadline (RFC 3339 text exactly as sent)."
+        },
+        {
+          "name": "media_profile",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.media_profile",
+          "anchor": "webhookcallcancellednotificationeventmedia_profile-property",
+          "signatures": ["media_profile: str"],
+          "docs": ""
+        },
+        {
+          "name": "reason",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.reason",
+          "anchor": "webhookcallcancellednotificationeventreason-property",
+          "signatures": ["reason: str"],
+          "docs": "`answered`, `declined`, `ended`, `expired` or a later reason."
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.__init__",
+          "anchor": "webhookcallcancellednotificationevent-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    event_id: str,\n    event_type: Literal[\"notification.callCancelled\"] = \"notification.callCancelled\",\n    occurred_at: str,\n    project_id: str,\n    subject_ref: WebhookSubjectRef,\n    recipient_id: str,\n    conversation_id: str,\n    sender_id: str,\n    connected: bool,\n    live_session_id: str,\n    alert_id: str,\n    expires_at: str,\n    media_profile: str,\n    reason: str,\n) -> None"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "ref": "convohop.webhooks#WebhookCallCancelledNotificationEvent.to_dict",
+          "anchor": "webhookcallcancellednotificationeventto_dict-method",
+          "signatures": ["def to_dict(self) -> dict[str, Any]"],
+          "docs": "The event in its wire form, with camelCase keys, as the push builders accept it."
+        }
+      ]
+    },
+    {
+      "name": "WebhookCallNotificationEvent",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookCallNotificationEvent",
+      "anchor": "webhookcallnotificationevent-class",
+      "signatures": [
+        "@dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookCallNotificationEvent"
+      ],
+      "docs": "An incoming call: one ring for the recipient. A later ring of the same call has a new `alert_id`.",
+      "members": [
+        {
+          "name": "known",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.known:static",
+          "anchor": "webhookcallnotificationeventknown-static-property",
+          "signatures": ["known: ClassVar[bool] = True"],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "event_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.event_id",
+          "anchor": "webhookcallnotificationeventevent_id-property",
+          "signatures": ["event_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "event_type",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.event_type",
+          "anchor": "webhookcallnotificationeventevent_type-property",
+          "signatures": ["event_type: Literal[\"notification.call\"] = \"notification.call\""],
+          "docs": ""
+        },
+        {
+          "name": "occurred_at",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.occurred_at",
+          "anchor": "webhookcallnotificationeventoccurred_at-property",
+          "signatures": ["occurred_at: str"],
+          "docs": ""
+        },
+        {
+          "name": "project_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.project_id",
+          "anchor": "webhookcallnotificationeventproject_id-property",
+          "signatures": ["project_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "subject_ref",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.subject_ref",
+          "anchor": "webhookcallnotificationeventsubject_ref-property",
+          "signatures": ["subject_ref: WebhookSubjectRef"],
+          "docs": ""
+        },
+        {
+          "name": "recipient_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.recipient_id",
+          "anchor": "webhookcallnotificationeventrecipient_id-property",
+          "signatures": ["recipient_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "conversation_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.conversation_id",
+          "anchor": "webhookcallnotificationeventconversation_id-property",
+          "signatures": ["conversation_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "sender_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.sender_id",
+          "anchor": "webhookcallnotificationeventsender_id-property",
+          "signatures": ["sender_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "connected",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.connected",
+          "anchor": "webhookcallnotificationeventconnected-property",
+          "signatures": ["connected: bool"],
+          "docs": ""
+        },
+        {
+          "name": "live_session_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.live_session_id",
+          "anchor": "webhookcallnotificationeventlive_session_id-property",
+          "signatures": ["live_session_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "alert_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.alert_id",
+          "anchor": "webhookcallnotificationeventalert_id-property",
+          "signatures": ["alert_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "expires_at",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.expires_at",
+          "anchor": "webhookcallnotificationeventexpires_at-property",
+          "signatures": ["expires_at: str"],
+          "docs": "When the ringing stops (RFC 3339 text exactly as sent)."
+        },
+        {
+          "name": "media_profile",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.media_profile",
+          "anchor": "webhookcallnotificationeventmedia_profile-property",
+          "signatures": ["media_profile: str"],
+          "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a later profile."
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.__init__",
+          "anchor": "webhookcallnotificationevent-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    event_id: str,\n    event_type: Literal[\"notification.call\"] = \"notification.call\",\n    occurred_at: str,\n    project_id: str,\n    subject_ref: WebhookSubjectRef,\n    recipient_id: str,\n    conversation_id: str,\n    sender_id: str,\n    connected: bool,\n    live_session_id: str,\n    alert_id: str,\n    expires_at: str,\n    media_profile: str,\n) -> None"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "ref": "convohop.webhooks#WebhookCallNotificationEvent.to_dict",
+          "anchor": "webhookcallnotificationeventto_dict-method",
+          "signatures": ["def to_dict(self) -> dict[str, Any]"],
+          "docs": "The event in its wire form, with camelCase keys, as the push builders accept it."
+        }
+      ]
+    },
+    {
+      "name": "WebhookDelivery",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookDelivery",
+      "anchor": "webhookdelivery-class",
+      "signatures": ["@dataclass(frozen=True, slots=True)\nclass WebhookDelivery(WebhookSignature)"],
+      "docs": "A verified delivery and its metadata-only event.",
+      "members": [
+        {
+          "name": "event",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookDelivery.event",
+          "anchor": "webhookdeliveryevent-property",
+          "signatures": ["event: WebhookEvent"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookDelivery.__init__",
+          "anchor": "webhookdelivery-constructor",
+          "signatures": [
+            "def __init__(self, webhook_id: str, timestamp: int, event: WebhookEvent) -> None"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "webhook_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookDelivery.webhook_id",
+          "anchor": "webhookdeliverywebhook_id-property",
+          "signatures": ["webhook_id: str"],
+          "docs": "",
+          "inherited": "WebhookSignature"
+        },
+        {
+          "name": "timestamp",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookDelivery.timestamp",
+          "anchor": "webhookdeliverytimestamp-property",
+          "signatures": ["timestamp: int"],
+          "docs": "",
+          "inherited": "WebhookSignature"
+        }
+      ]
+    },
+    {
+      "name": "WebhookEndpointDisabledEvent",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookEndpointDisabledEvent",
+      "anchor": "webhookendpointdisabledevent-class",
+      "signatures": [
+        "@dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookEndpointDisabledEvent"
+      ],
+      "docs": "Another of the project's webhook endpoints was disabled after repeated failures. `subject_ref.id` names it.",
+      "members": [
+        {
+          "name": "known",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookEndpointDisabledEvent.known:static",
+          "anchor": "webhookendpointdisabledeventknown-static-property",
+          "signatures": ["known: ClassVar[bool] = True"],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "event_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookEndpointDisabledEvent.event_id",
+          "anchor": "webhookendpointdisabledeventevent_id-property",
+          "signatures": ["event_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "event_type",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookEndpointDisabledEvent.event_type",
+          "anchor": "webhookendpointdisabledeventevent_type-property",
+          "signatures": [
+            "event_type: Literal[\"webhook.endpointDisabled\"] = \"webhook.endpointDisabled\""
+          ],
+          "docs": ""
+        },
+        {
+          "name": "occurred_at",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookEndpointDisabledEvent.occurred_at",
+          "anchor": "webhookendpointdisabledeventoccurred_at-property",
+          "signatures": ["occurred_at: str"],
+          "docs": ""
+        },
+        {
+          "name": "project_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookEndpointDisabledEvent.project_id",
+          "anchor": "webhookendpointdisabledeventproject_id-property",
+          "signatures": ["project_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "subject_ref",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookEndpointDisabledEvent.subject_ref",
+          "anchor": "webhookendpointdisabledeventsubject_ref-property",
+          "signatures": ["subject_ref: WebhookSubjectRef"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookEndpointDisabledEvent.__init__",
+          "anchor": "webhookendpointdisabledevent-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    event_id: str,\n    event_type: Literal[\"webhook.endpointDisabled\"] = \"webhook.endpointDisabled\",\n    occurred_at: str,\n    project_id: str,\n    subject_ref: WebhookSubjectRef,\n) -> None"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "ref": "convohop.webhooks#WebhookEndpointDisabledEvent.to_dict",
+          "anchor": "webhookendpointdisabledeventto_dict-method",
+          "signatures": ["def to_dict(self) -> dict[str, Any]"],
+          "docs": "The event in its wire form, with camelCase keys."
+        }
+      ]
+    },
+    {
+      "name": "WebhookMessageNotificationEvent",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookMessageNotificationEvent",
+      "anchor": "webhookmessagenotificationevent-class",
+      "signatures": [
+        "@dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookMessageNotificationEvent"
+      ],
+      "docs": "A message for the recipient.\n\n`connected` says whether the recipient had an active realtime connection when the event was produced. It is a\nhint for your sending policy: it isn't per device, and it can change before you send. The push builders ignore it.",
+      "members": [
+        {
+          "name": "known",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.known:static",
+          "anchor": "webhookmessagenotificationeventknown-static-property",
+          "signatures": ["known: ClassVar[bool] = True"],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "event_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.event_id",
+          "anchor": "webhookmessagenotificationeventevent_id-property",
+          "signatures": ["event_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "event_type",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.event_type",
+          "anchor": "webhookmessagenotificationeventevent_type-property",
+          "signatures": ["event_type: Literal[\"notification.message\"] = \"notification.message\""],
+          "docs": ""
+        },
+        {
+          "name": "occurred_at",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.occurred_at",
+          "anchor": "webhookmessagenotificationeventoccurred_at-property",
+          "signatures": ["occurred_at: str"],
+          "docs": ""
+        },
+        {
+          "name": "project_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.project_id",
+          "anchor": "webhookmessagenotificationeventproject_id-property",
+          "signatures": ["project_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "subject_ref",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.subject_ref",
+          "anchor": "webhookmessagenotificationeventsubject_ref-property",
+          "signatures": ["subject_ref: WebhookSubjectRef"],
+          "docs": ""
+        },
+        {
+          "name": "recipient_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.recipient_id",
+          "anchor": "webhookmessagenotificationeventrecipient_id-property",
+          "signatures": ["recipient_id: str"],
+          "docs": "The principal to notify. Each recipient gets its own event."
+        },
+        {
+          "name": "conversation_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.conversation_id",
+          "anchor": "webhookmessagenotificationeventconversation_id-property",
+          "signatures": ["conversation_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "sender_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.sender_id",
+          "anchor": "webhookmessagenotificationeventsender_id-property",
+          "signatures": ["sender_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "connected",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.connected",
+          "anchor": "webhookmessagenotificationeventconnected-property",
+          "signatures": ["connected: bool"],
+          "docs": ""
+        },
+        {
+          "name": "message_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.message_id",
+          "anchor": "webhookmessagenotificationeventmessage_id-property",
+          "signatures": ["message_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "preview",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.preview",
+          "anchor": "webhookmessagenotificationeventpreview-property",
+          "signatures": ["preview: WebhookNotificationPreview | None = None"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.__init__",
+          "anchor": "webhookmessagenotificationevent-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    event_id: str,\n    event_type: Literal[\"notification.message\"] = \"notification.message\",\n    occurred_at: str,\n    project_id: str,\n    subject_ref: WebhookSubjectRef,\n    recipient_id: str,\n    conversation_id: str,\n    sender_id: str,\n    connected: bool,\n    message_id: str,\n    preview: WebhookNotificationPreview | None = None,\n) -> None"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "ref": "convohop.webhooks#WebhookMessageNotificationEvent.to_dict",
+          "anchor": "webhookmessagenotificationeventto_dict-method",
+          "signatures": ["def to_dict(self) -> dict[str, Any]"],
+          "docs": "The event in its wire form, with camelCase keys, as the push builders accept it."
+        }
+      ]
+    },
+    {
+      "name": "WebhookNotificationPreview",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookNotificationPreview",
+      "anchor": "webhooknotificationpreview-class",
+      "signatures": ["@dataclass(frozen=True, slots=True)\nclass WebhookNotificationPreview"],
+      "docs": "The start of the message text. Present only when the project opts in to previews and the message has text.",
+      "members": [
+        {
+          "name": "text",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookNotificationPreview.text",
+          "anchor": "webhooknotificationpreviewtext-property",
+          "signatures": ["text: str"],
+          "docs": "1 to 512 Unicode code points."
+        },
+        {
+          "name": "truncated",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookNotificationPreview.truncated",
+          "anchor": "webhooknotificationpreviewtruncated-property",
+          "signatures": ["truncated: bool"],
+          "docs": "Whether the message text continues after `text`."
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookNotificationPreview.__init__",
+          "anchor": "webhooknotificationpreview-constructor",
+          "signatures": ["def __init__(self, text: str, truncated: bool) -> None"],
+          "docs": ""
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "ref": "convohop.webhooks#WebhookNotificationPreview.to_dict",
+          "anchor": "webhooknotificationpreviewto_dict-method",
+          "signatures": ["def to_dict(self) -> dict[str, Any]"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebhookResourceEvent",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookResourceEvent",
+      "anchor": "webhookresourceevent-class",
+      "signatures": [
+        "@dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookResourceEvent"
+      ],
+      "docs": "A change to a conversation, member, message, receipt or call. `subject_ref` names the resource.",
+      "members": [
+        {
+          "name": "known",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookResourceEvent.known:static",
+          "anchor": "webhookresourceeventknown-static-property",
+          "signatures": ["known: ClassVar[bool] = True"],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "event_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookResourceEvent.event_id",
+          "anchor": "webhookresourceeventevent_id-property",
+          "signatures": ["event_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "event_type",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookResourceEvent.event_type",
+          "anchor": "webhookresourceeventevent_type-property",
+          "signatures": ["event_type: WebhookResourceEventType"],
+          "docs": ""
+        },
+        {
+          "name": "occurred_at",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookResourceEvent.occurred_at",
+          "anchor": "webhookresourceeventoccurred_at-property",
+          "signatures": ["occurred_at: str"],
+          "docs": "RFC 3339 text exactly as sent."
+        },
+        {
+          "name": "project_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookResourceEvent.project_id",
+          "anchor": "webhookresourceeventproject_id-property",
+          "signatures": ["project_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "subject_ref",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookResourceEvent.subject_ref",
+          "anchor": "webhookresourceeventsubject_ref-property",
+          "signatures": ["subject_ref: WebhookSubjectRef"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookResourceEvent.__init__",
+          "anchor": "webhookresourceevent-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    event_id: str,\n    event_type: WebhookResourceEventType,\n    occurred_at: str,\n    project_id: str,\n    subject_ref: WebhookSubjectRef,\n) -> None"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "ref": "convohop.webhooks#WebhookResourceEvent.to_dict",
+          "anchor": "webhookresourceeventto_dict-method",
+          "signatures": ["def to_dict(self) -> dict[str, Any]"],
+          "docs": "The event in its wire form, with camelCase keys."
+        }
+      ]
+    },
+    {
+      "name": "WebhookSignature",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookSignature",
+      "anchor": "webhooksignature-class",
+      "signatures": ["@dataclass(frozen=True, slots=True)\nclass WebhookSignature"],
+      "docs": "A verified delivery's `webhook-id` and `webhook-timestamp` (Unix seconds).",
+      "members": [
+        {
+          "name": "webhook_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookSignature.webhook_id",
+          "anchor": "webhooksignaturewebhook_id-property",
+          "signatures": ["webhook_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "timestamp",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookSignature.timestamp",
+          "anchor": "webhooksignaturetimestamp-property",
+          "signatures": ["timestamp: int"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookSignature.__init__",
+          "anchor": "webhooksignature-constructor",
+          "signatures": ["def __init__(self, webhook_id: str, timestamp: int) -> None"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebhookSubjectRef",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookSubjectRef",
+      "anchor": "webhooksubjectref-class",
+      "signatures": ["@dataclass(frozen=True, slots=True)\nclass WebhookSubjectRef"],
+      "docs": "The resource an event is about.",
+      "members": [
+        {
+          "name": "id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookSubjectRef.id",
+          "anchor": "webhooksubjectrefid-property",
+          "signatures": ["id: str"],
+          "docs": ""
+        },
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookSubjectRef.kind",
+          "anchor": "webhooksubjectrefkind-property",
+          "signatures": ["kind: str"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookSubjectRef.__init__",
+          "anchor": "webhooksubjectref-constructor",
+          "signatures": ["def __init__(self, id: str, kind: str) -> None"],
+          "docs": ""
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "ref": "convohop.webhooks#WebhookSubjectRef.to_dict",
+          "anchor": "webhooksubjectrefto_dict-method",
+          "signatures": ["def to_dict(self) -> dict[str, Any]"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebhookUnknownEvent",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookUnknownEvent",
+      "anchor": "webhookunknownevent-class",
+      "signatures": ["@dataclass(frozen=True, slots=True, kw_only=True)\nclass WebhookUnknownEvent"],
+      "docs": "An event this SDK does not know, including a `notification.*` event that doesn't match the push payload\ncontract. Acknowledge it; it never makes `verify()` raise.",
+      "members": [
+        {
+          "name": "known",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookUnknownEvent.known:static",
+          "anchor": "webhookunknowneventknown-static-property",
+          "signatures": ["known: ClassVar[bool] = False"],
+          "docs": "",
+          "static": true
+        },
+        {
+          "name": "event_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookUnknownEvent.event_id",
+          "anchor": "webhookunknowneventevent_id-property",
+          "signatures": ["event_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "event_type",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookUnknownEvent.event_type",
+          "anchor": "webhookunknowneventevent_type-property",
+          "signatures": ["event_type: str"],
+          "docs": ""
+        },
+        {
+          "name": "occurred_at",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookUnknownEvent.occurred_at",
+          "anchor": "webhookunknowneventoccurred_at-property",
+          "signatures": ["occurred_at: str"],
+          "docs": ""
+        },
+        {
+          "name": "project_id",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookUnknownEvent.project_id",
+          "anchor": "webhookunknowneventproject_id-property",
+          "signatures": ["project_id: str"],
+          "docs": ""
+        },
+        {
+          "name": "subject_ref",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookUnknownEvent.subject_ref",
+          "anchor": "webhookunknowneventsubject_ref-property",
+          "signatures": ["subject_ref: WebhookSubjectRef"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookUnknownEvent.__init__",
+          "anchor": "webhookunknownevent-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    event_id: str,\n    event_type: str,\n    occurred_at: str,\n    project_id: str,\n    subject_ref: WebhookSubjectRef,\n) -> None"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "ref": "convohop.webhooks#WebhookUnknownEvent.to_dict",
+          "anchor": "webhookunknowneventto_dict-method",
+          "signatures": ["def to_dict(self) -> dict[str, Any]"],
+          "docs": "The envelope fields in their wire form, with camelCase keys."
+        }
+      ]
+    },
+    {
+      "name": "WebhookVerificationError",
+      "kind": "class",
+      "ref": "convohop.webhooks#WebhookVerificationError",
+      "anchor": "webhookverificationerror-class",
+      "signatures": ["class WebhookVerificationError(Exception)"],
+      "docs": "A delivery that failed verification. The message never contains secrets, signatures or the body.\n\nChecks run in this order and stop at the first failure:\n\n- `INVALID_SECRET`: no secret is given, or one is not `whsec_` followed by padded standard Base64 of 24 to\n  64 bytes. This is your configuration, not the sender.\n- `MISSING_HEADER`: `webhook-id`, `webhook-timestamp` or `webhook-signature` is absent or empty.\n- `INVALID_HEADER`: one of those headers is repeated.\n- `INVALID_TIMESTAMP`: `webhook-timestamp` is not 1 to 15 ASCII digits (integer Unix seconds).\n- `TIMESTAMP_EXPIRED`: the timestamp is more than `tolerance_seconds` before now.\n- `TIMESTAMP_FUTURE`: the timestamp is more than `tolerance_seconds` after now.\n- `BODY_TOO_LARGE`: the body exceeds 4096 bytes.\n- `TOO_MANY_SIGNATURES`: `webhook-signature` has more than 8 entries.\n- `NO_MATCHING_SIGNATURE`: no `v1` entry matches any secret.\n- `INVALID_BODY`: `verify()` only; the signed body is not a UTF-8 JSON event envelope.",
+      "members": [
+        {
+          "name": "code",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookVerificationError.code",
+          "anchor": "webhookverificationerrorcode-property",
+          "signatures": ["code: WebhookVerificationCode"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop.webhooks#WebhookVerificationError.__init__",
+          "anchor": "webhookverificationerror-constructor",
+          "signatures": ["def __init__(self, code: WebhookVerificationCode, message: str) -> None"],
+          "docs": ""
+        },
+        {
+          "name": "message",
+          "kind": "property",
+          "ref": "convohop.webhooks#WebhookVerificationError.message",
+          "anchor": "webhookverificationerrormessage-property",
+          "signatures": ["@property\ndef message(self) -> str"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebhookHeaders",
+      "kind": "interface",
+      "ref": "convohop.webhooks#WebhookHeaders",
+      "anchor": "webhookheaders-interface",
+      "signatures": ["class WebhookHeaders(Protocol)"],
+      "docs": "Request headers: a mapping, or any object whose `items()` yields every (name, value) pair, such as the header\nobjects of Starlette, Django, Flask, aiohttp and `http.server`. A value may be a one-element list.",
+      "members": [
+        {
+          "name": "items",
+          "kind": "method",
+          "ref": "convohop.webhooks#WebhookHeaders.items",
+          "anchor": "webhookheadersitems-method",
+          "signatures": ["def items(self) -> Iterable[tuple[Any, Any]]"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebhookEvent",
+      "kind": "type",
+      "ref": "convohop.webhooks#WebhookEvent",
+      "anchor": "webhookevent-type",
+      "signatures": [
+        "WebhookEvent: TypeAlias = (\n    WebhookResourceEvent | WebhookEndpointDisabledEvent | WebhookNotificationEvent | WebhookUnknownEvent\n)"
+      ],
+      "docs": "A verified delivery's event. Match on the class, or check `known` and then `event_type`."
+    },
+    {
+      "name": "WebhookEventType",
+      "kind": "type",
+      "ref": "convohop.webhooks#WebhookEventType",
+      "anchor": "webhookeventtype-type",
+      "signatures": [
+        "WebhookEventType: TypeAlias = (\n    WebhookResourceEventType | Literal[\"webhook.endpointDisabled\"] | WebhookNotificationEventType\n)"
+      ],
+      "docs": "Every event type the authority sends today. Later types arrive as `WebhookUnknownEvent`."
+    },
+    {
+      "name": "WebhookNotificationEvent",
+      "kind": "type",
+      "ref": "convohop.webhooks#WebhookNotificationEvent",
+      "anchor": "webhooknotificationevent-type",
+      "signatures": [
+        "WebhookNotificationEvent: TypeAlias = (\n    WebhookMessageNotificationEvent | WebhookCallNotificationEvent | WebhookCallCancelledNotificationEvent\n)"
+      ],
+      "docs": "A per-recipient notification event: the input of the push payload builders."
+    },
+    {
+      "name": "WebhookNotificationEventType",
+      "kind": "type",
+      "ref": "convohop.webhooks#WebhookNotificationEventType",
+      "anchor": "webhooknotificationeventtype-type",
+      "signatures": [
+        "WebhookNotificationEventType: TypeAlias = Literal[\n    \"notification.message\", \"notification.call\", \"notification.callCancelled\"\n]"
+      ],
+      "docs": "Per-recipient notification events for your push notifications. The contract is `spec/push-payload/`."
+    },
+    {
+      "name": "WebhookResourceEventType",
+      "kind": "type",
+      "ref": "convohop.webhooks#WebhookResourceEventType",
+      "anchor": "webhookresourceeventtype-type",
+      "signatures": [
+        "WebhookResourceEventType: TypeAlias = Literal[\n    \"conversation.created\",\n    \"conversation.updated\",\n    \"member.added\",\n    \"member.roleChanged\",\n    \"member.historyExpanded\",\n    \"member.removed\",\n    \"member.broadcastPermissionChanged\",\n    \"message.created\",\n    \"message.edited\",\n    \"message.deleted\",\n    \"receipt.reported\",\n    \"live.started\",\n    \"live.participationChanged\",\n    \"live.alerted\",\n    \"live.ready\",\n    \"live.connected\",\n    \"live.ended\",\n]"
+      ],
+      "docs": "A change to a conversation, member, message, receipt or call."
+    },
+    {
+      "name": "WebhookVerificationCode",
+      "kind": "type",
+      "ref": "convohop.webhooks#WebhookVerificationCode",
+      "anchor": "webhookverificationcode-type",
+      "signatures": [
+        "WebhookVerificationCode: TypeAlias = Literal[\n    \"INVALID_SECRET\",\n    \"MISSING_HEADER\",\n    \"INVALID_HEADER\",\n    \"INVALID_TIMESTAMP\",\n    \"TIMESTAMP_EXPIRED\",\n    \"TIMESTAMP_FUTURE\",\n    \"BODY_TOO_LARGE\",\n    \"TOO_MANY_SIGNATURES\",\n    \"NO_MATCHING_SIGNATURE\",\n    \"INVALID_BODY\",\n]"
+      ],
+      "docs": "Why a delivery failed verification. See `WebhookVerificationError`."
+    },
+    {
+      "name": "verify",
+      "kind": "function",
+      "ref": "convohop.webhooks#verify",
+      "anchor": "verify-function",
+      "signatures": [
+        "def verify(\n    *,\n    headers: WebhookHeaders,\n    body: str | bytes | bytearray | memoryview,\n    secrets: str | Sequence[str],\n    tolerance_seconds: int = 300,\n    now: datetime | None = None,\n) -> WebhookDelivery"
+      ],
+      "docs": "Verifies the signature and timestamp, then parses the metadata-only event.\n\nParameters:\n\n- `headers`: The request headers (see `WebhookHeaders`). Names match case-insensitively; a repeated\n  name fails.\n- `body`: The exact request body bytes, or their exact UTF-8 decoding. Never re-serialized JSON.\n- `secrets`: The endpoint's `whsec_` secrets: the current one and, during a rotation, the next or replaced one.\n- `tolerance_seconds`: Allowed distance between `webhook-timestamp` and `now` in whole seconds, inclusive.\n- `now`: The verifier's clock, a timezone-aware datetime. Defaults to the current time.\n\nRaises:\n\n- `WebhookVerificationError`: The delivery failed verification; `code` says why.\n- `TypeError`: An argument has the wrong type.\n- `ValueError`: `tolerance_seconds` is negative."
+    },
+    {
+      "name": "verify_signature",
+      "kind": "function",
+      "ref": "convohop.webhooks#verify_signature",
+      "anchor": "verify_signature-function",
+      "signatures": [
+        "def verify_signature(\n    *,\n    headers: WebhookHeaders,\n    body: str | bytes | bytearray | memoryview,\n    secrets: str | Sequence[str],\n    tolerance_seconds: int = 300,\n    now: datetime | None = None,\n) -> WebhookSignature"
+      ],
+      "docs": "Verifies only the signature and timestamp, for bodies you parse yourself. Arguments are as for `verify()`."
+    }
+  ]
+}

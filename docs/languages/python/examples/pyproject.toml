@@ -1,0 +1,53 @@
+[project]
+name = "convohop-docs-python-examples"
+version = "0"
+description = "Tested snippets for the Python docs. The tests start the conformance mock with Node.js, so run npm ci at the repository root first."
+requires-python = ">=3.11"
+license = "Apache-2.0"
+dependencies = [
+  "convohop",
+  "firebase-admin==7.7.0",
+  "pywebpush==2.5.0",
+]
+
+[dependency-groups]
+dev = [
+  "mypy>=1.15",
+  "pytest>=8.3",
+]
+
+[tool.uv]
+# The snippets are documentation, not a package: uv installs only the dependencies.
+package = false
+
+[tool.uv.sources]
+convohop = { path = "../../../../python", editable = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = ["-ra", "--strict-markers", "--strict-config", "-p", "no:cacheprovider"]
+xfail_strict = true
+filterwarnings = ["error"]
+
+[tool.mypy]
+# tests/test_types.py runs mypy on the snippets and the tests, with the Python version that runs pytest.
+strict = true
+warn_unreachable = true
+mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
+files = ["$MYPY_CONFIG_FILE_DIR/src", "$MYPY_CONFIG_FILE_DIR/tests"]
+
+[[tool.mypy.overrides]]
+# These push libraries ship no py.typed marker, as in most backends that use them.
+module = ["firebase_admin", "firebase_admin.*", "http_ece", "pywebpush"]
+ignore_missing_imports = true
+
+[tool.ruff]
+# The snippets follow the Python SDK's lint rules.
+extend = "../../../../python/pyproject.toml"
+src = ["src", "tests"]
+
+[tool.ruff.lint.per-file-ignores]
+# Each region imports what its sample uses, so every included sample is complete.
+"src/*.py" = ["E402"]
+"tests/**" = ["S105", "S106", "S603", "PT011"]

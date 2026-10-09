@@ -78,3 +78,4 @@ mutation CommunicationAddMembers($context: RequestContextInput!, $input: AddMemb
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.addMembers`](../../typescript/reference/server.md#projectserverclientaddmembers-method), [`ServerConversation.members.addBatch`](../../typescript/reference/server.md#serverconversationmembersaddbatch-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.add_members`](../../python/reference/convohop.md#convohopadd_members-method), [`AsyncConvoHop.add_members`](../../python/reference/convohop.md#asyncconvohopadd_members-method) |
