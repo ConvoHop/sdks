@@ -11,6 +11,8 @@ import Foundation
 ///
 /// The queue is saved in the client's recovery storage, with the message text, so use storage your app protects at
 /// rest and call ``removeAll()`` when the user signs out. Without recovery storage the queue lives in memory only.
+/// Each user has one saved queue, so keep one outbox per user, in your app's process: outboxes that share a user's
+/// queue, such as a share extension's, overwrite each other's unsent messages.
 ///
 /// The outbox never renews the session. When a send fails because the session needs renewal, the whole queue pauses
 /// and ``pauseReason`` holds the error: call ``ConvoHopClient/refreshSession()``, then ``resume()``.

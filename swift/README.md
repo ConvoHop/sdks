@@ -210,7 +210,9 @@ List(model.entries) { entry in
   item becomes `unresolved`: it rechecks when connectivity returns, and
   `resend(_:)` sends it again under a new request ID once the user accepts the
   small risk of a duplicate. When the session needs renewal the queue pauses:
-  renew it, then call `resume()`.
+  renew it, then call `resume()`. Each user has one saved queue, so keep one
+  outbox per user, in your app's process: outboxes that share a user's queue,
+  such as a share extension's, overwrite each other's unsent messages.
 - **`ConvoHopTypingIndicator`** reports this user's typing at most every 3
   seconds, and that typing stopped after 5 seconds without edits.
   **`ConvoHopReadReceiptReporter`** reports how far this user has read, only
