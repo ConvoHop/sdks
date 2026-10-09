@@ -203,7 +203,7 @@ internal class CallNotificationsTest {
         assertEquals("Missed call", push.notification(alert).title)
         assertEquals(listOf("incoming $alert", "ended $alert MISSED ended"), push.events())
         // The user dismisses the missed call, and the process forgets the ended call.
-        push.app.getSystemService(NotificationManager::class.java).cancel(alert, CallNotifier.NOTIFICATION_ID)
+        push.app.getSystemService(NotificationManager::class.java).cancel(alert, CallNotifier.MISSED_CALL_NOTIFICATION_ID)
         push.advance(60_000)
         assertNull(manager.call(alert))
 
@@ -211,6 +211,29 @@ internal class CallNotificationsTest {
         assertEquals(PushResult.IGNORED, push.handle(cancelData(id(3), alert, "expired")))
         assertNull(push.posted(alert))
         assertEquals(emptyList<String>(), push.events())
+    }
+
+    @Test
+    fun missedCallsOutlastTheirRingsTimeout() {
+        val expiring = id(101)
+        push.handle(callData(id(1), alert))
+        push.handle(callData(id(2), expiring))
+        assertEquals(30_000L, push.notification(alert).timeoutAfter)
+        // The server stops one ring a second in; the other rings until its deadline here.
+        push.advance(1_000)
+        assertEquals(PushResult.MISSED, push.handle(cancelData(id(3), alert, "ended")))
+        // The ring is gone, which stops its looping sound, and the missed call has no timeout.
+        assertEquals(0L, push.notification(alert).timeoutAfter)
+        push.advance(29_000)
+        // At the deadline, Android times both rings out.
+        timeOut(alert)
+        timeOut(expiring)
+        assertEquals("Missed call", push.notification(alert).title)
+        assertEquals("Missed call", push.notification(expiring).title)
+        assertEquals(
+            listOf("incoming $alert", "incoming $expiring", "ended $alert MISSED ended", "ended $expiring EXPIRED null"),
+            push.events(),
+        )
     }
 
     @Test
@@ -359,5 +382,10 @@ internal class CallNotificationsTest {
             .setSmallIcon(android.R.drawable.sym_call_incoming)
             .build()
         push.app.getSystemService(NotificationManager::class.java).notify(alert, CallNotifier.NOTIFICATION_ID, stale)
+    }
+
+    /** Times out [alertId]'s ring as Android does, cancelling whatever notification then has the ring's tag and ID. */
+    private fun timeOut(alertId: String) {
+        push.app.getSystemService(NotificationManager::class.java).cancel(alertId, CallNotifier.NOTIFICATION_ID)
     }
 }

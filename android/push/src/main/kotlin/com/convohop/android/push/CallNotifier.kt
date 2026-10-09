@@ -14,7 +14,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 
-/** Builds and posts the SDK's notifications. Calls and their missed-call notices share a tag: the `alertId`. */
+/**
+ * Builds and posts the SDK's notifications, tagged with a call's `alertId` or a message's `conversationId`.
+ * A ring and its missed call share the tag but not the ID: when the ring's timeout passes, Android cancels
+ * whatever notification then has the ring's tag and ID.
+ */
 internal class CallNotifier(private val manager: ConvoHopNotifications) {
     private val context get() = manager.context
     private val compat by lazy { NotificationManagerCompat.from(context) }
@@ -39,9 +43,9 @@ internal class CallNotifier(private val manager: ConvoHopNotifications) {
         // intent when the app doesn't hold USE_FULL_SCREEN_INTENT.
         val callStyle = incoming != null && (Build.VERSION.SDK_INT !in 31..33 || manager.canUseFullScreenIntent())
         try {
-            notify(call.alertId, build(info, incoming, answer, decline, callStyle))
+            notify(call.alertId, NOTIFICATION_ID, build(info, incoming, answer, decline, callStyle))
         } catch (_: IllegalArgumentException) {
-            if (callStyle) notify(call.alertId, build(info, incoming, answer, decline, false))
+            if (callStyle) notify(call.alertId, NOTIFICATION_ID, build(info, incoming, answer, decline, false))
         }
     }
 
@@ -108,7 +112,8 @@ internal class CallNotifier(private val manager: ConvoHopNotifications) {
                 manager.conversationIntent(call, ConvoHopNotifications.ACTION_MISSED_CALL)?.let { activity(it, alertId, "missed") },
             )
         manager.options.color?.let(builder::setColor)
-        notify(alertId, builder.build())
+        compat.cancel(alertId, NOTIFICATION_ID)
+        notify(alertId, MISSED_CALL_NOTIFICATION_ID, builder.build())
     }
 
     fun postMessage(message: PushNotification.Message, content: MessageContent) {
@@ -129,19 +134,21 @@ internal class CallNotifier(private val manager: ConvoHopNotifications) {
                     ?.let { activity(it, message.conversationId, "message") },
             )
         manager.options.color?.let(builder::setColor)
-        notify(message.conversationId, builder.build())
+        notify(message.conversationId, NOTIFICATION_ID, builder.build())
     }
 
+    /** Removes a call's ring and its missed call. */
     fun cancelCall(alertId: String) {
         compat.cancel(alertId, NOTIFICATION_ID)
+        compat.cancel(alertId, MISSED_CALL_NOTIFICATION_ID)
     }
 
     // Android drops notifications without POST_NOTIFICATIONS on its own, except incoming calls of a
     // self-managed ConnectionService, which it exempts. So post unconditionally.
     @SuppressLint("MissingPermission")
-    private fun notify(tag: String, notification: Notification) {
+    private fun notify(tag: String, id: Int, notification: Notification) {
         try {
-            compat.notify(tag, NOTIFICATION_ID, notification)
+            compat.notify(tag, id, notification)
         } catch (_: SecurityException) {
         }
     }
@@ -191,7 +198,10 @@ internal class CallNotifier(private val manager: ConvoHopNotifications) {
         const val CHANNEL_CALLS = "convohop_calls"
         const val CHANNEL_MISSED_CALLS = "convohop_missed_calls"
         const val CHANNEL_MESSAGES = "convohop_messages"
+
+        /** The ID of rings and messages. Missed calls have their own. */
         const val NOTIFICATION_ID = 0x0c0c
+        const val MISSED_CALL_NOTIFICATION_ID = 0x0c0d
         private const val FLAGS = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     }
 }
