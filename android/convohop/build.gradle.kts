@@ -27,6 +27,8 @@ android {
             isIncludeAndroidResources = true
             all { test ->
                 test.maxHeapSize = "1g"
+                // -ProbolectricSdks=34 runs only those Android versions, so local runs download fewer of them.
+                providers.gradleProperty("robolectricSdks").orNull?.let { test.systemProperty("robolectric.enabledSdks", it) }
             }
         }
     }
