@@ -79,7 +79,7 @@ internal class SqliteLocalStoreTest {
     @Test
     fun anUnreadableOutboxEntryIsAnErrorNotSkipped() = runBlocking {
         store.putPending(pending("request-1"))
-        raw { it.execSQL("INSERT INTO pending VALUES (?, ?, ?)", arrayOf("request-2", 2, """{"requestId":"request-2"}""")) }
+        raw { it.execSQL("INSERT INTO pending VALUES (?, ?, ?)", arrayOf<Any>("request-2", 2, """{"requestId":"request-2"}""")) }
         val error = runCatching { store.pending() }.exceptionOrNull()
         assertTrue("Expected a protocol error, got $error", error is ConvoHopProtocolException)
     }
