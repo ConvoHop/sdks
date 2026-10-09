@@ -147,3 +147,4 @@ query ManagementGetOperation($context: RequestContextInput!, $input: GetOperatio
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.operation`](../../typescript/reference/server.md#convohopmanagementclientoperation-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_operation`](../../python/reference/convohop.md#convohopmanagementget_operation-method), [`AsyncConvoHopManagement.get_operation`](../../python/reference/convohop.md#asyncconvohopmanagementget_operation-method) |

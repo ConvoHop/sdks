@@ -119,3 +119,4 @@ query CommunicationLiveSessions($context: RequestContextInput!, $input: LiveSess
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.live.history`](../../typescript/reference/server.md#serverconversationlivehistory-method), [`ConversationLive.history`](../../typescript/reference/client.md#conversationlivehistory-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.live_sessions`](../../python/reference/convohop.md#convohoplive_sessions-method), [`ConvoHop.iter_live_sessions`](../../python/reference/convohop.md#convohopiter_live_sessions-method), [`AsyncConvoHop.live_sessions`](../../python/reference/convohop.md#asyncconvohoplive_sessions-method), [`AsyncConvoHop.iter_live_sessions`](../../python/reference/convohop.md#asyncconvohopiter_live_sessions-method) |

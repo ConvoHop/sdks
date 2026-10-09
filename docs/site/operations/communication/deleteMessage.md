@@ -94,3 +94,4 @@ mutation CommunicationDeleteMessage($context: RequestContextInput!, $input: Dele
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.messages.delete`](../../typescript/reference/server.md#serverconversationmessagesdelete-method), [`ConvoHopClient.delete`](../../typescript/reference/client.md#convohopclientdelete-method), [`ConversationHandle.messages.delete`](../../typescript/reference/client.md#conversationhandlemessagesdelete-property) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.delete_message`](../../python/reference/convohop.md#convohopdelete_message-method), [`AsyncConvoHop.delete_message`](../../python/reference/convohop.md#asyncconvohopdelete_message-method) |

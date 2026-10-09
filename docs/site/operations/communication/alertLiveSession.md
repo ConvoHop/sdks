@@ -72,3 +72,4 @@ mutation CommunicationAlertLiveSession($context: RequestContextInput!, $input: A
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerLiveSession.alert`](../../typescript/reference/server.md#serverlivesessionalert-method), [`LiveSessionHandle.alerts.send`](../../typescript/reference/client.md#livesessionhandlealertssend-property) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.alert_live_session`](../../python/reference/convohop.md#convohopalert_live_session-method), [`AsyncConvoHop.alert_live_session`](../../python/reference/convohop.md#asyncconvohopalert_live_session-method) |

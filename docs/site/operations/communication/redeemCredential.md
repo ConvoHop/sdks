@@ -85,3 +85,4 @@ mutation CommunicationRedeemCredential($context: RequestContextInput!, $input: R
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | Not wrapped by a method |

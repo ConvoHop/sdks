@@ -154,6 +154,25 @@ updates:
           - minor
           - patch
 
+  # Tested Python docs snippets (docs/languages/python/examples). They install
+  # the SDK from python/. Major updates stay ungrouped so each one is checked
+  # against its quickstart, for example the form of firebase-admin's Android
+  # options.
+  - package-ecosystem: uv
+    directory: /docs/languages/python/examples
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: docs
+      include: scope
+    groups:
+      docs-python-examples:
+        update-types:
+          - minor
+          - patch
+
   # The Android SDK's own Gradle build (android/), including its wrapper.
   - package-ecosystem: gradle
     directory: /android

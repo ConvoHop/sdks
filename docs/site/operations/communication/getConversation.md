@@ -95,3 +95,4 @@ query CommunicationGetConversation($context: RequestContextInput!, $input: GetCo
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.get`](../../typescript/reference/server.md#serverconversationget-method), [`ConvoHopClient.getConversation`](../../typescript/reference/client.md#convohopclientgetconversation-method), [`ConversationHandle.get`](../../typescript/reference/client.md#conversationhandleget-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.get_conversation`](../../python/reference/convohop.md#convohopget_conversation-method), [`AsyncConvoHop.get_conversation`](../../python/reference/convohop.md#asyncconvohopget_conversation-method) |

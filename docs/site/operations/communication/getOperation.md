@@ -149,3 +149,4 @@ query CommunicationGetOperation($context: RequestContextInput!, $input: GetOpera
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.operation`](../../typescript/reference/server.md#projectserverclientoperation-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.get_operation`](../../python/reference/convohop.md#convohopget_operation-method), [`AsyncConvoHop.get_operation`](../../python/reference/convohop.md#asyncconvohopget_operation-method) |

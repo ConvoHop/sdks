@@ -91,3 +91,4 @@ mutation CommunicationSetBroadcastPermission($context: RequestContextInput!, $in
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.setBroadcastPermission`](../../typescript/reference/server.md#serverconversationmemberssetbroadcastpermission-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.set_broadcast_permission`](../../python/reference/convohop.md#convohopset_broadcast_permission-method), [`AsyncConvoHop.set_broadcast_permission`](../../python/reference/convohop.md#asyncconvohopset_broadcast_permission-method) |
