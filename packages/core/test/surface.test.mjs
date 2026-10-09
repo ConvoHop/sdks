@@ -11,7 +11,7 @@ const publicValues = [
   "parseSearchHit", "parseString",
 ];
 const internalValues = [
-  "authenticatedTransport", "beforeSubmitting", "canonical", "currentSession", "eventPage", "jsonClone", "origin", "parseURL", "randomUUID", "route",
+  "adoptRecovery", "authenticatedTransport", "beforeSubmitting", "canonical", "currentSession", "eventPage", "jsonClone", "origin", "parseURL", "randomUUID", "route",
   "sameSession", "sessionExpiry", "sessionMetadata", "timestamp", "validateOutput", "validatePlatform",
 ];
 

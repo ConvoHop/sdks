@@ -201,7 +201,7 @@ for (const failingWrite of [1, 2]) {
       assert.equal(current[key], original[key]);
     assert.equal(current.attemptCount, failingWrite);
     assert.deepEqual(current.input, original.input);
-    assert.equal(saved.reads.length, 1);
+    assert.equal(saved.reads.length, 1 + saved.writes.length, "restored once; each write merges into the stored journal");
   });
 }
 
@@ -333,7 +333,8 @@ test("async retry restores the original request, fingerprint and budget without 
   assert.equal(current.attemptCount, 2);
   assert.equal(current.lastAttemptAt, now);
   assert.equal(mutations, 1);
-  assert.equal(saved.reads.length, 2);
+  assert.equal(saved.reads.length, 3 + saved.writes.length,
+    "each transport restores once, the retry rereads the journal, and each write merges into it");
   assert.ok(saved.writes.every(({ value }) => !value.includes("never-journal")));
   assert.equal(saved.removals.length, 0);
 });
@@ -573,12 +574,12 @@ test("browser synchronous storage restores immediately and remains usable withou
     sessionToken: "private-session", recoveryStorage, fetch: async () => { throw new Error("offline"); } };
   const first = new ConvoHopClient(clientOptions), requestId = id(), conversationId = id();
   await assert.rejects(first.send(conversationId, "original", requestId), { code: "TRANSPORT_UNKNOWN" });
-  const restored = new ConvoHopClient(clientOptions);
+  const before = reads, restored = new ConvoHopClient(clientOptions);
   assert.deepEqual(restored.http.recoveryStates, first.http.recoveryStates);
   assert.equal(restored.storage, recoveryStorage);
   assert.equal(restored.conversation(conversationId).then, undefined);
-  assert.equal(reads, 2);
+  assert.equal(reads, before + 1, "construction restores with one read");
   await restored.http.initializeRecovery();
-  assert.equal(reads, 2);
+  assert.equal(reads, before + 1);
   assert.ok([...values.values()].every(value => !value.includes("private-session")));
 });

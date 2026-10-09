@@ -4,16 +4,18 @@ import { ConversationStore, ConvoHopClient, Outbox } from "@convohop/client";
 
 let current;
 
-/** Connectivity that stays offline until `resume`, whatever the browser reports. */
+/** Connectivity that stays offline until `resume`, whatever the browser reports, and again after `hold`. */
 function heldConnectivity() {
   const listeners = new Set();
+  const set = online => {
+    connectivity.online = online;
+    for (const listener of [...listeners]) listener(online);
+  };
   const connectivity = {
     online: false,
     subscribe(listener) { listeners.add(listener); return () => { listeners.delete(listener); }; },
-    resume() {
-      connectivity.online = true;
-      for (const listener of [...listeners]) listener(true);
-    },
+    resume() { set(true); },
+    hold() { set(false); },
   };
   return connectivity;
 }
@@ -22,7 +24,7 @@ window.harness = {
   /**
    * Opens a conversation as `user`, with an outbox that keeps unsent messages in `localStorage` when `persist`, and
    * resolves once both have loaded. Without `conversationId`, opens only the outbox, which needs no network. When
-   * `held`, the outbox treats the network as offline until `resume`, rather than following the browser.
+   * `held`, the outbox treats the network as offline until `resume` and after `hold`, rather than following the browser.
    */
   async open({ projectId, incarnation, principalId, sessionToken, conversationId, persist = false, held = false }) {
     const errors = [], report = error => errors.push(error.message);
@@ -37,6 +39,10 @@ window.harness = {
   /** Lets an outbox opened with `held` send. */
   resume() {
     current.connectivity.resume();
+  },
+  /** Stops an outbox opened with `held` from sending again. */
+  hold() {
+    current.connectivity.hold();
   },
   send(text) {
     return current.store.send(text).requestId;
