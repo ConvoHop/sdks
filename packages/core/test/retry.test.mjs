@@ -20,11 +20,14 @@ test("one classifier decides whether initialization, the realtime stream and que
     ["INVALID_RESPONSE", 502, "retry"],
     ["RATE_LIMITED", 429, "retry"],
     ["ADMISSION_LIMIT", 429, "retry"],
+    ["SPEND_UNVERIFIED", 503, "retry"],
     // Routing again finds the region that serves the project.
     ["WRONG_REGION", 409, "reroute"],
     // The schema says a later attempt can't succeed, whatever the status.
     ["QUOTA_EXCEEDED", 429, "stop"],
     ["PLAN_LIMIT_EXCEEDED", 403, "stop"],
+    ["CREDITS_EXHAUSTED", 402, "stop"],
+    ["SPEND_CAP_REACHED", 402, "stop"],
     ["MEMBERSHIP_COUNT_INVALID", 503, "stop"],
     ["UNAUTHENTICATED", 401, "stop"],
     ["SESSION_REFRESH_REQUIRED", 409, "stop"],
@@ -44,9 +47,9 @@ test("one classifier decides whether initialization, the realtime stream and que
 });
 
 test("a request may be sent again after a retryable code, or after WRONG_REGION once routed again", () => {
-  for (const code of ["RATE_LIMITED", "AUTHORITY_UNAVAILABLE", "TRANSPORT_UNKNOWN", "WRONG_REGION", "NEWLY_ADDED"])
+  for (const code of ["RATE_LIMITED", "AUTHORITY_UNAVAILABLE", "TRANSPORT_UNKNOWN", "WRONG_REGION", "SPEND_UNVERIFIED", "NEWLY_ADDED"])
     assert.equal(retryableCode(code), true, code);
-  for (const code of ["QUOTA_EXCEEDED", "PLAN_LIMIT_EXCEEDED", "NOT_FOUND", "FORBIDDEN", "RECOVERY_LIMIT"])
+  for (const code of ["QUOTA_EXCEEDED", "PLAN_LIMIT_EXCEEDED", "NOT_FOUND", "FORBIDDEN", "RECOVERY_LIMIT", "CREDITS_EXHAUSTED", "SPEND_CAP_REACHED"])
     assert.equal(retryableCode(code), false, code);
 });
 
@@ -65,6 +68,10 @@ test("a realtime close reports the problem its reason names, whatever the close 
     [4429, "RATE_LIMITED retryAfter=5", ["RATE_LIMITED", 429, 5], "retry"],
     [4429, "QUOTA_EXCEEDED retryAfter=60 meter=messages", ["QUOTA_EXCEEDED", 429, 60], "stop"],
     [4403, "PLAN_LIMIT_EXCEEDED planLimit=connections", ["PLAN_LIMIT_EXCEEDED", 403, undefined], "stop"],
+    [4402, "CREDITS_EXHAUSTED meter=messages", ["CREDITS_EXHAUSTED", 402, undefined], "stop"],
+    [4402, "SPEND_CAP_REACHED meter=mau", ["SPEND_CAP_REACHED", 402, undefined], "stop"],
+    // The authority's wait is a floor beyond the backoff ceiling.
+    [4503, "SPEND_UNVERIFIED retryAfter=600 meter=mau", ["SPEND_UNVERIFIED", 503, 600], "retry"],
     [4409, "  WRONG_REGION  ", ["WRONG_REGION", 409, undefined], "reroute"],
     [1011, "AUTHORITY_UNAVAILABLE retryAfter=2", ["AUTHORITY_UNAVAILABLE", 503, 2], "retry"],
     // A retryAfter that isn't whole seconds is ignored rather than guessed.
@@ -89,7 +96,7 @@ test("a close that ends realtime authorization without naming a code reports UNA
   }
   // These reconnect after the usual backoff.
   for (const [code, reason] of [[1000, ""], [1001, "going away"], [1006, ""], [1011, "internal error"], [4429, "slow down"],
-    [4500, ""], [4429, "rate_limited retryAfter=5"]])
+    [4500, ""], [4429, "rate_limited retryAfter=5"], [4402, ""], [4402, "Payment required"], [4503, "MAINTENANCE window=1"]])
     assert.equal(closeProblem(code, reason, requestId), undefined, `${code} ${reason}`);
 });
 

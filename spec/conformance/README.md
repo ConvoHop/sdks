@@ -61,15 +61,15 @@ several areas.
 | Expiry | `auth.expiry` | 2 | Expired backend key; a short-lived user session that expires mid-scenario |
 | CRUD | `crud` | 5 | Conversations, memberships and the message lifecycle, read back by other principals |
 | Pagination | `pagination` | 3 | Member limit and cursor, newest-first message history, events after a cursor |
-| Errors | `errors`, `errors.rateLimited` | 21, 5 | Revision conflicts, not found, invalid input, edits by members who are neither author nor moderator, `RATE_LIMITED` with retry-after, `RECOVERY_LIMIT`, realtime closes for `QUOTA_EXCEEDED` and `PLAN_LIMIT_EXCEEDED` |
+| Errors | `errors`, `errors.rateLimited` | 23, 5 | Revision conflicts, not found, invalid input, edits by members who are neither author nor moderator, `RATE_LIMITED` with retry-after, `RECOVERY_LIMIT`, realtime closes for `QUOTA_EXCEEDED`, `PLAN_LIMIT_EXCEEDED`, `SPEND_CAP_REACHED` and `SPEND_UNVERIFIED` |
 | Idempotency | `idempotency` | 13 | Same-id replay from the same or a new client, payload conflicts, replay after a rate limit, same-id retry from a full recovery journal |
 | Recovery | `recovery` | 9 | Drops before and after commit, resolving a request id, recovery state across a restart, a full recovery journal that evicts final records or fails closed |
 | Webhook signatures | `webhooks.signature` | 14 | Valid, wrong secret, expired and future timestamps, multiple secrets, rotation |
-| Realtime | `realtime.ordering`, `realtime.reconnect`, `realtime.resume` | 6, 7, 2 | Replay then live, subscriber agreement, server restart, revoked authorization, stored cursors, reconnecting after gateway errors and rate limits, stopping on quota and plan limits |
+| Realtime | `realtime.ordering`, `realtime.reconnect`, `realtime.resume` | 6, 9, 2 | Replay then live, subscriber agreement, server restart, revoked authorization, stored cursors, reconnecting after gateway errors, rate limits and unverified spend, stopping on quota, plan and spend limits |
 
 The suites are `auth` (14 scenarios), `crud` (4), `pagination` (3), `errors`
-(9), `idempotency` (6), `recovery` (9), `realtime` (14) and `webhooks` (14),
-for 73 in total. Run `npm run conformance -- --list` to print every
+(9), `idempotency` (6), `recovery` (9), `realtime` (16) and `webhooks` (14),
+for 75 in total. Run `npm run conformance -- --list` to print every
 scenario with its tags and title.
 
 Live sessions and native media are not covered. The client obtains a live
@@ -441,46 +441,46 @@ tests also run a few scenarios through it.
 
 ### Current results
 
-The TypeScript reference driver passes all 73 scenarios against the mock,
+The TypeScript reference driver passes all 75 scenarios against the mock,
 with none skipped, including the 14 `webhooks` scenarios,
-`errors.rate-limited.retry-after` and the 9 that need `recovery.eviction` or
+`errors.rate-limited.retry-after` and the 11 that need `recovery.eviction` or
 `realtime.reconnectPolicy`.
 
-The JVM driver declares the backend and management roles. It passes 71
+The JVM driver declares the backend and management roles. It passes 73
 scenarios against the mock and skips the 2 that only use user clients,
 `auth.user-token.invalid` and `realtime.subscribe.invalid-token`. Its
 [workflow](../../.github/workflows/jvm.yml) fails on any other skip.
 
 The .NET driver declares the backend and management roles too. With both
-the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 71
+the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 73
 scenarios against the mock and skips the same 2. Its
 [workflow](../../.github/workflows/dotnet.yml) fails on any other skip.
 
 The Python driver declares the backend and management roles too. With both
-the sync and the async clients, it passes 71 scenarios against the mock and
+the sync and the async clients, it passes 73 scenarios against the mock and
 skips the same 2. Its [workflow](../../.github/workflows/python.yml) fails
 on any other skip.
 
 The Go driver also declares the backend and management roles, and the
-`recovery.eviction` feature. It passes 71 scenarios against the mock and
+`recovery.eviction` feature. It passes 73 scenarios against the mock and
 skips only the 2 that only use user clients. Its
 [workflow](../../.github/workflows/go.yml) fails on any other skip.
 
 The Android driver declares only the user role and no `webhooks.verify`
-feature. It passes 33 scenarios against the mock and skips 40: those that
+feature. It passes 33 scenarios against the mock and skips 42: those that
 use only backend or management clients, those that verify webhooks, and the
-7 that need `recovery.eviction` or `realtime.reconnectPolicy` with a user
+9 that need `recovery.eviction` or `realtime.reconnectPolicy` with a user
 client, until its SDK follows the [recovery and reconnect
 rules](../recovery/README.md). Its
 [workflow](../../.github/workflows/android.yml) fails on any other skip.
 
 The Dart driver also declares only the user role and no `webhooks.verify`
 feature. It passes the same 33 scenarios against the mock and skips the
-same 40. Its [workflow](../../.github/workflows/flutter.yml) fails on any
+same 42. Its [workflow](../../.github/workflows/flutter.yml) fails on any
 other skip.
 
 The React Native driver declares only the user role and no
-`webhooks.verify` feature. It passes 40 scenarios against the mock and
+`webhooks.verify` feature. It passes 42 scenarios against the mock and
 skips 33: those that use only backend or management clients, and those that
 verify webhooks. It inherits the TypeScript client's recovery and reconnect
 behaviour, so it declares `recovery.eviction` and `realtime.reconnectPolicy`. Its [workflow](../../.github/workflows/react-native.yml)
@@ -489,7 +489,7 @@ native platform module.
 
 The Swift driver also declares only the user role and no `webhooks.verify`
 feature. It passes the same 33 scenarios against the mock and skips the
-same 40. On Linux it doesn't declare `realtime`, because Ubuntu's libcurl
+same 42. On Linux it doesn't declare `realtime`, because Ubuntu's libcurl
 has no WebSocket support. There it passes 24 scenarios and also skips the 9
 realtime ones. Its [workflow](../../.github/workflows/swift.yml) fails on
 any other skip.

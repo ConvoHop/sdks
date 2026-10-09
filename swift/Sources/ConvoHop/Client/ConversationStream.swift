@@ -5,6 +5,10 @@ import Foundation
 /// Each batch reaches `apply` once and in order. The cursor advances, and is stored, only after `apply` returns.
 /// When the realtime connection drops, the stream fills the gap from history before it reconnects. Close the stream
 /// when you no longer need it.
+///
+/// When the organization runs out of prepaid credits or reaches its monthly spend cap, the stream closes and reports
+/// `CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` with status 402. `SPEND_UNVERIFIED` goes to `onError` and the stream
+/// reconnects no sooner than its `retryAfter`.
 public actor ConversationStream {
     public nonisolated let conversationId: String
     private let client: ConvoHopClient
@@ -50,6 +54,11 @@ public actor ConversationStream {
     }
 
     private static let channel = GraphQLRealtime.conversationEvents
+    /// The spend codes a close reason may name. The TypeScript SDK reads any code the schema lists in a close reason;
+    /// this stream reads only these, the same way, until it classifies the rest.
+    private static let spendCloseCodes: Set = ["CREDITS_EXHAUSTED", "SPEND_CAP_REACHED", "SPEND_UNVERIFIED"]
+    /// The longest wait before reconnecting, 2³¹−1 ms (about 24.8 days): what a timer accepts, as in the TypeScript SDK.
+    private static let maxReconnectDelayMs = 2_147_483_647
 
     init(
         client: ConvoHopClient, conversationId: String, route: ProjectRoute, token: String, cursor: Cursor?,
@@ -212,18 +221,21 @@ public actor ConversationStream {
             return
         }
         let retryable: Bool
+        var minimumSeconds = 0
         switch error {
         case let problem as ConvoHopError:
             retryable = problem.status == nil || problem.status == 429 || problem.status == 503 || problem.code == .wrongRegion
+            minimumSeconds = problem.retryAfter ?? 0
         case let terminal as RealtimeTerminal:
             retryable = terminal.error.code == .wrongRegion
+            minimumSeconds = terminal.error.retryAfter ?? 0
         default:
             retryable = false
         }
         if retryable {
             dropSocket(code: 4000)
             onError(reported)
-            retry()
+            retry(minimumSeconds: minimumSeconds)
             return
         }
         shut()
@@ -312,12 +324,16 @@ public actor ConversationStream {
         schedule(.pace, after: 250 + environment.random(250))
     }
 
-    private func retry() {
+    /// Reconnects after backoff, and never sooner than `minimumSeconds`, the `retryAfter` the authority asked for, up
+    /// to `maxReconnectDelayMs`.
+    private func retry(minimumSeconds: Int = 0) {
         if isClosed || paused || timer != nil { return }
         let attempt = min(reconnectAttempts, 4)
         reconnectAttempts += 1
-        let delay = min(Self.channel.baseDelayMs * (1 << attempt), Self.channel.maxDelayMs)
-        schedule(.reconnect, after: delay + environment.random(Self.channel.jitterMs))
+        let backoff = min(Self.channel.baseDelayMs * (1 << attempt), Self.channel.maxDelayMs)
+        let minimum = minimumSeconds > Self.maxReconnectDelayMs / 1000 ? Self.maxReconnectDelayMs : minimumSeconds * 1000
+        let delay = max(backoff, minimum) + environment.random(Self.channel.jitterMs)
+        schedule(.reconnect, after: min(delay, Self.maxReconnectDelayMs))
     }
 
     private func schedule(_ kind: TimerKind, after delay: Int) {
@@ -424,12 +440,16 @@ public actor ConversationStream {
         case .failed:
             setConnected(false)
             if !isClosed && !paused { onError(unavailable(socket.subscriptionId)) }
-        case .closed(let code):
+        case .closed(let code, let reason):
             self.socket = nil
             setConnected(false)
             socket.reader.cancel()
             if isClosed || paused { return }
-            if !Self.channel.terminalCloseCodes.contains(code) {
+            // The reason's code decides, not the close code: a spend stop ends the stream, and unverified spend
+            // reconnects no sooner than its `retryAfter`.
+            if let spend = Self.spendCloseProblem(code, reason, socket.subscriptionId) {
+                fail(spend)
+            } else if !Self.channel.terminalCloseCodes.contains(code) {
                 retry()
             } else {
                 fail(
@@ -444,6 +464,20 @@ public actor ConversationStream {
         ConvoHopError(
             code: .transportUnknown, requestId: subscriptionId, outcome: .unknown, status: nil,
             message: "Realtime connection unavailable; current history remains authoritative")
+    }
+
+    /// The problem a close reports when its reason starts with a spend code, such as
+    /// `SPEND_UNVERIFIED retryAfter=30 meter=mau`, whatever the close code: that code, the schema's status for it,
+    /// and the reason's `retryAfter=` seconds. `nil` for any other reason.
+    private static func spendCloseProblem(_ code: Int, _ reason: String?, _ subscriptionId: String) -> ConvoHopError? {
+        let words = (reason ?? "").split(whereSeparator: \.isWhitespace).map(String.init)
+        guard let name = words.first, spendCloseCodes.contains(name) else { return nil }
+        let status = ConvoHopErrorCode.catalog[name]?.status ?? ((4000...4999).contains(code) ? code - 4000 : 0)
+        let retryAfter = words.first { $0.hasPrefix("retryAfter=") }.map { String($0.dropFirst("retryAfter=".count)) }
+        return ConvoHopError(
+            code: ConvoHopErrorCode(rawValue: name), requestId: subscriptionId, outcome: .rejected, status: status,
+            message: "Realtime connection closed: " + words.joined(separator: " "),
+            retryAfter: ConvoHopTransport.retryDelay(retryAfter.map(JSONValue.string)))
     }
 
     private func send(_ message: JSONObject, on connection: any ConvoHopWebSocket) {
@@ -491,11 +525,16 @@ public actor ConversationStream {
         let requestId = try ProtocolChecks.id(extensions["requestId"])
         let outcome = ConvoHopOutcome(rawValue: try ProtocolChecks.string(extensions["outcome"]))
         let message = try ProtocolChecks.string(problem["message"])
+        let retryAfter = ConvoHopTransport.retryDelay(extensions["retryAfter"])
         guard let number = extensions["status"]?.numberValue, ProtocolChecks.isSafeInteger(number) else {
             return RealtimeTerminal(
-                error: ConvoHopError(code: code, requestId: requestId, outcome: outcome, status: nil, message: message))
+                error: ConvoHopError(
+                    code: code, requestId: requestId, outcome: outcome, status: nil, message: message,
+                    retryAfter: retryAfter))
         }
-        return ConvoHopError(code: code, requestId: requestId, outcome: outcome, status: Int(number), message: message)
+        return ConvoHopError(
+            code: code, requestId: requestId, outcome: outcome, status: Int(number), message: message,
+            retryAfter: retryAfter)
     }
 
     private func subscribe(_ socket: Socket) throws {

@@ -11,10 +11,13 @@ import pytest
 
 from convohop import (
     ConvoHopProblem,
+    CreditsExhaustedProblem,
     PlanLimitExceededProblem,
     QuotaExceededProblem,
     RateLimitedProblem,
     ScopeRequiredProblem,
+    SpendCapReachedProblem,
+    SpendUnverifiedProblem,
 )
 
 from .graphql import BACKEND_KEY, Authority, Received, graphql_error, uid
@@ -167,6 +170,23 @@ def test_quota_and_plan_problems_are_typed(code: str, status: int, cls: type[Con
     error = problem(lambda request: graphql_error(request, code, status, "Limit reached", retryAfter=60))
     assert type(error) is cls
     assert (error.code, error.status, error.outcome, error.retry_after) == (code, status, "rejected", 60)
+
+
+@pytest.mark.parametrize(
+    ("code", "cls"), [("CREDITS_EXHAUSTED", CreditsExhaustedProblem), ("SPEND_CAP_REACHED", SpendCapReachedProblem)]
+)
+def test_spend_stops_are_typed_and_not_retryable(code: str, cls: type[ConvoHopProblem]) -> None:
+    error = problem(lambda request: graphql_error(request, code, 402, "Spend stopped", retryable=False, meter="mau"))
+    assert type(error) is cls
+    assert (error.code, error.status, error.outcome, error.retry_after) == (code, 402, "rejected", None)
+    assert not error.retryable
+
+
+def test_unverified_spend_is_typed_and_keeps_its_retry_delay() -> None:
+    error = problem(lambda request: graphql_error(request, "SPEND_UNVERIFIED", 503, "Unverified", retryAfter=30))
+    assert type(error) is SpendUnverifiedProblem
+    assert (error.code, error.status, error.outcome, error.retry_after) == ("SPEND_UNVERIFIED", 503, "rejected", 30)
+    assert error.retryable
 
 
 def test_problems_constructed_directly_keep_the_same_shape() -> None:

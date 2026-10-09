@@ -11,7 +11,7 @@ implements the same behaviour, and the
 | Rule | Driver feature | Scenarios |
 | --- | --- | --- |
 | [Recovery journal](#recovery-journal) | `recovery.eviction` | `recovery.eviction.final-records.user`, `recovery.eviction.final-records.backend`, `recovery.eviction.fail-closed.user`, `recovery.eviction.fail-closed.backend` |
-| [Retry and reconnect](#retry-and-reconnect) | `realtime.reconnectPolicy` | `realtime.reconnect.gateway-errors`, `realtime.reconnect.retry-after`, `realtime.reconnect.rate-limited`, `realtime.reconnect.quota-exceeded`, `realtime.reconnect.plan-limit` |
+| [Retry and reconnect](#retry-and-reconnect) | `realtime.reconnectPolicy` | `realtime.reconnect.gateway-errors`, `realtime.reconnect.retry-after`, `realtime.reconnect.rate-limited`, `realtime.reconnect.quota-exceeded`, `realtime.reconnect.plan-limit`, `realtime.reconnect.spend-stop`, `realtime.reconnect.spend-unverified` |
 
 The values come from the schema IR, [`schema/ir.json`](../../schema/ir.json):
 each error code's `status` and `retryable` in `errors.codes`, each
@@ -218,6 +218,9 @@ a quota is spent, which doesn't. Its documented closes:
 | 4429 | `RATE_LIMITED retryAfter=N` | Reconnect, no sooner than N seconds. |
 | 4429 | `QUOTA_EXCEEDED retryAfter=N meter=M` | Stop and report `QUOTA_EXCEEDED`. |
 | 4403 | `PLAN_LIMIT_EXCEEDED planLimit=X` | Stop and report `PLAN_LIMIT_EXCEEDED`. |
+| 4402 | `SPEND_CAP_REACHED meter=M` | Stop and report `SPEND_CAP_REACHED`. |
+| 4402 | `CREDITS_EXHAUSTED meter=M` | Stop and report `CREDITS_EXHAUSTED`. |
+| 4503 | `SPEND_UNVERIFIED retryAfter=N meter=M` | Reconnect, no sooner than N seconds. |
 
 The service may also refuse the WebSocket upgrade with an HTTP 429
 `application/problem+json` response. An SDK whose WebSocket client exposes
@@ -267,6 +270,8 @@ feature are skipped (see the
 | `realtime.reconnect.rate-limited` | A 4429 `RATE_LIMITED retryAfter=4` close reconnects, no sooner than 4 seconds. |
 | `realtime.reconnect.quota-exceeded` | A 4429 `QUOTA_EXCEEDED` close ends the stream with that problem. |
 | `realtime.reconnect.plan-limit` | A 4403 `PLAN_LIMIT_EXCEEDED` close ends the stream with that problem, not `UNAUTHENTICATED`. |
+| `realtime.reconnect.spend-stop` | A 4402 `SPEND_CAP_REACHED` close ends the stream with that problem. |
+| `realtime.reconnect.spend-unverified` | A 4503 `SPEND_UNVERIFIED retryAfter=4` close reports that problem and reconnects, no sooner than 4 seconds. |
 
 The mock target's `httpStatus` fault and reason-coded realtime drops drive
 them (see [targets](../conformance/targets.md#faults)). The mock doesn't

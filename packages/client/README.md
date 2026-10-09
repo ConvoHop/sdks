@@ -150,11 +150,14 @@ deletions are read back from the authority, so the store shows the
 authority's revision, never one it guessed. A dropped realtime connection
 reconnects on its own and catches up from the applied position. It reconnects
 after the failures that the [retry rules](../../spec/recovery/README.md#retry-and-reconnect)
-call retryable, such as network errors, timeouts, `RATE_LIMITED` and most 5xx
-responses, with a backoff that waits at least the `retryAfter` the authority
-asked for, and after `WRONG_REGION` it routes again first. A refusal that
-reconnecting can't change, such as `QUOTA_EXCEEDED`, `PLAN_LIMIT_EXCEEDED` or
-an authorization failure, stops the stream with status `error` instead. If the
+call retryable, such as network errors, timeouts, `RATE_LIMITED`,
+`SPEND_UNVERIFIED` and most 5xx responses, with a backoff that waits at least
+the `retryAfter` the authority asked for, and after `WRONG_REGION` it routes
+again first. A refusal that reconnecting can't change, such as
+`QUOTA_EXCEEDED`, `PLAN_LIMIT_EXCEEDED`, an authorization failure, or a 402
+`CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` when the organization's prepaid
+credits run out or it reaches its monthly spend cap, stops the stream with
+status `error` instead. If the
 stream closes as `UNAUTHENTICATED` and `sessionRefresh` is configured, the
 store refreshes the session once and follows the conversation again. Status
 `error` with `resyncRequired` means the saved replay position is no longer
@@ -171,8 +174,9 @@ resolution before resending only what the authority never observed.
 Failures that the retry rules call retryable keep the request and retry it,
 `WRONG_REGION` routes again before resending, and a full recovery journal
 (`RECOVERY_LIMIT`) keeps the message queued until a final record makes room.
-A refusal that resending can't change, such as `QUOTA_EXCEEDED` or
-`PLAN_LIMIT_EXCEEDED`, fails the message at once.
+A refusal that resending can't change, such as `QUOTA_EXCEEDED`,
+`PLAN_LIMIT_EXCEEDED`, `CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED`, fails the
+message at once.
 `failed` is final: `resend(requestId)` sends the text again as a new
 message, and `unconfirmed` warns that the old one may have arrived.
 `persist: true` keeps unsent messages, including their text, in the client's

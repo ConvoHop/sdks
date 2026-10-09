@@ -238,6 +238,8 @@ If the app is killed during a send, the next start resends the message under the
 
 Timelines reconnect on their own. After a dropped connection, they catch up over HTTP from the last event they applied, then follow the conversation live again. While the session renews they pause, and they resume on the renewed session. When the network comes back, the store reconnects at once instead of waiting out its backoff, and the outbox delivers what it holds.
 
+When the organization's prepaid credits run out or it reaches its monthly spend cap, the timeline closes with a 402 `CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` problem; open a new one once the organization can pay again. While ConvoHop can't verify current spend, the timeline reports `SPEND_UNVERIFIED` and reconnects no sooner than its `retryAfter`, even if the network comes back sooner.
+
 ## Typing and read receipts
 
 ```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#typing

@@ -161,6 +161,14 @@ store, `client.watch(conversationId, apply, onError)` replays a
 conversation's events from the stored cursor through your own `apply` and
 follows them over realtime.
 
+When the organization's prepaid credits run out or it reaches its monthly
+spend cap, the stream closes with a 402 `CREDITS_EXHAUSTED` or
+`SPEND_CAP_REACHED` problem and doesn't reconnect: the store is `failed`
+until you call `store.reconnect()` once the organization can pay again.
+While ConvoHop can't verify current spend, the store reports
+`SPEND_UNVERIFIED` and reconnects no sooner than its `retryAfter`;
+`store.reconnect()` doesn't cut that wait short.
+
 ## Offline queue and optimistic sends
 
 `ConvoHopOutbox` sends messages in the background, in order within each

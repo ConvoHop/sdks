@@ -1628,6 +1628,72 @@
           ]
         },
         {
+          "name": "CreditsExhaustedProblem",
+          "kind": "class",
+          "signatures": ["class CreditsExhaustedProblem(ConvoHopProblem)"],
+          "docs": "`CREDITS_EXHAUSTED`: prepaid credits are spent and the monthly spend cap is zero (402, not retryable).\n\nBillable usage beyond the plan's allowances is refused before any effect; usage within them continues. Add\ncredits or raise the cap, then send a new request.",
+          "members": [
+            {
+              "name": "code",
+              "kind": "property",
+              "signatures": ["code: str"],
+              "docs": "The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "request_id",
+              "kind": "property",
+              "signatures": ["request_id: str"],
+              "docs": "The request the problem belongs to.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "outcome",
+              "kind": "property",
+              "signatures": ["outcome: str"],
+              "docs": "`rejected`, `committed`, `accepted` or `unknown`.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["status: int"],
+              "docs": "The HTTP status, or 0 when no response was received or storage failed.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "retry_after",
+              "kind": "property",
+              "signatures": ["retry_after: int | None"],
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay\n(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or\nresends on its own because of it.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "__init__",
+              "kind": "constructor",
+              "signatures": [
+                "def __init__(\n    self,\n    code: str,\n    request_id: str,\n    outcome: str,\n    status: int,\n    message: str,\n    *,\n    retry_after: int | None = None,\n) -> None"
+              ],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "message",
+              "kind": "property",
+              "signatures": ["@property\ndef message(self) -> str"],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "retryable",
+              "kind": "property",
+              "signatures": ["@property\ndef retryable(self) -> bool"],
+              "docs": "Whether the error catalog marks the code as retryable with the same request ID.",
+              "inherited": "ConvoHopProblem"
+            }
+          ]
+        },
+        {
           "name": "MemoryStorage",
           "kind": "class",
           "signatures": ["class MemoryStorage"],
@@ -2056,6 +2122,138 @@
               "kind": "property",
               "signatures": ["retry_after: int | None"],
               "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay\n(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or\nresends on its own because of it.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "message",
+              "kind": "property",
+              "signatures": ["@property\ndef message(self) -> str"],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "retryable",
+              "kind": "property",
+              "signatures": ["@property\ndef retryable(self) -> bool"],
+              "docs": "Whether the error catalog marks the code as retryable with the same request ID.",
+              "inherited": "ConvoHopProblem"
+            }
+          ]
+        },
+        {
+          "name": "SpendCapReachedProblem",
+          "kind": "class",
+          "signatures": ["class SpendCapReachedProblem(ConvoHopProblem)"],
+          "docs": "`SPEND_CAP_REACHED`: the month's charges reached the organization's spend limit (402, not retryable).\n\nBillable usage beyond the plan's allowances is refused before any effect; usage within them continues. Add\ncredits or raise the cap, then send a new request.",
+          "members": [
+            {
+              "name": "code",
+              "kind": "property",
+              "signatures": ["code: str"],
+              "docs": "The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "request_id",
+              "kind": "property",
+              "signatures": ["request_id: str"],
+              "docs": "The request the problem belongs to.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "outcome",
+              "kind": "property",
+              "signatures": ["outcome: str"],
+              "docs": "`rejected`, `committed`, `accepted` or `unknown`.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["status: int"],
+              "docs": "The HTTP status, or 0 when no response was received or storage failed.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "retry_after",
+              "kind": "property",
+              "signatures": ["retry_after: int | None"],
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay\n(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or\nresends on its own because of it.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "__init__",
+              "kind": "constructor",
+              "signatures": [
+                "def __init__(\n    self,\n    code: str,\n    request_id: str,\n    outcome: str,\n    status: int,\n    message: str,\n    *,\n    retry_after: int | None = None,\n) -> None"
+              ],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "message",
+              "kind": "property",
+              "signatures": ["@property\ndef message(self) -> str"],
+              "docs": "",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "retryable",
+              "kind": "property",
+              "signatures": ["@property\ndef retryable(self) -> bool"],
+              "docs": "Whether the error catalog marks the code as retryable with the same request ID.",
+              "inherited": "ConvoHopProblem"
+            }
+          ]
+        },
+        {
+          "name": "SpendUnverifiedProblem",
+          "kind": "class",
+          "signatures": ["class SpendUnverifiedProblem(ConvoHopProblem)"],
+          "docs": "`SPEND_UNVERIFIED`: current spend cannot be verified, so billable usage failed closed (503, retryable).\n\nWait `retry_after` seconds, then resend with the same request ID.",
+          "members": [
+            {
+              "name": "code",
+              "kind": "property",
+              "signatures": ["code: str"],
+              "docs": "The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "request_id",
+              "kind": "property",
+              "signatures": ["request_id: str"],
+              "docs": "The request the problem belongs to.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "outcome",
+              "kind": "property",
+              "signatures": ["outcome: str"],
+              "docs": "`rejected`, `committed`, `accepted` or `unknown`.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["status: int"],
+              "docs": "The HTTP status, or 0 when no response was received or storage failed.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "retry_after",
+              "kind": "property",
+              "signatures": ["retry_after: int | None"],
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay\n(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or\nresends on its own because of it.",
+              "inherited": "ConvoHopProblem"
+            },
+            {
+              "name": "__init__",
+              "kind": "constructor",
+              "signatures": [
+                "def __init__(\n    self,\n    code: str,\n    request_id: str,\n    outcome: str,\n    status: int,\n    message: str,\n    *,\n    retry_after: int | None = None,\n) -> None"
+              ],
+              "docs": "",
               "inherited": "ConvoHopProblem"
             },
             {

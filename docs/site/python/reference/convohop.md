@@ -4293,6 +4293,106 @@ def retryable(self) -> bool
 
 Whether the error catalog marks the code as retryable with the same request ID.
 
+### `CreditsExhaustedProblem` class
+
+```python
+class CreditsExhaustedProblem(ConvoHopProblem)
+```
+
+`CREDITS_EXHAUSTED`: prepaid credits are spent and the monthly spend cap is zero (402, not retryable).
+
+Billable usage beyond the plan's allowances is refused before any effect; usage within them continues. Add
+credits or raise the cap, then send a new request.
+
+#### `CreditsExhaustedProblem.code` property
+
+```python
+code: str
+```
+
+The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.request_id` property
+
+```python
+request_id: str
+```
+
+The request the problem belongs to.
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.outcome` property
+
+```python
+outcome: str
+```
+
+`rejected`, `committed`, `accepted` or `unknown`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.status` property
+
+```python
+status: int
+```
+
+The HTTP status, or 0 when no response was received or storage failed.
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.retry_after` property
+
+```python
+retry_after: int | None
+```
+
+Whole seconds to wait before resending the same request, when the authority sent a delay
+(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or
+resends on its own because of it.
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem` constructor
+
+```python
+def __init__(
+    self,
+    code: str,
+    request_id: str,
+    outcome: str,
+    status: int,
+    message: str,
+    *,
+    retry_after: int | None = None,
+) -> None
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.message` property
+
+```python
+@property
+def message(self) -> str
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `CreditsExhaustedProblem.retryable` property
+
+```python
+@property
+def retryable(self) -> bool
+```
+
+Whether the error catalog marks the code as retryable with the same request ID.
+
+Inherited from `ConvoHopProblem`.
+
 ### `MemoryStorage` class
 
 ```python
@@ -4883,6 +4983,205 @@ def message(self) -> str
 Inherited from `ConvoHopProblem`.
 
 #### `ScopeRequiredProblem.retryable` property
+
+```python
+@property
+def retryable(self) -> bool
+```
+
+Whether the error catalog marks the code as retryable with the same request ID.
+
+Inherited from `ConvoHopProblem`.
+
+### `SpendCapReachedProblem` class
+
+```python
+class SpendCapReachedProblem(ConvoHopProblem)
+```
+
+`SPEND_CAP_REACHED`: the month's charges reached the organization's spend limit (402, not retryable).
+
+Billable usage beyond the plan's allowances is refused before any effect; usage within them continues. Add
+credits or raise the cap, then send a new request.
+
+#### `SpendCapReachedProblem.code` property
+
+```python
+code: str
+```
+
+The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.request_id` property
+
+```python
+request_id: str
+```
+
+The request the problem belongs to.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.outcome` property
+
+```python
+outcome: str
+```
+
+`rejected`, `committed`, `accepted` or `unknown`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.status` property
+
+```python
+status: int
+```
+
+The HTTP status, or 0 when no response was received or storage failed.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.retry_after` property
+
+```python
+retry_after: int | None
+```
+
+Whole seconds to wait before resending the same request, when the authority sent a delay
+(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or
+resends on its own because of it.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem` constructor
+
+```python
+def __init__(
+    self,
+    code: str,
+    request_id: str,
+    outcome: str,
+    status: int,
+    message: str,
+    *,
+    retry_after: int | None = None,
+) -> None
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.message` property
+
+```python
+@property
+def message(self) -> str
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendCapReachedProblem.retryable` property
+
+```python
+@property
+def retryable(self) -> bool
+```
+
+Whether the error catalog marks the code as retryable with the same request ID.
+
+Inherited from `ConvoHopProblem`.
+
+### `SpendUnverifiedProblem` class
+
+```python
+class SpendUnverifiedProblem(ConvoHopProblem)
+```
+
+`SPEND_UNVERIFIED`: current spend cannot be verified, so billable usage failed closed (503, retryable).
+
+Wait `retry_after` seconds, then resend with the same request ID.
+
+#### `SpendUnverifiedProblem.code` property
+
+```python
+code: str
+```
+
+The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.request_id` property
+
+```python
+request_id: str
+```
+
+The request the problem belongs to.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.outcome` property
+
+```python
+outcome: str
+```
+
+`rejected`, `committed`, `accepted` or `unknown`.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.status` property
+
+```python
+status: int
+```
+
+The HTTP status, or 0 when no response was received or storage failed.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.retry_after` property
+
+```python
+retry_after: int | None
+```
+
+Whole seconds to wait before resending the same request, when the authority sent a delay
+(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or
+resends on its own because of it.
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem` constructor
+
+```python
+def __init__(
+    self,
+    code: str,
+    request_id: str,
+    outcome: str,
+    status: int,
+    message: str,
+    *,
+    retry_after: int | None = None,
+) -> None
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.message` property
+
+```python
+@property
+def message(self) -> str
+```
+
+Inherited from `ConvoHopProblem`.
+
+#### `SpendUnverifiedProblem.retryable` property
 
 ```python
 @property
