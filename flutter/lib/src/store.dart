@@ -379,8 +379,14 @@ final class ConversationStore {
     if (_closed) throw StateError('The conversation store is closed');
   }
 
-  Future<void> _connect(int generation) async {
+  /// Loads what the store lacks and follows the conversation. After
+  /// `WRONG_REGION`, [reroute] routes the client again first.
+  Future<void> _connect(int generation, {bool reroute = false}) async {
     try {
+      if (reroute) {
+        await client.initialize();
+        if (generation != _generation) return;
+      }
       if (!_restoreTried) {
         _restoreTried = true;
         await _restore(generation);
@@ -443,13 +449,21 @@ final class ConversationStore {
       _requireResync(error);
       return;
     }
-    if (isTransient(error)) {
+    // Failures the shared classifier retries, and an ended session, which
+    // clears once the session is renewed, try again after backoff, and never
+    // sooner than the problem's retryAfter.
+    final action = reconnectAction(error);
+    if (action != ReconnectAction.stop || (error is ConvoHopProblem && sessionCodes.contains(error.code))) {
       _status = _loaded ? ConversationStoreStatus.ready : ConversationStoreStatus.loading;
       _failures++;
       _retry?.cancel();
-      _retry = Timer(Duration(milliseconds: backoffDelay(_failures, _random.nextInt(1 << 30))), () {
+      final retryAfter = error is ConvoHopProblem ? error.retryAfter ?? 0 : 0;
+      final delay = min(max(backoffDelay(_failures, _random.nextInt(1 << 30)), retryAfter * 1000), maxTimerDelayMs);
+      _retry = Timer(Duration(milliseconds: delay), () {
         _retry = null;
-        if (generation == _generation && !_closed) unawaited(_connect(generation));
+        if (generation == _generation && !_closed) {
+          unawaited(_connect(generation, reroute: action == ReconnectAction.reroute));
+        }
       });
     } else {
       _status = ConversationStoreStatus.failed;

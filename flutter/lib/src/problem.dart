@@ -20,8 +20,11 @@ class ConvoHopProblem implements Exception {
   final String message;
 
   /// Whole seconds to wait before resending the same request, when the
-  /// authority sent a delay (for example with `RATE_LIMITED`). The SDK never
-  /// waits or resends on its own because of it.
+  /// authority sent a delay (for example with `RATE_LIMITED`). Read from the
+  /// error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in
+  /// seconds, or from a realtime close reason's `retryAfter=`. A request you
+  /// send is never resent on its own; when the SDK reconnects a stream or
+  /// resends a queued outbox message, it waits at least this long first.
   final int? retryAfter;
 
   /// The underlying failure, when there is one.

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:convohop/convohop.dart';
+import 'package:convohop/src/failures.dart' show maxTimerDelayMs;
+import 'package:convohop/src/protocol.dart' show fingerprint;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +13,7 @@ import 'support/test_data.dart';
 
 const _otherConversationId = '0f9e8d7c-6b5a-4c3d-9e2f-1a0b9c8d7e6f';
 const _outboxKey = 'convohop.outbox:$projectId:$principalId';
+const _journalKey = 'convohop.requests:$projectId:$principalId';
 
 typedef _Answer = FutureOr<http.Response> Function(String requestId, Map<String, Object?> input);
 
@@ -126,6 +129,51 @@ bool _done(FakeAsync async, Future<void> future) {
   async.flushMicrotasks();
   return done;
 }
+
+/// A distinct canonical request ID.
+String _requestId(int index) => '00000000-0000-4000-8000-${index.toRadixString(16).padLeft(12, '0')}';
+
+/// The recovery record of an earlier message send, stored after one attempt
+/// at [at].
+Map<String, Object?> _journalRecord(
+  String id,
+  int at,
+  String resolutionState, {
+  String classification = 'submitted',
+  int? retryDeadline,
+}) {
+  final input = <String, Object?>{'conversationId': conversationId, 'text': id, 'props': <String, Object?>{}};
+  return <String, Object?>{
+    'requestId': id,
+    'incarnation': incarnation,
+    'payloadFingerprint': fingerprint(<String, Object?>{
+      'operation': 'communication.sendMessage',
+      'projectId': projectId,
+      'input': input,
+    }),
+    'operation': 'communication.sendMessage',
+    'projectId': projectId,
+    'input': input,
+    'firstSubmittedAt': at,
+    'retryDeadline': retryDeadline ?? at + 60000,
+    'attemptCount': 1,
+    'lastAttemptAt': at,
+    'lastAttemptClassification': classification,
+    'resolutionState': resolutionState,
+  };
+}
+
+/// The request IDs [client]'s recovery journal holds, in order.
+List<String> _journal(ConvoHopClient client) => <String>[
+  for (final state in client.transport.recoveryStates) state.requestId,
+];
+
+/// The refusal of request [id] while no recovery record can make room.
+Matcher _recoveryLimit(String id) => isA<ConvoHopProblem>()
+    .having((problem) => problem.code, 'code', 'RECOVERY_LIMIT')
+    .having((problem) => problem.requestId, 'requestId', id)
+    .having((problem) => problem.outcome, 'outcome', 'rejected')
+    .having((problem) => problem.status, 'status', 409);
 
 void main() {
   test('outbox queues, flushes in order, keeps request ids and persists unsent messages', () async {
@@ -697,6 +745,275 @@ void main() {
       settled(async, outbox.close());
       client.close();
       expect(async.pendingTimers, isEmpty);
+    });
+  });
+
+  group('recovery journal and retry policy', () {
+    test(
+      'keeps a message queued while the recovery journal is full, then sends it under its ID once a record is final',
+      () {
+        fakeAsync((async) {
+          int now() => fixedClock() + async.elapsed.inMilliseconds;
+          final authority = _Authority();
+          final storage = MemoryRecoveryStorage();
+          // Each stored send was rate limited, so it may be sent again until its
+          // retry deadline, 2.5 seconds from now.
+          final stored = <String>[for (var index = 1; index <= 128; index++) _requestId(index)];
+          storage.setItem(
+            _journalKey,
+            jsonEncode(<Object?>[
+              for (final (index, id) in stored.indexed)
+                _journalRecord(
+                  id,
+                  fixedClock() - 1000 + index,
+                  'rejected',
+                  classification: 'RATE_LIMITED',
+                  retryDeadline: fixedClock() + 2500,
+                ),
+            ]),
+          );
+          final errors = <Object>[];
+          final client = authority.client(now, storage: storage);
+          final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
+          final changes = <OutboxItem>[];
+          outbox.changes.listen(changes.add);
+
+          final item = settled(async, outbox.send(conversationId, 'waits for room'));
+          // Refused before anything was stored or sent, the message spent none of
+          // its budget and isn't in doubt.
+          expect(authority.operations, <String>['CommunicationResolveRequest']);
+          var current = outbox.items.single;
+          expect(
+            (current.state, current.errorCode, current.attempts, current.uncertain, current.nextAttemptAt),
+            (OutboxState.queued, 'RECOVERY_LIMIT', 0, false, fixedClock() + 1000),
+          );
+          expect(current.error, _recoveryLimit(item.requestId));
+          expect(errors, <Matcher>[_recoveryLimit(item.requestId)]);
+          expect(_journal(client), stored);
+          final saved = (jsonDecode(storage.items[_outboxKey]!) as List<Object?>).single! as Map<String, Object?>;
+          expect((saved['attempted'], saved['uncertain'], saved['attempts']), (false, false, 0));
+
+          async.elapse(const Duration(seconds: 1));
+          current = outbox.items.single;
+          expect(
+            (current.state, current.attempts, current.nextAttemptAt),
+            (OutboxState.queued, 0, fixedClock() + 3000),
+          );
+          expect(authority.sends, isEmpty);
+          expect(errors, hasLength(2));
+
+          // Past their deadline, the stored sends are final, and the oldest one
+          // makes room.
+          async.elapse(const Duration(seconds: 2));
+          expect(authority.sends, <String>[item.requestId]);
+          expect(authority.checks, <String>[item.requestId]);
+          expect(outbox.items, isEmpty);
+          expect((changes.last.state, changes.last.attempts), (OutboxState.sent, 1));
+          expect(_journal(client), <String>[...stored.skip(1), item.requestId]);
+          expect(errors, hasLength(2));
+
+          settled(async, outbox.close());
+          client.close();
+          expect(async.pendingTimers, isEmpty);
+        });
+      },
+    );
+
+    test('fails a message at once on a quota or plan limit, or an unlisted code with a client error status', () {
+      fakeAsync((async) {
+        int now() => fixedClock() + async.elapsed.inMilliseconds;
+        final authority = _Authority()
+          ..answer(
+            'CommunicationSendMessage',
+            (id, input) => jsonResponse(gqlError('QUOTA_EXCEEDED', status: 429, retryAfter: '60')),
+          )
+          ..answer(
+            'CommunicationSendMessage',
+            (id, input) => jsonResponse(gqlError('PLAN_LIMIT_EXCEEDED', status: 403)),
+          )
+          ..answer('CommunicationSendMessage', (id, input) => jsonResponse(gqlError('NEWLY_INVENTED', status: 400)));
+        final errors = <Object>[];
+        final client = authority.client(now);
+        final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
+
+        final sent = <String>[
+          for (final text in <String>['over quota', 'over plan', 'not understood'])
+            settled(async, outbox.send(conversationId, text)).requestId,
+        ];
+        expect(
+          outbox.items.map((item) => (item.text, item.state, item.errorCode, item.attempts, item.uncertain)),
+          <Object>[
+            ('over quota', OutboxState.failed, 'QUOTA_EXCEEDED', 1, false),
+            ('over plan', OutboxState.failed, 'PLAN_LIMIT_EXCEEDED', 1, false),
+            ('not understood', OutboxState.failed, 'NEWLY_INVENTED', 1, false),
+          ],
+        );
+        expect(async.pendingTimers, isEmpty);
+        async.elapse(const Duration(minutes: 5));
+        expect(authority.sends, sent);
+        expect(errors, isEmpty);
+
+        settled(async, outbox.close());
+        client.close();
+      });
+    });
+
+    test('keeps a message after a rejection the shared classifier retries, waiting at least its retryAfter', () {
+      fakeAsync((async) {
+        int now() => fixedClock() + async.elapsed.inMilliseconds;
+        final authority = _Authority()
+          // A code the IR doesn't list is retried by its status.
+          ..answer('CommunicationSendMessage', (id, input) => jsonResponse(gqlError('NEWLY_INVENTED', status: 503)))
+          ..answer(
+            'CommunicationSendMessage',
+            (id, input) => jsonResponse(gqlError('AUTHORITY_UNAVAILABLE', status: 503, retryAfter: '5')),
+          );
+        final errors = <Object>[];
+        final client = authority.client(now);
+        final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
+
+        final item = settled(async, outbox.send(conversationId, 'eventually'));
+        var current = outbox.items.single;
+        expect(
+          (current.state, current.errorCode, current.attempts, current.uncertain, current.nextAttemptAt),
+          (OutboxState.queued, 'NEWLY_INVENTED', 1, false, fixedClock() + 1000),
+        );
+        async.elapse(const Duration(seconds: 1));
+        // A second failure backs off two seconds, but the authority asked for five.
+        current = outbox.items.single;
+        expect(
+          (current.state, current.errorCode, current.attempts, current.nextAttemptAt),
+          (OutboxState.queued, 'AUTHORITY_UNAVAILABLE', 2, fixedClock() + 6000),
+        );
+        async.elapse(const Duration(milliseconds: 4999));
+        expect(authority.sends, hasLength(2));
+        async.elapse(const Duration(milliseconds: 1));
+        expect(authority.sends, <String>[item.requestId, item.requestId, item.requestId]);
+        expect(outbox.items, isEmpty);
+        expect(errors, isEmpty);
+
+        settled(async, outbox.close());
+        client.close();
+        expect(async.pendingTimers, isEmpty);
+      });
+    });
+
+    test('routes again after WRONG_REGION, then sends the message again under its ID', () {
+      fakeAsync((async) {
+        int now() => fixedClock() + async.elapsed.inMilliseconds;
+        final authority = _Authority()
+          ..answer('CommunicationSendMessage', (id, input) => jsonResponse(gqlError('WRONG_REGION', status: 409)));
+        final errors = <Object>[];
+        final client = authority.client(now);
+        final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
+
+        final item = settled(async, outbox.send(conversationId, 'moved'));
+        expect(authority.operations, <String>[
+          'CommunicationResolveRequest',
+          'CommunicationSendMessage',
+          'CommunicationRoute',
+        ]);
+        final current = outbox.items.single;
+        expect(
+          (current.state, current.errorCode, current.attempts, current.uncertain, current.nextAttemptAt),
+          (OutboxState.queued, 'WRONG_REGION', 1, false, fixedClock() + 1000),
+        );
+
+        async.elapse(const Duration(seconds: 1));
+        expect(authority.operations.skip(3), <String>['CommunicationResolveRequest', 'CommunicationSendMessage']);
+        expect(authority.sends, <String>[item.requestId, item.requestId]);
+        expect(outbox.items, isEmpty);
+        expect(errors, isEmpty);
+
+        settled(async, outbox.close());
+        client.close();
+        expect(async.pendingTimers, isEmpty);
+      });
+    });
+
+    test('keeps the recovery record of a message it may still send until the message fails or it closes', () {
+      fakeAsync((async) {
+        int now() => fixedClock() + async.elapsed.inMilliseconds;
+        final authority = _Authority()
+          ..answer('CommunicationSendMessage', (id, input) => jsonResponse(gqlError('QUOTA_EXCEEDED', status: 429)))
+          ..answer(
+            'CommunicationSendMessage',
+            (id, input) => jsonResponse(gqlError('RATE_LIMITED', status: 429, retryAfter: '120')),
+          );
+        final storage = MemoryRecoveryStorage();
+        // Sends whose outcome is unknown are never final.
+        final unknown = <String>[for (var index = 1; index <= 126; index++) _requestId(index)];
+        storage.setItem(
+          _journalKey,
+          jsonEncode(<Object?>[for (final id in unknown) _journalRecord(id, fixedClock() - 1000, 'unknown')]),
+        );
+        final client = authority.client(now, storage: storage);
+        final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+
+        final failed = settled(async, outbox.send(_otherConversationId, 'over quota'));
+        final held = settled(async, outbox.send(conversationId, 'rate limited'));
+        expect(outbox.items.map((item) => (item.requestId, item.state)), <Object>[
+          (failed.requestId, OutboxState.failed),
+          (held.requestId, OutboxState.queued),
+        ]);
+        expect(_journal(client), <String>[...unknown, failed.requestId, held.requestId]);
+
+        // Past their retry deadline, both records are final. The failed
+        // message's record makes room; the queued message's stays, though it
+        // is older than any other final record.
+        async.elapse(const Duration(seconds: 61));
+        settled(async, client.send(conversationId, 'first', requestId: _requestId(201)));
+        expect(_journal(client), <String>[...unknown, held.requestId, _requestId(201)]);
+        settled(async, client.send(conversationId, 'second', requestId: _requestId(202)));
+        expect(_journal(client), <String>[...unknown, held.requestId, _requestId(202)]);
+
+        // Closed, the outbox no longer keeps it.
+        settled(async, outbox.close());
+        settled(async, client.send(conversationId, 'third', requestId: _requestId(203)));
+        expect(_journal(client), <String>[...unknown, _requestId(202), _requestId(203)]);
+        expect(authority.sends, <String>[
+          failed.requestId,
+          held.requestId,
+          _requestId(201),
+          _requestId(202),
+          _requestId(203),
+        ]);
+        client.close();
+        expect(async.pendingTimers, isEmpty);
+      });
+    });
+
+    test('waits out a retryAfter longer than the longest timer in steps instead of spinning', () {
+      fakeAsync((async) {
+        int now() => fixedClock() + async.elapsed.inMilliseconds;
+        // 3,000,000 seconds, about 35 days, outlasts the longest timer.
+        const retryAfterMs = 3000000 * 1000;
+        final authority = _Authority()
+          ..answer(
+            'CommunicationSendMessage',
+            (id, input) => jsonResponse(gqlError('RATE_LIMITED', status: 429, retryAfter: '3000000')),
+          );
+        final client = authority.client(now);
+        final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+
+        final item = settled(async, outbox.send(conversationId, 'much later'));
+        expect(outbox.items.single.nextAttemptAt, fixedClock() + retryAfterMs);
+        expect(async.pendingTimers.single.duration, const Duration(milliseconds: maxTimerDelayMs));
+        async.elapse(const Duration(milliseconds: maxTimerDelayMs));
+        // Woken early, it only waits again for the rest.
+        expect(authority.calls, hasLength(2));
+        expect(async.pendingTimers.single.duration, const Duration(milliseconds: retryAfterMs - maxTimerDelayMs));
+        async.elapse(const Duration(milliseconds: retryAfterMs - maxTimerDelayMs));
+        // Its retry budget ran out long ago: it checks read-only, then fails.
+        expect(authority.checks, <String>[item.requestId, item.requestId]);
+        expect(authority.sends, <String>[item.requestId]);
+        final current = outbox.items.single;
+        expect((current.state, current.errorCode), (OutboxState.failed, 'RESOLUTION_REQUIRED'));
+        expect(async.pendingTimers, isEmpty);
+
+        settled(async, outbox.close());
+        client.close();
+      });
     });
   });
 }

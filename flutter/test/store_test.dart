@@ -546,6 +546,107 @@ void main() {
     });
   });
 
+  test('routes again after WRONG_REGION, then loads', () {
+    fakeAsync((async) {
+      final authority = _Authority()..post('first');
+      authority.answer('GetConversation', (id, input) => jsonResponse(gqlError('WRONG_REGION')));
+      final setup = _Setup(async, authority);
+      expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.loading, false));
+      expect(setup.snapshot.error, _problem('WRONG_REGION'));
+      expect(authority.operations, <String>['GetConversation']);
+
+      // Following the conversation then uses the route it just read.
+      authority.calls.clear();
+      async.elapse(const Duration(seconds: 1));
+      expect(authority.operations, <String>['Route', 'GetConversation', 'Messages', 'Receipts', 'Events']);
+      expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.ready, true));
+      expect(setup.texts, <String>['first']);
+
+      setup.close();
+      expect(async.pendingTimers, isEmpty);
+    });
+  });
+
+  test("retries what the shared classifier retries, never sooner than its retryAfter, and stops on limits", () {
+    fakeAsync((async) {
+      final authority = _Authority()..post('first');
+      authority
+        ..answer('GetConversation', (id, input) => jsonResponse(gqlError('RATE_LIMITED', status: 429, retryAfter: '7')))
+        ..answer('GetConversation', (id, input) => http.Response('<html>Bad gateway</html>', 502))
+        ..answer('GetConversation', (id, input) => jsonResponse(gqlError('NEWLY_INVENTED', status: 503)));
+      final setup = _Setup(async, authority);
+      expect(setup.snapshot.error, _problem('RATE_LIMITED'));
+      async.elapse(const Duration(milliseconds: 6999));
+      expect(authority.calls, hasLength(1));
+      async.elapse(const Duration(milliseconds: 1));
+      expect(authority.calls, hasLength(2));
+      expect(setup.snapshot.error, _problem('INVALID_RESPONSE'));
+      async.elapse(const Duration(seconds: 2));
+      expect(authority.calls, hasLength(3));
+      expect(setup.snapshot.error, _problem('NEWLY_INVENTED'));
+      expect(setup.snapshot.status, ConversationStoreStatus.loading);
+      authority.calls.clear();
+      async.elapse(const Duration(seconds: 4));
+      expect(authority.operations, _fullLoad);
+      expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.ready, true));
+      setup.close();
+      expect(async.pendingTimers, isEmpty);
+    });
+
+    for (final (code, status) in <(String, int)>[('QUOTA_EXCEEDED', 429), ('PLAN_LIMIT_EXCEEDED', 403)]) {
+      fakeAsync((async) {
+        final authority = _Authority()..post('first');
+        authority.answer(
+          'GetConversation',
+          (id, input) => jsonResponse(gqlError(code, status: status, retryAfter: '60')),
+        );
+        final setup = _Setup(async, authority);
+        expect(setup.snapshot.status, ConversationStoreStatus.failed);
+        expect(setup.snapshot.error, _problem(code));
+        async.elapse(const Duration(minutes: 5));
+        expect(authority.operations, <String>['GetConversation']);
+
+        // The app decides when to try again.
+        settled(async, setup.store.reconnect());
+        expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.ready, true));
+        setup.close();
+        expect(async.pendingTimers, isEmpty);
+      });
+    }
+  });
+
+  test('a quota close stops the store; a rate-limited close leaves reconnecting to the stream', () {
+    fakeAsync((async) {
+      final authority = _Authority()..post('first');
+      final setup = _Setup(async, authority);
+      setup.acknowledge();
+      authority.calls.clear();
+      unawaited(setup.socket.serverClose(4429, 'RATE_LIMITED retryAfter=4'));
+      async.flushMicrotasks();
+      expect(setup.snapshot.error, _problem('RATE_LIMITED'));
+      expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.ready, false));
+      async.elapse(const Duration(milliseconds: 3999));
+      expect(authority.calls, isEmpty);
+      async.elapse(const Duration(milliseconds: 500));
+      expect(authority.operations, <String>['Route', 'Events']);
+      expect(setup.connector.sockets, hasLength(2));
+
+      setup.acknowledge();
+      authority.calls.clear();
+      unawaited(setup.socket.serverClose(4429, 'QUOTA_EXCEEDED retryAfter=60 meter=messages'));
+      async.flushMicrotasks();
+      expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.failed, false));
+      expect(setup.snapshot.error, _problem('QUOTA_EXCEEDED'));
+      async.elapse(const Duration(minutes: 5));
+      expect(authority.calls, isEmpty);
+      expect(setup.connector.sockets, hasLength(2));
+      expect(setup.texts, <String>['first']);
+
+      setup.close();
+      expect(async.pendingTimers, isEmpty);
+    });
+  });
+
   test('close completes while listeners are paused and returns one future', () {
     fakeAsync((async) {
       final authority = _Authority()..post('first');
