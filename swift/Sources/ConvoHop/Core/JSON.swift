@@ -1,4 +1,3 @@
-import CryptoKit
 import Foundation
 
 /// A JSON text that is not well formed.
@@ -333,11 +332,7 @@ extension JSONValue {
 
     /// `sha256:` and the lowercase hex SHA-256 digest of the canonical text.
     func fingerprint() throws -> String {
-        let digest = SHA256.hash(data: Data(try canonicalText().utf8))
-        return "sha256:" + digest.map { byte in
-            let hex = String(byte, radix: 16)
-            return byte < 0x10 ? "0" + hex : hex
-        }.joined()
+        "sha256:" + sha256Hex(try canonicalText())
     }
 
     /// The JSON form of an encodable value.

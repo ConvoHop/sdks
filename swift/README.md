@@ -455,6 +455,11 @@ swift build --package-path conformance/drivers/swift/Driver
 npm run conformance -- --driver conformance/drivers/swift/Driver/.build/debug/ConvoHopConformanceDriver
 ```
 
+CI also builds the driver on Linux, because only Linux runners can start
+the dev stack. Linux isn't a supported app platform. There the driver
+doesn't declare realtime, because Ubuntu 24.04's libcurl has no WebSocket
+support.
+
 `Sources/ConvoHop/Generated` holds code generated from the schemas: never edit
 it. From the repository root, `npm run generate:graphql` regenerates it and
 `npm run check:graphql` checks it. See

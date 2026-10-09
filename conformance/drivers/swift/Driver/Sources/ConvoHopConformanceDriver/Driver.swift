@@ -2,6 +2,10 @@
 import ConvoHop
 import Foundation
 
+#if canImport(Glibc)
+    import Glibc
+#endif
+
 let driverInfo: JSON = ["name": "convohop-swift", "version": "0.1.0", "language": "swift"]
 
 enum ProtocolCode: String {
@@ -268,26 +272,25 @@ struct ConformanceDriver {
     static func main() async {
         signal(SIGPIPE, SIG_IGN)
         let driver = Driver()
-        var line: [UInt8] = []
-        do {
-            for try await byte in FileHandle.standardInput.bytes {
-                if byte != 0x0A {
-                    line.append(byte)
-                    continue
-                }
-                await respond(to: line, with: driver)
-                line.removeAll(keepingCapacity: true)
-            }
-        } catch {
-            FileHandle.standardError.write(Data("stdin failed: \(error)\n".utf8))
+        for await line in standardInputLines() {
+            await respond(to: line, with: driver)
         }
-        if !line.isEmpty { await respond(to: line, with: driver) }
         await driver.reset()
         exit(0)
     }
 
-    private static func respond(to bytes: [UInt8], with driver: Driver) async {
-        let text = String(decoding: bytes.last == 0x0D ? bytes.dropLast() : bytes[...], as: UTF8.self)
+    /// Standard input's lines without their line breaks, read on a thread of their own. `FileHandle.AsyncBytes`
+    /// exists only on Apple platforms.
+    private static func standardInputLines() -> AsyncStream<String> {
+        let (lines, continuation) = AsyncStream.makeStream(of: String.self)
+        Thread {
+            while let line = readLine(strippingNewline: true) { continuation.yield(line) }
+            continuation.finish()
+        }.start()
+        return lines
+    }
+
+    private static func respond(to text: String, with driver: Driver) async {
         guard let reply = await driver.process(text) else { return }
         do {
             try FileHandle.standardOutput.write(contentsOf: Data((reply.line + "\n").utf8))

@@ -1,5 +1,9 @@
 import Foundation
 
+#if canImport(FoundationNetworking)
+    import FoundationNetworking
+#endif
+
 /// An event from a realtime socket. A connection reports `closed` last.
 public enum ConvoHopWebSocketEvent: Sendable, Equatable {
     /// The handshake finished with the negotiated subprotocol.
@@ -156,10 +160,19 @@ final class URLSessionWebSocketConnection: NSObject, ConvoHopWebSocket, URLSessi
         if error != nil { fail() } else { finish(.closed(code: 1006)) }
     }
 
-    func urlSession(
-        _ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
-        newRequest request: URLRequest
-    ) async -> URLRequest? {
-        nil
-    }
+    #if canImport(FoundationNetworking)
+        func urlSession(
+            _ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+            newRequest request: URLRequest, completionHandler: @Sendable @escaping (URLRequest?) -> Void
+        ) {
+            completionHandler(nil)
+        }
+    #else
+        func urlSession(
+            _ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+            newRequest request: URLRequest
+        ) async -> URLRequest? {
+            nil
+        }
+    #endif
 }

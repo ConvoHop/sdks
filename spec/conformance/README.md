@@ -435,7 +435,10 @@ The Swift driver declares only the user role; the reference driver serves
 the backend clients that set up its scenarios. It passes 33 scenarios against
 the mock and skips 31: the 17 that only use backend or management clients,
 and the 14 `webhooks` scenarios, because a client SDK doesn't verify webhooks.
-Its [workflow](../../.github/workflows/swift.yml) fails on any other skip.
+On Linux the driver doesn't declare `realtime`, because Ubuntu's libcurl
+has no WebSocket support. There it passes 24 scenarios and also skips the 9
+realtime ones. Its [workflow](../../.github/workflows/swift.yml) fails on
+any other skip.
 
 Passing against the mock shows that the SDK, driver and scenarios agree on
 the public contract. It does not certify a real deployment; for that, run

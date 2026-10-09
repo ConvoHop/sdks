@@ -57,7 +57,7 @@ public final class URLSessionHTTPClient: ConvoHopHTTPClient, @unchecked Sendable
         configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         configuration.timeoutIntervalForRequest = timeout
         configuration.timeoutIntervalForResource = timeout
-        session = URLSession(configuration: configuration)
+        session = URLSession(configuration: configuration, delegate: RedirectRefusal(), delegateQueue: nil)
         self.timeout = timeout
     }
 
@@ -72,7 +72,7 @@ public final class URLSessionHTTPClient: ConvoHopHTTPClient, @unchecked Sendable
         urlRequest.httpShouldHandleCookies = false
         for (name, value) in request.headers { urlRequest.setValue(value, forHTTPHeaderField: name) }
         urlRequest.httpBody = request.body
-        let (data, response) = try await session.data(for: urlRequest, delegate: RedirectRefusal())
+        let (data, response) = try await session.data(for: urlRequest)
         guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
         var headers: [String: String] = [:]
         for (name, value) in http.allHeaderFields {
@@ -83,11 +83,22 @@ public final class URLSessionHTTPClient: ConvoHopHTTPClient, @unchecked Sendable
 }
 
 /// Refuses every redirect so that credentials never follow a response to another location.
+///
+/// It is the session's delegate, not a task's: FoundationNetworking asks only the session's delegate about redirects.
 private final class RedirectRefusal: NSObject, URLSessionTaskDelegate, Sendable {
-    func urlSession(
-        _ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
-        newRequest request: URLRequest
-    ) async -> URLRequest? {
-        nil
-    }
+    #if canImport(FoundationNetworking)
+        func urlSession(
+            _ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+            newRequest request: URLRequest, completionHandler: @Sendable @escaping (URLRequest?) -> Void
+        ) {
+            completionHandler(nil)
+        }
+    #else
+        func urlSession(
+            _ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+            newRequest request: URLRequest
+        ) async -> URLRequest? {
+            nil
+        }
+    #endif
 }

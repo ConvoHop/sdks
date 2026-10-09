@@ -1,4 +1,3 @@
-import CryptoKit
 import Foundation
 
 /// Durable storage for mutation recovery records and realtime replay cursors.
@@ -34,9 +33,9 @@ public actor InMemoryRecoveryStorage: RecoveryStorage {
 
 /// Recovery storage in files, one file per key, written atomically.
 ///
-/// The directory is excluded from backups because recovery records belong to one device's session. On iOS, files
-/// stay readable after the first unlock following a restart, so background work and call handling can resume
-/// requests while the device is locked.
+/// On Apple platforms, the directory is excluded from backups because recovery records belong to one device's session.
+/// On iOS, files stay readable after the first unlock following a restart, so background work and call handling can
+/// resume requests while the device is locked.
 public actor FileRecoveryStorage: RecoveryStorage {
     public nonisolated let directory: URL
 
@@ -45,10 +44,12 @@ public actor FileRecoveryStorage: RecoveryStorage {
         self.directory = directory
         try FileManager.default.createDirectory(
             at: directory, withIntermediateDirectories: true, attributes: Self.protection)
-        var values = URLResourceValues()
-        values.isExcludedFromBackup = true
-        var excluded = directory
-        try excluded.setResourceValues(values)
+        #if canImport(Darwin)
+            var values = URLResourceValues()
+            values.isExcludedFromBackup = true
+            var excluded = directory
+            try excluded.setResourceValues(values)
+        #endif
     }
 
     /// Storage in `Application Support/<subdirectory>` of the app's container.
@@ -58,15 +59,17 @@ public actor FileRecoveryStorage: RecoveryStorage {
         return try FileRecoveryStorage(directory: base.appendingPathComponent(subdirectory, isDirectory: true))
     }
 
-    /// Storage in an App Group container, shared with your app extensions.
-    public static func appGroup(_ identifier: String, subdirectory: String = "ConvoHop") throws -> FileRecoveryStorage {
-        guard let base = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier) else {
-            throw ConvoHopUsageError("The App Group container \(identifier) is unavailable to this target")
+    #if canImport(Darwin)
+        /// Storage in an App Group container, shared with your app extensions.
+        public static func appGroup(_ identifier: String, subdirectory: String = "ConvoHop") throws -> FileRecoveryStorage {
+            guard let base = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier) else {
+                throw ConvoHopUsageError("The App Group container \(identifier) is unavailable to this target")
+            }
+            return try FileRecoveryStorage(
+                directory: base.appendingPathComponent("Library/Application Support", isDirectory: true)
+                    .appendingPathComponent(subdirectory, isDirectory: true))
         }
-        return try FileRecoveryStorage(
-            directory: base.appendingPathComponent("Library/Application Support", isDirectory: true)
-                .appendingPathComponent(subdirectory, isDirectory: true))
-    }
+    #endif
 
     public func value(forKey key: String) throws -> String? {
         let file = location(of: key)
@@ -88,8 +91,7 @@ public actor FileRecoveryStorage: RecoveryStorage {
     }
 
     private func location(of key: String) -> URL {
-        let digest = SHA256.hash(data: Data(key.utf8)).map { String(format: "%02x", $0) }.joined()
-        return directory.appendingPathComponent(digest + ".json", isDirectory: false)
+        directory.appendingPathComponent(sha256Hex(key) + ".json", isDirectory: false)
     }
 
     #if os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)

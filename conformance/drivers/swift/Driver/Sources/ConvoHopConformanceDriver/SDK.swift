@@ -6,8 +6,14 @@ import Foundation
 let knownRoles = ["user", "backend", "management"]
 let declaredRole = "user"
 
-// webhooks.verify belongs to server SDKs.
-let features: [JSON] = ["realtime", "recovery.storage", "retryAfter"]
+// webhooks.verify belongs to server SDKs. Off Apple platforms, URLSession's WebSocket client needs a libcurl built with
+// WebSocket support, and Ubuntu 24.04's libcurl 8.5, which the Linux jobs use, has none. So the driver claims realtime
+// only on Apple platforms.
+#if canImport(Darwin)
+    let features: [JSON] = ["realtime", "recovery.storage", "retryAfter"]
+#else
+    let features: [JSON] = ["recovery.storage", "retryAfter"]
+#endif
 
 typealias UserOperation = @Sendable (ConvoHopClient, Args) async throws -> JSON
 
