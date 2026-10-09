@@ -1,7 +1,7 @@
 import Foundation
 
 /// Runs `work` on the caller's isolation and converts internal failures into public errors.
-func publicErrors<T>(
+func publicErrors<T: Sendable>(
     isolation: isolated (any Actor)? = #isolation, requestId: String? = nil, _ work: () async throws -> T
 ) async throws -> T {
     do {

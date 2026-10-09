@@ -56,7 +56,7 @@ jobs:
       - name: Check the copied push payload schema and vectors
         run: |
           for file in push-payload.schema.json vectors.json; do
-            cmp "spec/push-payload/$file" "swift/Tests/ConvoHopTests/Resources/push-payload/$file"
+            cmp "spec/push-payload/$file" "swift/Tests/ConvoHopTests/Fixtures/push-payload/$file"
           done
 
   build:

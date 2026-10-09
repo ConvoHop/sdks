@@ -38,7 +38,7 @@ let package = Package(
         .testTarget(
             name: "ConvoHopTests",
             dependencies: ["ConvoHop", "ConvoHopPush", "ConvoHopCalls", "ConvoHopNotificationService"],
-            resources: [.copy("Resources")]
+            resources: [.copy("Fixtures")]
         ),
     ]
 )
