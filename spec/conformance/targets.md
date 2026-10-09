@@ -222,7 +222,7 @@ prints the container's state and the last 40 lines that the stack's
 supervisor wrote, never the platform's own logs, because this repository's
 CI logs are public. It never fails, so it suits an `if: failure()` step.
 
-Eight jobs run the suite this way on an `ubuntu-24.04-arm` runner and upload
+Nine jobs run the suite this way on an `ubuntu-24.04-arm` runner and upload
 the reports: `dev-stack` in the
 [Conformance workflow](../../.github/workflows/conformance.yml), through the
 TypeScript reference driver, and `conformance-dev-stack` in the
@@ -231,11 +231,12 @@ TypeScript reference driver, and `conformance-dev-stack` in the
 clients), [.NET](../../.github/workflows/dotnet.yml) (with the `net10.0`
 build), [Go](../../.github/workflows/go.yml),
 [Android](../../.github/workflows/android.yml),
-[Flutter](../../.github/workflows/flutter.yml) (with the Dart driver) and
-[React Native](../../.github/workflows/react-native.yml) workflows. They run
-only when the repository variable `CONVOHOP_DEV_STACK_IMAGE` names the
-image, and never for pull requests from forks. A new dev-stack job uses the
-same two commands: grant the job `packages: read`, pass
-`CONVOHOP_DEV_STACK_IMAGE` and `GITHUB_TOKEN` to `start`, and run `logs` in
-an `if: failure()` step. Add capabilities to the descriptor as the image
-gains them.
+[Flutter](../../.github/workflows/flutter.yml) (with the Dart driver),
+[React Native](../../.github/workflows/react-native.yml) and
+[Swift](../../.github/workflows/swift.yml) (with the driver built for Linux,
+where it doesn't declare realtime) workflows. They run only when the
+repository variable `CONVOHOP_DEV_STACK_IMAGE` names the image, and never for
+pull requests from forks. A new dev-stack job uses the same two commands:
+grant the job `packages: read`, pass `CONVOHOP_DEV_STACK_IMAGE` and
+`GITHUB_TOKEN` to `start`, and run `logs` in an `if: failure()` step. Add
+capabilities to the descriptor as the image gains them.

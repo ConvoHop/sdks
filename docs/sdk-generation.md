@@ -21,6 +21,7 @@ flowchart LR
   I --> ECS["csharp"]
   I --> EG["go"]
   I --> ED["dart"]
+  I --> ES["swift"]
   I -.-> E5["future language emitters"]
 ```
 
@@ -74,6 +75,7 @@ Don't edit generated files by hand. Change the inputs and run
 | `go` | `go/types_gen.go`, `go/operations_gen.go`, `go/catalog_gen.go` | Types, one method per server operation on `ProjectClient` (Communication) and `ManagementClient` (Management), with a `Pages` method for each cursor-paginated query, and the catalog of operations and scalar rules that the runtime enforces, for the [Go server SDK](../go/README.md) |
 | `android` | `android/core/src/main/kotlin/com/convohop/android/generated/` | Kotlin models with decoders that validate responses, scalar rules, the operation catalog with idempotency and realtime metadata, and the error codes, for the operations a user session can call (layer `client` or `both`), for the [Android client SDK](../android/README.md) |
 | `dart` | `flutter/lib/src/generated/` | Models, response decoders, operation specs and catalogs for the operations a user session can run, for the [Flutter SDK](../flutter/README.md) |
+| `swift` | `swift/Sources/ConvoHop/Generated/` | Models and the operation catalog of the client and shared operations, with the output shapes that responses are checked against, error codes and realtime event types, for the [Swift client SDK](../swift/README.md) |
 
 Both `mcp-tools` and `cli-operations` leave out subscriptions, client-only and
 deprecated operations, and the operations whose results are credentials, such
@@ -219,6 +221,8 @@ The generator tests are in [`tools/sdkgen/test`](../tools/sdkgen/test) and use
 - The `:edge-fixture` project of the
   [Android build](../android/README.md#build-and-test) compiles the
   fixture's generated Kotlin with warnings as errors.
+- The [Swift workflow](../.github/workflows/swift.yml) type-checks the
+  fixture's generated Swift in the Swift 6 language mode.
 
 After an intended change to an emitter, refresh the golden files and review
 the diff before you commit it:

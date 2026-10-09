@@ -108,6 +108,18 @@ flutter test
 See the [Flutter SDK README](flutter/README.md#develop) for the conformance
 driver and the example app.
 
+The [Swift client SDK](swift/README.md) is a Swift package in `swift/`. Build
+and test it on macOS with Xcode 16.4 or later:
+
+```sh
+cd swift
+swift build
+swift test                 # XCTest unit tests on macOS
+```
+
+[Build and test](swift/README.md#build-and-test) explains how to run the tests
+in the iOS Simulator and the conformance scenarios with its driver.
+
 ## Repository layout
 
 | Path | Contents |
@@ -122,6 +134,7 @@ driver and the example app.
 | `android/` | Android client SDK (`com.convohop:convohop-android`, with `convohop-android-core` and `convohop-android-push`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/android/` and compiles the Kotlin generator's edge goldens |
 | `flutter/` | Flutter SDK (`convohop`, Dart): the package, its Android and iOS plugin code, tests and an example app. It isn't an npm workspace |
 | `packages/react-native` | React Native SDK (`@convohop/react-native`), in development: the client SDK's platform on Hermes, push, calls, media, the Codegen specs of its native modules and an example app's source. A private workspace, not in a release yet. Its conformance driver is in `conformance/drivers/react-native/` |
+| `swift/` | Swift client SDK for iOS and macOS (the `ConvoHop` Swift package and its products), a self-contained Swift package. Its conformance driver is a separate package in `conformance/drivers/swift/Driver/` |
 | `packages/cli` | The `convohop` command-line tool (`@convohop/cli`), built on `@convohop/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
 | `packages/mcp` | An MCP server (`@convohop/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
@@ -177,6 +190,7 @@ files from the IR:
 - `go/*_gen.go`
 - `android/core/src/main/kotlin/com/convohop/android/generated/`
 - `flutter/lib/src/generated/`
+- `swift/Sources/ConvoHop/Generated/`
 
 ```sh
 npm run generate:graphql   # regenerate after a schema or annotation change
@@ -318,6 +332,8 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
 - The Android SDK's tests use JUnit 4, with Robolectric in the `push` and
   `convohop` modules. They live in `android/*/src/test/` and run with
   `./gradlew test` in `android/`.
+- The Swift SDK's tests use XCTest. They live in `swift/Tests/` and run with
+  `swift test` in `swift/`.
 
 ## SDK design rules
 

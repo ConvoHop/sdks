@@ -1,0 +1,419 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:convohop:push-payload",
+  "title": "ConvoHop push payload contract",
+  "description": "The root validates a per-recipient notification event. $defs describe the builder options, the push requests built from an event and the shared vector file (#/$defs/vectors). See spec/push-payload/README.md. Strings are sequences of Unicode scalar values: implementations whose strings can hold lone surrogates must reject them, which this schema can't express portably.",
+  "$ref": "#/$defs/notificationEvent",
+  "$defs": {
+    "uuid": {
+      "description": "A lowercase, non-nil UUID in its 36-character hyphenated form.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "not": { "const": "00000000-0000-0000-0000-000000000000" }
+    },
+    "timestamp": {
+      "description": "An RFC 3339 date-time with an uppercase T, and Z or an offset; at most nine fraction digits, a date that exists and no second 60.",
+      "type": "string",
+      "pattern": "^(?:[0-9]{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12][0-9]|3[01])|(?:0[469]|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])$"
+    },
+    "identifier": {
+      "description": "An open enumeration value: an ASCII letter followed by up to 63 ASCII letters, digits or underscores. Consumers accept values they don't know.",
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$"
+    },
+    "preview": {
+      "description": "The start of the message text. Present only when the project opts in to previews and the message has text.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "truncated"],
+      "properties": {
+        "text": { "description": "1 to 512 Unicode code points.", "type": "string", "minLength": 1, "maxLength": 512 },
+        "truncated": { "description": "Whether the message text continues after text.", "type": "boolean" }
+      }
+    },
+    "recipient": {
+      "description": "The principal to notify. Each recipient gets its own event.",
+      "$ref": "#/$defs/uuid"
+    },
+    "sender": {
+      "description": "The principal who sent the message or started the ringing.",
+      "$ref": "#/$defs/uuid"
+    },
+    "connected": {
+      "description": "Whether the recipient had an active realtime connection when the event was produced. A hint for the sending policy: it isn't per device and can change before the push is sent. Builders ignore it.",
+      "type": "boolean"
+    },
+    "alertId": {
+      "description": "One ring of a call for one recipient. A later ring of the same call has a new alertId; a cancellation carries the alertId of the ring that stopped.",
+      "$ref": "#/$defs/uuid"
+    },
+    "expiresAt": {
+      "description": "When the ring stops if nobody answers. A cancellation carries the stopped ring's original deadline.",
+      "$ref": "#/$defs/timestamp"
+    },
+    "mediaProfile": {
+      "description": "AUDIO_ONLY, AUDIO_VIDEO or a later profile.",
+      "$ref": "#/$defs/identifier"
+    },
+    "messageNotification": {
+      "description": "A message for the recipient.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eventId", "eventType", "occurredAt", "projectId", "subjectRef", "recipientId",
+        "conversationId", "senderId", "connected", "messageId"],
+      "properties": {
+        "eventId": { "$ref": "#/$defs/uuid" },
+        "eventType": { "const": "notification.message" },
+        "occurredAt": { "$ref": "#/$defs/timestamp" },
+        "projectId": { "$ref": "#/$defs/uuid" },
+        "subjectRef": {
+          "description": "The message; id equals messageId.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "kind"],
+          "properties": { "id": { "$ref": "#/$defs/uuid" }, "kind": { "const": "message" } }
+        },
+        "recipientId": { "$ref": "#/$defs/recipient" },
+        "conversationId": { "$ref": "#/$defs/uuid" },
+        "senderId": { "$ref": "#/$defs/sender" },
+        "connected": { "$ref": "#/$defs/connected" },
+        "messageId": { "$ref": "#/$defs/uuid" },
+        "preview": { "$ref": "#/$defs/preview" }
+      }
+    },
+    "callNotification": {
+      "description": "An incoming call: a ring for the recipient.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eventId", "eventType", "occurredAt", "projectId", "subjectRef", "recipientId",
+        "conversationId", "senderId", "connected", "liveSessionId", "alertId", "expiresAt", "mediaProfile"],
+      "properties": {
+        "eventId": { "$ref": "#/$defs/uuid" },
+        "eventType": { "const": "notification.call" },
+        "occurredAt": { "$ref": "#/$defs/timestamp" },
+        "projectId": { "$ref": "#/$defs/uuid" },
+        "subjectRef": { "$ref": "#/$defs/liveSessionRef" },
+        "recipientId": { "$ref": "#/$defs/recipient" },
+        "conversationId": { "$ref": "#/$defs/uuid" },
+        "senderId": { "$ref": "#/$defs/sender" },
+        "connected": { "$ref": "#/$defs/connected" },
+        "liveSessionId": { "$ref": "#/$defs/uuid" },
+        "alertId": { "$ref": "#/$defs/alertId" },
+        "expiresAt": { "$ref": "#/$defs/expiresAt" },
+        "mediaProfile": { "$ref": "#/$defs/mediaProfile" }
+      }
+    },
+    "callCancelledNotification": {
+      "description": "A ring that stopped for the recipient.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eventId", "eventType", "occurredAt", "projectId", "subjectRef", "recipientId",
+        "conversationId", "senderId", "connected", "liveSessionId", "alertId", "expiresAt", "mediaProfile", "reason"],
+      "properties": {
+        "eventId": { "$ref": "#/$defs/uuid" },
+        "eventType": { "const": "notification.callCancelled" },
+        "occurredAt": { "$ref": "#/$defs/timestamp" },
+        "projectId": { "$ref": "#/$defs/uuid" },
+        "subjectRef": { "$ref": "#/$defs/liveSessionRef" },
+        "recipientId": { "$ref": "#/$defs/recipient" },
+        "conversationId": { "$ref": "#/$defs/uuid" },
+        "senderId": { "$ref": "#/$defs/sender" },
+        "connected": { "$ref": "#/$defs/connected" },
+        "liveSessionId": { "$ref": "#/$defs/uuid" },
+        "alertId": { "$ref": "#/$defs/alertId" },
+        "expiresAt": { "$ref": "#/$defs/expiresAt" },
+        "mediaProfile": { "$ref": "#/$defs/mediaProfile" },
+        "reason": {
+          "description": "answered or declined (by the recipient, on any device) only stop the ringing; ended (the call ended or stopped ringing first) and expired (nobody answered by expiresAt) are missed calls. Treat a later reason as stop ringing, without a missed call.",
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "liveSessionRef": {
+      "description": "The live session; id equals liveSessionId.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind"],
+      "properties": { "id": { "$ref": "#/$defs/uuid" }, "kind": { "const": "liveSession" } }
+    },
+    "notificationEvent": {
+      "description": "A per-recipient notification event, delivered as a signed webhook. Producers send exactly these fields; consumers ignore fields they don't know.",
+      "oneOf": [
+        { "$ref": "#/$defs/messageNotification" },
+        { "$ref": "#/$defs/callNotification" },
+        { "$ref": "#/$defs/callCancelledNotification" }
+      ]
+    },
+    "options": {
+      "description": "Builder options. The APNs builders require bundleId; the others ignore it. An empty title or body is the same as none.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bundleId": {
+          "description": "The app's bundle ID, the apns-topic of alerts. VoIP pushes use <bundleId>.voip.",
+          "type": "string",
+          "maxLength": 155,
+          "pattern": "^[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)*$"
+        },
+        "title": { "description": "The visible title.", "type": "string" },
+        "body": { "description": "The visible body. Replaces the message preview.", "type": "string" },
+        "preview": { "description": "Whether a message event's preview becomes the body when body is empty. Defaults to true.", "type": "boolean" }
+      }
+    },
+    "data": {
+      "description": "The convohop object every payload carries: the event's fields without subjectRef, connected and preview. APNs VoIP, FCM and Web Push payloads also carry the visible title and body here.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eventId", "eventType", "occurredAt", "projectId", "recipientId", "conversationId", "senderId"],
+      "properties": {
+        "eventId": { "$ref": "#/$defs/uuid" },
+        "eventType": { "enum": ["notification.message", "notification.call", "notification.callCancelled"] },
+        "occurredAt": { "$ref": "#/$defs/timestamp" },
+        "projectId": { "$ref": "#/$defs/uuid" },
+        "recipientId": { "$ref": "#/$defs/uuid" },
+        "conversationId": { "$ref": "#/$defs/uuid" },
+        "senderId": { "$ref": "#/$defs/uuid" },
+        "messageId": { "$ref": "#/$defs/uuid" },
+        "liveSessionId": { "$ref": "#/$defs/uuid" },
+        "alertId": { "$ref": "#/$defs/uuid" },
+        "expiresAt": { "$ref": "#/$defs/timestamp" },
+        "mediaProfile": { "$ref": "#/$defs/identifier" },
+        "reason": { "$ref": "#/$defs/identifier" },
+        "title": { "type": "string", "minLength": 1 },
+        "body": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["eventType"], "properties": { "eventType": { "const": "notification.message" } } },
+          "then": {
+            "required": ["messageId"],
+            "properties": { "liveSessionId": false, "alertId": false, "expiresAt": false, "mediaProfile": false, "reason": false }
+          }
+        },
+        {
+          "if": { "required": ["eventType"], "properties": { "eventType": { "const": "notification.call" } } },
+          "then": {
+            "required": ["liveSessionId", "alertId", "expiresAt", "mediaProfile"],
+            "properties": { "messageId": false, "reason": false }
+          }
+        },
+        {
+          "if": { "required": ["eventType"], "properties": { "eventType": { "const": "notification.callCancelled" } } },
+          "then": {
+            "required": ["liveSessionId", "alertId", "expiresAt", "mediaProfile", "reason"],
+            "properties": { "messageId": false }
+          }
+        }
+      ]
+    },
+    "collapseKey": {
+      "description": "A ring's alertId without hyphens: valid as an APNs collapse ID, an FCM collapse key and a Web Push topic.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "apnsHeaders": {
+      "description": "HTTP/2 request headers for APNs. The sender adds authorization and the device token.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["apns-push-type", "apns-topic", "apns-priority", "apns-expiration"],
+      "properties": {
+        "apns-push-type": { "enum": ["alert", "voip"] },
+        "apns-topic": { "type": "string", "minLength": 1 },
+        "apns-priority": { "enum": ["5", "10"] },
+        "apns-expiration": { "description": "Unix seconds.", "type": "string", "pattern": "^[1-9][0-9]{0,14}$" },
+        "apns-collapse-id": { "$ref": "#/$defs/collapseKey" }
+      }
+    },
+    "apnsAlert": {
+      "description": "An APNs alert for a message, an incoming call or a missed call.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["headers", "payload"],
+      "properties": {
+        "headers": { "$ref": "#/$defs/apnsHeaders", "properties": { "apns-push-type": { "const": "alert" } } },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["aps", "convohop"],
+          "properties": {
+            "aps": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["alert", "sound", "mutable-content", "thread-id"],
+              "properties": {
+                "alert": {
+                  "description": "A body, or a loc-key the app localizes when there is no body.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "title": { "type": "string", "minLength": 1 },
+                    "body": { "type": "string", "minLength": 1 },
+                    "loc-key": { "enum": ["CONVOHOP_MESSAGE", "CONVOHOP_CALL", "CONVOHOP_MISSED_CALL"] }
+                  },
+                  "oneOf": [{ "required": ["body"] }, { "required": ["loc-key"] }]
+                },
+                "sound": { "const": "default" },
+                "mutable-content": { "const": 1 },
+                "thread-id": { "description": "The conversationId.", "$ref": "#/$defs/uuid" }
+              }
+            },
+            "convohop": { "$ref": "#/$defs/data", "properties": { "title": false, "body": false } }
+          }
+        }
+      }
+    },
+    "apnsVoip": {
+      "description": "An APNs VoIP (PushKit) push for an incoming call. iOS requires the app to report every VoIP push to CallKit.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["headers", "payload"],
+      "properties": {
+        "headers": {
+          "$ref": "#/$defs/apnsHeaders",
+          "properties": { "apns-push-type": { "const": "voip" }, "apns-topic": { "pattern": "\\.voip$" }, "apns-collapse-id": false }
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["convohop"],
+          "properties": {
+            "convohop": { "$ref": "#/$defs/data", "properties": { "eventType": { "const": "notification.call" } } }
+          }
+        }
+      }
+    },
+    "fcm": {
+      "description": "An FCM HTTP v1 messages:send message without a target; the sender adds token or fid.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["message"],
+      "properties": {
+        "message": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["data", "android"],
+          "properties": {
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["convohop"],
+              "properties": {
+                "convohop": { "description": "The data object (#/$defs/data) as canonical JSON. Compare it after parsing.", "type": "string" }
+              }
+            },
+            "android": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["priority", "ttl"],
+              "properties": {
+                "priority": { "enum": ["NORMAL", "HIGH"] },
+                "ttl": { "description": "Whole seconds with an s suffix.", "type": "string", "pattern": "^[1-9][0-9]{0,6}s$" },
+                "collapse_key": { "$ref": "#/$defs/collapseKey" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "webPush": {
+      "description": "A Web Push message: RFC 8030 headers and the payload to encrypt (RFC 8291).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["headers", "payload"],
+      "properties": {
+        "headers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["TTL", "Urgency"],
+          "properties": {
+            "TTL": { "description": "Whole seconds.", "type": "string", "pattern": "^[1-9][0-9]{0,6}$" },
+            "Urgency": { "enum": ["very-low", "low", "normal", "high"] },
+            "Topic": { "$ref": "#/$defs/collapseKey" }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["convohop"],
+          "properties": { "convohop": { "$ref": "#/$defs/data" } }
+        }
+      }
+    },
+    "vectorId": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$", "maxLength": 64 },
+    "vector": {
+      "description": "Builder inputs and the expected request of every builder: null when the builder returns none, or the request with its canonical size in bytes.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "event", "options", "nowSeconds", "expected"],
+      "properties": {
+        "id": { "$ref": "#/$defs/vectorId" },
+        "title": { "type": "string", "minLength": 1 },
+        "event": { "$ref": "#/$defs/notificationEvent" },
+        "unknownFields": {
+          "description": "Fields the contract doesn't define for the event's type, such as a later producer might add; event has none of them. Consumers ignore them: adding them to event doesn't change the expected requests, although the result no longer passes the root schema.",
+          "type": "object",
+          "minProperties": 1
+        },
+        "options": { "$ref": "#/$defs/options", "required": ["bundleId"] },
+        "nowSeconds": { "description": "The builders' clock, Unix seconds.", "type": "integer", "minimum": 0 },
+        "expected": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["apnsAlert", "apnsVoip", "fcm", "webPush"],
+          "properties": {
+            "apnsAlert": {
+              "type": ["object", "null"],
+              "additionalProperties": false,
+              "required": ["request", "bytes"],
+              "properties": { "request": { "$ref": "#/$defs/apnsAlert" }, "bytes": { "type": "integer", "minimum": 1, "maximum": 4096 } }
+            },
+            "apnsVoip": {
+              "type": ["object", "null"],
+              "additionalProperties": false,
+              "required": ["request", "bytes"],
+              "properties": { "request": { "$ref": "#/$defs/apnsVoip" }, "bytes": { "type": "integer", "minimum": 1, "maximum": 5120 } }
+            },
+            "fcm": {
+              "type": ["object", "null"],
+              "additionalProperties": false,
+              "required": ["request", "bytes"],
+              "properties": { "request": { "$ref": "#/$defs/fcm" }, "bytes": { "type": "integer", "minimum": 1, "maximum": 4096 } }
+            },
+            "webPush": {
+              "type": ["object", "null"],
+              "additionalProperties": false,
+              "required": ["request", "bytes"],
+              "properties": { "request": { "$ref": "#/$defs/webPush" }, "bytes": { "type": "integer", "minimum": 1, "maximum": 3993 } }
+            }
+          }
+        }
+      }
+    },
+    "invalidEvent": {
+      "description": "A webhook body that isn't a notification event under this contract. Builders reject it and webhook verifiers return it as an unknown event.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "event", "schemaValid"],
+      "properties": {
+        "id": { "$ref": "#/$defs/vectorId" },
+        "title": { "type": "string", "minLength": 1 },
+        "event": { "type": "object" },
+        "schemaValid": {
+          "description": "Whether the event passes the root schema. True only for rules JSON Schema can't express, such as subjectRef.id naming the event's message or live session.",
+          "type": "boolean"
+        }
+      }
+    },
+    "vectors": {
+      "description": "The shared vector file, spec/push-payload/vectors.json.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "vectors", "invalidEvents"],
+      "properties": {
+        "description": { "type": "string" },
+        "vectors": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/vector" } },
+        "invalidEvents": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/invalidEvent" } }
+      }
+    }
+  }
+}

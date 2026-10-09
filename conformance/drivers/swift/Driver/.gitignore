@@ -1,0 +1,6 @@
+.DS_Store
+.build/
+.swiftpm/
+# The driver links only the ConvoHop product, which has no third-party dependencies. swift/Package.resolved pins the
+# SDK's other dependencies.
+Package.resolved

@@ -9,6 +9,7 @@ import ir from "./emitters/ir.mjs";
 import java from "./emitters/java.mjs";
 import mcpTools from "./emitters/mcp-tools.mjs";
 import python from "./emitters/python.mjs";
+import swift from "./emitters/swift.mjs";
 import typescript from "./emitters/typescript.mjs";
 
 /**
@@ -16,7 +17,7 @@ import typescript from "./emitters/typescript.mjs";
  * keyed by emitter name. Register new language emitters here.
  */
 export default {
-  emitters: [ir, graphqlOperations, typescript, docSnippets, java, mcpTools, cliOperations, python, csharp, go, android, dart],
+  emitters: [ir, graphqlOperations, typescript, docSnippets, java, mcpTools, cliOperations, python, csharp, go, android, dart, swift],
   options: {
     typescript: { directory: "packages/core/src/generated" },
     java: { directory: "jvm/convohop-server/src/generated/java", kotlinDirectory: "jvm/convohop-server-kotlin/src/generated/kotlin" },
@@ -24,5 +25,6 @@ export default {
     csharp: { directory: "dotnet/src/ConvoHop/Generated", layers: ["server", "both"] },
     go: { directory: "go", clients: { communication: "ProjectClient", management: "ManagementClient" } },
     dart: { directory: "flutter/lib/src/generated" },
+    swift: { directory: "swift/Sources/ConvoHop/Generated" },
   },
 };
