@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'failures.dart';
 import 'generated/generated.dart';
 import 'http.dart';
 import 'problem.dart';
@@ -16,9 +17,8 @@ const _requestTimeout = Duration(seconds: 12);
 const _maxResponseUnits = 1048576;
 // A UTF-8 body longer than this can't decode to at most _maxResponseUnits UTF-16 units.
 const _maxResponseBytes = _maxResponseUnits * 3;
-final _retryAfterPattern = RegExp(r'^[0-9]{1,10}$');
 const _settled = {'committed', 'accepted'};
-const _resolutionStates = {'pending', 'unknown', 'committed', 'accepted'};
+const _resolutionStates = {'pending', 'unknown', 'rejected', 'committed', 'accepted'};
 
 /// What the SDK durably remembers about one mutation, so that it can retry
 /// the same request or resolve its outcome after a crash or a lost response.
@@ -59,7 +59,8 @@ final class RecoveryState {
   final String lastAttemptClassification;
 
   /// `pending` (never sent), `unknown` (sent, outcome not observed),
-  /// `committed` or `accepted`.
+  /// `rejected` (the authority refused every attempt), `committed` or
+  /// `accepted`.
   final String resolutionState;
   final bool mediaAdmissionAttempted;
 
@@ -148,6 +149,18 @@ final class _Record {
 
   bool get settled => _settled.contains(resolutionState);
 
+  /// Whether the SDK can't send the request again: the authority committed or
+  /// accepted it, rejected every attempt with a last code that isn't
+  /// retryable, or its retry budget (three attempts within 60 seconds) is
+  /// spent. A spent budget makes even a request in doubt final; only a
+  /// read-only resolve can settle it then. Only final records make room in a
+  /// full journal.
+  bool isFinal(int now) =>
+      settled ||
+      attemptCount >= _maxAttempts ||
+      now > retryDeadline ||
+      (resolutionState == 'rejected' && !retryableCode(lastAttemptClassification));
+
   RecoveryState snapshot() => RecoveryState(
     requestId: requestId,
     incarnation: incarnation,
@@ -210,12 +223,45 @@ final class TransportAuthentication {
 /// The transport's session custody, for the client that constructed it.
 TransportAuthentication transportAuthentication(ConvoHopTransport transport) => transport._authentication;
 
+/// Keeps the records of the request IDs that [requestIds] lists, each time the
+/// transport makes room, from being evicted, though they are final: a caller
+/// that may still resend or report a request retains its record. Returns a
+/// function that stops retaining them.
+void Function() retainRecovery(ConvoHopTransport transport, Iterable<String> Function() requestIds) {
+  Iterable<String> retainer() => requestIds();
+  transport._retainers.add(retainer);
+  return () => transport._retainers.remove(retainer);
+}
+
+/// Runs [hook] before each submission of [requestId] within its retry budget:
+/// after the transport has stored the request's recovery record, and before it
+/// counts and sends the attempt, which wait for the hook. A caller that notes
+/// that the request may have been sent does so here, so storage never holds
+/// that note without the record that recovers the request. If the hook
+/// throws, nothing is sent and the submission fails with its error. Returns a
+/// function that removes the hook.
+void Function() beforeSubmitting(ConvoHopTransport transport, String requestId, Future<void> Function() hook) {
+  final hooks = transport._submissionHooks;
+  hooks[requestId] = hook;
+  return () {
+    if (identical(hooks[requestId], hook)) hooks.remove(requestId);
+  };
+}
+
 /// Sends generated operations to `/graphql` and keeps mutation recovery.
 ///
 /// A mutation keeps its request ID, payload, incarnation and retry budget
 /// (three attempts within 60 seconds) across retries and restarts. When the
 /// outcome is unknown, resolve the original request ID; the transport never
 /// treats a lost response as a rejection or a commit.
+///
+/// The recovery journal holds at most 128 records. When a new mutation finds
+/// it full, the transport evicts the final record whose last attempt is
+/// oldest and that no call is using and no caller retains. A record is final
+/// once the SDK can't send its request again: committed, accepted, rejected
+/// with a code that isn't retryable, or out of retry budget. When no record
+/// can go, it refuses the new mutation before sending it, with
+/// `RECOVERY_LIMIT`. An evicted request can still be resolved by its ID.
 final class ConvoHopTransport {
   ConvoHopTransport({
     required String baseUrl,
@@ -244,6 +290,8 @@ final class ConvoHopTransport {
   late final TransportAuthentication _authentication;
   final Map<String, _Record> _states = <String, _Record>{};
   final Map<String, _Active> _active = <String, _Active>{};
+  final Set<Iterable<String> Function()> _retainers = <Iterable<String> Function()>{};
+  final Map<String, Future<void> Function()> _submissionHooks = <String, Future<void> Function()>{};
   Future<void>? _initialization;
   bool _recoveryInitialized = false;
   Future<void>? _writes;
@@ -497,11 +545,7 @@ final class ConvoHopTransport {
         );
       }
       if (state == null) {
-        if (_states.length >= _maxRecoveryRecords) {
-          final evictable = _states.values.where((value) => value.settled && !_active.containsKey(value.requestId));
-          if (evictable.isEmpty) throw StateError('Resolve outstanding mutations before creating more');
-          _states.remove(evictable.first.requestId);
-        }
+        _reserve(requestId);
         final now = _clock();
         state = _Record(
           requestId: requestId,
@@ -531,6 +575,35 @@ final class ConvoHopTransport {
     }
   }
 
+  /// Makes room for one more record by forgetting the final record attempted
+  /// longest ago that no call is using and no caller retains, or refuses the
+  /// new request [requestId] with `RECOVERY_LIMIT`, before anything is sent.
+  void _reserve(String requestId) {
+    if (_states.length < _maxRecoveryRecords) return;
+    // A retainer may release itself while it runs.
+    final retained = <String>{for (final retainer in List.of(_retainers)) ...retainer()};
+    final now = _clock();
+    _Record? forgotten;
+    for (final value in _states.values) {
+      if (value.isFinal(now) &&
+          !_active.containsKey(value.requestId) &&
+          !retained.contains(value.requestId) &&
+          (forgotten == null || value.lastAttemptAt < forgotten.lastAttemptAt)) {
+        forgotten = value;
+      }
+    }
+    if (forgotten == null) {
+      throw ConvoHopProblem(
+        'RECOVERY_LIMIT',
+        requestId,
+        'rejected',
+        409,
+        "Recovery storage already holds $_maxRecoveryRecords requests that aren't final; retry or resolve them first",
+      );
+    }
+    _states.remove(forgotten.requestId);
+  }
+
   Future<_Reply> _submit(_Record state, OperationSpec<Object?> spec, String? credential, {bool retry = false}) async {
     if (state.incarnation != incarnation) {
       throw ConvoHopProblem(
@@ -554,9 +627,12 @@ final class ConvoHopTransport {
         'Retry budget expired or clock changed; resolve this request read-only',
       );
     }
+    await _submissionHooks[state.requestId]?.call();
+    final prior = state.resolutionState;
     state.attemptCount += 1;
     state.lastAttemptAt = now;
-    if (state.resolutionState == 'pending') state.resolutionState = 'unknown';
+    final attempt = state.attemptCount;
+    if (prior == 'pending' || prior == 'rejected') state.resolutionState = 'unknown';
     state.lastAttemptClassification = 'submitted';
     await _persist(state);
     if (state.incarnation != incarnation) {
@@ -598,6 +674,16 @@ final class ConvoHopTransport {
       outcome = status as String;
     } on Object catch (error) {
       state.lastAttemptClassification = error is ConvoHopProblem ? error.code : 'opaqueTransportFailure';
+      // A rejection is the request's outcome only if every attempt was
+      // rejected: those before this one, and this one.
+      if (error is ConvoHopProblem &&
+          error.outcome == 'rejected' &&
+          (prior == 'pending' || prior == 'rejected') &&
+          state.resolutionState == 'unknown' &&
+          state.attemptCount == attempt &&
+          state.lastAttemptAt == now) {
+        state.resolutionState = 'rejected';
+      }
       await _persist(state);
       rethrow;
     }
@@ -755,12 +841,15 @@ final class ConvoHopTransport {
     try {
       decoded = jsonDecode(text);
     } on FormatException {
+      // A proxy's or gateway's error page isn't JSON, but its Retry-After
+      // still bounds the next attempt.
       throw ConvoHopProblem(
         'INVALID_RESPONSE',
         requestId,
         'unknown',
         response.status,
         'Unrecognized authority response',
+        retryAfter: retryDelay(response.headers['retry-after']),
       );
     }
     final ok = response.status >= 200 && response.status < 300;
@@ -776,7 +865,7 @@ final class ConvoHopTransport {
           _string(extensions['outcome']) ?? 'unknown',
           _status(extensions['status']) ?? 503,
           _string(error['message']) ?? 'GraphQL rejected the request',
-          retryAfter: _retryDelay(extensions['retryAfter']) ?? _retryDelay(response.headers['retry-after']),
+          retryAfter: retryDelay(extensions['retryAfter']) ?? retryDelay(response.headers['retry-after']),
         );
       }
       if (!ok) {
@@ -786,7 +875,7 @@ final class ConvoHopTransport {
           _string(graphql['outcome']) ?? 'unknown',
           response.status,
           _string(graphql['message']) ?? 'Authority rejected the request',
-          retryAfter: _retryDelay(graphql['retryAfter']) ?? _retryDelay(response.headers['retry-after']),
+          retryAfter: retryDelay(graphql['retryAfter']) ?? retryDelay(response.headers['retry-after']),
         );
       }
       final value = parseObject(parseObject(graphql['data'])[spec.field]);
@@ -859,12 +948,4 @@ int? _status(Object? value) {
   if (value is int) return value;
   if (value is double && value.isFinite && value == value.truncateToDouble()) return value.toInt();
   return null;
-}
-
-/// Whole-second retry delay from `extensions.retryAfter` or an HTTP
-/// `Retry-After` delta; anything else is ignored.
-int? _retryDelay(Object? value) {
-  if (value is String && _retryAfterPattern.hasMatch(value)) value = int.parse(value);
-  if (value is double && value == value.truncateToDouble()) value = value.toInt();
-  return value is int && value >= 0 && value <= maxSafeInteger ? value : null;
 }

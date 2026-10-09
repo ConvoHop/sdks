@@ -15,7 +15,13 @@ typedef MemoryStorage = MemoryRecoveryStorage;
 typedef DriverError = Map<String, Object?>;
 
 /// The SDK's client surface has no webhook verification: that belongs to server SDKs.
-const features = <String>['realtime', 'recovery.storage', 'retryAfter'];
+const features = <String>[
+  'realtime',
+  'realtime.reconnectPolicy',
+  'recovery.eviction',
+  'recovery.storage',
+  'retryAfter',
+];
 
 const packages = <String, String>{'convohop': convoHopPackageVersion};
 

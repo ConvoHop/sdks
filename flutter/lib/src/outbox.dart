@@ -202,6 +202,10 @@ const _settled = {'committed', 'accepted'};
 // Raised before a request leaves the device, or when its budget is spent.
 const _unsentCodes = {'RESOLUTION_REQUIRED', 'INCARNATION_MISMATCH', 'IDEMPOTENCY_CONFLICT'};
 
+// Rejections that don't refuse the message: it waits for the session to be
+// renewed, or for room in the recovery journal.
+const _waitingCodes = {...sessionCodes, 'RECOVERY_LIMIT'};
+
 /// Sends messages in the background so the UI can show them at once
 /// (optimistic sends), in order within each conversation, across lost
 /// connectivity and app restarts.
@@ -216,6 +220,20 @@ const _unsentCodes = {'RESOLUTION_REQUIRED', 'INCARNATION_MISMATCH', 'IDEMPOTENC
 /// message's first submission, so waiting offline doesn't spend the budget.
 /// Call [flush] when connectivity returns.
 ///
+/// A message stays queued, and is tried again after a backoff that is never
+/// shorter than the authority's [ConvoHopProblem.retryAfter], after an
+/// unknown outcome, a rejection the realtime stream would also retry (such as
+/// `RATE_LIMITED`), `WRONG_REGION`, after which the client routes again
+/// first, `RECOVERY_LIMIT` and an ended session. Any other rejection, such as
+/// `QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, fails it at once.
+///
+/// While the outbox is open, the transport never evicts the recovery record
+/// of a message the outbox may still send or check. A message attempted
+/// before the outbox loaded it may have lost its record meanwhile, evicted
+/// or lost with storage. Unless a read-only check finds it committed, such a
+/// message isn't sent again: it fails with `RESOLUTION_REQUIRED`, as
+/// [OutboxState.unknown] if an attempt may have reached the authority.
+///
 /// With [ConvoHopClient.storage] set and [persist] on, unsent messages,
 /// including their text, are stored under
 /// `convohop.outbox:<project>:<principal>` until sent or discarded.
@@ -224,7 +242,13 @@ final class ConvoHopOutbox {
     : _onError = onError,
       _storage = persist ? client.storage : null,
       _clock = clock,
-      _random = random ?? Random();
+      _random = random ?? Random() {
+    _unretain = retainRecovery(client.transport, () sync* {
+      for (final entry in _entries) {
+        if (entry.state != OutboxState.sent && entry.state != OutboxState.failed) yield entry.requestId;
+      }
+    });
+  }
 
   /// Unsent messages the outbox holds at most. Sending more throws a
   /// [StateError] until some are sent, resent or discarded.
@@ -238,6 +262,7 @@ final class ConvoHopOutbox {
   final RecoveryStorage? _storage;
   final Clock _clock;
   final Random _random;
+  late final void Function() _unretain;
   final List<_Entry> _entries = <_Entry>[];
   final StreamController<OutboxItem> _changes = StreamController<OutboxItem>.broadcast();
   Future<void>? _initialization;
@@ -480,19 +505,30 @@ final class ConvoHopOutbox {
       if (due == null || at < due) due = at;
     }
     _timer?.cancel();
-    _timer = due == null ? null : Timer(Duration(milliseconds: max(0, due - _clock())), _wake);
+    // A wait past the longest timer, after a huge retryAfter, wakes early and re-arms.
+    _timer = due == null ? null : Timer(Duration(milliseconds: min(max(0, due - _clock()), maxTimerDelayMs)), _wake);
   }
 
   Future<void> _attempt(_Entry entry) async {
     entry.state = OutboxState.sending;
     entry.error = null;
     _emit(entry);
+    Object? failure;
     try {
       _sent(entry, (await _deliver(entry)).ack);
     } on Object catch (error) {
+      failure = error;
       _failed(entry, error);
     }
     await _finish(entry);
+    // After `WRONG_REGION`, the next attempt needs the project's current route.
+    if (failure != null && reconnectAction(failure) == ReconnectAction.reroute) {
+      try {
+        await client.initialize();
+      } on Object {
+        // The next attempt fails as well and is handled then.
+      }
+    }
   }
 
   Future<void> _finish(_Entry entry) async {
@@ -516,32 +552,51 @@ final class ConvoHopOutbox {
         throw ConvoHopProblem('INVALID_RESPONSE', entry.requestId, 'unknown', 503, 'Unknown request resolution state');
       }
       final record = _record(entry.requestId);
-      if (record == null) {
-        // The transport stores its record before submitting, so nothing was sent.
-        entry.uncertain = false;
-      } else if (_settled.contains(record.resolutionState)) {
-        return const _Delivered(null);
+      if (record != null && _settled.contains(record.resolutionState)) return const _Delivered(null);
+      if (record == null && entry.attempted) {
+        // The transport stored the request's record before the attempt, so
+        // the record was evicted while no outbox held it, or lost with
+        // storage: the request can't be resent safely.
+        throw ConvoHopProblem(
+          'RESOLUTION_REQUIRED',
+          entry.requestId,
+          'unknown',
+          409,
+          "The message was not observed and its request can't be resent; resend it as a new message if it should still be sent",
+        );
       }
     }
-    final wasUncertain = entry.uncertain;
-    entry.attempted = true;
-    // In doubt until the attempt settles, in case the app stops meanwhile.
-    entry.uncertain = true;
-    entry.attempts += 1;
-    try {
+    final wasAttempted = entry.attempted, wasUncertain = entry.uncertain, attempts = entry.attempts;
+    var submitted = false;
+    // Noted once the transport has stored the request's record, so storage
+    // never says the message may have been sent without the record that
+    // recovers it. In doubt until the attempt settles, in case the app stops
+    // meanwhile.
+    final forget = beforeSubmitting(client.transport, entry.requestId, () async {
+      entry
+        ..attempted = true
+        ..uncertain = true
+        ..attempts = attempts + 1;
       await _save();
+      submitted = true;
+    });
+    try {
       return _Delivered(
         await client.send(entry.conversationId, entry.text, props: entry.props, requestId: entry.requestId),
       );
     } on Object catch (error) {
-      final problem = error is ConvoHopProblem ? error : null;
-      // The transport refused before submitting.
-      final unsent = problem != null
-          ? problem.outcome != 'rejected' && _unsentCodes.contains(problem.code)
-          : (_record(entry.requestId)?.resolutionState ?? 'pending') == 'pending';
-      if (unsent) entry.attempts -= 1;
-      if (unsent || problem?.outcome == 'rejected') entry.uncertain = wasUncertain;
+      if (!submitted) {
+        // The transport refused before submitting, so nothing was sent.
+        entry
+          ..attempted = wasAttempted
+          ..uncertain = wasUncertain
+          ..attempts = attempts;
+      } else if (error is ConvoHopProblem && error.outcome == 'rejected') {
+        entry.uncertain = wasUncertain;
+      }
       rethrow;
+    } finally {
+      forget();
     }
   }
 
@@ -598,16 +653,19 @@ final class ConvoHopOutbox {
       entry.state = OutboxState.queued;
       return;
     }
-    final waits =
+    // An unknown outcome is never a rejection. A rejection keeps the message
+    // when the shared classifier retries it, or while it waits for a session
+    // or for room in the journal.
+    final keeps =
         problem == null ||
         problem.outcome != 'rejected' ||
-        (errorCodes[problem.code]?.retryable ?? false) ||
-        waitingCodes.contains(code);
-    if (!waits || _unsentCodes.contains(code)) {
+        _waitingCodes.contains(code) ||
+        reconnectAction(problem) != ReconnectAction.stop;
+    if (!keeps || _unsentCodes.contains(code)) {
       entry.state = entry.uncertain ? OutboxState.unknown : OutboxState.failed;
       return;
     }
-    if (problem == null || waitingCodes.contains(code)) _report(error);
+    if (problem == null || _waitingCodes.contains(code)) _report(error);
     entry
       ..state = OutboxState.queued
       ..failures += 1
@@ -691,6 +749,7 @@ final class ConvoHopOutbox {
     await _settle(_running);
     // Messages queued, discarded or checked before closing may still be saving.
     await _settle(_writes);
+    _unretain();
   }
 }
 

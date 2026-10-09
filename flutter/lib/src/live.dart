@@ -58,6 +58,28 @@ RecoveryState? _savedState(ConvoHopTransport transport, String requestId) {
   return null;
 }
 
+final _heldReleases = Finalizer<void Function()>((release) => release());
+
+/// Keeps the transport from evicting the records of the requests [handle]
+/// holds, whatever their outcome, for as long as it holds them: it reads a
+/// saved request again, such as an end's original revision or the committed
+/// grant a connection marks as used. Only a weak reference reaches [handle],
+/// so the app can drop it, which stops the retention. [held] must not capture
+/// [handle].
+void _retainHeld<T extends Object>(ConvoHopTransport transport, T handle, Iterable<String?> Function(T) held) {
+  final reference = WeakReference<T>(handle);
+  late final void Function() release;
+  release = retainRecovery(transport, () {
+    final target = reference.target;
+    if (target == null) {
+      release();
+      return const <String>[];
+    }
+    return held(target).whereType<String>();
+  });
+  _heldReleases.attach(handle, release);
+}
+
 /// One conversation: its messages, this user's mute and its calls.
 final class ConversationHandle {
   ConversationHandle._(this.client, this.conversationId);
@@ -297,14 +319,19 @@ final class LiveSessionHandle {
   LiveSessionHandle._(this.client, this.snapshot)
     : liveSessionId = parseId(snapshot.liveSessionId),
       generation = snapshot.generation,
-      conversationId = parseId(snapshot.conversationId);
+      conversationId = parseId(snapshot.conversationId) {
+    _retainHeld(client.transport, this, _held);
+  }
 
-  static Future<LiveSessionHandle> _load(ConvoHopClient client, String liveSessionId) async => LiveSessionHandle._(
-    client,
-    (await client.transport.execute(Operations.communicationLiveSession, client.projectId, {
-      'liveSessionId': parseId(liveSessionId),
-    })).result,
-  );
+  static Iterable<String?> _held(LiveSessionHandle handle) => [handle._endRequest];
+
+  static Future<LiveSessionHandle> _load(ConvoHopClient client, String liveSessionId) async =>
+      LiveSessionHandle._(client, await _fetch(client, liveSessionId));
+
+  static Future<LiveSession> _fetch(ConvoHopClient client, String liveSessionId) async =>
+      (await client.transport.execute(Operations.communicationLiveSession, client.projectId, {
+        'liveSessionId': parseId(liveSessionId),
+      })).result;
 
   final ConvoHopClient client;
   final LiveSession snapshot;
@@ -317,7 +344,7 @@ final class LiveSessionHandle {
 
   /// The call now. Throws when it is no longer the same occurrence.
   Future<LiveSession> get() async {
-    final current = (await _load(client, liveSessionId)).snapshot;
+    final current = await _fetch(client, liveSessionId);
     if (current.generation != generation || current.conversationId != conversationId) {
       throw const FormatException('Live occurrence identity changed');
     }
@@ -403,7 +430,10 @@ final class LiveParticipationHandle {
       'participationId',
       participationId,
     )?.requestId;
+    _retainHeld(live.client.transport, this, _held);
   }
+
+  static Iterable<String?> _held(LiveParticipationHandle handle) => [handle._leaveRequest, handle._attempt?.requestId];
 
   final LiveSessionHandle live;
   final LiveParticipation snapshot;

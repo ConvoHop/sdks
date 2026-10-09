@@ -4,11 +4,21 @@ import 'dart:convert';
 import 'package:convohop/convohop.dart';
 
 final class FakeRealtimeSocket implements RealtimeSocket {
-  FakeRealtimeSocket({this.protocol = 'graphql-transport-ws'});
+  /// A socket whose upgrade fails with [refusal], when given. Like
+  /// `web_socket_channel`, it then fails [ready], and its [stream] reports
+  /// the error and ends without a close code.
+  FakeRealtimeSocket({this.protocol = 'graphql-transport-ws', Object? refusal})
+    : _ready = refusal == null ? Future<void>.value() : Future<void>.error(refusal) {
+    _ready.ignore();
+    if (refusal != null) {
+      _incoming.addError(refusal);
+      unawaited(_incoming.close());
+    }
+  }
 
   final StreamController<Object?> _incoming = StreamController<Object?>();
   final List<Map<String, Object?>> sent = <Map<String, Object?>>[];
-  final Completer<void> _ready = Completer<void>()..complete();
+  final Future<void> _ready;
   bool closedByClient = false;
 
   @override
@@ -18,7 +28,10 @@ final class FakeRealtimeSocket implements RealtimeSocket {
   int? closeCode;
 
   @override
-  Future<void> get ready => _ready.future;
+  String? closeReason;
+
+  @override
+  Future<void> get ready => _ready;
 
   @override
   Stream<Object?> get stream => _incoming.stream;
@@ -32,8 +45,9 @@ final class FakeRealtimeSocket implements RealtimeSocket {
 
   void fail(Object error) => _incoming.addError(error);
 
-  Future<void> serverClose([int? code]) async {
+  Future<void> serverClose([int? code, String? reason]) async {
     closeCode = code;
+    closeReason = reason;
     await _incoming.close();
   }
 
@@ -41,6 +55,7 @@ final class FakeRealtimeSocket implements RealtimeSocket {
   void close([int? code, String? reason]) {
     closedByClient = true;
     closeCode = code;
+    closeReason = reason;
     unawaited(_incoming.close());
   }
 }
@@ -49,9 +64,12 @@ final class FakeRealtimeConnector {
   final List<FakeRealtimeSocket> sockets = <FakeRealtimeSocket>[];
   final List<Uri> urls = <Uri>[];
 
+  /// Upgrade failures for the next connections, in order.
+  final List<Object> refusals = <Object>[];
+
   RealtimeSocket call(Uri url, String protocol) {
     urls.add(url);
-    final socket = FakeRealtimeSocket(protocol: protocol);
+    final socket = FakeRealtimeSocket(protocol: protocol, refusal: refusals.isEmpty ? null : refusals.removeAt(0));
     sockets.add(socket);
     return socket;
   }

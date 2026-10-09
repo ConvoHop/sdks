@@ -475,9 +475,10 @@ rules](../recovery/README.md). Its
 [workflow](../../.github/workflows/android.yml) fails on any other skip.
 
 The Dart driver also declares only the user role and no `webhooks.verify`
-feature. It passes the same 33 scenarios against the mock and skips the
-same 40. Its [workflow](../../.github/workflows/flutter.yml) fails on any
-other skip.
+feature. It declares `recovery.eviction` and `realtime.reconnectPolicy`, so
+it passes 40 scenarios against the mock and skips 33: those that use only
+backend or management clients, and those that verify webhooks. Its
+[workflow](../../.github/workflows/flutter.yml) fails on any other skip.
 
 The React Native driver declares only the user role and no
 `webhooks.verify` feature. It passes 40 scenarios against the mock and
@@ -488,8 +489,8 @@ fails on any other skip. It runs on Node.js, not Hermes, with a fake of the
 native platform module.
 
 The Swift driver also declares only the user role and no `webhooks.verify`
-feature. It passes the same 33 scenarios against the mock and skips the
-same 40. On Linux it doesn't declare `realtime`, because Ubuntu's libcurl
+feature. Like the Android driver, it passes 33 scenarios against the mock
+and skips 40. On Linux it doesn't declare `realtime`, because Ubuntu's libcurl
 has no WebSocket support. There it passes 24 scenarios and also skips the 9
 realtime ones. Its [workflow](../../.github/workflows/swift.yml) fails on
 any other skip.
