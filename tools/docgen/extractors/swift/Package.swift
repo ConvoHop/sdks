@@ -12,7 +12,7 @@ let package = Package(
         .executable(name: "swift-surface", targets: ["swift-surface"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax.git", exact: "601.0.1"),
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", exact: "604.0.0"),
     ],
     targets: [
         .target(
