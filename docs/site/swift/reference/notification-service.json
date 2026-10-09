@@ -1,0 +1,72 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "swift",
+  "package": "ConvoHopNotificationService",
+  "layer": "client",
+  "page": "notification-service.md",
+  "symbols": [
+    {
+      "name": "ConvoHopNotificationService",
+      "kind": "class",
+      "ref": "ConvoHopNotificationService#ConvoHopNotificationService",
+      "anchor": "convohopnotificationservice-class",
+      "signatures": ["public final class ConvoHopNotificationService: @unchecked Sendable"],
+      "docs": "Shows message text in a Notification Service Extension when a push carries only metadata, and hides the text of\npushes for anyone but the signed-in user.\n\nConvoHop's message pushes carry no message text unless the project opts in to previews; the alert then shows the\n`CONVOHOP_MESSAGE` string from your app's `Localizable.strings`. This helper fetches the message with the user's\nsession and replaces the body with its text. It delivers the push unchanged when:\n\n- the push isn't a ConvoHop message, for example a call or a missed call;\n- the push already has a body, because the project opted in to previews or your backend sent text;\n- your factory returns no client, or a client for another project or user;\n- the message was deleted or has no text;\n- anything fails, or the time runs out.\n\nWith a ledger, a push for anyone but the ledger's `ConvoHopNotificationLedger.recipient`, such as one that\nreaches the device after sign-out, is delivered without its text: no title, and the `CONVOHOP_MESSAGE`,\n`CONVOHOP_CALL` or `CONVOHOP_MISSED_CALL` string as the body. So is a ConvoHop push this version can't read,\nunless the recipient is `ConvoHopPushRecipient.any`. Without Apple's notification filtering entitlement, iOS\nshows every alert push, so the helper hides the text instead of dropping the push.\n\n```swift snippet=docs/languages/swift/examples/Sources/Examples/NotificationService.swift#notification-service\nfinal class NotificationService: UNNotificationServiceExtension {\n    private let service = ConvoHopNotificationService(\n        ledger: ConvoHopNotificationLedger(suiteName: \"group.com.example.chat\")\n    ) { notification in\n        // A client for notification.recipientId with its own short-lived session, kept in memory\n        // (for example, fetched from your backend), or nil.\n        try await ExtensionSession.client(for: notification)\n    }\n\n    override func didReceive(\n        _ request: UNNotificationRequest,\n        withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void\n    ) {\n        service.didReceive(request, withContentHandler: contentHandler)\n    }\n\n    override func serviceExtensionTimeWillExpire() {\n        service.serviceExtensionTimeWillExpire()\n    }\n}\n```\n\nCreate the client with in-memory recovery storage, and don't persist its session token.\n\nA missed-call push reaches the extension, not your app. Pass a ledger on the App Group suite that\n`ConvoHopCallsConfiguration.ledgerSuiteName` names, so `ConvoHopCalls` doesn't ring for a VoIP push of that ring that\narrives later, and so the extension sees the recipient your app sets.",
+      "members": [
+        {
+          "name": "maximumBodyLength",
+          "kind": "property",
+          "ref": "ConvoHopNotificationService#ConvoHopNotificationService.maximumBodyLength:static",
+          "anchor": "convohopnotificationservicemaximumbodylength-static-property",
+          "signatures": ["public static let maximumBodyLength = 1024"],
+          "docs": "The most characters of message text the body shows.",
+          "static": true
+        },
+        {
+          "name": "init",
+          "kind": "constructor",
+          "ref": "ConvoHopNotificationService#ConvoHopNotificationService.init",
+          "anchor": "convohopnotificationservice-constructor",
+          "signatures": [
+            "public init(\n    timeout: TimeInterval = 20,\n    ledger: ConvoHopNotificationLedger? = nil,\n    client: @escaping ClientFactory\n)"
+          ],
+          "docs": "Parameters:\n\n- `timeout`: How long to wait for the message, in seconds. iOS gives an extension about 30.\n- `ledger`: Shared with your app through an App Group: where to record rings that stopped, and whose pushes to\n  show.\n- `client`: Creates a client for the push."
+        },
+        {
+          "name": "didReceive",
+          "kind": "method",
+          "ref": "ConvoHopNotificationService#ConvoHopNotificationService.didReceive",
+          "anchor": "convohopnotificationservicedidreceive-method",
+          "signatures": [
+            "public func didReceive(\n    _ request: UNNotificationRequest,\n    withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void\n)"
+          ],
+          "docs": "Call it from `UNNotificationServiceExtension.didReceive(_:withContentHandler:)`. It calls `contentHandler`\nexactly once.",
+          "operations": [
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "serviceExtensionTimeWillExpire",
+          "kind": "method",
+          "ref": "ConvoHopNotificationService#ConvoHopNotificationService.serviceExtensionTimeWillExpire",
+          "anchor": "convohopnotificationserviceserviceextensiontimewillexpire-method",
+          "signatures": ["public func serviceExtensionTimeWillExpire()"],
+          "docs": "Call it from `UNNotificationServiceExtension.serviceExtensionTimeWillExpire()`. It delivers pending pushes\nunchanged."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopNotificationService.ClientFactory",
+      "kind": "type",
+      "ref": "ConvoHopNotificationService#ConvoHopNotificationService.ClientFactory",
+      "anchor": "convohopnotificationserviceclientfactory-type",
+      "signatures": [
+        "public typealias ClientFactory = @Sendable (ConvoHopNotification) async throws -> ConvoHopClient?"
+      ],
+      "docs": "Returns a client for the push's project and recipient, or `nil` to deliver the push unchanged."
+    }
+  ]
+}

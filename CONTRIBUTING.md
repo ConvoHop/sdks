@@ -118,7 +118,8 @@ swift test                 # XCTest unit tests on macOS
 ```
 
 [Build and test](swift/README.md#build-and-test) explains how to run the tests
-in the iOS Simulator and the conformance scenarios with its driver.
+in the iOS Simulator, the conformance scenarios with its driver and the tests
+of the docs projects.
 
 ## Repository layout
 
@@ -342,7 +343,10 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   examples, in `docs/languages/android/examples/src/test/`, which use
   Robolectric and start the conformance mock.
 - The Swift SDK's tests use XCTest. They live in `swift/Tests/` and run with
-  `swift test` in `swift/`.
+  `swift test` in `swift/`. So do the tests of the Swift docs extractor, in
+  `tools/docgen/extractors/swift/Tests/`, which run with `swift test` in
+  `tools/docgen/extractors/swift/`, and of the docs examples, in
+  `docs/languages/swift/examples/Tests/`, which start the conformance mock.
 
 ## SDK design rules
 

@@ -363,3 +363,40 @@ updates:
         update-types:
           - minor
           - patch
+
+  # The Swift docs extractor (tools/docgen/extractors/swift). It only runs in
+  # development and CI. swift-syntax majors follow Swift releases, so they stay
+  # ungrouped and each one is checked against the extractor's tests.
+  - package-ecosystem: swift
+    directory: /tools/docgen/extractors/swift
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      swift-docs-extractor:
+        update-types:
+          - minor
+          - patch
+
+  # Tested Swift docs samples (docs/languages/swift/examples). They build the
+  # SDK from swift/, so their Package.resolved pins the SDK's dependencies.
+  # Those aren't direct dependencies of the samples, so version updates leave
+  # them alone: refresh them with `swift package update` in that directory.
+  - package-ecosystem: swift
+    directory: /docs/languages/swift/examples
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: docs
+      include: scope
+    groups:
+      docs-swift-examples:
+        update-types:
+          - minor
+          - patch

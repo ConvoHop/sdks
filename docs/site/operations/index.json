@@ -71,6 +71,23 @@
             "page": "../go/reference/convohop.md#projectclientcapabilities-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.capabilities",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientcapabilities-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopTypingIndicator.textChanged",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohoptypingindicatortextchanged-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.textChanged",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodeltextchanged-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.capabilities",
@@ -187,6 +204,43 @@
             "page": "../go/reference/convohop.md#projectclientinitialize-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.initialize",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientinitialize-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.refreshSession",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientrefreshsession-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.scheduleSessionRefresh",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientschedulesessionrefresh-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.watch",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.resync",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelresync-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.initialize",
@@ -268,6 +322,43 @@
             "ref": "@convohop/react#useSessionRefresh",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#usesessionrefresh-function"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.initialize",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientinitialize-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.refreshSession",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientrefreshsession-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.scheduleSessionRefresh",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientschedulesessionrefresh-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.watch",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.resync",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelresync-method"
           }
         ],
         "android": [
@@ -483,6 +574,43 @@
             "page": "../go/reference/convohop.md#projectclientgetconversation-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.getConversation",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientgetconversation-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "ConvoHop#ConversationHandle.get",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationhandleget-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopReadReceiptReporter.markRead",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopreadreceiptreportermarkread-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.resync",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelresync-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.markRead",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelmarkread-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.getConversation",
@@ -649,6 +777,13 @@
             "page": "../go/reference/convohop.md#projectclientmemberspages-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.members",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientmembers-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.members",
@@ -803,6 +938,33 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.MessagesPages",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientmessagespages-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.messages",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientmessages-method"
+          },
+          {
+            "ref": "ConvoHop#ConversationMessages.list",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationmessageslist-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.resync",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelresync-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.loadOlder",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelloadolder-method"
           }
         ],
         "android": [
@@ -961,6 +1123,38 @@
             "page": "../go/reference/convohop.md#projectclientgetmessage-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.getMessage",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientgetmessage-method"
+          },
+          {
+            "ref": "ConvoHop#ConversationMessages.get",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationmessagesget-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.resync",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelresync-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.send",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelsend-method"
+          },
+          {
+            "ref": "ConvoHopNotificationService#ConvoHopNotificationService.didReceive",
+            "package": "ConvoHopNotificationService",
+            "page": "../swift/reference/notification-service.md#convohopnotificationservicedidreceive-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.getMessage",
@@ -1067,6 +1261,38 @@
             "ref": "@convohop/react#ConversationView.resync",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#conversationviewresync-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.events",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientevents-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.watch",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "ConvoHop#ConversationStream.reconcile",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationstreamreconcile-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.resync",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelresync-method"
           }
         ],
         "android": [
@@ -1180,6 +1406,23 @@
             "ref": "@convohop/react#ConversationView.resync",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#conversationviewresync-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.receipts",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientreceipts-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.resync",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelresync-method"
           }
         ],
         "android": [
@@ -1318,6 +1561,13 @@
             "page": "../go/reference/convohop.md#projectclientinboxpages-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.inbox",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientinbox-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.inbox",
@@ -1432,6 +1682,13 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.SearchPages",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientsearchpages-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.search",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientsearch-method"
           }
         ],
         "android": [
@@ -1593,6 +1850,83 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.Retry",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientretry-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.resolveRequest",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientresolverequest-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.retryRequest",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientretryrequest-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.recoverPending",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientrecoverpending-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.watch",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopOutbox.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopoutboxstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopOutbox.enqueue",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopoutboxenqueue-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopOutbox.resume",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopoutboxresume-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopOutbox.flush",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopoutboxflush-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopOutbox.resend",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopoutboxresend-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.resync",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelresync-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.send",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelsend-method"
+          },
+          {
+            "ref": "ConvoHop#LiveParticipationHandle.connect",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#liveparticipationhandleconnect-method"
+          },
+          {
+            "ref": "ConvoHop#MediaConnection.reconnect",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#mediaconnectionreconnect-method"
           }
         ],
         "android": [
@@ -1796,6 +2130,7 @@
             "page": "../go/reference/convohop.md#projectclientgetoperation-method"
           }
         ],
+        "swift": [],
         "android": [],
         "flutter": [
           {
@@ -1869,6 +2204,13 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.ConversationMute",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientconversationmute-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConversationMuteSetting.get",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationmutesettingget-method"
           }
         ],
         "android": [
@@ -1965,6 +2307,13 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.CurrentLiveSession",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientcurrentlivesession-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConversationLive.current",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationlivecurrent-method"
           }
         ],
         "android": [
@@ -2076,6 +2425,53 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.LiveSession",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientlivesession-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.liveSession",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientlivesession-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.ringStopReason",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientringstopreason-method"
+          },
+          {
+            "ref": "ConvoHop#LiveSessionHandle.get",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#livesessionhandleget-method"
+          },
+          {
+            "ref": "ConvoHop#LiveSessionHandle.participation",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#livesessionhandleparticipation-method"
+          },
+          {
+            "ref": "ConvoHop#LiveSessionHandle.end",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#livesessionhandleend-method"
+          },
+          {
+            "ref": "ConvoHop#LiveStartOperation.ready",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#livestartoperationready-method"
+          },
+          {
+            "ref": "ConvoHop#LiveParticipationHandle.get",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#liveparticipationhandleget-method"
+          },
+          {
+            "ref": "ConvoHop#LiveParticipationHandle.connect",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#liveparticipationhandleconnect-method"
+          },
+          {
+            "ref": "ConvoHop#MediaConnection.reconnect",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#mediaconnectionreconnect-method"
           }
         ],
         "android": [
@@ -2259,6 +2655,13 @@
             "page": "../go/reference/convohop.md#projectclientlivesessionspages-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConversationLive.history",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationlivehistory-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConversationLive.history",
@@ -2375,6 +2778,13 @@
             "page": "../go/reference/convohop.md#projectclientlivesessionparticipantspages-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#LiveSessionHandle.participants",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#livesessionhandleparticipants-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#LiveSessionHandle.participants",
@@ -2411,6 +2821,13 @@
             "ref": "@convohop/client#ConvoHopClient.liveAlerts.list",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientlivealertslist-property"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.liveAlerts",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientlivealerts-method"
           }
         ],
         "android": [
@@ -2527,6 +2944,23 @@
             "ref": "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessionOperation",
             "package": "github.com/ConvoHop/sdks/go",
             "page": "../go/reference/convohop.md#projectclientlivesessionoperation-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#LiveAction.get",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#liveactionget-method"
+          },
+          {
+            "ref": "ConvoHop#LiveAction.completed",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#liveactioncompleted-method"
+          },
+          {
+            "ref": "ConvoHop#LiveStartOperation.ready",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#livestartoperationready-method"
           }
         ],
         "android": [
@@ -2980,6 +3414,7 @@
             "page": "../go/reference/convohop.md#projectclientrevokesession-method"
           }
         ],
+        "swift": [],
         "android": [],
         "flutter": [
           {
@@ -3122,6 +3557,7 @@
             "page": "../go/reference/convohop.md#projectclientupdateconversation-method"
           }
         ],
+        "swift": [],
         "android": [],
         "flutter": [
           {
@@ -3500,6 +3936,48 @@
             "page": "../go/reference/convohop.md#projectclientsendmessage-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.send",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientsend-method"
+          },
+          {
+            "ref": "ConvoHop#ConversationMessages.send",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationmessagessend-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopOutbox.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopoutboxstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopOutbox.enqueue",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopoutboxenqueue-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopOutbox.resume",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopoutboxresume-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopOutbox.flush",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopoutboxflush-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopOutbox.resend",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopoutboxresend-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.send",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelsend-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.send",
@@ -3651,6 +4129,18 @@
             "page": "../go/reference/convohop.md#projectclienteditmessage-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.edit",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientedit-method"
+          },
+          {
+            "ref": "ConvoHop#ConversationMessages.edit",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationmessagesedit-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.edit",
@@ -3757,6 +4247,18 @@
             "page": "../go/reference/convohop.md#projectclientdeletemessage-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.delete",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientdelete-method"
+          },
+          {
+            "ref": "ConvoHop#ConversationMessages.delete",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationmessagesdelete-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.delete",
@@ -3828,6 +4330,23 @@
             "ref": "@convohop/react#ConversationView.markDelivered",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#conversationviewmarkdelivered-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.reportRead",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientreportread-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopReadReceiptReporter.markRead",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopreadreceiptreportermarkread-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.markRead",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelmarkread-method"
           }
         ],
         "android": [
@@ -3911,6 +4430,38 @@
             "ref": "@convohop/react#TypingControls.stop",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#typingcontrolsstop-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.setTyping",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientsettyping-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopTypingIndicator.textChanged",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohoptypingindicatortextchanged-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopTypingIndicator.stop",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohoptypingindicatorstop-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.send",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelsend-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.textChanged",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodeltextchanged-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.stop",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelstop-method"
           }
         ],
         "android": [
@@ -4091,6 +4642,13 @@
             "page": "../go/reference/convohop.md#projectclientsetconversationmute-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConversationMuteSetting.set",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationmutesettingset-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#ConversationHandle.mute.set",
@@ -4137,6 +4695,23 @@
             "ref": "@convohop/client#ConversationLive.startBroadcast",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationlivestartbroadcast-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConversationLive.startVoice",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationlivestartvoice-method"
+          },
+          {
+            "ref": "ConvoHop#ConversationLive.startVideo",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationlivestartvideo-method"
+          },
+          {
+            "ref": "ConvoHop#ConversationLive.startBroadcast",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#conversationlivestartbroadcast-method"
           }
         ],
         "android": [
@@ -4195,6 +4770,13 @@
             "ref": "@convohop/client#LiveSessionHandle.join",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#livesessionhandlejoin-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#LiveSessionHandle.join",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#livesessionhandlejoin-method"
           }
         ],
         "android": [
@@ -4288,6 +4870,13 @@
             "page": "../go/reference/convohop.md#projectclientalertlivesession-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#LiveSessionAlerts.send",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#livesessionalertssend-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#LiveSessionHandle.alerts.send",
@@ -4324,6 +4913,13 @@
             "ref": "@convohop/client#LiveParticipationHandle.leave",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#liveparticipationhandleleave-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#LiveParticipationHandle.leave",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#liveparticipationhandleleave-method"
           }
         ],
         "android": [
@@ -4417,6 +5013,13 @@
             "page": "../go/reference/convohop.md#projectclientendlivesession-method"
           }
         ],
+        "swift": [
+          {
+            "ref": "ConvoHop#LiveSessionHandle.end",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#livesessionhandleend-method"
+          }
+        ],
         "android": [
           {
             "ref": "com.convohop:convohop-android-core#LiveSessionHandle.end",
@@ -4473,6 +5076,18 @@
             "ref": "@convohop/react#MediaConnectionView.reconnect",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#mediaconnectionviewreconnect-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#LiveParticipationHandle.connect",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#liveparticipationhandleconnect-method"
+          },
+          {
+            "ref": "ConvoHop#MediaConnection.reconnect",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#mediaconnectionreconnect-method"
           }
         ],
         "android": [
@@ -4641,6 +5256,28 @@
             "ref": "@convohop/react#ConversationView.resync",
             "package": "@convohop/react",
             "page": "../typescript/reference/react.md#conversationviewresync-method"
+          }
+        ],
+        "swift": [
+          {
+            "ref": "ConvoHop#ConvoHopClient.watch",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.start",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelstart-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopConversationModel.resync",
+            "package": "ConvoHop",
+            "page": "../swift/reference/convohop.md#convohopconversationmodelresync-method"
           }
         ],
         "android": [

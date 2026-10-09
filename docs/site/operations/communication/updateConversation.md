@@ -104,5 +104,6 @@ mutation CommunicationUpdateConversation($context: RequestContextInput!, $input:
 | [.NET](../../dotnet/reference/operations.md) | [`ServerConversation.UpdateAsync`](../../dotnet/reference/convohop.md#serverconversationupdateasync-method), [`CommunicationApi.UpdateConversationAsync`](../../dotnet/reference/api.md#communicationapiupdateconversationasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.updateConversation`](../../jvm/reference/server.md#communicationapiupdateconversation-method), [`CommunicationSuspendApi.updateConversation`](../../jvm/reference/server-kotlin.md#communicationsuspendapiupdateconversation-method) |
 | [Go](../../go/reference/operations.md) | [`ProjectClient.UpdateConversation`](../../go/reference/convohop.md#projectclientupdateconversation-method) |
+| [Swift](../../swift/reference/operations.md) | Not wrapped by a method |
 | [Android](../../android/reference/operations.md) | Not wrapped by a method |
 | [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.updateConversation`](../../flutter/reference/convohop.md#communicationoperationsupdateconversation-method) |

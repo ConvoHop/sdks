@@ -1,0 +1,226 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "swift",
+  "package": "ConvoHopLiveKit",
+  "layer": "client",
+  "page": "livekit.md",
+  "symbols": [
+    {
+      "name": "LiveKitMediaRoom",
+      "kind": "class",
+      "ref": "ConvoHopLiveKit#LiveKitMediaRoom",
+      "anchor": "livekitmediaroom-class",
+      "signatures": [
+        "public final class LiveKitMediaRoom: NSObject, ConvoHopMediaRoom, @unchecked Sendable",
+        "extension LiveKitMediaRoom: RoomDelegate"
+      ],
+      "docs": "A `ConvoHopMediaRoom` on the official LiveKit Swift SDK.\n\nEach instance connects once. LiveKit resumes a dropped connection itself while its token allows, and reports the\nresume; anything else needs `MediaConnection.reconnect()`, which admits a new connection with a new room.",
+      "members": [
+        {
+          "name": "room",
+          "kind": "property",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoom.room",
+          "anchor": "livekitmediaroomroom-property",
+          "signatures": ["public let room: Room"],
+          "docs": "LiveKit's room, for rendering tracks, reading participants and statistics. Don't connect or disconnect it\nyourself, and don't publish the microphone or camera outside `MediaConnection`."
+        },
+        {
+          "name": "init",
+          "kind": "constructor",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoom.init",
+          "anchor": "livekitmediaroom-constructor",
+          "signatures": [
+            "public init(roomOptions: RoomOptions = RoomOptions(), reconnectAttempts: Int = 3)"
+          ],
+          "docs": "Parameters:\n\n- `roomOptions`: LiveKit's room options, such as capture defaults and adaptive stream.\n- `reconnectAttempts`: How often LiveKit tries to resume a dropped connection before it gives up."
+        },
+        {
+          "name": "connect",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoom.connect",
+          "anchor": "livekitmediaroomconnect-method",
+          "signatures": [
+            "public func connect(\n    url: URL,\n    token: String,\n    iceTransportPolicy: ConvoHopICETransportPolicy,\n    onEvent: @escaping @Sendable (ConvoHopMediaRoomEvent) -> Void\n) async throws -> String"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "setMicrophone",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoom.setMicrophone",
+          "anchor": "livekitmediaroomsetmicrophone-method",
+          "signatures": ["public func setMicrophone(enabled: Bool) async throws"],
+          "docs": ""
+        },
+        {
+          "name": "setCamera",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoom.setCamera",
+          "anchor": "livekitmediaroomsetcamera-method",
+          "signatures": ["public func setCamera(enabled: Bool) async throws"],
+          "docs": ""
+        },
+        {
+          "name": "disconnect",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoom.disconnect",
+          "anchor": "livekitmediaroomdisconnect-method",
+          "signatures": ["public func disconnect() async"],
+          "docs": ""
+        },
+        {
+          "name": "room(_:didStartReconnectWithMode:)",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoom.room(_:didStartReconnectWithMode:)",
+          "anchor": "livekitmediaroomroom_didstartreconnectwithmode-method",
+          "signatures": [
+            "public func room(_ room: Room, didStartReconnectWithMode reconnectMode: ReconnectMode)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "room(_:didCompleteReconnectWithMode:)",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoom.room(_:didCompleteReconnectWithMode:)",
+          "anchor": "livekitmediaroomroom_didcompletereconnectwithmode-method",
+          "signatures": [
+            "public func room(_ room: Room, didCompleteReconnectWithMode reconnectMode: ReconnectMode)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "room(_:didDisconnectWithError:)",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoom.room(_:didDisconnectWithError:)",
+          "anchor": "livekitmediaroomroom_diddisconnectwitherror-method",
+          "signatures": [
+            "public func room(_ room: Room, didDisconnectWithError error: LiveKitError?)"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "MediaConnection",
+      "kind": "class",
+      "ref": "ConvoHopLiveKit#MediaConnection",
+      "anchor": "mediaconnection-class",
+      "signatures": ["extension MediaConnection"],
+      "docs": "What `ConvoHopLiveKit` adds to `MediaConnection`, which `ConvoHop` declares.",
+      "members": [
+        {
+          "name": "liveKitRoom",
+          "kind": "property",
+          "ref": "ConvoHopLiveKit#MediaConnection.liveKitRoom",
+          "anchor": "mediaconnectionlivekitroom-property",
+          "signatures": ["public nonisolated var liveKitRoom: Room? { get }"],
+          "docs": "LiveKit's room, when the connection uses `ConvoHopMediaOptions.liveKit(iceTransportPolicy:roomOptions:reconnectAttempts:onDisconnected:onResuming:onResumed:)`."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopMediaOptions",
+      "kind": "struct",
+      "ref": "ConvoHopLiveKit#ConvoHopMediaOptions",
+      "anchor": "convohopmediaoptions-struct",
+      "signatures": ["extension ConvoHopMediaOptions"],
+      "docs": "What `ConvoHopLiveKit` adds to `ConvoHopMediaOptions`, which `ConvoHop` declares.",
+      "members": [
+        {
+          "name": "liveKit",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#ConvoHopMediaOptions.liveKit:static",
+          "anchor": "convohopmediaoptionslivekit-static-method",
+          "signatures": [
+            "public static func liveKit(\n    iceTransportPolicy: ConvoHopICETransportPolicy = .all,\n    roomOptions: RoomOptions = RoomOptions(),\n    reconnectAttempts: Int = 3,\n    onDisconnected: (@Sendable () -> Void)? = nil,\n    onResuming: (@Sendable () -> Void)? = nil,\n    onResumed: (@Sendable () -> Void)? = nil\n) -> ConvoHopMediaOptions"
+          ],
+          "docs": "Connects native media with the official LiveKit Swift SDK.",
+          "static": true
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopCallKitAudio",
+      "kind": "enum",
+      "ref": "ConvoHopLiveKit#ConvoHopCallKitAudio",
+      "anchor": "convohopcallkitaudio-enum",
+      "signatures": ["public enum ConvoHopCallKitAudio"],
+      "docs": "Starts LiveKit's audio only while CallKit's audio session is active, as LiveKit's CallKit guide requires.\n\nCall `prepare()` at launch, before any room connects. Then call `activate(_:mode:options:)` and\n`deactivate()` from CallKit's audio session callbacks, for example `ConvoHopCallsDelegate`'s.\n\nAvailable on iOS only.",
+      "members": [
+        {
+          "name": "prepare",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#ConvoHopCallKitAudio.prepare:static",
+          "anchor": "convohopcallkitaudioprepare-static-method",
+          "signatures": ["public static func prepare() throws"],
+          "docs": "Stops LiveKit from configuring the audio session and keeps its audio engine off.",
+          "static": true
+        },
+        {
+          "name": "activate",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#ConvoHopCallKitAudio.activate:static",
+          "anchor": "convohopcallkitaudioactivate-static-method",
+          "signatures": [
+            "public static func activate(\n    _ session: AVAudioSession,\n    mode: AVAudioSession.Mode = .voiceChat,\n    options: AVAudioSession.CategoryOptions = [.mixWithOthers]\n) throws"
+          ],
+          "docs": "Configures the session CallKit activated and starts LiveKit's audio engine.",
+          "static": true
+        },
+        {
+          "name": "deactivate",
+          "kind": "method",
+          "ref": "ConvoHopLiveKit#ConvoHopCallKitAudio.deactivate:static",
+          "anchor": "convohopcallkitaudiodeactivate-static-method",
+          "signatures": ["public static func deactivate() throws"],
+          "docs": "Stops LiveKit's audio engine after CallKit deactivated the session.",
+          "static": true
+        }
+      ]
+    },
+    {
+      "name": "LiveKitMediaRoomError",
+      "kind": "enum",
+      "ref": "ConvoHopLiveKit#LiveKitMediaRoomError",
+      "anchor": "livekitmediaroomerror-enum",
+      "signatures": [
+        "public enum LiveKitMediaRoomError: Error, Sendable, Equatable, CustomStringConvertible, LocalizedError"
+      ],
+      "docs": "A `LiveKitMediaRoom` that can't connect.",
+      "members": [
+        {
+          "name": "alreadyConnected",
+          "kind": "case",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoomError.alreadyConnected",
+          "anchor": "livekitmediaroomerroralreadyconnected-case",
+          "signatures": ["case alreadyConnected"],
+          "docs": "The room already connected once. Each connection needs a new room."
+        },
+        {
+          "name": "missingParticipantId",
+          "kind": "case",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoomError.missingParticipantId",
+          "anchor": "livekitmediaroomerrormissingparticipantid-case",
+          "signatures": ["case missingParticipantId"],
+          "docs": "LiveKit connected without a participant ID."
+        },
+        {
+          "name": "description",
+          "kind": "property",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoomError.description",
+          "anchor": "livekitmediaroomerrordescription-property",
+          "signatures": ["public var description: String { get }"],
+          "docs": ""
+        },
+        {
+          "name": "errorDescription",
+          "kind": "property",
+          "ref": "ConvoHopLiveKit#LiveKitMediaRoomError.errorDescription",
+          "anchor": "livekitmediaroomerrorerrordescription-property",
+          "signatures": ["public var errorDescription: String? { get }"],
+          "docs": ""
+        }
+      ]
+    }
+  ]
+}
