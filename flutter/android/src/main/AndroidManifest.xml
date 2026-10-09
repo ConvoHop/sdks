@@ -1,0 +1,23 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Notifications, from Android 13. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Full-screen incoming calls. Apps that don't ring can remove it with
+         tools:node="remove"; Google Play limits it to calling apps. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application>
+        <!-- Receives FCM messages. An app with another FCM service extends
+             this one, or removes it and calls ConvoHopMessaging. -->
+        <service
+            android:name="com.convohop.flutter.ConvoHopMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <receiver
+            android:name="com.convohop.flutter.ConvoHopCallReceiver"
+            android:exported="false" />
+    </application>
+</manifest>

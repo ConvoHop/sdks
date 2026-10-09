@@ -1,0 +1,44 @@
+group = "com.convohop.flutter"
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.1.0")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: "com.android.library"
+
+android {
+    namespace = "com.convohop.flutter"
+
+    compileSdk = 36
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    defaultConfig {
+        minSdk = 24
+    }
+}
+
+dependencies {
+    implementation("androidx.core:core:1.13.1")
+    // 25.1.0 added FCM registration by Firebase installation ID; 25.1.2 (BoM 34.18.0) fixed
+    // FID_ALREADY_USED. Apps on a later BoM get its versions.
+    implementation("com.google.firebase:firebase-installations:19.1.1")
+    implementation("com.google.firebase:firebase-messaging:25.1.2")
+}

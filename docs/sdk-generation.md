@@ -20,6 +20,7 @@ flowchart LR
   I --> EC["cli-operations"]
   I --> ECS["csharp"]
   I --> EG["go"]
+  I --> ED["dart"]
   I -.-> E5["future language emitters"]
 ```
 
@@ -72,6 +73,7 @@ Don't edit generated files by hand. Change the inputs and run
 | `csharp` | `dotnet/src/ConvoHop/Generated/` | Models with a System.Text.Json source-generation context, the operation catalog, the schema metadata that validates responses, and one API class per plane with `IAsyncEnumerable` pages methods for cursor-paginated queries, for the [.NET server SDK](../dotnet/README.md). It covers the server layers and leaves out subscriptions |
 | `go` | `go/types_gen.go`, `go/operations_gen.go`, `go/catalog_gen.go` | Types, one method per server operation on `ProjectClient` (Communication) and `ManagementClient` (Management), with a `Pages` method for each cursor-paginated query, and the catalog of operations and scalar rules that the runtime enforces, for the [Go server SDK](../go/README.md) |
 | `android` | `android/core/src/main/kotlin/com/convohop/android/generated/` | Kotlin models with decoders that validate responses, scalar rules, the operation catalog with idempotency and realtime metadata, and the error codes, for the operations a user session can call (layer `client` or `both`), for the [Android client SDK](../android/README.md) |
+| `dart` | `flutter/lib/src/generated/` | Models, response decoders, operation specs and catalogs for the operations a user session can run, for the [Flutter SDK](../flutter/README.md) |
 
 Both `mcp-tools` and `cli-operations` leave out subscriptions, client-only and
 deprecated operations, and the operations whose results are credentials, such
@@ -199,7 +201,9 @@ The generator tests are in [`tools/sdkgen/test`](../tools/sdkgen/test) and use
   Tests compare it byte for byte.
 - Other tests check that the committed generated files in this repository
   match a fresh run, and compile the fixture's generated TypeScript with
-  strict `tsc`.
+  strict `tsc`. With `SDKGEN_DART=1` and the Dart SDK on the `PATH`, they
+  also analyze the fixture's generated Dart and run checks against it. The
+  [Flutter workflow](../.github/workflows/flutter.yml) does this.
 - The `sdkgen-edge` project of the [JVM build](../jvm/README.md) compiles the
   fixture's generated Java and Kotlin against the JVM runtime with warnings
   as errors.

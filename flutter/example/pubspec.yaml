@@ -1,0 +1,22 @@
+name: convohop_example
+description: A ConvoHop chat and calling example for Flutter on Android and iOS.
+publish_to: none
+version: 0.0.0
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
+
+dependencies:
+  convohop:
+    path: ../
+  flutter:
+    sdk: flutter
+  http: ^1.6.0
+  path_provider: ^2.1.5
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

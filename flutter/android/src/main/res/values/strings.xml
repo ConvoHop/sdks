@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Text for ConvoHop notifications without a title or body, which is the
+     default because message previews are off. Override or translate these
+     in your app's resources. -->
+<resources>
+    <string name="convohop_channel_messages">Messages</string>
+    <string name="convohop_channel_calls">Incoming calls</string>
+    <string name="convohop_channel_missed_calls">Missed calls</string>
+    <string name="convohop_message_title">New message</string>
+    <string name="convohop_call_title">Incoming call</string>
+    <string name="convohop_call_voice">Voice call</string>
+    <string name="convohop_call_video">Video call</string>
+    <string name="convohop_missed_call_title">Missed call</string>
+    <string name="convohop_call_answer">Answer</string>
+    <string name="convohop_call_decline">Decline</string>
+</resources>

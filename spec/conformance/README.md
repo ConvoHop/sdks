@@ -40,6 +40,7 @@ flowchart LR
 | [`conformance/drivers/dotnet/`](../../conformance/drivers/dotnet) | The driver for the [.NET server SDK](../../dotnet/README.md). |
 | [`conformance/drivers/go/`](../../conformance/drivers/go) | The driver for the [Go server SDK](../../go/README.md). |
 | [`conformance/drivers/android/`](../../conformance/drivers/android) | The driver for the [Android client SDK](../../android/README.md). |
+| [`conformance/drivers/dart/`](../../conformance/drivers/dart) | The driver for the [Flutter SDK](../../flutter/README.md). |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |
 | [`conformance/targets/`](../../conformance/targets) | Descriptors for real targets, such as the dev-stack image. |
 | [`conformance/test/`](../../conformance/test) | `node:test` tests for the harness itself. |
@@ -411,6 +412,13 @@ regression. Its `dev-stack` job is described under
 that CI runs, so it also runs `npm run conformance -- --strict` before it
 packs a release; `npm run check:release` enforces that.
 
+The `conformance` job of the [Flutter workflow](../../.github/workflows/flutter.yml)
+builds the [Dart driver](../../conformance/drivers/dart) and runs the
+scenarios with it against the mock, without `--strict`, and uploads the
+reports as the `conformance-reports-dart-mock` artifact. The Dart driver
+declares only the user role, so the reference driver provides the other
+roles, and scenarios that need what it doesn't declare are skipped.
+
 ### Current results
 
 The TypeScript reference driver passes all 64 scenarios against the mock,
@@ -435,6 +443,11 @@ The Android driver declares only the user role and no `webhooks.verify`
 feature. It passes 33 scenarios against the mock and skips 31: those that
 use only backend or management clients, and those that verify webhooks. Its
 [workflow](../../.github/workflows/android.yml) fails on any other skip.
+
+The Dart driver also declares only the user role and no `webhooks.verify`
+feature. It passes the same 33 scenarios against the mock and skips the
+same 31. Its [workflow](../../.github/workflows/flutter.yml) fails on any
+other skip.
 
 Passing against the mock shows that the SDK, driver and scenarios agree on
 the public contract. It does not certify a real deployment; for that, run

@@ -39,6 +39,7 @@ planned languages, push notifications, package names, versioning and support.
 | [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, a conversation store with an offline outbox, typing and read receipts, push in a Web Push service worker, and calls through `livekit-client` with explicit connect and capture |
 | [React hooks](packages/react/README.md) | `@convohop/react`, not in a release yet | React 18 or later, with `@convohop/client` | Conversations with optimistic, offline-safe sends, typing, session renewal, live sessions and browser media |
 | [Android client](android/README.md) | `com.convohop:convohop-android` | Android 7.0 (API 24) or later. Apps compile against API 36. | Chat, history and search, realtime updates with replay, session renewal, a SQLite store with an offline outbox and optimistic sends, typing and read receipts, FCM push with incoming calls through Telecom, and calls through the LiveKit Android SDK with explicit capture |
+| [Flutter](flutter/README.md) | `convohop` (Dart) | Flutter 3.38 or later, on Android 7.0 (API level 24) or later and iOS 13 or later | Session refresh, chat, history and search, realtime updates with resume, a local store and an offline outbox with optimistic sends, typing, read receipts and recent activity, calls through `livekit_client`, push registration, notification handling and the system incoming-call UI |
 | [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and push payload builders |
 | [Java and Kotlin server](jvm/README.md) | `com.convohop:convohop-server`, `com.convohop:convohop-server-kotlin` | Java 11 or later. Kotlin coroutine extensions are optional. | User identities and sessions, conversations, membership and messages for your backend, generated APIs with paginators for every server operation, backend key issuance, webhook verification, and push payload builders |
 | [.NET server](dotnet/README.md) | `ConvoHop` | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Organization and project management, backend key issuance, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, generated APIs for every server operation with async page streams, webhook verification, and push payload builders |
@@ -58,11 +59,15 @@ These names match the planned registry names under
 package registry yet. [Install a release](#install-a-release) or
 [build from source](#build-from-source).
 
+The Flutter package isn't part of the releases yet. Add it as a Git
+dependency pinned to a commit, as its [README](flutter/README.md#install)
+shows.
+
 ### Planned
 
 | Layer | Languages and platforms |
 | --- | --- |
-| Client | iOS and macOS (Swift), React Native, Flutter |
+| Client | iOS and macOS (Swift), React Native |
 
 ## Tools
 
@@ -171,6 +176,13 @@ The Android SDK has its own Gradle build and
 [Android workflow](.github/workflows/android.yml). See
 [Build and test](android/README.md#build-and-test).
 
+The Flutter SDK in [`flutter/`](flutter) needs Flutter 3.38 or later; see
+its [README](flutter/README.md#develop). The
+[Flutter workflow](.github/workflows/flutter.yml) analyzes and tests it on
+Flutter 3.38 and the current stable release, checks its generated code, runs
+the conformance scenarios through the Dart driver against the mock and builds
+the example app for Android and iOS. It doesn't publish anything either.
+
 ## API contract
 
 - The Communication API and the Management API have separate origins. Each
@@ -234,6 +246,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
   notifications, package names, versioning and support
 - [Client SDK](packages/client/README.md)
 - [Android client SDK](android/README.md)
+- [Flutter SDK](flutter/README.md)
 - [Node.js server SDK](packages/server/README.md)
 - [Java and Kotlin server SDK](jvm/README.md)
 - [.NET server SDK](dotnet/README.md)
