@@ -27,8 +27,9 @@ import UserNotifications
 ///     private let service = ConvoHopNotificationService(
 ///         ledger: ConvoHopNotificationLedger(suiteName: "group.com.example.chat")
 ///     ) { notification in
-///         // A client for notification.recipientId with a short-lived session from your App Group, or nil.
-///         try await SharedSession.client(for: notification)
+///         // A client for notification.recipientId with its own short-lived session, kept in memory
+///         // (for example, fetched from your backend), or nil.
+///         try await ExtensionSession.client(for: notification)
 ///     }
 ///
 ///     override func didReceive(
