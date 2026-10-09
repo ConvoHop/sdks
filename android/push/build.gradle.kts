@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 // Push and incoming-call handling with no networking, LiveKit or coroutines,
 // so wrappers such as the React Native SDK can ship it on its own. Its
 // floors are lower than the rest of the build: Kotlin 1.9 compilers can read
-// it (language and API version 2.0, stdlib 2.0.21) and compileSdk 35 apps
-// can consume it.
+// it (language and API version 2.0, stdlib 2.0.21) and apps that compile
+// against API 34 can consume it (minCompileSdk below).
 plugins {
     alias(libs.plugins.android.library)
     `maven-publish`
@@ -46,8 +46,6 @@ android {
 
     lint {
         abortOnError = true
-        textReport = true
-        textOutput = file("stdout")
     }
 
     publishing {

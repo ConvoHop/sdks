@@ -178,6 +178,33 @@ updates:
     directory: /android
     schedule:
       interval: weekly
+    # Each update below would raise a consumer floor in android/README.md or
+    # change the public API, so it needs its own change with the README.
+    ignore:
+      # Kotlin 2.3 deprecates language version 2.0, which
+      # convohop-android-push compiles for with warnings as errors. The other
+      # modules don't pin a language version, so a newer compiler also raises
+      # the Kotlin that apps need.
+      - dependency-name: "org.jetbrains.kotlin.*"
+        versions: [">= 2.3.0"]
+      - dependency-name: "org.jetbrains.kotlin:*"
+        versions: [">= 2.3.0"]
+      # kotlinx-serialization 1.10 and later are built with Kotlin 2.3 and
+      # bring kotlin-stdlib 2.3 to apps, so they move with Kotlin.
+      - dependency-name: "org.jetbrains.kotlinx:kotlinx-serialization-*"
+        versions: [">= 1.10.0"]
+      # androidx.core 1.15 and later need compileSdk 35 or later, and apps
+      # that use only convohop-android-push compile against API 34.
+      - dependency-name: "androidx.core:core"
+        versions: [">= 1.15.0"]
+      # OkHttpEngine and OkHttpRealtimeConnector take an OkHttpClient, so
+      # OkHttp 5 changes the public API. okhttp-android 5.5 also needs
+      # compileSdk 37.
+      - dependency-name: "com.squareup.okhttp3:*"
+        update-types: ["version-update:semver-major"]
+      # The SDK compiles and tests against the oldest firebase-messaging that
+      # apps may supply (see android/gradle/libs.versions.toml).
+      - dependency-name: "com.google.firebase:firebase-messaging"
     cooldown:
       default-days: 7
     # Gradle has no development dependency type, so test-only updates get
