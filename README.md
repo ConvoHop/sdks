@@ -39,6 +39,7 @@ planned languages, push notifications, package names, versioning and support.
 | [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native isn't verified yet. | Chat, history and search, realtime updates with replay, and calls with explicit connect and capture |
 | [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and push payload builders |
 | [Java and Kotlin server](jvm/README.md) | `com.convohop:convohop-server`, `com.convohop:convohop-server-kotlin` | Java 11 or later. Kotlin coroutine extensions are optional. | User identities and sessions, conversations, membership and messages for your backend, generated APIs with paginators for every server operation, backend key issuance, webhook verification, and push payload builders |
+| [iOS and macOS client](swift/README.md) | Swift package products `ConvoHop`, `ConvoHopLiveKit`, `ConvoHopCalls`, `ConvoHopPush` and `ConvoHopNotificationService` | iOS 15 or macOS 12 or later, Swift 6.1 or later | Chat and history, realtime updates with replay, a local cache, an offline outbox and a conversation model, typing and read receipts, calls with LiveKit and CallKit, push registration and routing, and a Notification Service Extension helper |
 
 The TypeScript packages depend on [`@convohop/core`](packages/core/README.md), which
 holds the generated GraphQL types and operations and the shared transport.
@@ -58,7 +59,7 @@ package registry yet. [Install a release](#install-a-release) or
 | Layer | Languages and platforms |
 | --- | --- |
 | Server | Python, .NET, Go |
-| Client | React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter |
+| Client | React hooks, Android (Kotlin), React Native, Flutter |
 
 ## Tools
 
@@ -147,6 +148,10 @@ The Java and Kotlin SDK has its own Gradle build and
 [JVM workflow](.github/workflows/jvm.yml). See
 [Build and test](jvm/README.md#build-and-test).
 
+The Swift SDK has its own Swift package and
+[Swift workflow](.github/workflows/swift.yml), which runs on GitHub-hosted
+macOS runners. See [Build and test](swift/README.md#build-and-test).
+
 ## API contract
 
 - The Communication API and the Management API have separate origins. Each
@@ -211,6 +216,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - [Client SDK](packages/client/README.md)
 - [Node.js server SDK](packages/server/README.md)
 - [Java and Kotlin server SDK](jvm/README.md)
+- [Swift client SDK for iOS and macOS](swift/README.md)
 - [Shared core package](packages/core/README.md)
 - [CLI](packages/cli/README.md) and [MCP server](packages/mcp/README.md)
 - [Releasing](RELEASING.md): how releases happen, and how to install and

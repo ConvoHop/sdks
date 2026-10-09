@@ -16,7 +16,7 @@ work, what the packages are called, and how they're versioned and supported.
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
 | Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md) |
-| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md) |
+| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); iOS and macOS: [`ConvoHop`](../swift/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
 
@@ -39,7 +39,7 @@ ever hold a credential that's limited to one user and expires quickly.
 | Scope | Your whole project, limited by the key's permissions | What that one user is allowed to see and do |
 | Realtime | Signed webhooks | WebSocket subscriptions with reconnect and replay |
 | Voice and video | Call control and call reads, no media | Media through the platform's official LiveKit SDK |
-| Local state | None per user. Optional recovery storage lets an interrupted request be resolved or retried safely. | Optional recovery storage today. A reactive store, offline cache and optimistic sends are planned. |
+| Local state | None per user. Optional recovery storage lets an interrupted request be resolved or retried safely. | Optional recovery storage. The Swift SDK adds a local cache, an offline outbox with optimistic sends and an observable conversation model, which are planned for the other client SDKs. |
 
 ### Server SDKs
 
@@ -136,7 +136,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 | --- | --- | --- | --- |
 | Web | TypeScript | LiveKit JavaScript SDK | Source available |
 | React | Hooks on top of the Web SDK | Same as Web | Planned |
-| iOS and macOS | Swift | LiveKit Swift SDK | Planned |
+| iOS and macOS | Swift | LiveKit Swift SDK | Source available |
 | Android | Kotlin | LiveKit Android SDK | Planned |
 | React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | Planned |
 | Flutter | Dart | LiveKit Flutter SDK | Planned |
@@ -175,8 +175,9 @@ types in `@convohop/core` and one reference snippet per operation from
 [conformance suite](../spec/conformance/README.md) runs its scenarios through
 a TypeScript reference driver against a deterministic mock, and can target a
 real deployment. The [JVM server SDK](../jvm/README.md) adds a Java and
-Kotlin generator and its own conformance driver. Generators for the other
-languages are in development.
+Kotlin generator and its own conformance driver, and the
+[Swift client SDK](../swift/README.md) adds a Swift generator and driver.
+Generators for the other languages are in development.
 The same IR generates the operation catalog of the `convohop` command-line
 tool ([`packages/cli`](../packages/cli/README.md)) and the tools of an MCP
 server for AI agents ([`packages/mcp`](../packages/mcp/README.md)). Neither is
@@ -257,8 +258,9 @@ How it works:
 > APNs, FCM and Web Push requests from notification events, with its
 > [push payload builders](../packages/server/README.md#push-payloads). The
 > [push payload contract](../spec/push-payload/README.md) defines the
-> events, the requests and shared vectors for every server SDK. The other
-> helpers in this table are planned.
+> events, the requests and shared vectors for every server SDK. The
+> [Swift SDK](../swift/README.md#push-notifications) has the iOS and macOS
+> helpers. The other helpers in this table are planned.
 
 The SDK helpers are all optional:
 
@@ -316,7 +318,9 @@ Notes:
   are case-sensitive.
 - **Swift Package Manager.** The Swift package needs `Package.swift` at the
   root of its repository, so it's distributed from a dedicated repository
-  that will be created when the SDK is ready. We don't plan to publish to
+  that will be created when the SDK is ready. Until then, its source is in
+  [`swift/`](../swift/README.md), and apps add it as a local package. We
+  don't plan to publish to
   CocoaPods, because its trunk is scheduled to become read-only in December
   2026.
 - **Maven Central and pub.dev.** These names need namespace ownership
@@ -399,7 +403,7 @@ release.
 | Go | The two most recent Go releases, matching Go's own support policy |
 | Web | The current and previous major versions of Chrome, Edge, Firefox and Safari. Calls need WebRTC. |
 | React | 18 and later |
-| iOS and macOS | iOS 15 and later, macOS 12 and later |
+| iOS and macOS | iOS 15 and later, macOS 12 and later. Builds with Xcode 16.4 (Swift 6.1) and later. |
 | Android | API level 24 (Android 7.0) and later |
 | React Native | 0.76 and later, with the New Architecture |
 | Flutter | The current stable release |
@@ -407,6 +411,8 @@ release.
 Today, CI verifies the TypeScript packages on Node.js 22 and 24, and the Java
 and Kotlin SDK on Java 11, 17, 21 and 25. Each other row becomes a CI
 requirement when that SDK lands.
+CI builds and tests the Swift SDK on macOS and in the iOS Simulator with
+Xcode 16.4 and 26.6. It doesn't test on iOS 15 or macOS 12.
 
 ## Releases and distribution
 

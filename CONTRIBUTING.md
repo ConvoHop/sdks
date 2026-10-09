@@ -48,6 +48,18 @@ cd jvm
 [Build and test](jvm/README.md#build-and-test) explains how to run the tests
 on other JDKs and how to run the conformance scenarios with its driver.
 
+The [Swift client SDK](swift/README.md) is a Swift package in `swift/`. Build
+and test it on macOS with Xcode 16.4 or later:
+
+```sh
+cd swift
+swift build
+swift test                 # XCTest unit tests on macOS
+```
+
+[Build and test](swift/README.md#build-and-test) explains how to run the tests
+in the iOS Simulator and the conformance scenarios with its driver.
+
 ## Repository layout
 
 | Path | Contents |
@@ -56,6 +68,7 @@ on other JDKs and how to run the conformance scenarios with its driver.
 | `packages/client` | Client SDK (`@convohop/client`) for browsers and React Native, with realtime and media |
 | `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
 | `jvm/` | Java and Kotlin server SDK (`com.convohop:convohop-server` and `com.convohop:convohop-server-kotlin`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/jvm/` |
+| `swift/` | Swift client SDK for iOS and macOS (the `ConvoHop` Swift package and its products), a self-contained Swift package. Its conformance driver is a separate package in `conformance/drivers/swift/Driver/` |
 | `packages/cli` | The `convohop` command-line tool (`@convohop/cli`), built on `@convohop/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
 | `packages/mcp` | An MCP server (`@convohop/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
 | `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
@@ -106,6 +119,7 @@ files from the IR:
 - `docs/snippets/`
 - `jvm/convohop-server/src/generated/java/` and
   `jvm/convohop-server-kotlin/src/generated/kotlin/`
+- `swift/Sources/ConvoHop/Generated/`
 
 ```sh
 npm run generate:graphql   # regenerate after a schema or annotation change
@@ -222,6 +236,8 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   [Tested code](docs/docs-pipeline.md#tested-code) describes.
 - The Java and Kotlin SDK's tests use JUnit 5. They live in
   `jvm/*/src/test/` and run with `./gradlew test` in `jvm/`.
+- The Swift SDK's tests use XCTest. They live in `swift/Tests/` and run with
+  `swift test` in `swift/`.
 
 ## SDK design rules
 
