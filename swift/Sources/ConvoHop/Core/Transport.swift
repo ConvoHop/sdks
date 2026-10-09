@@ -366,8 +366,10 @@ actor ConvoHopTransport {
                     code: .invalidResponse, requestId: requestId, outcome: .unknown, status: 503,
                     message: "Request resolution identity changed")
             }
-            if let state = target?.stringValue.flatMap({ record($0) }) {
-                if state.projectId != projectId || state.incarnation != self.incarnation {
+            if let lookedUp = target?.stringValue, let state = record(lookedUp) {
+                let sameProject = state.projectId == projectId
+                let sameIncarnation = state.incarnation == self.incarnation
+                if !sameProject || !sameIncarnation {
                     throw ConvoHopError(
                         code: .resolutionRequired, requestId: requestId, outcome: .unknown, status: 409,
                         message: "Resolve within the original project and incarnation")
