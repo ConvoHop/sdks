@@ -452,8 +452,9 @@ ledger's `recipient`, such as one that arrives after sign-out. The push shows
 no title, and the `CONVOHOP_MESSAGE`, `CONVOHOP_CALL` or `CONVOHOP_MISSED_CALL`
 string as its body, from the extension's `Localizable.strings` or else the
 app's. The extension fetches nothing for it. It also hides the text of a
-ConvoHop push it can't read, unless the recipient is `.any`. iOS shows every
-alert push, so an extension can only hide its text.
+ConvoHop push it can't read, unless the recipient is `.any`. Without Apple's
+notification filtering entitlement, iOS shows every alert push, so the helper
+hides the text instead of dropping the push.
 
 ## Errors
 

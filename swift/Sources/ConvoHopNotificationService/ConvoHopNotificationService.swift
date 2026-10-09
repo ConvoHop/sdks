@@ -19,8 +19,8 @@ import UserNotifications
 /// With a ledger, a push for anyone but the ledger's ``ConvoHopNotificationLedger/recipient``, such as one that
 /// reaches the device after sign-out, is delivered without its text: no title, and the `CONVOHOP_MESSAGE`,
 /// `CONVOHOP_CALL` or `CONVOHOP_MISSED_CALL` string as the body. So is a ConvoHop push this version can't read,
-/// unless the recipient is ``ConvoHopPushRecipient/any``. iOS shows every alert push, so hiding its text is all an
-/// extension can do.
+/// unless the recipient is ``ConvoHopPushRecipient/any``. Without Apple's notification filtering entitlement, iOS
+/// shows every alert push, so the helper hides the text instead of dropping the push.
 ///
 /// ```swift
 /// final class NotificationService: UNNotificationServiceExtension {
