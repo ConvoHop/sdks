@@ -11,7 +11,7 @@
       "ref": "ConvoHop#ConversationStream",
       "anchor": "conversationstream-class",
       "signatures": ["public actor ConversationStream"],
-      "docs": "Replays one conversation's events from a cursor, then follows new events in real time.\n\nEach batch reaches `apply` once and in order. The cursor advances, and is stored, only after `apply` returns.\nWhen the realtime connection drops, the stream fills the gap from history before it reconnects. Close the stream\nwhen you no longer need it.",
+      "docs": "Replays one conversation's events from a cursor, then follows new events in real time.\n\nEach batch reaches `apply` once and in order. The cursor advances, and is stored, only after `apply` returns.\nWhen the realtime connection drops, the stream fills the gap from history before it reconnects. Close the stream\nwhen you no longer need it.\n\nWhen the organization runs out of prepaid credits or reaches its monthly spend cap, the stream closes and reports\n`CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` with status 402. `SPEND_UNVERIFIED` goes to `onError` and the stream\nreconnects no sooner than its `retryAfter`.",
       "members": [
         {
           "name": "conversationId",
@@ -1839,6 +1839,290 @@
       ]
     },
     {
+      "name": "AgentGrant",
+      "kind": "struct",
+      "ref": "ConvoHop#AgentGrant",
+      "anchor": "agentgrant-struct",
+      "signatures": ["public struct AgentGrant: Codable, Hashable, Sendable"],
+      "docs": "",
+      "members": [
+        {
+          "name": "grantId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentGrant.grantId",
+          "anchor": "agentgrantgrantid-property",
+          "signatures": ["public var grantId: String"],
+          "docs": ""
+        },
+        {
+          "name": "orgId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentGrant.orgId",
+          "anchor": "agentgrantorgid-property",
+          "signatures": ["public var orgId: String"],
+          "docs": ""
+        },
+        {
+          "name": "signupId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentGrant.signupId",
+          "anchor": "agentgrantsignupid-property",
+          "signatures": ["public var signupId: String"],
+          "docs": ""
+        },
+        {
+          "name": "agentActorId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentGrant.agentActorId",
+          "anchor": "agentgrantagentactorid-property",
+          "signatures": ["public var agentActorId: String"],
+          "docs": ""
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentGrant.projectId",
+          "anchor": "agentgrantprojectid-property",
+          "signatures": ["public var projectId: String?"],
+          "docs": ""
+        },
+        {
+          "name": "scopes",
+          "kind": "property",
+          "ref": "ConvoHop#AgentGrant.scopes",
+          "anchor": "agentgrantscopes-property",
+          "signatures": ["public var scopes: [String]"],
+          "docs": ""
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "ConvoHop#AgentGrant.expiresAt",
+          "anchor": "agentgrantexpiresat-property",
+          "signatures": ["public var expiresAt: String"],
+          "docs": ""
+        },
+        {
+          "name": "revokedAt",
+          "kind": "property",
+          "ref": "ConvoHop#AgentGrant.revokedAt",
+          "anchor": "agentgrantrevokedat-property",
+          "signatures": ["public var revokedAt: String?"],
+          "docs": ""
+        },
+        {
+          "name": "createdAt",
+          "kind": "property",
+          "ref": "ConvoHop#AgentGrant.createdAt",
+          "anchor": "agentgrantcreatedat-property",
+          "signatures": ["public var createdAt: String"],
+          "docs": ""
+        },
+        {
+          "name": "keys",
+          "kind": "property",
+          "ref": "ConvoHop#AgentGrant.keys",
+          "anchor": "agentgrantkeys-property",
+          "signatures": ["public var keys: [AgentKey]"],
+          "docs": ""
+        },
+        {
+          "name": "init",
+          "kind": "constructor",
+          "ref": "ConvoHop#AgentGrant.init",
+          "anchor": "agentgrant-constructor",
+          "signatures": [
+            "public init(\n    grantId: String,\n    orgId: String,\n    signupId: String,\n    agentActorId: String,\n    projectId: String? = nil,\n    scopes: [String],\n    expiresAt: String,\n    revokedAt: String? = nil,\n    createdAt: String,\n    keys: [AgentKey]\n)"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "AgentKey",
+      "kind": "struct",
+      "ref": "ConvoHop#AgentKey",
+      "anchor": "agentkey-struct",
+      "signatures": ["public struct AgentKey: Codable, Hashable, Sendable"],
+      "docs": "",
+      "members": [
+        {
+          "name": "operationId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentKey.operationId",
+          "anchor": "agentkeyoperationid-property",
+          "signatures": ["public var operationId: String"],
+          "docs": ""
+        },
+        {
+          "name": "state",
+          "kind": "property",
+          "ref": "ConvoHop#AgentKey.state",
+          "anchor": "agentkeystate-property",
+          "signatures": ["public var state: String"],
+          "docs": ""
+        },
+        {
+          "name": "scopes",
+          "kind": "property",
+          "ref": "ConvoHop#AgentKey.scopes",
+          "anchor": "agentkeyscopes-property",
+          "signatures": ["public var scopes: [String]"],
+          "docs": ""
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "ConvoHop#AgentKey.expiresAt",
+          "anchor": "agentkeyexpiresat-property",
+          "signatures": ["public var expiresAt: String"],
+          "docs": ""
+        },
+        {
+          "name": "keyId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentKey.keyId",
+          "anchor": "agentkeykeyid-property",
+          "signatures": ["public var keyId: String?"],
+          "docs": ""
+        },
+        {
+          "name": "deliveryId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentKey.deliveryId",
+          "anchor": "agentkeydeliveryid-property",
+          "signatures": ["public var deliveryId: String?"],
+          "docs": ""
+        },
+        {
+          "name": "deliveryExpiresAt",
+          "kind": "property",
+          "ref": "ConvoHop#AgentKey.deliveryExpiresAt",
+          "anchor": "agentkeydeliveryexpiresat-property",
+          "signatures": ["public var deliveryExpiresAt: String?"],
+          "docs": ""
+        },
+        {
+          "name": "init",
+          "kind": "constructor",
+          "ref": "ConvoHop#AgentKey.init",
+          "anchor": "agentkey-constructor",
+          "signatures": [
+            "public init(\n    operationId: String,\n    state: String,\n    scopes: [String],\n    expiresAt: String,\n    keyId: String? = nil,\n    deliveryId: String? = nil,\n    deliveryExpiresAt: String? = nil\n)"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "AgentSignupStatus",
+      "kind": "struct",
+      "ref": "ConvoHop#AgentSignupStatus",
+      "anchor": "agentsignupstatus-struct",
+      "signatures": ["public struct AgentSignupStatus: Codable, Hashable, Sendable"],
+      "docs": "",
+      "members": [
+        {
+          "name": "signupId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.signupId",
+          "anchor": "agentsignupstatussignupid-property",
+          "signatures": ["public var signupId: String"],
+          "docs": ""
+        },
+        {
+          "name": "state",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.state",
+          "anchor": "agentsignupstatusstate-property",
+          "signatures": ["public var state: String"],
+          "docs": ""
+        },
+        {
+          "name": "orgId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.orgId",
+          "anchor": "agentsignupstatusorgid-property",
+          "signatures": ["public var orgId: String?"],
+          "docs": ""
+        },
+        {
+          "name": "deploymentId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.deploymentId",
+          "anchor": "agentsignupstatusdeploymentid-property",
+          "signatures": ["public var deploymentId: String?"],
+          "docs": ""
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.projectId",
+          "anchor": "agentsignupstatusprojectid-property",
+          "signatures": ["public var projectId: String?"],
+          "docs": ""
+        },
+        {
+          "name": "nextStep",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.nextStep",
+          "anchor": "agentsignupstatusnextstep-property",
+          "signatures": ["public var nextStep: String?"],
+          "docs": ""
+        },
+        {
+          "name": "scopes",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.scopes",
+          "anchor": "agentsignupstatusscopes-property",
+          "signatures": ["public var scopes: [String]"],
+          "docs": ""
+        },
+        {
+          "name": "grantExpiresAt",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.grantExpiresAt",
+          "anchor": "agentsignupstatusgrantexpiresat-property",
+          "signatures": ["public var grantExpiresAt: String?"],
+          "docs": ""
+        },
+        {
+          "name": "keys",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.keys",
+          "anchor": "agentsignupstatuskeys-property",
+          "signatures": ["public var keys: [AgentKey]"],
+          "docs": ""
+        },
+        {
+          "name": "incarnation",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.incarnation",
+          "anchor": "agentsignupstatusincarnation-property",
+          "signatures": ["public var incarnation: String?"],
+          "docs": ""
+        },
+        {
+          "name": "servingEpoch",
+          "kind": "property",
+          "ref": "ConvoHop#AgentSignupStatus.servingEpoch",
+          "anchor": "agentsignupstatusservingepoch-property",
+          "signatures": ["public var servingEpoch: String?"],
+          "docs": ""
+        },
+        {
+          "name": "init",
+          "kind": "constructor",
+          "ref": "ConvoHop#AgentSignupStatus.init",
+          "anchor": "agentsignupstatus-constructor",
+          "signatures": [
+            "public init(\n    signupId: String,\n    state: String,\n    orgId: String? = nil,\n    deploymentId: String? = nil,\n    projectId: String? = nil,\n    nextStep: String? = nil,\n    scopes: [String],\n    grantExpiresAt: String? = nil,\n    keys: [AgentKey],\n    incarnation: String? = nil,\n    servingEpoch: String? = nil\n)"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
       "name": "AlertLiveSessionInput",
       "kind": "struct",
       "ref": "ConvoHop#AlertLiveSessionInput",
@@ -3574,6 +3858,17 @@
           "static": true
         },
         {
+          "name": "creditsExhausted",
+          "kind": "property",
+          "ref": "ConvoHop#ConvoHopErrorCode.creditsExhausted:static",
+          "anchor": "convohoperrorcodecreditsexhausted-static-property",
+          "signatures": [
+            "public static let creditsExhausted = ConvoHopErrorCode(rawValue: \"CREDITS_EXHAUSTED\")"
+          ],
+          "docs": "Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+          "static": true
+        },
+        {
           "name": "cursorAhead",
           "kind": "property",
           "ref": "ConvoHop#ConvoHopErrorCode.cursorAhead:static",
@@ -4084,6 +4379,28 @@
             "public static let sessionRefreshUnverified = ConvoHopErrorCode(rawValue: \"SESSION_REFRESH_UNVERIFIED\")"
           ],
           "docs": "The refreshed session could not be verified.",
+          "static": true
+        },
+        {
+          "name": "spendCapReached",
+          "kind": "property",
+          "ref": "ConvoHop#ConvoHopErrorCode.spendCapReached:static",
+          "anchor": "convohoperrorcodespendcapreached-static-property",
+          "signatures": [
+            "public static let spendCapReached = ConvoHopErrorCode(rawValue: \"SPEND_CAP_REACHED\")"
+          ],
+          "docs": "The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.",
+          "static": true
+        },
+        {
+          "name": "spendUnverified",
+          "kind": "property",
+          "ref": "ConvoHop#ConvoHopErrorCode.spendUnverified:static",
+          "anchor": "convohoperrorcodespendunverified-static-property",
+          "signatures": [
+            "public static let spendUnverified = ConvoHopErrorCode(rawValue: \"SPEND_UNVERIFIED\")"
+          ],
+          "docs": "Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.",
           "static": true
         },
         {
@@ -6534,6 +6851,17 @@
             "public static let permitBound = GraphQLIdempotency(name: \"permitBound\", retry: .sameRequest, resolvable: false, retryBudget: GraphQLRetryBudget(maxAttempts: 3, windowMs: 60000))"
           ],
           "docs": "Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.",
+          "static": true
+        },
+        {
+          "name": "replayOnly",
+          "kind": "property",
+          "ref": "ConvoHop#GraphQLIdempotency.replayOnly:static",
+          "anchor": "graphqlidempotencyreplayonly-static-property",
+          "signatures": [
+            "public static let replayOnly = GraphQLIdempotency(name: \"replayOnly\", retry: .sameRequest, resolvable: false, retryBudget: GraphQLRetryBudget(maxAttempts: 3, windowMs: 60000))"
+          ],
+          "docs": "Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.",
           "static": true
         },
         {
@@ -10379,6 +10707,186 @@
       ]
     },
     {
+      "name": "OrganizationSpend",
+      "kind": "struct",
+      "ref": "ConvoHop#OrganizationSpend",
+      "anchor": "organizationspend-struct",
+      "signatures": ["public struct OrganizationSpend: Codable, Hashable, Sendable"],
+      "docs": "",
+      "members": [
+        {
+          "name": "orgId",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.orgId",
+          "anchor": "organizationspendorgid-property",
+          "signatures": ["public var orgId: String"],
+          "docs": ""
+        },
+        {
+          "name": "planId",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.planId",
+          "anchor": "organizationspendplanid-property",
+          "signatures": ["public var planId: String"],
+          "docs": ""
+        },
+        {
+          "name": "currency",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.currency",
+          "anchor": "organizationspendcurrency-property",
+          "signatures": ["public var currency: String"],
+          "docs": ""
+        },
+        {
+          "name": "catalogVersion",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.catalogVersion",
+          "anchor": "organizationspendcatalogversion-property",
+          "signatures": ["public var catalogVersion: String"],
+          "docs": ""
+        },
+        {
+          "name": "monthlySpendCap",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.monthlySpendCap",
+          "anchor": "organizationspendmonthlyspendcap-property",
+          "signatures": ["public var monthlySpendCap: String?"],
+          "docs": ""
+        },
+        {
+          "name": "agentPurchaseLimit",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.agentPurchaseLimit",
+          "anchor": "organizationspendagentpurchaselimit-property",
+          "signatures": ["public var agentPurchaseLimit: String?"],
+          "docs": ""
+        },
+        {
+          "name": "updatedAt",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.updatedAt",
+          "anchor": "organizationspendupdatedat-property",
+          "signatures": ["public var updatedAt: String?"],
+          "docs": ""
+        },
+        {
+          "name": "monthlyMinimum",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.monthlyMinimum",
+          "anchor": "organizationspendmonthlyminimum-property",
+          "signatures": ["public var monthlyMinimum: String?"],
+          "docs": ""
+        },
+        {
+          "name": "periodStart",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.periodStart",
+          "anchor": "organizationspendperiodstart-property",
+          "signatures": ["public var periodStart: String?"],
+          "docs": ""
+        },
+        {
+          "name": "periodEnd",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.periodEnd",
+          "anchor": "organizationspendperiodend-property",
+          "signatures": ["public var periodEnd: String?"],
+          "docs": ""
+        },
+        {
+          "name": "credits",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.credits",
+          "anchor": "organizationspendcredits-property",
+          "signatures": ["public var credits: String?"],
+          "docs": ""
+        },
+        {
+          "name": "charges",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.charges",
+          "anchor": "organizationspendcharges-property",
+          "signatures": ["public var charges: String?"],
+          "docs": ""
+        },
+        {
+          "name": "margin",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.margin",
+          "anchor": "organizationspendmargin-property",
+          "signatures": ["public var margin: String?"],
+          "docs": ""
+        },
+        {
+          "name": "stop",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.stop",
+          "anchor": "organizationspendstop-property",
+          "signatures": ["public var stop: String?"],
+          "docs": ""
+        },
+        {
+          "name": "refusedMeters",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.refusedMeters",
+          "anchor": "organizationspendrefusedmeters-property",
+          "signatures": ["public var refusedMeters: [String]"],
+          "docs": ""
+        },
+        {
+          "name": "evaluatedAt",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.evaluatedAt",
+          "anchor": "organizationspendevaluatedat-property",
+          "signatures": ["public var evaluatedAt: String?"],
+          "docs": ""
+        },
+        {
+          "name": "usageThrough",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.usageThrough",
+          "anchor": "organizationspendusagethrough-property",
+          "signatures": ["public var usageThrough: String?"],
+          "docs": ""
+        },
+        {
+          "name": "validUntil",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.validUntil",
+          "anchor": "organizationspendvaliduntil-property",
+          "signatures": ["public var validUntil: String?"],
+          "docs": ""
+        },
+        {
+          "name": "minimumCredit",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.minimumCredit",
+          "anchor": "organizationspendminimumcredit-property",
+          "signatures": ["public var minimumCredit: String?"],
+          "docs": ""
+        },
+        {
+          "name": "chargeLimit",
+          "kind": "property",
+          "ref": "ConvoHop#OrganizationSpend.chargeLimit",
+          "anchor": "organizationspendchargelimit-property",
+          "signatures": ["public var chargeLimit: String?"],
+          "docs": ""
+        },
+        {
+          "name": "init",
+          "kind": "constructor",
+          "ref": "ConvoHop#OrganizationSpend.init",
+          "anchor": "organizationspend-constructor",
+          "signatures": [
+            "public init(\n    orgId: String,\n    planId: String,\n    currency: String,\n    catalogVersion: String,\n    monthlySpendCap: String? = nil,\n    agentPurchaseLimit: String? = nil,\n    updatedAt: String? = nil,\n    monthlyMinimum: String? = nil,\n    periodStart: String? = nil,\n    periodEnd: String? = nil,\n    credits: String? = nil,\n    charges: String? = nil,\n    margin: String? = nil,\n    stop: String? = nil,\n    refusedMeters: [String],\n    evaluatedAt: String? = nil,\n    usageThrough: String? = nil,\n    validUntil: String? = nil,\n    minimumCredit: String? = nil,\n    chargeLimit: String? = nil\n)"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
       "name": "Principal",
       "kind": "struct",
       "ref": "ConvoHop#Principal",
@@ -11389,6 +11897,22 @@
       "docs": "Exactly one typed field contains the retained, currently authorized receipt result.",
       "members": [
         {
+          "name": "agentGrant",
+          "kind": "property",
+          "ref": "ConvoHop#RetainedResult.agentGrant",
+          "anchor": "retainedresultagentgrant-property",
+          "signatures": ["public var agentGrant: AgentGrant?"],
+          "docs": ""
+        },
+        {
+          "name": "agentSignupStatus",
+          "kind": "property",
+          "ref": "ConvoHop#RetainedResult.agentSignupStatus",
+          "anchor": "retainedresultagentsignupstatus-property",
+          "signatures": ["public var agentSignupStatus: AgentSignupStatus?"],
+          "docs": ""
+        },
+        {
           "name": "billingCheckoutSession",
           "kind": "property",
           "ref": "ConvoHop#RetainedResult.billingCheckoutSession",
@@ -11533,6 +12057,14 @@
           "docs": ""
         },
         {
+          "name": "organizationSpend",
+          "kind": "property",
+          "ref": "ConvoHop#RetainedResult.organizationSpend",
+          "anchor": "retainedresultorganizationspend-property",
+          "signatures": ["public var organizationSpend: OrganizationSpend?"],
+          "docs": ""
+        },
+        {
           "name": "principal",
           "kind": "property",
           "ref": "ConvoHop#RetainedResult.principal",
@@ -11578,7 +12110,7 @@
           "ref": "ConvoHop#RetainedResult.init",
           "anchor": "retainedresult-constructor",
           "signatures": [
-            "public init(\n    billingCheckoutSession: BillingCheckoutSession? = nil,\n    billingPortalSession: BillingPortalSession? = nil,\n    broadcastPermissionChanged: BroadcastPermissionChanged? = nil,\n    conversation: Conversation? = nil,\n    conversationMemberBatch: ConversationMemberBatch? = nil,\n    conversationMute: ConversationMute? = nil,\n    credentialDeliveryReceipt: CredentialDeliveryReceipt? = nil,\n    deliveryAck: DeliveryAck? = nil,\n    liveAlertBatch: LiveAlertBatch? = nil,\n    liveCredentialIssuance: LiveCredentialIssuance? = nil,\n    liveSessionEndRequested: LiveSessionEndRequested? = nil,\n    liveSessionJoined: LiveSessionJoined? = nil,\n    liveSessionLeft: LiveSessionLeft? = nil,\n    liveSessionStarted: LiveSessionStarted? = nil,\n    member: Member? = nil,\n    message: Message? = nil,\n    messageAck: MessageAck? = nil,\n    organization: Organization? = nil,\n    principal: Principal? = nil,\n    readReceipt: ReadReceipt? = nil,\n    sessionBootstrap: SessionBootstrap? = nil,\n    sessionRevocation: SessionRevocation? = nil,\n    signedProof: JSONObject? = nil\n)"
+            "public init(\n    agentGrant: AgentGrant? = nil,\n    agentSignupStatus: AgentSignupStatus? = nil,\n    billingCheckoutSession: BillingCheckoutSession? = nil,\n    billingPortalSession: BillingPortalSession? = nil,\n    broadcastPermissionChanged: BroadcastPermissionChanged? = nil,\n    conversation: Conversation? = nil,\n    conversationMemberBatch: ConversationMemberBatch? = nil,\n    conversationMute: ConversationMute? = nil,\n    credentialDeliveryReceipt: CredentialDeliveryReceipt? = nil,\n    deliveryAck: DeliveryAck? = nil,\n    liveAlertBatch: LiveAlertBatch? = nil,\n    liveCredentialIssuance: LiveCredentialIssuance? = nil,\n    liveSessionEndRequested: LiveSessionEndRequested? = nil,\n    liveSessionJoined: LiveSessionJoined? = nil,\n    liveSessionLeft: LiveSessionLeft? = nil,\n    liveSessionStarted: LiveSessionStarted? = nil,\n    member: Member? = nil,\n    message: Message? = nil,\n    messageAck: MessageAck? = nil,\n    organization: Organization? = nil,\n    organizationSpend: OrganizationSpend? = nil,\n    principal: Principal? = nil,\n    readReceipt: ReadReceipt? = nil,\n    sessionBootstrap: SessionBootstrap? = nil,\n    sessionRevocation: SessionRevocation? = nil,\n    signedProof: JSONObject? = nil\n)"
           ],
           "docs": ""
         }
@@ -14252,8 +14784,8 @@
           "kind": "case",
           "ref": "ConvoHop#ConvoHopWebSocketEvent.closed",
           "anchor": "convohopwebsocketeventclosed-case",
-          "signatures": ["case closed(code: Int)"],
-          "docs": ""
+          "signatures": ["case closed(code: Int, reason: String? = nil)"],
+          "docs": "The connection ended. `reason` is the close reason the server sent, if any. ConvoHop puts details there, such as\n`SPEND_UNVERIFIED retryAfter=5 meter=mau`."
         }
       ]
     },

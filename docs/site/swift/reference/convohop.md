@@ -18,6 +18,10 @@ Each batch reaches `apply` once and in order. The cursor advances, and is stored
 When the realtime connection drops, the stream fills the gap from history before it reconnects. Close the stream
 when you no longer need it.
 
+When the organization runs out of prepaid credits or reaches its monthly spend cap, the stream closes and reports
+`CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` with status 402. `SPEND_UNVERIFIED` goes to `onError` and the stream
+reconnects no sooner than its `retryAfter`.
+
 #### `ConversationStream.conversationId` property
 
 ```swift
@@ -1584,6 +1588,241 @@ public var objectId: String
 public init(tenantId: String, objectId: String)
 ```
 
+### `AgentGrant` struct
+
+```swift
+public struct AgentGrant: Codable, Hashable, Sendable
+```
+
+#### `AgentGrant.grantId` property
+
+```swift
+public var grantId: String
+```
+
+#### `AgentGrant.orgId` property
+
+```swift
+public var orgId: String
+```
+
+#### `AgentGrant.signupId` property
+
+```swift
+public var signupId: String
+```
+
+#### `AgentGrant.agentActorId` property
+
+```swift
+public var agentActorId: String
+```
+
+#### `AgentGrant.projectId` property
+
+```swift
+public var projectId: String?
+```
+
+#### `AgentGrant.scopes` property
+
+```swift
+public var scopes: [String]
+```
+
+#### `AgentGrant.expiresAt` property
+
+```swift
+public var expiresAt: String
+```
+
+#### `AgentGrant.revokedAt` property
+
+```swift
+public var revokedAt: String?
+```
+
+#### `AgentGrant.createdAt` property
+
+```swift
+public var createdAt: String
+```
+
+#### `AgentGrant.keys` property
+
+```swift
+public var keys: [AgentKey]
+```
+
+#### `AgentGrant` constructor
+
+```swift
+public init(
+    grantId: String,
+    orgId: String,
+    signupId: String,
+    agentActorId: String,
+    projectId: String? = nil,
+    scopes: [String],
+    expiresAt: String,
+    revokedAt: String? = nil,
+    createdAt: String,
+    keys: [AgentKey]
+)
+```
+
+### `AgentKey` struct
+
+```swift
+public struct AgentKey: Codable, Hashable, Sendable
+```
+
+#### `AgentKey.operationId` property
+
+```swift
+public var operationId: String
+```
+
+#### `AgentKey.state` property
+
+```swift
+public var state: String
+```
+
+#### `AgentKey.scopes` property
+
+```swift
+public var scopes: [String]
+```
+
+#### `AgentKey.expiresAt` property
+
+```swift
+public var expiresAt: String
+```
+
+#### `AgentKey.keyId` property
+
+```swift
+public var keyId: String?
+```
+
+#### `AgentKey.deliveryId` property
+
+```swift
+public var deliveryId: String?
+```
+
+#### `AgentKey.deliveryExpiresAt` property
+
+```swift
+public var deliveryExpiresAt: String?
+```
+
+#### `AgentKey` constructor
+
+```swift
+public init(
+    operationId: String,
+    state: String,
+    scopes: [String],
+    expiresAt: String,
+    keyId: String? = nil,
+    deliveryId: String? = nil,
+    deliveryExpiresAt: String? = nil
+)
+```
+
+### `AgentSignupStatus` struct
+
+```swift
+public struct AgentSignupStatus: Codable, Hashable, Sendable
+```
+
+#### `AgentSignupStatus.signupId` property
+
+```swift
+public var signupId: String
+```
+
+#### `AgentSignupStatus.state` property
+
+```swift
+public var state: String
+```
+
+#### `AgentSignupStatus.orgId` property
+
+```swift
+public var orgId: String?
+```
+
+#### `AgentSignupStatus.deploymentId` property
+
+```swift
+public var deploymentId: String?
+```
+
+#### `AgentSignupStatus.projectId` property
+
+```swift
+public var projectId: String?
+```
+
+#### `AgentSignupStatus.nextStep` property
+
+```swift
+public var nextStep: String?
+```
+
+#### `AgentSignupStatus.scopes` property
+
+```swift
+public var scopes: [String]
+```
+
+#### `AgentSignupStatus.grantExpiresAt` property
+
+```swift
+public var grantExpiresAt: String?
+```
+
+#### `AgentSignupStatus.keys` property
+
+```swift
+public var keys: [AgentKey]
+```
+
+#### `AgentSignupStatus.incarnation` property
+
+```swift
+public var incarnation: String?
+```
+
+#### `AgentSignupStatus.servingEpoch` property
+
+```swift
+public var servingEpoch: String?
+```
+
+#### `AgentSignupStatus` constructor
+
+```swift
+public init(
+    signupId: String,
+    state: String,
+    orgId: String? = nil,
+    deploymentId: String? = nil,
+    projectId: String? = nil,
+    nextStep: String? = nil,
+    scopes: [String],
+    grantExpiresAt: String? = nil,
+    keys: [AgentKey],
+    incarnation: String? = nil,
+    servingEpoch: String? = nil
+)
+```
+
 ### `AlertLiveSessionInput` struct
 
 ```swift
@@ -2939,6 +3178,14 @@ public static let credentialRequired = ConvoHopErrorCode(rawValue: "CREDENTIAL_R
 
 Delivery-permit requests cannot be resolved by lookup. Obtain a current permit and resubmit the same delivery explicitly.
 
+#### `ConvoHopErrorCode.creditsExhausted` static property
+
+```swift
+public static let creditsExhausted = ConvoHopErrorCode(rawValue: "CREDITS_EXHAUSTED")
+```
+
+Prepaid credits are spent and the monthly spend cap is zero, so billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+
 #### `ConvoHopErrorCode.cursorAhead` static property
 
 ```swift
@@ -3314,6 +3561,22 @@ public static let sessionRefreshUnverified = ConvoHopErrorCode(rawValue: "SESSIO
 ```
 
 The refreshed session could not be verified.
+
+#### `ConvoHopErrorCode.spendCapReached` static property
+
+```swift
+public static let spendCapReached = ConvoHopErrorCode(rawValue: "SPEND_CAP_REACHED")
+```
+
+The spend month's usage charges reached the charge limit that the organization's prepaid credits and monthly spend cap set, less a safety margin. Billable usage beyond the plan's allowances is refused before any effect (WebSocket close 4402). extensions.meter names the meter and extensions.periodEnd ends the spend month. Usage within allowances continues; add credits or raise the cap.
+
+#### `ConvoHopErrorCode.spendUnverified` static property
+
+```swift
+public static let spendUnverified = ConvoHopErrorCode(rawValue: "SPEND_UNVERIFIED")
+```
+
+Current spend cannot be verified, so billable usage beyond the plan's allowances fails closed before any effect (WebSocket close 4503). extensions.meter names the meter and extensions.periodEnd ends the spend month; extensions.retryAfter (HTTP Retry-After) counts the seconds before the same request may succeed.
 
 #### `ConvoHopErrorCode.transportUnknown` static property
 
@@ -5282,6 +5545,14 @@ public static let permitBound = GraphQLIdempotency(name: "permitBound", retry: .
 ```
 
 Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.
+
+#### `GraphQLIdempotency.replayOnly` static property
+
+```swift
+public static let replayOnly = GraphQLIdempotency(name: "replayOnly", retry: .sameRequest, resolvable: false, retryBudget: GraphQLRetryBudget(maxAttempts: 3, windowMs: 60000))
+```
+
+Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
 
 #### `GraphQLIdempotency.safe` static property
 
@@ -8263,6 +8534,159 @@ public var revision: String
 public init(orgId: String, name: String, status: String, revision: String)
 ```
 
+### `OrganizationSpend` struct
+
+```swift
+public struct OrganizationSpend: Codable, Hashable, Sendable
+```
+
+#### `OrganizationSpend.orgId` property
+
+```swift
+public var orgId: String
+```
+
+#### `OrganizationSpend.planId` property
+
+```swift
+public var planId: String
+```
+
+#### `OrganizationSpend.currency` property
+
+```swift
+public var currency: String
+```
+
+#### `OrganizationSpend.catalogVersion` property
+
+```swift
+public var catalogVersion: String
+```
+
+#### `OrganizationSpend.monthlySpendCap` property
+
+```swift
+public var monthlySpendCap: String?
+```
+
+#### `OrganizationSpend.agentPurchaseLimit` property
+
+```swift
+public var agentPurchaseLimit: String?
+```
+
+#### `OrganizationSpend.updatedAt` property
+
+```swift
+public var updatedAt: String?
+```
+
+#### `OrganizationSpend.monthlyMinimum` property
+
+```swift
+public var monthlyMinimum: String?
+```
+
+#### `OrganizationSpend.periodStart` property
+
+```swift
+public var periodStart: String?
+```
+
+#### `OrganizationSpend.periodEnd` property
+
+```swift
+public var periodEnd: String?
+```
+
+#### `OrganizationSpend.credits` property
+
+```swift
+public var credits: String?
+```
+
+#### `OrganizationSpend.charges` property
+
+```swift
+public var charges: String?
+```
+
+#### `OrganizationSpend.margin` property
+
+```swift
+public var margin: String?
+```
+
+#### `OrganizationSpend.stop` property
+
+```swift
+public var stop: String?
+```
+
+#### `OrganizationSpend.refusedMeters` property
+
+```swift
+public var refusedMeters: [String]
+```
+
+#### `OrganizationSpend.evaluatedAt` property
+
+```swift
+public var evaluatedAt: String?
+```
+
+#### `OrganizationSpend.usageThrough` property
+
+```swift
+public var usageThrough: String?
+```
+
+#### `OrganizationSpend.validUntil` property
+
+```swift
+public var validUntil: String?
+```
+
+#### `OrganizationSpend.minimumCredit` property
+
+```swift
+public var minimumCredit: String?
+```
+
+#### `OrganizationSpend.chargeLimit` property
+
+```swift
+public var chargeLimit: String?
+```
+
+#### `OrganizationSpend` constructor
+
+```swift
+public init(
+    orgId: String,
+    planId: String,
+    currency: String,
+    catalogVersion: String,
+    monthlySpendCap: String? = nil,
+    agentPurchaseLimit: String? = nil,
+    updatedAt: String? = nil,
+    monthlyMinimum: String? = nil,
+    periodStart: String? = nil,
+    periodEnd: String? = nil,
+    credits: String? = nil,
+    charges: String? = nil,
+    margin: String? = nil,
+    stop: String? = nil,
+    refusedMeters: [String],
+    evaluatedAt: String? = nil,
+    usageThrough: String? = nil,
+    validUntil: String? = nil,
+    minimumCredit: String? = nil,
+    chargeLimit: String? = nil
+)
+```
+
 ### `Principal` struct
 
 ```swift
@@ -9071,6 +9495,18 @@ public struct RetainedResult: Codable, Hashable, Sendable
 
 Exactly one typed field contains the retained, currently authorized receipt result.
 
+#### `RetainedResult.agentGrant` property
+
+```swift
+public var agentGrant: AgentGrant?
+```
+
+#### `RetainedResult.agentSignupStatus` property
+
+```swift
+public var agentSignupStatus: AgentSignupStatus?
+```
+
 #### `RetainedResult.billingCheckoutSession` property
 
 ```swift
@@ -9179,6 +9615,12 @@ public var messageAck: MessageAck?
 public var organization: Organization?
 ```
 
+#### `RetainedResult.organizationSpend` property
+
+```swift
+public var organizationSpend: OrganizationSpend?
+```
+
 #### `RetainedResult.principal` property
 
 ```swift
@@ -9213,6 +9655,8 @@ public var signedProof: JSONObject?
 
 ```swift
 public init(
+    agentGrant: AgentGrant? = nil,
+    agentSignupStatus: AgentSignupStatus? = nil,
     billingCheckoutSession: BillingCheckoutSession? = nil,
     billingPortalSession: BillingPortalSession? = nil,
     broadcastPermissionChanged: BroadcastPermissionChanged? = nil,
@@ -9231,6 +9675,7 @@ public init(
     message: Message? = nil,
     messageAck: MessageAck? = nil,
     organization: Organization? = nil,
+    organizationSpend: OrganizationSpend? = nil,
     principal: Principal? = nil,
     readReceipt: ReadReceipt? = nil,
     sessionBootstrap: SessionBootstrap? = nil,
@@ -11445,8 +11890,11 @@ The transport failed. A `closed` event follows.
 #### `ConvoHopWebSocketEvent.closed` case
 
 ```swift
-case closed(code: Int)
+case closed(code: Int, reason: String? = nil)
 ```
+
+The connection ended. `reason` is the close reason the server sent, if any. ConvoHop puts details there, such as
+`SPEND_UNVERIFIED retryAfter=5 meter=mau`.
 
 ### `GraphQLContextUse` enum
 
