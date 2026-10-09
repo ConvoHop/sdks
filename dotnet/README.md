@@ -235,6 +235,15 @@ RequestResolution resolution = await server.Requests.RetryAsync(exception.Reques
   Records hold request inputs, never credentials.
   `InMemoryRecoveryStorage` survives client re-creation but not restarts.
   `server.Transport.GetRecoveryStatesAsync()` lists the records.
+- A client keeps at most 128 records. To make room for a new request it
+  forgets the final record attempted longest ago that no call is using. A
+  record is final when the authority committed or accepted the request, or
+  rejected it in a way that resending can't change: the error code isn't
+  retryable, or the request's three-attempt/60-second retry budget is spent
+  (see the [recovery journal rules](../spec/recovery/README.md#recovery-journal)).
+  With no final record to forget, the new request fails with
+  `ConvoHopException` code `RECOVERY_LIMIT`, outcome `rejected` and status
+  409 before it is sent; resend or resolve the kept requests first.
 
 ## Webhooks
 
