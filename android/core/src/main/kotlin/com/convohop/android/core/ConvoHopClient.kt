@@ -1,5 +1,6 @@
 package com.convohop.android.core
 
+import com.convohop.android.generated.Capabilities
 import com.convohop.android.generated.Cursor
 import com.convohop.android.generated.CursorInput
 import com.convohop.android.generated.DeleteMessageRequestInput
@@ -9,9 +10,13 @@ import com.convohop.android.generated.EventPage
 import com.convohop.android.generated.EventsRequestInput
 import com.convohop.android.generated.GetConversationRequestInput
 import com.convohop.android.generated.GetMessageRequestInput
+import com.convohop.android.generated.InboxPage
+import com.convohop.android.generated.InboxRequestInput
 import com.convohop.android.generated.LiveAlertPage
 import com.convohop.android.generated.LiveAlertsInput
 import com.convohop.android.generated.Member
+import com.convohop.android.generated.MemberPage
+import com.convohop.android.generated.MembersRequestInput
 import com.convohop.android.generated.Message
 import com.convohop.android.generated.MessagePage
 import com.convohop.android.generated.MessagesRequestInput
@@ -612,15 +617,33 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
         eventPage(http.execute(Operations.Communication.events, projectId, input).result, http.incarnation, id, after)
     }
 
-    /** Reports that this principal read [conversationId] through [throughSequence] under [membership]. */
-    public suspend fun reportRead(conversationId: String, membership: Member, throughSequence: String): ReadReceipt = serial {
-        val input = ReportReceiptRequestInput(
-            requireId(conversationId, "conversationId"), "read", membership.membershipEpoch, membership.visibilityEpoch,
-            requireCounter(throughSequence, "throughSequence"),
-        ).toJson()
-        http.execute(Operations.Communication.reportReceipt, projectId, input).result
-            ?: protocolError("Invalid protocol object")
-    }
+    /**
+     * Reports that this principal read [conversationId] through [throughSequence]
+     * under [membership], which also covers delivery. Returns its current receipt.
+     */
+    public suspend fun reportRead(conversationId: String, membership: Member, throughSequence: String): ReadReceipt =
+        reportReceipt("read", conversationId, membership, throughSequence)
+
+    /**
+     * Reports that this principal received [conversationId] through
+     * [throughSequence] under [membership], for example when a push arrives.
+     * Returns its current receipt.
+     */
+    public suspend fun reportDelivered(conversationId: String, membership: Member, throughSequence: String): ReadReceipt =
+        reportReceipt("delivered", conversationId, membership, throughSequence)
+
+    private suspend fun reportReceipt(kind: String, conversationId: String, membership: Member, throughSequence: String): ReadReceipt =
+        serial {
+            val id = requireId(conversationId, "conversationId")
+            require(membership.conversationId == id) { "membership must belong to conversationId" }
+            val input = ReportReceiptRequestInput(
+                id, kind, membership.membershipEpoch, membership.visibilityEpoch, requireCounter(throughSequence, "throughSequence"),
+            ).toJson()
+            val receipt = http.execute(Operations.Communication.reportReceipt, projectId, input).result
+                ?: protocolError("Invalid protocol object")
+            if (receipt.principalId != principalId) protocolError("Receipt does not belong to this principal")
+            receipt
+        }
 
     /** The members' current read receipts. */
     public suspend fun receipts(conversationId: String): ReceiptPage = serial {
@@ -629,6 +652,43 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
             ?: protocolError("Invalid protocol object")
         boundedPage(page.items)
         page
+    }
+
+    /** One page of [conversationId]'s members: up to [limit] (1 to 100), after [cursor] from the previous page. */
+    public suspend fun members(conversationId: String, cursor: String? = null, limit: Int = 100): MemberPage = serial {
+        val id = requireId(conversationId, "conversationId")
+        val input = MembersRequestInput(id, pageLimit(limit), cursor).toJson()
+        val page = http.execute(Operations.Communication.members, projectId, input).result
+            ?: protocolError("Invalid protocol object")
+        boundedPage(page.items, limit)
+        if (page.items.any { it.conversationId != id }) protocolError("Member is outside this conversation")
+        page
+    }
+
+    /**
+     * One page of the conversations this principal can see: up to [limit]
+     * (1 to 100), after [cursor] from the previous page. A page with a
+     * `partialReason` is incomplete for that reason.
+     */
+    public suspend fun inbox(cursor: String? = null, limit: Int = 100): InboxPage = serial {
+        val input = InboxRequestInput(pageLimit(limit), cursor).toJson()
+        val page = http.execute(Operations.Communication.inbox, projectId, input).result
+            ?: protocolError("Invalid protocol object")
+        boundedPage(page.items, limit)
+        for (item in page.items) {
+            val latest = item.latestVisibleMessage ?: continue
+            if (latest.conversationId != item.conversationId) protocolError("Inbox item conversation scope does not match its message")
+        }
+        page
+    }
+
+    /**
+     * The project's features, limits and media policy. Check `features?.typing`
+     * before sending typing signals and `features?.inbox` before listing the inbox.
+     */
+    public suspend fun capabilities(): Capabilities = serial {
+        http.execute(Operations.Communication.capabilities, projectId, EMPTY_INPUT).result
+            ?: protocolError("Missing project capabilities")
     }
 
     /** Lexical search across readable conversations, optionally limited to [conversationIds]. */
@@ -647,7 +707,8 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
 
     /**
      * Sends an ephemeral typing signal. It is not recorded for recovery and is
-     * never retried; returns whether the authority accepted it.
+     * never retried; returns whether the authority accepted it. Check
+     * `features?.typing` in [capabilities] first.
      */
     public suspend fun typing(conversationId: String, isTyping: Boolean): Boolean = serial {
         val input = TypingRequestInput(requireId(conversationId, "conversationId"), isTyping).toJson()

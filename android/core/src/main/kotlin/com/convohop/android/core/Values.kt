@@ -105,7 +105,13 @@ internal fun requireCounter(value: String, name: String = "sequence"): String {
 internal fun isCredential(value: String): Boolean =
     value.isNotEmpty() && value.length <= 16_384 && value.none { it == '\r' || it == '\n' }
 
-/** Rejects a page longer than the protocol's 100-item bound. */
-internal fun boundedPage(items: List<*>) {
-    if (items.size > 100) protocolError("Invalid bounded page")
+/** Rejects a page longer than the requested [limit], which is at most the protocol's 100-item bound. */
+internal fun boundedPage(items: List<*>, limit: Int = 100) {
+    if (items.size > limit) protocolError("Invalid bounded page")
+}
+
+/** Checks a caller-supplied page size. */
+internal fun pageLimit(limit: Int): Int {
+    require(limit in 1..100) { "Page size must be 1 to 100" }
+    return limit
 }

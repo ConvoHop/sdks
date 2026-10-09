@@ -1,11 +1,16 @@
 package com.convohop.android.core
 
+import com.convohop.android.generated.Capabilities
 import com.convohop.android.generated.Conversation
 import com.convohop.android.generated.Cursor
 import com.convohop.android.generated.Event
 import com.convohop.android.generated.EventPage
 import com.convohop.android.generated.EventPayload
+import com.convohop.android.generated.Features
+import com.convohop.android.generated.InboxItem
+import com.convohop.android.generated.InboxPage
 import com.convohop.android.generated.Member
+import com.convohop.android.generated.MemberPage
 import com.convohop.android.generated.Message
 import com.convohop.android.generated.MessageAck
 import com.convohop.android.generated.MessagePage
@@ -39,6 +44,9 @@ internal const val BASE_TIME = 1_767_225_600_000L
 internal const val BASE_URL = "http://127.0.0.1:8080"
 
 internal fun testId(kind: Int, n: Long): String = String.format(Locale.ROOT, "%08x-0000-4000-8000-%012x", kind, n)
+
+/** Durable mutations: the authority answers them with receipt evidence. */
+private val MUTATIONS = setOf("CommunicationSendMessage", "CommunicationReportReceipt")
 
 internal val PROJECT = testId(1, 1)
 internal val INCARNATION = testId(1, 2)
@@ -74,6 +82,9 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
 
         /** The authority rejects the request. */
         data class Problem(val code: String, val status: Int, val outcome: String = "rejected") : Fault
+
+        /** The authority answers with [result] in an otherwise valid envelope, so tests can check what the SDK accepts. */
+        data class Reply(val result: JsonElement) : Fault
     }
 
     data class Call(val operation: String, val requestId: String, val input: JsonObject, val token: String?)
@@ -95,6 +106,22 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
     private val faults = HashMap<String, ArrayDeque<Fault>>()
     private val rooms = LinkedHashMap<String, Room>()
     private val ledger = HashMap<String, Retained>()
+
+    /** What the authority reports from `capabilities`. */
+    val capabilities = Capabilities(
+        serverRelease = "test",
+        capabilityRevision = "1",
+        limitsRevision = "1",
+        features = Features(
+            chat = true, inbox = true, lexicalSearch = true, typing = true, webhooks = false, liveSessions = true, liveBroadcast = false,
+        ),
+        limits = emptyList(),
+        environment = "development",
+        productionQualified = false,
+        offerings = emptyList(),
+        geos = emptyList(),
+        installationProfiles = emptyList(),
+    )
 
     /** False while the device cannot reach the authority: requests fail and sockets cannot connect. */
     var reachable = true
@@ -238,6 +265,7 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
         val fault = faults[operation]?.removeFirstOrNull()
         if (fault == Fault.Unreachable) throw IOException("Connection reset")
         if (fault is Fault.Problem) return problem(requestId, fault.code, fault.status, fault.outcome)
+        if (fault is Fault.Reply) return crafted(operation, requestId, fault.result)
         val response = try {
             val session = tokens[token]
             if (session == null || timestampMillis(session.expiresAt) <= now()) throw Rejection("UNAUTHENTICATED", 401)
@@ -264,6 +292,14 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
                 val after = (input["after"] as? JsonObject)?.let { counter(it.string("sequence")) } ?: 0L
                 page(room, after, minOf(input.getValue("limit").jsonPrimitive.int, 100)).toJson()
             }
+            "CommunicationMembers" -> "members" to visible(input, principalId).let { room ->
+                val (items, next) = slice(room.members.values.toList(), input)
+                MemberPage(items, next == null, false, next).toJson()
+            }
+            "CommunicationInbox" -> "inbox" to rooms.values.filter { principalId in it.members }.map { inboxItem(it, principalId) }
+                .let { slice(it, input) }
+                .let { (items, next) -> InboxPage(items, next == null, false, next).toJson() }
+            "CommunicationCapabilities" -> "capabilities" to capabilities.toJson()
             "CommunicationReceipts" -> "receipts" to
                 ReceiptPage(visible(input, principalId).receipts.values.toList(), true, false).toJson()
             "CommunicationTyping" -> "typing" to visible(input, principalId).let { TypingStatus(true).toJson() }
@@ -292,6 +328,30 @@ internal class FakeAuthority(private val now: () -> Long) : HttpEngine, Realtime
         val items = ordered.take(minOf(input.getValue("limit").jsonPrimitive.int, 100))
         val complete = ordered.size <= items.size
         return MessagePage(items, complete, false, if (complete) null else items.last().sequence).toJson()
+    }
+
+    /** One page of [items] from the offset in the input's cursor; the next cursor is the following offset. */
+    private fun <T> slice(items: List<T>, input: JsonObject): Pair<List<T>, String?> {
+        val start = (input["cursor"] as? JsonPrimitive)?.content?.toInt() ?: 0
+        val page = items.drop(start).take(input.getValue("limit").jsonPrimitive.int)
+        val end = start + page.size
+        return page to end.takeIf { it < items.size }?.toString()
+    }
+
+    /** The conversation as [principalId]'s inbox shows it: unread while another member's newest message is past their read receipt. */
+    private fun inboxItem(room: Room, principalId: String): InboxItem {
+        val latest = room.messages.values.maxByOrNull { counter(it.sequence) }
+        val read = room.receipts[principalId]?.readThroughSequence?.let { counter(it) } ?: 0L
+        val unread = latest != null && latest.authorId != principalId && counter(latest.sequence) > read
+        return InboxItem(room.id, "Room", latest?.createdAt, room.members.getValue(principalId).visibilityEpoch, latest, unread)
+    }
+
+    /** A [Fault.Reply] answer, with receipt evidence when the operation is a durable mutation. */
+    private fun crafted(operation: String, requestId: String, result: JsonElement): HttpResponse {
+        val field = operation.removePrefix("Communication").replaceFirstChar { it.lowercaseChar() }
+        if (operation !in MUTATIONS) return reply(field, envelope("ok", requestId, result, null, null))
+        val retained = Retained(JsonObject(emptyMap()), result, null, nextId(), stamp())
+        return reply(field, envelope("committed", requestId, result, retained, false))
     }
 
     /** Applies a durable mutation once per request ID; a repeat with the same payload replays the retained result. */
