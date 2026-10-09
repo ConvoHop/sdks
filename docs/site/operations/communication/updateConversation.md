@@ -107,3 +107,4 @@ mutation CommunicationUpdateConversation($context: RequestContextInput!, $input:
 | [Swift](../../swift/reference/operations.md) | Not wrapped by a method |
 | [Android](../../android/reference/operations.md) | Not wrapped by a method |
 | [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.updateConversation`](../../flutter/reference/convohop.md#communicationoperationsupdateconversation-method) |
+| [React Native](../../react-native/reference/operations.md) | Not wrapped by a method |

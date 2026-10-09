@@ -126,3 +126,4 @@ query CommunicationLiveSessions($context: RequestContextInput!, $input: LiveSess
 | [Swift](../../swift/reference/operations.md) | [`ConversationLive.history`](../../swift/reference/convohop.md#conversationlivehistory-method) |
 | [Android](../../android/reference/operations.md) | [`ConversationLive.history`](../../android/reference/android-core.md#conversationlivehistory-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`ConversationLive.history`](../../flutter/reference/convohop.md#conversationlivehistory-method), [`CommunicationOperations.liveSessions`](../../flutter/reference/convohop.md#communicationoperationslivesessions-method) |
+| [React Native](../../react-native/reference/operations.md) | [`ConversationLive.history`](../../react-native/reference/client.md#conversationlivehistory-method) |

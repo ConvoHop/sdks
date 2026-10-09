@@ -98,3 +98,4 @@ mutation CommunicationEndLiveSession($context: RequestContextInput!, $input: End
 | [Swift](../../swift/reference/operations.md) | [`LiveSessionHandle.end`](../../swift/reference/convohop.md#livesessionhandleend-method) |
 | [Android](../../android/reference/operations.md) | [`LiveSessionHandle.end`](../../android/reference/android-core.md#livesessionhandleend-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`LiveSessionHandle.end`](../../flutter/reference/convohop.md#livesessionhandleend-method), [`CommunicationOperations.endLiveSession`](../../flutter/reference/convohop.md#communicationoperationsendlivesession-method) |
+| [React Native](../../react-native/reference/operations.md) | [`LiveSessionHandle.end`](../../react-native/reference/client.md#livesessionhandleend-method) |

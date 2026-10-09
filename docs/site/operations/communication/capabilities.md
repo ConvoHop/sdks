@@ -118,3 +118,4 @@ query CommunicationCapabilities($context: RequestContextInput!) {
 | [Swift](../../swift/reference/operations.md) | [`ConvoHopClient.capabilities`](../../swift/reference/convohop.md#convohopclientcapabilities-method), [`ConvoHopTypingIndicator.textChanged`](../../swift/reference/convohop.md#convohoptypingindicatortextchanged-method), [`ConvoHopConversationModel.textChanged`](../../swift/reference/convohop.md#convohopconversationmodeltextchanged-method) |
 | [Android](../../android/reference/operations.md) | [`ConvoHopClient.capabilities`](../../android/reference/android-core.md#convohopclientcapabilities-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.capabilities`](../../flutter/reference/convohop.md#communicationoperationscapabilities-method) |
+| [React Native](../../react-native/reference/operations.md) | [`ConvoHopClient.capabilities`](../../react-native/reference/client.md#convohopclientcapabilities-method) |

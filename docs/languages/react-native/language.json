@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../spec/docs/language.schema.json",
+  "id": "react-native",
+  "name": "React Native",
+  "order": 90,
+  "status": "preview",
+  "codeFence": "ts",
+  "regionComment": "//",
+  "testedFences": ["ts", "typescript", "tsx", "mts", "cts", "js", "javascript", "jsx", "mjs", "cjs"],
+  "snippetRoots": ["examples/src"],
+  "packages": [
+    {
+      "name": "@convohop/react-native",
+      "slug": "react-native",
+      "layer": "client",
+      "summary": "React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom.",
+      "runtime": "React Native 0.76 or later with the New Architecture: Android 7.0 or later, and iOS 15.1 or later with React Native 0.84 or later.",
+      "source": "packages/react-native"
+    },
+    {
+      "name": "@convohop/react-native/media",
+      "slug": "media",
+      "layer": "client",
+      "summary": "Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @convohop/react-native.",
+      "runtime": "As @convohop/react-native, with @livekit/react-native 3, @livekit/react-native-webrtc 144.2 or later and livekit-client 2.22.3 or later.",
+      "source": "packages/react-native"
+    },
+    {
+      "name": "@convohop/client",
+      "slug": "client",
+      "layer": "client",
+      "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @convohop/react-native.",
+      "runtime": "React Native 0.76 or later, with the platform from @convohop/react-native.",
+      "source": "packages/client"
+    },
+    {
+      "name": "@convohop/react",
+      "slug": "react",
+      "layer": "client",
+      "summary": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @convohop/react-native/media: useMediaConnection needs a browser.",
+      "runtime": "React 18 or later, in React Native 0.76 or later.",
+      "source": "packages/react"
+    }
+  ],
+  "quickstarts": ["client", "push", "calling"],
+  "operations": "operations.json",
+  "extract": {
+    "command": ["node", "tools/docgen/extractors/typescript.mjs", "docs/languages/react-native/language.json"]
+  },
+  "test": {
+    "install": ["npm", "ci", "--prefix", "docs/languages/react-native/examples", "--ignore-scripts", "--omit=optional", "--no-audit", "--no-fund"],
+    "command": ["npm", "test", "--prefix", "docs/languages/react-native/examples"]
+  }
+}

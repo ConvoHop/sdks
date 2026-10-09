@@ -103,3 +103,4 @@ query CommunicationMembers($context: RequestContextInput!, $input: MembersReques
 | [Swift](../../swift/reference/operations.md) | [`ConvoHopClient.members`](../../swift/reference/convohop.md#convohopclientmembers-method) |
 | [Android](../../android/reference/operations.md) | [`ConvoHopClient.members`](../../android/reference/android-core.md#convohopclientmembers-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.members`](../../flutter/reference/convohop.md#communicationoperationsmembers-method) |
+| [React Native](../../react-native/reference/operations.md) | [`ConvoHopClient.members`](../../react-native/reference/client.md#convohopclientmembers-method) |

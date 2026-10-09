@@ -517,6 +517,12 @@ What runs in CI, without a device:
   and also against the dev stack when the repository has one configured.
 - A type check of the example app, and a test that its dependencies match
   the versions the package is tested with.
+- The samples in the [React Native docs](site/react-native/index.md), in
+  the workflow's docs job on Node.js 22 and 24. It checks that
+  `docs/languages/react-native/surface.json` matches the built
+  declarations, type-checks every sample, and runs the client samples
+  against the conformance mock and the push samples against the native
+  modules' stand-ins.
 - The Android modules' JVM tests, and a debug build of the example for
   arm64-v8a, in the workflow's Android job. The tests cover the values and
   error codes sent to JavaScript, call snapshots, signed notification

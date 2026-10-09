@@ -101,6 +101,13 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationscapabilities-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.capabilities",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientcapabilities-method"
+          }
         ]
       }
     },
@@ -289,6 +296,28 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsroute-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.initialize",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientinitialize-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.refreshSession",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientrefreshsession-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.scheduleSessionRefresh",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientschedulesessionrefresh-method"
+          },
+          {
+            "ref": "@convohop/react#useSessionRefresh",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#usesessionrefresh-function"
+          }
         ]
       }
     },
@@ -403,6 +432,28 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.currentSession",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationscurrentsession-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.initialize",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientinitialize-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.refreshSession",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientrefreshsession-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.scheduleSessionRefresh",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientschedulesessionrefresh-method"
+          },
+          {
+            "ref": "@convohop/react#useSessionRefresh",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#usesessionrefresh-function"
           }
         ]
       }
@@ -674,6 +725,43 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsgetconversation-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.getConversation",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientgetconversation-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.get",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationhandleget-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewresync-method"
+          }
         ]
       }
     },
@@ -796,6 +884,13 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.members",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsmembers-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.members",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientmembers-method"
           }
         ]
       }
@@ -1025,6 +1120,53 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsmessages-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.messages",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientmessages-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.messages.list",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationhandlemessageslist-property"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.loadOlder",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreloadolder-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewresync-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.loadOlder",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewloadolder-method"
+          }
         ]
       }
     },
@@ -1208,6 +1350,38 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsgetmessage-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.getMessage",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientgetmessage-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewresync-method"
+          }
         ]
       }
     },
@@ -1363,6 +1537,48 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsevents-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.events",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientevents-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.watch",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewresync-method"
+          }
         ]
       }
     },
@@ -1462,6 +1678,38 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.receipts",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsreceipts-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.receipts",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientreceipts-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewresync-method"
           }
         ]
       }
@@ -1586,6 +1834,13 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsinbox-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.inbox",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientinbox-method"
+          }
         ]
       }
     },
@@ -1708,6 +1963,13 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.search",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationssearch-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.search",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientsearch-method"
           }
         ]
       }
@@ -2062,6 +2324,48 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsresolverequest-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.requests.resolve",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientrequestsresolve-property"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.requests.retry",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientrequestsretry-property"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.recoverPending",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientrecoverpending-method"
+          },
+          {
+            "ref": "@convohop/client#Outbox.send",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#outboxsend-method"
+          },
+          {
+            "ref": "@convohop/client#Outbox.resend",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#outboxresend-method"
+          },
+          {
+            "ref": "@convohop/client#Outbox.flush",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#outboxflush-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.send",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoresend-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.send",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewsend-method"
+          }
         ]
       }
     },
@@ -2138,7 +2442,8 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsgetoperation-method"
           }
-        ]
+        ],
+        "react-native": []
       }
     },
     {
@@ -2230,6 +2535,13 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.conversationMute",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsconversationmute-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConversationHandle.mute.get",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationhandlemuteget-property"
           }
         ]
       }
@@ -2333,6 +2645,23 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.currentLiveSession",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationscurrentlivesession-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConversationLive.current",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationlivecurrent-method"
+          },
+          {
+            "ref": "@convohop/react#useLiveSession",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#uselivesession-function"
+          },
+          {
+            "ref": "@convohop/react#LiveSessionView.refresh",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#livesessionviewrefresh-method"
           }
         ]
       }
@@ -2557,6 +2886,43 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationslivesession-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.liveSession",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientlivesession-method"
+          },
+          {
+            "ref": "@convohop/client#LiveSessionHandle.get:static",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livesessionhandleget-static-method"
+          },
+          {
+            "ref": "@convohop/client#LiveSessionHandle.get",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livesessionhandleget-method"
+          },
+          {
+            "ref": "@convohop/client#LiveSessionHandle.participation",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livesessionhandleparticipation-method"
+          },
+          {
+            "ref": "@convohop/client#LiveStartOperation.ready",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livestartoperationready-method"
+          },
+          {
+            "ref": "@convohop/client#LiveParticipationHandle.get",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#liveparticipationhandleget-method"
+          },
+          {
+            "ref": "@convohop/react-native#watchRingingCalls",
+            "package": "@convohop/react-native",
+            "page": "../react-native/reference/react-native.md#watchringingcalls-function"
+          }
         ]
       }
     },
@@ -2679,6 +3045,13 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.liveSessions",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationslivesessions-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConversationLive.history",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationlivehistory-method"
           }
         ]
       }
@@ -2803,6 +3176,13 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationslivesessionparticipants-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#LiveSessionHandle.participants",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livesessionhandleparticipants-method"
+          }
         ]
       }
     },
@@ -2847,6 +3227,18 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.liveSessionAlerts",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationslivesessionalerts-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.liveAlerts.list",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientlivealertslist-property"
+          },
+          {
+            "ref": "@convohop/react-native#watchRingingCalls",
+            "package": "@convohop/react-native",
+            "page": "../react-native/reference/react-native.md#watchringingcalls-function"
           }
         ]
       }
@@ -3000,6 +3392,33 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.liveSessionOperation",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationslivesessionoperation-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#LiveStartOperation.get",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livestartoperationget-method"
+          },
+          {
+            "ref": "@convohop/client#LiveStartOperation.completed",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livestartoperationcompleted-method"
+          },
+          {
+            "ref": "@convohop/client#LiveStartOperation.ready",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livestartoperationready-method"
+          },
+          {
+            "ref": "@convohop/client#LiveEndOperation.get",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#liveendoperationget-method"
+          },
+          {
+            "ref": "@convohop/client#LiveEndOperation.completed",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#liveendoperationcompleted-method"
           }
         ]
       }
@@ -3422,7 +3841,8 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsrevokesession-method"
           }
-        ]
+        ],
+        "react-native": []
       }
     },
     {
@@ -3565,7 +3985,8 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsupdateconversation-method"
           }
-        ]
+        ],
+        "react-native": []
       }
     },
     {
@@ -4051,6 +4472,43 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationssendmessage-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.send",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientsend-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.messages.send",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationhandlemessagessend-property"
+          },
+          {
+            "ref": "@convohop/client#Outbox.send",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#outboxsend-method"
+          },
+          {
+            "ref": "@convohop/client#Outbox.resend",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#outboxresend-method"
+          },
+          {
+            "ref": "@convohop/client#Outbox.flush",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#outboxflush-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.send",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoresend-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.send",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewsend-method"
+          }
         ]
       }
     },
@@ -4168,6 +4626,18 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.editMessage",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationseditmessage-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.edit",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientedit-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.messages.edit",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationhandlemessagesedit-property"
           }
         ]
       }
@@ -4287,6 +4757,18 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsdeletemessage-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.delete",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientdelete-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationHandle.messages.delete",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationhandlemessagesdelete-property"
+          }
         ]
       }
     },
@@ -4381,6 +4863,38 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.reportReceipt",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsreportreceipt-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.reportRead",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientreportread-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.reportDelivered",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientreportdelivered-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.markRead",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoremarkread-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.markDelivered",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoremarkdelivered-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.markRead",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewmarkread-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.markDelivered",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewmarkdelivered-method"
           }
         ]
       }
@@ -4511,6 +5025,43 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.typing",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationstyping-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.typing",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclienttyping-method"
+          },
+          {
+            "ref": "@convohop/client#TypingIndicator.input",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#typingindicatorinput-method"
+          },
+          {
+            "ref": "@convohop/client#TypingIndicator.stop",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#typingindicatorstop-method"
+          },
+          {
+            "ref": "@convohop/client#TypingIndicator.dispose",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#typingindicatordispose-method"
+          },
+          {
+            "ref": "@convohop/react#useTyping",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#usetyping-function"
+          },
+          {
+            "ref": "@convohop/react#TypingControls.input",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#typingcontrolsinput-method"
+          },
+          {
+            "ref": "@convohop/react#TypingControls.stop",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#typingcontrolsstop-method"
           }
         ]
       }
@@ -4667,6 +5218,13 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationssetconversationmute-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConversationHandle.mute.set",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationhandlemuteset-property"
+          }
         ]
       }
     },
@@ -4752,6 +5310,23 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsstartlivesession-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConversationLive.startVoice",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationlivestartvoice-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationLive.startVideo",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationlivestartvideo-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationLive.startBroadcast",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationlivestartbroadcast-method"
+          }
         ]
       }
     },
@@ -4801,6 +5376,13 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.joinLiveSession",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsjoinlivesession-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#LiveSessionHandle.join",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livesessionhandlejoin-method"
           }
         ]
       }
@@ -4895,6 +5477,13 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsalertlivesession-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#LiveSessionHandle.alerts.send",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livesessionhandlealertssend-property"
+          }
         ]
       }
     },
@@ -4944,6 +5533,13 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.leaveLiveSession",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsleavelivesession-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#LiveParticipationHandle.leave",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#liveparticipationhandleleave-method"
           }
         ]
       }
@@ -5038,6 +5634,13 @@
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationsendlivesession-method"
           }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#LiveSessionHandle.end",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#livesessionhandleend-method"
+          }
         ]
       }
     },
@@ -5127,6 +5730,13 @@
             "ref": "package:convohop/convohop.dart#CommunicationOperations.liveSessionCredentials",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#communicationoperationslivesessioncredentials-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#LiveParticipationHandle.connectWith",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#liveparticipationhandleconnectwith-method"
           }
         ]
       }
@@ -5322,6 +5932,43 @@
             "ref": "package:convohop/convohop.dart#ConversationStore.resync",
             "package": "package:convohop/convohop.dart",
             "page": "../flutter/reference/convohop.md#conversationstoreresync-method"
+          }
+        ],
+        "react-native": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.watch",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../react-native/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../react-native/reference/react.md#conversationviewresync-method"
           }
         ]
       }

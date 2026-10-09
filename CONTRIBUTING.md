@@ -215,13 +215,15 @@ The [docs pipeline](docs/docs-pipeline.md) generates `docs/site/` from the
 IR, the operation snippets and each language's inputs in `docs/languages/`.
 Those inputs include the language's public API, which an extractor reads
 from the built packages into `surface.json`. After you change the schemas,
-the annotations, a package's public API or a docs input, regenerate both:
+the annotations, a package's public API or a docs input, regenerate both.
+The React Native docs document `@convohop/client` and `@convohop/react` as
+well as `@convohop/react-native`, so refresh them with the TypeScript docs:
 
 ```sh
-npm run build                             # the TypeScript extractor reads the built declarations
-npm run extract:docs -- typescript        # refresh the language's surface.json
-npm run generate:docs                     # regenerate docs/site
-npm run test:docs -- --install typescript # compile and run the language's example code
+npm run build                                          # the TypeScript extractor reads the built declarations
+npm run extract:docs -- typescript react-native        # refresh both languages' surface.json
+npm run generate:docs                                  # regenerate docs/site
+npm run test:docs -- --install typescript react-native # compile and run their example code
 ```
 
 CI fails if `surface.json` or `docs/site` is stale. Resolve conflicts in
@@ -327,7 +329,9 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   [React Native workflow](.github/workflows/react-native.yml) also runs the
   Android modules' JVM tests and builds the example app for Android and the
   iOS simulator. See [Testing](docs/react-native.md#testing) for what isn't
-  verified.
+  verified. The React Native docs examples' tests, in
+  `docs/languages/react-native/examples/test/`, run the samples on Node.js
+  with the same stand-ins.
 - The docs pipeline's tests live in `tools/docgen/test/`. Run them with
   `npm run test:docgen`. Code in the docs is tested too: put it in a
   language's example code and include it by region, as

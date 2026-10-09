@@ -77,3 +77,4 @@ query CommunicationLiveSessionAlerts($context: RequestContextInput!, $input: Liv
 | [Swift](../../swift/reference/operations.md) | [`ConvoHopClient.liveAlerts`](../../swift/reference/convohop.md#convohopclientlivealerts-method) |
 | [Android](../../android/reference/operations.md) | [`ConvoHopClient.liveAlerts.list`](../../android/reference/android-core.md#convohopclientlivealertslist-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`LiveAlerts.list`](../../flutter/reference/convohop.md#livealertslist-method), [`CommunicationOperations.liveSessionAlerts`](../../flutter/reference/convohop.md#communicationoperationslivesessionalerts-method) |
+| [React Native](../../react-native/reference/operations.md) | [`ConvoHopClient.liveAlerts.list`](../../react-native/reference/client.md#convohopclientlivealertslist-property), [`watchRingingCalls`](../../react-native/reference/react-native.md#watchringingcalls-function) |
