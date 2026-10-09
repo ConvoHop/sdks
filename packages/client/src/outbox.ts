@@ -4,7 +4,7 @@ import {
 } from "@convohop/core";
 import { jsonClone, randomUUID } from "@convohop/core/internal";
 import type { ConvoHopClient } from "./client.js";
-import { connectivityOf, lifecycleOf, listen } from "./platform.js";
+import { abortReason, connectivityOf, lifecycleOf, listen, storageWrites, throwIfAborted } from "./platform.js";
 import { asError, frozen, notify } from "./util.js";
 
 /**
@@ -36,9 +36,19 @@ export interface OutboxOptions {
   /**
    * Keep unsent messages, including their text, in the client's `recoveryStorage` or `asyncRecoveryStorage` across
    * reloads. Off by default; use one persistent outbox per client. Messages that may have been submitted are
-   * recovered, never re-sent as new. Asynchronous storage loads saved messages in the background; they are sent
-   * before messages added meanwhile, and {@link Outbox.flush} waits for them. Until they load, the limit of 100
-   * unsent messages counts only messages added meanwhile, so the outbox can hold up to 200.
+   * recovered, never re-sent as new.
+   *
+   * Each running persistent outbox of a user saves its messages separately, so tabs sharing `localStorage` keep each
+   * other's. Up to 16 run at once; they coordinate through Web Locks, or within one JavaScript context where the
+   * runtime has none. When one stops, such as when its tab closes or reloads, another running outbox takes over the
+   * messages it left unsent; if none can yet, the next one to start, come back online or return to the foreground
+   * does. An outbox created in the same JavaScript context while another closes, such as on a React remount,
+   * continues with the closing one's messages instead. While it runs, the outbox holds a Web Lock, so Chromium won't
+   * keep the page in its back/forward cache; close the outbox on `pagehide` if you need that.
+   *
+   * Saved messages load in the background; they are sent before messages added meanwhile, and
+   * {@link Outbox.flush} waits for them. {@link Outbox.send} refuses a message while 100 are unsent, but loading or
+   * taking over saved messages can bring an outbox up to 200.
    */
   persist?: boolean;
   /** Called when an entry fails and when persistence or a listener throws. */
@@ -65,6 +75,68 @@ const maxUnsent = 100, maxSent = 100;
 const waiting = new Set(["UNAUTHENTICATED", "SESSION_REFRESH_REQUIRED", "RATE_LIMITED"]);
 const unrecoverable = new Set(["IDEMPOTENCY_CONFLICT", "INCARNATION_MISMATCH", "CREDENTIAL_REQUIRED"]);
 
+/** Running persistent outboxes of one user each save to their own slot: the base key, then `${base}:1` and up. */
+const slotCount = 16;
+interface Slot { readonly key: string; release(): Promise<void> }
+/** The part of the Web Locks API the outbox uses. */
+interface Locks {
+  request(name: string, options: { ifAvailable?: boolean; signal?: AbortSignal },
+    callback: (lock: unknown) => Promise<void> | undefined): Promise<unknown>;
+}
+/** The requests waiting for each held lock. */
+const memoryQueues = new Map<string, (() => void)[]>();
+/** Locks within this JavaScript context, for runtimes without Web Locks, such as React Native. */
+const memoryLocks: Locks = {
+  async request(name, { ifAvailable, signal }, callback) {
+    throwIfAborted(signal);
+    const queue = memoryQueues.get(name);
+    if (!queue) memoryQueues.set(name, []);
+    else if (ifAvailable) return callback(null);
+    else {
+      await new Promise<void>((resolve, reject) => {
+        const grant = (): void => { signal?.removeEventListener("abort", abort); resolve(); };
+        const abort = (): void => { const index = queue.indexOf(grant); if (index >= 0) queue.splice(index, 1); reject(abortReason(signal!)); };
+        queue.push(grant);
+        signal?.addEventListener("abort", abort, { once: true });
+      });
+    }
+    try { return await callback({ name }); } finally {
+      const next = memoryQueues.get(name)?.shift();
+      if (next) next(); else memoryQueues.delete(name);
+    }
+  },
+};
+function webLocks(): Locks | undefined {
+  try {
+    const locks = (globalThis as { navigator?: { locks?: Partial<Locks> } }).navigator?.locks;
+    return typeof locks?.request === "function" ? locks as Locks : undefined;
+  } catch {
+    return undefined;
+  }
+}
+/** Takes `name` unless someone holds it. Resolves the release, which settles once the lock is free again. */
+function tryLock(locks: Locks, name: string): Promise<(() => Promise<void>) | undefined> {
+  return new Promise((resolve, reject) => {
+    const request = locks.request(name, { ifAvailable: true }, lock => {
+      if (!lock) { resolve(undefined); return undefined; }
+      return new Promise<void>(free => { resolve(() => { free(); return released; }); });
+    });
+    const released = request.then(() => undefined, () => undefined);
+    request.catch(reject);
+  });
+}
+/** A closing persistent outbox of this context. An outbox created meanwhile becomes its heir and gets its slot. */
+interface Handoff {
+  done: Promise<void>;
+  /** Whether the slot was passed on or released, so it's too late to become the heir. */
+  ended: boolean;
+  heir?: (slot: Slot | undefined) => void;
+}
+/** This context's closing persistent outboxes by storage key. */
+const closing = new Map<string, Set<Handoff>>();
+/** This context's running persistent outboxes by storage key, told which slot each one claims. */
+const peers = new Map<string, Set<(key: string) => void>>();
+
 /** Whether a definitive rejection may pass: waiting for a session, quota or capacity isn't refusing the message. */
 function retryable(problem: ConvoHopProblem): boolean {
   return waiting.has(problem.code) || problem.status === 0 || problem.status === 408 || problem.status === 429 || problem.status >= 500;
@@ -81,13 +153,27 @@ export class Outbox {
   readonly #lanes = new Map<string, Promise<void>>();
   readonly #connectivity: Connectivity;
   readonly #unsubscribe: (() => void)[] = [];
-  readonly #key: string | undefined;
+  /** The storage key of the user's first slot, when persistent. */
+  readonly #base: string | undefined;
+  /** The storage keys of the user's slots, when persistent. */
+  readonly #keys: readonly string[] = [];
+  readonly #locks: Locks = webLocks() ?? memoryLocks;
   readonly #onError: ((error: Error) => void) | undefined;
   #entries: readonly OutboxEntry[] | undefined;
   #timer: ReturnType<typeof setTimeout> | undefined;
   #closed = false;
-  /** Loading saved entries from asynchronous storage; nothing is sent or saved until it settles. */
+  /** Where this outbox saves; none until claimed, after it's released, or when every slot is taken. */
+  #slot: Slot | undefined;
+  /** Whether the slot's saved entries have loaded; saves wait until they have. */
+  #loaded = false;
+  /** Claiming a slot and loading saved entries, then taking over abandoned ones; nothing is sent until it settles. */
   #restoring: Promise<void> | undefined;
+  /** Taking over entries other outboxes left behind. */
+  #adopting: Promise<void> | undefined;
+  /** Waiting requests for the slots other running outboxes hold, to take over what each leaves when it stops. */
+  readonly #watching = new Map<string, AbortController>();
+  /** Takeovers of slots whose watch was granted. */
+  readonly #takes = new Set<Promise<void>>();
   #deferredSave = false;
   #writing: Promise<void> = Promise.resolve();
   constructor(client: ConvoHopClient, options: OutboxOptions = {}) {
@@ -96,20 +182,28 @@ export class Outbox {
     if (options.persist) {
       if (!client.storage && !client.asyncStorage)
         throw new TypeError("A persistent outbox requires the client's recoveryStorage or asyncRecoveryStorage");
-      const key = this.#key = `convohop.outbox:${client.projectId}:${client.principalId}`;
-      if (client.storage) {
-        let text: unknown = null;
-        try { text = client.storage.getItem(key); } catch (error) { this.#report(error); }
-        for (const item of this.#parse(text)) this.#items.set(item.requestId, item);
-      } else {
-        const storage = client.asyncStorage!;
-        this.#restoring = Promise.resolve().then(() => this.#restore(storage, key));
-      }
+      const base = this.#base = `convohop.outbox:${client.projectId}:${client.principalId}`;
+      this.#keys = Array.from({ length: slotCount }, (_, index) => index ? `${base}:${index}` : base);
     }
     try {
-      this.#unsubscribe.push(listen(this.#connectivity, online => { if (online) this.#wake(); }));
-      this.#unsubscribe.push(listen(lifecycleOf(client.platform), state => { if (state === "active") this.#pump(); }));
+      this.#unsubscribe.push(listen(this.#connectivity, online => { if (online) { this.#wake(); this.#rescan(); } }));
+      this.#unsubscribe.push(listen(lifecycleOf(client.platform), state => {
+        if (state === "active") { this.#pump(); this.#rescan(); }
+      }));
+      if (this.#base !== undefined) {
+        // Other pages saving to slots this outbox doesn't watch yet, such as a tab opened after it started.
+        this.#unsubscribe.push(storageWrites(key => { if (this.#keys.includes(key)) this.#watch(key); }));
+        const base = this.#base, running = peers.get(base) ?? new Set<(key: string) => void>();
+        const watch = (key: string): void => this.#watch(key);
+        peers.set(base, running.add(watch));
+        this.#unsubscribe.push(() => { running.delete(watch); if (!running.size && peers.get(base) === running) peers.delete(base); });
+      }
     } catch (error) { this.close(); throw error; }
+    if (this.#base !== undefined) {
+      const handoffs = [...closing.get(this.#base) ?? []], handoff = handoffs.find(handoff => !handoff.ended && !handoff.heir);
+      const inherited = handoff && new Promise<Slot | undefined>(resolve => { handoff.heir = resolve; });
+      this.#restoring = this.#start(handoffs.map(handoff => handoff.done), inherited);
+    }
     this.#arm();
   }
   /** A frozen snapshot in send order, replaced on every change. */
@@ -155,19 +249,33 @@ export class Outbox {
    */
   async flush(): Promise<void> {
     await this.#restoring;
+    await this.#adopting;
     for (const item of this.#items.values()) item.notBefore = 0;
     this.#pump();
     while (this.#lanes.size) await Promise.all([...this.#lanes.values()]);
   }
-  /** Stops sending. Persisted entries stay saved, and the client keeps its recovery state. */
+  /**
+   * Stops sending. Persisted entries stay saved, and the client keeps its recovery state. Once its sends and saves
+   * settle, a persistent outbox of the user created meanwhile in this JavaScript context continues with its saved
+   * entries; otherwise another running one, or the next to start, takes them over.
+   */
   close(): void {
     if (this.#closed) return;
     this.#closed = true;
     for (const unsubscribe of this.#unsubscribe.splice(0)) {
       try { unsubscribe(); } catch (error) { this.#report(error); }
     }
+    for (const watch of this.#watching.values()) watch.abort();
     if (this.#timer !== undefined) clearTimeout(this.#timer);
     this.#timer = undefined;
+    const base = this.#base;
+    if (base === undefined) return;
+    const handoffs = closing.get(base) ?? new Set<Handoff>(), handoff: Handoff = { done: Promise.resolve(), ended: false };
+    handoff.done = this.#release(handoff).catch((error: unknown) => this.#report(error)).finally(() => {
+      handoffs.delete(handoff);
+      if (!handoffs.size && closing.get(base) === handoffs) closing.delete(base);
+    });
+    closing.set(base, handoffs.add(handoff));
   }
   #enqueue(conversationId: string, text: string, props: ProtocolObject): OutboxEntry {
     if (this.#closed) throw new Error("The outbox is closed");
@@ -325,40 +433,160 @@ export class Outbox {
     notify(this.#listeners, error => this.#report(error));
   }
   /**
-   * Saves the unsent entries as they are now. Failures go to `onError`. Asynchronous writes run in order; the
-   * returned promise settles when this one has.
+   * Saves the unsent entries as they are now to this outbox's slot, resolving whether they were saved. Failures go
+   * to `onError`. Asynchronous writes run in order; the returned promise settles when this one has.
    */
-  #save(): Promise<void> {
-    const key = this.#key;
-    if (key === undefined) return Promise.resolve();
-    if (this.#restoring) { this.#deferredSave = true; return Promise.resolve(); }
+  #save(): Promise<boolean> {
+    if (this.#base === undefined) return Promise.resolve(true);
+    if (!this.#loaded) { this.#deferredSave = true; return Promise.resolve(false); }
+    const key = this.#slot?.key;
+    if (key === undefined) return Promise.resolve(false);
     const saved = [...this.#items.values()].filter(item => item.status !== "sent").map(item => ({
       requestId: item.requestId, conversationId: item.conversationId, text: item.text, props: item.props, createdAt: item.createdAt,
       attempted: item.attempted, ...(item.status === "failed" ? { failed: true } : {}), ...(item.unconfirmed ? { unconfirmed: true } : {}),
     }));
     const text = saved.length ? JSON.stringify(saved) : undefined, storage = this.client.storage;
     if (storage) {
-      try { if (text) storage.setItem(key, text); else storage.removeItem(key); }
-      catch (error) { this.#report(error); }
-      return Promise.resolve();
+      try {
+        if (text) storage.setItem(key, text); else storage.removeItem(key);
+        return Promise.resolve(true);
+      } catch (error) {
+        this.#report(error);
+        return Promise.resolve(false);
+      }
     }
     const asyncStorage: AsyncRecoveryStorage = this.client.asyncStorage!;
-    const write = this.#writing.then(() => text ? asyncStorage.setItem(key, text) : asyncStorage.removeItem(key))
-      .catch((error: unknown) => this.#report(error));
-    this.#writing = write;
+    const write = this.#writing.then(async () => {
+      if (text) await asyncStorage.setItem(key, text); else await asyncStorage.removeItem(key);
+      return true;
+    }).catch((error: unknown) => { this.#report(error); return false; });
+    this.#writing = write.then(() => undefined);
     return write;
   }
-  async #restore(storage: AsyncRecoveryStorage, key: string): Promise<void> {
-    let text: unknown = null;
-    try { text = await storage.getItem(key); } catch (error) { this.#report(error); }
-    const restored = this.#parse(text), added = [...this.#items.values()];
-    this.#restoring = undefined;
-    // Saved entries were queued first, so they keep their place ahead of entries added while they loaded.
-    this.#items.clear();
-    for (const item of restored) this.#items.set(item.requestId, item);
-    for (const item of added) if (!this.#items.has(item.requestId)) this.#items.set(item.requestId, item);
+  /**
+   * Takes over the slot of an outbox of this context that was closing when this one was created, or else claims one
+   * no running outbox holds, once the earlier closing outboxes have settled. Loads the slot's entries, then takes
+   * over entries other outboxes left.
+   */
+  async #start(earlier: readonly Promise<void>[], inherited: Promise<Slot | undefined> | undefined): Promise<void> {
+    let readable = false;
+    try {
+      this.#slot = await inherited;
+      await Promise.all(earlier);
+      const slot = this.#slot ??= await this.#claim();
+      if (!slot) {
+        this.#report(new Error(`${slotCount} outboxes already save this user's messages, so this one keeps them only in memory`));
+      } else {
+        let text: unknown = null;
+        try { text = await this.#read(slot.key); readable = true; } catch (error) { this.#report(error); }
+        const restored = this.#parse(text), added = [...this.#items.values()];
+        // Saved entries were queued first, so they keep their place ahead of entries added while they loaded.
+        this.#items.clear();
+        for (const item of restored) this.#items.set(item.requestId, item);
+        for (const item of added) if (!this.#items.has(item.requestId)) this.#items.set(item.requestId, item);
+      }
+    } catch (error) { this.#report(error); }
+    this.#loaded = true;
     if (this.#deferredSave) { this.#deferredSave = false; void this.#save(); }
-    this.#changed(); this.#pump(); this.#arm();
+    this.#changed();
+    if (!this.#closed) {
+      // Pages get `storage` events for other pages' slots; outboxes of this context learn of this one's here.
+      const key = this.#slot?.key;
+      if (key !== undefined) for (const watch of [...peers.get(this.#base!) ?? []]) watch(key);
+      // Storage that just failed would fail again; coming back online or to the foreground looks again.
+      if (readable) await this.#adopt();
+    }
+    this.#restoring = undefined;
+    this.#pump(); this.#arm();
+  }
+  async #claim(): Promise<Slot | undefined> {
+    for (const key of this.#keys) {
+      const release = await tryLock(this.#locks, key);
+      if (release) return { key, release };
+    }
+    return undefined;
+  }
+  /** Looks again for abandoned entries when the app comes back online or to the foreground. */
+  #rescan(): void {
+    if (this.#restoring || this.#adopting || !this.#slot || this.#closed) return;
+    void this.#adopt().then(() => { this.#pump(); this.#arm(); });
+  }
+  /** Takes over the entries saved in slots no running outbox holds, such as a closed tab's. */
+  #adopt(): Promise<void> {
+    if (!this.#adopting) {
+      this.#adopting = this.#scan().catch((error: unknown) => this.#report(error)).finally(() => { this.#adopting = undefined; });
+    }
+    return this.#adopting;
+  }
+  /** Takes over the slots no outbox holds and watches the others. Stops at the first storage failure. */
+  async #scan(): Promise<void> {
+    for (const key of this.#keys) {
+      const own = this.#slot;
+      if (this.#closed || !own) return;
+      if (key === own.key || this.#watching.has(key)) continue;
+      const release = await tryLock(this.#locks, key);
+      if (!release) { this.#watch(key); continue; }
+      try { await this.#take(key); } finally { void release(); }
+    }
+  }
+  /** Waits for the slot `key`, which another running outbox holds, to take over what that outbox leaves unsent. */
+  #watch(key: string): void {
+    if (this.#closed || !this.#loaded || !this.#slot || key === this.#slot.key || this.#watching.has(key)) return;
+    const watch = new AbortController();
+    this.#watching.set(key, watch);
+    this.#locks.request(key, { signal: watch.signal }, () => {
+      // The lock may be granted just as this outbox closes; the slot's entries then wait for another one.
+      if (this.#closed) return undefined;
+      const take: Promise<void> = this.#take(key).catch((error: unknown) => this.#report(error)).finally(() => { this.#takes.delete(take); });
+      this.#takes.add(take);
+      return take;
+    }).then(() => { this.#pump(); this.#arm(); }, (error: unknown) => { if (!watch.signal.aborted) this.#report(error); })
+      .finally(() => { if (this.#watching.get(key) === watch) this.#watching.delete(key); });
+  }
+  /**
+   * Moves the entries saved under `key`, whose lock this outbox holds, into its own slot, then removes them there.
+   * Rejects when the slot can't be read.
+   */
+  async #take(key: string): Promise<void> {
+    const text = await this.#read(key);
+    if (this.#closed || text === null || text === undefined) return;
+    const found = this.#parse(text).filter(item => !this.#items.has(item.requestId));
+    if (found.length) {
+      let unsent = found.length;
+      for (const item of this.#items.values()) if (item.status !== "sent") unsent++;
+      // Left for a later scan, when this outbox has room.
+      if (unsent > 2 * maxUnsent) return;
+      for (const item of found) this.#items.set(item.requestId, item);
+      this.#changed();
+      // The other slot keeps its copy until this one holds the entries.
+      if (!await this.#save()) return;
+    }
+    try { await this.#remove(key); } catch (error) { this.#report(error); }
+  }
+  /** Once loading, takeovers, sends and saves have settled, passes the slot to the heir or else releases it. */
+  async #release(handoff: Handoff): Promise<void> {
+    try {
+      await this.#restoring;
+      await this.#adopting;
+      while (this.#takes.size) await Promise.all([...this.#takes]);
+      while (this.#lanes.size) await Promise.all([...this.#lanes.values()]);
+      // A discard after close still saves; it must land before another outbox can claim the slot.
+      let writing: Promise<void>;
+      do { writing = this.#writing; await writing; } while (writing !== this.#writing);
+    } finally {
+      const slot = this.#slot;
+      this.#slot = undefined;
+      handoff.ended = true;
+      if (handoff.heir) handoff.heir(slot); else await slot?.release();
+    }
+  }
+  async #read(key: string): Promise<unknown> {
+    const storage = this.client.storage;
+    return storage ? storage.getItem(key) : this.client.asyncStorage!.getItem(key);
+  }
+  async #remove(key: string): Promise<void> {
+    const storage = this.client.storage;
+    if (storage) storage.removeItem(key); else await this.client.asyncStorage!.removeItem(key);
   }
   /** Saved entries from storage. Unreadable data and entries go to `onError` and are skipped. */
   #parse(text: unknown): Item[] {
