@@ -48,7 +48,7 @@ type exchange struct {
 }
 
 // response is the test authority's answer. A zero status is 200, and a nil
-// body is a successful reply with a null result.
+// body is the [answer] to the request.
 type response struct {
 	status int
 	header http.Header
@@ -140,7 +140,7 @@ func (a *authority) serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if out.body == nil {
-		out.body = success(op, requestID, nil)
+		out.body = answer(ex)
 	}
 	var payload []byte
 	switch b := out.body.(type) {
@@ -185,7 +185,8 @@ func replying(id string, result func(*exchange) any) func(*exchange) response {
 	}
 }
 
-// success is a successful reply of op to requestID carrying result.
+// success is a successful reply of op to requestID carrying result. A nil
+// result leaves the reply's result null.
 func success(op *operation, requestID string, result any) map[string]any {
 	name, _ := unwrapType(op.result)
 	reply := placeholder(name).(map[string]any)
@@ -207,6 +208,37 @@ func success(op *operation, requestID string, result any) map[string]any {
 		set("result", result)
 	}
 	return map[string]any{"data": map[string]any{op.field: reply}}
+}
+
+// answer is a successful reply to ex. When the operation requires a result,
+// it carries a placeholder result that echoes the request's ID fields.
+func answer(ex *exchange) map[string]any {
+	if !ex.op.requireResult {
+		return success(ex.op, ex.requestID, nil)
+	}
+	result := validResult(ex.op)
+	if record, ok := result.(map[string]any); ok {
+		for _, name := range ex.op.echo {
+			if value, ok := ex.input[name]; ok {
+				if _, declared := record[name]; declared {
+					record[name] = value
+				}
+			}
+		}
+	}
+	return success(ex.op, ex.requestID, result)
+}
+
+// validResult is a placeholder of the result in op's reply envelope.
+func validResult(op *operation) any {
+	name, _ := unwrapType(op.result)
+	for _, field := range catalog.objects[name] {
+		if field.name == "result" {
+			inner, _ := unwrapType(field.typ)
+			return placeholder(inner)
+		}
+	}
+	panic(op.id + " has no result")
 }
 
 // sendInput is a sendMessage input for the test conversation.

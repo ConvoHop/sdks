@@ -130,6 +130,13 @@ go doc github.com/ConvoHop/sdks/go ProjectClient.SendMessage
   empty. Page sizes, such as `Limit`, must be 1 to 100.
 - The SDK checks each input before sending it. An input the operation
   doesn't accept fails with `INVALID_REQUEST`, and nothing is sent.
+- A successful reply carries its `Result`, with two exceptions.
+  `CurrentLiveSession`'s is nil when no live session is active. A
+  long-running operation's may be nil: poll the reply's `Operation`, as its
+  doc comment says. These are `EndLiveSession` and every Management API
+  mutation except `CreateOrganization`, `CredentialPermit`, `PauseOperation`
+  and `ResumeOperation`. Any other reply without its result is malformed and
+  fails with `INVALID_RESPONSE` (see [Errors](#errors)).
 
 ### Pages
 

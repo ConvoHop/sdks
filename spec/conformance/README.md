@@ -42,6 +42,7 @@ flowchart LR
 | [`conformance/drivers/android/`](../../conformance/drivers/android) | The driver for the [Android client SDK](../../android/README.md). |
 | [`conformance/drivers/dart/`](../../conformance/drivers/dart) | The driver for the [Flutter SDK](../../flutter/README.md). |
 | [`conformance/drivers/react-native/`](../../conformance/drivers/react-native) | The driver for the [React Native SDK](../../packages/react-native/README.md). It runs the reference driver's protocol loop with the client on the React Native SDK's platform, in a Node.js process with React Native's globals and a fake of its native module. |
+| [`conformance/drivers/swift/`](../../conformance/drivers/swift) | The driver for the [Swift client SDK](../../swift/README.md), a Swift package in `Driver/`. |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |
 | [`conformance/targets/`](../../conformance/targets) | Descriptors for real targets, such as the dev-stack image. |
 | [`conformance/test/`](../../conformance/test) | `node:test` tests for the harness itself. |
@@ -465,6 +466,13 @@ skips 31: those that use only backend or management clients, and those that
 verify webhooks. Its [workflow](../../.github/workflows/react-native.yml)
 fails on any other skip. It runs on Node.js, not Hermes, with a fake of the
 native platform module.
+
+The Swift driver also declares only the user role and no `webhooks.verify`
+feature. It passes the same 33 scenarios against the mock and skips the
+same 31. On Linux it doesn't declare `realtime`, because Ubuntu's libcurl
+has no WebSocket support. There it passes 24 scenarios and also skips the 9
+realtime ones. Its [workflow](../../.github/workflows/swift.yml) fails on
+any other skip.
 
 Passing against the mock shows that the SDK, driver and scenarios agree on
 the public contract. It does not certify a real deployment; for that, run

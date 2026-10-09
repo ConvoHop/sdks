@@ -561,7 +561,7 @@ func (c *ProjectClient) AlertLiveSession(ctx context.Context, input AlertLiveSes
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ProjectClient.LiveSessionOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ProjectClient.LiveSessionOperation] with the reply's Operation reference until the work completes.
 // Realtime events: live.ended.
 // Authorized by backendKey with scope callManage.
 func (c *ProjectClient) EndLiveSession(ctx context.Context, input EndLiveSessionInput, opts ...CallOption) (*EndLiveSessionPayload, error) {
@@ -776,7 +776,7 @@ func (c *ManagementClient) CreateOrganization(ctx context.Context, input CreateO
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ManagementClient.GetOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ManagementClient.GetOperation] with the reply's Operation reference until the work completes.
 // Authorized by portalCredential (condition: owner).
 func (c *ManagementClient) CreateDeployment(ctx context.Context, input CreateDeploymentRequestInput, opts ...CallOption) (*CreateDeploymentReply, error) {
 	var out *CreateDeploymentReply
@@ -789,7 +789,7 @@ func (c *ManagementClient) CreateDeployment(ctx context.Context, input CreateDep
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ManagementClient.GetOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ManagementClient.GetOperation] with the reply's Operation reference until the work completes.
 // Authorized by portalCredential (condition: owner).
 func (c *ManagementClient) CreateProject(ctx context.Context, input CreateProjectRequestInput, opts ...CallOption) (*CreateProjectReply, error) {
 	var out *CreateProjectReply
@@ -802,7 +802,7 @@ func (c *ManagementClient) CreateProject(ctx context.Context, input CreateProjec
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ManagementClient.GetOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ManagementClient.GetOperation] with the reply's Operation reference until the work completes.
 // Authorized by portalCredential (condition: owner).
 func (c *ManagementClient) IssueBackendKey(ctx context.Context, input IssueBackendKeyRequestInput, opts ...CallOption) (*IssueBackendKeyReply, error) {
 	var out *IssueBackendKeyReply
@@ -815,7 +815,7 @@ func (c *ManagementClient) IssueBackendKey(ctx context.Context, input IssueBacke
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ManagementClient.GetOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ManagementClient.GetOperation] with the reply's Operation reference until the work completes.
 // Authorized by portalCredential (condition: owner).
 func (c *ManagementClient) RevokeBackendKey(ctx context.Context, input RevokeBackendKeyRequestInput, opts ...CallOption) (*RevokeBackendKeyReply, error) {
 	var out *RevokeBackendKeyReply
@@ -828,7 +828,7 @@ func (c *ManagementClient) RevokeBackendKey(ctx context.Context, input RevokeBac
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ManagementClient.GetOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ManagementClient.GetOperation] with the reply's Operation reference until the work completes.
 // Authorized by portalCredential (condition: owner).
 func (c *ManagementClient) ProjectPolicy(ctx context.Context, input ProjectPolicyRequestInput, opts ...CallOption) (*ProjectPolicyReply, error) {
 	var out *ProjectPolicyReply
@@ -901,7 +901,7 @@ func (c *ManagementClient) CreateBillingPortalSession(ctx context.Context, input
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ManagementClient.GetOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ManagementClient.GetOperation] with the reply's Operation reference until the work completes.
 // Authorized by portalCredential (condition: owner).
 func (c *ManagementClient) ConfigureWebhook(ctx context.Context, input ConfigureWebhookRequestInput, opts ...CallOption) (*ConfigureWebhookReply, error) {
 	var out *ConfigureWebhookReply
@@ -914,7 +914,7 @@ func (c *ManagementClient) ConfigureWebhook(ctx context.Context, input Configure
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ManagementClient.GetOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ManagementClient.GetOperation] with the reply's Operation reference until the work completes.
 // Authorized by portalCredential (condition: owner).
 func (c *ManagementClient) UpdateWebhook(ctx context.Context, input UpdateWebhookRequestInput, opts ...CallOption) (*UpdateWebhookReply, error) {
 	var out *UpdateWebhookReply
@@ -927,7 +927,7 @@ func (c *ManagementClient) UpdateWebhook(ctx context.Context, input UpdateWebhoo
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ManagementClient.GetOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ManagementClient.GetOperation] with the reply's Operation reference until the work completes.
 // Authorized by portalCredential (condition: owner).
 func (c *ManagementClient) RotateWebhookSecret(ctx context.Context, input RotateWebhookSecretRequestInput, opts ...CallOption) (*RotateWebhookSecretReply, error) {
 	var out *RotateWebhookSecretReply
@@ -940,7 +940,7 @@ func (c *ManagementClient) RotateWebhookSecret(ctx context.Context, input Rotate
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ManagementClient.GetOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ManagementClient.GetOperation] with the reply's Operation reference until the work completes.
 // Authorized by portalCredential (condition: owner).
 func (c *ManagementClient) DisableWebhook(ctx context.Context, input DisableWebhookRequestInput, opts ...CallOption) (*DisableWebhookReply, error) {
 	var out *DisableWebhookReply
@@ -953,7 +953,7 @@ func (c *ManagementClient) DisableWebhook(ctx context.Context, input DisableWebh
 //
 // Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [ManagementClient.GetOperation] with the operation reference from the result until the work completes.
+// Long-running: poll [ManagementClient.GetOperation] with the reply's Operation reference until the work completes.
 // Authorized by portalCredential (condition: owner).
 func (c *ManagementClient) ReplayWebhookDeliveries(ctx context.Context, input ReplayWebhookDeliveriesRequestInput, opts ...CallOption) (*ReplayWebhookDeliveriesReply, error) {
 	var out *ReplayWebhookDeliveriesReply

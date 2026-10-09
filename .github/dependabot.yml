@@ -319,3 +319,22 @@ updates:
         update-types:
           - minor
           - patch
+
+  # The Swift client SDK (swift/). SwiftPM has no development dependency type,
+  # so test-only updates get the fix prefix too.
+  - package-ecosystem: swift
+    directory: /swift
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: fix
+      include: scope
+    groups:
+      swift:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch

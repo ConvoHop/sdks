@@ -16,7 +16,7 @@ work, what the packages are called, and how they're versioned and supported.
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
 | Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md); .NET: [`ConvoHop`](../dotnet/README.md); Go: [`github.com/ConvoHop/sdks/go`](../go/README.md); Python: [`convohop`](../python/README.md) |
-| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md); Android: [`convohop-android`](../android/README.md); Flutter: [`convohop`](../flutter/README.md) |
+| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md); Android: [`convohop-android`](../android/README.md); Flutter: [`convohop`](../flutter/README.md); iOS and macOS: [`ConvoHop`](../swift/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
 
@@ -39,7 +39,7 @@ ever hold a credential that's limited to one user and expires quickly.
 | Scope | Your whole project, limited by the key's permissions | What that one user is allowed to see and do |
 | Realtime | Signed webhooks | WebSocket subscriptions with reconnect and replay |
 | Voice and video | Call control and call reads, no media | Media through the platform's official LiveKit SDK |
-| Local state | None per user. Optional recovery storage lets an interrupted request be resolved or retried safely. | Optional recovery storage. The Web, Android and Flutter SDKs also have a local store and an offline outbox with optimistic sends; they're planned for the others. |
+| Local state | None per user. Optional recovery storage lets an interrupted request be resolved or retried safely. | Optional recovery storage. The Web, Android, Flutter and Swift SDKs also have a local store and an offline outbox with optimistic sends; they're planned for the others. |
 
 ### Server SDKs
 
@@ -136,7 +136,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 | --- | --- | --- | --- |
 | Web | TypeScript | LiveKit JavaScript SDK | Source available |
 | React | Hooks on top of the Web SDK | Same as Web | Source available |
-| iOS and macOS | Swift | LiveKit Swift SDK | Planned |
+| iOS and macOS | Swift | LiveKit Swift SDK | Source available |
 | Android | Kotlin | LiveKit Android SDK | Source available |
 | React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | In development; see the [design](react-native.md) |
 | Flutter | Dart | LiveKit Flutter SDK | Source available |
@@ -184,8 +184,9 @@ generator and its own conformance driver. The
 conformance driver. The [Android client SDK](../android/README.md) adds a
 Kotlin generator for Android, separate from the JVM one, and its own
 conformance driver. The [Flutter SDK](../flutter/README.md) adds a Dart
-generator and its own conformance driver. Generators for the other
-languages are in development.
+generator and its own conformance driver. The
+[Swift client SDK](../swift/README.md) adds a Swift generator and its own
+conformance driver. Generators for the other languages are in development.
 The same IR generates the operation catalog of the `convohop` command-line
 tool ([`packages/cli`](../packages/cli/README.md)) and the tools of an MCP
 server for AI agents ([`packages/mcp`](../packages/mcp/README.md)). Neither is
@@ -290,7 +291,8 @@ registration error.
 > [Android client SDK](../android/README.md#push-notifications) has the
 > Android helpers, and the
 > [Flutter SDK](../flutter/README.md#push-notifications) has the Flutter
-> ones. The other helpers in this table are planned.
+> ones. The [Swift SDK](../swift/README.md#push-notifications) has the iOS
+> and macOS helpers. The other helpers in this table are planned.
 
 The SDK helpers are all optional:
 
@@ -350,7 +352,9 @@ Notes:
   are case-sensitive.
 - **Swift Package Manager.** The Swift package needs `Package.swift` at the
   root of its repository, so it's distributed from a dedicated repository
-  that will be created when the SDK is ready. We don't plan to publish to
+  that will be created when the SDK is ready. Until then, its source is in
+  [`swift/`](../swift/README.md), and apps add it as a local package. We
+  don't plan to publish to
   CocoaPods, because its trunk is scheduled to become read-only in December
   2026.
 - **Maven Central and pub.dev.** These names need namespace ownership
@@ -433,7 +437,7 @@ release.
 | Go | The two most recent Go releases, matching Go's own support policy: Go 1.26 and 1.27 today |
 | Web | The current and previous major versions of Chrome, Edge, Firefox and Safari. Calls need WebRTC. |
 | React | 18 and later |
-| iOS and macOS | iOS 15 and later, macOS 12 and later |
+| iOS and macOS | iOS 15 and later, macOS 12 and later. Builds with Xcode 16.4 (Swift 6.1) and later. |
 | Android | API level 24 (Android 7.0) and later |
 | React Native | 0.76 and later, with the New Architecture |
 | Flutter | The current stable release. The package needs Flutter 3.38 or later, and CI tests both. Apps run on Android 7.0 (API level 24) and later and iOS 13 and later. |
@@ -451,6 +455,10 @@ current builds of Chromium, Firefox and WebKit. For the React row, it runs
 the hooks on React 18 and 19. For the React Native row, it runs React
 Native 0.87.1's Codegen on the native modules' specs and type-checks the
 example app; no workflow builds or runs an app yet.
+
+For the iOS and macOS row, CI builds and tests the Swift SDK on macOS and in
+the iOS Simulator with Xcode 16.4 and 26.6. It doesn't test on iOS 15 or
+macOS 12.
 
 ## Releases and distribution
 

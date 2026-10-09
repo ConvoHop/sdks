@@ -104,7 +104,7 @@ func TestInitializeRejectsRoute(t *testing.T) {
 		code   ErrorCode
 		status int
 	}{
-		{"missing route", nil, codeInvalidResponse, 503},
+		{"missing route", nil, codeInvalidResponse, 200},
 		{"other project", route(map[string]any{"projectId": testUUID}), codeIncarnationMismatch, 409},
 		{"other incarnation", route(map[string]any{"incarnation": testUUID}), codeIncarnationMismatch, 409},
 		{"noncanonical epoch", route(map[string]any{"servingEpoch": "042"}), codeInvalidResponse, 503},
@@ -287,14 +287,14 @@ func TestResponseValidation(t *testing.T) {
 	capabilities := catalog.operations["communication.capabilities"]
 	edit := func(change func(body, reply map[string]any)) func() any {
 		return func() any {
-			body := success(capabilities, testRequest, nil)
+			body := success(capabilities, testRequest, validResult(capabilities))
 			change(body, replyOf(body))
 			return body
 		}
 	}
 	encoded := func(prefix, suffix string) func() any {
 		return func() any {
-			data, _ := json.Marshal(success(capabilities, testRequest, nil))
+			data, _ := json.Marshal(success(capabilities, testRequest, validResult(capabilities)))
 			return prefix + string(data) + suffix
 		}
 	}
@@ -309,6 +309,7 @@ func TestResponseValidation(t *testing.T) {
 		{"case-folded field", edit(func(_, r map[string]any) { r["RequestID"] = testUUID }), malformed},
 		{"uppercase UUID", edit(func(_, r map[string]any) { r["requestId"] = upperUUID }), malformed},
 		{"missing operation", edit(func(b, _ map[string]any) { b["data"] = map[string]any{} }), malformed},
+		{"missing result", edit(func(_, r map[string]any) { r["result"] = nil }), malformed},
 		{"wrong scalar type", edit(func(_, r map[string]any) { r["replayed"] = "false" }), malformed},
 		{"trailing data", encoded("", " {}"), "Unrecognized authority response"},
 		{"oversized", edit(func(_, r map[string]any) { r["serverTime"] = strings.Repeat("a", maxResponseLength) }),
@@ -333,7 +334,11 @@ func TestResponseValidation(t *testing.T) {
 	}{
 		{"undeclared field", edit(func(_, r map[string]any) { r["extra"] = "ignored" })},
 		{"byte order mark", encoded("\ufeff", "")},
-		{"bounded astral characters", edit(func(_, r map[string]any) { r["serverTime"] = strings.Repeat("\U0001F600", maxResponseLength/2-200) })},
+		{"bounded astral characters", edit(func(b, r map[string]any) {
+			// Each counts as two UTF-16 code units: fill the bound less the rest of the body.
+			data, _ := json.Marshal(b)
+			r["serverTime"] = strings.Repeat("\U0001F600", (maxResponseLength-len(data))/2)
+		})},
 	}
 	for _, tc := range accepted {
 		t.Run(tc.name, func(t *testing.T) {
@@ -357,6 +362,7 @@ func TestMutationEnvelope(t *testing.T) {
 		{"committed without replay flag", func(r map[string]any) { r["replayed"] = nil }, ""},
 		{"commit time without milliseconds", func(r map[string]any) { r["committedAt"] = "2026-01-02T03:04:05Z" }, ""},
 		{"accepted without operation", func(r map[string]any) { r["status"] = "accepted" }, ""},
+		{"committed without result", func(r map[string]any) { r["result"] = nil }, ""},
 		{"committed", func(map[string]any) {}, "committed"},
 		{"accepted", func(r map[string]any) {
 			r["status"] = "accepted"
@@ -366,7 +372,7 @@ func TestMutationEnvelope(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			a := newAuthority(t, func(ex *exchange) response {
-				body := success(sendMessage, ex.requestID, nil)
+				body := success(sendMessage, ex.requestID, sent(ex))
 				tc.change(replyOf(body))
 				return response{body: body}
 			})
@@ -390,6 +396,26 @@ func TestMutationEnvelope(t *testing.T) {
 				t.Errorf("record %+v, want %s", records[0], tc.state)
 			}
 		})
+	}
+}
+
+// TestOptionalResults covers the replies that may leave their result null:
+// no live session, and a long-running operation, which is polled instead.
+func TestOptionalResults(t *testing.T) {
+	a := newAuthority(t, nil)
+	ctx := context.Background()
+	live, err := newProject(t, a).CurrentLiveSession(ctx, ConversationLiveInput{ConversationID: testConversation})
+	if err != nil || live.Result != nil {
+		t.Fatalf("CurrentLiveSession = %+v, %v; want no live session", live, err)
+	}
+	management, err := NewManagementClient(ManagementConfig{BaseURL: a.server.URL, AccessToken: "operator-token", ActorID: testActor})
+	if err != nil {
+		t.Fatal(err)
+	}
+	input := IssueBackendKeyRequestInput{ProjectID: testProject, Name: "ci", Scopes: []string{"messagesRead"}, ExpiresAt: testTime}
+	key, err := management.IssueBackendKey(ctx, input)
+	if err != nil || key.Result != nil {
+		t.Fatalf("IssueBackendKey = %+v, %v; want a reply without its result", key, err)
 	}
 }
 
@@ -544,7 +570,7 @@ func TestLocalRejections(t *testing.T) {
 }
 
 func TestTextIsSentUnchanged(t *testing.T) {
-	a := newAuthority(t, nil)
+	a := newAuthority(t, replying("communication.sendMessage", sent))
 	text := "\ufffd <b>&amp;</b> \u2028 \\ufffd \U0001F600"
 	if _, err := newProject(t, a).SendMessage(context.Background(), sendInput(text)); err != nil {
 		t.Fatal(err)
