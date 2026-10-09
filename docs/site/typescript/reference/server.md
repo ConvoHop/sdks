@@ -2690,7 +2690,7 @@ type FcmRequest = { … }
 message: { … }
 ```
 
-An FCM HTTP v1 REST `messages:send` message without a target: add `token`. `convohop` is `PushData` as JSON.
+An FCM HTTP v1 REST `messages:send` message without a target: add `token` or `fid`. `convohop` is `PushData` as JSON.
 Firebase Admin SDKs take `android` in their own form, such as `firebase-admin`'s `ttl` in milliseconds.
 
 ##### `FcmRequest.message.data` property

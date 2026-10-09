@@ -184,7 +184,7 @@ class FcmMessage(TypedDict):
 
 
 class FcmRequest(TypedDict):
-    """An FCM HTTP v1 REST ``messages:send`` message without a target: add ``token`` to ``message``.
+    """An FCM HTTP v1 REST ``messages:send`` message without a target: add ``token`` or ``fid`` to ``message``.
 
     Firebase Admin SDKs take ``android`` in their own form, such as ``firebase_admin.messaging.AndroidConfig`` with a
     ``ttl`` in seconds.

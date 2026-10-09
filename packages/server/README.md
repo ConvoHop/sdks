@@ -268,9 +268,9 @@ ConvoHop doesn't send push notifications for you
 ([bring your own](../../docs/sdk-strategy.md#push-notifications-bring-your-own)).
 `push` builds APNs, FCM and Web Push requests from a verified notification
 event. Its builders are pure functions: they hold no credentials and send
-nothing. Your push library adds the device token and the APNs or FCM
-authorization, encrypts and VAPID-signs Web Push messages, and sends them.
-The builders follow the [push payload contract](../../spec/push-payload/README.md).
+nothing. Your push library adds the device's token or FID and the APNs or
+FCM authorization, encrypts and VAPID-signs Web Push messages, and sends
+them. The builders follow the [push payload contract](../../spec/push-payload/README.md).
 To receive the events, subscribe a webhook endpoint to
 `notification.message`, `notification.call` and `notification.callCancelled`.
 Deliveries are at least once and unordered, so deduplicate on `eventId`, as
@@ -295,7 +295,7 @@ export async function handle(event: WebhookEvent): Promise<void> {
 
 async function notify(event: WebhookNotificationEvent): Promise<void> {
   const title = await displayName(event.senderId); // Your own text and localization.
-  for (const device of await devicesOf(event.recipientId)) { // Your own token store.
+  for (const device of await devicesOf(event.recipientId)) { // Your own device store.
     if (device.platform === "ios") {
       // A CallKit app gets incoming calls as VoIP pushes. apnsVoip() returns null for other events.
       const voip = push.apnsVoip(event, { bundleId, title });
@@ -304,7 +304,8 @@ async function notify(event: WebhookNotificationEvent): Promise<void> {
       if (alert) await sendApns(device.token, alert.headers, alert.payload);
     } else if (device.platform === "android") {
       const request = push.fcm(event, { title });
-      if (request) await sendFcm({ ...request.message, token: device.token });
+      // device.target is { token } by default, or { fid }: see below.
+      if (request) await sendFcm({ ...request.message, ...device.target });
     } else {
       const request = push.webPush(event, { title });
       if (request) await sendWebPush(device.subscription, JSON.stringify(request.payload), request.headers);
@@ -320,7 +321,7 @@ its platform or is stale. Send nothing for `null`.
 | --- | --- | --- | --- |
 | `push.apnsAlert(event, options)` | APNs `headers` and `payload` for an alert | A `notification.callCancelled` that isn't a missed call | 4096 of `payload` |
 | `push.apnsVoip(event, options)` | APNs `headers` and `payload` for a PushKit VoIP push, on the `<bundleId>.voip` topic | Every event but `notification.call` | 5120 of `payload` |
-| `push.fcm(event, options?)` | An FCM HTTP v1 `message` with `data` and Android options. Add `token`. | Stale events only | 4096 of `message.data` |
+| `push.fcm(event, options?)` | An FCM HTTP v1 `message` with `data` and Android options. Add `token` or `fid`. | Stale events only | 4096 of `message.data` |
 | `push.webPush(event, options?)` | RFC 8030 `headers` (`TTL`, `Urgency` and `Topic`) and a `payload` for your library to encrypt | Stale events only | 3993 of `payload`, the RFC 8291 plaintext limit |
 
 The options are:
@@ -355,7 +356,12 @@ The requests follow these rules:
 - **FCM.** Requests carry Android options only, at high priority; send to
   Apple devices with the APNs requests. Show a notification for every
   high-priority message, or Android can lower the app's later messages to
-  normal priority.
+  normal priority. Send each request to the target that the Android app
+  registered: its registration `token` by default, or its `fid`, the
+  Firebase Installation ID, when the app's manifest sets
+  `firebase_messaging_installation_id_enabled`. `firebase-admin` sends to a
+  FID from 14.1.0. That version marks `TokenMessage` deprecated, and still
+  sends to a token.
 - **`connected`.** An event's `connected` is a hint for your sending policy,
   for example to skip a message push for a user who is online. The builders
   ignore it.
