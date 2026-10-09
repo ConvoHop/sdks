@@ -30,6 +30,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopcapabilities-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ProjectServerClient.GetCapabilitiesAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#projectserverclientgetcapabilitiesasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.CapabilitiesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapicapabilitiesasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ProjectServerClient.capabilities",
@@ -96,6 +108,18 @@
             "ref": "convohop#AsyncConvoHop.initialize",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopinitialize-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ProjectServerClient.InitializeAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#projectserverclientinitializeasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.RouteAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapirouteasync-method"
           }
         ],
         "jvm": [
@@ -170,6 +194,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopget_principal-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerPrincipals.GetAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverprincipalsgetasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.GetPrincipalAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapigetprincipalasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ProjectServerClient.principals.get",
@@ -228,6 +264,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopget_conversation-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerConversation.GetAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverconversationgetasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.GetConversationAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapigetconversationasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ServerConversation.get",
@@ -284,6 +332,23 @@
             "ref": "convohop#AsyncConvoHop.iter_members",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopiter_members-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMembers.ListAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermemberslistasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.MembersAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapimembersasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.MembersPagesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapimemberspagesasync-method"
           }
         ],
         "jvm": [
@@ -364,6 +429,23 @@
             "page": "../python/reference/convohop.md#asyncconvohopiter_messages-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMessages.ListAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermessageslistasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.MessagesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapimessagesasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.MessagesPagesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapimessagespagesasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ServerConversation.messages.list",
@@ -420,6 +502,18 @@
             "ref": "convohop#AsyncConvoHop.get_message",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopget_message-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMessages.GetAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermessagesgetasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.GetMessageAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapigetmessageasync-method"
           }
         ],
         "jvm": [
@@ -528,6 +622,23 @@
             "page": "../python/reference/convohop.md#asyncconvohopiter_inbox-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ProjectServerClient.GetInboxAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#projectserverclientgetinboxasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.InboxAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiinboxasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.InboxPagesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiinboxpagesasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#CommunicationApi.inbox",
@@ -594,6 +705,23 @@
             "ref": "convohop#AsyncConvoHop.iter_search",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopiter_search-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ProjectServerClient.SearchAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#projectserverclientsearchasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.SearchAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapisearchasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.SearchPagesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapisearchpagesasync-method"
           }
         ],
         "jvm": [
@@ -679,6 +807,28 @@
             "page": "../python/reference/convohop.md#asyncconvohopretry_request-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerRequests.ResolveAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverrequestsresolveasync-method"
+          },
+          {
+            "ref": "ConvoHop#ServerRequests.RetryAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverrequestsretryasync-method"
+          },
+          {
+            "ref": "ConvoHop#ConvoHopTransport.RetryAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#convohoptransportretryasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.ResolveRequestAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiresolverequestasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#Requests.resolve",
@@ -730,6 +880,18 @@
             "ref": "convohop#AsyncConvoHop.get_operation",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopget_operation-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ProjectServerClient.GetOperationAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#projectserverclientgetoperationasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.GetOperationAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapigetoperationasync-method"
           }
         ],
         "jvm": [
@@ -785,6 +947,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopconversation_mute-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMembers.GetMuteAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermembersgetmuteasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.ConversationMuteAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiconversationmuteasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#CommunicationApi.conversationMute",
@@ -831,6 +1005,18 @@
             "ref": "convohop#AsyncConvoHop.current_live_session",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopcurrent_live_session-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerConversationLive.GetCurrentAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverconversationlivegetcurrentasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.CurrentLiveSessionAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapicurrentlivesessionasync-method"
           }
         ],
         "jvm": [
@@ -906,6 +1092,18 @@
             "page": "../python/reference/convohop.md#asyncconvohoplive_session-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerLiveSession.GetAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverlivesessiongetasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.LiveSessionAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapilivesessionasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#CommunicationApi.liveSession",
@@ -962,6 +1160,23 @@
             "ref": "convohop#AsyncConvoHop.iter_live_sessions",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopiter_live_sessions-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerConversationLive.ListHistoryAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverconversationlivelisthistoryasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.LiveSessionsAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapilivesessionsasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.LiveSessionsPagesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapilivesessionspagesasync-method"
           }
         ],
         "jvm": [
@@ -1030,6 +1245,23 @@
             "ref": "convohop#AsyncConvoHop.iter_live_session_participants",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopiter_live_session_participants-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerLiveSession.ListParticipantsAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverlivesessionlistparticipantsasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.LiveSessionParticipantsAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapilivesessionparticipantsasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.LiveSessionParticipantsPagesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapilivesessionparticipantspagesasync-method"
           }
         ],
         "jvm": [
@@ -1134,6 +1366,23 @@
             "page": "../python/reference/convohop.md#asyncconvohoplive_session_operation-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerLiveOperation.GetAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverliveoperationgetasync-method"
+          },
+          {
+            "ref": "ConvoHop#ServerLiveOperation.WaitForCompletionAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverliveoperationwaitforcompletionasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.LiveSessionOperationAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapilivesessionoperationasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#CommunicationApi.liveSessionOperation",
@@ -1180,6 +1429,18 @@
             "ref": "convohop#AsyncConvoHop.session_request_outcome",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopsession_request_outcome-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerSessions.GetOutcomeAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serversessionsgetoutcomeasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.SessionRequestOutcomeAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapisessionrequestoutcomeasync-method"
           }
         ],
         "jvm": [
@@ -1230,6 +1491,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopcreate_principal-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerPrincipals.CreateAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverprincipalscreateasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.CreatePrincipalAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapicreateprincipalasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ProjectServerClient.principals.create",
@@ -1276,6 +1549,18 @@
             "ref": "convohop#AsyncConvoHop.disable_principal",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopdisable_principal-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerPrincipals.DisableAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverprincipalsdisableasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.DisablePrincipalAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapidisableprincipalasync-method"
           }
         ],
         "jvm": [
@@ -1331,6 +1616,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopissue_session-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerSessions.IssueAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serversessionsissueasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.IssueSessionAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiissuesessionasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ProjectServerClient.sessions.issue",
@@ -1379,6 +1676,18 @@
             "page": "../python/reference/convohop.md#asyncconvohoprenew_session-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerSessions.RenewAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serversessionsrenewasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.RenewSessionAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapirenewsessionasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ProjectServerClient.sessions.renew",
@@ -1425,6 +1734,18 @@
             "ref": "convohop#AsyncConvoHop.revoke_session",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohoprevoke_session-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerSessions.RevokeAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serversessionsrevokeasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.RevokeSessionAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapirevokesessionasync-method"
           }
         ],
         "jvm": [
@@ -1480,6 +1801,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopcreate_conversation-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerConversations.CreateAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverconversationscreateasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.CreateConversationAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapicreateconversationasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ProjectServerClient.conversations.create",
@@ -1528,6 +1861,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopupdate_conversation-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerConversation.UpdateAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverconversationupdateasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.UpdateConversationAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiupdateconversationasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#CommunicationApi.updateConversation",
@@ -1569,6 +1914,18 @@
             "ref": "convohop#AsyncConvoHop.add_member",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopadd_member-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMembers.AddAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermembersaddasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.AddMemberAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiaddmemberasync-method"
           }
         ],
         "jvm": [
@@ -1624,6 +1981,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopadd_members-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMembers.AddBatchAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermembersaddbatchasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.AddMembersAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiaddmembersasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ServerConversation.members.addBatch",
@@ -1672,6 +2041,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopremove_member-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMembers.RemoveAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermembersremoveasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.RemoveMemberAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiremovememberasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ServerConversation.members.remove",
@@ -1718,6 +2099,18 @@
             "ref": "convohop#AsyncConvoHop.history_grant",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohophistory_grant-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMembers.GrantHistoryAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermembersgranthistoryasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.HistoryGrantAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapihistorygrantasync-method"
           }
         ],
         "jvm": [
@@ -1771,6 +2164,18 @@
             "ref": "convohop#AsyncConvoHop.send_message",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopsend_message-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMessages.SendAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermessagessendasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.SendMessageAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapisendmessageasync-method"
           }
         ],
         "jvm": [
@@ -1831,6 +2236,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopedit_message-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMessages.EditAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermessageseditasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.EditMessageAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapieditmessageasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ServerConversation.messages.edit",
@@ -1887,6 +2304,18 @@
             "ref": "convohop#AsyncConvoHop.delete_message",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopdelete_message-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMessages.DeleteAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermessagesdeleteasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.DeleteMessageAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapideletemessageasync-method"
           }
         ],
         "jvm": [
@@ -1967,6 +2396,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopset_broadcast_permission-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMembers.SetBroadcastPermissionAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermemberssetbroadcastpermissionasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.SetBroadcastPermissionAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapisetbroadcastpermissionasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#CommunicationApi.setBroadcastPermission",
@@ -2013,6 +2454,18 @@
             "ref": "convohop#AsyncConvoHop.set_conversation_mute",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopset_conversation_mute-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerMembers.SetMuteAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#servermemberssetmuteasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.SetConversationMuteAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapisetconversationmuteasync-method"
           }
         ],
         "jvm": [
@@ -2111,6 +2564,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopalert_live_session-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerLiveSession.AlertAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverlivesessionalertasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.AlertLiveSessionAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapialertlivesessionasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#CommunicationApi.alertLiveSession",
@@ -2178,6 +2643,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopend_live_session-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ServerLiveSession.EndAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#serverlivesessionendasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.EndLiveSessionAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiendlivesessionasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#CommunicationApi.endLiveSession",
@@ -2228,6 +2705,13 @@
       "languages": {
         "typescript": [],
         "python": [],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.RedeemCredentialAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiredeemcredentialasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#CommunicationApi.redeemCredential",
@@ -2254,6 +2738,13 @@
       "languages": {
         "typescript": [],
         "python": [],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#CommunicationApi.AcknowledgeCredentialAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#communicationapiacknowledgecredentialasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#CommunicationApi.acknowledgeCredential",
@@ -2315,6 +2806,13 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementcapabilities-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.CapabilitiesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapicapabilitiesasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.capabilities",
@@ -2350,6 +2848,13 @@
             "ref": "convohop#AsyncConvoHopManagement.organizations",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementorganizations-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.OrganizationsAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiorganizationsasync-method"
           }
         ],
         "jvm": [
@@ -2389,6 +2894,13 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementget_organization-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.GetOrganizationAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapigetorganizationasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.getOrganization",
@@ -2424,6 +2936,13 @@
             "ref": "convohop#AsyncConvoHopManagement.get_deployment",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementget_deployment-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.GetDeploymentAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapigetdeploymentasync-method"
           }
         ],
         "jvm": [
@@ -2463,6 +2982,13 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementget_project-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.GetProjectAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapigetprojectasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.getProject",
@@ -2498,6 +3024,13 @@
             "ref": "convohop#AsyncConvoHopManagement.deployment_health",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementdeployment_health-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.DeploymentHealthAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapideploymenthealthasync-method"
           }
         ],
         "jvm": [
@@ -2537,6 +3070,13 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementdeployment_usage-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.DeploymentUsageAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapideploymentusageasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.deploymentUsage",
@@ -2572,6 +3112,13 @@
             "ref": "convohop#AsyncConvoHopManagement.project_usage",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementproject_usage-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.ProjectUsageAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiprojectusageasync-method"
           }
         ],
         "jvm": [
@@ -2611,6 +3158,13 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementorganization_usage-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.OrganizationUsageAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiorganizationusageasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.organizationUsage",
@@ -2648,6 +3202,13 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementwebhook_endpoints-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.WebhookEndpointsAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiwebhookendpointsasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.webhookEndpoints",
@@ -2683,6 +3244,13 @@
             "ref": "convohop#AsyncConvoHopManagement.webhook_deliveries",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementwebhook_deliveries-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.WebhookDeliveriesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiwebhookdeliveriesasync-method"
           }
         ],
         "jvm": [
@@ -2730,6 +3298,18 @@
             "ref": "convohop#AsyncConvoHopManagement.retry_request",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementretry_request-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ConvoHopTransport.RetryAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#convohoptransportretryasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#ManagementApi.ResolveRequestAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiresolverequestasync-method"
           }
         ],
         "jvm": [
@@ -2785,6 +3365,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementget_operation-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ConvoHopManagementClient.GetOperationAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#convohopmanagementclientgetoperationasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#ManagementApi.GetOperationAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapigetoperationasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.getOperation",
@@ -2826,6 +3418,18 @@
             "ref": "convohop#AsyncConvoHopManagement.create_organization",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementcreate_organization-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ConvoHopManagementClient.CreateOrganizationAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#convohopmanagementclientcreateorganizationasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#ManagementApi.CreateOrganizationAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapicreateorganizationasync-method"
           }
         ],
         "jvm": [
@@ -2871,6 +3475,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementcreate_deployment-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ConvoHopManagementClient.CreateDeploymentAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#convohopmanagementclientcreatedeploymentasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#ManagementApi.CreateDeploymentAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapicreatedeploymentasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.createDeployment",
@@ -2912,6 +3528,18 @@
             "ref": "convohop#AsyncConvoHopManagement.create_project",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementcreate_project-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ConvoHopManagementClient.CreateProjectAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#convohopmanagementclientcreateprojectasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#ManagementApi.CreateProjectAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapicreateprojectasync-method"
           }
         ],
         "jvm": [
@@ -2957,6 +3585,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementissue_backend_key-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ConvoHopManagementClient.IssueBackendKeyAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#convohopmanagementclientissuebackendkeyasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#ManagementApi.IssueBackendKeyAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiissuebackendkeyasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementClient.issueBackendKey",
@@ -2999,6 +3639,13 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementrevoke_backend_key-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.RevokeBackendKeyAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapirevokebackendkeyasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.revokeBackendKey",
@@ -3034,6 +3681,13 @@
             "ref": "convohop#AsyncConvoHopManagement.project_policy",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementproject_policy-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.ProjectPolicyAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiprojectpolicyasync-method"
           }
         ],
         "jvm": [
@@ -3079,6 +3733,18 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementcredential_permit-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop#ConvoHopManagementClient.GetDeliveryPermitAsync",
+            "package": "ConvoHop",
+            "page": "../dotnet/reference/convohop.md#convohopmanagementclientgetdeliverypermitasync-method"
+          },
+          {
+            "ref": "ConvoHop.Api#ManagementApi.CredentialPermitAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapicredentialpermitasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.credentialPermit",
@@ -3114,6 +3780,13 @@
             "ref": "convohop#AsyncConvoHopManagement.pause_operation",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementpause_operation-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.PauseOperationAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapipauseoperationasync-method"
           }
         ],
         "jvm": [
@@ -3153,6 +3826,13 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementresume_operation-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.ResumeOperationAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiresumeoperationasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.resumeOperation",
@@ -3188,6 +3868,13 @@
             "ref": "convohop#AsyncConvoHopManagement.configure_webhook",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementconfigure_webhook-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.ConfigureWebhookAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiconfigurewebhookasync-method"
           }
         ],
         "jvm": [
@@ -3227,6 +3914,13 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementupdate_webhook-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.UpdateWebhookAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapiupdatewebhookasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.updateWebhook",
@@ -3262,6 +3956,13 @@
             "ref": "convohop#AsyncConvoHopManagement.rotate_webhook_secret",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementrotate_webhook_secret-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.RotateWebhookSecretAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapirotatewebhooksecretasync-method"
           }
         ],
         "jvm": [
@@ -3301,6 +4002,13 @@
             "page": "../python/reference/convohop.md#asyncconvohopmanagementdisable_webhook-method"
           }
         ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.DisableWebhookAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapidisablewebhookasync-method"
+          }
+        ],
         "jvm": [
           {
             "ref": "com.convohop:convohop-server#ManagementApi.disableWebhook",
@@ -3336,6 +4044,13 @@
             "ref": "convohop#AsyncConvoHopManagement.replay_webhook_deliveries",
             "package": "convohop",
             "page": "../python/reference/convohop.md#asyncconvohopmanagementreplay_webhook_deliveries-method"
+          }
+        ],
+        "dotnet": [
+          {
+            "ref": "ConvoHop.Api#ManagementApi.ReplayWebhookDeliveriesAsync",
+            "package": "ConvoHop.Api",
+            "page": "../dotnet/reference/api.md#managementapireplaywebhookdeliveriesasync-method"
           }
         ],
         "jvm": [

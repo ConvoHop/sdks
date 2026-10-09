@@ -123,6 +123,53 @@
       ]
     },
     {
+      "id": "dotnet",
+      "name": ".NET",
+      "status": "preview",
+      "codeFence": "cs",
+      "home": "dotnet/index.md",
+      "reference": "dotnet/reference/index.md",
+      "coverage": "dotnet/reference/operations.md",
+      "llmsFull": "dotnet/llms-full.txt",
+      "packages": [
+        {
+          "name": "ConvoHop",
+          "slug": "convohop",
+          "layer": "server",
+          "summary": "Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders.",
+          "runtime": ".NET 8 or later. The netstandard2.0 build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
+          "source": "dotnet/src/ConvoHop",
+          "reference": "dotnet/reference/convohop.md",
+          "data": "dotnet/reference/convohop.json"
+        },
+        {
+          "name": "ConvoHop.Api",
+          "slug": "api",
+          "layer": "server",
+          "summary": "Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones.",
+          "runtime": ".NET 8 or later. The netstandard2.0 build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
+          "source": "dotnet/src/ConvoHop",
+          "reference": "dotnet/reference/api.md",
+          "data": "dotnet/reference/api.json"
+        },
+        {
+          "name": "ConvoHop.Models",
+          "slug": "models",
+          "layer": "server",
+          "summary": "Generated input and result models of the ConvoHop GraphQL API.",
+          "runtime": ".NET 8 or later. The netstandard2.0 build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
+          "source": "dotnet/src/ConvoHop",
+          "reference": "dotnet/reference/models.md",
+          "data": "dotnet/reference/models.json"
+        }
+      ],
+      "quickstarts": [
+        {"topic": "server", "path": "dotnet/quickstarts/server.md"},
+        {"topic": "webhooks", "path": "dotnet/quickstarts/webhooks.md"},
+        {"topic": "push", "path": "dotnet/quickstarts/push.md"}
+      ]
+    },
+    {
       "id": "jvm",
       "name": "Java and Kotlin",
       "status": "preview",
@@ -322,6 +369,75 @@
       "title": "Python operation coverage",
       "description": "The Python SDK members that send each API operation. 63 of the 65 operations that Python packages can send have a method.",
       "language": "python"
+    },
+    {
+      "path": "dotnet/index.md",
+      "kind": "language",
+      "title": ".NET SDK",
+      "description": "The ConvoHop package wraps the ConvoHop API for .NET backends. It runs on your servers with a secret backend key, verifies the webhooks that ConvoHop sends, and builds push requests from notification events.",
+      "language": "dotnet"
+    },
+    {
+      "path": "dotnet/quickstarts/server.md",
+      "kind": "quickstart",
+      "title": ".NET server quickstart",
+      "description": "Call ConvoHop from your .NET backend with the ConvoHop package: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.",
+      "language": "dotnet",
+      "topic": "server"
+    },
+    {
+      "path": "dotnet/quickstarts/webhooks.md",
+      "kind": "quickstart",
+      "title": ".NET webhooks quickstart",
+      "description": "Receive ConvoHop events in your .NET backend: verify each signed delivery with Webhooks.Verify, acknowledge it quickly, and handle its event in a queue worker.",
+      "language": "dotnet",
+      "topic": "webhooks"
+    },
+    {
+      "path": "dotnet/quickstarts/push.md",
+      "kind": "quickstart",
+      "title": ".NET push notifications quickstart",
+      "description": "Send push notifications for ConvoHop messages and calls: PushPayloads turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.",
+      "language": "dotnet",
+      "topic": "push"
+    },
+    {
+      "path": "dotnet/reference/index.md",
+      "kind": "reference-index",
+      "title": ".NET reference",
+      "description": "The public API of each .NET package, generated from its declarations.",
+      "language": "dotnet"
+    },
+    {
+      "path": "dotnet/reference/convohop.md",
+      "kind": "reference",
+      "title": "ConvoHop",
+      "description": "Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders.",
+      "language": "dotnet",
+      "package": "ConvoHop"
+    },
+    {
+      "path": "dotnet/reference/api.md",
+      "kind": "reference",
+      "title": "ConvoHop.Api",
+      "description": "Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones.",
+      "language": "dotnet",
+      "package": "ConvoHop.Api"
+    },
+    {
+      "path": "dotnet/reference/models.md",
+      "kind": "reference",
+      "title": "ConvoHop.Models",
+      "description": "Generated input and result models of the ConvoHop GraphQL API.",
+      "language": "dotnet",
+      "package": "ConvoHop.Models"
+    },
+    {
+      "path": "dotnet/reference/operations.md",
+      "kind": "coverage",
+      "title": ".NET operation coverage",
+      "description": "The .NET SDK members that send each API operation. 65 of the 65 operations that .NET packages can send have a method.",
+      "language": "dotnet"
     },
     {
       "path": "jvm/index.md",

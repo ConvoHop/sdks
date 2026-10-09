@@ -135,4 +135,5 @@ mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: Revo
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.revoke_backend_key`](../../python/reference/convohop.md#convohopmanagementrevoke_backend_key-method), [`AsyncConvoHopManagement.revoke_backend_key`](../../python/reference/convohop.md#asyncconvohopmanagementrevoke_backend_key-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.RevokeBackendKeyAsync`](../../dotnet/reference/api.md#managementapirevokebackendkeyasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.revokeBackendKey`](../../jvm/reference/server.md#managementapirevokebackendkey-method), [`ManagementSuspendApi.revokeBackendKey`](../../jvm/reference/server-kotlin.md#managementsuspendapirevokebackendkey-method) |

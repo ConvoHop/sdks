@@ -1,0 +1,193 @@
+{
+  "$schema": "../../../spec/docs/operation-map.schema.json",
+  "operations": {
+    "communication.capabilities": [
+      "ConvoHop#ProjectServerClient.GetCapabilitiesAsync",
+      "ConvoHop.Api#CommunicationApi.CapabilitiesAsync"
+    ],
+    "communication.route": ["ConvoHop#ProjectServerClient.InitializeAsync", "ConvoHop.Api#CommunicationApi.RouteAsync"],
+    "communication.getPrincipal": [
+      "ConvoHop#ServerPrincipals.GetAsync",
+      "ConvoHop.Api#CommunicationApi.GetPrincipalAsync"
+    ],
+    "communication.getConversation": [
+      "ConvoHop#ServerConversation.GetAsync",
+      "ConvoHop.Api#CommunicationApi.GetConversationAsync"
+    ],
+    "communication.members": [
+      "ConvoHop#ServerMembers.ListAsync",
+      "ConvoHop.Api#CommunicationApi.MembersAsync",
+      "ConvoHop.Api#CommunicationApi.MembersPagesAsync"
+    ],
+    "communication.messages": [
+      "ConvoHop#ServerMessages.ListAsync",
+      "ConvoHop.Api#CommunicationApi.MessagesAsync",
+      "ConvoHop.Api#CommunicationApi.MessagesPagesAsync"
+    ],
+    "communication.getMessage": ["ConvoHop#ServerMessages.GetAsync", "ConvoHop.Api#CommunicationApi.GetMessageAsync"],
+    "communication.inbox": [
+      "ConvoHop#ProjectServerClient.GetInboxAsync",
+      "ConvoHop.Api#CommunicationApi.InboxAsync",
+      "ConvoHop.Api#CommunicationApi.InboxPagesAsync"
+    ],
+    "communication.search": [
+      "ConvoHop#ProjectServerClient.SearchAsync",
+      "ConvoHop.Api#CommunicationApi.SearchAsync",
+      "ConvoHop.Api#CommunicationApi.SearchPagesAsync"
+    ],
+    "communication.resolveRequest": [
+      "ConvoHop#ServerRequests.ResolveAsync",
+      "ConvoHop#ServerRequests.RetryAsync",
+      "ConvoHop#ConvoHopTransport.RetryAsync",
+      "ConvoHop.Api#CommunicationApi.ResolveRequestAsync"
+    ],
+    "communication.getOperation": [
+      "ConvoHop#ProjectServerClient.GetOperationAsync",
+      "ConvoHop.Api#CommunicationApi.GetOperationAsync"
+    ],
+    "communication.conversationMute": [
+      "ConvoHop#ServerMembers.GetMuteAsync",
+      "ConvoHop.Api#CommunicationApi.ConversationMuteAsync"
+    ],
+    "communication.currentLiveSession": [
+      "ConvoHop#ServerConversationLive.GetCurrentAsync",
+      "ConvoHop.Api#CommunicationApi.CurrentLiveSessionAsync"
+    ],
+    "communication.liveSession": [
+      "ConvoHop#ServerLiveSession.GetAsync",
+      "ConvoHop.Api#CommunicationApi.LiveSessionAsync"
+    ],
+    "communication.liveSessions": [
+      "ConvoHop#ServerConversationLive.ListHistoryAsync",
+      "ConvoHop.Api#CommunicationApi.LiveSessionsAsync",
+      "ConvoHop.Api#CommunicationApi.LiveSessionsPagesAsync"
+    ],
+    "communication.liveSessionParticipants": [
+      "ConvoHop#ServerLiveSession.ListParticipantsAsync",
+      "ConvoHop.Api#CommunicationApi.LiveSessionParticipantsAsync",
+      "ConvoHop.Api#CommunicationApi.LiveSessionParticipantsPagesAsync"
+    ],
+    "communication.liveSessionOperation": [
+      "ConvoHop#ServerLiveOperation.GetAsync",
+      "ConvoHop#ServerLiveOperation.WaitForCompletionAsync",
+      "ConvoHop.Api#CommunicationApi.LiveSessionOperationAsync"
+    ],
+    "communication.sessionRequestOutcome": [
+      "ConvoHop#ServerSessions.GetOutcomeAsync",
+      "ConvoHop.Api#CommunicationApi.SessionRequestOutcomeAsync"
+    ],
+    "communication.createPrincipal": [
+      "ConvoHop#ServerPrincipals.CreateAsync",
+      "ConvoHop.Api#CommunicationApi.CreatePrincipalAsync"
+    ],
+    "communication.disablePrincipal": [
+      "ConvoHop#ServerPrincipals.DisableAsync",
+      "ConvoHop.Api#CommunicationApi.DisablePrincipalAsync"
+    ],
+    "communication.issueSession": [
+      "ConvoHop#ServerSessions.IssueAsync",
+      "ConvoHop.Api#CommunicationApi.IssueSessionAsync"
+    ],
+    "communication.renewSession": [
+      "ConvoHop#ServerSessions.RenewAsync",
+      "ConvoHop.Api#CommunicationApi.RenewSessionAsync"
+    ],
+    "communication.revokeSession": [
+      "ConvoHop#ServerSessions.RevokeAsync",
+      "ConvoHop.Api#CommunicationApi.RevokeSessionAsync"
+    ],
+    "communication.createConversation": [
+      "ConvoHop#ServerConversations.CreateAsync",
+      "ConvoHop.Api#CommunicationApi.CreateConversationAsync"
+    ],
+    "communication.updateConversation": [
+      "ConvoHop#ServerConversation.UpdateAsync",
+      "ConvoHop.Api#CommunicationApi.UpdateConversationAsync"
+    ],
+    "communication.addMember": ["ConvoHop#ServerMembers.AddAsync", "ConvoHop.Api#CommunicationApi.AddMemberAsync"],
+    "communication.addMembers": [
+      "ConvoHop#ServerMembers.AddBatchAsync",
+      "ConvoHop.Api#CommunicationApi.AddMembersAsync"
+    ],
+    "communication.removeMember": [
+      "ConvoHop#ServerMembers.RemoveAsync",
+      "ConvoHop.Api#CommunicationApi.RemoveMemberAsync"
+    ],
+    "communication.historyGrant": [
+      "ConvoHop#ServerMembers.GrantHistoryAsync",
+      "ConvoHop.Api#CommunicationApi.HistoryGrantAsync"
+    ],
+    "communication.sendMessage": ["ConvoHop#ServerMessages.SendAsync", "ConvoHop.Api#CommunicationApi.SendMessageAsync"],
+    "communication.editMessage": ["ConvoHop#ServerMessages.EditAsync", "ConvoHop.Api#CommunicationApi.EditMessageAsync"],
+    "communication.deleteMessage": [
+      "ConvoHop#ServerMessages.DeleteAsync",
+      "ConvoHop.Api#CommunicationApi.DeleteMessageAsync"
+    ],
+    "communication.setBroadcastPermission": [
+      "ConvoHop#ServerMembers.SetBroadcastPermissionAsync",
+      "ConvoHop.Api#CommunicationApi.SetBroadcastPermissionAsync"
+    ],
+    "communication.setConversationMute": [
+      "ConvoHop#ServerMembers.SetMuteAsync",
+      "ConvoHop.Api#CommunicationApi.SetConversationMuteAsync"
+    ],
+    "communication.alertLiveSession": [
+      "ConvoHop#ServerLiveSession.AlertAsync",
+      "ConvoHop.Api#CommunicationApi.AlertLiveSessionAsync"
+    ],
+    "communication.endLiveSession": [
+      "ConvoHop#ServerLiveSession.EndAsync",
+      "ConvoHop.Api#CommunicationApi.EndLiveSessionAsync"
+    ],
+    "communication.redeemCredential": ["ConvoHop.Api#CommunicationApi.RedeemCredentialAsync"],
+    "communication.acknowledgeCredential": ["ConvoHop.Api#CommunicationApi.AcknowledgeCredentialAsync"],
+    "management.capabilities": ["ConvoHop.Api#ManagementApi.CapabilitiesAsync"],
+    "management.organizations": ["ConvoHop.Api#ManagementApi.OrganizationsAsync"],
+    "management.getOrganization": ["ConvoHop.Api#ManagementApi.GetOrganizationAsync"],
+    "management.getDeployment": ["ConvoHop.Api#ManagementApi.GetDeploymentAsync"],
+    "management.getProject": ["ConvoHop.Api#ManagementApi.GetProjectAsync"],
+    "management.deploymentHealth": ["ConvoHop.Api#ManagementApi.DeploymentHealthAsync"],
+    "management.deploymentUsage": ["ConvoHop.Api#ManagementApi.DeploymentUsageAsync"],
+    "management.projectUsage": ["ConvoHop.Api#ManagementApi.ProjectUsageAsync"],
+    "management.organizationUsage": ["ConvoHop.Api#ManagementApi.OrganizationUsageAsync"],
+    "management.webhookEndpoints": ["ConvoHop.Api#ManagementApi.WebhookEndpointsAsync"],
+    "management.webhookDeliveries": ["ConvoHop.Api#ManagementApi.WebhookDeliveriesAsync"],
+    "management.resolveRequest": [
+      "ConvoHop#ConvoHopTransport.RetryAsync",
+      "ConvoHop.Api#ManagementApi.ResolveRequestAsync"
+    ],
+    "management.getOperation": [
+      "ConvoHop#ConvoHopManagementClient.GetOperationAsync",
+      "ConvoHop.Api#ManagementApi.GetOperationAsync"
+    ],
+    "management.createOrganization": [
+      "ConvoHop#ConvoHopManagementClient.CreateOrganizationAsync",
+      "ConvoHop.Api#ManagementApi.CreateOrganizationAsync"
+    ],
+    "management.createDeployment": [
+      "ConvoHop#ConvoHopManagementClient.CreateDeploymentAsync",
+      "ConvoHop.Api#ManagementApi.CreateDeploymentAsync"
+    ],
+    "management.createProject": [
+      "ConvoHop#ConvoHopManagementClient.CreateProjectAsync",
+      "ConvoHop.Api#ManagementApi.CreateProjectAsync"
+    ],
+    "management.issueBackendKey": [
+      "ConvoHop#ConvoHopManagementClient.IssueBackendKeyAsync",
+      "ConvoHop.Api#ManagementApi.IssueBackendKeyAsync"
+    ],
+    "management.revokeBackendKey": ["ConvoHop.Api#ManagementApi.RevokeBackendKeyAsync"],
+    "management.projectPolicy": ["ConvoHop.Api#ManagementApi.ProjectPolicyAsync"],
+    "management.credentialPermit": [
+      "ConvoHop#ConvoHopManagementClient.GetDeliveryPermitAsync",
+      "ConvoHop.Api#ManagementApi.CredentialPermitAsync"
+    ],
+    "management.pauseOperation": ["ConvoHop.Api#ManagementApi.PauseOperationAsync"],
+    "management.resumeOperation": ["ConvoHop.Api#ManagementApi.ResumeOperationAsync"],
+    "management.configureWebhook": ["ConvoHop.Api#ManagementApi.ConfigureWebhookAsync"],
+    "management.updateWebhook": ["ConvoHop.Api#ManagementApi.UpdateWebhookAsync"],
+    "management.rotateWebhookSecret": ["ConvoHop.Api#ManagementApi.RotateWebhookSecretAsync"],
+    "management.disableWebhook": ["ConvoHop.Api#ManagementApi.DisableWebhookAsync"],
+    "management.replayWebhookDeliveries": ["ConvoHop.Api#ManagementApi.ReplayWebhookDeliveriesAsync"]
+  }
+}

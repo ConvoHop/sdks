@@ -263,9 +263,10 @@ How it works:
    conversation or call, and fetches any content with the user's own session.
 
 Your backend sends to a registration token with the FCM HTTP v1 `token`
-target, and to a FID with the `fid` target, which `firebase-admin` supports
-from 14.1.0 for Node.js and 7.5.0 for Python. Those versions mark the
-`token` target deprecated, and still send to it.
+target, and to a FID with the `fid` target, which the Firebase Admin SDKs
+support from 14.1.0 for Node.js, 7.5.0 for Python, 9.10.0 for Java and 3.6.0
+for .NET. Those versions mark the `token` target deprecated, and still send
+to it.
 
 On Android, firebase-messaging 25.1.0 deprecates `getToken()`,
 `deleteToken()` and `FirebaseMessagingService.onNewToken()` in favor of

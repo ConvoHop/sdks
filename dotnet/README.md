@@ -4,8 +4,9 @@
 Use it only in trusted .NET backends, because it holds secret backend keys
 and operator credentials. Never put it, or a backend key, in a MAUI, Blazor
 WebAssembly, Unity or other client app. It isn't on NuGet yet:
-[build it from source](#install-from-source).
-License: [Apache-2.0](../LICENSE).
+[build it from source](#install-from-source). The
+[.NET docs](../docs/site/dotnet/index.md) have quickstarts with tested code
+and the API reference. License: [Apache-2.0](../LICENSE).
 
 ## Requirements
 
@@ -324,9 +325,9 @@ ConvoHop doesn't send push notifications for you
 `PushPayloads` builds APNs, FCM and Web Push requests from a notification
 event, following the [push payload contract](../spec/push-payload/README.md).
 The builders hold no credentials and send nothing: your push library adds the
-device token and the provider's authorization, encrypts and VAPID-signs Web
-Push messages, and sends them. Subscribe a webhook endpoint to
-`notification.message`, `notification.call` and
+device's token or FID and the provider's authorization, encrypts and
+VAPID-signs Web Push messages, and sends them. Subscribe a webhook endpoint
+to `notification.message`, `notification.call` and
 `notification.callCancelled`, and de-duplicate on the event ID.
 
 ```csharp
@@ -345,7 +346,7 @@ platform or is stale. Send nothing for null.
 | --- | --- | --- | --- |
 | `ApnsAlert(notification, apnsOptions)` | APNs `Headers` and `PayloadJson` for an alert | A `notification.callCancelled` that isn't a missed call | 4096 of the payload |
 | `ApnsVoip(notification, apnsOptions)` | APNs headers and payload for a PushKit VoIP push, on the `<bundleId>.voip` topic | Every event but `notification.call` | 5120 of the payload |
-| `Fcm(notification[, options])` | `MessageJson`, an FCM HTTP v1 message without a target, with Android options. Add `token`, or use `Data` and `Android` with the Firebase Admin SDK. | Stale events only | 4096 of the data |
+| `Fcm(notification[, options])` | `MessageJson`, an FCM HTTP v1 message without a target, with Android options. Add `token` or `fid`, or use `Data` and `Android` with the Firebase Admin SDK. | Stale events only | 4096 of the data |
 | `WebPush(notification[, options])` | RFC 8030 `Headers` (`TTL`, `Urgency` and `Topic`) and a `PayloadJson` for your library to encrypt | Stale events only | 3993 of the payload, the RFC 8291 plaintext limit |
 
 `PushOptions` sets the visible `Title` and `Body`, such as the sender's
@@ -357,6 +358,14 @@ collapse keys from the event, and shorten text that doesn't fit. See the
 [push payload contract](../spec/push-payload/README.md) for the rules, and
 [Calls on iOS](../spec/push-payload/README.md#calls-on-ios) for why VoIP
 pushes are for `notification.call` only.
+
+An FCM message goes to the target that the Android app registered: its
+registration `token` by default, or its `fid`, the Firebase Installation ID,
+when the app's manifest sets `firebase_messaging_installation_id_enabled`.
+The Firebase Admin SDK for .NET, `FirebaseAdmin`, sends to a FID from
+[3.6.0](https://github.com/firebase/firebase-admin-dotnet/releases/tag/v3.6.0),
+with `Message.Fid`. From that version, `Message.Token` is obsolete (warning
+CS0618) and still sends.
 
 Invalid options throw `PushPayloadException` with code `InvalidOptions`.
 Each builder also takes a `JsonElement`, to validate a notification event you
@@ -451,6 +460,21 @@ npm run conformance -- --driver "dotnet conformance/drivers/dotnet/bin/Release/n
 The driver in `bin/Release/net8.0/` runs the `netstandard2.0` build on the
 .NET 8 runtime.
 
+Two projects outside `dotnet/` serve the
+[.NET docs](../docs/site/dotnet/index.md):
+`tools/docgen/extractors/dotnet` reads the SDK's public API from its sources
+for the [docs pipeline](../docs/docs-pipeline.md), and
+`docs/languages/dotnet/examples` holds the code that the docs include, with
+tests on .NET 8 and 10. The tests start the conformance mock, so they need
+Node.js 22 or later and `npm ci` at the repository root. After you change the
+public API or its doc comments, from the repository root:
+
+```sh
+npm run extract:docs -- dotnet          # refresh docs/languages/dotnet/surface.json
+npm run generate:docs                   # regenerate docs/site
+npm run test:docs -- --install dotnet   # restore, build and run the docs examples
+```
+
 `src/ConvoHop/Generated` holds code generated from the schemas: never edit
 it. `npm run generate:graphql` regenerates it and `npm run check:graphql`
 checks it. See [SDK generation](../docs/sdk-generation.md).
@@ -462,3 +486,5 @@ checks it. See [SDK generation](../docs/sdk-generation.md).
 | `test/ConvoHop.Tests` | xUnit tests, with the fake authority and fixtures in `TestSupport` |
 | `test/ConvoHop.SdkgenEdge`, `test/ConvoHop.SdkgenEdge.AllLayers` | Compile the generator's edge-case golden output against the runtime |
 | [`../conformance/drivers/dotnet`](../conformance/drivers/dotnet) | The conformance driver |
+| [`../tools/docgen/extractors/dotnet`](../tools/docgen/extractors/dotnet) | The docs pipeline's surface extractor, built on Roslyn, and its xUnit tests |
+| [`../docs/languages/dotnet`](../docs/languages/dotnet) | The .NET docs' pages, their tested examples and the extracted surface |

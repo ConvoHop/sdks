@@ -88,4 +88,5 @@ query ManagementDeploymentHealth($context: RequestContextInput!, $input: Deploym
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.deployment_health`](../../python/reference/convohop.md#convohopmanagementdeployment_health-method), [`AsyncConvoHopManagement.deployment_health`](../../python/reference/convohop.md#asyncconvohopmanagementdeployment_health-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.DeploymentHealthAsync`](../../dotnet/reference/api.md#managementapideploymenthealthasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.deploymentHealth`](../../jvm/reference/server.md#managementapideploymenthealth-method), [`ManagementSuspendApi.deploymentHealth`](../../jvm/reference/server-kotlin.md#managementsuspendapideploymenthealth-method) |

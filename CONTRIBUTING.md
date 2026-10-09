@@ -297,7 +297,8 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
 - The Java and Kotlin SDK's tests use JUnit 5. They live in
   `jvm/*/src/test/` and run with `./gradlew test` in `jvm/`.
 - The .NET SDK's tests use xUnit. They live in `dotnet/test/ConvoHop.Tests/`
-  and run with `dotnet test`.
+  and run with `dotnet test`. So do the tests of the .NET docs extractor, in
+  `tools/docgen/extractors/dotnet/test/`.
 - The Go SDK's tests use the standard `testing` package. They live next to
   the code in `go/` and run with `go test ./...` in `go/`.
 - The Android SDK's tests use JUnit 4, with Robolectric in the `push` and

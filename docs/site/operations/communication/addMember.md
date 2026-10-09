@@ -93,4 +93,5 @@ mutation CommunicationAddMember($context: RequestContextInput!, $input: AddMembe
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.add`](../../typescript/reference/server.md#serverconversationmembersadd-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.add_member`](../../python/reference/convohop.md#convohopadd_member-method), [`AsyncConvoHop.add_member`](../../python/reference/convohop.md#asyncconvohopadd_member-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.AddAsync`](../../dotnet/reference/convohop.md#servermembersaddasync-method), [`CommunicationApi.AddMemberAsync`](../../dotnet/reference/api.md#communicationapiaddmemberasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ServerConversation.members.add`](../../jvm/reference/server.md#serverconversationmembersadd-method), [`CommunicationApi.addMember`](../../jvm/reference/server.md#communicationapiaddmember-method), [`CommunicationSuspendApi.addMember`](../../jvm/reference/server-kotlin.md#communicationsuspendapiaddmember-method) |
