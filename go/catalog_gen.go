@@ -22,6 +22,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `query CommunicationCapabilities($context: RequestContextInput!) {
   capabilities(context: $context) {
@@ -95,6 +96,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `query CommunicationRoute($context: RequestContextInput!) {
   route(context: $context) {
@@ -131,6 +133,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"principalId"},
 		document: `query CommunicationGetPrincipal($context: RequestContextInput!, $input: GetPrincipalRequestInput!) {
@@ -173,6 +176,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"conversationId"},
 		document: `query CommunicationGetConversation($context: RequestContextInput!, $input: GetConversationRequestInput!) {
@@ -227,6 +231,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result", "items"},
 		echo:          []string{"conversationId"},
 		document: `query CommunicationMembers($context: RequestContextInput!, $input: MembersRequestInput!) {
@@ -279,6 +284,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result", "items"},
 		echo:          []string{"conversationId"},
 		document: `query CommunicationMessages($context: RequestContextInput!, $input: MessagesRequestInput!) {
@@ -333,6 +339,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"conversationId", "messageId"},
 		document: `query CommunicationGetMessage($context: RequestContextInput!, $input: GetMessageRequestInput!) {
@@ -382,6 +389,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result", "items"},
 		document: `query CommunicationInbox($context: RequestContextInput!, $input: InboxRequestInput!) {
   inbox(context: $context, input: $input) {
@@ -443,6 +451,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result", "items"},
 		document: `query CommunicationSearch($context: RequestContextInput!, $input: SearchRequestInput!) {
   search(context: $context, input: $input) {
@@ -499,6 +508,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `query CommunicationResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {
   resolveRequest(context: $context, input: $input) {
@@ -796,6 +806,7 @@ var operations = []operation{
 		bearer:        "backendKey",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"operationId"},
 		document: `query CommunicationGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {
@@ -1321,6 +1332,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `mutation CommunicationCreatePrincipal($context: RequestContextInput!, $input: CreatePrincipalRequestInput!) {
   createPrincipal(context: $context, input: $input) {
@@ -1365,6 +1377,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"principalId"},
 		document: `mutation CommunicationDisablePrincipal($context: RequestContextInput!, $input: DisablePrincipalRequestInput!) {
@@ -1410,6 +1423,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `mutation CommunicationIssueSession($context: RequestContextInput!, $input: IssueSessionRequestInput!) {
   issueSession(context: $context, input: $input) {
@@ -1461,6 +1475,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `mutation CommunicationRenewSession($context: RequestContextInput!, $input: RenewSessionRequestInput!) {
   renewSession(context: $context, input: $input) {
@@ -1512,6 +1527,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"sessionId"},
 		document: `mutation CommunicationRevokeSession($context: RequestContextInput!, $input: RevokeSessionRequestInput!) {
@@ -1565,6 +1581,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `mutation CommunicationCreateConversation($context: RequestContextInput!, $input: CreateConversationRequestInput!) {
   createConversation(context: $context, input: $input) {
@@ -1621,6 +1638,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"conversationId"},
 		document: `mutation CommunicationUpdateConversation($context: RequestContextInput!, $input: UpdateConversationRequestInput!) {
@@ -1678,6 +1696,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"conversationId", "principalId"},
 		document: `mutation CommunicationAddMember($context: RequestContextInput!, $input: AddMemberRequestInput!) {
@@ -1768,6 +1787,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"conversationId", "principalId"},
 		document: `mutation CommunicationRemoveMember($context: RequestContextInput!, $input: RemoveMemberRequestInput!) {
@@ -1818,6 +1838,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"conversationId", "principalId"},
 		document: `mutation CommunicationHistoryGrant($context: RequestContextInput!, $input: HistoryGrantRequestInput!) {
@@ -1868,6 +1889,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"conversationId"},
 		document: `mutation CommunicationSendMessage($context: RequestContextInput!, $input: SendMessageRequestInput!) {
@@ -1919,6 +1941,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"conversationId", "messageId"},
 		document: `mutation CommunicationEditMessage($context: RequestContextInput!, $input: EditMessageRequestInput!) {
@@ -1971,6 +1994,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"conversationId", "messageId"},
 		document: `mutation CommunicationDeleteMessage($context: RequestContextInput!, $input: DeleteMessageRequestInput!) {
@@ -2192,6 +2216,7 @@ var operations = []operation{
 		maxAttempts:   3,
 		windowMs:      60000,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `mutation CommunicationRedeemCredential($context: RequestContextInput!, $input: RedeemCredentialRequestInput!) {
   redeemCredential(context: $context, input: $input) {
@@ -2240,6 +2265,7 @@ var operations = []operation{
 		maxAttempts:   3,
 		windowMs:      60000,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"deliveryId"},
 		document: `mutation CommunicationAcknowledgeCredential($context: RequestContextInput!, $input: AcknowledgeCredentialRequestInput!) {
@@ -2278,6 +2304,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `query ManagementCapabilities($context: RequestContextInput!) {
   capabilities(context: $context) {
@@ -2351,6 +2378,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result", "items"},
 		document: `query ManagementOrganizations($context: RequestContextInput!) {
   organizations(context: $context) {
@@ -2397,6 +2425,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"orgId"},
 		document: `query ManagementGetOrganization($context: RequestContextInput!, $input: GetOrganizationRequestInput!) {
@@ -2439,6 +2468,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"deploymentId"},
 		document: `query ManagementGetDeployment($context: RequestContextInput!, $input: GetDeploymentRequestInput!) {
@@ -2488,6 +2518,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"projectId"},
 		document: `query ManagementGetProject($context: RequestContextInput!, $input: GetProjectRequestInput!) {
@@ -2537,6 +2568,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"deploymentId"},
 		document: `query ManagementDeploymentHealth($context: RequestContextInput!, $input: DeploymentHealthRequestInput!) {
@@ -2585,6 +2617,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"deploymentId"},
 		document: `query ManagementDeploymentUsage($context: RequestContextInput!, $input: DeploymentUsageRequestInput!) {
@@ -2637,6 +2670,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"projectId"},
 		document: `query ManagementProjectUsage($context: RequestContextInput!, $input: ProjectUsageRequestInput!) {
@@ -2689,6 +2723,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"orgId"},
 		document: `query ManagementOrganizationUsage($context: RequestContextInput!, $input: OrganizationUsageRequestInput!) {
@@ -2741,6 +2776,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result", "items"},
 		document: `query ManagementWebhookEndpoints($context: RequestContextInput!, $input: WebhookEndpointsRequestInput!) {
   webhookEndpoints(context: $context, input: $input) {
@@ -2799,6 +2835,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result", "items"},
 		document: `query ManagementWebhookDeliveries($context: RequestContextInput!, $input: WebhookDeliveriesRequestInput!) {
   webhookDeliveries(context: $context, input: $input) {
@@ -2857,6 +2894,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRequestRequestInput!) {
   resolveRequest(context: $context, input: $input) {
@@ -3154,6 +3192,7 @@ var operations = []operation{
 		bearer:        "portalCredential",
 		retry:         "repeat",
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"operationId"},
 		document: `query ManagementGetOperation($context: RequestContextInput!, $input: GetOperationRequestInput!) {
@@ -3265,6 +3304,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `mutation ManagementCreateOrganization($context: RequestContextInput!, $input: CreateOrganizationRequestInput!) {
   createOrganization(context: $context, input: $input) {
@@ -3777,6 +3817,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		document: `mutation ManagementCredentialPermit($context: RequestContextInput!, $input: CredentialPermitRequestInput!) {
   credentialPermit(context: $context, input: $input) {
@@ -3816,6 +3857,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"operationId"},
 		document: `mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseOperationRequestInput!) {
@@ -3927,6 +3969,7 @@ var operations = []operation{
 		windowMs:      60000,
 		resolvable:    true,
 		envelope:      true,
+		requireResult: true,
 		subject:       []string{"result"},
 		echo:          []string{"operationId"},
 		document: `mutation ManagementResumeOperation($context: RequestContextInput!, $input: ResumeOperationRequestInput!) {

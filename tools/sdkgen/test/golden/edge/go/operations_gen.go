@@ -66,7 +66,7 @@ func (c *AlphaClient) FetchHTTPStatus(ctx context.Context, input *FetchInput, op
 //
 // Idempotency: idempotent. Retry with the same requestId and input; resolve an unknown outcome with resolveRequest.
 // Retry budget: 3 attempts within 60 seconds.
-// Long-running: poll [AlphaClient.Job] with the job reference from the result until the work completes.
+// Long-running: poll [AlphaClient.Job] with the reply's Job reference until the work completes.
 // Realtime events: job.started and job.finished.
 // Authorized by serverKey with scope widgetWrite.
 func (c *AlphaClient) StartJob(ctx context.Context, input StartJobInput, opts ...CallOption) (*StartJobPayload, error) {

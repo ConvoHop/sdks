@@ -117,6 +117,23 @@ test("the Go emitter writes three files with the generated-code header, a method
   }
 });
 
+test("Go catalog entries require the nullable result of a reply with an operation reference, unless the operation is long-running", () => {
+  const requiring = ir => new Set(render(ir)[2].contents.split("\n\t{\n").slice(1)
+    .filter(entry => /^\t\trequireResult: +true,$/m.test(entry)).map(entry => /^\t\tid: +"([^"]+)",$/m.exec(entry)[1]));
+  const ir = buildIr(repoSources());
+  const required = requiring(ir);
+  for (const id of ["communication.createPrincipal", "communication.messages", "communication.sendMessage", "management.createOrganization"]) {
+    assert.ok(required.has(id), `${id} must carry its result`);
+  }
+  // No live session leaves currentLiveSession's result null, the schema check
+  // already requires liveSession's non-null result, and the others are polled.
+  for (const id of ["communication.currentLiveSession", "communication.liveSession", "communication.endLiveSession", "management.issueBackendKey"]) {
+    assert.ok(!required.has(id), `${id} needs no result check`);
+  }
+  delete ir.operations.find(operation => operation.id === "management.issueBackendKey").longRunning;
+  assert.ok(requiring(ir).has("management.issueBackendKey"), "the reply must carry its result once the operation is not long-running");
+});
+
 test("Go page iterators check next cursors against the cursor scalar, and in the style's order only for decimal cursors", () => {
   const iterators = ir => Object.fromEntries([...render(ir)[1].contents.matchAll(
     /^func \(c \*\w+\) (\w+Pages)\([^\n]*\n\treturn paginate\(input\.\w+, pageCursor\{"(\w+)", (\w+)\}, /gm)]
