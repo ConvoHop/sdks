@@ -7218,7 +7218,7 @@
       "field": "resumeOperation",
       "operationName": "ManagementResumeOperation",
       "layer": "server",
-      "summary": "Resume a paused operation.",
+      "summary": "Resume a paused or blocked operation.",
       "page": "management/resumeOperation.md",
       "languages": {
         "typescript": [],

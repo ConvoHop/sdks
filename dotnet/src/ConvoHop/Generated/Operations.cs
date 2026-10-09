@@ -1641,7 +1641,7 @@ namespace ConvoHop
                 layer: "server",
                 pagination: "none");
 
-            /// <summary>Resume a paused operation.</summary>
+            /// <summary>Resume a paused or blocked operation.</summary>
             public static readonly global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.ResumeOperationRequestInput, global::ConvoHop.Models.ResumeOperationReply> ResumeOperation = new global::ConvoHop.OperationDescriptor<global::ConvoHop.Models.ResumeOperationRequestInput, global::ConvoHop.Models.ResumeOperationReply>(
                 id: "management.resumeOperation",
                 plane: "management",

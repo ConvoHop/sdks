@@ -767,7 +767,7 @@
       "kind": "mutation",
       "field": "resumeOperation",
       "operationName": "ManagementResumeOperation",
-      "summary": "Resume a paused operation.",
+      "summary": "Resume a paused or blocked operation.",
       "layer": "server",
       "path": "management/resumeOperation.md"
     },

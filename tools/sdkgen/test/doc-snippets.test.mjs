@@ -120,6 +120,20 @@ test("transient error advice follows the retry policy of the operation's idempot
   assert.deepEqual([...policies].sort(), ["none", "repeat", "sameRequest"], "the fixture covers every retry policy");
 });
 
+test("resumeOperation documents paused and blocked operations and non-transient agent-key admission problems", () => {
+  const snippet = snippetOf(snippets(buildIr(repoSources())), "management", "resumeOperation");
+  assert.match(snippet, /^## `resumeOperation`\n\nResume a paused or blocked operation\./);
+  const lines = snippet.split("\n");
+  const returned = lines.find(line => line.startsWith("- Returned by the authority:"));
+  const transient = lines.find(line => line.startsWith("- Transient"));
+  assert.ok(returned, "resumeOperation must list the authority's problems");
+  assert.ok(transient, "resumeOperation must keep its existing transient error advice");
+  for (const name of ["AGENTIC_NOT_CONFIGURED", "AGENT_GRANT_REVOKED", "AGENT_GRANT_EXPIRED", "AGENT_KEY_LIMIT"]) {
+    assert.ok(returned.includes(code(name)), `${name} must be an authority problem`);
+    assert.equal(transient.includes(code(name)), false, `${name} must not become retryable`);
+  }
+});
+
 test("doc-snippets fails loudly on IR references it cannot resolve", () => {
   const ir = buildIr(fixtureSources());
   const render = mutate => () => {

@@ -4538,7 +4538,7 @@ public final class Operations {
               + "}")
           .build();
 
-  /** <code>management.resumeOperation</code>: Resume a paused operation. */
+  /** <code>management.resumeOperation</code>: Resume a paused or blocked operation. */
   public static final OperationDescriptor<ResumeOperationReply> MANAGEMENT_RESUME_OPERATION =
       OperationDescriptor.builder("management.resumeOperation", Wire.required(ResumeOperationReply::decode))
           .plane("management")

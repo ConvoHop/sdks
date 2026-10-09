@@ -2489,7 +2489,7 @@ export const mcpTools: readonly McpToolDefinition[] = [
   {
     "name": "management_resume_operation",
     "title": "Management: resume operation",
-    "description": "Resume a paused operation.\n\nOperation management.resumeOperation (mutation).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nEach call is a new request. Results and errors carry its requestId. When the outcome is unknown, call retry_request with that requestId instead of calling this tool again.",
+    "description": "Resume a paused or blocked operation.\n\nOperation management.resumeOperation (mutation).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nEach call is a new request. Results and errors carry its requestId. When the outcome is unknown, call retry_request with that requestId instead of calling this tool again.",
     "inputSchema": {
       "type": "object",
       "properties": {

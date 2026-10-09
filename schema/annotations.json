@@ -2299,7 +2299,7 @@
       }
     },
     "management.resumeOperation": {
-      "summary": "Resume a paused operation.",
+      "summary": "Resume a paused or blocked operation.",
       "layer": "server",
       "auth": [{"credential": "portalCredential", "condition": "owner"}],
       "idempotency": "idempotent",
@@ -2307,7 +2307,14 @@
       "realtime": {"mode": "none"},
       "errors": {
         "sets": ["request", "http", "mutation"],
-        "codes": ["NOT_FOUND", "REVISION_CONFLICT"]
+        "codes": [
+          "NOT_FOUND",
+          "REVISION_CONFLICT",
+          "AGENTIC_NOT_CONFIGURED",
+          "AGENT_GRANT_REVOKED",
+          "AGENT_GRANT_EXPIRED",
+          "AGENT_KEY_LIMIT"
+        ]
       }
     },
     "management.createBillingCheckoutSession": {
