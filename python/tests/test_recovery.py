@@ -23,6 +23,7 @@ from .graphql import (
     UnexpectedRequestError,
     answer,
     full,
+    graphql_error,
     offline,
     rejects,
     reply,
@@ -41,7 +42,7 @@ BUDGET = "Retry budget expired or clock changed; resolve this request read-only"
 ELIGIBILITY = "The original request is no longer eligible for resend"
 ABSENT = "Previously observed commit or native admission cannot be retried from absent evidence"
 STORAGE = "Recovery storage did not confirm durability; retain the original request and its outcome"
-FULL = "Resolve outstanding mutations before creating more"
+LIMIT = "Recovery storage already holds 128 requests that aren't final; retry or resolve them first"
 SCOPE = "Resolve within the original project and incarnation"
 IDENTITY = "Request resolution identity changed"
 ORIGINAL = {"conversationId": CONVERSATION, "text": "Original", "props": {}}
@@ -529,7 +530,7 @@ def test_a_failed_write_after_a_transport_failure_reports_the_storage_failure() 
 # Stored records
 
 
-def test_at_most_128_records_are_kept_and_only_settled_ones_are_evicted() -> None:
+def test_a_full_journal_refuses_a_new_request_until_a_record_is_final() -> None:
     storage = Storage()
     authority = Authority(answer(offline, "committed"))
     client = authority.management(actor_id=ACTOR, recovery_storage=storage)
@@ -537,14 +538,152 @@ def test_at_most_128_records_are_kept_and_only_settled_ones_are_evicted() -> Non
     for request_id in ids:
         rejects(partial(create_organization, client, request_id), "TRANSPORT_UNKNOWN", UNAVAILABLE)
     extra = uid()
-    problem = rejects(partial(create_organization, client, extra), "RESOLUTION_REQUIRED", FULL)
-    assert (problem.request_id, problem.outcome, problem.status) == (extra, "rejected", 409)
+    problem = rejects(partial(create_organization, client, extra), "RECOVERY_LIMIT", LIMIT)
+    assert (problem.request_id, problem.outcome, problem.status, problem.retryable) == (extra, "rejected", 409, False)
     assert authority.count("management.createOrganization") == 128
 
     assert client.resolve_request(request_id=ids[0]).state == "committed"
     rejects(partial(create_organization, client, extra), "TRANSPORT_UNKNOWN", UNAVAILABLE)
     assert [record["requestId"] for record in storage.records(MANAGEMENT_KEY)] == [*ids[1:], extra]
     assert max(len(json.loads(value)) for _, value in storage.writes) == 128
+
+
+def test_a_full_journal_evicts_the_final_record_attempted_longest_ago(clock: list[int]) -> None:
+    online = [False]
+
+    def forbid(request: Received) -> httpx.Response:
+        if not online[0]:
+            raise httpx.ConnectError("offline")
+        return graphql_error(request, "FORBIDDEN", 403, "Forbidden", retryable=False)
+
+    storage = Storage()
+    authority = Authority(forbid)
+    client = authority.management(actor_id=ACTOR, recovery_storage=storage)
+    lost, *ids = [uid() for _ in range(128)]
+    rejects(partial(create_organization, client, lost), "TRANSPORT_UNKNOWN", UNAVAILABLE)
+    online[0] = True
+    # The first rejected request is resent last, so it is no longer the final record attempted longest ago.
+    for request_id in [*ids, ids[0]]:
+        clock[0] += 1
+        rejects(partial(create_organization, client, request_id), "FORBIDDEN")
+    extra = uid()
+    rejects(partial(create_organization, client, extra), "FORBIDDEN")
+    assert authority.count("management.createOrganization") == 130
+    records = storage.records(MANAGEMENT_KEY)
+    assert [record["requestId"] for record in records] == [lost, ids[0], *ids[2:], extra]
+    assert [record["resolutionState"] for record in records] == ["unknown", *["rejected"] * 127]
+    assert (records[1]["attemptCount"], records[1]["lastAttemptClassification"]) == (2, "FORBIDDEN")
+    restarted = authority.management(actor_id=ACTOR, recovery_storage=storage)
+    assert restarted.recovery_states == client.recovery_states
+
+
+@pytest.mark.parametrize(("code", "status"), [("RATE_LIMITED", 429), ("WRONG_REGION", 409), ("NEWER_CODE", 409)])
+def test_a_journal_full_of_resendable_rejections_refuses_new_requests(clock: list[int], code: str, status: int) -> None:
+    accept = [False]
+
+    def respond(request: Received) -> httpx.Response:
+        return settle(request) if accept[0] else graphql_error(request, code, status, "Not now")
+
+    storage = Storage()
+    authority = Authority(respond)
+    client = authority.management(actor_id=ACTOR, recovery_storage=storage)
+    ids = [uid() for _ in range(128)]
+    for request_id in ids:
+        rejects(partial(create_organization, client, request_id), code)
+    assert {state.resolution_state for state in client.recovery_states} == {"rejected"}
+    extra = uid()
+    problem = rejects(partial(create_organization, client, extra), "RECOVERY_LIMIT", LIMIT)
+    assert (problem.request_id, problem.outcome, problem.status) == (extra, "rejected", 409)
+    assert authority.count("management.createOrganization") == 128
+
+    # A kept request is resent under its own ID without a new record; once committed, its record makes room.
+    accept[0] = True
+    clock[0] += 1
+    create_organization(client, ids[5])
+    create_organization(client, extra)
+    assert [record["requestId"] for record in storage.records(MANAGEMENT_KEY)] == [*ids[:5], *ids[6:], extra]
+    assert authority.count("management.createOrganization") == 130
+
+
+def test_a_spent_retry_budget_makes_a_resendable_rejection_final(clock: list[int]) -> None:
+    storage = Storage()
+    authority = Authority(lambda request: graphql_error(request, "RATE_LIMITED", 429, "Slow down"))
+    client = authority.management(actor_id=ACTOR, recovery_storage=storage)
+    start = clock[0]
+    ids = [uid() for _ in range(128)]
+    for request_id in ids:
+        rejects(partial(create_organization, client, request_id), "RATE_LIMITED")
+    for _ in range(2):
+        clock[0] += 1
+        rejects(partial(create_organization, client, ids[3]), "RATE_LIMITED")
+    extra = uid()
+    rejects(partial(create_organization, client, extra), "RATE_LIMITED")
+    assert [record["requestId"] for record in storage.records(MANAGEMENT_KEY)] == [*ids[:3], *ids[4:], extra]
+
+    clock[0] = start + WINDOW_MS + 1
+    later = uid()
+    rejects(partial(create_organization, client, later), "RATE_LIMITED")
+    assert [record["requestId"] for record in storage.records(MANAGEMENT_KEY)] == [*ids[1:3], *ids[4:], extra, later]
+    assert authority.count("management.createOrganization") == 132
+
+
+def test_a_request_is_rejected_only_if_every_attempt_was(clock: list[int]) -> None:
+    plan: list[str] = []
+
+    def respond(request: Received) -> httpx.Response:
+        if plan.pop(0) == "lost":
+            raise httpx.ConnectError("offline")
+        return graphql_error(request, "FORBIDDEN", 403, "Forbidden", retryable=False)
+
+    storage = Storage()
+    client = Authority(respond).management(actor_id=ACTOR, recovery_storage=storage)
+    first, second = uid(), uid()
+    plan[:] = ["lost", "rejected", "rejected", "lost"]
+    rejects(partial(create_organization, client, first), "TRANSPORT_UNKNOWN", UNAVAILABLE)
+    rejects(partial(create_organization, client, second), "FORBIDDEN")
+    clock[0] += 1
+    rejects(partial(create_organization, client, first), "FORBIDDEN")
+    rejects(partial(create_organization, client, second), "TRANSPORT_UNKNOWN", UNAVAILABLE)
+    expected = [("unknown", 2, "FORBIDDEN"), ("unknown", 2, "TRANSPORT_UNKNOWN")]
+    states = client.recovery_states
+    assert [(s.resolution_state, s.attempt_count, s.last_attempt_classification) for s in states] == expected
+    assert [record["resolutionState"] for record in storage.records(MANAGEMENT_KEY)] == ["unknown", "unknown"]
+
+
+def test_restored_records_make_room_only_once_final(clock: list[int]) -> None:
+    now = clock[0]
+
+    def record(state: str, classification: str, **fields: Any) -> dict[str, Any]:
+        times = {"firstSubmittedAt": now - 10, "retryDeadline": now - 10 + WINDOW_MS, "lastAttemptAt": now - 10}
+        return stored(**(times | {"resolutionState": state, "lastAttemptClassification": classification} | fields))
+
+    final = [  # in the order they make room: the one attempted longest ago first
+        record("committed", "authorityReceipt", lastAttemptAt=now - 9),
+        record("rejected", "RATE_LIMITED", retryDeadline=now - 1, lastAttemptAt=now - 8),
+        record("rejected", "FORBIDDEN", lastAttemptAt=now - 7),
+        record("rejected", "RATE_LIMITED", attemptCount=3, lastAttemptAt=now - 6),
+    ]
+    kept = [
+        record("rejected", "RATE_LIMITED", attemptCount=2),
+        record("rejected", "WRONG_REGION"),
+        record("rejected", "NEWER_CODE"),
+        record("unknown", "submitted"),
+        record("pending", "notSubmitted", attemptCount=0),
+    ]
+    filler = [record("unknown", "TRANSPORT_UNKNOWN") for _ in range(128 - len(final) - len(kept))]
+    saved = [final[2], *kept[:2], final[0], *filler, final[3], *kept[2:], final[1]]
+    storage = Storage()
+    storage.values[MANAGEMENT_KEY] = json.dumps(saved)
+    authority = Authority(offline)
+    client = authority.management(actor_id=ACTOR, recovery_storage=storage)
+    extras = [uid() for _ in final]
+    for count, request_id in enumerate(extras, 1):
+        rejects(partial(create_organization, client, request_id), "TRANSPORT_UNKNOWN", UNAVAILABLE)
+        evicted = {item["requestId"] for item in final[:count]}
+        expected = [item["requestId"] for item in saved if item["requestId"] not in evicted] + extras[:count]
+        assert [item["requestId"] for item in storage.records(MANAGEMENT_KEY)] == expected
+    rejects(partial(create_organization, client, uid()), "RECOVERY_LIMIT", LIMIT)
+    assert authority.count("management.createOrganization") == len(final)
 
 
 def test_records_use_the_typescript_layout_and_fingerprints(clock: list[int]) -> None:

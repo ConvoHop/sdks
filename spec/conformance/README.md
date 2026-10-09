@@ -446,19 +446,20 @@ with none skipped, including the 14 `webhooks` scenarios,
 `errors.rate-limited.retry-after` and the 9 that need `recovery.eviction` or
 `realtime.reconnectPolicy`.
 
-The JVM driver declares the backend and management roles. It passes 69
-scenarios against the mock and skips 4: the 2 that only use user clients,
-`auth.user-token.invalid` and `realtime.subscribe.invalid-token`, and the 2
-that need `recovery.eviction` with a backend client,
-`recovery.eviction.final-records.backend` and
-`recovery.eviction.fail-closed.backend`, until its SDK follows the
-[recovery journal](../recovery/README.md#recovery-journal) rules. Its
+The JVM driver declares the backend and management roles. It passes 71
+scenarios against the mock and skips the 2 that only use user clients,
+`auth.user-token.invalid` and `realtime.subscribe.invalid-token`. Its
 [workflow](../../.github/workflows/jvm.yml) fails on any other skip.
 
 The .NET driver declares the backend and management roles too. With both
-the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 69
-scenarios against the mock and skips the same 4. Its
+the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 71
+scenarios against the mock and skips the same 2. Its
 [workflow](../../.github/workflows/dotnet.yml) fails on any other skip.
+
+The Python driver declares the backend and management roles too. With both
+the sync and the async clients, it passes 71 scenarios against the mock and
+skips the same 2. Its [workflow](../../.github/workflows/python.yml) fails
+on any other skip.
 
 The Go driver also declares the backend and management roles, and the
 `recovery.eviction` feature. It passes 71 scenarios against the mock and
