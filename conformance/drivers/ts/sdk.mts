@@ -6,6 +6,9 @@ import { ConvoHopManagementClient, ProjectServerClient, WebhookVerificationError
 import type { WebhookVerificationCode } from "@convohop/server";
 import { ParamsError, entries, integer, isRecord, optionalText, record, strings, text, type Args } from "./params.mjs";
 
+/** The driver's name in `hello`, which reports show. A driver that replaces this module names its own SDK. */
+export const DRIVER = { name: "convohop-typescript-reference", version: "0.1.0", language: "typescript" } as const;
+
 export type Role = "user" | "backend" | "management";
 export const ROLES: readonly Role[] = ["user", "backend", "management"];
 

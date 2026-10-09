@@ -138,7 +138,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 | React | Hooks on top of the Web SDK | Same as Web | Source available |
 | iOS and macOS | Swift | LiveKit Swift SDK | Source available |
 | Android | Kotlin | LiveKit Android SDK | Source available |
-| React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | Planned |
+| React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | In development; see the [design](react-native.md) |
 | Flutter | Dart | LiveKit Flutter SDK | Source available |
 
 ### How the SDKs are built
@@ -452,7 +452,9 @@ requirement when that SDK lands.
 
 For the Web row, CI runs the Web client's browser tests in Playwright's
 current builds of Chromium, Firefox and WebKit. For the React row, it runs
-the hooks on React 18 and 19.
+the hooks on React 18 and 19. For the React Native row, it runs React
+Native 0.87.1's Codegen on the native modules' specs and type-checks the
+example app; no workflow builds or runs an app yet.
 
 For the iOS and macOS row, CI builds and tests the Swift SDK on macOS and in
 the iOS Simulator with Xcode 16.4 and 26.6. It doesn't test on iOS 15 or

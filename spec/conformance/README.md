@@ -41,6 +41,7 @@ flowchart LR
 | [`conformance/drivers/go/`](../../conformance/drivers/go) | The driver for the [Go server SDK](../../go/README.md). |
 | [`conformance/drivers/android/`](../../conformance/drivers/android) | The driver for the [Android client SDK](../../android/README.md). |
 | [`conformance/drivers/dart/`](../../conformance/drivers/dart) | The driver for the [Flutter SDK](../../flutter/README.md). |
+| [`conformance/drivers/react-native/`](../../conformance/drivers/react-native) | The driver for the [React Native SDK](../../packages/react-native/README.md). It runs the reference driver's protocol loop with the client on the React Native SDK's platform, in a Node.js process with React Native's globals and a fake of its native module. |
 | [`conformance/drivers/swift/`](../../conformance/drivers/swift) | The driver for the [Swift client SDK](../../swift/README.md), a Swift package in `Driver/`. |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |
 | [`conformance/targets/`](../../conformance/targets) | Descriptors for real targets, such as the dev-stack image. |
@@ -420,6 +421,15 @@ reports as the `conformance-reports-dart-mock` artifact. The Dart driver
 declares only the user role, so the reference driver provides the other
 roles, and scenarios that need what it doesn't declare are skipped.
 
+The `conformance` job of the
+[React Native workflow](../../.github/workflows/react-native.yml) runs the
+scenarios with the [React Native driver](../../conformance/drivers/react-native)
+against the mock, without `--strict`, and uploads the reports as the
+`conformance-reports-react-native-mock` artifact. The driver declares only
+the user role, so the reference driver provides the other roles, and
+scenarios that need what it doesn't declare are skipped. The harness's
+tests also run a few scenarios through it.
+
 ### Current results
 
 The TypeScript reference driver passes all 64 scenarios against the mock,
@@ -449,6 +459,13 @@ The Dart driver also declares only the user role and no `webhooks.verify`
 feature. It passes the same 33 scenarios against the mock and skips the
 same 31. Its [workflow](../../.github/workflows/flutter.yml) fails on any
 other skip.
+
+The React Native driver declares only the user role and no
+`webhooks.verify` feature. It passes 33 scenarios against the mock and
+skips 31: those that use only backend or management clients, and those that
+verify webhooks. Its [workflow](../../.github/workflows/react-native.yml)
+fails on any other skip. It runs on Node.js, not Hermes, with a fake of the
+native platform module.
 
 The Swift driver also declares only the user role and no `webhooks.verify`
 feature. It passes the same 33 scenarios against the mock and skips the

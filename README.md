@@ -187,6 +187,14 @@ Flutter 3.38 and the current stable release, checks its generated code, runs
 the conformance scenarios through the Dart driver against the mock and builds
 the example app for Android and iOS. It doesn't publish anything either.
 
+The React Native SDK in [`packages/react-native`](packages/react-native) is
+an npm workspace, so CI builds and tests it with the other TypeScript
+packages. The [React Native workflow](.github/workflows/react-native.yml)
+also type-checks its example app and runs the conformance scenarios through
+its driver against the mock. Its native modules aren't written yet, so no
+workflow builds native code or runs Hermes. See
+[Testing](docs/react-native.md#testing).
+
 The Swift SDK has its own Swift package and
 [Swift workflow](.github/workflows/swift.yml), which runs on GitHub-hosted
 macOS runners. See [Build and test](swift/README.md#build-and-test).
@@ -255,6 +263,8 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - [Client SDK](packages/client/README.md)
 - [Android client SDK](android/README.md)
 - [Flutter SDK](flutter/README.md)
+- [React Native SDK](packages/react-native/README.md), in development, and
+  its [design](docs/react-native.md)
 - [Swift client SDK for iOS and macOS](swift/README.md)
 - [Node.js server SDK](packages/server/README.md)
 - [Java and Kotlin server SDK](jvm/README.md)
