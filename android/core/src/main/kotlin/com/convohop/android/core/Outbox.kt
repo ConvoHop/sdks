@@ -37,12 +37,21 @@ private val HOLD_CODES = setOf("SESSION_REFRESH_REQUIRED", "SESSION_EXPIRED", "I
  * never resends under a new ID on its own. [sendAgain] does that only when
  * the app asks.
  *
+ * A message becomes [PendingState.SENDING] only after the client has saved
+ * its request's recovery record, just before each attempt, so a process
+ * that ends mid-send leaves either that record or a message never sent.
+ * On the next start, a message with a record is resent under the same
+ * request ID while its budget lasts, then resolved read-only; one that was
+ * never submitted becomes [PendingState.FAILED] with `RESOLUTION_REQUIRED`.
+ * Without durable recovery storage, a SENDING message can only be resolved.
+ *
  * When the authority refuses the session, the outbox holds every send and
  * tries again only on [drain], so new sends do not spend the held message's
  * retry budget. A refused attempt was not applied: the message stays
  * [PendingState.QUEUED] with the refusal in [PendingMessage.errorCode]. If
  * the hold outlasts the budget (three attempts, or 60 seconds from the
- * first), the message is resolved read-only like any other.
+ * first), the message is resolved read-only; one the authority never applied
+ * becomes [PendingState.FAILED].
  */
 public class Outbox internal constructor(
     private val client: ConvoHopClient,
@@ -60,7 +69,6 @@ public class Outbox internal constructor(
     private val forced = AtomicBoolean(false)
     private val waiting = ConcurrentHashMap<String, Job>()
     private val failures = HashMap<String, Int>()
-    private val admitted = HashSet<String>()
     private var lastSweep: Long? = null
 
     /** Set when the authority refused the session; only a forced [drain] tries again. */
@@ -240,21 +248,28 @@ public class Outbox internal constructor(
     }
 
     private suspend fun deliver(entry: PendingMessage): Step {
-        if (entry.state == PendingState.SENDING && entry.requestId !in admitted) {
-            // An earlier process submitted it. Without its recovery record the attempt can only be resolved, not resent.
-            val known = try {
-                recorded(entry.requestId)
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                report(onError, error)
-                return Step.HOLD
-            }
-            if (!known) return resolve(entry)
+        val record = try {
+            record(entry.requestId)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            report(onError, error)
+            return Step.HOLD
         }
-        val previous = entry.state
-        update(entry.requestId) { it.copy(state = PendingState.SENDING) } ?: return Step.NEXT
-        admitted += entry.requestId
+        // Noted as submitted, but its recovery record is gone, as after a restart without durable recovery storage:
+        // it may have committed, so it can only be resolved, not resent.
+        if (entry.state == PendingState.SENDING && record == null) return resolve(entry)
+        val noted = AtomicBoolean(entry.state == PendingState.SENDING)
+        // Noted just before each submission, once the client has saved the request's recovery record, so a process
+        // that dies at any point leaves either that record, which recovers the request, or a message never sent.
+        val forget = client.http.beforeSubmitting(entry.requestId) {
+            if (!noted.get()) {
+                checkNotNull(update(entry.requestId) { it.copy(state = PendingState.SENDING) }) {
+                    "The message left the outbox before it was sent"
+                }
+                noted.set(true)
+            }
+        }
         return try {
             val receipt = client.send(entry.conversationId, entry.text, entry.requestId, entry.props)
             sent(entry.requestId, receipt.messageId)
@@ -262,18 +277,18 @@ public class Outbox internal constructor(
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
-            failed(entry, previous, error)
+            // Discarded while still queued: the submission stopped before anything was sent.
+            if (entries.value.none { it.requestId == entry.requestId }) Step.NEXT else failed(entry, error)
+        } finally {
+            forget()
         }
     }
 
-    private suspend fun failed(entry: PendingMessage, previous: PendingState, error: Exception): Step {
+    private suspend fun failed(entry: PendingMessage, error: Exception): Step {
         val problem = error as? ConvoHopProblem
         return when {
             problem == null && error !is ConvoHopProtocolException -> {
-                // Thrown before admission, by a closed client or by storage: unsubmitted messages stay queued.
-                if (previous == PendingState.QUEUED && !recordedOrUnknown(entry.requestId)) {
-                    update(entry.requestId) { it.copy(state = PendingState.QUEUED) }
-                }
+                // Thrown by a closed client or by storage. The message stays queued unless an attempt was noted.
                 report(onError, error)
                 Step.HOLD
             }
@@ -285,8 +300,7 @@ public class Outbox internal constructor(
                 Step.NEXT
             }
             holds(error) -> {
-                // A refused attempt was not applied, so the message stands where it stood before it.
-                if (problem?.outcome == "rejected") update(entry.requestId) { it.copy(state = previous, errorCode = problem.code) }
+                refused(entry, problem)
                 held = true
                 report(onError, error)
                 Step.HOLD
@@ -297,8 +311,16 @@ public class Outbox internal constructor(
                 report(onError, error)
                 Step.NEXT
             }
-            else -> retryLater(entry, error)
+            else -> {
+                refused(entry, problem)
+                retryLater(entry, error)
+            }
         }
+    }
+
+    /** A refused attempt was not applied, so the message stands where it stood before it. */
+    private suspend fun refused(entry: PendingMessage, problem: ConvoHopProblem?) {
+        if (problem?.outcome == "rejected") update(entry.requestId) { it.copy(state = entry.state, errorCode = problem.code) }
     }
 
     private suspend fun resolve(entry: PendingMessage): Step {
@@ -314,22 +336,35 @@ public class Outbox internal constructor(
         }
         when (resolution.state) {
             "committed", "accepted" -> sent(entry.requestId, resolution.receipt?.result?.messageAck?.messageId)
-            "notObservedYet" -> settle(entry.requestId, PendingState.UNCONFIRMED, null)
+            "notObservedYet" -> unobserved(entry)
             else -> return retryLater(entry, ConvoHopProtocolException("Unknown request resolution state"))
         }
         return Step.NEXT
     }
 
-    private suspend fun recorded(requestId: String): Boolean = client.requests.records().any { it.requestId == requestId }
-
-    /** Whether the client admitted [requestId], counting an unreadable ledger as admitted so nothing is resent early. */
-    private suspend fun recordedOrUnknown(requestId: String): Boolean = try {
-        recorded(requestId)
-    } catch (error: CancellationException) {
-        throw error
-    } catch (_: Exception) {
-        true
+    /** Settles a message the authority has not observed and the client will not resend, by what is known of its attempts. */
+    private suspend fun unobserved(entry: PendingMessage) {
+        val record = try {
+            record(entry.requestId)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            report(onError, error)
+            null
+        }
+        val current = entries.value.firstOrNull { it.requestId == entry.requestId } ?: return
+        when {
+            // A commit the client observed outlives the authority's retention of its result; the replay delivers it.
+            record?.resolutionState == "committed" -> sent(entry.requestId, null)
+            // No attempt could have been applied: none was submitted, as when the process ended before the first, or
+            // the authority refused each one. Resending it as a new message cannot duplicate it.
+            record?.attemptCount == 0L || current.state == PendingState.QUEUED ->
+                settle(entry.requestId, PendingState.FAILED, current.errorCode ?: "RESOLUTION_REQUIRED")
+            else -> settle(entry.requestId, PendingState.UNCONFIRMED, null)
+        }
     }
+
+    private suspend fun record(requestId: String): RecoveryRecord? = client.requests.records().firstOrNull { it.requestId == requestId }
 
     private fun holds(error: Exception): Boolean =
         error is ConvoHopProblem && (error.status == 401 || error.code in HOLD_CODES)

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Clients and stores for one test against a [FakeAuthority], on the test's
@@ -32,6 +33,7 @@ internal class Harness(private val test: TestScope) : AutoCloseable {
         token: String = authority.issue(),
         storage: RecoveryStorage? = null,
         refresh: SessionRefresh? = null,
+        http: HttpEngine = authority,
     ): ConvoHopClient {
         val options = ConvoHopClientOptions(
             baseUrl = BASE_URL,
@@ -41,7 +43,7 @@ internal class Harness(private val test: TestScope) : AutoCloseable {
             principalId = ME,
             recoveryStorage = storage,
             sessionRefresh = refresh,
-            http = authority,
+            http = http,
             realtime = authority,
             environment = environment,
             dispatcher = dispatcher,
@@ -64,6 +66,13 @@ internal class Harness(private val test: TestScope) : AutoCloseable {
     /** Error codes reported so far, for assertions. */
     fun errorCodes(): List<String> = errors.map { (it as? ConvoHopProblem)?.code ?: it.javaClass.simpleName }
 
+    /** The request ID of every send the authority was asked for, in order. */
+    fun sends(): List<String> = authority.calls("CommunicationSendMessage").map { it.requestId }
+
+    /** The request IDs the clients resolved read-only, in order. */
+    fun resolutions(): List<String> =
+        authority.calls("CommunicationResolveRequest").map { it.input.getValue("requestId").jsonPrimitive.content }
+
     override fun close() {
         // Newest first: stores stop their timelines and outbox before their client closes.
         for (item in owned.asReversed()) item.close()
@@ -71,3 +80,6 @@ internal class Harness(private val test: TestScope) : AutoCloseable {
         test.runCurrent()
     }
 }
+
+/** The state of each outbox message, in order. */
+internal fun ConvoHopStore.states(): List<PendingState> = outbox.pending.value.map { it.state }

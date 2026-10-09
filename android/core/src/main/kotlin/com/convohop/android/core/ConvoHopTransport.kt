@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import java.util.concurrent.ConcurrentHashMap
 
 private const val REQUEST_TIMEOUT_MILLIS = 12_000L
 private const val MAX_RESPONSE_CHARS = 1_048_576
@@ -54,6 +55,7 @@ internal class ConvoHopTransport(
     private val storageKey = "convohop.requests:$namespace"
     private val states = LinkedHashMap<String, RecoveryState>()
     private val activeMutations = HashMap<String, ActiveMutation>()
+    private val submissionHooks = ConcurrentHashMap<String, suspend () -> Unit>()
     private var initialization: Deferred<Unit>? = null
     private val writes = Mutex()
 
@@ -86,6 +88,22 @@ internal class ConvoHopTransport(
         state.lastAttemptClassification = "nativeAdmissionAttempted"
         state.mediaAdmissionAttempted = true
         persist(state)
+    }
+
+    /**
+     * Runs [hook] before each submission of [requestId] within its retry
+     * budget: after the request's recovery record is saved, and before the
+     * attempt is counted and sent, which wait for it. A caller that notes that
+     * the request may have been sent does so here, so storage never holds that
+     * note without the record that recovers the request. If [hook] throws,
+     * nothing is sent and the submission fails with its error. Unlike other
+     * members, it may be called from any thread. Returns a function that
+     * removes the hook.
+     */
+    fun beforeSubmitting(requestId: String, hook: suspend () -> Unit): () -> Unit {
+        val key = parseId(requestId)
+        submissionHooks[key] = hook
+        return { submissionHooks.remove(key, hook) }
     }
 
     /** Writes a full snapshot; snapshots reach storage in the order they were taken. */
@@ -288,6 +306,7 @@ internal class ConvoHopTransport(
         if (state.attemptCount >= 3 || now > state.retryDeadline || now < state.firstSubmittedAt || now < state.lastAttemptAt) {
             throw resolutionRequired(state.requestId, "Retry budget expired or clock changed; resolve this request read-only")
         }
+        submissionHooks[state.requestId]?.invoke()
         state.attemptCount += 1
         state.lastAttemptAt = now
         if (state.resolutionState == "pending") state.resolutionState = "unknown"

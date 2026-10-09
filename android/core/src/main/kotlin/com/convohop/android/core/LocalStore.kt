@@ -11,7 +11,11 @@ public enum class PendingState {
      */
     QUEUED,
 
-    /** Submitted at least once; the outcome is not known yet, so it is resent under the same request ID. */
+    /**
+     * It may have been submitted: the outbox marks it just before each
+     * attempt, once the request's recovery record is saved. Until the
+     * outcome is known it is resent only under the same request ID.
+     */
     SENDING,
 
     /** The authority committed it; it leaves the outbox once the timeline holds the message. */
@@ -24,7 +28,11 @@ public enum class PendingState {
      */
     UNCONFIRMED,
 
-    /** The authority rejected it; [PendingMessage.errorCode] says why. It was not sent. */
+    /**
+     * It was not sent: the authority rejected it, or its retry budget ran
+     * out before any attempt could have been applied, as when it was never
+     * submitted or every attempt was refused. [PendingMessage.errorCode] says why.
+     */
     FAILED,
 }
 

@@ -2,20 +2,12 @@ package com.convohop.android.core
 
 import com.convohop.android.core.FakeAuthority.Fault
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class OutboxTest {
-    private fun ConvoHopStore.states(): List<PendingState> = outbox.pending.value.map { it.state }
-
-    private fun Harness.sends(): List<String> = authority.calls("CommunicationSendMessage").map { it.requestId }
-
-    private fun Harness.resolutions(): List<String> =
-        authority.calls("CommunicationResolveRequest").map { it.input.getValue("requestId").jsonPrimitive.content }
-
     @Test
     fun sendShowsTheMessageAtOnceAndConfirmsIt() = runTest {
         Harness(this).use { h ->

@@ -175,10 +175,10 @@ state:
 | `PendingState` | Meaning |
 | --- | --- |
 | `QUEUED` | Waiting to be sent. Nothing was applied: it wasn't submitted yet, or the authority refused the attempt, for example because the session expired. |
-| `SENDING` | Submitted; the outcome isn't known yet, so it's resent under the same request ID. |
+| `SENDING` | It may have been submitted. Until the outcome is known it's resent only under the same request ID. |
 | `SENT` | Committed. It leaves the outbox when the timeline shows it. |
 | `UNCONFIRMED` | Three attempts or 60 seconds passed and the authority hasn't seen it. It may still commit, so it's never resent on its own. |
-| `FAILED` | Rejected; `errorCode` says why. |
+| `FAILED` | Not sent. The authority rejected it, or three attempts or 60 seconds passed and none could have been applied, because it was never submitted or every attempt was refused. `errorCode` says why. |
 
 Every attempt reuses the message's request ID and payload, so the
 authority applies it at most once. For an `UNCONFIRMED` or `FAILED`
@@ -187,6 +187,13 @@ An unconfirmed original may still commit and show twice, so ask the user
 first. `outbox.discard(requestId)` removes a message unless it's
 `SENDING`. Losing the network holds the outbox; coming back delivers it
 and reconnects every timeline.
+
+The outbox marks a message `SENDING` only once recovery storage holds its
+request. If the app is killed mid-send, the next start resends it under
+the same request ID within the same three attempts and 60 seconds, then
+looks up its outcome. A message never submitted in time becomes `FAILED`
+with `RESOLUTION_REQUIRED`. Without durable `recoveryStorage`, a
+`SENDING` message can only be looked up, so it may end `UNCONFIRMED`.
 
 Without the store, `client.conversation(id).messages` sends, lists, edits
 and deletes directly. To resend after an unknown outcome, pass the same
