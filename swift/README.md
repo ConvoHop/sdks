@@ -240,8 +240,11 @@ List(model.entries) { entry in
 
 The store and the outbox save message text in the storage you give them. Use
 storage your app protects at rest, such as `FileRecoveryStorage` (excluded from
-backups and, on iOS, protected until the first unlock), and call
-`removeAll()` on both when the user signs out.
+backups and, on iOS, protected until the first unlock). When the user signs
+out, `await outbox.stop()`, which returns once the outbox and the send it
+started have stopped writing, then call `removeAll()` on both. If you also
+clear the storage, first wait for requests still running elsewhere on the
+client: they save their recovery records when they settle.
 
 **Presence and typing.** ConvoHop's client API has no presence, and it doesn't
 deliver other members' typing state yet. `setTyping(_:in:)` sends this user's

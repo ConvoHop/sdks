@@ -10,7 +10,8 @@ import Foundation
 /// ``resend(_:)`` sends it again under a new request ID once the user or app accepts the small risk of a duplicate.
 ///
 /// The queue is saved in the client's recovery storage, with the message text, so use storage your app protects at
-/// rest and call ``removeAll()`` when the user signs out. Without recovery storage the queue lives in memory only.
+/// rest. When the user signs out, await ``stop()``, then call ``removeAll()``. Without recovery storage the queue lives
+/// in memory only.
 /// Each user has one saved queue, so keep one outbox per user, in your app's process: outboxes that share a user's
 /// queue, such as a share extension's, overwrite each other's unsent messages.
 ///
@@ -181,8 +182,14 @@ public actor ConvoHopOutbox {
         schedule()
     }
 
-    /// Stops starting attempts. An attempt in flight finishes. The queue stays saved.
-    public func stop() {
+    /// Stops starting attempts, and returns once the outbox has stopped writing: the attempt and the lookup it had in
+    /// flight, and the saves they started, have settled. A send in flight finishes or times out first. The queue stays
+    /// saved, and ``start()`` sends it again.
+    ///
+    /// On sign-out, await it before you clear the storage. Don't await it in your
+    /// ``ConvoHopConfiguration/refreshSession`` callback: requests wait while a renewal runs, so the send that `stop()`
+    /// waits for would wait for the callback.
+    public func stop() async {
         started = false
         reachable = false
         forced = false
@@ -190,9 +197,13 @@ public actor ConvoHopOutbox {
         monitorTask = nil
         timer?.task.cancel()
         timer = nil
-        recheckTask?.task.cancel()
+        let recheck = recheckTask?.task
+        recheck?.cancel()
         recheckTask = nil
         emit()
+        await attemptTask?.value
+        await recheck?.value
+        _ = await writes?.result
     }
 
     // MARK: Queue
@@ -320,7 +331,7 @@ public actor ConvoHopOutbox {
     }
 
     /// Removes every item and the saved queue. Call it when the user signs out, or to discard a saved queue that
-    /// can't be read. An attempt in flight still finishes.
+    /// can't be read. An attempt in flight still finishes; await ``stop()`` first to wait for it.
     public func removeAll() async throws {
         loaded = true
         entries.removeAll()

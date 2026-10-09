@@ -152,6 +152,41 @@ final class OutboxTests: XCTestCase {
         XCTAssertEqual(states, [.sent, .sent])
     }
 
+    func testStopReturnsOnceTheAttemptInFlightAndItsSavesSettled() async throws {
+        let network = FakeNetworkMonitor(reachable: true)
+        let storage = InMemoryRecoveryStorage()
+        let (h, outbox) = try await outbox(network: network, storage: storage)
+        let gate = Gate()
+        await h.http.on("communication.sendMessage") { request in
+            await gate.wait()
+            return Reply.ok(request, ["result": Fixture.messageAck(TestIDs.conversation, sequence: "31")])
+        }
+        try await outbox.start()
+        let item = try await outbox.enqueue("in flight", to: TestIDs.conversation)
+        try await eventually { await h.http.count("communication.sendMessage") == 1 }
+
+        let stopped = Shared(false)
+        let stopping = Task {
+            await outbox.stop()
+            stopped.update { $0 = true }
+        }
+        try await eventually { await outbox.snapshot.isReachable == false }
+        XCTAssertFalse(stopped.value, "stop() returned with a send in flight")
+
+        gate.open()
+        await stopping.value
+        // Once stop() returns, the attempt's outcome is saved: the sent message left the saved queue, and its recovery
+        // record holds the receipt.
+        let queue = await storage.value(forKey: Self.storageKey)
+        XCTAssertNil(queue)
+        let recordsValue = await storage.value(forKey: "convohop.requests:\(TestIDs.project):\(TestIDs.principal)")
+        let records = try JSONParser.parse(XCTUnwrap(recordsValue)).arrayValue ?? []
+        XCTAssertEqual(records.compactMap { $0.objectValue?["requestId"]?.stringValue }, [item.requestId])
+        XCTAssertEqual(records.compactMap { $0.objectValue?["resolutionState"]?.stringValue }, ["committed"])
+        let items = try await outbox.items()
+        XCTAssertEqual(items.map(\.state), [.sent])
+    }
+
     // MARK: Apps that die
 
     func testAnAppThatDiesAtAnyStepStillSendsTheMessageOnce() async throws {
