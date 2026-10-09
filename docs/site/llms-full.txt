@@ -43570,7 +43570,7 @@ LastAttemptClassification describes the last attempt: notSubmitted, submitted, a
 ResolutionState string `json:"resolutionState"`
 ```
 
-ResolutionState is pending before the first attempt, unknown until the authority confirms it, then committed or accepted.
+ResolutionState is pending before the first attempt and unknown once an attempt may have taken effect. It is committed or accepted once the authority confirms the request, and rejected while the authority has refused every attempt.
 
 #### `RecoveryRecord.MediaAdmissionAttempted` property
 

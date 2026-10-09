@@ -38,7 +38,20 @@ const (
 // Retryable reports whether the API documents the error code as retryable with the same request ID.
 func (c ErrorCode) Retryable() bool {
 	switch c {
-	case ErrorCodeTransportUnknown, ErrorCodeUnavailable:
+	case ErrorCodeTransportUnknown,
+		ErrorCodeUnavailable:
+		return true
+	}
+	return false
+}
+
+// nonRetryable reports whether the API documents the error code as not retryable. Unlike
+// !c.Retryable(), it is false for a code the API does not document.
+func (c ErrorCode) nonRetryable() bool {
+	switch c {
+	case ErrorCodeCursorExpired,
+		ErrorCodeInvalidRequest,
+		ErrorCodeNotFound:
 		return true
 	}
 	return false

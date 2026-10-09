@@ -2875,7 +2875,7 @@
               "name": "ResolutionState",
               "kind": "property",
               "signatures": ["ResolutionState string `json:\"resolutionState\"`"],
-              "docs": "ResolutionState is pending before the first attempt, unknown until the authority confirms it, then committed or accepted."
+              "docs": "ResolutionState is pending before the first attempt and unknown once an attempt may have taken effect. It is committed or accepted once the authority confirms the request, and rejected while the authority has refused every attempt."
             },
             {
               "name": "MediaAdmissionAttempted",

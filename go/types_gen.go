@@ -276,7 +276,97 @@ const (
 // Retryable reports whether the API documents the error code as retryable with the same request ID.
 func (c ErrorCode) Retryable() bool {
 	switch c {
-	case ErrorCodeAdmissionLimit, ErrorCodeAuthorityUnavailable, ErrorCodeHTTPFailure, ErrorCodeInvalidResponse, ErrorCodeOutcomeUnknown, ErrorCodeRateLimited, ErrorCodeRetryExhausted, ErrorCodeTransportUnknown:
+	case ErrorCodeAdmissionLimit,
+		ErrorCodeAuthorityUnavailable,
+		ErrorCodeHTTPFailure,
+		ErrorCodeInvalidResponse,
+		ErrorCodeOutcomeUnknown,
+		ErrorCodeRateLimited,
+		ErrorCodeRetryExhausted,
+		ErrorCodeTransportUnknown:
+		return true
+	}
+	return false
+}
+
+// nonRetryable reports whether the API documents the error code as not retryable. Unlike
+// !c.Retryable(), it is false for a code the API does not document.
+func (c ErrorCode) nonRetryable() bool {
+	switch c {
+	case ErrorCodeAlreadyConnected,
+		ErrorCodeAlreadyExists,
+		ErrorCodeBillingCatalogConflict,
+		ErrorCodeBillingCatalogNotSynced,
+		ErrorCodeBillingCustomerMissing,
+		ErrorCodeBillingLinkExpired,
+		ErrorCodeBillingNotConfigured,
+		ErrorCodeBillingPlanUnavailable,
+		ErrorCodeBillingProviderChanged,
+		ErrorCodeBillingProviderRejected,
+		ErrorCodeBillingSubscriptionActive,
+		ErrorCodeBillingSuspended,
+		ErrorCodeCredentialDeliveryExpired,
+		ErrorCodeCredentialExpired,
+		ErrorCodeCredentialRefreshRequired,
+		ErrorCodeCredentialRequired,
+		ErrorCodeCursorAhead,
+		ErrorCodeCursorExpired,
+		ErrorCodeCursorInvalid,
+		ErrorCodeCursorMismatch,
+		ErrorCodeCursorScopeMismatch,
+		ErrorCodeDeliveryConsumed,
+		ErrorCodeDeliveryNotRedeemed,
+		ErrorCodeDeploymentNotReady,
+		ErrorCodeFeatureUnsupported,
+		ErrorCodeForbidden,
+		ErrorCodeGenerationConflict,
+		ErrorCodeGraphQLError,
+		ErrorCodeGraphQLInvalidRequest,
+		ErrorCodeGraphQLQueryLimit,
+		ErrorCodeGraphQLResponseLimit,
+		ErrorCodeIdempotencyConflict,
+		ErrorCodeIncarnationMismatch,
+		ErrorCodeInvalidReplacement,
+		ErrorCodeInvalidRequest,
+		ErrorCodeLiveAlertLimit,
+		ErrorCodeLiveSessionClosed,
+		ErrorCodeLiveSessionExists,
+		ErrorCodeMediaConnectFailed,
+		ErrorCodeMediaFenceRequired,
+		ErrorCodeMediaNotReady,
+		ErrorCodeMediaRecovering,
+		ErrorCodeMembershipCountInvalid,
+		ErrorCodeMemberLimit,
+		ErrorCodeMessageDeleted,
+		ErrorCodeNotASessionRequest,
+		ErrorCodeNotFound,
+		ErrorCodePageItemTooLarge,
+		ErrorCodeParticipationMismatch,
+		ErrorCodePermitExpired,
+		ErrorCodePlanLimitExceeded,
+		ErrorCodeQuotaExceeded,
+		ErrorCodeRecoveryLimit,
+		ErrorCodeRecoveryStorageFailure,
+		ErrorCodeRequestExpired,
+		ErrorCodeRequestTooLarge,
+		ErrorCodeResolutionRequired,
+		ErrorCodeResponseTooLarge,
+		ErrorCodeResyncRequired,
+		ErrorCodeRevisionConflict,
+		ErrorCodeScopeRequired,
+		ErrorCodeSessionReceiptBindingMismatch,
+		ErrorCodeSessionReceiptInvalid,
+		ErrorCodeSessionRefreshFailed,
+		ErrorCodeSessionRefreshRejected,
+		ErrorCodeSessionRefreshRequired,
+		ErrorCodeSessionRefreshUnverified,
+		ErrorCodeUnauthenticated,
+		ErrorCodeWebhookDestinationDenied,
+		ErrorCodeWebhookEndpointDisabled,
+		ErrorCodeWebhookEndpointLimit,
+		ErrorCodeWebhookRotationPending,
+		ErrorCodeWebhookSecretUnacknowledged,
+		ErrorCodeWrongRegion:
 		return true
 	}
 	return false

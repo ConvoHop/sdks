@@ -500,9 +500,12 @@ function renderTypes(model) {
   if (codes.length) {
     declarations.push(`// Error codes reported in [Problem]. Classify errors by code, never by message text.\nconst (\n${sectionedRows(codes, "\t")})\n`);
   }
-  const retryable = codes.filter(code => code.retryable).map(code => code.name);
+  const among = names => `${names.length ? `\tswitch c {\n\tcase ${names.join(",\n\t\t")}:\n\t\treturn true\n\t}\n` : ""}\treturn false\n`;
   declarations.push("// Retryable reports whether the API documents the error code as retryable with the same request ID.\n" +
-    `func (c ErrorCode) Retryable() bool {\n${retryable.length ? `\tswitch c {\n\tcase ${retryable.join(", ")}:\n\t\treturn true\n\t}\n` : ""}\treturn false\n}\n`);
+    `func (c ErrorCode) Retryable() bool {\n${among(codes.filter(code => code.retryable).map(code => code.name))}}\n`);
+  declarations.push("// nonRetryable reports whether the API documents the error code as not retryable. Unlike\n" +
+    "// !c.Retryable(), it is false for a code the API does not document.\n" +
+    `func (c ErrorCode) nonRetryable() bool {\n${among(codes.filter(code => code.retryable === false).map(code => code.name))}}\n`);
 
   for (const type of reachable) {
     if (type.kind === "enum") {
