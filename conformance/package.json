@@ -9,13 +9,14 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc --build drivers/ts ../packages/react",
+    "build": "tsc --build drivers/ts ../packages/react ../packages/react-native",
     "test": "npm run build && node --test \"test/*.test.mjs\"",
     "test:browser": "node --test --test-concurrency=1 \"browser/*.test.mjs\""
   },
   "devDependencies": {
     "@convohop/client": "*",
     "@convohop/react": "*",
+    "@convohop/react-native": "*",
     "@convohop/server": "*",
     "@types/node": "^22.20.5",
     "graphql": "17.0.2",

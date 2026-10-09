@@ -3,10 +3,8 @@ import { createInterface } from "node:readline";
 import { setTimeout as delay } from "node:timers/promises";
 import { parseArgs } from "node:util";
 import { ParamsError, counter, handle, integer, isRecord, optionalText, record, text, type Args } from "./params.mjs";
-import { FEATURES, MemoryStorage, OPERATIONS, PACKAGES, ROLES, createClient, driverError, operation, verifyWebhook, watch,
-  type DriverError, type RealtimeHandle, type Role, type SdkClient } from "./sdk.mjs";
-
-const DRIVER = { name: "convohop-typescript-reference", version: "0.1.0", language: "typescript" } as const;
+import { DRIVER, FEATURES, MemoryStorage, OPERATIONS, PACKAGES, ROLES, createClient, driverError, operation, verifyWebhook,
+  watch, type DriverError, type RealtimeHandle, type Role, type SdkClient } from "./sdk.mjs";
 
 type ProtocolCode = "INVALID_REQUEST" | "UNKNOWN_METHOD" | "INVALID_PARAMS" | "UNKNOWN_HANDLE" | "UNSUPPORTED" |
   "DRIVER_FAILURE";
@@ -24,14 +22,16 @@ interface Subscription {
   stopped: boolean;
 }
 
-const isRole = (value: string): value is Role => ROLES.some(role => role === value);
+// The protocol's roles. A driver that replaces sdk.mts may declare fewer: the others are then UNSUPPORTED.
+const PROTOCOL_ROLES: readonly Role[] = ["user", "backend", "management"];
+const isRole = (value: string): value is Role => PROTOCOL_ROLES.some(role => role === value);
 
 // --roles narrows the declared roles, e.g. "--roles user" to behave like a client-only SDK driver.
 function declaredRoles(): readonly Role[] {
   const { values } = parseArgs({ options: { roles: { type: "string" } }, strict: true });
   if (values.roles === undefined) return ROLES;
   const requested = values.roles.split(",").map(role => role.trim());
-  if (!requested.every(isRole)) {
+  if (!requested.every(role => ROLES.some(declared => declared === role))) {
     process.stderr.write(`--roles must be a comma-separated subset of ${ROLES.join(", ")}\n`);
     process.exit(2);
   }
@@ -73,7 +73,7 @@ function createHandle(args: Args): unknown {
   const name = handle(args, "client");
   if (clients.has(name)) throw new ParamsError(`Client handle ${name} already exists`);
   const role = text(args, "role");
-  if (!isRole(role)) throw new ParamsError(`role must be one of ${ROLES.join(", ")}`);
+  if (!isRole(role)) throw new ParamsError(`role must be one of ${PROTOCOL_ROLES.join(", ")}`);
   if (!roles.includes(role)) throw new ProtocolError("UNSUPPORTED", `This driver does not declare the ${role} role`);
   const storageName = args.storage === undefined ? undefined : handle(args, "storage");
   const storage = storageName === undefined ? undefined : storages.get(storageName) ?? new MemoryStorage();
@@ -166,8 +166,15 @@ function reset(): unknown {
   return {};
 }
 
+// A driver that replaces sdk.mts may declare fewer features; their methods are then UNSUPPORTED.
+const methodFeatures: ReadonlyMap<string, string> = new Map([["realtime.subscribe", "realtime"],
+  ["realtime.collect", "realtime"], ["realtime.close", "realtime"], ["webhooks.verify", "webhooks.verify"]]);
+
 function dispatch(method: string, args: Args): unknown {
   if (!negotiated && method !== "hello") throw new ProtocolError("INVALID_REQUEST", "hello must be the first request");
+  const feature = methodFeatures.get(method);
+  if (feature !== undefined && !FEATURES.includes(feature))
+    throw new ProtocolError("UNSUPPORTED", `This driver does not declare the ${feature} feature`);
   switch (method) {
     case "hello": return hello(args);
     case "client.create": return createHandle(args);

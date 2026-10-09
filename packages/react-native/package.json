@@ -1,0 +1,86 @@
+{
+  "name": "@convohop/react-native",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ConvoHop client SDK for React Native: the platform adapter for @convohop/client, push and call bridges over the ConvoHop iOS and Android helpers, and LiveKit React Native media.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ConvoHop/sdks.git",
+    "directory": "packages/react-native"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./media": {
+      "types": "./dist/media.d.ts",
+      "default": "./dist/media.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "!dist/.tsbuildinfo",
+    "src/specs",
+    "NOTICE"
+  ],
+  "codegenConfig": {
+    "name": "RNConvoHopSpec",
+    "type": "modules",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "com.convohop.reactnative"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "test": "tsc --build . ../react && node --test --import ./test/support/register.mjs test/*.test.mjs",
+    "typecheck:example": "tsc --build . ../react && tsc -p example/tsconfig.json",
+    "check:package": "publint --strict && attw --pack . --profile esm-only"
+  },
+  "dependencies": {
+    "whatwg-url-without-unicode": "8.0.0-3"
+  },
+  "peerDependencies": {
+    "@convohop/client": "*",
+    "@livekit/react-native": "^3.0.0",
+    "@livekit/react-native-webrtc": "^144.2.0",
+    "livekit-client": "^2.22.3",
+    "react-native": ">=0.76"
+  },
+  "peerDependenciesMeta": {
+    "@livekit/react-native": {
+      "optional": true
+    },
+    "@livekit/react-native-webrtc": {
+      "optional": true
+    },
+    "livekit-client": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@convohop/client": "*",
+    "@convohop/core": "*",
+    "@convohop/react": "*",
+    "@livekit/react-native": "3.0.0",
+    "@livekit/react-native-webrtc": "144.2.0",
+    "@react-native-async-storage/async-storage": "3.1.1",
+    "@react-native-community/netinfo": "12.0.1",
+    "@react-native/codegen": "0.87.1",
+    "@types/react": "19.3.0",
+    "livekit-client": "2.22.3",
+    "react": "19.3.0",
+    "react-native": "0.87.1",
+    "react-native-safe-area-context": "5.10.1",
+    "typescript": "^7.0.2"
+  }
+}

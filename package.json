@@ -8,7 +8,8 @@
     "conformance",
     "packages/cli",
     "packages/mcp",
-    "packages/react"
+    "packages/react",
+    "packages/react-native"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
