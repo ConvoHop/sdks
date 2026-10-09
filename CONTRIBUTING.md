@@ -80,6 +80,18 @@ CONVOHOP_REQUIRE_SPEC=1 go test -race ./...
 [Build and test](go/README.md#build-and-test) explains how to run the
 conformance scenarios with its driver.
 
+The [Android client SDK](android/README.md) has its own Gradle build in
+`android/`. Build it with JDK 17 and the Android SDK with platform 36; the
+Gradle wrapper downloads Gradle itself:
+
+```sh
+cd android
+./gradlew build lint       # compile, lint, and run the JVM and Robolectric tests
+```
+
+[Build and test](android/README.md#build-and-test) explains the test layers
+and how to run the conformance scenarios with its driver.
+
 The [Swift client SDK](swift/README.md) is a Swift package in `swift/`. Build
 and test it on macOS with Xcode 16.4 or later:
 
@@ -103,6 +115,7 @@ in the iOS Simulator and the conformance scenarios with its driver.
 | `jvm/` | Java and Kotlin server SDK (`com.convohop:convohop-server` and `com.convohop:convohop-server-kotlin`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/jvm/` |
 | `dotnet/` | .NET server SDK (`ConvoHop`), its xUnit tests and the projects that compile the C# generator goldens. Its conformance driver is in `conformance/drivers/dotnet/` |
 | `go/` | Go server SDK (`github.com/ConvoHop/sdks/go`), a Go module with no dependencies. Its conformance driver is a separate module in `conformance/drivers/go/` |
+| `android/` | Android client SDK (`com.convohop:convohop-android`, with `convohop-android-core` and `convohop-android-push`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/android/` and compiles the Kotlin generator's edge goldens |
 | `swift/` | Swift client SDK for iOS and macOS (the `ConvoHop` Swift package and its products), a self-contained Swift package. Its conformance driver is a separate package in `conformance/drivers/swift/Driver/` |
 | `packages/cli` | The `convohop` command-line tool (`@convohop/cli`), built on `@convohop/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
 | `packages/mcp` | An MCP server (`@convohop/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
@@ -156,6 +169,7 @@ files from the IR:
   `jvm/convohop-server-kotlin/src/generated/kotlin/`
 - `dotnet/src/ConvoHop/Generated/`
 - `go/*_gen.go`
+- `android/core/src/main/kotlin/com/convohop/android/generated/`
 - `swift/Sources/ConvoHop/Generated/`
 
 ```sh
@@ -286,6 +300,9 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   and run with `dotnet test`.
 - The Go SDK's tests use the standard `testing` package. They live next to
   the code in `go/` and run with `go test ./...` in `go/`.
+- The Android SDK's tests use JUnit 4, with Robolectric in the `push` and
+  `convohop` modules. They live in `android/*/src/test/` and run with
+  `./gradlew test` in `android/`.
 - The Swift SDK's tests use XCTest. They live in `swift/Tests/` and run with
   `swift test` in `swift/`.
 

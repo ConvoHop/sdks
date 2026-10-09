@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Message and missed-call notifications on Android 13 and later. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- The self-managed ConnectionService for incoming calls. -->
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
+    <!-- The incoming-call screen over the lock screen. On Android 14 and later the
+         user or Google Play can deny it; the call then shows as a heads-up. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <application>
+        <!-- Used only on Android 8 and later; earlier versions ring with the notification alone. -->
+        <service
+            android:name=".ConvoHopConnectionService"
+            android:exported="true"
+            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
+            tools:targetApi="26">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".ConvoHopCallActionReceiver"
+            android:exported="false" />
+
+        <activity
+            android:name=".ConvoHopAnswerActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+    </application>
+</manifest>

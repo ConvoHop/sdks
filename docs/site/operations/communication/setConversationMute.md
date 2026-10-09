@@ -73,3 +73,4 @@ mutation CommunicationSetConversationMute($context: RequestContextInput!, $input
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.setMute`](../../typescript/reference/server.md#serverconversationmemberssetmute-method), [`ConversationHandle.mute.set`](../../typescript/reference/client.md#conversationhandlemuteset-property) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.set_conversation_mute`](../../python/reference/convohop.md#convohopset_conversation_mute-method), [`AsyncConvoHop.set_conversation_mute`](../../python/reference/convohop.md#asyncconvohopset_conversation_mute-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.setConversationMute`](../../jvm/reference/server.md#communicationapisetconversationmute-method), [`CommunicationSuspendApi.setConversationMute`](../../jvm/reference/server-kotlin.md#communicationsuspendapisetconversationmute-method) |

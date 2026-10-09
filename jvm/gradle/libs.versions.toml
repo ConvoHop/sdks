@@ -1,14 +1,21 @@
 [versions]
+firebase-admin = "9.11.0"
 jspecify = "1.0.1"
 junit = "5.14.4"
 kotlin = "2.4.21"
 kotlinx-coroutines = "1.11.0"
 
 [libraries]
+# The FCM sample in the push quickstart. Message.Builder.setFid needs 9.10.0 or later.
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebase-admin" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+# Parses the Kotlin sources for the docs extractor in tools/docgen/extractors/jvm.
+kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
+# The compiler's API annotations, which javac reads when the docs extractor compiles against it.
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
 [plugins]

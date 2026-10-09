@@ -134,3 +134,4 @@ mutation ManagementProjectPolicy($context: RequestContextInput!, $input: Project
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.project_policy`](../../python/reference/convohop.md#convohopmanagementproject_policy-method), [`AsyncConvoHopManagement.project_policy`](../../python/reference/convohop.md#asyncconvohopmanagementproject_policy-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.projectPolicy`](../../jvm/reference/server.md#managementapiprojectpolicy-method), [`ManagementSuspendApi.projectPolicy`](../../jvm/reference/server-kotlin.md#managementsuspendapiprojectpolicy-method) |

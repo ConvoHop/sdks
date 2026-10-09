@@ -16,7 +16,7 @@ work, what the packages are called, and how they're versioned and supported.
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
 | Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md); .NET: [`ConvoHop`](../dotnet/README.md); Go: [`github.com/ConvoHop/sdks/go`](../go/README.md); Python: [`convohop`](../python/README.md) |
-| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md); iOS and macOS: [`ConvoHop`](../swift/README.md) |
+| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md); iOS and macOS: [`ConvoHop`](../swift/README.md); Android: [`convohop-android`](../android/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
 
@@ -39,7 +39,7 @@ ever hold a credential that's limited to one user and expires quickly.
 | Scope | Your whole project, limited by the key's permissions | What that one user is allowed to see and do |
 | Realtime | Signed webhooks | WebSocket subscriptions with reconnect and replay |
 | Voice and video | Call control and call reads, no media | Media through the platform's official LiveKit SDK |
-| Local state | None per user. Optional recovery storage lets an interrupted request be resolved or retried safely. | Optional recovery storage. The Web and Swift SDKs add a conversation store, an offline outbox and optimistic sends, which are planned for the other client SDKs. The Swift SDK also caches messages on the device. |
+| Local state | None per user. Optional recovery storage lets an interrupted request be resolved or retried safely. | Optional recovery storage. The Web, Swift and Android SDKs add a conversation store, an offline outbox and optimistic sends, which are planned for the other client SDKs. The Swift and Android SDKs also cache messages on the device. |
 
 ### Server SDKs
 
@@ -137,7 +137,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 | Web | TypeScript | LiveKit JavaScript SDK | Source available |
 | React | Hooks on top of the Web SDK | Same as Web | Source available |
 | iOS and macOS | Swift | LiveKit Swift SDK | Source available |
-| Android | Kotlin | LiveKit Android SDK | Planned |
+| Android | Kotlin | LiveKit Android SDK | Source available |
 | React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | Planned |
 | Flutter | Dart | LiveKit Flutter SDK | Planned |
 
@@ -180,9 +180,11 @@ Kotlin generator and its own conformance driver. The
 conformance driver. The [Go server SDK](../go/README.md) adds a Go
 generator and its own conformance driver. The
 [Python server SDK](../python/README.md) adds a Python generator and its own
-conformance driver, and the [Swift client SDK](../swift/README.md) adds a
-Swift generator and driver. Generators for the other languages are in
-development.
+conformance driver. The [Android client SDK](../android/README.md) adds a
+Kotlin generator for Android, separate from the JVM one, and its own
+conformance driver. The [Swift client SDK](../swift/README.md) adds a Swift
+generator and its own conformance driver. Generators for the other languages
+are in development.
 The same IR generates the operation catalog of the `convohop` command-line
 tool ([`packages/cli`](../packages/cli/README.md)) and the tools of an MCP
 server for AI agents ([`packages/mcp`](../packages/mcp/README.md)). Neither is
@@ -235,7 +237,8 @@ tokens. You keep control of:
 
 - Your push credentials: APNs keys or certificates, Firebase Cloud Messaging
   service accounts and Web Push (VAPID) keys.
-- Device tokens and push subscriptions, stored in your own backend.
+- Device tokens, Firebase Installation IDs and push subscriptions, stored in
+  your own backend.
 - Notification text, localization and branding.
 - Your delivery tooling. Send directly to APNs, FCM and Web Push, or through a
   push or engagement service that you already use.
@@ -244,7 +247,9 @@ How it works:
 
 1. Your app registers for push with the platform as usual. Client SDK helpers
    hand the device token or Web Push subscription to your app, and your app
-   sends it to your backend.
+   sends it to your backend. On Android, that's the FCM registration token,
+   or a Firebase Installation ID (FID) when the app's manifest sets
+   `firebase_messaging_installation_id_enabled`.
 2. When a user should be notified, ConvoHop sends your backend a signed
    webhook with a per-recipient notification event. Examples are a new
    message in one of their conversations, an incoming call, or a call that
@@ -257,6 +262,22 @@ How it works:
 4. On the device, the client SDK parses the notification, opens the right
    conversation or call, and fetches any content with the user's own session.
 
+Your backend sends to a registration token with the FCM HTTP v1 `token`
+target, and to a FID with the `fid` target, which `firebase-admin` supports
+from 14.1.0 for Node.js and 7.5.0 for Python. Those versions mark the
+`token` target deprecated, and still send to it.
+
+On Android, firebase-messaging 25.1.0 deprecates `getToken()`,
+`deleteToken()` and `FirebaseMessagingService.onNewToken()` in favor of
+`register()`, `unregister()` and `onRegistered()`. Both sets work: the
+deprecated methods without the manifest flag, and the new ones with it. The
+token stays the default because the flag applies to the whole app: with it,
+`FirebaseMessaging.getToken()` fails for every library in the app, so set it
+only if none of them needs a token. For FID mode, use firebase-messaging
+25.1.2 or later (Firebase Android BoM 34.18.0 or later): 25.1.1 fixed
+re-registration when the FID changes, and 25.1.2 fixed a `FID_ALREADY_USED`
+registration error.
+
 > [!NOTE]
 > The Node.js server SDK verifies webhooks, with
 > [`webhooks.verify()`](../packages/server/README.md#webhooks), and builds
@@ -264,8 +285,9 @@ How it works:
 > [push payload builders](../packages/server/README.md#push-payloads). The
 > [push payload contract](../spec/push-payload/README.md) defines the
 > events, the requests and shared vectors for every server SDK. The
-> [Swift SDK](../swift/README.md#push-notifications) has the iOS and macOS
-> helpers. The other helpers in this table are planned.
+> [Android client SDK](../android/README.md#push-notifications) has the
+> Android helpers, and the [Swift SDK](../swift/README.md#push-notifications)
+> has the iOS and macOS helpers. The other helpers in this table are planned.
 
 The SDK helpers are all optional:
 
@@ -296,7 +318,7 @@ registry yet.
 | npm | `@convohop/server` | `@convohop/client` (Web), `@convohop/react`, `@convohop/react-native` |
 | PyPI | `convohop` | None |
 | NuGet | `ConvoHop` | None |
-| Maven Central | `com.convohop:convohop-server` (Java), `com.convohop:convohop-server-kotlin` (Kotlin coroutines) | `com.convohop:convohop-android` |
+| Maven Central | `com.convohop:convohop-server` (Java), `com.convohop:convohop-server-kotlin` (Kotlin coroutines) | `com.convohop:convohop-android`, which brings in `com.convohop:convohop-android-core` and `com.convohop:convohop-android-push` |
 | Go modules | `github.com/ConvoHop/sdks/go` | None |
 | Swift Package Manager | None | `ConvoHop`, from `github.com/ConvoHop/convohop-swift` |
 | pub.dev | None | `convohop` (Flutter) |
@@ -416,9 +438,10 @@ release.
 
 Today, CI verifies the TypeScript packages on Node.js 22 and 24, the Java
 and Kotlin SDK on Java 11, 17, 21 and 25, the .NET SDK on .NET 8, 9 and 10,
-the Go SDK on the two most recent Go releases, and the Python SDK on Python
-3.11, 3.12, 3.13 and 3.14. Each other row becomes a CI requirement when that
-SDK lands.
+the Go SDK on the two most recent Go releases, the Python SDK on Python
+3.11, 3.12, 3.13 and 3.14, and the Android SDK on Robolectric at API levels
+24, 26, 33 and 34, without a device or emulator. Each other row becomes a CI
+requirement when that SDK lands.
 
 For the Web row, CI runs the Web client's browser tests in Playwright's
 current builds of Chromium, Firefox and WebKit. For the React row, it runs

@@ -91,3 +91,4 @@ mutation CommunicationRemoveMember($context: RequestContextInput!, $input: Remov
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.remove`](../../typescript/reference/server.md#serverconversationmembersremove-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.remove_member`](../../python/reference/convohop.md#convohopremove_member-method), [`AsyncConvoHop.remove_member`](../../python/reference/convohop.md#asyncconvohopremove_member-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ServerConversation.members.remove`](../../jvm/reference/server.md#serverconversationmembersremove-method), [`CommunicationApi.removeMember`](../../jvm/reference/server.md#communicationapiremovemember-method), [`CommunicationSuspendApi.removeMember`](../../jvm/reference/server-kotlin.md#communicationsuspendapiremovemember-method) |

@@ -1,0 +1,37 @@
+{
+  "$schema": "../../../spec/docs/language.schema.json",
+  "id": "jvm",
+  "name": "Java and Kotlin",
+  "order": 40,
+  "status": "preview",
+  "codeFence": "java",
+  "regionComment": "//",
+  "testedFences": ["java", "kotlin", "kt"],
+  "snippetRoots": ["examples/src/main"],
+  "packages": [
+    {
+      "name": "com.convohop:convohop-server",
+      "slug": "server",
+      "layer": "server",
+      "summary": "Java server SDK for trusted JVM backends: backend-key data-plane calls, management, webhook verification and push requests.",
+      "runtime": "Java 11 or later",
+      "source": "jvm/convohop-server"
+    },
+    {
+      "name": "com.convohop:convohop-server-kotlin",
+      "slug": "server-kotlin",
+      "layer": "server",
+      "summary": "Kotlin coroutine extensions for the Java server SDK: suspending APIs, page flows and interruptible blocking calls.",
+      "runtime": "Kotlin 2.2 or later, on Java 11 or later",
+      "source": "jvm/convohop-server-kotlin"
+    }
+  ],
+  "quickstarts": ["server", "webhooks", "push"],
+  "operations": "operations.json",
+  "extract": {
+    "command": ["node", "tools/docgen/extractors/jvm.mjs", "docs/languages/jvm/language.json"]
+  },
+  "test": {
+    "command": ["jvm/gradlew", "-p", "jvm", "--no-daemon", "--console=plain", ":docs-examples:test"]
+  }
+}

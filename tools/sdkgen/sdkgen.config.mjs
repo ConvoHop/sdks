@@ -1,3 +1,4 @@
+import android from "./emitters/android.mjs";
 import cliOperations from "./emitters/cli-operations.mjs";
 import csharp from "./emitters/csharp.mjs";
 import docSnippets from "./emitters/doc-snippets.mjs";
@@ -15,7 +16,7 @@ import typescript from "./emitters/typescript.mjs";
  * keyed by emitter name. Register new language emitters here.
  */
 export default {
-  emitters: [ir, graphqlOperations, typescript, docSnippets, java, mcpTools, cliOperations, python, csharp, go, swift],
+  emitters: [ir, graphqlOperations, typescript, docSnippets, java, mcpTools, cliOperations, python, csharp, go, android, swift],
   options: {
     typescript: { directory: "packages/core/src/generated" },
     java: { directory: "jvm/convohop-server/src/generated/java", kotlinDirectory: "jvm/convohop-server-kotlin/src/generated/kotlin" },

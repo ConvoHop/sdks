@@ -283,7 +283,7 @@
       }
     },
     "fcm": {
-      "description": "An FCM HTTP v1 messages:send message without a target; the sender adds token.",
+      "description": "An FCM HTTP v1 messages:send message without a target; the sender adds token or fid.",
       "type": "object",
       "additionalProperties": false,
       "required": ["message"],

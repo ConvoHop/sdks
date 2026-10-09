@@ -121,6 +121,43 @@
         {"topic": "webhooks", "path": "python/quickstarts/webhooks.md"},
         {"topic": "push", "path": "python/quickstarts/push.md"}
       ]
+    },
+    {
+      "id": "jvm",
+      "name": "Java and Kotlin",
+      "status": "preview",
+      "codeFence": "java",
+      "home": "jvm/index.md",
+      "reference": "jvm/reference/index.md",
+      "coverage": "jvm/reference/operations.md",
+      "llmsFull": "jvm/llms-full.txt",
+      "packages": [
+        {
+          "name": "com.convohop:convohop-server",
+          "slug": "server",
+          "layer": "server",
+          "summary": "Java server SDK for trusted JVM backends: backend-key data-plane calls, management, webhook verification and push requests.",
+          "runtime": "Java 11 or later",
+          "source": "jvm/convohop-server",
+          "reference": "jvm/reference/server.md",
+          "data": "jvm/reference/server.json"
+        },
+        {
+          "name": "com.convohop:convohop-server-kotlin",
+          "slug": "server-kotlin",
+          "layer": "server",
+          "summary": "Kotlin coroutine extensions for the Java server SDK: suspending APIs, page flows and interruptible blocking calls.",
+          "runtime": "Kotlin 2.2 or later, on Java 11 or later",
+          "source": "jvm/convohop-server-kotlin",
+          "reference": "jvm/reference/server-kotlin.md",
+          "data": "jvm/reference/server-kotlin.json"
+        }
+      ],
+      "quickstarts": [
+        {"topic": "server", "path": "jvm/quickstarts/server.md"},
+        {"topic": "webhooks", "path": "jvm/quickstarts/webhooks.md"},
+        {"topic": "push", "path": "jvm/quickstarts/push.md"}
+      ]
     }
   ],
   "operations": {"index": "operations/index.md", "data": "operations/index.json"},
@@ -285,6 +322,67 @@
       "title": "Python operation coverage",
       "description": "The Python SDK members that send each API operation. 63 of the 65 operations that Python packages can send have a method.",
       "language": "python"
+    },
+    {
+      "path": "jvm/index.md",
+      "kind": "language",
+      "title": "Java and Kotlin SDKs",
+      "description": "com.convohop:convohop-server wraps the ConvoHop API for Java backends, and com.convohop:convohop-server-kotlin adds coroutine extensions to it. Both run only in your backend, with a secret backend key. Never put them, or the key, in an Android app or any other client.",
+      "language": "jvm"
+    },
+    {
+      "path": "jvm/quickstarts/server.md",
+      "kind": "quickstart",
+      "title": "Java and Kotlin server quickstart",
+      "description": "Call ConvoHop from your Java or Kotlin backend with convohop-server: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, recover a send whose response was lost, and make the calls from coroutines.",
+      "language": "jvm",
+      "topic": "server"
+    },
+    {
+      "path": "jvm/quickstarts/webhooks.md",
+      "kind": "quickstart",
+      "title": "Java and Kotlin webhooks quickstart",
+      "description": "Receive ConvoHop events in your Java or Kotlin backend with convohop-server: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
+      "language": "jvm",
+      "topic": "webhooks"
+    },
+    {
+      "path": "jvm/quickstarts/push.md",
+      "kind": "quickstart",
+      "title": "Java and Kotlin push notifications quickstart",
+      "description": "Send push notifications for ConvoHop messages and calls: convohop-server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.",
+      "language": "jvm",
+      "topic": "push"
+    },
+    {
+      "path": "jvm/reference/index.md",
+      "kind": "reference-index",
+      "title": "Java and Kotlin reference",
+      "description": "The public API of each Java and Kotlin package, generated from its declarations.",
+      "language": "jvm"
+    },
+    {
+      "path": "jvm/reference/server.md",
+      "kind": "reference",
+      "title": "com.convohop:convohop-server",
+      "description": "Java server SDK for trusted JVM backends: backend-key data-plane calls, management, webhook verification and push requests.",
+      "language": "jvm",
+      "package": "com.convohop:convohop-server"
+    },
+    {
+      "path": "jvm/reference/server-kotlin.md",
+      "kind": "reference",
+      "title": "com.convohop:convohop-server-kotlin",
+      "description": "Kotlin coroutine extensions for the Java server SDK: suspending APIs, page flows and interruptible blocking calls.",
+      "language": "jvm",
+      "package": "com.convohop:convohop-server-kotlin"
+    },
+    {
+      "path": "jvm/reference/operations.md",
+      "kind": "coverage",
+      "title": "Java and Kotlin operation coverage",
+      "description": "The Java and Kotlin SDK members that send each API operation. 65 of the 65 operations that Java and Kotlin packages can send have a method.",
+      "language": "jvm"
     },
     {
       "path": "operations/index.md",

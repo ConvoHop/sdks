@@ -135,3 +135,4 @@ mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: Conf
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.configure_webhook`](../../python/reference/convohop.md#convohopmanagementconfigure_webhook-method), [`AsyncConvoHopManagement.configure_webhook`](../../python/reference/convohop.md#asyncconvohopmanagementconfigure_webhook-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.configureWebhook`](../../jvm/reference/server.md#managementapiconfigurewebhook-method), [`ManagementSuspendApi.configureWebhook`](../../jvm/reference/server-kotlin.md#managementsuspendapiconfigurewebhook-method) |

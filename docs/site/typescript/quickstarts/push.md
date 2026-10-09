@@ -26,8 +26,12 @@ import {
 // The devices your app registered for a user, from your own database.
 export type Device =
   | { platform: "ios"; token: string; voipToken?: string } // voipToken: the PushKit token of a CallKit app.
-  | { platform: "android"; token: string }
+  | { platform: "android"; target: FcmTarget }
   | { platform: "web"; subscription: WebSubscription };
+
+// An Android app's registration token, or its Firebase Installation ID (FID) when its manifest sets
+// firebase_messaging_installation_id_enabled.
+export type FcmTarget = { token: string } | { fid: string };
 
 // A browser's PushSubscription.toJSON().
 export interface WebSubscription {
@@ -38,7 +42,7 @@ export interface WebSubscription {
 // Your push clients: an APNs HTTP/2 client, firebase-admin and web-push.
 export interface PushSenders {
   apns(token: string, request: ApnsAlertRequest | ApnsVoipRequest): Promise<void>;
-  fcm(token: string, request: FcmRequest): Promise<void>;
+  fcm(target: FcmTarget, request: FcmRequest): Promise<void>;
   webPush(subscription: WebSubscription, request: WebPushRequest): Promise<void>;
 }
 
@@ -62,7 +66,7 @@ export async function notify(
       }
     } else if (device.platform === "android") {
       const request = push.fcm(event, options);
-      if (request) await senders.fcm(device.token, request);
+      if (request) await senders.fcm(device.target, request);
     } else {
       const request = push.webPush(event, options);
       if (request) await senders.webPush(device.subscription, request);
@@ -113,14 +117,14 @@ export async function sendWebPush(
 FCM requests use the FCM HTTP v1 REST form, where `ttl` is a string of seconds such as `"45s"`. `firebase-admin` takes Android options in its own form: `ttl` is a number of milliseconds, `priority` is lowercase and `collapse_key` is `collapseKey`. It throws for `"45s"`, and treats a bare `45` as 45 milliseconds, so a ring would expire almost at once. Convert the options:
 
 ```ts snippet=docs/languages/typescript/examples/src/push.ts#fcm
-import { getMessaging, type TokenMessage } from "firebase-admin/messaging";
+import { getMessaging, type Message } from "firebase-admin/messaging";
 
 // firebase-admin takes Android options in its own form: lowercase priority, collapseKey, and ttl in
 // milliseconds. The request's REST form ttl ("45s") makes it throw, and a bare 45 would mean 45 ms.
-export function firebaseMessage(token: string, request: FcmRequest): TokenMessage {
+export function firebaseMessage(target: FcmTarget, request: FcmRequest): Message {
   const { data, android } = request.message;
   return {
-    token,
+    ...target, // firebase-admin sends to a fid from 14.1.0.
     data,
     android: {
       priority: android.priority === "HIGH" ? "high" : "normal",
@@ -131,10 +135,14 @@ export function firebaseMessage(token: string, request: FcmRequest): TokenMessag
 }
 
 // Call initializeApp() from firebase-admin/app with your service account first.
-export async function sendFcm(token: string, request: FcmRequest): Promise<void> {
-  await getMessaging().send(firebaseMessage(token, request));
+export async function sendFcm(target: FcmTarget, request: FcmRequest): Promise<void> {
+  await getMessaging().send(firebaseMessage(target, request));
 }
 ```
+
+Each Android device has the target that its app registered: a registration token by default, or a Firebase Installation ID (FID) when the app's manifest sets `firebase_messaging_installation_id_enabled`. The app gets the token in `FirebaseMessagingService.onNewToken()`, or the FID in `onRegistered()`. firebase-messaging 25.1.0 deprecates `getToken()`, `deleteToken()` and `onNewToken()` in favor of `register()`, `unregister()` and `onRegistered()`. Both sets work: the deprecated methods without the flag, and the new ones with it. The token stays the default because the flag applies to the whole app: with it, `FirebaseMessaging.getToken()` fails for every library in the app. For FID mode, use firebase-messaging 25.1.2 or later (Firebase Android BoM 34.18.0 or later): 25.1.1 fixed re-registration when the FID changes, and 25.1.2 fixed a `FID_ALREADY_USED` registration error.
+
+`firebase-admin` sends to a FID from version 14.1.0. That version also marks `TokenMessage` deprecated, and still sends to a token.
 
 FCM requests carry Android options only. Send to Apple devices with the APNs requests.
 
@@ -146,7 +154,7 @@ iOS requires an app to report every VoIP push to CallKit as an incoming call, so
 
 ## How the samples are tested
 
-The test runs `notify` on every vector of the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md) and checks the request it sends to each kind of device. It also checks that `web-push` sends each Web Push request's `TTL`, `Urgency` and `Topic` headers, and that `firebase-admin` accepts each converted FCM message and sends the request's Android options.
+The test runs `notify` on every vector of the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md) and checks the request it sends to each kind of device. It also checks that `web-push` sends each Web Push request's `TTL`, `Urgency` and `Topic` headers, and that `firebase-admin` accepts each converted FCM message, to a token and to a FID, and sends the request's Android options.
 
 ## Next steps
 

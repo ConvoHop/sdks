@@ -148,3 +148,4 @@ query ManagementGetOperation($context: RequestContextInput!, $input: GetOperatio
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.operation`](../../typescript/reference/server.md#convohopmanagementclientoperation-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_operation`](../../python/reference/convohop.md#convohopmanagementget_operation-method), [`AsyncConvoHopManagement.get_operation`](../../python/reference/convohop.md#asyncconvohopmanagementget_operation-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.getOperation`](../../jvm/reference/server.md#managementapigetoperation-method), [`ManagementSuspendApi.getOperation`](../../jvm/reference/server-kotlin.md#managementsuspendapigetoperation-method) |

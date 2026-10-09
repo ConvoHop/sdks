@@ -110,3 +110,4 @@ query ManagementCapabilities($context: RequestContextInput!) {
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.capabilities`](../../python/reference/convohop.md#convohopmanagementcapabilities-method), [`AsyncConvoHopManagement.capabilities`](../../python/reference/convohop.md#asyncconvohopmanagementcapabilities-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.capabilities`](../../jvm/reference/server.md#managementapicapabilities-method), [`ManagementSuspendApi.capabilities`](../../jvm/reference/server-kotlin.md#managementsuspendapicapabilities-method) |

@@ -94,3 +94,4 @@ query ManagementProjectUsage($context: RequestContextInput!, $input: ProjectUsag
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.project_usage`](../../python/reference/convohop.md#convohopmanagementproject_usage-method), [`AsyncConvoHopManagement.project_usage`](../../python/reference/convohop.md#asyncconvohopmanagementproject_usage-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.projectUsage`](../../jvm/reference/server.md#managementapiprojectusage-method), [`ManagementSuspendApi.projectUsage`](../../jvm/reference/server-kotlin.md#managementsuspendapiprojectusage-method) |

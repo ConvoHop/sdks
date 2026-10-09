@@ -363,7 +363,8 @@ Reports delivery through the newest loaded message. Resolves whether a report wa
 close(): void
 ```
 
-Stops following the conversation. A store the app didn't give an outbox also closes its own.
+Stops following the conversation. A store the app didn't give an outbox also closes its own; await
+`store.outbox.close()` to know when that outbox has stopped writing.
 
 ### `ConversationStream` class
 
@@ -1380,12 +1381,17 @@ Waits for saved entries to load first.
 #### `Outbox.close` method
 
 ```ts
-close(): void
+close(): Promise<void>
 ```
 
 Stops sending. Persisted entries stay saved, and the client keeps its recovery state. Once its sends and saves
 settle, a persistent outbox of the user created meanwhile in this JavaScript context continues with its saved
 entries; otherwise another running one, or the next to start, takes them over.
+
+Resolves once the outbox has stopped writing: what it was loading, taking over, sending and saving has settled,
+and its storage is passed on or released. A send in flight is waited for until it finishes or times out. So on
+sign-out, wait for it before clearing the storage. It never rejects; failures go to `onError`. Every call returns
+the same promise.
 
 ### `ScopeRequiredProblem` class
 
@@ -2989,6 +2995,11 @@ type PushRegistration = {
 } | {
     readonly kind: "fcm";
     readonly token: string;
+    readonly fid?: never;
+} | {
+    readonly kind: "fcm";
+    readonly fid: string;
+    readonly token?: never;
 }
 ```
 
@@ -2998,7 +3009,10 @@ endpoint can store registrations from browsers and native apps. ConvoHop never s
 - `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.
 - `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.
 - `apnsVoip`: an iOS PushKit token for incoming calls.
-- `fcm`: an Android Firebase Cloud Messaging registration token.
+- `fcm`: an Android app's Firebase Cloud Messaging target, with exactly one of `token` and `fid`. `token` is the
+  registration token, which apps get by default. `fid` is the Firebase Installation ID, which apps get instead when
+  their manifest sets `firebase_messaging_installation_id_enabled`. Send to it with the FCM HTTP v1 target of the
+  same name.
 
 ### `ReadReceipt` type
 

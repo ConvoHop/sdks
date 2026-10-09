@@ -40,6 +40,10 @@ FCM requests use the FCM HTTP v1 REST form, where `ttl` is a string of seconds s
 ```ts include=examples/src/push.ts#fcm
 ```
 
+Each Android device has the target that its app registered: a registration token by default, or a Firebase Installation ID (FID) when the app's manifest sets `firebase_messaging_installation_id_enabled`. The app gets the token in `FirebaseMessagingService.onNewToken()`, or the FID in `onRegistered()`. firebase-messaging 25.1.0 deprecates `getToken()`, `deleteToken()` and `onNewToken()` in favor of `register()`, `unregister()` and `onRegistered()`. Both sets work: the deprecated methods without the flag, and the new ones with it. The token stays the default because the flag applies to the whole app: with it, `FirebaseMessaging.getToken()` fails for every library in the app. For FID mode, use firebase-messaging 25.1.2 or later (Firebase Android BoM 34.18.0 or later): 25.1.1 fixed re-registration when the FID changes, and 25.1.2 fixed a `FID_ALREADY_USED` registration error.
+
+`firebase-admin` sends to a FID from version 14.1.0. That version also marks `TokenMessage` deprecated, and still sends to a token.
+
 FCM requests carry Android options only. Send to Apple devices with the APNs requests.
 
 ## APNs
@@ -50,7 +54,7 @@ iOS requires an app to report every VoIP push to CallKit as an incoming call, so
 
 ## How the samples are tested
 
-The test runs `notify` on every vector of the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md) and checks the request it sends to each kind of device. It also checks that `web-push` sends each Web Push request's `TTL`, `Urgency` and `Topic` headers, and that `firebase-admin` accepts each converted FCM message and sends the request's Android options.
+The test runs `notify` on every vector of the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md) and checks the request it sends to each kind of device. It also checks that `web-push` sends each Web Push request's `TTL`, `Urgency` and `Topic` headers, and that `firebase-admin` accepts each converted FCM message, to a token and to a FID, and sends the request's Android options.
 
 ## Next steps
 

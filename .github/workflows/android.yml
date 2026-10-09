@@ -1,0 +1,244 @@
+# Builds and tests the Android SDK in android/, its own Gradle build: the
+# pure-JVM runtime (:core), push and incoming calls (:push) and the Android
+# library (:convohop). Unit tests run on the JVM and under Robolectric on
+# every Android version they name, lint checks the libraries, and the
+# libraries are published to a directory in the build (dry run). The
+# conformance jobs run the shared scenarios through the Android driver
+# (conformance/drivers/android), which drives :core on the host JVM. No job
+# starts an emulator. See android/README.md.
+name: Android
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/android.yml
+      - android/**
+      - conformance/**
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/android.yml
+      - android/**
+      - conformance/**
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+
+permissions: {}
+
+jobs:
+  build:
+    name: Generate, build, test, lint and publish locally
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Check the generated code, including the Android SDK's Kotlin
+        run: npm run check:graphql
+      - name: Test the generators against their golden files
+        run: npm run test:sdkgen
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            android/**/*.gradle.kts
+            android/gradle/libs.versions.toml
+            android/gradle/wrapper/gradle-wrapper.properties
+            conformance/drivers/android/build.gradle.kts
+      # gradle.properties caps the build at two workers and a 2 GiB daemon.
+      # --continue reports every failing test and lint finding in one run.
+      - name: Compile, test (JVM and Robolectric) and lint
+        working-directory: android
+        run: ./gradlew --no-daemon --console=plain --continue build lint
+      - name: Publish to a Maven repository in the build directory (dry run)
+        working-directory: android
+        run: ./gradlew --no-daemon --console=plain publishAllPublicationsToBuildRepository
+      - name: Check the publications
+        working-directory: android
+        run: |
+          python3 - build/repo/com/convohop <<'EOF'
+          import pathlib, re, sys, zipfile
+          root = pathlib.Path(sys.argv[1])
+          for artifact, packaging in (("convohop-android", "aar"), ("convohop-android-push", "aar"), ("convohop-android-core", "jar")):
+              versions = [path for path in (root / artifact).iterdir() if path.is_dir()]
+              if len(versions) != 1:
+                  sys.exit(f"{artifact}: expected one version, found {versions}")
+              names = sorted(path.name for path in versions[0].iterdir())
+              def find(suffix):
+                  found = [name for name in names if name.endswith(suffix) and (suffix == "-sources.jar" or not name.endswith("-sources.jar"))]
+                  if not found:
+                      sys.exit(f"{artifact}: no {suffix} file in {names}")
+                  return versions[0] / found[-1]
+              for suffix in (".pom", ".module", "-sources.jar"):
+                  find(suffix)
+              main = find(f".{packaging}")
+              if packaging == "aar":
+                  with zipfile.ZipFile(main) as aar:
+                      manifest = aar.read("AndroidManifest.xml").decode()
+                  if 'android:minSdkVersion="24"' not in manifest:
+                      sys.exit(f"{artifact}: the AAR's manifest does not declare minSdkVersion 24")
+              print(f"{artifact}: {main.name}")
+          EOF
+      - name: Upload the Maven repository
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-maven-repo
+          path: android/build/repo/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload the test and lint reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-reports
+          path: |
+            android/*/build/reports/
+            android/*/build/test-results/
+            conformance/drivers/android/build/reports/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  conformance:
+    name: Android driver (mock target)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            android/**/*.gradle.kts
+            android/gradle/libs.versions.toml
+            android/gradle/wrapper/gradle-wrapper.properties
+            conformance/drivers/android/build.gradle.kts
+      - name: Build the Android driver
+        working-directory: android
+        run: ./gradlew --no-daemon --console=plain :conformance-driver:installDist
+      - name: Run the conformance scenarios against the mock target
+        # Not --strict: a client SDK declares only the user role and does not verify
+        # webhooks, so the runner skips the scenarios that only use backend or
+        # management clients and those that verify webhooks. The next step allows only those.
+        run: >-
+          npm run conformance --
+          --driver conformance/drivers/android/build/install/convohop-conformance-android/bin/convohop-conformance-android
+          --reports conformance/reports/android
+      - name: Fail on any other skip
+        run: |
+          node --input-type=module <<'SCRIPT'
+          import { readFileSync } from "node:fs";
+          const allowed = [
+            /^it only uses (?:backend|management)(?:, (?:backend|management))* clients, which the driver under test does not declare$/,
+            /^driver convohop-android does not declare feature webhooks\.verify$/,
+          ];
+          const summary = JSON.parse(readFileSync("conformance/reports/android/summary.json", "utf8"));
+          const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
+          const passed = scenarios.filter((scenario) => scenario.status === "passed");
+          const other = scenarios.filter((scenario) => scenario.status !== "passed"
+            && !(scenario.status === "skipped" && typeof scenario.reason === "string"
+              && scenario.reason.split("; ").every((reason) => allowed.some((pattern) => pattern.test(reason)))));
+          for (const scenario of other) {
+            console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
+          }
+          console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
+          if (summary.driver.name !== "convohop-android" || passed.length === 0 || other.length > 0) process.exit(1);
+          SCRIPT
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-android-mock
+          path: conformance/reports/android/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # Like the dev-stack job in conformance.yml, runs the scenarios against the
+  # ConvoHop dev stack: the private, development-only linux/arm64 image that
+  # runs the whole platform in one container (see spec/conformance/targets.md),
+  # which conformance/dev-stack.mjs starts. The job runs only when the
+  # CONVOHOP_DEV_STACK_IMAGE repository variable names the image, and never for
+  # pull requests from forks, which cannot pull it.
+  conformance-dev-stack:
+    name: Android driver (dev stack)
+    if: vars.CONVOHOP_DEV_STACK_IMAGE != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+      packages: read # pull the dev-stack image from GitHub Packages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            android/**/*.gradle.kts
+            android/gradle/libs.versions.toml
+            android/gradle/wrapper/gradle-wrapper.properties
+            conformance/drivers/android/build.gradle.kts
+      - name: Build the Android driver
+        working-directory: android
+        run: ./gradlew --no-daemon --console=plain :conformance-driver:installDist
+      - name: Start the dev stack
+        env:
+          CONVOHOP_DEV_STACK_IMAGE: ${{ vars.CONVOHOP_DEV_STACK_IMAGE }}
+          GITHUB_TOKEN: ${{ github.token }}
+        # Pulls the image with the job's token, waits until the stack is ready and exports
+        # the seed.env values that conformance/targets/dev-stack.json reads, masking its credentials.
+        run: node conformance/dev-stack.mjs start
+      - name: Run the conformance scenarios against the dev stack
+        run: >-
+          npm run conformance --
+          --target conformance/targets/dev-stack.json
+          --driver conformance/drivers/android/build/install/convohop-conformance-android/bin/convohop-conformance-android
+          --reports conformance/reports/android-dev-stack
+      - name: Show why the dev stack stopped
+        if: failure()
+        # This repository's logs are public, so it prints only the stack supervisor's lines, not the platform's logs.
+        run: node conformance/dev-stack.mjs logs
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-android-dev-stack
+          path: conformance/reports/android-dev-stack/
+          if-no-files-found: ignore
+          retention-days: 14

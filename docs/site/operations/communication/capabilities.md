@@ -112,3 +112,4 @@ query CommunicationCapabilities($context: RequestContextInput!) {
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.capabilities`](../../typescript/reference/server.md#projectserverclientcapabilities-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.capabilities`](../../python/reference/convohop.md#convohopcapabilities-method), [`AsyncConvoHop.capabilities`](../../python/reference/convohop.md#asyncconvohopcapabilities-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.capabilities`](../../jvm/reference/server.md#projectserverclientcapabilities-method), [`CommunicationApi.capabilities`](../../jvm/reference/server.md#communicationapicapabilities-method), [`CommunicationSuspendApi.capabilities`](../../jvm/reference/server-kotlin.md#communicationsuspendapicapabilities-method) |

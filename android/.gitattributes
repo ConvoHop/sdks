@@ -1,0 +1,3 @@
+# The Windows wrapper script needs CRLF line endings; the root file defaults to LF.
+gradlew.bat text eol=crlf
+*.jar binary

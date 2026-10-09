@@ -19,10 +19,8 @@ import org.jspecify.annotations.Nullable;
  * Verifies ConvoHop webhook deliveries (Standard Webhooks, symmetric {@code v1} signatures). Pass the exact request
  * body, respond {@code 2xx} within 5 seconds, then process, and de-duplicate on {@code webhook-id}.
  *
- * <pre>{@code
- * WebhookVerifier verifier = WebhookVerifier.builder().secrets(System.getenv("CONVOHOP_WEBHOOK_SECRET")).build();
- * VerifiedWebhook delivery = verifier.verify(WebhookHeaders.ofMultiValued(requestHeaders), requestBody);
- * }</pre>
+ * <p>Build one verifier with {@code WebhookVerifier.builder().secrets(secret).build()}, then pass each delivery's
+ * {@link WebhookHeaders} and raw body to {@code verify}.
  *
  * <p>Failures throw {@link WebhookVerificationException}. Its message never contains secrets, signatures or the body.
  * A verifier is immutable and thread-safe.
