@@ -97,7 +97,7 @@ function page(values, asynchronous = false) {
 }
 function outbox(t, client, options = {}) {
   const errors = [], value = new Outbox(client, { connectivity: connectivity(), onError: error => errors.push(error), ...options });
-  t.after(() => value.close());
+  t.after(() => { void value.close(); });
   return { outbox: value, errors };
 }
 const statuses = box => box.entries.map(entry => entry.status);
@@ -606,6 +606,61 @@ test("in-flight and uncertain messages can't be discarded, and closing stops sen
   await box.flush();
   assert.equal(setup.sends.length, 1);
   assert.equal(box.entries[0].status, "unknown", "a closed outbox keeps its entries");
+});
+
+for (const [kind, option, make] of [["synchronous", "recoveryStorage", storage], ["asynchronous", "asyncRecoveryStorage", asyncStorage]]) {
+  test(`close resolves once the outbox and its sends stop writing, so storage cleared then stays clear (${kind} storage)`, async t => {
+    const saved = make(), setup = authority({ clientOptions: { [option]: saved } }), entered = deferred(), held = deferred();
+    const { outbox: box, errors } = outbox(t, setup.client(), { persist: true });
+    setup.onSend = async () => { entered.resolve(); await held.promise; };
+    const { requestId } = box.send(id(), "in flight at sign-out");
+    await entered.promise;
+    const closing = box.close();
+    assert.equal(box.close(), closing, "every call returns the same promise");
+    let closed = false;
+    void closing.then(() => { closed = true; });
+    saved.values.clear();
+    for (let index = 0; index < 5; index++) await turn();
+    assert.equal(closed, false, "a send in flight keeps the outbox writing");
+    held.resolve();
+    await closing;
+    assert.deepEqual(sendIds(setup), [requestId]);
+    assert.ok(saved.values.size > 0, "the send that settled after close() was called wrote to the cleared storage");
+    saved.values.clear();
+    for (let index = 0; index < 20; index++) await turn();
+    assert.deepEqual([...saved.values.keys()], [], "nothing writes once close() resolves");
+    assert.deepEqual(errors, []);
+  });
+}
+
+test("closing an outbox that doesn't persist resolves once its sends settle", async t => {
+  const setup = authority(), { outbox: box } = outbox(t, setup.client()), entered = deferred(), held = deferred();
+  setup.onSend = async () => { entered.resolve(); await held.promise; };
+  box.send(id(), "in flight");
+  await entered.promise;
+  let closed = false;
+  void box.close().then(() => { closed = true; });
+  for (let index = 0; index < 5; index++) await turn();
+  assert.equal(closed, false, "a send in flight keeps the outbox open");
+  held.resolve();
+  await box.close();
+  assert.deepEqual(statuses(box), ["sent"]);
+});
+
+test("close resolves even when the outbox's last save fails, and reports the failure", async t => {
+  const saved = storage(), setup = authority({ recoveryStorage: saved }), entered = deferred(), held = deferred();
+  const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`;
+  const { outbox: box, errors } = outbox(t, setup.client(), { persist: true });
+  setup.onSend = async () => { entered.resolve(); await held.promise; };
+  box.send(id(), "in flight");
+  await entered.promise;
+  const remove = saved.removeItem;
+  saved.removeItem = name => { if (name === key) throw new Error("storage unavailable"); remove(name); };
+  const closing = box.close();
+  held.resolve();
+  await closing;
+  assert.deepEqual(errors.map(error => error.message), ["storage unavailable"]);
+  assert.equal(JSON.parse(saved.values.get(key))[0].attempted, true, "the entry the failed save meant to remove stays saved");
 });
 
 test("listener failures are reported without stopping other listeners", async t => {
