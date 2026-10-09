@@ -10,7 +10,8 @@ import { ParamsError, optionalText, text } from "../ts/dist/params.mjs";
 export const DRIVER = Object.freeze({ name: "convohop-react-native", version: "0.1.0", language: "typescript" });
 export const ROLES = Object.freeze(["user"]);
 // A client SDK doesn't verify webhooks: that is the backend's job.
-export const FEATURES = Object.freeze(["realtime", "realtime.reconnectPolicy", "recovery.eviction", "recovery.storage", "retryAfter"]);
+export const FEATURES = Object.freeze(["realtime", "realtime.reconnectPolicy", "recovery.eviction", "recovery.spentBudget",
+  "recovery.storage", "retryAfter"]);
 
 // One platform for the process, as an app creates one and shares it between clients.
 const platform = createPlatform();

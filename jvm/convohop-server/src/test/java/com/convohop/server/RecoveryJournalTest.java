@@ -182,6 +182,54 @@ class RecoveryJournalTest {
   }
 
   @Test
+  void aSpentRetryBudgetMakesAnUnansweredRequestFinal() {
+    AtomicBoolean online = new AtomicBoolean();
+    try (FakeAuthority authority = new FakeAuthority(exchange -> {
+      if (exchange.operationName().equals("ManagementResolveRequest")) {
+        return Response.json(reply(exchange.request(),
+            map("result", resolution((String) input(exchange.request()).get("requestId"), "notObservedYet"))));
+      }
+      return online.get() ? Response.json(reply(exchange.request(), map("result", organization()))) : Response.drop();
+    })) {
+      ManagementClient client = client(authority);
+      List<String> ids = ids(127);
+      for (String requestId : ids) {
+        rejects(() -> create(client, requestId), "TRANSPORT_UNKNOWN", UNAVAILABLE);
+      }
+      String spent = id(), extra = id();
+      for (int attempt = 1; attempt <= 3; attempt++) {
+        this.time.incrementAndGet();
+        rejects(() -> create(client, spent), "TRANSPORT_UNKNOWN", UNAVAILABLE);
+        if (attempt < 3) {
+          refused(rejects(() -> create(client, extra), "RECOVERY_LIMIT", LIMIT), extra);
+        }
+      }
+      // The SDK won't send the request again, so its record is final though its outcome is unknown.
+      online.set(true);
+      ConvoHopProblem problem = rejects(() -> create(client, spent), "RESOLUTION_REQUIRED", null);
+      assertEquals(Arrays.asList(spent, "unknown", 409),
+          Arrays.<Object>asList(problem.getRequestId(), problem.getOutcome(), problem.getStatus()));
+      assertEquals(130, mutations(authority));
+      create(client, extra);
+      List<String> expected = new ArrayList<>(ids);
+      expected.add(extra);
+      assertEquals(expected, ids(stored()));
+
+      // Forgotten, the request can still be resolved, but not retried.
+      assertEquals("notObservedYet", client.requests().resolve(spent).getState());
+      assertThrows(IllegalStateException.class, () -> client.requests().retry(spent));
+      // Sent again under its ID, it is a new record with a new budget. The authority deduplicates by request ID.
+      create(client, spent);
+      expected.set(expected.size() - 1, spent);
+      List<Map<String, Object>> records = stored();
+      assertEquals(expected, ids(records));
+      assertEquals(Arrays.asList(1L, "committed"), Arrays.asList(records.get(127).get("attemptCount"),
+          records.get(127).get("resolutionState")));
+      assertEquals(132, mutations(authority));
+    }
+  }
+
+  @Test
   void aRequestIsRejectedOnlyIfEveryAttemptWas() {
     Queue<String> plan = new ConcurrentLinkedQueue<>(Arrays.asList("lost", "rejected", "rejected", "lost"));
     try (FakeAuthority authority = new FakeAuthority(exchange -> "lost".equals(plan.poll())
@@ -215,23 +263,31 @@ class RecoveryJournalTest {
         record(now, "committed", "authorityReceipt", map("lastAttemptAt", now - 9)),
         record(now, "rejected", "RATE_LIMITED", map("retryDeadline", now - 1, "lastAttemptAt", now - 8)),
         record(now, "rejected", "FORBIDDEN", map("lastAttemptAt", now - 7)),
-        record(now, "rejected", "RATE_LIMITED", map("attemptCount", 3, "lastAttemptAt", now - 6)));
+        record(now, "rejected", "RATE_LIMITED", map("attemptCount", 3, "lastAttemptAt", now - 6)),
+        // Final too, though no answer settled them, since their budget is spent.
+        record(now, "unknown", "TRANSPORT_UNKNOWN", map("attemptCount", 3, "lastAttemptAt", now - 5)),
+        record(now, "pending", "notSubmitted", map("attemptCount", 0, "retryDeadline", now - 1, "lastAttemptAt", now - 4)));
     List<Map<String, Object>> kept = Arrays.asList(
         record(now, "rejected", "RATE_LIMITED", map("attemptCount", 2)),
         record(now, "rejected", "WRONG_REGION", map()),
         record(now, "rejected", "NEWER_CODE", map()),
         record(now, "unknown", "submitted", map()),
-        record(now, "pending", "notSubmitted", map("attemptCount", 0)));
+        record(now, "pending", "notSubmitted", map("attemptCount", 0)),
+        // A record from a clock that was ahead refuses a resend only until this clock catches up.
+        record(now, "unknown", "submitted",
+            map("firstSubmittedAt", now + 30_000, "lastAttemptAt", now + 30_000, "retryDeadline", now + 90_000)));
     List<Map<String, Object>> saved = new ArrayList<>();
     saved.add(fin.get(2));
     saved.addAll(kept.subList(0, 2));
     saved.add(fin.get(0));
+    saved.add(fin.get(5));
     for (int filler = 0; filler < 128 - fin.size() - kept.size(); filler++) {
       saved.add(record(now, "unknown", "TRANSPORT_UNKNOWN", map()));
     }
     saved.add(fin.get(3));
     saved.addAll(kept.subList(2, kept.size()));
     saved.add(fin.get(1));
+    saved.add(fin.get(4));
     this.storage.put(key(), Json.stringify(saved));
     try (FakeAuthority authority = new FakeAuthority(exchange -> Response.drop())) {
       ManagementClient client = client(authority);
