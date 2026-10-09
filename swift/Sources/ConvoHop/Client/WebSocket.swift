@@ -12,7 +12,9 @@ public enum ConvoHopWebSocketEvent: Sendable, Equatable {
     case binary(Data)
     /// The transport failed. A `closed` event follows.
     case failed
-    case closed(code: Int)
+    /// The connection ended with a close code and the reason the peer sent, empty without one. A socket should pass
+    /// the reason on: the stream classifies a close by the error code that starts it, such as `QUOTA_EXCEEDED`.
+    case closed(code: Int, reason: String = "")
 }
 
 /// One realtime connection. Implementations deliver events in order and finish `events` after `closed`.
@@ -103,7 +105,7 @@ final class URLSessionWebSocketConnection: NSObject, ConvoHopWebSocket, URLSessi
                 self.receive(task)
             case .failure:
                 if task.closeCode != .invalid {
-                    self.finish(.closed(code: task.closeCode.rawValue))
+                    self.finish(.closed(code: task.closeCode.rawValue, reason: Self.text(task.closeReason)))
                 } else {
                     // The delegate normally reports why the connection ended; this covers stacks that never do.
                     DispatchQueue.global().asyncAfter(deadline: .now() + 1) { [weak self] in self?.fail() }
@@ -116,6 +118,11 @@ final class URLSessionWebSocketConnection: NSObject, ConvoHopWebSocket, URLSessi
         lock.lock()
         defer { lock.unlock() }
         if !finished { continuation.yield(event) }
+    }
+
+    /// A close frame's reason as text. Invalid UTF-8 becomes replacement characters.
+    private static func text(_ reason: Data?) -> String {
+        reason.map { String(decoding: $0, as: UTF8.self) } ?? ""
     }
 
     private func fail() {
@@ -153,7 +160,7 @@ final class URLSessionWebSocketConnection: NSObject, ConvoHopWebSocket, URLSessi
         _ session: URLSession, webSocketTask: URLSessionWebSocketTask,
         didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?
     ) {
-        finish(.closed(code: closeCode.rawValue))
+        finish(.closed(code: closeCode.rawValue, reason: Self.text(reason)))
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {

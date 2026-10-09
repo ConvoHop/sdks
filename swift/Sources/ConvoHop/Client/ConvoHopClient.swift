@@ -786,7 +786,11 @@ public actor ConvoHopClient {
             "submitted", "TRANSPORT_UNKNOWN", "OUTCOME_UNKNOWN", "AUTHORITY_UNAVAILABLE", "RETRY_EXHAUSTED",
             "ADMISSION_LIMIT", "HTTP_FAILURE", "INVALID_RESPONSE",
         ]
-        for state in states.filter({ $0.resolutionState == .pending || $0.resolutionState == .unknown }).prefix(16) {
+        let unresolved = states.filter {
+            $0.resolutionState == .pending || $0.resolutionState == .unknown
+                || ($0.resolutionState == .rejected && RetryPolicy.retryableCode($0.lastAttemptClassification))
+        }
+        for state in unresolved.prefix(16) {
             let now = environment.now()
             let resend = transient.contains(state.lastAttemptClassification) && state.attemptCount < 3
                 && now >= state.lastAttemptAt && now >= state.firstSubmittedAt && now <= state.retryDeadline

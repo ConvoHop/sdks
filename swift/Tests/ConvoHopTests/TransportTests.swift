@@ -67,26 +67,6 @@ final class TransportTests: XCTestCase {
         return transport
     }
 
-    /// A recovery record as the transport stores it, sent once at the test clock's start.
-    private static func record(
-        _ requestId: String = uuid(), operation: String = TransportTests.send, projectId: String? = TestIDs.project,
-        input: JSONObject = TransportTests.sendInput, incarnation: String = TestIDs.incarnation,
-        resolution: String = "unknown", fingerprint: String? = nil, mediaAdmissionAttempted: Bool = false
-    ) throws -> JSONObject {
-        let now = 1_800_000_000_000
-        var record: JSONObject = [
-            "requestId": .string(requestId), "incarnation": .string(incarnation),
-            "payloadFingerprint": .string(
-                try fingerprint ?? ConvoHopTransport.fingerprint(operation: operation, projectId: projectId, input: input)),
-            "operation": .string(operation), "input": .object(input), "firstSubmittedAt": .number(Double(now)),
-            "retryDeadline": .number(Double(now + 60_000)), "attemptCount": 1, "lastAttemptAt": .number(Double(now)),
-            "lastAttemptClassification": "TRANSPORT_UNKNOWN", "resolutionState": .string(resolution),
-        ]
-        if let projectId { record["projectId"] = .string(projectId) }
-        if mediaAdmissionAttempted { record["mediaAdmissionAttempted"] = true }
-        return record
-    }
-
     private static func stored(_ records: [JSONObject]) -> [String: String] {
         [storageKey: JSONValue.array(records.map(JSONValue.object)).jsonText()]
     }
@@ -331,6 +311,26 @@ final class TransportTests: XCTestCase {
         }
     }
 
+    func testAGatewayErrorPageIsAnUnknownOutcomeThatKeepsItsRetryAfter() async throws {
+        for status in [502, 504] {
+            let http = StubHTTP()
+            await http.on(Self.typing) { _ in
+                ConvoHopHTTPResponse(
+                    status: status, headers: ["content-type": "text/html", "retry-after": "7"],
+                    body: Data("<html><body>Bad gateway</body></html>".utf8))
+            }
+            let transport = try await Self.makeTransport(http)
+            let error = await convoHopError {
+                try await transport.execute(Self.typing, projectId: TestIDs.project, input: Self.typingInput)
+            }
+            XCTAssertEqual(error?.code, .invalidResponse, "\(status)")
+            XCTAssertEqual(error?.outcome, .unknown, "\(status)")
+            XCTAssertEqual(error?.status, status)
+            XCTAssertEqual(error?.retryAfter, 7, "\(status)")
+            XCTAssertEqual(error.map { RetryPolicy.reconnectAction($0) }, .retry, "\(status)")
+        }
+    }
+
     /// A rate-limit GraphQL error whose `extensions.retryAfter` is any JSON value.
     private static func graphQLError(retryAfter: JSONValue?) -> ConvoHopHTTPResponse {
         var extensions: JSONObject = ["code": "RATE_LIMITED", "outcome": "rejected", "status": 429]
@@ -371,9 +371,10 @@ final class TransportTests: XCTestCase {
     }
 
     func testInvalidStoredRecordsBlockEveryRequest() async throws {
-        let valid = try Self.record()
+        let valid = try Fixture.recoveryRecord()
         var cases = ["", "{", "null", "{}", "[1]", "[null]", #"{"records":[]}"#]
-        cases.append(Self.stored(try (0...ConvoHopTransport.maximumRecords).map { _ in try Self.record() })[Self.storageKey]!)
+        let overfull = try (0...ConvoHopTransport.maximumRecords).map { _ in try Fixture.recoveryRecord() }
+        cases.append(Self.stored(overfull)[Self.storageKey]!)
         cases.append(Self.stored([valid, valid])[Self.storageKey]!)
         let changes: [(String, JSONValue?)] = [
             ("operation", "communication.unknown"), ("operation", .string(Self.resolve)), ("resolutionState", "lost"),
@@ -414,8 +415,9 @@ final class TransportTests: XCTestCase {
             "mode": "AUDIO_VIDEO",
         ]
         let records = [
-            try Self.record(), try Self.record(resolution: "committed"),
-            try Self.record(operation: Self.credentials, input: input, resolution: "committed", mediaAdmissionAttempted: true),
+            try Fixture.recoveryRecord(), try Fixture.recoveryRecord(resolution: "committed"),
+            try Fixture.recoveryRecord(
+                operation: Self.credentials, input: input, resolution: "committed", mediaAdmissionAttempted: true),
         ]
         let ids = try records.map { try XCTUnwrap($0["requestId"]?.stringValue) }
         let transport = try await Self.makeTransport(StubHTTP(), storage: ScriptedStorage(Self.stored(records)))
@@ -488,38 +490,203 @@ final class TransportTests: XCTestCase {
         XCTAssertEqual(states.map(\.resolutionState), [.committed])
     }
 
-    func testTheRecordLimitOnlyEvictsSettledRecords() async throws {
+    func testAFullJournalRefusesANewRequestWhenNoRecordIsFinal() async throws {
         let http = StubHTTP()
         await http.on(Self.send) { request in Reply.ok(request) }
-        let unresolved = try (0..<ConvoHopTransport.maximumRecords).map { _ in try Self.record() }
-        let full = try await Self.makeTransport(http, storage: ScriptedStorage(Self.stored(unresolved)))
+        // Pending, unknown and retryably refused requests can all still be resent under their IDs.
+        let kept = try (0..<ConvoHopTransport.maximumRecords).map { index in
+            switch index % 3 {
+            case 0: try Fixture.recoveryRecord(resolution: "pending", classification: "notSubmitted", attempts: 0)
+            case 1: try Fixture.recoveryRecord(resolution: "unknown")
+            default: try Fixture.recoveryRecord(resolution: "rejected", classification: "RATE_LIMITED")
+            }
+        }
+        let transport = try await Self.makeTransport(http, storage: ScriptedStorage(Self.stored(kept)))
         let requestId = uuid()
         let error = await convoHopError {
-            try await full.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput, requestId: requestId)
+            try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput, requestId: requestId)
         }
 
-        XCTAssertEqual(error?.code, .resolutionRequired)
+        XCTAssertEqual(error?.code, .recoveryLimit)
         XCTAssertEqual(error?.outcome, .rejected)
         XCTAssertEqual(error?.status, 409)
-        XCTAssertEqual(error?.message, "Resolve outstanding mutations before creating more")
+        XCTAssertEqual(error?.requestId, requestId)
+        XCTAssertEqual(
+            error?.message,
+            "Recovery storage already holds 128 requests that aren't final; retry or resolve them first")
         let sent = await http.requests.count
         XCTAssertEqual(sent, 0)
-
-        let settled = try Self.record(resolution: "committed")
-        let mixed = [unresolved[0], settled] + unresolved.dropFirst(2)
-        let transport = try await Self.makeTransport(http, storage: ScriptedStorage(Self.stored(mixed)))
-        _ = try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput, requestId: requestId)
         let states = try await transport.recoveryStates()
+        XCTAssertEqual(states.map(\.requestId), kept.compactMap { $0["requestId"]?.stringValue })
+    }
+
+    func testAFullJournalForgetsTheOldestFinalRecordFirst() async throws {
+        let http = StubHTTP()
+        await http.on(Self.send) { request in Reply.ok(request) }
+        let receipt = "authorityReceipt"
+        let committed = try Fixture.recoveryRecord(resolution: "committed", classification: receipt, age: 1_000)
+        let accepted = try Fixture.recoveryRecord(resolution: "accepted", classification: receipt, age: 3_000)
+        let refused = try Fixture.recoveryRecord(resolution: "rejected", classification: "QUOTA_EXCEEDED", age: 2_000)
+        let limited = try Fixture.recoveryRecord(resolution: "rejected", classification: "RATE_LIMITED", age: 9_000)
+        let unknown = try Fixture.recoveryRecord(resolution: "unknown", age: 9_000)
+        let records =
+            [unknown, committed, refused, limited, accepted]
+            + (try (5..<ConvoHopTransport.maximumRecords).map { _ in try Fixture.recoveryRecord() })
+        let transport = try await Self.makeTransport(http, storage: ScriptedStorage(Self.stored(records)))
+
+        var forgotten: [String] = []
+        for _ in 0..<3 {
+            let before = Set(try await transport.recoveryStates().map(\.requestId))
+            _ = try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput)
+            let after = Set(try await transport.recoveryStates().map(\.requestId))
+            XCTAssertEqual(after.count, ConvoHopTransport.maximumRecords)
+            forgotten.append(contentsOf: before.subtracting(after))
+        }
+
+        // Oldest attempt first, whether committed, accepted or refused for good; never the unknown or retryable ones.
+        XCTAssertEqual(forgotten, [accepted, refused, committed].compactMap { $0["requestId"]?.stringValue })
+        let states = try await transport.recoveryStates()
+        XCTAssertEqual(states.first?.requestId, unknown["requestId"]?.stringValue)
+        XCTAssertTrue(states.contains { $0.requestId == limited["requestId"]?.stringValue })
+    }
+
+    func testASpentRetryBudgetMakesARecordFinal() async throws {
+        let http = StubHTTP()
+        await http.on(Self.send) { request in Reply.ok(request) }
+        let clock = TestClock()
+        let attempted = try Fixture.recoveryRecord(resolution: "unknown", attempts: ConvoHopTransport.maximumAttempts)
+        let limited = try Fixture.recoveryRecord(resolution: "rejected", classification: "RATE_LIMITED", age: 5_000)
+        let unknown = try (2..<ConvoHopTransport.maximumRecords).map { _ in try Fixture.recoveryRecord() }
+        let records = [limited, attempted] + unknown
+        let transport = try await Self.makeTransport(http, storage: ScriptedStorage(Self.stored(records)), clock: clock)
+
+        // Three attempts spend the budget, whatever the outcome.
+        _ = try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput)
+        var states = try await transport.recoveryStates()
+        XCTAssertFalse(states.contains { $0.requestId == attempted["requestId"]?.stringValue })
+        XCTAssertTrue(states.contains { $0.requestId == limited["requestId"]?.stringValue })
+
+        // So does the 60-second window: then the retryable refusal attempted longest ago goes first.
+        clock.advance(by: 60_001)
+        _ = try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput)
+        states = try await transport.recoveryStates()
+        XCTAssertFalse(states.contains { $0.requestId == limited["requestId"]?.stringValue })
         XCTAssertEqual(states.count, ConvoHopTransport.maximumRecords)
-        XCTAssertFalse(states.contains { $0.requestId == settled["requestId"]?.stringValue })
-        XCTAssertEqual(states.first?.requestId, unresolved[0]["requestId"]?.stringValue)
-        XCTAssertEqual(states.last?.requestId, requestId)
+    }
+
+    func testAFullJournalKeepsRetainedRecords() async throws {
+        let http = StubHTTP()
+        await http.on(Self.send) { request in Reply.ok(request) }
+        let first = try Fixture.recoveryRecord(resolution: "committed", classification: "authorityReceipt", age: 2_000)
+        let second = try Fixture.recoveryRecord(resolution: "committed", classification: "authorityReceipt", age: 1_000)
+        let records =
+            [first, second] + (try (2..<ConvoHopTransport.maximumRecords).map { _ in try Fixture.recoveryRecord() })
+        let transport = try await Self.makeTransport(http, storage: ScriptedStorage(Self.stored(records)))
+        var retainer: RecoveryRetainer? = RecoveryRetainer()
+        retainer?.hold([try XCTUnwrap(first["requestId"]?.stringValue)])
+        transport.retention.add(try XCTUnwrap(retainer))
+
+        _ = try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput)
+        var ids = try await transport.recoveryStates().map(\.requestId)
+        XCTAssertTrue(ids.contains(try XCTUnwrap(first["requestId"]?.stringValue)))
+        XCTAssertFalse(ids.contains(try XCTUnwrap(second["requestId"]?.stringValue)))
+
+        // Retention ends when its holder lets go.
+        retainer = nil
+        _ = try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput)
+        ids = try await transport.recoveryStates().map(\.requestId)
+        XCTAssertFalse(ids.contains(try XCTUnwrap(first["requestId"]?.stringValue)))
+    }
+
+    func testAFullJournalKeepsTheRecordOfARequestInFlight() async throws {
+        let http = StubHTTP()
+        let gate = Gate()
+        let final = try Fixture.recoveryRecord(resolution: "committed", classification: "authorityReceipt", age: 2_000)
+        let finalId = try XCTUnwrap(final["requestId"]?.stringValue)
+        await http.on(Self.send) { request in
+            if request.requestId == finalId { await gate.wait() }
+            return Reply.ok(request)
+        }
+        let records = [final] + (try (1..<ConvoHopTransport.maximumRecords).map { _ in try Fixture.recoveryRecord() })
+        let transport = try await Self.makeTransport(http, storage: ScriptedStorage(Self.stored(records)))
+        // Resending a committed request asks the authority for its receipt again. Capture plain values: the Xcode 26.6
+        // region checker can't analyze a `Self` capture in a `Task`.
+        let send = Self.send, input = Self.sendInput
+        let resend = Task {
+            try await transport.execute(send, projectId: TestIDs.project, input: input, requestId: finalId)
+        }
+        try await eventually("the resend") { await http.count(Self.send) == 1 }
+
+        let error = await convoHopError {
+            try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput)
+        }
+        XCTAssertEqual(error?.code, .recoveryLimit)
+        gate.open()
+        _ = try await resend.value
+        _ = try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput)
+        let ids = try await transport.recoveryStates().map(\.requestId)
+        XCTAssertFalse(ids.contains(finalId))
+    }
+
+    func testARefusalOfEveryAttemptIsRecordedAsRejected() async throws {
+        let http = StubHTTP()
+        let replies = Shared<[ConvoHopHTTPResponse]>([
+            Reply.graphQLError(code: "RATE_LIMITED", status: 429, retryAfter: 2),
+            Reply.graphQLError(code: "QUOTA_EXCEEDED", status: 429, retryAfter: 60),
+        ])
+        await http.on(Self.send) { request in
+            replies.update { $0.isEmpty ? Reply.ok(request) : $0.removeFirst() }
+        }
+        let transport = try await Self.makeTransport(http)
+        let limited = uuid(), refused = uuid()
+        let limitedError = await convoHopError {
+            try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput, requestId: limited)
+        }
+        let refusedError = await convoHopError {
+            try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput, requestId: refused)
+        }
+
+        XCTAssertEqual(limitedError?.code, .rateLimited)
+        XCTAssertEqual(limitedError?.retryAfter, 2)
+        XCTAssertEqual(refusedError?.code, .quotaExceeded)
+        var states = try await transport.recoveryStates()
+        XCTAssertEqual(states.map(\.requestId), [limited, refused])
+        XCTAssertEqual(states.map(\.resolutionState), [.rejected, .rejected])
+        XCTAssertEqual(states.map(\.lastAttemptClassification), ["RATE_LIMITED", "QUOTA_EXCEEDED"])
+
+        // A retryable refusal can still be resent under its ID; here the resend commits.
+        _ = try await transport.execute(Self.send, projectId: TestIDs.project, input: Self.sendInput, requestId: limited)
+        states = try await transport.recoveryStates()
+        XCTAssertEqual(states.first?.resolutionState, .committed)
+        XCTAssertEqual(states.first?.attemptCount, 2)
+    }
+
+    func testARefusalAfterAnUncertainAttemptStaysUnknown() async throws {
+        let http = StubHTTP()
+        let replies = Shared<[ConvoHopHTTPResponse]>([
+            Reply.graphQLError(code: "AUTHORITY_UNAVAILABLE", outcome: "unknown", status: 503),
+            Reply.graphQLError(code: "RATE_LIMITED", status: 429),
+        ])
+        await http.on(Self.send) { _ in replies.update { $0.removeFirst() } }
+        let transport = try await Self.makeTransport(http)
+        let requestId = uuid()
+        for _ in 0..<2 {
+            _ = await convoHopError {
+                try await transport.execute(
+                    Self.send, projectId: TestIDs.project, input: Self.sendInput, requestId: requestId)
+            }
+        }
+
+        // The first attempt may have been applied, so the later refusal isn't the request's outcome.
+        let states = try await transport.recoveryStates()
+        XCTAssertEqual(states.map(\.resolutionState), [.unknown])
+        XCTAssertEqual(states.map(\.lastAttemptClassification), ["RATE_LIMITED"])
     }
 
     // MARK: Recovery
 
     func testAnotherIncarnationsRecordNeedsExplicitRecovery() async throws {
-        let record = try Self.record(incarnation: uuid())
+        let record = try Fixture.recoveryRecord(incarnation: uuid())
         let requestId = try XCTUnwrap(record["requestId"]?.stringValue)
         let http = StubHTTP()
         let transport = try await Self.makeTransport(http, storage: ScriptedStorage(Self.stored([record])))
@@ -541,7 +708,7 @@ final class TransportTests: XCTestCase {
     }
 
     func testRetryRefusesARecordWhosePayloadChanged() async throws {
-        let record = try Self.record(fingerprint: "sha256:" + String(repeating: "0", count: 64))
+        let record = try Fixture.recoveryRecord(fingerprint: "sha256:" + String(repeating: "0", count: 64))
         let requestId = try XCTUnwrap(record["requestId"]?.stringValue)
         let http = StubHTTP()
         await http.on(Self.resolve) { request in
@@ -565,7 +732,8 @@ final class TransportTests: XCTestCase {
             "liveSessionId": .string(uuid()), "participationId": .string(uuid()), "expectedGeneration": "1",
             "mode": "AUDIO_VIDEO",
         ]
-        let record = try Self.record(operation: Self.credentials, input: input, mediaAdmissionAttempted: true)
+        let record = try Fixture.recoveryRecord(
+            operation: Self.credentials, input: input, mediaAdmissionAttempted: true)
         let requestId = try XCTUnwrap(record["requestId"]?.stringValue)
         let http = StubHTTP()
         await http.on(Self.resolve) { request in
@@ -585,7 +753,7 @@ final class TransportTests: XCTestCase {
 
     func testMarksANativeAdmissionOnlyAfterACommittedIssuance() async throws {
         func issuance(_ resolution: String) throws -> JSONObject {
-            try Self.record(
+            try Fixture.recoveryRecord(
                 operation: Self.credentials,
                 input: [
                     "liveSessionId": .string(uuid()), "participationId": .string(uuid()), "expectedGeneration": "1",
@@ -593,7 +761,9 @@ final class TransportTests: XCTestCase {
                 ],
                 resolution: resolution)
         }
-        let records = [try issuance("unknown"), try issuance("committed"), try Self.record(resolution: "committed")]
+        let records = [
+            try issuance("unknown"), try issuance("committed"), try Fixture.recoveryRecord(resolution: "committed"),
+        ]
         let ids = try records.map { try XCTUnwrap($0["requestId"]?.stringValue) }
         let storage = ScriptedStorage(Self.stored(records))
         let transport = try await Self.makeTransport(StubHTTP(), storage: storage)
@@ -638,7 +808,7 @@ final class TransportTests: XCTestCase {
     }
 
     func testResolvingSettlesOnlyTheOriginalProjectsRecord() async throws {
-        let record = try Self.record()
+        let record = try Fixture.recoveryRecord()
         let requestId = try XCTUnwrap(record["requestId"]?.stringValue)
         let observed = Shared("accepted")
         let http = StubHTTP()
@@ -736,7 +906,7 @@ final class TransportTests: XCTestCase {
 
     func testABlockedGateRefusesRequestsButNotProbes() async throws {
         let clock = TestClock()
-        let record = try Self.record()
+        let record = try Fixture.recoveryRecord()
         let requestId = try XCTUnwrap(record["requestId"]?.stringValue)
         let http = StubHTTP()
         await http.on(Self.typing) { request in Reply.ok(request, ["status": "ok"]) }

@@ -180,9 +180,10 @@ private func next(_ subscriptionId: String, _ page: JSONValue) -> JSONValue {
 }
 
 /// A GraphQL error as realtime frames carry it.
-private func problem(_ code: String, status: Int?) -> JSONValue {
+private func problem(_ code: String, status: Int?, retryAfter: Int? = nil) -> JSONValue {
     var extensions: JSONObject = ["code": .string(code), "requestId": .string(uuid()), "outcome": "rejected"]
     if let status { extensions["status"] = .number(Double(status)) }
+    if let retryAfter { extensions["retryAfter"] = .number(Double(retryAfter)) }
     return ["message": "Denied", "extensions": .object(extensions)]
 }
 
@@ -825,6 +826,125 @@ final class ConversationStreamRealtimeTests: XCTestCase {
         for await connected in await stream.connectionChanges() { late.append(connected) }
         XCTAssertEqual(late, [false], "A closed stream reports its state and ends")
         observer.cancel()
+    }
+
+    // MARK: Reconnect policy
+
+    func testARateLimitCloseReconnectsNoSoonerThanItsRetryAfter() async throws {
+        let h = try await Harness.make()
+        await EventLog(events: 1).serve(h.http)
+        let delivery = Delivery()
+        let stream = try await delivery.watch(h.client)
+        let socket = try await h.sockets.connection(0)
+        _ = try await subscribe(socket, stream)
+
+        socket.deliver(.closed(code: 4429, reason: "RATE_LIMITED retryAfter=4"))
+        try await eventually("reconnect timer") { h.clock.pendingSleeps == 1 }
+        XCTAssertEqual(h.clock.deadlines, [h.clock.now + 4000])
+        let reported = try XCTUnwrap(delivery.problems.first)
+        XCTAssertEqual(reported.code, .rateLimited)
+        XCTAssertEqual(reported.status, 429)
+        XCTAssertEqual(reported.retryAfter, 4)
+        let closed = await stream.isClosed
+        XCTAssertFalse(closed)
+
+        h.clock.advance(by: 4000)
+        let resumed = try await subscribe(try await h.sockets.connection(1), stream)
+        XCTAssertEqual(resumed.input?["after"], EventLog.cursor(1))
+        await stream.close()
+    }
+
+    func testQuotaAndPlanLimitClosesEndTheStream() async throws {
+        let closes: [(code: Int, reason: String, problem: ConvoHopErrorCode, status: Int, retryAfter: Int?)] = [
+            (4429, "QUOTA_EXCEEDED retryAfter=60 meter=messages", .quotaExceeded, 429, 60),
+            (4403, "PLAN_LIMIT_EXCEEDED planLimit=conversations", .planLimitExceeded, 403, nil),
+        ]
+        for close in closes {
+            let h = try await Harness.make()
+            await EventLog(events: 1).serve(h.http)
+            let delivery = Delivery()
+            let stream = try await delivery.watch(h.client)
+            let socket = try await h.sockets.connection(0)
+            _ = try await subscribe(socket, stream)
+
+            socket.deliver(.closed(code: close.code, reason: close.reason))
+            try await eventually("closed by \(close.reason)") { await stream.isClosed }
+            XCTAssertEqual(delivery.problems.count, 1, close.reason)
+            let reported = try XCTUnwrap(delivery.problems.first)
+            XCTAssertEqual(reported.code, close.problem)
+            XCTAssertEqual(reported.status, close.status, close.reason)
+            XCTAssertEqual(reported.outcome, .rejected, close.reason)
+            XCTAssertEqual(reported.retryAfter, close.retryAfter, close.reason)
+            XCTAssertEqual(h.clock.pendingSleeps, 0, close.reason)
+            h.clock.advance(by: 120_000)
+            XCTAssertEqual(h.sockets.connections.count, 1, close.reason)
+        }
+    }
+
+    func testKeepsReconnectingThroughGatewayErrorsWhileRouting() async throws {
+        let h = try await Harness.make()
+        await EventLog(events: 1).serve(h.http)
+        let delivery = Delivery()
+        let stream = try await delivery.watch(h.client)
+        let socket = try await h.sockets.connection(0)
+        _ = try await subscribe(socket, stream)
+
+        let failures = Shared([502, 504])
+        let clock = h.clock
+        await h.http.on("communication.route") { request in
+            if let status = failures.update({ pending -> Int? in pending.isEmpty ? nil : pending.removeFirst() }) {
+                return ConvoHopHTTPResponse(
+                    status: status, headers: ["content-type": "text/html"], body: Data("<html>Gateway</html>".utf8))
+            }
+            return Reply.ok(request, ["result": Fixture.route(now: clock.now)], now: clock.now)
+        }
+        socket.fail()
+        var delays: [Int] = []
+        for index in 0..<3 {
+            try await eventually("reconnect \(index)") { h.clock.pendingSleeps == 1 }
+            let delay = try XCTUnwrap(h.clock.deadlines.first) - h.clock.now
+            delays.append(delay)
+            h.clock.advance(by: delay)
+        }
+        let resumed = try await subscribe(try await h.sockets.connection(1), stream)
+        XCTAssertEqual(delays, [1000, 2000, 4000])
+        XCTAssertEqual(resumed.input?["after"], EventLog.cursor(1))
+        XCTAssertEqual(delivery.problems.map(\.code), [.transportUnknown, .invalidResponse, .invalidResponse])
+        XCTAssertEqual(delivery.problems.map(\.status), [nil, 502, 504])
+        let closed = await stream.isClosed
+        XCTAssertFalse(closed)
+        await stream.close()
+    }
+
+    func testAnErrorFrameDelaysTheReconnectByItsRetryAfterAndAQuotaEndsTheStream() async throws {
+        let h = try await Harness.make()
+        await EventLog(events: 1).serve(h.http)
+        let delivery = Delivery()
+        let stream = try await delivery.watch(h.client)
+        let first = try await h.sockets.connection(0)
+        let subscription = try await subscribe(first, stream)
+
+        first.receive([
+            "type": "next", "id": .string(subscription.id),
+            "payload": ["errors": [problem("RATE_LIMITED", status: 429, retryAfter: 7)]],
+        ])
+        try await eventually("reconnect timer") { h.clock.pendingSleeps == 1 }
+        XCTAssertEqual(h.clock.deadlines, [h.clock.now + 7000])
+        XCTAssertEqual(delivery.problems.first?.retryAfter, 7)
+
+        h.clock.advance(by: 7000)
+        let second = try await h.sockets.connection(1)
+        let resumed = try await subscribe(second, stream)
+        second.receive([
+            "type": "next", "id": .string(resumed.id),
+            "payload": ["errors": [problem("QUOTA_EXCEEDED", status: 429, retryAfter: 60)]],
+        ])
+        try await eventually("closed") { await stream.isClosed }
+        XCTAssertEqual(delivery.problems.map(\.code), [.rateLimited, .quotaExceeded])
+        XCTAssertEqual(delivery.problems.last?.status, 429)
+        XCTAssertEqual(h.clock.pendingSleeps, 0)
+        h.clock.advance(by: 120_000)
+        XCTAssertEqual(h.sockets.connections.count, 2)
     }
 }
 

@@ -220,6 +220,17 @@ wake-up, such as connectivity returning or the app coming to the foreground,
 may skip the backoff but never the floor. Initialization and queued sends
 may back off on their own curves. The stream uses the IR's.
 
+The floor binds the retries that an SDK runs by itself. Two other kinds of
+attempt may come sooner:
+
+- A stream that was paused to renew its session may resume as soon as the
+  renewal ends with a verified session, the new one or the original. These
+  rules leave renewal as it is (see [Classification](#classification)), so
+  each renewal attempt may let a waiting stream try once early. If the
+  service still refuses, its answer sets a new floor.
+- An attempt that the app asks for, such as flushing an outbox, is the
+  app's call, not the SDK's. It may skip the floor as well as the backoff.
+
 ### Reconnecting the stream
 
 A dropped stream reconnects after a backoff that the channel's `reconnect`
