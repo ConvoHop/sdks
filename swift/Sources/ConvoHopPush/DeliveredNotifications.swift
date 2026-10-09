@@ -9,17 +9,25 @@ public enum ConvoHopDeliveredNotifications {
     public static func remove(alertId: String) async {
         let center = UNUserNotificationCenter.current()
         let delivered = await center.deliveredNotifications()
-        let identifiers = delivered.compactMap { notification -> String? in
-            let payload = notification.request.content.userInfo["convohop"]
+        let identifiers = matching(
+            alertId, in: delivered.map { ($0.request.identifier, $0.request.content.userInfo) })
+        if !identifiers.isEmpty { center.removeDeliveredNotifications(withIdentifiers: identifiers) }
+    }
+
+    /// The identifiers of the notifications whose `convohop` object, or its JSON text, has the `alertId`.
+    static func matching(_ alertId: String, in notifications: [(identifier: String, userInfo: [AnyHashable: Any])])
+        -> [String]
+    {
+        notifications.compactMap { notification in
+            let payload = notification.userInfo["convohop"]
             let fields: [String: Any]? =
                 if let text = payload as? String, let data = text.data(using: .utf8) {
                     (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
                 } else {
                     payload as? [String: Any]
                 }
-            return fields?["alertId"] as? String == alertId ? notification.request.identifier : nil
+            return fields?["alertId"] as? String == alertId ? notification.identifier : nil
         }
-        if !identifiers.isEmpty { center.removeDeliveredNotifications(withIdentifiers: identifiers) }
     }
 }
 #endif
