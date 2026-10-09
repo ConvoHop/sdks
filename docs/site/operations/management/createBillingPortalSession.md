@@ -83,3 +83,4 @@ mutation ManagementCreateBillingPortalSession($context: RequestContextInput!, $i
 | [Python](../../python/reference/operations.md) | Not wrapped by a method |
 | [.NET](../../dotnet/reference/operations.md) | Not wrapped by a method |
 | [Java and Kotlin](../../jvm/reference/operations.md) | Not wrapped by a method |
+| [Go](../../go/reference/operations.md) | Not wrapped by a method |

@@ -649,7 +649,7 @@
       "path": "go/reference/operations.md",
       "kind": "coverage",
       "title": "Go operation coverage",
-      "description": "The Go SDK members that send each API operation. 65 of the 65 operations that Go packages can send have a method.",
+      "description": "The Go SDK members that send each API operation. 65 of the 68 operations that Go packages can send have a method.",
       "language": "go"
     },
     {

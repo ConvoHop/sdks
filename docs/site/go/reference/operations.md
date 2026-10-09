@@ -1,6 +1,6 @@
 # Go operation coverage
 
-The Go SDK members that send each API operation. 65 of the 65 operations that Go packages can send have a method.
+The Go SDK members that send each API operation. 65 of the 68 operations that Go packages can send have a method.
 
 ## Communication
 
@@ -62,6 +62,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](../../operations/management/deploymentUsage.md) | server | [`ManagementClient.DeploymentUsage`](convohop.md#managementclientdeploymentusage-method) |
 | [`management.projectUsage`](../../operations/management/projectUsage.md) | server | [`ManagementClient.ProjectUsage`](convohop.md#managementclientprojectusage-method) |
 | [`management.organizationUsage`](../../operations/management/organizationUsage.md) | server | [`ManagementClient.OrganizationUsage`](convohop.md#managementclientorganizationusage-method) |
+| [`management.organizationBilling`](../../operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](../../operations/management/webhookEndpoints.md) | server | [`ManagementClient.WebhookEndpoints`](convohop.md#managementclientwebhookendpoints-method) |
 | [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md) | server | [`ManagementClient.WebhookDeliveries`](convohop.md#managementclientwebhookdeliveries-method) |
 | [`management.resolveRequest`](../../operations/management/resolveRequest.md) | server | [`ManagementClient.ResolveRequest`](convohop.md#managementclientresolverequest-method), [`ManagementClient.Retry`](convohop.md#managementclientretry-method) |
@@ -75,6 +76,8 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.credentialPermit`](../../operations/management/credentialPermit.md) | server | [`ManagementClient.CredentialPermit`](convohop.md#managementclientcredentialpermit-method) |
 | [`management.pauseOperation`](../../operations/management/pauseOperation.md) | server | [`ManagementClient.PauseOperation`](convohop.md#managementclientpauseoperation-method) |
 | [`management.resumeOperation`](../../operations/management/resumeOperation.md) | server | [`ManagementClient.ResumeOperation`](convohop.md#managementclientresumeoperation-method) |
+| [`management.createBillingCheckoutSession`](../../operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
+| [`management.createBillingPortalSession`](../../operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
 | [`management.configureWebhook`](../../operations/management/configureWebhook.md) | server | [`ManagementClient.ConfigureWebhook`](convohop.md#managementclientconfigurewebhook-method) |
 | [`management.updateWebhook`](../../operations/management/updateWebhook.md) | server | [`ManagementClient.UpdateWebhook`](convohop.md#managementclientupdatewebhook-method) |
 | [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md) | server | [`ManagementClient.RotateWebhookSecret`](convohop.md#managementclientrotatewebhooksecret-method) |
