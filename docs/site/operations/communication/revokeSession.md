@@ -96,3 +96,4 @@ mutation CommunicationRevokeSession($context: RequestContextInput!, $input: Revo
 | [.NET](../../dotnet/reference/operations.md) | [`ServerSessions.RevokeAsync`](../../dotnet/reference/convohop.md#serversessionsrevokeasync-method), [`CommunicationApi.RevokeSessionAsync`](../../dotnet/reference/api.md#communicationapirevokesessionasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.sessions.revoke`](../../jvm/reference/server.md#projectserverclientsessionsrevoke-method), [`CommunicationApi.revokeSession`](../../jvm/reference/server.md#communicationapirevokesession-method), [`CommunicationSuspendApi.revokeSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapirevokesession-method) |
 | [Go](../../go/reference/operations.md) | [`ProjectClient.RevokeSession`](../../go/reference/convohop.md#projectclientrevokesession-method) |
+| [Android](../../android/reference/operations.md) | Not wrapped by a method |

@@ -74,3 +74,4 @@ query CommunicationLiveSessionAlerts($context: RequestContextInput!, $input: Liv
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.liveAlerts.list`](../../typescript/reference/client.md#convohopclientlivealertslist-property) |
+| [Android](../../android/reference/operations.md) | [`ConvoHopClient.liveAlerts.list`](../../android/reference/android-core.md#convohopclientlivealertslist-method) |

@@ -272,6 +272,53 @@
         {"topic": "webhooks", "path": "go/quickstarts/webhooks.md"},
         {"topic": "push", "path": "go/quickstarts/push.md"}
       ]
+    },
+    {
+      "id": "android",
+      "name": "Android",
+      "status": "preview",
+      "codeFence": "kotlin",
+      "home": "android/index.md",
+      "reference": "android/reference/index.md",
+      "coverage": "android/reference/operations.md",
+      "llmsFull": "android/llms-full.txt",
+      "packages": [
+        {
+          "name": "com.convohop:convohop-android",
+          "slug": "android",
+          "layer": "client",
+          "summary": "The SDK an Android app depends on: SQLite and SharedPreferences storage, network monitoring, LiveKit calls and message text for notifications. It brings in the other two packages.",
+          "runtime": "Android 7.0 (API 24) or later. Apps compile against API 36. Tested with Kotlin 2.2.21.",
+          "source": "android/convohop",
+          "reference": "android/reference/android.md",
+          "data": "android/reference/android.json"
+        },
+        {
+          "name": "com.convohop:convohop-android-core",
+          "slug": "android-core",
+          "layer": "client",
+          "summary": "The platform-free client that convohop-android brings in: sessions and their renewal, conversations, the store, the offline outbox, timelines, recovery, live sessions and the generated protocol types.",
+          "runtime": "Android 7.0 (API 24) or later, through convohop-android. It isn't a supported entry point on its own.",
+          "source": "android/core",
+          "reference": "android/reference/android-core.md",
+          "data": "android/reference/android-core.json"
+        },
+        {
+          "name": "com.convohop:convohop-android-push",
+          "slug": "android-push",
+          "layer": "client",
+          "summary": "FCM registration, notifications and Telecom incoming calls, with no networking, LiveKit or coroutines, so a React Native or Flutter wrapper can ship it alone.",
+          "runtime": "Android 7.0 (API 24) or later. Apps compile against API 34 or later and supply firebase-messaging 25.1.2 or later.",
+          "source": "android/push",
+          "reference": "android/reference/android-push.md",
+          "data": "android/reference/android-push.json"
+        }
+      ],
+      "quickstarts": [
+        {"topic": "client", "path": "android/quickstarts/client.md"},
+        {"topic": "push", "path": "android/quickstarts/push.md"},
+        {"topic": "calling", "path": "android/quickstarts/calling.md"}
+      ]
     }
   ],
   "operations": {"index": "operations/index.md", "data": "operations/index.json"},
@@ -651,6 +698,75 @@
       "title": "Go operation coverage",
       "description": "The Go SDK members that send each API operation. 65 of the 68 operations that Go packages can send have a method.",
       "language": "go"
+    },
+    {
+      "path": "android/index.md",
+      "kind": "language",
+      "title": "Android SDK",
+      "description": "com.convohop:convohop-android is the Kotlin SDK for Android apps. It acts as one user, with a short-lived session that your backend issues, and covers chat with a local store, an offline outbox and optimistic sends, typing signals and read receipts, calls through the LiveKit Android SDK, and FCM push notifications that ring incoming calls through Telecom. It never holds a backend key.",
+      "language": "android"
+    },
+    {
+      "path": "android/quickstarts/client.md",
+      "kind": "quickstart",
+      "title": "Android client quickstart",
+      "description": "Use ConvoHop in your Android app with com.convohop:convohop-android: connect with the session your backend issued and keep it renewed, show a conversation from a local store and keep it current, and send messages optimistically through an outbox that survives dropped connections and restarts.",
+      "language": "android",
+      "topic": "client"
+    },
+    {
+      "path": "android/quickstarts/push.md",
+      "kind": "quickstart",
+      "title": "Android push notifications quickstart",
+      "description": "Show ConvoHop's push notifications in your Android app with com.convohop:convohop-android: register the device with Firebase Cloud Messaging, show message notifications whether or not the project sends message previews, and ring incoming calls.",
+      "language": "android",
+      "topic": "push"
+    },
+    {
+      "path": "android/quickstarts/calling.md",
+      "kind": "quickstart",
+      "title": "Android calling quickstart",
+      "description": "Add voice and video calls to a conversation with com.convohop:convohop-android: start a call and ring other members, join the current call, answer incoming calls from a push, and leave or end a call.",
+      "language": "android",
+      "topic": "calling"
+    },
+    {
+      "path": "android/reference/index.md",
+      "kind": "reference-index",
+      "title": "Android reference",
+      "description": "The public API of each Android package, generated from its declarations.",
+      "language": "android"
+    },
+    {
+      "path": "android/reference/android.md",
+      "kind": "reference",
+      "title": "com.convohop:convohop-android",
+      "description": "The SDK an Android app depends on: SQLite and SharedPreferences storage, network monitoring, LiveKit calls and message text for notifications. It brings in the other two packages.",
+      "language": "android",
+      "package": "com.convohop:convohop-android"
+    },
+    {
+      "path": "android/reference/android-core.md",
+      "kind": "reference",
+      "title": "com.convohop:convohop-android-core",
+      "description": "The platform-free client that convohop-android brings in: sessions and their renewal, conversations, the store, the offline outbox, timelines, recovery, live sessions and the generated protocol types.",
+      "language": "android",
+      "package": "com.convohop:convohop-android-core"
+    },
+    {
+      "path": "android/reference/android-push.md",
+      "kind": "reference",
+      "title": "com.convohop:convohop-android-push",
+      "description": "FCM registration, notifications and Telecom incoming calls, with no networking, LiveKit or coroutines, so a React Native or Flutter wrapper can ship it alone.",
+      "language": "android",
+      "package": "com.convohop:convohop-android-push"
+    },
+    {
+      "path": "android/reference/operations.md",
+      "kind": "coverage",
+      "title": "Android operation coverage",
+      "description": "The Android SDK members that send each API operation. 32 of the 35 operations that Android packages can send have a method.",
+      "language": "android"
     },
     {
       "path": "operations/index.md",

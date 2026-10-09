@@ -81,3 +81,4 @@ mutation CommunicationStartLiveSession($context: RequestContextInput!, $input: S
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ConversationLive.startVoice`](../../typescript/reference/client.md#conversationlivestartvoice-method), [`ConversationLive.startVideo`](../../typescript/reference/client.md#conversationlivestartvideo-method), [`ConversationLive.startBroadcast`](../../typescript/reference/client.md#conversationlivestartbroadcast-method) |
+| [Android](../../android/reference/operations.md) | [`ConversationLive.startVoice`](../../android/reference/android-core.md#conversationlivestartvoice-method), [`ConversationLive.startVideo`](../../android/reference/android-core.md#conversationlivestartvideo-method), [`ConversationLive.startBroadcast`](../../android/reference/android-core.md#conversationlivestartbroadcast-method) |

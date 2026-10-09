@@ -2,10 +2,12 @@
 # pure-JVM runtime (:core), push and incoming calls (:push) and the Android
 # library (:convohop). Unit tests run on the JVM and under Robolectric on
 # every Android version they name, lint checks the libraries, and the
-# libraries are published to a directory in the build (dry run). The
-# conformance jobs run the shared scenarios through the Android driver
-# (conformance/drivers/android), which drives :core on the host JVM. No job
-# starts an emulator. See android/README.md.
+# libraries are published to a directory in the build (dry run). The build
+# job also checks the Android docs' surface and runs their tested examples
+# (docs/languages/android). The conformance jobs run the shared scenarios
+# through the Android driver (conformance/drivers/android), which drives
+# :core on the host JVM. No job starts an emulator. See android/README.md
+# and docs/docs-pipeline.md.
 name: Android
 
 on:
@@ -15,8 +17,10 @@ on:
       - .github/workflows/android.yml
       - android/**
       - conformance/**
+      - docs/languages/android/**
       - schema/**
       - spec/**
+      - tools/docgen/**
       - tools/sdkgen/**
   pull_request:
     branches: [main]
@@ -24,8 +28,10 @@ on:
       - .github/workflows/android.yml
       - android/**
       - conformance/**
+      - docs/languages/android/**
       - schema/**
       - spec/**
+      - tools/docgen/**
       - tools/sdkgen/**
 
 permissions: {}
@@ -61,8 +67,12 @@ jobs:
             android/gradle/libs.versions.toml
             android/gradle/wrapper/gradle-wrapper.properties
             conformance/drivers/android/build.gradle.kts
+            docs/languages/android/examples/build.gradle.kts
+            tools/docgen/extractors/android/build.gradle.kts
       # gradle.properties caps the build at two workers and a 2 GiB daemon.
       # --continue reports every failing test and lint finding in one run.
+      # The build includes the docs projects: the surface extractor and the
+      # docs examples, whose tests start the conformance mock with Node.js.
       - name: Compile, test (JVM and Robolectric) and lint
         working-directory: android
         run: ./gradlew --no-daemon --console=plain --continue build lint
@@ -102,6 +112,11 @@ jobs:
           path: android/build/repo/
           if-no-files-found: error
           retention-days: 14
+      # The build step already ran the docs examples' tests, so Gradle reruns them here only if they're out of date.
+      - name: Check that the docs surface matches the SDK sources
+        run: node tools/docgen/cli.mjs extract --check android
+      - name: Compile and run the docs examples against the conformance mock
+        run: node tools/docgen/cli.mjs test --install android
       - name: Upload the test and lint reports
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -111,6 +126,10 @@ jobs:
             android/*/build/reports/
             android/*/build/test-results/
             conformance/drivers/android/build/reports/
+            docs/languages/android/examples/build/reports/
+            docs/languages/android/examples/build/test-results/
+            tools/docgen/extractors/android/build/reports/
+            tools/docgen/extractors/android/build/test-results/
           if-no-files-found: ignore
           retention-days: 14
 
@@ -140,6 +159,8 @@ jobs:
             android/gradle/libs.versions.toml
             android/gradle/wrapper/gradle-wrapper.properties
             conformance/drivers/android/build.gradle.kts
+            docs/languages/android/examples/build.gradle.kts
+            tools/docgen/extractors/android/build.gradle.kts
       - name: Build the Android driver
         working-directory: android
         run: ./gradlew --no-daemon --console=plain :conformance-driver:installDist
@@ -214,6 +235,8 @@ jobs:
             android/gradle/libs.versions.toml
             android/gradle/wrapper/gradle-wrapper.properties
             conformance/drivers/android/build.gradle.kts
+            docs/languages/android/examples/build.gradle.kts
+            tools/docgen/extractors/android/build.gradle.kts
       - name: Build the Android driver
         working-directory: android
         run: ./gradlew --no-daemon --console=plain :conformance-driver:installDist

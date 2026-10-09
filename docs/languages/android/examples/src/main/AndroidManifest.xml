@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- The incoming-call screen that Calling.kt shows and the push snippets' full-screen ring opens. -->
+        <activity
+            android:name=".CallActivity"
+            android:exported="false" />
+    </application>
+
+</manifest>

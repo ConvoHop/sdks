@@ -153,3 +153,4 @@ query CommunicationGetOperation($context: RequestContextInput!, $input: GetOpera
 | [.NET](../../dotnet/reference/operations.md) | [`ProjectServerClient.GetOperationAsync`](../../dotnet/reference/convohop.md#projectserverclientgetoperationasync-method), [`CommunicationApi.GetOperationAsync`](../../dotnet/reference/api.md#communicationapigetoperationasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.operation`](../../jvm/reference/server.md#projectserverclientoperation-method), [`CommunicationApi.getOperation`](../../jvm/reference/server.md#communicationapigetoperation-method), [`CommunicationSuspendApi.getOperation`](../../jvm/reference/server-kotlin.md#communicationsuspendapigetoperation-method) |
 | [Go](../../go/reference/operations.md) | [`ProjectClient.GetOperation`](../../go/reference/convohop.md#projectclientgetoperation-method) |
+| [Android](../../android/reference/operations.md) | Not wrapped by a method |

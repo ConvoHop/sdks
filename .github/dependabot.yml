@@ -173,7 +173,10 @@ updates:
           - minor
           - patch
 
-  # The Android SDK's own Gradle build (android/), including its wrapper.
+  # The Android SDK's own Gradle build (android/), including its wrapper. It
+  # also covers the docs extractor (tools/docgen/extractors/android) and the
+  # docs examples (docs/languages/android/examples), which the build
+  # includes and which take their versions from android/gradle/libs.versions.toml.
   - package-ecosystem: gradle
     directory: /android
     schedule:

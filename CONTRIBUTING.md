@@ -89,8 +89,8 @@ cd android
 ./gradlew build lint       # compile, lint, and run the JVM and Robolectric tests
 ```
 
-[Build and test](android/README.md#build-and-test) explains the test layers
-and how to run the conformance scenarios with its driver.
+[Build and test](android/README.md#build-and-test) explains the test layers,
+the docs projects and how to run the conformance scenarios with its driver.
 
 The Flutter SDK in `flutter/` and its conformance driver need
 [Flutter](https://docs.flutter.dev/get-started/install) 3.38 or later. CI
@@ -331,7 +331,10 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   the code in `go/` and run with `go test ./...` in `go/`.
 - The Android SDK's tests use JUnit 4, with Robolectric in the `push` and
   `convohop` modules. They live in `android/*/src/test/` and run with
-  `./gradlew test` in `android/`.
+  `./gradlew test` in `android/`. So do the tests of the Android docs
+  extractor, in `tools/docgen/extractors/android/src/test/`, and of the docs
+  examples, in `docs/languages/android/examples/src/test/`, which use
+  Robolectric and start the conformance mock.
 - The Swift SDK's tests use XCTest. They live in `swift/Tests/` and run with
   `swift test` in `swift/`.
 

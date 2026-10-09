@@ -11,8 +11,9 @@ a backend key or operator credential. It covers:
 - FCM push, with incoming calls through Telecom.
 
 It isn't published to a package registry yet:
-[build it from source](#install-from-source). License:
-[Apache-2.0](../LICENSE).
+[build it from source](#install-from-source). The
+[Android docs](../docs/site/android/index.md) have quickstarts with tested
+code and the API reference. License: [Apache-2.0](../LICENSE).
 
 ## Requirements
 
@@ -479,6 +480,21 @@ npm run conformance -- --driver conformance/drivers/android/build/install/convoh
 The driver declares only the user role, so the runner skips scenarios that
 need backend or management clients or that verify webhooks.
 
+The build also includes two projects for the
+[Android docs](../docs/site/android/index.md): `:docs-surface` reads the
+SDK's public API for the [docs pipeline](../docs/docs-pipeline.md), and
+`:docs-examples` holds the code that the docs include, with Robolectric
+tests. The examples' tests start the conformance mock, so they need
+Node.js 22 or later and `npm ci` at the repository root; skip them with
+`-x :docs-examples:test`. After you change the public API, from the
+repository root:
+
+```sh
+npm run extract:docs -- android   # refresh docs/languages/android/surface.json
+npm run generate:docs             # regenerate docs/site
+npm run test:docs -- android      # compile and run the docs examples
+```
+
 | Path | Contents |
 | --- | --- |
 | `android/core` | `convohop-android-core`, including the generated code |
@@ -487,6 +503,8 @@ need backend or management clients or that verify webhooks.
 | `android/edge-fixture` | Compiles the generator's edge goldens |
 | `conformance/drivers/android` | The conformance driver |
 | `tools/sdkgen/emitters/android.mjs` | The Kotlin emitter |
+| `tools/docgen/extractors/android` | `:docs-surface`, the docs surface extractor |
+| `docs/languages/android` | The docs pages, the extracted surface and the examples (`:docs-examples`) |
 
 Not yet verified: LiveKit media, Telecom and FCM delivery on a device or
 emulator, instrumented tests, Kotlin versions other than 2.2.21, and apps
