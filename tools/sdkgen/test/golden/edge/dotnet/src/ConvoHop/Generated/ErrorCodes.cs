@@ -22,5 +22,22 @@ namespace ConvoHop
 
         /// <summary>Temporarily unavailable.</summary>
         public const string Unavailable = "UNAVAILABLE";
+
+        /// <summary>Whether the schema says a later attempt with the same requestId may succeed after <paramref name="code"/>; null for a code it doesn't list.</summary>
+        internal static bool? Retryable(string code)
+        {
+            switch (code)
+            {
+                case TransportUnknown:
+                case Unavailable:
+                    return true;
+                case CursorExpired:
+                case InvalidRequest:
+                case NotFound:
+                    return false;
+                default:
+                    return null;
+            }
+        }
     }
 }

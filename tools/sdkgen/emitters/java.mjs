@@ -747,6 +747,10 @@ ${lines.map(line => `          ${line}`).join("\n")}
     "java.util.List", "java.util.Map", ...[...uses].map(name => `${PACKAGE}.model.${name}`),
   ]);
   if (constants.some(text => text.includes("@Nullable"))) names.add("org.jspecify.annotations.Nullable");
+  const retryable = ir.errors.codes.map(code => {
+    if (typeof code.retryable !== "boolean") throw new EmitterError(`java: error code ${code.name} has no boolean retryable`);
+    return `Map.entry(${javaString(code.name)}, ${code.retryable})`;
+  });
   return `${NOTICE}package ${PACKAGE}.api;
 
 ${imports(names)}/** Descriptors of the server-layer queries and mutations, and each plane's resolve operation. */
@@ -755,10 +759,12 @@ public final class Operations {
 ${constants.length ? `\n${constants.join("\n\n")}\n` : ""}
   private static final OperationCatalog CATALOG = new OperationCatalog(
       List.of(${described.map(({ constant }) => constant).join(",\n          ")}),
-      Map.ofEntries(${resolve.map(plane => `Map.entry(${javaString(plane.name)}, ${javaString(plane.resolveOperation)})`).join(",\n          ")}));
+      Map.ofEntries(${resolve.map(plane => `Map.entry(${javaString(plane.name)}, ${javaString(plane.resolveOperation)})`).join(",\n          ")}),
+      Map.ofEntries(${retryable.join(",\n          ")}));
 
   /**
-   * Every descriptor, keyed by operation id, with each plane's resolve operation.
+   * Every descriptor, keyed by operation id, with each plane's resolve operation and whether the schema marks each error
+   * code retryable.
    *
    * @return the catalog
    */

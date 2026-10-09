@@ -132,6 +132,14 @@ namespace ConvoHop.Tests
             Assert.Equal("SCOPE_REQUIRED", ErrorCodes.ScopeRequired);
         }
 
+        [Fact]
+        public void ErrorCodesSayWhetherTheSchemaMarksEachCodeRetryable()
+        {
+            Assert.All(Spec.Load("ir.json")["errors"]!["codes"]!.AsArray(), code =>
+                Assert.Equal((bool)code!["retryable"]!, ErrorCodes.Retryable((string)code["name"]!)));
+            Assert.Null(ErrorCodes.Retryable("NEWER_CODE"));
+        }
+
         private static IEnumerable<JsonNode> ServerOperations() => Spec.Load("ir.json")["operations"]!.AsArray()
             .Select(operation => operation!)
             .Where(operation => (string?)operation["layer"] != "client" && (string?)operation["kind"] != "subscription");

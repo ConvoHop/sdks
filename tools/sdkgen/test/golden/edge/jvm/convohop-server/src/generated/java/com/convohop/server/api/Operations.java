@@ -294,10 +294,16 @@ public final class Operations {
           BETA_WIDGETS,
           BETA_CREATE_WIDGET),
       Map.ofEntries(Map.entry("alpha", "alpha.resolveRequest"),
-          Map.entry("beta", "beta.resolveRequest")));
+          Map.entry("beta", "beta.resolveRequest")),
+      Map.ofEntries(Map.entry("CURSOR_EXPIRED", false),
+          Map.entry("INVALID_REQUEST", false),
+          Map.entry("NOT_FOUND", false),
+          Map.entry("TRANSPORT_UNKNOWN", true),
+          Map.entry("UNAVAILABLE", true)));
 
   /**
-   * Every descriptor, keyed by operation id, with each plane's resolve operation.
+   * Every descriptor, keyed by operation id, with each plane's resolve operation and whether the schema marks each error
+   * code retryable.
    *
    * @return the catalog
    */

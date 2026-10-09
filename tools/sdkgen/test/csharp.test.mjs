@@ -27,6 +27,21 @@ test("C# literals and member names keep schema text from ending a literal or bec
   assert.match(files["JsonContext.cs"], /typeof\(global::ConvoHop\.Models\.@object\)/);
 });
 
+test("C# error codes say whether the schema marks each code retryable, and null for a code it doesn't list", () => {
+  const ir = buildIr(fixtureSources());
+  const group = retryable => ir.errors.codes.filter(code => code.retryable === retryable)
+    .map(code => `                case ${memberName(code.name, code.name)}:\n`).join("") + `                    return ${retryable};\n`;
+  assert.ok(renderCs(ir)["ErrorCodes.cs"].includes(`${group(true)}${group(false)}                default:\n                    return null;\n`));
+  const rejects = (change, message) => {
+    const variant = JSON.parse(JSON.stringify(ir));
+    change(variant.errors.codes);
+    assert.throws(() => csharp.emit(variant), new EmitterError(`csharp: ${message}`));
+  };
+  rejects(codes => { codes[0].retryable = "yes"; }, `error code ${ir.errors.codes[0].name} has no boolean retryable`);
+  rejects(codes => codes.push({ name: "RETRYABLE", summary: "Shadows the lookup.", origin: "server", retryable: false }),
+    'ErrorCodes: "RETRYABLE" and "the Retryable lookup" both map to Retryable');
+});
+
 test("C# scalar patterns are translated only where .NET and JavaScript agree", () => {
   assert.equal(csPattern("^[0-9a-f]{8}-[0-9a-f]{4}$"), "^[0-9a-f]{8}-[0-9a-f]{4}\\z", "$ never matches before a final newline");
   assert.equal(csPattern("^\\d+\\.[\\-_a-z\\d]?$"), "^[0-9]+\\.[\\-_a-z0-9]?\\z", "\\d matches ASCII digits only");

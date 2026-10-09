@@ -285,3 +285,12 @@ test("the Java emitter rejects cursor pagination it cannot page", () => {
     Object.assign(ir.operations.find(operation => operation.id === "alpha.ping"), { layer: "server", field: "pageFlow" });
   })), new EmitterError("java: alpha.ping would shadow the Kotlin pageFlow helper; rename it or extend the emitter"));
 });
+
+test("the Java operation catalog says whether the schema marks each error code retryable", () => {
+  const ir = buildIr(fixtureSources());
+  const operations = renderJava(ir).find(file => file.path.endsWith("/api/Operations.java")).contents;
+  assert.ok(ir.errors.codes.some(code => code.retryable) && ir.errors.codes.some(code => !code.retryable));
+  for (const code of ir.errors.codes) assert.ok(operations.includes(`Map.entry("${code.name}", ${code.retryable})`), code.name);
+  ir.errors.codes[0].retryable = "yes";
+  assert.throws(() => renderJava(ir), new EmitterError(`java: error code ${ir.errors.codes[0].name} has no boolean retryable`));
+});
