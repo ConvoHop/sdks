@@ -341,7 +341,24 @@
           "ref": "@convohop/client#ConversationStore.open",
           "anchor": "conversationstoreopen-method",
           "signatures": ["open(): Promise<void>"],
-          "docs": "Loads the conversation and follows it, rejecting if that fails. While an attempt is running, including the\nreconnect after a session refresh, this returns it; after an error it reconnects from the loaded state. It doesn't\nrecover from `resyncRequired`: call `resync` for that."
+          "docs": "Loads the conversation and follows it, rejecting if that fails. While an attempt is running, including the\nreconnect after a session refresh, this returns it; after an error it reconnects from the loaded state. It doesn't\nrecover from `resyncRequired`: call `resync` for that.",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            },
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"},
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            },
+            {"id": "communication.events", "page": "../../operations/communication/events.md"},
+            {"id": "communication.receipts", "page": "../../operations/communication/receipts.md"},
+            {
+              "id": "communication.conversationEvents",
+              "page": "../../operations/communication/conversationEvents.md"
+            }
+          ]
         },
         {
           "name": "resync",
@@ -349,7 +366,24 @@
           "ref": "@convohop/client#ConversationStore.resync",
           "anchor": "conversationstoreresync-method",
           "signatures": ["resync(): Promise<void>"],
-          "docs": "Discards the saved replay position, reloads the conversation and replays its authorized history from the start."
+          "docs": "Discards the saved replay position, reloads the conversation and replays its authorized history from the start.",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            },
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"},
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            },
+            {"id": "communication.events", "page": "../../operations/communication/events.md"},
+            {"id": "communication.receipts", "page": "../../operations/communication/receipts.md"},
+            {
+              "id": "communication.conversationEvents",
+              "page": "../../operations/communication/conversationEvents.md"
+            }
+          ]
         },
         {
           "name": "loadOlder",
@@ -357,7 +391,10 @@
           "ref": "@convohop/client#ConversationStore.loadOlder",
           "anchor": "conversationstoreloadolder-method",
           "signatures": ["loadOlder(): Promise<boolean>"],
-          "docs": "Loads the previous page of messages. Resolves whether it added any."
+          "docs": "Loads the previous page of messages. Resolves whether it added any.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
         },
         {
           "name": "send",
@@ -365,7 +402,17 @@
           "ref": "@convohop/client#ConversationStore.send",
           "anchor": "conversationstoresend-method",
           "signatures": ["send(text: string, props?: ProtocolObject): OutboxEntry"],
-          "docs": "Queues a message in the outbox. It shows in `pending` until it appears in `messages`."
+          "docs": "Queues a message in the outbox. It shows in `pending` until it appears in `messages`.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            },
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
         },
         {
           "name": "markRead",
@@ -373,7 +420,13 @@
           "ref": "@convohop/client#ConversationStore.markRead",
           "anchor": "conversationstoremarkread-method",
           "signatures": ["markRead(): Promise<boolean>"],
-          "docs": "Reports reading through the newest loaded message. Resolves whether a report was needed."
+          "docs": "Reports reading through the newest loaded message. Resolves whether a report was needed.",
+          "operations": [
+            {
+              "id": "communication.reportReceipt",
+              "page": "../../operations/communication/reportReceipt.md"
+            }
+          ]
         },
         {
           "name": "markDelivered",
@@ -381,7 +434,13 @@
           "ref": "@convohop/client#ConversationStore.markDelivered",
           "anchor": "conversationstoremarkdelivered-method",
           "signatures": ["markDelivered(): Promise<boolean>"],
-          "docs": "Reports delivery through the newest loaded message. Resolves whether a report was needed."
+          "docs": "Reports delivery through the newest loaded message. Resolves whether a report was needed.",
+          "operations": [
+            {
+              "id": "communication.reportReceipt",
+              "page": "../../operations/communication/reportReceipt.md"
+            }
+          ]
         },
         {
           "name": "close",
@@ -633,7 +692,14 @@
           "ref": "@convohop/client#ConvoHopClient.scheduleSessionRefresh",
           "anchor": "convohopclientschedulesessionrefresh-method",
           "signatures": ["scheduleSessionRefresh(options?: SessionRefreshSchedule): () => void"],
-          "docs": "Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is\ncalled. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the\n`sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.\nReturning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'\ntimers can fire late."
+          "docs": "Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is\ncalled. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the\n`sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.\nReturning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'\ntimers can fire late.",
+          "operations": [
+            {"id": "communication.route", "page": "../../operations/communication/route.md"},
+            {
+              "id": "communication.currentSession",
+              "page": "../../operations/communication/currentSession.md"
+            }
+          ]
         },
         {
           "name": "conversation",
@@ -837,7 +903,13 @@
           "signatures": [
             "reportDelivered(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>"
           ],
-          "docs": "Reports delivery through a message's sequence. Returns the user's current receipt."
+          "docs": "Reports delivery through a message's sequence. Returns the user's current receipt.",
+          "operations": [
+            {
+              "id": "communication.reportReceipt",
+              "page": "../../operations/communication/reportReceipt.md"
+            }
+          ]
         },
         {
           "name": "receipts",
@@ -856,7 +928,13 @@
           "ref": "@convohop/client#ConvoHopClient.getMessage",
           "anchor": "convohopclientgetmessage-method",
           "signatures": ["getMessage(id: string, messageId: string): Promise<ConversationMessage>"],
-          "docs": ""
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            }
+          ]
         },
         {
           "name": "members",
@@ -866,7 +944,10 @@
           "signatures": [
             "members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>"
           ],
-          "docs": ""
+          "docs": "",
+          "operations": [
+            {"id": "communication.members", "page": "../../operations/communication/members.md"}
+          ]
         },
         {
           "name": "inbox",
@@ -874,7 +955,10 @@
           "ref": "@convohop/client#ConvoHopClient.inbox",
           "anchor": "convohopclientinbox-method",
           "signatures": ["inbox(options?: PageOptions): Promise<InboxPage>"],
-          "docs": ""
+          "docs": "",
+          "operations": [
+            {"id": "communication.inbox", "page": "../../operations/communication/inbox.md"}
+          ]
         },
         {
           "name": "capabilities",
@@ -882,7 +966,13 @@
           "ref": "@convohop/client#ConvoHopClient.capabilities",
           "anchor": "convohopclientcapabilities-method",
           "signatures": ["capabilities(): Promise<ProjectCapabilities>"],
-          "docs": ""
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.capabilities",
+              "page": "../../operations/communication/capabilities.md"
+            }
+          ]
         },
         {
           "name": "typing",
@@ -890,7 +980,10 @@
           "ref": "@convohop/client#ConvoHopClient.typing",
           "anchor": "convohopclienttyping-method",
           "signatures": ["typing(id: string, isTyping: boolean): Promise<boolean>"],
-          "docs": "Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,\nretried or resolved. Check `features?.typing` in `capabilities` first."
+          "docs": "Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,\nretried or resolved. Check `features?.typing` in `capabilities` first.",
+          "operations": [
+            {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+          ]
         },
         {
           "name": "search",
@@ -1284,7 +1377,13 @@
           "signatures": [
             "connectWith<C extends LiveConnection>(connector: LiveConnector<C>, options?: CommandOptions): Promise<C>"
           ],
-          "docs": "Connects this participation's media with your own native client, such as a stock LiveKit SDK on React Native.\nThe SDK obtains a participation-bound grant, checks the media URL, records the attempt durably, then calls\n`connector` once. A connector failure is `MEDIA_CONNECT_FAILED` with an unknown outcome: the reservation remains,\nand the next call resolves the old attempt before a fresh one. Rejects while another attempt is in flight or\nanother connection is connected."
+          "docs": "Connects this participation's media with your own native client, such as a stock LiveKit SDK on React Native.\nThe SDK obtains a participation-bound grant, checks the media URL, records the attempt durably, then calls\n`connector` once. A connector failure is `MEDIA_CONNECT_FAILED` with an unknown outcome: the reservation remains,\nand the next call resolves the old attempt before a fresh one. Rejects while another attempt is in flight or\nanother connection is connected.",
+          "operations": [
+            {
+              "id": "communication.liveSessionCredentials",
+              "page": "../../operations/communication/liveSessionCredentials.md"
+            }
+          ]
         },
         {
           "name": "leave",
@@ -1752,7 +1851,17 @@
           "signatures": [
             "send(conversationId: string, text: string, props?: ProtocolObject): OutboxEntry"
           ],
-          "docs": ""
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            },
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
         },
         {
           "name": "resend",
@@ -1760,7 +1869,17 @@
           "ref": "@convohop/client#Outbox.resend",
           "anchor": "outboxresend-method",
           "signatures": ["resend(requestId: string): OutboxEntry"],
-          "docs": "Sends a failed entry's message again as a new request, after the entries already waiting."
+          "docs": "Sends a failed entry's message again as a new request, after the entries already waiting.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            },
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
         },
         {
           "name": "discard",
@@ -1784,7 +1903,17 @@
           "ref": "@convohop/client#Outbox.flush",
           "anchor": "outboxflush-method",
           "signatures": ["flush(): Promise<void>"],
-          "docs": "Attempts every waiting entry now, ignoring backoff, and resolves when each conversation's queue is idle or blocked.\nWaits for saved entries to load first."
+          "docs": "Attempts every waiting entry now, ignoring backoff, and resolves when each conversation's queue is idle or blocked.\nWaits for saved entries to load first.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            },
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
         },
         {
           "name": "close",
@@ -1925,7 +2054,10 @@
           "ref": "@convohop/client#TypingIndicator.input",
           "anchor": "typingindicatorinput-method",
           "signatures": ["input(): void"],
-          "docs": "Call on every edit to the draft. Signals typing at most once per `intervalMs`."
+          "docs": "Call on every edit to the draft. Signals typing at most once per `intervalMs`.",
+          "operations": [
+            {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+          ]
         },
         {
           "name": "stop",
@@ -1933,7 +2065,10 @@
           "ref": "@convohop/client#TypingIndicator.stop",
           "anchor": "typingindicatorstop-method",
           "signatures": ["stop(): void"],
-          "docs": "Call when the user sends or clears the draft. Signals that typing stopped if it had started."
+          "docs": "Call when the user sends or clears the draft. Signals that typing stopped if it had started.",
+          "operations": [
+            {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+          ]
         },
         {
           "name": "dispose",
@@ -1941,7 +2076,10 @@
           "ref": "@convohop/client#TypingIndicator.dispose",
           "anchor": "typingindicatordispose-method",
           "signatures": ["dispose(): void"],
-          "docs": ""
+          "docs": "",
+          "operations": [
+            {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+          ]
         }
       ]
     },

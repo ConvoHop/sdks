@@ -317,6 +317,8 @@ Loads the conversation and follows it, rejecting if that fails. While an attempt
 reconnect after a session refresh, this returns it; after an error it reconnects from the loaded state. It doesn't
 recover from `resyncRequired`: call `resync` for that.
 
+Sends [`communication.getConversation`](../../operations/communication/getConversation.md), [`communication.messages`](../../operations/communication/messages.md), [`communication.getMessage`](../../operations/communication/getMessage.md), [`communication.events`](../../operations/communication/events.md), [`communication.receipts`](../../operations/communication/receipts.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
+
 #### `ConversationStore.resync` method
 
 ```ts
@@ -324,6 +326,8 @@ resync(): Promise<void>
 ```
 
 Discards the saved replay position, reloads the conversation and replays its authorized history from the start.
+
+Sends [`communication.getConversation`](../../operations/communication/getConversation.md), [`communication.messages`](../../operations/communication/messages.md), [`communication.getMessage`](../../operations/communication/getMessage.md), [`communication.events`](../../operations/communication/events.md), [`communication.receipts`](../../operations/communication/receipts.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
 
 #### `ConversationStore.loadOlder` method
 
@@ -333,6 +337,8 @@ loadOlder(): Promise<boolean>
 
 Loads the previous page of messages. Resolves whether it added any.
 
+Sends [`communication.messages`](../../operations/communication/messages.md).
+
 #### `ConversationStore.send` method
 
 ```ts
@@ -340,6 +346,8 @@ send(text: string, props?: ProtocolObject): OutboxEntry
 ```
 
 Queues a message in the outbox. It shows in `pending` until it appears in `messages`.
+
+Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../../operations/communication/sendMessage.md).
 
 #### `ConversationStore.markRead` method
 
@@ -349,6 +357,8 @@ markRead(): Promise<boolean>
 
 Reports reading through the newest loaded message. Resolves whether a report was needed.
 
+Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
+
 #### `ConversationStore.markDelivered` method
 
 ```ts
@@ -356,6 +366,8 @@ markDelivered(): Promise<boolean>
 ```
 
 Reports delivery through the newest loaded message. Resolves whether a report was needed.
+
+Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
 
 #### `ConversationStore.close` method
 
@@ -548,6 +560,8 @@ called. A failed renewal that leaves the current session verified is retried wit
 Returning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'
 timers can fire late.
 
+Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
+
 #### `ConvoHopClient.conversation` method
 
 ```ts
@@ -668,6 +682,8 @@ reportDelivered(id: string, membership: Membership, throughSequence: string): Pr
 
 Reports delivery through a message's sequence. Returns the user's current receipt.
 
+Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
+
 #### `ConvoHopClient.receipts` method
 
 ```ts
@@ -682,11 +698,15 @@ Sends [`communication.receipts`](../../operations/communication/receipts.md).
 getMessage(id: string, messageId: string): Promise<ConversationMessage>
 ```
 
+Sends [`communication.getMessage`](../../operations/communication/getMessage.md).
+
 #### `ConvoHopClient.members` method
 
 ```ts
 members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>
 ```
+
+Sends [`communication.members`](../../operations/communication/members.md).
 
 #### `ConvoHopClient.inbox` method
 
@@ -694,11 +714,15 @@ members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>
 inbox(options?: PageOptions): Promise<InboxPage>
 ```
 
+Sends [`communication.inbox`](../../operations/communication/inbox.md).
+
 #### `ConvoHopClient.capabilities` method
 
 ```ts
 capabilities(): Promise<ProjectCapabilities>
 ```
+
+Sends [`communication.capabilities`](../../operations/communication/capabilities.md).
 
 #### `ConvoHopClient.typing` method
 
@@ -708,6 +732,8 @@ typing(id: string, isTyping: boolean): Promise<boolean>
 
 Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,
 retried or resolved. Check `features?.typing` in `capabilities` first.
+
+Sends [`communication.typing`](../../operations/communication/typing.md).
 
 #### `ConvoHopClient.search` method
 
@@ -986,6 +1012,8 @@ The SDK obtains a participation-bound grant, checks the media URL, records the a
 `connector` once. A connector failure is `MEDIA_CONNECT_FAILED` with an unknown outcome: the reservation remains,
 and the next call resolves the old attempt before a fresh one. Rejects while another attempt is in flight or
 another connection is connected.
+
+Sends [`communication.liveSessionCredentials`](../../operations/communication/liveSessionCredentials.md).
 
 #### `LiveParticipationHandle.leave` method
 
@@ -1345,6 +1373,8 @@ subscribe(listener: () => void): () => void
 send(conversationId: string, text: string, props?: ProtocolObject): OutboxEntry
 ```
 
+Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../../operations/communication/sendMessage.md).
+
 #### `Outbox.resend` method
 
 ```ts
@@ -1352,6 +1382,8 @@ resend(requestId: string): OutboxEntry
 ```
 
 Sends a failed entry's message again as a new request, after the entries already waiting.
+
+Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../../operations/communication/sendMessage.md).
 
 #### `Outbox.discard` method
 
@@ -1377,6 +1409,8 @@ flush(): Promise<void>
 
 Attempts every waiting entry now, ignoring backoff, and resolves when each conversation's queue is idle or blocked.
 Waits for saved entries to load first.
+
+Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../../operations/communication/sendMessage.md).
 
 #### `Outbox.close` method
 
@@ -1515,6 +1549,8 @@ input(): void
 
 Call on every edit to the draft. Signals typing at most once per `intervalMs`.
 
+Sends [`communication.typing`](../../operations/communication/typing.md).
+
 #### `TypingIndicator.stop` method
 
 ```ts
@@ -1523,11 +1559,15 @@ stop(): void
 
 Call when the user sends or clears the draft. Signals that typing stopped if it had started.
 
+Sends [`communication.typing`](../../operations/communication/typing.md).
+
 #### `TypingIndicator.dispose` method
 
 ```ts
 dispose(): void
 ```
+
+Sends [`communication.typing`](../../operations/communication/typing.md).
 
 ## Interfaces
 

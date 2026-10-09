@@ -1,6 +1,6 @@
 # TypeScript SDKs
 
-`@convohop/server` and `@convohop/client` wrap the ConvoHop API for TypeScript and JavaScript. The server SDK runs in your backend with a secret backend key, and the client SDK runs in your users' apps with a short-lived session for one user.
+`@convohop/server` and `@convohop/client` wrap the ConvoHop API for TypeScript and JavaScript. The server SDK runs in your backend with a secret backend key, and the client SDK runs in your users' apps with a short-lived session for one user. `@convohop/react` adds React hooks over the client SDK, and `@convohop/client/push` subscribes browsers to Web Push and shows the notifications.
 
 ## How they fit together
 
@@ -13,18 +13,18 @@ Keep the backend key on your servers. It never belongs in browser code, bundles,
 
 ## Install
 
-The packages aren't on a package registry yet. [Build them from source](https://github.com/ConvoHop/sdks#build-from-source), or [install a GitHub release](https://github.com/ConvoHop/sdks#install-a-release) once one is published. Both packages are ESM-only and include TypeScript declarations, and `@convohop/server` needs Node.js 22 or later.
+The packages aren't on a package registry yet. [Build them from source](https://github.com/ConvoHop/sdks#build-from-source), or [install a GitHub release](https://github.com/ConvoHop/sdks#install-a-release) once one is published. They're ESM-only and include TypeScript declarations. `@convohop/server` needs Node.js 22 or later, and `@convohop/react` needs React 18 or later. `@convohop/client/push` ships with `@convohop/client`.
 
-Both depend on `@convohop/core`. Import its types and errors, such as `ConvoHopProblem`, from `@convohop/server` or `@convohop/client`, never from `@convohop/core`.
+`@convohop/server` and `@convohop/client` depend on `@convohop/core`. Import its types and errors, such as `ConvoHopProblem`, from `@convohop/server` or `@convohop/client`, never from `@convohop/core`.
 
 ## Tested examples
 
 Every TypeScript sample in these docs is a region of a file in [the examples package](https://github.com/ConvoHop/sdks/tree/main/docs/languages/typescript/examples), which CI typechecks and tests on every change:
 
-- The server and client samples run against the conformance mock, a local stand-in for the ConvoHop API, including dropped connections.
+- The server and client samples run against the conformance mock, a local stand-in for the ConvoHop API, including dropped connections. The mock doesn't renew sessions, so CI only typechecks session renewal.
 - The webhooks samples verify deliveries signed the way ConvoHop signs them.
-- The push samples run on every vector of the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md), and check the requests with `web-push` and `firebase-admin`.
-- The calling samples need a browser with WebRTC, so CI only typechecks them.
+- The push samples run on every vector of the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md), and check the requests with `web-push` and `firebase-admin`. The browser's service worker runs on every Web Push request of the contract.
+- The calling, React and browser subscription samples need a browser, so CI only typechecks them.
 
 ## Packages
 
@@ -32,6 +32,8 @@ Every TypeScript sample in these docs is a region of a file in [the examples pac
 | --- | --- | --- | --- |
 | [`@convohop/server`](reference/server.md) | Server | Node.js 22 or later | Server SDK for trusted Node.js runtimes: backend-key data-plane calls, management, webhook verification and push requests. |
 | [`@convohop/client`](reference/client.md) | Client | Current browsers. React Native isn't verified yet. | Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. |
+| [`@convohop/client/push`](reference/client-push.md) | Client | Current browsers and their service workers. No dependencies. | Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK. |
+| [`@convohop/react`](reference/react.md) | Client | React 18 or later in current browsers. React Native isn't verified yet. | React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media. |
 
 ## Quickstarts
 
@@ -195,21 +197,30 @@ Retry with the same `ProjectServerClient`, which keeps the original request in m
 
 # TypeScript client quickstart
 
-Use ConvoHop in your users' browsers with `@convohop/client`: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads.
+Use ConvoHop in your users' browsers with `@convohop/client`: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads. `@convohop/react` offers the same as React hooks.
 
 ## Before you start
 
-Your backend signs the user in and returns a session, as the [server quickstart](quickstarts/server.md#sign-in-a-user) shows. `@convohop/client` never holds a backend key. It targets the current and previous major versions of Chrome, Edge, Firefox and Safari. React Native isn't verified yet.
+Your backend signs the user in and returns a session, as the [server quickstart](quickstarts/server.md#sign-in-a-user) shows. `@convohop/client` never holds a backend key. It targets the current and previous major versions of Chrome, Edge, Firefox and Safari. React Native isn't verified yet. `@convohop/react` needs React 18 or later.
 
 ## Connect
 
 ```ts snippet=docs/languages/typescript/examples/src/client.ts#connect
-import { ConvoHopClient, type RecoveryStorage, type SessionBootstrap } from "@convohop/client";
+import {
+  ConvoHopClient,
+  type RecoveryStorage,
+  type SessionBootstrap,
+  type SessionRefresh,
+} from "@convohop/client";
 
 // What your backend's login endpoint returns. See the server quickstart.
 export type UserBootstrap = SessionBootstrap & { baseUrl: string; projectId: string };
 
-export async function connectUser(bootstrap: UserBootstrap, storage: RecoveryStorage): Promise<ConvoHopClient> {
+export async function connectUser(
+  bootstrap: UserBootstrap,
+  storage: RecoveryStorage,
+  sessionRefresh?: SessionRefresh, // Optional: renews the session before it expires.
+): Promise<ConvoHopClient> {
   const client = new ConvoHopClient({
     baseUrl: bootstrap.baseUrl,
     projectId: bootstrap.projectId,
@@ -217,6 +228,7 @@ export async function connectUser(bootstrap: UserBootstrap, storage: RecoverySto
     principalId: bootstrap.session.principalId,
     sessionToken: bootstrap.sessionToken,
     recoveryStorage: storage, // localStorage in a browser. It keeps unconfirmed sends, never tokens.
+    sessionRefresh,
   });
   await client.initialize();
   // Finishes sends that an earlier page load left unconfirmed.
@@ -227,9 +239,199 @@ export async function connectUser(bootstrap: UserBootstrap, storage: RecoverySto
 
 `recoveryStorage` keeps sends that the authority hasn't confirmed, so that `recoverPending` can finish them after a reload. It holds their inputs, including message text, but never tokens. Use storage that only this user can read, not a shared computer's.
 
-Sessions expire, after 15 minutes by default. To renew one without signing the user out, see [session credential lifetime](https://github.com/ConvoHop/sdks/blob/main/packages/client/README.md#session-credential-lifetime).
+## Renew the session
+
+Sessions expire, after 15 minutes by default. To renew the user's session before it does, pass `renewSession` to `connectUser` as `sessionRefresh`, then call `keepSessionAlive`:
+
+```ts snippet=docs/languages/typescript/examples/src/client.ts#renew
+import type { SessionMetadata } from "@convohop/client";
+
+// Pass it to connectUser as sessionRefresh. The client calls it with the session's metadata, never its token.
+export async function renewSession(current: Readonly<SessionMetadata>): Promise<SessionBootstrap> {
+  // Your backend's endpoint, behind your app's own sign-in. It renews the session with @convohop/server.
+  const response = await fetch("/api/convohop/session/renew", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ sessionId: current.sessionId, expectedRevision: current.sessionRevision }),
+    signal: AbortSignal.timeout(10_000), // The client pauses its streams until this settles.
+  });
+  if (!response.ok) throw new Error(`Session renewal failed with HTTP ${response.status}`);
+  return response.json(); // The client checks the renewed session with ConvoHop before it uses it.
+}
+
+// Renews the session a minute before it expires, and after each renewal, until you call the returned function.
+export function keepSessionAlive(client: ConvoHopClient): () => void {
+  return client.scheduleSessionRefresh({ onError: error => console.warn("Couldn't renew the session", error) });
+}
+```
+
+The renewal endpoint is your backend's, behind your app's own sign-in. It renews the session with [`sessions.renew`](reference/server.md#projectserverclientsessionsrenew-property), taking the principal and device from that sign-in rather than from the request, and returns the `SessionBootstrap` that `sessions.renew` resolves with.
+
+The client pauses its streams and lets its requests finish before it calls `sessionRefresh`, and checks the renewed session with ConvoHop before it uses it. Don't call the client from `sessionRefresh`: the call would wait for the renewal. [Session credential lifetime](https://github.com/ConvoHop/sdks/blob/main/packages/client/README.md#session-credential-lifetime) covers what your endpoint must check, and what happens when a renewal fails.
 
 ## Show a conversation
+
+```ts snippet=docs/languages/typescript/examples/src/client.ts#store
+import { ConversationStore, Outbox, type ConversationSnapshot } from "@convohop/client";
+
+// One outbox for the signed-in user. With persist, unsent messages survive page reloads in the client's
+// recoveryStorage. Close it when the user signs out.
+export function openOutbox(client: ConvoHopClient): Outbox {
+  return new Outbox(client, {
+    persist: true,
+    onError: error => console.warn("A message wasn't sent", error),
+  });
+}
+
+// Loads a conversation, keeps it current and renders every change. Close the store when the view goes away.
+export async function showConversation(
+  client: ConvoHopClient,
+  outbox: Outbox,
+  conversationId: string,
+  render: (snapshot: ConversationSnapshot) => void,
+): Promise<ConversationStore> {
+  const store = new ConversationStore(client, conversationId, { outbox });
+  store.subscribe(() => render(store.snapshot));
+  try {
+    await store.open(); // The conversation, its newest messages and receipts, then new events as they happen.
+  } catch (error) {
+    store.close();
+    throw error;
+  }
+  return store;
+}
+```
+
+`ConversationStore` keeps one conversation current: its messages, oldest first, each member's read receipts, and the user's messages that aren't sent yet. Each change replaces the frozen `snapshot`. A dropped connection reconnects on its own and catches up. Keep one store per conversation, and one outbox per client.
+
+- `store.loadOlder()` loads earlier messages while `snapshot.hasOlder` is true. `store.markRead()` tells the other members what the user has read.
+- If the store's saved position in the conversation can't be used any more, for example because it expired, the store stops with `snapshot.resyncRequired` instead of silently skipping messages. `store.resync()` loads the conversation again.
+
+## Send a message
+
+```ts snippet=docs/languages/typescript/examples/src/client.ts#outbox
+import type { OutboxEntry } from "@convohop/client";
+
+// The message shows in snapshot.pending at once, and moves to snapshot.messages once ConvoHop commits it.
+export function sendDraft(store: ConversationStore, draft: string): OutboxEntry | null {
+  const text = draft.trim();
+  return text ? store.send(text) : null;
+}
+
+// What to show next to a message in snapshot.pending.
+export function pendingLabel(entry: OutboxEntry): string {
+  switch (entry.status) {
+    case "queued":
+    case "sending":
+    case "unknown": // The connection dropped. The outbox tries again with the same request ID, so it posts once.
+      return "Sending…";
+    case "sent":
+      return "Sent";
+    case "failed":
+      // Offer outbox.resend(entry.requestId), which sends the text as a new message, and outbox.discard(entry.requestId).
+      return entry.unconfirmed ? "Not confirmed" : "Not sent"; // Resending an unconfirmed message can post it twice.
+  }
+}
+```
+
+The outbox sends each conversation's messages in order. It waits while the browser is offline, and gives each message one request ID, so a dropped connection never posts a message twice. With `persist`, messages that weren't sent yet survive a reload, and when the user closes a tab, another of their tabs sends what it left. A failed message stays in `snapshot.pending` until you resend or discard it.
+
+## Sign out
+
+```ts snippet=docs/languages/typescript/examples/src/client.ts#sign-out
+// When the user signs out, close their conversation stores, then call this. storage is the recoveryStorage you gave
+// the client: it holds unsent messages, including their text.
+export async function signOut(outbox: Outbox, storage: Storage): Promise<void> {
+  await outbox.close(); // Resolves once the outbox and the sends it started have stopped writing to storage.
+  storage.clear();
+}
+```
+
+`recoveryStorage` holds the user's unsent messages, including their text, so clear it when they sign out. Close the outbox first: until `close()` resolves, the sends it started can still save to the storage. If you call `client.send` yourself, wait for those calls to settle too. `storage.clear()` also removes your app's own keys in that storage.
+
+Other tabs of the same user share `localStorage` and keep saving to it, so sign them out too, for example with a `BroadcastChannel` message. Have your backend revoke the session with [`sessions.revoke`](reference/server.md#projectserverclientsessionsrevoke-property), so that its token stops working before it expires. To stop the browser's push notifications too, see [subscribe a browser](quickstarts/push.md#subscribe-a-browser).
+
+## Use React
+
+`@convohop/react` wraps the client in hooks. Give its provider the user's client and outbox:
+
+```tsx snippet=docs/languages/typescript/examples/src/react.tsx#provider
+import type { ReactNode } from "react";
+import type { ConvoHopClient, Outbox } from "@convohop/client";
+import { ConvoHopProvider, useSessionRefresh } from "@convohop/react";
+
+// Wrap the signed-in part of your app. When the user signs in, create the client with connectUser, passing
+// renewSession as sessionRefresh, and the outbox with openOutbox. When they sign out, unmount this, then call signOut.
+export function SignedIn({ client, outbox, children }: { client: ConvoHopClient; outbox: Outbox; children: ReactNode }) {
+  return (
+    <ConvoHopProvider client={client} outbox={outbox}>
+      <KeepSessionAlive />
+      {children}
+    </ConvoHopProvider>
+  );
+}
+
+// Renews the session before it expires while it's mounted.
+function KeepSessionAlive(): null {
+  useSessionRefresh({ onError: error => console.warn("Couldn't renew the session", error) });
+  return null;
+}
+```
+
+The provider doesn't own the client or the outbox. `useSessionRefresh` renews the session while it's mounted. Without `sessionRefresh` on the client, it throws `SESSION_REFRESH_REQUIRED` to the nearest error boundary.
+
+`useConversation` follows a conversation with a `ConversationStore` while the component is mounted, and returns the store's snapshot and actions:
+
+```tsx snippet=docs/languages/typescript/examples/src/react.tsx#conversation
+import { useState } from "react";
+import { useConversation, useTyping } from "@convohop/react";
+import { pendingLabel } from "./client.ts";
+
+// typing: whether the project has typing indicators, from (await client.capabilities()).features?.typing.
+export function Thread({ conversationId, typing }: { conversationId: string; typing: boolean }) {
+  const thread = useConversation(conversationId, { onError: error => console.warn("Conversation error", error) });
+  const typingSignal = useTyping(conversationId, { enabled: typing });
+  const [draft, setDraft] = useState("");
+  if (thread.status === "idle" || thread.status === "loading") return <p>Loading…</p>;
+
+  const send = () => {
+    typingSignal.stop();
+    const text = draft.trim();
+    if (text) thread.send(text); // Shows in thread.pending at once.
+    setDraft("");
+  };
+  return (
+    <section>
+      {thread.hasOlder && <button onClick={() => void thread.loadOlder()}>Earlier messages</button>}
+      {thread.messages.map(message => (
+        <p key={message.messageId}>{message.deleted ? "Deleted" : message.text}</p>
+      ))}
+      {thread.pending.map(entry => (
+        <p key={entry.requestId}>
+          {entry.text} ({pendingLabel(entry)})
+        </p>
+      ))}
+      {thread.resyncRequired && <button onClick={() => void thread.resync()}>Reload</button>}
+      <input
+        value={draft}
+        onChange={event => {
+          setDraft(event.target.value);
+          typingSignal.input();
+        }}
+      />
+      <button onClick={send}>Send</button>
+    </section>
+  );
+}
+```
+
+The view's `status` is `idle` until the component's first effect creates the store, and `send` throws until then. `useTyping` sends throttled typing signals while the user writes. Other members' typing isn't delivered to clients yet.
+
+## Without the store
+
+`ConversationStore` and the outbox use `watch` and `send`, which you can also use yourself.
+
+### Watch a conversation's events
 
 `watch` replays the conversation's events from the cursor it saved last time, or from the start, and then delivers new events as they happen. Events say what changed, so read the current messages when one did.
 
@@ -257,7 +459,7 @@ export async function watchConversation(
 
 Close the stream when the view goes away. If the saved cursor can't be used any more, for example because it expired, `watch` fails instead of silently skipping history. [Chat and replay](https://github.com/ConvoHop/sdks/blob/main/packages/client/README.md#chat-and-replay) describes how to recover.
 
-## Send a message
+### Send with your own request ID
 
 ```ts snippet=docs/languages/typescript/examples/src/client.ts#send
 // Keep requestId with the draft until the send succeeds, and reuse it if you send the draft again.
@@ -277,8 +479,9 @@ Create the request ID when the user writes the message, for example with `crypto
 ## Next steps
 
 - [Calling quickstart](quickstarts/calling.md): start and join calls in a conversation.
-- [Push notifications quickstart](quickstarts/push.md): notify users who aren't watching.
+- [Push notifications quickstart](quickstarts/push.md): notify users who aren't watching, and subscribe browsers.
 - [`ConvoHopClient` reference](reference/client.md#convohopclient-class): every method, with the operation it sends.
+- [`@convohop/react` reference](reference/react.md): every hook.
 
 # TypeScript webhooks quickstart
 
@@ -377,7 +580,7 @@ Notification events, such as `notification.message`, are addressed to one recipi
 
 # TypeScript push notifications quickstart
 
-Send push notifications for ConvoHop messages and calls: `@convohop/server` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
+Send push notifications for ConvoHop messages and calls: `@convohop/server` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries. In browsers, `@convohop/client/push` subscribes to Web Push and shows the notifications.
 
 ## Before you start
 
@@ -386,6 +589,7 @@ ConvoHop doesn't send push notifications itself. You need:
 - A webhook endpoint that receives `notification.message`, `notification.call` and `notification.callCancelled` events, as the [webhooks quickstart](quickstarts/webhooks.md) shows. Each of these events is addressed to one recipient. Events arrive at least once and in any order, so deduplicate on `eventId` before you send.
 - The devices that your app registered for each user, in your own database.
 - Your push credentials and clients. This page uses `firebase-admin` for FCM and `web-push` for browsers. For APNs, use any HTTP/2 client.
+- For browsers, a VAPID key pair, such as `web-push generate-vapid-keys` makes. Your backend signs Web Push requests with the private key, and browsers subscribe with the public key.
 
 ## Build and send the requests
 
@@ -529,13 +733,83 @@ Send each APNs request with an HTTP/2 client: POST its `payload` as JSON to `/3/
 
 iOS requires an app to report every VoIP push to CallKit as an incoming call, so `apnsVoip` builds requests for `notification.call` only. A CallKit app stops ringing when its realtime connection reports that the ring stopped. A missed call also gets an APNs alert, and an answered or declined ring gets no APNs request. [Calls on iOS](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md#calls-on-ios) has the details.
 
+## Subscribe a browser
+
+`@convohop/client/push` subscribes the browser with your VAPID public key and gives you the registration to store:
+
+```ts snippet=docs/languages/typescript/examples/src/browser-push.ts#subscribe
+import { subscribePush, unsubscribePush, type PushRegistration } from "@convohop/client/push";
+
+// Run it from a click, such as on a "Turn on notifications" button: subscribing asks for permission, and some
+// browsers only ask from a click. Once the user has allowed notifications, also run it when your app starts: it
+// reuses the subscription and registers it again, so your backend keeps it current.
+export async function enableNotifications(vapidPublicKey: string): Promise<void> {
+  const registration = await navigator.serviceWorker.register("/service-worker.js", { type: "module" });
+  await subscribePush(registration, { applicationServerKey: vapidPublicKey, register: device => saveDevice("POST", device) });
+}
+
+// Run it when the user signs out, before your backend ends their sign-in: your backend forgets this browser, and
+// then the browser unsubscribes.
+export async function disableNotifications(): Promise<void> {
+  const registration = await navigator.serviceWorker.getRegistration("/");
+  if (registration) await unsubscribePush(registration, device => saveDevice("DELETE", device));
+}
+
+// Your backend's endpoint, behind your app's own sign-in. It stores or deletes the signed-in user's device:
+// { kind: "webPush", subscription }, where subscription is the browser's PushSubscription.toJSON().
+async function saveDevice(method: "POST" | "DELETE", device: PushRegistration): Promise<void> {
+  const response = await fetch("/api/push/devices", {
+    method,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(device),
+  });
+  if (!response.ok) throw new Error(`Saving the device failed with HTTP ${response.status}`);
+}
+```
+
+Your endpoint stores the registration's `subscription` as one of the signed-in user's devices, which `notify` sends Web Push requests to. Check that it has an `endpoint` and `p256dh` and `auth` keys before you store it. `subscribePush` reuses the browser's subscription when it was made with the same key, so registering on every start keeps your backend's copy current.
+
+## Show notifications in the browser
+
+The service worker shows each push, and opens its conversation when the user clicks it:
+
+```ts snippet=docs/languages/typescript/examples/src/service-worker.ts#service-worker
+import { handleNotificationClick, handlePushEvent } from "@convohop/client/push";
+
+declare const self: ServiceWorkerGlobalScope;
+
+self.addEventListener("push", event =>
+  handlePushEvent(self.registration, event, {
+    // Pushes that aren't ConvoHop notifications end here, including your app's own. Browsers expect every push to
+    // show a notification, so show one.
+    onError: () => self.registration.showNotification("New activity", { tag: "app-activity" }),
+  }),
+);
+
+self.addEventListener("notificationclick", event => {
+  // Opens the notification's conversation, or focuses a window that already shows it.
+  if (handleNotificationClick(self.clients, event, notification => `/conversations/${notification.conversationId}`)) return;
+  event.notification.close(); // Your app's own notifications, such as the one above.
+  event.waitUntil(self.clients.openWindow("/"));
+});
+```
+
+`handlePushEvent` checks each push against the push payload contract and shows its notification. Each notification is tagged with its message or call, so a later one for the same message or call replaces it. A repeated event, or a call that was answered or declined, replaces it silently, and a missed call replaces the ring with a missed-call notification. Browsers expect a notification for every push, so it shows one even for a repeat, and the sample's `onError` shows one for pushes that aren't ConvoHop notifications. It remembers events and cancelled rings only while the browser keeps the service worker running. The default titles are English. Pass `render` to show your own text.
+
+`handleNotificationClick` resolves your URL against the service worker's location, then focuses a window that already shows it or opens one. It refuses a URL on another origin.
+
+Build the service worker with your app's bundler, which resolves `@convohop/client/push`. That entry point has no dependencies. In TypeScript, compile the service worker with the `WebWorker` library instead of the DOM's, as the examples' [`tsconfig.worker.json`](https://github.com/ConvoHop/sdks/blob/main/docs/languages/typescript/examples/tsconfig.worker.json) does.
+
 ## How the samples are tested
 
 The test runs `notify` on every vector of the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md) and checks the request it sends to each kind of device. It also checks that `web-push` sends each Web Push request's `TTL`, `Urgency` and `Topic` headers, and that `firebase-admin` accepts each converted FCM message, to a token and to a FID, and sends the request's Android options.
 
+A second test runs the service worker on every Web Push request of the contract: each push shows one notification with the expected tag, and clicking it opens the conversation. Subscribing needs a browser with a push service, so CI only typechecks that sample.
+
 ## Next steps
 
 - [`push` reference](reference/server.md#push-constant): every builder and its options.
+- [`@convohop/client/push` reference](reference/client-push.md): subscribing, and showing and opening notifications.
 - [Calling quickstart](quickstarts/calling.md): start the calls that these notifications ring.
 
 # TypeScript calling quickstart
@@ -648,10 +922,125 @@ export async function endCall(call: Call): Promise<void> {
 
 Leaving ends this device's participation, and the call goes on for everyone else. Ending stops it for everyone: `completed()` resolves once the authority has cut off everyone's media.
 
+## Calls in React
+
+With `@convohop/react`, inside the provider that the [client quickstart](quickstarts/client.md#use-react) sets up:
+
+```tsx snippet=docs/languages/typescript/examples/src/react.tsx#call
+import { useCallback } from "react";
+import type { LiveParticipationHandle, LiveSessionHandle } from "@convohop/client";
+import { useConvoHopClient, useLiveSession, useMediaConnection } from "@convohop/react";
+
+// Starts, joins and leaves a conversation's call. Mount it beside the conversation's Thread: useLiveSession reloads
+// on the call events that useConversation receives.
+export function CallPanel({ conversationId }: { conversationId: string }) {
+  const client = useConvoHopClient();
+  const live = useLiveSession(conversationId);
+  const media = useMediaConnection();
+  const [participation, setParticipation] = useState<LiveParticipationHandle>();
+
+  // Run these from clicks, never from an effect: each connect spends a single-use admission.
+  const join = async (session: LiveSessionHandle) => {
+    const joined = await session.join();
+    setParticipation(joined);
+    const connection = await media.connect(joined); // Receiving only.
+    if (joined.snapshot.permissions.microphone) await connection.microphone(true); // Asks for permission.
+  };
+  const start = async () => {
+    const started = await client.conversation(conversationId).live.startVoice();
+    await join(await started.ready());
+  };
+  const leave = async (current: LiveParticipationHandle) => {
+    await current.leave(); // Disconnects the media first. The call goes on for everyone else.
+    setParticipation(undefined);
+  };
+
+  if (!participation) {
+    const session = live.session;
+    if (session === undefined) return null; // Still loading.
+    return session ? (
+      <button onClick={() => join(session).catch(showError)}>Join the call</button>
+    ) : (
+      <button onClick={() => start().catch(showError)}>Start a call</button>
+    );
+  }
+  return (
+    <section>
+      {media.tracks.map(track => (
+        <Media key={track.trackId} element={track.element} />
+      ))}
+      {media.audioBlocked && <button onClick={() => media.enableAudio().catch(showError)}>Play audio</button>}
+      {media.status === "disconnected" && <button onClick={() => media.reconnect().catch(showError)}>Reconnect</button>}
+      {media.status === "failed" && <button onClick={() => media.connect(participation).catch(showError)}>Retry</button>}
+      <button onClick={() => leave(participation).catch(showError)}>Leave</button>
+    </section>
+  );
+}
+
+// Shows one remote track: track.element is an audio or video element.
+function Media({ element }: { element: HTMLMediaElement }) {
+  const attach = useCallback(
+    (node: HTMLDivElement | null) => {
+      node?.append(element);
+    },
+    [element],
+  );
+  return <div ref={attach} />;
+}
+
+function showError(error: unknown) {
+  console.error("The call failed", error);
+}
+```
+
+`useLiveSession` loads the conversation's current call, or `null` when there's none. It reloads on the call events that a mounted `useConversation` for the same conversation receives. Without one, call `live.refresh()`, for example when a call notification arrives.
+
+`useMediaConnection` connects with `livekit-client`, and shows the connection's `status` and remote `tracks`. Call `connect` and `reconnect` from clicks, never from an effect: each attempt spends a single-use admission, and React's StrictMode runs effects twice. Unmounting disconnects the media, but doesn't leave the call.
+
+## Connect your own LiveKit Room
+
+`connect` creates and manages the LiveKit connection for you. To manage a `livekit-client` `Room` yourself, for example to use LiveKit's UI components, connect with `connectWith`:
+
+```ts snippet=docs/languages/typescript/examples/src/calling.ts#connect-with
+import { ConnectionState, Room } from "livekit-client";
+
+// The connection connectWith resolves with: your LiveKit Room, and what the SDK needs to know about it.
+export interface NativeConnection {
+  readonly room: Room;
+  readonly connected: boolean;
+  disconnect(): Promise<void>;
+}
+
+// Connects a participation's media with your own LiveKit Room, as on React Native. Call it again after the Room
+// disconnects: the SDK asks for a new connection that replaces the old one.
+export function connectNative(participation: LiveParticipationHandle): Promise<NativeConnection> {
+  return participation.connectWith(async attempt => {
+    // attempt.token is single-use and expires about 60 seconds after issue. Use it once, now, and only with
+    // attempt.url. Never store or log it.
+    const room = new Room();
+    await room.connect(attempt.url, attempt.token);
+    return {
+      room,
+      // Stays true while LiveKit resumes the connection, so the SDK doesn't open a second one.
+      get connected() {
+        return room.state !== ConnectionState.Disconnected;
+      },
+      disconnect: () => room.disconnect(),
+    };
+  });
+}
+```
+
+The SDK gets a single-use token for this device's participation, then calls your function once with it. The token admits one new connection to `attempt.url`, and expires about 60 seconds after issue. LiveKit resumes a dropped connection on its own, but a new connection needs a new `connectWith`.
+
+- `connected` must stay true while LiveKit resumes the connection: `connectWith` refuses to start another connection while one is connected.
+- If your function throws, this device keeps its place in the call, and the next `connectWith` settles the failed attempt before it starts another.
+
 ## Next steps
 
 - [Push notifications quickstart](quickstarts/push.md): ring members whose app isn't open.
 - [`LiveParticipationHandle` reference](reference/client.md#liveparticipationhandle-class): join, connect, leave and end.
+- [`@convohop/react` reference](reference/react.md): `useLiveSession` and `useMediaConnection`.
 
 # TypeScript reference
 
@@ -661,6 +1050,8 @@ The public API of each TypeScript package, generated from its declarations.
 | --- | --- | --- |
 | [`@convohop/server`](reference/server.md) | Server | Server SDK for trusted Node.js runtimes: backend-key data-plane calls, management, webhook verification and push requests. |
 | [`@convohop/client`](reference/client.md) | Client | Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. |
+| [`@convohop/client/push`](reference/client-push.md) | Client | Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK. |
+| [`@convohop/react`](reference/react.md) | Client | React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media. |
 
 [Operation coverage](reference/operations.md) lists the members that send each API operation.
 
@@ -4363,6 +4754,8 @@ Loads the conversation and follows it, rejecting if that fails. While an attempt
 reconnect after a session refresh, this returns it; after an error it reconnects from the loaded state. It doesn't
 recover from `resyncRequired`: call `resync` for that.
 
+Sends [`communication.getConversation`](../operations/communication/getConversation.md), [`communication.messages`](../operations/communication/messages.md), [`communication.getMessage`](../operations/communication/getMessage.md), [`communication.events`](../operations/communication/events.md), [`communication.receipts`](../operations/communication/receipts.md) and [`communication.conversationEvents`](../operations/communication/conversationEvents.md).
+
 #### `ConversationStore.resync` method
 
 ```ts
@@ -4370,6 +4763,8 @@ resync(): Promise<void>
 ```
 
 Discards the saved replay position, reloads the conversation and replays its authorized history from the start.
+
+Sends [`communication.getConversation`](../operations/communication/getConversation.md), [`communication.messages`](../operations/communication/messages.md), [`communication.getMessage`](../operations/communication/getMessage.md), [`communication.events`](../operations/communication/events.md), [`communication.receipts`](../operations/communication/receipts.md) and [`communication.conversationEvents`](../operations/communication/conversationEvents.md).
 
 #### `ConversationStore.loadOlder` method
 
@@ -4379,6 +4774,8 @@ loadOlder(): Promise<boolean>
 
 Loads the previous page of messages. Resolves whether it added any.
 
+Sends [`communication.messages`](../operations/communication/messages.md).
+
 #### `ConversationStore.send` method
 
 ```ts
@@ -4386,6 +4783,8 @@ send(text: string, props?: ProtocolObject): OutboxEntry
 ```
 
 Queues a message in the outbox. It shows in `pending` until it appears in `messages`.
+
+Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../operations/communication/sendMessage.md).
 
 #### `ConversationStore.markRead` method
 
@@ -4395,6 +4794,8 @@ markRead(): Promise<boolean>
 
 Reports reading through the newest loaded message. Resolves whether a report was needed.
 
+Sends [`communication.reportReceipt`](../operations/communication/reportReceipt.md).
+
 #### `ConversationStore.markDelivered` method
 
 ```ts
@@ -4402,6 +4803,8 @@ markDelivered(): Promise<boolean>
 ```
 
 Reports delivery through the newest loaded message. Resolves whether a report was needed.
+
+Sends [`communication.reportReceipt`](../operations/communication/reportReceipt.md).
 
 #### `ConversationStore.close` method
 
@@ -4594,6 +4997,8 @@ called. A failed renewal that leaves the current session verified is retried wit
 Returning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'
 timers can fire late.
 
+Sends [`communication.route`](../operations/communication/route.md) and [`communication.currentSession`](../operations/communication/currentSession.md).
+
 #### `ConvoHopClient.conversation` method
 
 ```ts
@@ -4714,6 +5119,8 @@ reportDelivered(id: string, membership: Membership, throughSequence: string): Pr
 
 Reports delivery through a message's sequence. Returns the user's current receipt.
 
+Sends [`communication.reportReceipt`](../operations/communication/reportReceipt.md).
+
 #### `ConvoHopClient.receipts` method
 
 ```ts
@@ -4728,11 +5135,15 @@ Sends [`communication.receipts`](../operations/communication/receipts.md).
 getMessage(id: string, messageId: string): Promise<ConversationMessage>
 ```
 
+Sends [`communication.getMessage`](../operations/communication/getMessage.md).
+
 #### `ConvoHopClient.members` method
 
 ```ts
 members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>
 ```
+
+Sends [`communication.members`](../operations/communication/members.md).
 
 #### `ConvoHopClient.inbox` method
 
@@ -4740,11 +5151,15 @@ members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>
 inbox(options?: PageOptions): Promise<InboxPage>
 ```
 
+Sends [`communication.inbox`](../operations/communication/inbox.md).
+
 #### `ConvoHopClient.capabilities` method
 
 ```ts
 capabilities(): Promise<ProjectCapabilities>
 ```
+
+Sends [`communication.capabilities`](../operations/communication/capabilities.md).
 
 #### `ConvoHopClient.typing` method
 
@@ -4754,6 +5169,8 @@ typing(id: string, isTyping: boolean): Promise<boolean>
 
 Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,
 retried or resolved. Check `features?.typing` in `capabilities` first.
+
+Sends [`communication.typing`](../operations/communication/typing.md).
 
 #### `ConvoHopClient.search` method
 
@@ -5032,6 +5449,8 @@ The SDK obtains a participation-bound grant, checks the media URL, records the a
 `connector` once. A connector failure is `MEDIA_CONNECT_FAILED` with an unknown outcome: the reservation remains,
 and the next call resolves the old attempt before a fresh one. Rejects while another attempt is in flight or
 another connection is connected.
+
+Sends [`communication.liveSessionCredentials`](../operations/communication/liveSessionCredentials.md).
 
 #### `LiveParticipationHandle.leave` method
 
@@ -5391,6 +5810,8 @@ subscribe(listener: () => void): () => void
 send(conversationId: string, text: string, props?: ProtocolObject): OutboxEntry
 ```
 
+Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../operations/communication/sendMessage.md).
+
 #### `Outbox.resend` method
 
 ```ts
@@ -5398,6 +5819,8 @@ resend(requestId: string): OutboxEntry
 ```
 
 Sends a failed entry's message again as a new request, after the entries already waiting.
+
+Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../operations/communication/sendMessage.md).
 
 #### `Outbox.discard` method
 
@@ -5423,6 +5846,8 @@ flush(): Promise<void>
 
 Attempts every waiting entry now, ignoring backoff, and resolves when each conversation's queue is idle or blocked.
 Waits for saved entries to load first.
+
+Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../operations/communication/sendMessage.md).
 
 #### `Outbox.close` method
 
@@ -5561,6 +5986,8 @@ input(): void
 
 Call on every edit to the draft. Signals typing at most once per `intervalMs`.
 
+Sends [`communication.typing`](../operations/communication/typing.md).
+
 #### `TypingIndicator.stop` method
 
 ```ts
@@ -5569,11 +5996,15 @@ stop(): void
 
 Call when the user sends or clears the draft. Signals that typing stopped if it had started.
 
+Sends [`communication.typing`](../operations/communication/typing.md).
+
 #### `TypingIndicator.dispose` method
 
 ```ts
 dispose(): void
 ```
+
+Sends [`communication.typing`](../operations/communication/typing.md).
 
 ## Interfaces
 
@@ -7224,9 +7655,1362 @@ namespace GraphqlTypes
 
 Re-exported from `@convohop/core`.
 
+# `@convohop/client/push`
+
+Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK.
+
+**Layer:** Client. **Runtime:** Current browsers and their service workers. No dependencies. **Source:** `packages/client`.
+
+## Classes
+
+### `NotificationHandler` class
+
+```ts
+class NotificationHandler
+```
+
+Decides how to present pushes. It remembers recent events and stopped rings, so it recognizes duplicates and stops
+a call whose cancellation arrived first. A service worker keeps this memory only while it runs.
+
+#### `NotificationHandler.handle` method
+
+```ts
+handle(payload: unknown, now?: number): NotificationAction
+```
+
+Validates a push, recognizes duplicates by `eventId`, and treats a call as stopped once a cancellation of its ring
+arrived (in either order) or its `expiresAt` passed. Throws a `TypeError` for a payload that isn't a valid
+notification. `now` is in milliseconds.
+
+## Interfaces
+
+### `CallCancelledPushNotification` interface
+
+```ts
+interface CallCancelledPushNotification extends PushNotificationFields
+```
+
+#### `CallCancelledPushNotification.eventType` property
+
+```ts
+eventType: "notification.callCancelled"
+```
+
+#### `CallCancelledPushNotification.liveSessionId` property
+
+```ts
+liveSessionId: string
+```
+
+#### `CallCancelledPushNotification.alertId` property
+
+```ts
+alertId: string
+```
+
+The ring that stopped.
+
+#### `CallCancelledPushNotification.expiresAt` property
+
+```ts
+expiresAt: string
+```
+
+#### `CallCancelledPushNotification.mediaProfile` property
+
+```ts
+mediaProfile: string
+```
+
+#### `CallCancelledPushNotification.reason` property
+
+```ts
+reason: string
+```
+
+`answered`, `declined`, `ended`, `expired` or a later reason.
+
+#### `CallCancelledPushNotification.eventId` property
+
+```ts
+eventId: string
+```
+
+Identifies the event across retries and replays of its webhook.
+
+Inherited from `PushNotificationFields`.
+
+#### `CallCancelledPushNotification.occurredAt` property
+
+```ts
+occurredAt: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `CallCancelledPushNotification.projectId` property
+
+```ts
+projectId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `CallCancelledPushNotification.recipientId` property
+
+```ts
+recipientId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `CallCancelledPushNotification.conversationId` property
+
+```ts
+conversationId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `CallCancelledPushNotification.senderId` property
+
+```ts
+senderId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `CallCancelledPushNotification.title` property
+
+```ts
+title?: string
+```
+
+The visible title your backend set, if any.
+
+Inherited from `PushNotificationFields`.
+
+#### `CallCancelledPushNotification.body` property
+
+```ts
+body?: string
+```
+
+The visible body your backend set, if any.
+
+Inherited from `PushNotificationFields`.
+
+### `CallPushNotification` interface
+
+```ts
+interface CallPushNotification extends PushNotificationFields
+```
+
+#### `CallPushNotification.eventType` property
+
+```ts
+eventType: "notification.call"
+```
+
+#### `CallPushNotification.liveSessionId` property
+
+```ts
+liveSessionId: string
+```
+
+#### `CallPushNotification.alertId` property
+
+```ts
+alertId: string
+```
+
+Identifies this ring. A later ring of the same call has a new `alertId`.
+
+#### `CallPushNotification.expiresAt` property
+
+```ts
+expiresAt: string
+```
+
+When the ring stops if nobody answers.
+
+#### `CallPushNotification.mediaProfile` property
+
+```ts
+mediaProfile: string
+```
+
+`AUDIO_ONLY`, `AUDIO_VIDEO` or a later profile.
+
+#### `CallPushNotification.eventId` property
+
+```ts
+eventId: string
+```
+
+Identifies the event across retries and replays of its webhook.
+
+Inherited from `PushNotificationFields`.
+
+#### `CallPushNotification.occurredAt` property
+
+```ts
+occurredAt: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `CallPushNotification.projectId` property
+
+```ts
+projectId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `CallPushNotification.recipientId` property
+
+```ts
+recipientId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `CallPushNotification.conversationId` property
+
+```ts
+conversationId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `CallPushNotification.senderId` property
+
+```ts
+senderId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `CallPushNotification.title` property
+
+```ts
+title?: string
+```
+
+The visible title your backend set, if any.
+
+Inherited from `PushNotificationFields`.
+
+#### `CallPushNotification.body` property
+
+```ts
+body?: string
+```
+
+The visible body your backend set, if any.
+
+Inherited from `PushNotificationFields`.
+
+### `MessagePushNotification` interface
+
+```ts
+interface MessagePushNotification extends PushNotificationFields
+```
+
+#### `MessagePushNotification.eventType` property
+
+```ts
+eventType: "notification.message"
+```
+
+#### `MessagePushNotification.messageId` property
+
+```ts
+messageId: string
+```
+
+#### `MessagePushNotification.eventId` property
+
+```ts
+eventId: string
+```
+
+Identifies the event across retries and replays of its webhook.
+
+Inherited from `PushNotificationFields`.
+
+#### `MessagePushNotification.occurredAt` property
+
+```ts
+occurredAt: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `MessagePushNotification.projectId` property
+
+```ts
+projectId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `MessagePushNotification.recipientId` property
+
+```ts
+recipientId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `MessagePushNotification.conversationId` property
+
+```ts
+conversationId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `MessagePushNotification.senderId` property
+
+```ts
+senderId: string
+```
+
+Inherited from `PushNotificationFields`.
+
+#### `MessagePushNotification.title` property
+
+```ts
+title?: string
+```
+
+The visible title your backend set, if any.
+
+Inherited from `PushNotificationFields`.
+
+#### `MessagePushNotification.body` property
+
+```ts
+body?: string
+```
+
+The visible body your backend set, if any.
+
+Inherited from `PushNotificationFields`.
+
+### `NotificationAction` interface
+
+```ts
+interface NotificationAction
+```
+
+#### `NotificationAction.kind` property
+
+```ts
+kind: NotificationKind
+```
+
+#### `NotificationAction.notification` property
+
+```ts
+notification: PushNotification
+```
+
+#### `NotificationAction.tag` property
+
+```ts
+tag: string
+```
+
+A stable notification ID: the message ID for messages, and for calls the ring's collapse key (its `alertId`
+without hyphens). Presenting a notification with the same tag replaces the earlier one.
+
+#### `NotificationAction.duplicate` property
+
+```ts
+duplicate: boolean
+```
+
+Whether this event was already handled. Delivery is at least once, so the same event can arrive again.
+
+### `WebClients` interface
+
+```ts
+interface WebClients
+```
+
+The parts of a service worker's `clients` these helpers use.
+
+#### `WebClients.matchAll` method
+
+```ts
+matchAll(options: {
+    type: "window";
+    includeUncontrolled: boolean;
+}): Promise<readonly WindowClientLike[]>
+```
+
+#### `WebClients.openWindow` method
+
+```ts
+openWindow(url: string): Promise<unknown>
+```
+
+### `WebNotification` interface
+
+```ts
+interface WebNotification
+```
+
+A notification to show with `ServiceWorkerRegistration.showNotification`.
+
+#### `WebNotification.title` property
+
+```ts
+title: string
+```
+
+#### `WebNotification.options` property
+
+```ts
+options: NotificationOptions
+```
+
+### `WebNotificationClickEvent` interface
+
+```ts
+interface WebNotificationClickEvent
+```
+
+The parts of a service worker `notificationclick` event these helpers use.
+
+#### `WebNotificationClickEvent.notification` property
+
+```ts
+readonly notification: { … }
+```
+
+##### `WebNotificationClickEvent.notification.data` property
+
+```ts
+readonly data: unknown
+```
+
+##### `WebNotificationClickEvent.notification.tag` property
+
+```ts
+readonly tag: string
+```
+
+##### `WebNotificationClickEvent.notification.close` method
+
+```ts
+close(): void
+```
+
+#### `WebNotificationClickEvent.action` property
+
+```ts
+readonly action?: string
+```
+
+#### `WebNotificationClickEvent.waitUntil` method
+
+```ts
+waitUntil(promise: Promise<unknown>): void
+```
+
+### `WebPushEvent` interface
+
+```ts
+interface WebPushEvent
+```
+
+The parts of a service worker `push` event these helpers use.
+
+#### `WebPushEvent.data` property
+
+```ts
+readonly data: {
+    json(): unknown;
+} | null
+```
+
+#### `WebPushEvent.waitUntil` method
+
+```ts
+waitUntil(promise: Promise<unknown>): void
+```
+
+### `WebPushEventOptions` interface
+
+```ts
+interface WebPushEventOptions extends WebPushHandlerOptions
+```
+
+#### `WebPushEventOptions.onError` property
+
+```ts
+onError?: (error: Error) => Promise<void> | void
+```
+
+Receives payloads that aren't ConvoHop notifications and failures to show them. The event waits for it, so it
+can show a notification of its own: browsers expect one for every push.
+
+#### `WebPushEventOptions.handler` property
+
+```ts
+handler?: NotificationHandler
+```
+
+Decides what to show. Default: the handler `handleNotification` uses.
+
+Inherited from `WebPushHandlerOptions`.
+
+#### `WebPushEventOptions.render` property
+
+```ts
+render?: (action: NotificationAction) => WebNotification
+```
+
+Builds the notification to show. Default `defaultWebNotification`.
+
+Inherited from `WebPushHandlerOptions`.
+
+### `WebPushHandlerOptions` interface
+
+```ts
+interface WebPushHandlerOptions
+```
+
+#### `WebPushHandlerOptions.handler` property
+
+```ts
+handler?: NotificationHandler
+```
+
+Decides what to show. Default: the handler `handleNotification` uses.
+
+#### `WebPushHandlerOptions.render` property
+
+```ts
+render?: (action: NotificationAction) => WebNotification
+```
+
+Builds the notification to show. Default `defaultWebNotification`.
+
+### `WebPushSubscribeOptions` interface
+
+```ts
+interface WebPushSubscribeOptions
+```
+
+#### `WebPushSubscribeOptions.applicationServerKey` property
+
+```ts
+applicationServerKey: string | Uint8Array
+```
+
+Your VAPID public key, as base64url or bytes. Your backend signs pushes with its private key.
+
+#### `WebPushSubscribeOptions.register` property
+
+```ts
+register: (registration: PushRegistration) => Promise<void> | void
+```
+
+Stores the registration with your backend, for the signed-in user, so it can send pushes to this browser.
+Called on every subscribe, so your backend can refresh what it stored.
+
+### `WebPushSubscription` interface
+
+```ts
+interface WebPushSubscription
+```
+
+A Web Push subscription, as `PushSubscription.toJSON()` returns it.
+
+#### `WebPushSubscription.endpoint` property
+
+```ts
+readonly endpoint?: string
+```
+
+#### `WebPushSubscription.expirationTime` property
+
+```ts
+readonly expirationTime?: number | null
+```
+
+#### `WebPushSubscription.keys` property
+
+```ts
+readonly keys?: Readonly<Record<string, string>>
+```
+
+## Types
+
+### `NotificationKind` type
+
+```ts
+type NotificationKind = "message" | "ring" | "stopRinging" | "missedCall"
+```
+
+What to present for a push:
+- `message`: a new message.
+- `ring`: an incoming call that is still ringing.
+- `stopRinging`: the call stopped ringing without being missed: it was answered or declined, on any device, or
+  stopped for a reason this SDK doesn't know.
+- `missedCall`: nobody answered: the call ended first or the ring expired.
+
+### `PushNotification` type
+
+```ts
+type PushNotification = MessagePushNotification | CallPushNotification | CallCancelledPushNotification
+```
+
+The `convohop` object a push carries, with only the fields the contract defines for its type.
+
+### `PushNotificationType` type
+
+```ts
+type PushNotificationType = "notification.message" | "notification.call" | "notification.callCancelled"
+```
+
+### `PushRegistration` type
+
+```ts
+type PushRegistration = {
+    readonly kind: "webPush";
+    readonly subscription: WebPushSubscription;
+} | {
+    readonly kind: "apns" | "apnsVoip";
+    readonly token: string;
+    readonly environment?: "development" | "production";
+} | {
+    readonly kind: "fcm";
+    readonly token: string;
+    readonly fid?: never;
+} | {
+    readonly kind: "fcm";
+    readonly fid: string;
+    readonly token?: never;
+}
+```
+
+Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend
+endpoint can store registrations from browsers and native apps. ConvoHop never sees them.
+
+- `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.
+- `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.
+- `apnsVoip`: an iOS PushKit token for incoming calls.
+- `fcm`: an Android app's Firebase Cloud Messaging target, with exactly one of `token` and `fid`. `token` is the
+  registration token, which apps get by default. `fid` is the Firebase Installation ID, which apps get instead when
+  their manifest sets `firebase_messaging_installation_id_enabled`. Send to it with the FCM HTTP v1 target of the
+  same name.
+
+## Functions
+
+### `defaultWebNotification` function
+
+```ts
+function defaultWebNotification(action: NotificationAction): WebNotification
+```
+
+The default presentation. It uses the title and body your backend set, with English fallback titles, and the
+action's tag, so a duplicate or a stopped ring replaces its earlier notification. A ring stays until it is handled;
+a ring that stopped without being missed is replaced silently.
+
+### `handleNotification` function
+
+```ts
+function handleNotification(payload: unknown, now?: number): NotificationAction
+```
+
+`NotificationHandler.handle` with a handler shared by this module.
+
+### `handleNotificationClick` function
+
+```ts
+function handleNotificationClick(clients: WebClients, event: WebNotificationClickEvent, url: (notification: PushNotification, action: string | undefined) => string): boolean
+```
+
+Handles a `notificationclick` for a ConvoHop notification: closes it, then focuses a window already showing `url`
+or opens one. `url` maps the notification (and the clicked action, if any) to a URL of your app: relative to the
+service worker, such as `/conversations/${notification.conversationId}`, or absolute on its origin. Another origin
+is a TypeError, and the notification stays open. Returns whether the notification was a ConvoHop one.
+
+### `handlePushEvent` function
+
+```ts
+function handlePushEvent(registration: ServiceWorkerRegistration, event: WebPushEvent, options?: WebPushEventOptions): void
+```
+
+Handles a service worker `push` event: `self.addEventListener("push", event => handlePushEvent(self.registration, event))`.
+
+### `parsePushNotification` function
+
+```ts
+function parsePushNotification(value: unknown): PushNotification
+```
+
+Validates the `convohop` object of a push against the push payload contract. Returns its known fields and ignores
+fields the contract doesn't define for its type. Throws a `TypeError` for anything else.
+
+### `parsePushPayload` function
+
+```ts
+function parsePushPayload(payload: unknown): PushNotification
+```
+
+Finds and validates the notification in a push: a Web Push or APNs payload (`{ convohop: {...} }`), FCM data
+(`{ convohop: "<json>" }`) or the `convohop` object itself.
+
+### `showPushNotification` function
+
+```ts
+function showPushNotification(registration: ServiceWorkerRegistration, payload: unknown, options?: WebPushHandlerOptions): Promise<NotificationAction>
+```
+
+Shows the notification for a decrypted Web Push payload (`event.data.json()`) and returns the action taken.
+
+Browsers expect every push to show a notification: Safari revokes the subscription after a few pushes that don't,
+and Chrome shows a generic one. So every action, including duplicates and stopped rings, shows or replaces one.
+
+### `subscribePush` function
+
+```ts
+function subscribePush(registration: ServiceWorkerRegistration, options: WebPushSubscribeOptions): Promise<PushSubscription>
+```
+
+Subscribes this browser to Web Push with your VAPID key and registers the subscription with your backend.
+Reuses a subscription for the same key and replaces one made with another key. Call it from a user gesture:
+subscribing asks for notification permission, and some browsers only ask from a gesture.
+
+### `unsubscribePush` function
+
+```ts
+function unsubscribePush(registration: ServiceWorkerRegistration, unregister?: (registration: PushRegistration) => Promise<void> | void): Promise<boolean>
+```
+
+Unsubscribes this browser and, first, lets your backend forget the subscription. Resolves whether a subscription
+existed.
+
+# `@convohop/react`
+
+React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.
+
+**Layer:** Client. **Runtime:** React 18 or later in current browsers. React Native isn't verified yet. **Source:** `packages/react`.
+
+## Interfaces
+
+### `ConversationOptions` interface
+
+```ts
+interface ConversationOptions
+```
+
+#### `ConversationOptions.onEvent` property
+
+```ts
+onEvent?: ((event: ProtocolObject) => void) | undefined
+```
+
+Called after each new event is applied, including call and live-session events the store doesn't track.
+
+#### `ConversationOptions.onError` property
+
+```ts
+onError?: ((error: Error) => void) | undefined
+```
+
+Called for every error, including realtime interruptions the store recovers from on its own.
+
+### `ConversationView` interface
+
+```ts
+interface ConversationView extends ConversationSnapshot
+```
+
+A conversation's state and the actions on it. Actions reject, and `send` throws, until the conversation's store exists.
+
+#### `ConversationView.store` property
+
+```ts
+readonly store: ConversationStore | undefined
+```
+
+The store following the conversation, or undefined without a conversation ID and before the first effect runs.
+
+#### `ConversationView.send` method
+
+```ts
+send(text: string, props?: ProtocolObject): OutboxEntry
+```
+
+Queues a message in the outbox. It shows in `pending` until it appears in `messages`.
+
+Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../operations/communication/sendMessage.md).
+
+#### `ConversationView.open` method
+
+```ts
+open(): Promise<void>
+```
+
+Reconnects after an error, from the loaded state.
+
+Sends [`communication.getConversation`](../operations/communication/getConversation.md), [`communication.messages`](../operations/communication/messages.md), [`communication.getMessage`](../operations/communication/getMessage.md), [`communication.events`](../operations/communication/events.md), [`communication.receipts`](../operations/communication/receipts.md) and [`communication.conversationEvents`](../operations/communication/conversationEvents.md).
+
+#### `ConversationView.resync` method
+
+```ts
+resync(): Promise<void>
+```
+
+Discards the replay position and reloads the conversation; needed when `resyncRequired` is set.
+
+Sends [`communication.getConversation`](../operations/communication/getConversation.md), [`communication.messages`](../operations/communication/messages.md), [`communication.getMessage`](../operations/communication/getMessage.md), [`communication.events`](../operations/communication/events.md), [`communication.receipts`](../operations/communication/receipts.md) and [`communication.conversationEvents`](../operations/communication/conversationEvents.md).
+
+#### `ConversationView.loadOlder` method
+
+```ts
+loadOlder(): Promise<boolean>
+```
+
+Loads the previous page of messages. Resolves whether it added any.
+
+Sends [`communication.messages`](../operations/communication/messages.md).
+
+#### `ConversationView.markRead` method
+
+```ts
+markRead(): Promise<boolean>
+```
+
+Reports reading through the newest loaded message. Resolves whether a report was needed.
+
+Sends [`communication.reportReceipt`](../operations/communication/reportReceipt.md).
+
+#### `ConversationView.markDelivered` method
+
+```ts
+markDelivered(): Promise<boolean>
+```
+
+Reports delivery through the newest loaded message. Resolves whether a report was needed.
+
+Sends [`communication.reportReceipt`](../operations/communication/reportReceipt.md).
+
+#### `ConversationView.status` property
+
+```ts
+readonly status: ConversationStatus
+```
+
+Inherited from `ConversationSnapshot`.
+
+#### `ConversationView.conversation` property
+
+```ts
+readonly conversation: Readonly<Conversation> | undefined
+```
+
+The conversation and the user's membership, once loaded.
+
+Inherited from `ConversationSnapshot`.
+
+#### `ConversationView.messages` property
+
+```ts
+readonly messages: readonly Readonly<ConversationMessage>[]
+```
+
+Loaded messages, oldest first. Deleted messages stay, with `deleted: true` and no text.
+
+Inherited from `ConversationSnapshot`.
+
+#### `ConversationView.pending` property
+
+```ts
+readonly pending: readonly OutboxEntry[]
+```
+
+This conversation's outbox entries that aren't in `messages` yet, in send order.
+
+Inherited from `ConversationSnapshot`.
+
+#### `ConversationView.receipts` property
+
+```ts
+readonly receipts: readonly Readonly<ReadReceipt>[]
+```
+
+Each member's delivery and read progress, ordered by principal.
+
+Inherited from `ConversationSnapshot`.
+
+#### `ConversationView.hasOlder` property
+
+```ts
+readonly hasOlder: boolean
+```
+
+Whether `ConversationStore.loadOlder` can load earlier messages.
+
+Inherited from `ConversationSnapshot`.
+
+#### `ConversationView.error` property
+
+```ts
+readonly error: Error | undefined
+```
+
+Inherited from `ConversationSnapshot`.
+
+#### `ConversationView.resyncRequired` property
+
+```ts
+readonly resyncRequired: boolean
+```
+
+The saved replay position is no longer valid. Only `ConversationStore.resync` recovers.
+
+Inherited from `ConversationSnapshot`.
+
+### `ConvoHopProviderProps` interface
+
+```ts
+interface ConvoHopProviderProps
+```
+
+#### `ConvoHopProviderProps.client` property
+
+```ts
+readonly client: ConvoHopClient
+```
+
+The signed-in user's client. Create it outside the provider, or above it, and close it when the user signs out.
+
+#### `ConvoHopProviderProps.outbox` property
+
+```ts
+readonly outbox?: Outbox | undefined
+```
+
+The outbox every conversation below sends through. Without one, each conversation's store sends through an outbox
+of its own, which stops sending when the component unmounts.
+
+#### `ConvoHopProviderProps.children` property
+
+```ts
+readonly children?: ReactNode
+```
+
+### `LiveSessionState` interface
+
+```ts
+interface LiveSessionState
+```
+
+#### `LiveSessionState.status` property
+
+```ts
+readonly status: LiveSessionStatus
+```
+
+#### `LiveSessionState.session` property
+
+```ts
+readonly session: LiveSessionHandle | null | undefined
+```
+
+The conversation's current live session, `null` when none is running, and undefined until it first loads.
+
+#### `LiveSessionState.error` property
+
+```ts
+readonly error: Error | undefined
+```
+
+Why the last load failed. `session` keeps the value last loaded.
+
+### `LiveSessionView` interface
+
+```ts
+interface LiveSessionView extends LiveSessionState
+```
+
+#### `LiveSessionView.refresh` method
+
+```ts
+refresh(): Promise<void>
+```
+
+Loads the current live session again; a failure shows in `error`. Calls during a load share one more load after it.
+
+Sends [`communication.currentLiveSession`](../operations/communication/currentLiveSession.md).
+
+#### `LiveSessionView.status` property
+
+```ts
+readonly status: LiveSessionStatus
+```
+
+Inherited from `LiveSessionState`.
+
+#### `LiveSessionView.session` property
+
+```ts
+readonly session: LiveSessionHandle | null | undefined
+```
+
+The conversation's current live session, `null` when none is running, and undefined until it first loads.
+
+Inherited from `LiveSessionState`.
+
+#### `LiveSessionView.error` property
+
+```ts
+readonly error: Error | undefined
+```
+
+Why the last load failed. `session` keeps the value last loaded.
+
+Inherited from `LiveSessionState`.
+
+### `MediaConnectionState` interface
+
+```ts
+interface MediaConnectionState
+```
+
+#### `MediaConnectionState.status` property
+
+```ts
+readonly status: MediaConnectionStatus
+```
+
+#### `MediaConnectionState.connection` property
+
+```ts
+readonly connection: MediaConnection | undefined
+```
+
+The latest connection: use it for the microphone, camera and stats. It stays after a disconnection, for `reconnect()`.
+
+#### `MediaConnectionState.tracks` property
+
+```ts
+readonly tracks: readonly RemoteMedia[]
+```
+
+Remote audio and video, in subscription order. Add each `element` to the page, for example from a ref callback.
+
+#### `MediaConnectionState.audioBlocked` property
+
+```ts
+readonly audioBlocked: boolean
+```
+
+The browser blocked remote audio: call `enableAudio()` from a user gesture, such as a click.
+
+#### `MediaConnectionState.error` property
+
+```ts
+readonly error: Error | undefined
+```
+
+Why the last connect or reconnect failed.
+
+### `MediaConnectionView` interface
+
+```ts
+interface MediaConnectionView extends MediaConnectionState
+```
+
+#### `MediaConnectionView.connect` method
+
+```ts
+connect(participation: LiveParticipationHandle, options?: LiveConnectOptions): Promise<MediaConnection>
+```
+
+Connects a participation's media with `livekit-client`. Call it from a user gesture, so the browser allows audio and
+each admission is used once. Rejects while this hook's connection is connecting or connected, or when the
+participation's media is connected elsewhere.
+
+Sends [`communication.liveSessionCredentials`](../operations/communication/liveSessionCredentials.md).
+
+#### `MediaConnectionView.reconnect` method
+
+```ts
+reconnect(): Promise<MediaConnection>
+```
+
+Connects again with fresh credentials, typically after `disconnected`.
+
+Sends [`communication.liveSessionCredentials`](../operations/communication/liveSessionCredentials.md).
+
+#### `MediaConnectionView.disconnect` method
+
+```ts
+disconnect(): Promise<void>
+```
+
+Disconnects. A connection still opening closes as soon as it opens.
+
+#### `MediaConnectionView.enableAudio` method
+
+```ts
+enableAudio(): Promise<void>
+```
+
+Plays the remote audio the browser blocked. Call it from a user gesture.
+
+#### `MediaConnectionView.status` property
+
+```ts
+readonly status: MediaConnectionStatus
+```
+
+Inherited from `MediaConnectionState`.
+
+#### `MediaConnectionView.connection` property
+
+```ts
+readonly connection: MediaConnection | undefined
+```
+
+The latest connection: use it for the microphone, camera and stats. It stays after a disconnection, for `reconnect()`.
+
+Inherited from `MediaConnectionState`.
+
+#### `MediaConnectionView.tracks` property
+
+```ts
+readonly tracks: readonly RemoteMedia[]
+```
+
+Remote audio and video, in subscription order. Add each `element` to the page, for example from a ref callback.
+
+Inherited from `MediaConnectionState`.
+
+#### `MediaConnectionView.audioBlocked` property
+
+```ts
+readonly audioBlocked: boolean
+```
+
+The browser blocked remote audio: call `enableAudio()` from a user gesture, such as a click.
+
+Inherited from `MediaConnectionState`.
+
+#### `MediaConnectionView.error` property
+
+```ts
+readonly error: Error | undefined
+```
+
+Why the last connect or reconnect failed.
+
+Inherited from `MediaConnectionState`.
+
+### `SessionRefreshOptions` interface
+
+```ts
+interface SessionRefreshOptions
+```
+
+#### `SessionRefreshOptions.leadMs` property
+
+```ts
+leadMs?: number | undefined
+```
+
+How long before the session expires to renew it, in milliseconds. Default 60000.
+
+#### `SessionRefreshOptions.enabled` property
+
+```ts
+enabled?: boolean | undefined
+```
+
+Whether to keep the session renewed. Default true.
+
+#### `SessionRefreshOptions.onRefreshed` property
+
+```ts
+onRefreshed?: ((session: SessionMetadata) => void) | undefined
+```
+
+#### `SessionRefreshOptions.onError` property
+
+```ts
+onError?: ((error: Error) => void) | undefined
+```
+
+### `TypingControls` interface
+
+```ts
+interface TypingControls
+```
+
+#### `TypingControls.input` method
+
+```ts
+input(): void
+```
+
+Call on every edit to the draft.
+
+Sends [`communication.typing`](../operations/communication/typing.md).
+
+#### `TypingControls.stop` method
+
+```ts
+stop(): void
+```
+
+Call when the user sends or clears the draft.
+
+Sends [`communication.typing`](../operations/communication/typing.md).
+
+### `TypingOptions` interface
+
+```ts
+interface TypingOptions
+```
+
+#### `TypingOptions.intervalMs` property
+
+```ts
+intervalMs?: number | undefined
+```
+
+The shortest time between typing signals while the user keeps typing, in milliseconds. Default 3000.
+
+#### `TypingOptions.idleMs` property
+
+```ts
+idleMs?: number | undefined
+```
+
+How long after the last input the user stops typing, in milliseconds. Default 5000.
+
+#### `TypingOptions.enabled` property
+
+```ts
+enabled?: boolean | undefined
+```
+
+Whether to send signals. Pass `capabilities().features?.typing === true` to skip projects without typing. Default true.
+
+#### `TypingOptions.onError` property
+
+```ts
+onError?: ((error: Error) => void) | undefined
+```
+
+## Types
+
+### `LiveSessionStatus` type
+
+```ts
+type LiveSessionStatus = "idle" | "loading" | "ready" | "error"
+```
+
+### `MediaConnectionStatus` type
+
+```ts
+type MediaConnectionStatus = "idle" | "connecting" | "connected" | "resuming" | "disconnected" | "failed"
+```
+
+## Functions
+
+### `ConvoHopProvider` function
+
+```ts
+function ConvoHopProvider({ client, outbox, children }: ConvoHopProviderProps): ReactElement
+```
+
+Makes a client, and optionally a shared outbox, available to the hooks below it. It doesn't own or close either.
+
+### `useConversation` function
+
+```ts
+function useConversation(conversationId: string | null | undefined, options?: ConversationOptions): ConversationView
+```
+
+Follows a conversation while the component is mounted: it loads the conversation, keeps it live through
+reconnects and session refreshes, and sends optimistically through the provider's outbox. A new `conversationId`,
+client or outbox closes the old store and opens a new one; `null` closes it.
+
+Sends [`communication.getConversation`](../operations/communication/getConversation.md), [`communication.messages`](../operations/communication/messages.md), [`communication.getMessage`](../operations/communication/getMessage.md), [`communication.events`](../operations/communication/events.md), [`communication.receipts`](../operations/communication/receipts.md) and [`communication.conversationEvents`](../operations/communication/conversationEvents.md).
+
+### `useConvoHopClient` function
+
+```ts
+function useConvoHopClient(): ConvoHopClient
+```
+
+The provider's client.
+
+### `useLiveSession` function
+
+```ts
+function useLiveSession(conversationId: string | null | undefined): LiveSessionView
+```
+
+The conversation's current live session. It loads when the component mounts and again after each live-session event
+that a mounted `useConversation` for the same conversation, under the same provider, receives. Call `refresh()`
+in other cases, for example when a call push notification arrives.
+
+Sends [`communication.currentLiveSession`](../operations/communication/currentLiveSession.md).
+
+### `useMediaConnection` function
+
+```ts
+function useMediaConnection(): MediaConnectionView
+```
+
+Connects a live-session participation's media in the browser and tracks its remote audio and video. Unmounting
+disconnects. Browser only: on React Native, connect with `participation.connectWith` and a native LiveKit SDK.
+
+### `useOutbox` function
+
+```ts
+function useOutbox(outbox?: Outbox): readonly OutboxEntry[]
+```
+
+The entries of `outbox`, or of the provider's outbox, in send order.
+
+### `useSessionRefresh` function
+
+```ts
+function useSessionRefresh(options?: SessionRefreshOptions): void
+```
+
+Renews the provider client's session before it expires while the component is mounted. Needs `sessionRefresh`;
+without it, throws `SESSION_REFRESH_REQUIRED` to the nearest error boundary.
+
+Sends [`communication.route`](../operations/communication/route.md) and [`communication.currentSession`](../operations/communication/currentSession.md).
+
+### `useTyping` function
+
+```ts
+function useTyping(conversationId: string | null | undefined, options?: TypingOptions): TypingControls
+```
+
+Sends throttled typing signals for a conversation while the user types. Unmounting, or a new conversation, signals
+that typing stopped. The returned functions keep their identity.
+
+Sends [`communication.typing`](../operations/communication/typing.md).
+
 # TypeScript operation coverage
 
-The TypeScript SDK members that send each API operation. 52 of the 76 operations that TypeScript packages can send have a method.
+The TypeScript SDK members that send each API operation. 53 of the 76 operations that TypeScript packages can send have a method.
 
 ## Communication
 
@@ -7234,22 +9018,22 @@ Conversations, members, messages, receipts, realtime events and live sessions in
 
 | Operation | Layer | Members |
 | --- | --- | --- |
-| [`communication.capabilities`](../operations/communication/capabilities.md) | both | [`ProjectServerClient.capabilities`](reference/server.md#projectserverclientcapabilities-method) |
-| [`communication.route`](../operations/communication/route.md) | both | [`ProjectServerClient.initialize`](reference/server.md#projectserverclientinitialize-method), [`ConvoHopClient.initialize`](reference/client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](reference/client.md#convohopclientrefreshsession-method) |
-| [`communication.currentSession`](../operations/communication/currentSession.md) | client | [`ConvoHopClient.initialize`](reference/client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](reference/client.md#convohopclientrefreshsession-method) |
+| [`communication.capabilities`](../operations/communication/capabilities.md) | both | [`ProjectServerClient.capabilities`](reference/server.md#projectserverclientcapabilities-method), [`ConvoHopClient.capabilities`](reference/client.md#convohopclientcapabilities-method) |
+| [`communication.route`](../operations/communication/route.md) | both | [`ProjectServerClient.initialize`](reference/server.md#projectserverclientinitialize-method), [`ConvoHopClient.initialize`](reference/client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](reference/client.md#convohopclientrefreshsession-method), [`ConvoHopClient.scheduleSessionRefresh`](reference/client.md#convohopclientschedulesessionrefresh-method), [`useSessionRefresh`](reference/react.md#usesessionrefresh-function) |
+| [`communication.currentSession`](../operations/communication/currentSession.md) | client | [`ConvoHopClient.initialize`](reference/client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](reference/client.md#convohopclientrefreshsession-method), [`ConvoHopClient.scheduleSessionRefresh`](reference/client.md#convohopclientschedulesessionrefresh-method), [`useSessionRefresh`](reference/react.md#usesessionrefresh-function) |
 | [`communication.getPrincipal`](../operations/communication/getPrincipal.md) | server | [`ProjectServerClient.principals.get`](reference/server.md#projectserverclientprincipalsget-property) |
-| [`communication.getConversation`](../operations/communication/getConversation.md) | both | [`ServerConversation.get`](reference/server.md#serverconversationget-method), [`ConvoHopClient.getConversation`](reference/client.md#convohopclientgetconversation-method), [`ConversationHandle.get`](reference/client.md#conversationhandleget-method) |
-| [`communication.members`](../operations/communication/members.md) | both | [`ServerConversation.members.list`](reference/server.md#serverconversationmemberslist-method) |
-| [`communication.messages`](../operations/communication/messages.md) | both | [`ServerConversation.messages.list`](reference/server.md#serverconversationmessageslist-method), [`ConvoHopClient.messages`](reference/client.md#convohopclientmessages-method), [`ConversationHandle.messages.list`](reference/client.md#conversationhandlemessageslist-property) |
-| [`communication.getMessage`](../operations/communication/getMessage.md) | both | [`ServerConversation.messages.get`](reference/server.md#serverconversationmessagesget-method) |
-| [`communication.events`](../operations/communication/events.md) | client | [`ConvoHopClient.events`](reference/client.md#convohopclientevents-method), [`ConvoHopClient.watch`](reference/client.md#convohopclientwatch-method), [`ConvoHopClient.resyncAuthorizedHistory`](reference/client.md#convohopclientresyncauthorizedhistory-method) |
-| [`communication.receipts`](../operations/communication/receipts.md) | client | [`ConvoHopClient.receipts`](reference/client.md#convohopclientreceipts-method) |
-| [`communication.inbox`](../operations/communication/inbox.md) | both | [`ProjectServerClient.inbox`](reference/server.md#projectserverclientinbox-method) |
+| [`communication.getConversation`](../operations/communication/getConversation.md) | both | [`ServerConversation.get`](reference/server.md#serverconversationget-method), [`ConvoHopClient.getConversation`](reference/client.md#convohopclientgetconversation-method), [`ConversationHandle.get`](reference/client.md#conversationhandleget-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
+| [`communication.members`](../operations/communication/members.md) | both | [`ServerConversation.members.list`](reference/server.md#serverconversationmemberslist-method), [`ConvoHopClient.members`](reference/client.md#convohopclientmembers-method) |
+| [`communication.messages`](../operations/communication/messages.md) | both | [`ServerConversation.messages.list`](reference/server.md#serverconversationmessageslist-method), [`ConvoHopClient.messages`](reference/client.md#convohopclientmessages-method), [`ConversationHandle.messages.list`](reference/client.md#conversationhandlemessageslist-property), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`ConversationStore.loadOlder`](reference/client.md#conversationstoreloadolder-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method), [`ConversationView.loadOlder`](reference/react.md#conversationviewloadolder-method) |
+| [`communication.getMessage`](../operations/communication/getMessage.md) | both | [`ServerConversation.messages.get`](reference/server.md#serverconversationmessagesget-method), [`ConvoHopClient.getMessage`](reference/client.md#convohopclientgetmessage-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
+| [`communication.events`](../operations/communication/events.md) | client | [`ConvoHopClient.events`](reference/client.md#convohopclientevents-method), [`ConvoHopClient.watch`](reference/client.md#convohopclientwatch-method), [`ConvoHopClient.resyncAuthorizedHistory`](reference/client.md#convohopclientresyncauthorizedhistory-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
+| [`communication.receipts`](../operations/communication/receipts.md) | client | [`ConvoHopClient.receipts`](reference/client.md#convohopclientreceipts-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
+| [`communication.inbox`](../operations/communication/inbox.md) | both | [`ProjectServerClient.inbox`](reference/server.md#projectserverclientinbox-method), [`ConvoHopClient.inbox`](reference/client.md#convohopclientinbox-method) |
 | [`communication.search`](../operations/communication/search.md) | both | [`ProjectServerClient.search`](reference/server.md#projectserverclientsearch-method), [`ConvoHopClient.search`](reference/client.md#convohopclientsearch-method) |
-| [`communication.resolveRequest`](../operations/communication/resolveRequest.md) | both | [`ProjectServerClient.requests.resolve`](reference/server.md#projectserverclientrequestsresolve-property), [`ProjectServerClient.requests.retry`](reference/server.md#projectserverclientrequestsretry-property), [`ConvoHopClient.requests.resolve`](reference/client.md#convohopclientrequestsresolve-property), [`ConvoHopClient.requests.retry`](reference/client.md#convohopclientrequestsretry-property), [`ConvoHopClient.recoverPending`](reference/client.md#convohopclientrecoverpending-method) |
+| [`communication.resolveRequest`](../operations/communication/resolveRequest.md) | both | [`ProjectServerClient.requests.resolve`](reference/server.md#projectserverclientrequestsresolve-property), [`ProjectServerClient.requests.retry`](reference/server.md#projectserverclientrequestsretry-property), [`ConvoHopClient.requests.resolve`](reference/client.md#convohopclientrequestsresolve-property), [`ConvoHopClient.requests.retry`](reference/client.md#convohopclientrequestsretry-property), [`ConvoHopClient.recoverPending`](reference/client.md#convohopclientrecoverpending-method), [`Outbox.send`](reference/client.md#outboxsend-method), [`Outbox.resend`](reference/client.md#outboxresend-method), [`Outbox.flush`](reference/client.md#outboxflush-method), [`ConversationStore.send`](reference/client.md#conversationstoresend-method), [`ConversationView.send`](reference/react.md#conversationviewsend-method) |
 | [`communication.getOperation`](../operations/communication/getOperation.md) | both | [`ProjectServerClient.operation`](reference/server.md#projectserverclientoperation-method) |
 | [`communication.conversationMute`](../operations/communication/conversationMute.md) | both | [`ServerConversation.members.getMute`](reference/server.md#serverconversationmembersgetmute-method), [`ConversationHandle.mute.get`](reference/client.md#conversationhandlemuteget-property) |
-| [`communication.currentLiveSession`](../operations/communication/currentLiveSession.md) | both | [`ServerConversation.live.current`](reference/server.md#serverconversationlivecurrent-method), [`ConversationLive.current`](reference/client.md#conversationlivecurrent-method) |
+| [`communication.currentLiveSession`](../operations/communication/currentLiveSession.md) | both | [`ServerConversation.live.current`](reference/server.md#serverconversationlivecurrent-method), [`ConversationLive.current`](reference/client.md#conversationlivecurrent-method), [`useLiveSession`](reference/react.md#uselivesession-function), [`LiveSessionView.refresh`](reference/react.md#livesessionviewrefresh-method) |
 | [`communication.liveSession`](../operations/communication/liveSession.md) | both | [`ServerLiveSession.get`](reference/server.md#serverlivesessionget-method), [`ConvoHopClient.liveSession`](reference/client.md#convohopclientlivesession-method), [`LiveSessionHandle.get` (static)](reference/client.md#livesessionhandleget-static-method), [`LiveSessionHandle.get`](reference/client.md#livesessionhandleget-method), [`LiveSessionHandle.participation`](reference/client.md#livesessionhandleparticipation-method), [`LiveStartOperation.ready`](reference/client.md#livestartoperationready-method), [`LiveParticipationHandle.get`](reference/client.md#liveparticipationhandleget-method) |
 | [`communication.liveSessions`](../operations/communication/liveSessions.md) | both | [`ServerConversation.live.history`](reference/server.md#serverconversationlivehistory-method), [`ConversationLive.history`](reference/client.md#conversationlivehistory-method) |
 | [`communication.liveSessionParticipants`](../operations/communication/liveSessionParticipants.md) | both | [`ServerLiveSession.participants`](reference/server.md#serverlivesessionparticipants-method), [`LiveSessionHandle.participants`](reference/client.md#livesessionhandleparticipants-method) |
@@ -7267,11 +9051,11 @@ Conversations, members, messages, receipts, realtime events and live sessions in
 | [`communication.addMembers`](../operations/communication/addMembers.md) | server | [`ProjectServerClient.addMembers`](reference/server.md#projectserverclientaddmembers-method), [`ServerConversation.members.addBatch`](reference/server.md#serverconversationmembersaddbatch-method) |
 | [`communication.removeMember`](../operations/communication/removeMember.md) | server | [`ServerConversation.members.remove`](reference/server.md#serverconversationmembersremove-method) |
 | [`communication.historyGrant`](../operations/communication/historyGrant.md) | server | [`ServerConversation.members.grantHistory`](reference/server.md#serverconversationmembersgranthistory-method) |
-| [`communication.sendMessage`](../operations/communication/sendMessage.md) | both | [`ServerConversation.messages.send`](reference/server.md#serverconversationmessagessend-method), [`ConvoHopClient.send`](reference/client.md#convohopclientsend-method), [`ConversationHandle.messages.send`](reference/client.md#conversationhandlemessagessend-property) |
+| [`communication.sendMessage`](../operations/communication/sendMessage.md) | both | [`ServerConversation.messages.send`](reference/server.md#serverconversationmessagessend-method), [`ConvoHopClient.send`](reference/client.md#convohopclientsend-method), [`ConversationHandle.messages.send`](reference/client.md#conversationhandlemessagessend-property), [`Outbox.send`](reference/client.md#outboxsend-method), [`Outbox.resend`](reference/client.md#outboxresend-method), [`Outbox.flush`](reference/client.md#outboxflush-method), [`ConversationStore.send`](reference/client.md#conversationstoresend-method), [`ConversationView.send`](reference/react.md#conversationviewsend-method) |
 | [`communication.editMessage`](../operations/communication/editMessage.md) | both | [`ServerConversation.messages.edit`](reference/server.md#serverconversationmessagesedit-method), [`ConvoHopClient.edit`](reference/client.md#convohopclientedit-method), [`ConversationHandle.messages.edit`](reference/client.md#conversationhandlemessagesedit-property) |
 | [`communication.deleteMessage`](../operations/communication/deleteMessage.md) | both | [`ServerConversation.messages.delete`](reference/server.md#serverconversationmessagesdelete-method), [`ConvoHopClient.delete`](reference/client.md#convohopclientdelete-method), [`ConversationHandle.messages.delete`](reference/client.md#conversationhandlemessagesdelete-property) |
-| [`communication.reportReceipt`](../operations/communication/reportReceipt.md) | client | [`ConvoHopClient.reportRead`](reference/client.md#convohopclientreportread-method) |
-| [`communication.typing`](../operations/communication/typing.md) | client | Not wrapped by a method |
+| [`communication.reportReceipt`](../operations/communication/reportReceipt.md) | client | [`ConvoHopClient.reportRead`](reference/client.md#convohopclientreportread-method), [`ConvoHopClient.reportDelivered`](reference/client.md#convohopclientreportdelivered-method), [`ConversationStore.markRead`](reference/client.md#conversationstoremarkread-method), [`ConversationStore.markDelivered`](reference/client.md#conversationstoremarkdelivered-method), [`ConversationView.markRead`](reference/react.md#conversationviewmarkread-method), [`ConversationView.markDelivered`](reference/react.md#conversationviewmarkdelivered-method) |
+| [`communication.typing`](../operations/communication/typing.md) | client | [`ConvoHopClient.typing`](reference/client.md#convohopclienttyping-method), [`TypingIndicator.input`](reference/client.md#typingindicatorinput-method), [`TypingIndicator.stop`](reference/client.md#typingindicatorstop-method), [`TypingIndicator.dispose`](reference/client.md#typingindicatordispose-method), [`useTyping`](reference/react.md#usetyping-function), [`TypingControls.input`](reference/react.md#typingcontrolsinput-method), [`TypingControls.stop`](reference/react.md#typingcontrolsstop-method) |
 | [`communication.setBroadcastPermission`](../operations/communication/setBroadcastPermission.md) | server | [`ServerConversation.members.setBroadcastPermission`](reference/server.md#serverconversationmemberssetbroadcastpermission-method) |
 | [`communication.setConversationMute`](../operations/communication/setConversationMute.md) | both | [`ServerConversation.members.setMute`](reference/server.md#serverconversationmemberssetmute-method), [`ConversationHandle.mute.set`](reference/client.md#conversationhandlemuteset-property) |
 | [`communication.startLiveSession`](../operations/communication/startLiveSession.md) | client | [`ConversationLive.startVoice`](reference/client.md#conversationlivestartvoice-method), [`ConversationLive.startVideo`](reference/client.md#conversationlivestartvideo-method), [`ConversationLive.startBroadcast`](reference/client.md#conversationlivestartbroadcast-method) |
@@ -7279,10 +9063,10 @@ Conversations, members, messages, receipts, realtime events and live sessions in
 | [`communication.alertLiveSession`](../operations/communication/alertLiveSession.md) | both | [`ServerLiveSession.alert`](reference/server.md#serverlivesessionalert-method), [`LiveSessionHandle.alerts.send`](reference/client.md#livesessionhandlealertssend-property) |
 | [`communication.leaveLiveSession`](../operations/communication/leaveLiveSession.md) | client | [`LiveParticipationHandle.leave`](reference/client.md#liveparticipationhandleleave-method) |
 | [`communication.endLiveSession`](../operations/communication/endLiveSession.md) | both | [`ServerLiveSession.end`](reference/server.md#serverlivesessionend-method), [`LiveSessionHandle.end`](reference/client.md#livesessionhandleend-method) |
-| [`communication.liveSessionCredentials`](../operations/communication/liveSessionCredentials.md) | client | [`LiveParticipationHandle.connect`](reference/client.md#liveparticipationhandleconnect-method), [`MediaConnection.reconnect`](reference/client.md#mediaconnectionreconnect-method) |
+| [`communication.liveSessionCredentials`](../operations/communication/liveSessionCredentials.md) | client | [`LiveParticipationHandle.connect`](reference/client.md#liveparticipationhandleconnect-method), [`LiveParticipationHandle.connectWith`](reference/client.md#liveparticipationhandleconnectwith-method), [`MediaConnection.reconnect`](reference/client.md#mediaconnectionreconnect-method), [`MediaConnectionView.connect`](reference/react.md#mediaconnectionviewconnect-method), [`MediaConnectionView.reconnect`](reference/react.md#mediaconnectionviewreconnect-method) |
 | [`communication.redeemCredential`](../operations/communication/redeemCredential.md) | server | Not wrapped by a method |
 | [`communication.acknowledgeCredential`](../operations/communication/acknowledgeCredential.md) | server | Not wrapped by a method |
-| [`communication.conversationEvents`](../operations/communication/conversationEvents.md) | client | [`ConvoHopClient.watch`](reference/client.md#convohopclientwatch-method), [`ConvoHopClient.resyncAuthorizedHistory`](reference/client.md#convohopclientresyncauthorizedhistory-method) |
+| [`communication.conversationEvents`](../operations/communication/conversationEvents.md) | client | [`ConvoHopClient.watch`](reference/client.md#convohopclientwatch-method), [`ConvoHopClient.resyncAuthorizedHistory`](reference/client.md#convohopclientresyncauthorizedhistory-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
 
 ## Management
 

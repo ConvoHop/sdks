@@ -90,4 +90,4 @@ query CommunicationReceipts($context: RequestContextInput!, $input: ReceiptsRequ
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.receipts`](../../typescript/reference/client.md#convohopclientreceipts-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.receipts`](../../typescript/reference/client.md#convohopclientreceipts-method), [`ConversationStore.open`](../../typescript/reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](../../typescript/reference/client.md#conversationstoreresync-method), [`useConversation`](../../typescript/reference/react.md#useconversation-function), [`ConversationView.open`](../../typescript/reference/react.md#conversationviewopen-method), [`ConversationView.resync`](../../typescript/reference/react.md#conversationviewresync-method) |

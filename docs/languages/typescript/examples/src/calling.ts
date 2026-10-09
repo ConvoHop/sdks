@@ -1,4 +1,4 @@
-// Calling quickstart snippets. They need a browser and real WebRTC, so the tests only typecheck them.
+// Calling quickstart snippets. They need real WebRTC, so the tests only typecheck them.
 
 // #region start-call
 import type {
@@ -84,3 +84,33 @@ export async function endCall(call: Call): Promise<void> {
   await ending.completed(); // Resolves once the authority has cut off everyone's media.
 }
 // #endregion end-call
+
+// #region connect-with
+import { ConnectionState, Room } from "livekit-client";
+
+// The connection connectWith resolves with: your LiveKit Room, and what the SDK needs to know about it.
+export interface NativeConnection {
+  readonly room: Room;
+  readonly connected: boolean;
+  disconnect(): Promise<void>;
+}
+
+// Connects a participation's media with your own LiveKit Room, as on React Native. Call it again after the Room
+// disconnects: the SDK asks for a new connection that replaces the old one.
+export function connectNative(participation: LiveParticipationHandle): Promise<NativeConnection> {
+  return participation.connectWith(async attempt => {
+    // attempt.token is single-use and expires about 60 seconds after issue. Use it once, now, and only with
+    // attempt.url. Never store or log it.
+    const room = new Room();
+    await room.connect(attempt.url, attempt.token);
+    return {
+      room,
+      // Stays true while LiveKit resumes the connection, so the SDK doesn't open a second one.
+      get connected() {
+        return room.state !== ConnectionState.Disconnected;
+      },
+      disconnect: () => room.disconnect(),
+    };
+  });
+}
+// #endregion connect-with

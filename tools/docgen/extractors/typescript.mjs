@@ -6,7 +6,9 @@
  *
  * Reads the built declaration files (`exports["."].types`) of each package
  * listed in the language file and prints surface JSON
- * (spec/docs/surface.schema.json) on stdout. Run `npm ci && npm run build`
+ * (spec/docs/surface.schema.json) on stdout. A listed name can also be a
+ * package's subpath export, such as `@convohop/client/push`, which reads
+ * `exports["./push"].types`. Run `npm ci && npm run build`
  * first. Re-exports are followed into other workspace packages; third-party
  * packages are not documented. Declarations from `generated/` modules are
  * listed by signature only: their members mirror the GraphQL schema, which the
@@ -81,6 +83,16 @@ export function collapseSignature(text, maxLines = MAX_SIGNATURE_LINES) {
   return current;
 }
 
+/**
+ * Splits a bare module specifier into its package name and `exports` subpath:
+ * `@scope/pkg/push` is `{ name: "@scope/pkg", subpath: "./push" }`, and a
+ * plain package name has subpath `"."`. Returns `null` for anything else.
+ */
+export function splitSpecifier(specifier) {
+  const match = /^((?:@[^/]+\/)?[^/@.][^/]*)(\/.*)?$/.exec(specifier);
+  return match ? { name: match[1], subpath: match[2] ? `.${match[2]}` : "." } : null;
+}
+
 function isInside(parent, child) {
   const path = relative(parent, child);
   return path !== "" && !path.startsWith("..") && !path.startsWith(sep) && !/^[A-Za-z]:/.test(path);
@@ -134,10 +146,10 @@ class Program {
       if (!file) throw new ExtractError(`${relative(this.root, fromFile)}: cannot resolve ${JSON.stringify(specifier)}`);
       return file;
     }
-    const match = /^((?:@[^/]+\/)?[^/@][^/]*)(\/.*)?$/.exec(specifier);
-    if (!match) throw new ExtractError(`${relative(this.root, fromFile)}: unsupported module specifier ${JSON.stringify(specifier)}`);
-    const info = this.package(match[1]);
-    return info ? this.typesEntry(info, match[2] ? `.${match[2]}` : ".") : null;
+    const parts = splitSpecifier(specifier);
+    if (!parts) throw new ExtractError(`${relative(this.root, fromFile)}: unsupported module specifier ${JSON.stringify(specifier)}`);
+    const info = this.package(parts.name);
+    return info ? this.typesEntry(info, parts.subpath) : null;
   }
 
   module(file) {
@@ -317,8 +329,11 @@ export function extractTypeScript({ root = ROOT, language = "typescript", packag
   return {
     language,
     packages: packages.map(name => {
-      const entry = program.typesEntry(program.requirePackage(name));
-      const symbols = [...program.exports(entry)].map(([exported, target]) => symbolFor(program, exported, target, name));
+      const parts = splitSpecifier(name);
+      if (!parts) throw new ExtractError(`${name} is not a package name or a package subpath`);
+      const entry = program.typesEntry(program.requirePackage(parts.name), parts.subpath);
+      // A subpath's declarations belong to its package, so they get no origin.
+      const symbols = [...program.exports(entry)].map(([exported, target]) => symbolFor(program, exported, target, parts.name));
       return { name, symbols: symbols.sort((a, b) => codeUnitCompare(a.name, b.name)) };
     }),
   };

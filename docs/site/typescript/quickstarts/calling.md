@@ -108,7 +108,122 @@ export async function endCall(call: Call): Promise<void> {
 
 Leaving ends this device's participation, and the call goes on for everyone else. Ending stops it for everyone: `completed()` resolves once the authority has cut off everyone's media.
 
+## Calls in React
+
+With `@convohop/react`, inside the provider that the [client quickstart](client.md#use-react) sets up:
+
+```tsx snippet=docs/languages/typescript/examples/src/react.tsx#call
+import { useCallback } from "react";
+import type { LiveParticipationHandle, LiveSessionHandle } from "@convohop/client";
+import { useConvoHopClient, useLiveSession, useMediaConnection } from "@convohop/react";
+
+// Starts, joins and leaves a conversation's call. Mount it beside the conversation's Thread: useLiveSession reloads
+// on the call events that useConversation receives.
+export function CallPanel({ conversationId }: { conversationId: string }) {
+  const client = useConvoHopClient();
+  const live = useLiveSession(conversationId);
+  const media = useMediaConnection();
+  const [participation, setParticipation] = useState<LiveParticipationHandle>();
+
+  // Run these from clicks, never from an effect: each connect spends a single-use admission.
+  const join = async (session: LiveSessionHandle) => {
+    const joined = await session.join();
+    setParticipation(joined);
+    const connection = await media.connect(joined); // Receiving only.
+    if (joined.snapshot.permissions.microphone) await connection.microphone(true); // Asks for permission.
+  };
+  const start = async () => {
+    const started = await client.conversation(conversationId).live.startVoice();
+    await join(await started.ready());
+  };
+  const leave = async (current: LiveParticipationHandle) => {
+    await current.leave(); // Disconnects the media first. The call goes on for everyone else.
+    setParticipation(undefined);
+  };
+
+  if (!participation) {
+    const session = live.session;
+    if (session === undefined) return null; // Still loading.
+    return session ? (
+      <button onClick={() => join(session).catch(showError)}>Join the call</button>
+    ) : (
+      <button onClick={() => start().catch(showError)}>Start a call</button>
+    );
+  }
+  return (
+    <section>
+      {media.tracks.map(track => (
+        <Media key={track.trackId} element={track.element} />
+      ))}
+      {media.audioBlocked && <button onClick={() => media.enableAudio().catch(showError)}>Play audio</button>}
+      {media.status === "disconnected" && <button onClick={() => media.reconnect().catch(showError)}>Reconnect</button>}
+      {media.status === "failed" && <button onClick={() => media.connect(participation).catch(showError)}>Retry</button>}
+      <button onClick={() => leave(participation).catch(showError)}>Leave</button>
+    </section>
+  );
+}
+
+// Shows one remote track: track.element is an audio or video element.
+function Media({ element }: { element: HTMLMediaElement }) {
+  const attach = useCallback(
+    (node: HTMLDivElement | null) => {
+      node?.append(element);
+    },
+    [element],
+  );
+  return <div ref={attach} />;
+}
+
+function showError(error: unknown) {
+  console.error("The call failed", error);
+}
+```
+
+`useLiveSession` loads the conversation's current call, or `null` when there's none. It reloads on the call events that a mounted `useConversation` for the same conversation receives. Without one, call `live.refresh()`, for example when a call notification arrives.
+
+`useMediaConnection` connects with `livekit-client`, and shows the connection's `status` and remote `tracks`. Call `connect` and `reconnect` from clicks, never from an effect: each attempt spends a single-use admission, and React's StrictMode runs effects twice. Unmounting disconnects the media, but doesn't leave the call.
+
+## Connect your own LiveKit Room
+
+`connect` creates and manages the LiveKit connection for you. To manage a `livekit-client` `Room` yourself, for example to use LiveKit's UI components, connect with `connectWith`:
+
+```ts snippet=docs/languages/typescript/examples/src/calling.ts#connect-with
+import { ConnectionState, Room } from "livekit-client";
+
+// The connection connectWith resolves with: your LiveKit Room, and what the SDK needs to know about it.
+export interface NativeConnection {
+  readonly room: Room;
+  readonly connected: boolean;
+  disconnect(): Promise<void>;
+}
+
+// Connects a participation's media with your own LiveKit Room, as on React Native. Call it again after the Room
+// disconnects: the SDK asks for a new connection that replaces the old one.
+export function connectNative(participation: LiveParticipationHandle): Promise<NativeConnection> {
+  return participation.connectWith(async attempt => {
+    // attempt.token is single-use and expires about 60 seconds after issue. Use it once, now, and only with
+    // attempt.url. Never store or log it.
+    const room = new Room();
+    await room.connect(attempt.url, attempt.token);
+    return {
+      room,
+      // Stays true while LiveKit resumes the connection, so the SDK doesn't open a second one.
+      get connected() {
+        return room.state !== ConnectionState.Disconnected;
+      },
+      disconnect: () => room.disconnect(),
+    };
+  });
+}
+```
+
+The SDK gets a single-use token for this device's participation, then calls your function once with it. The token admits one new connection to `attempt.url`, and expires about 60 seconds after issue. LiveKit resumes a dropped connection on its own, but a new connection needs a new `connectWith`.
+
+- `connected` must stay true while LiveKit resumes the connection: `connectWith` refuses to start another connection while one is connected.
+- If your function throws, this device keeps its place in the call, and the next `connectWith` settles the failed attempt before it starts another.
+
 ## Next steps
 
 - [Push notifications quickstart](push.md): ring members whose app isn't open.
 - [`LiveParticipationHandle` reference](../reference/client.md#liveparticipationhandle-class): join, connect, leave and end.
+- [`@convohop/react` reference](../reference/react.md): `useLiveSession` and `useMediaConnection`.

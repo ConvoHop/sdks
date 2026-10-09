@@ -1,6 +1,6 @@
 # TypeScript push notifications quickstart
 
-Send push notifications for ConvoHop messages and calls: `@convohop/server` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
+Send push notifications for ConvoHop messages and calls: `@convohop/server` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries. In browsers, `@convohop/client/push` subscribes to Web Push and shows the notifications.
 
 ## Before you start
 
@@ -9,6 +9,7 @@ ConvoHop doesn't send push notifications itself. You need:
 - A webhook endpoint that receives `notification.message`, `notification.call` and `notification.callCancelled` events, as the [webhooks quickstart](webhooks.md) shows. Each of these events is addressed to one recipient. Events arrive at least once and in any order, so deduplicate on `eventId` before you send.
 - The devices that your app registered for each user, in your own database.
 - Your push credentials and clients. This page uses `firebase-admin` for FCM and `web-push` for browsers. For APNs, use any HTTP/2 client.
+- For browsers, a VAPID key pair, such as `web-push generate-vapid-keys` makes. Your backend signs Web Push requests with the private key, and browsers subscribe with the public key.
 
 ## Build and send the requests
 
@@ -52,11 +53,36 @@ Send each APNs request with an HTTP/2 client: POST its `payload` as JSON to `/3/
 
 iOS requires an app to report every VoIP push to CallKit as an incoming call, so `apnsVoip` builds requests for `notification.call` only. A CallKit app stops ringing when its realtime connection reports that the ring stopped. A missed call also gets an APNs alert, and an answered or declined ring gets no APNs request. [Calls on iOS](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md#calls-on-ios) has the details.
 
+## Subscribe a browser
+
+`@convohop/client/push` subscribes the browser with your VAPID public key and gives you the registration to store:
+
+```ts include=examples/src/browser-push.ts#subscribe
+```
+
+Your endpoint stores the registration's `subscription` as one of the signed-in user's devices, which `notify` sends Web Push requests to. Check that it has an `endpoint` and `p256dh` and `auth` keys before you store it. `subscribePush` reuses the browser's subscription when it was made with the same key, so registering on every start keeps your backend's copy current.
+
+## Show notifications in the browser
+
+The service worker shows each push, and opens its conversation when the user clicks it:
+
+```ts include=examples/src/service-worker.ts#service-worker
+```
+
+`handlePushEvent` checks each push against the push payload contract and shows its notification. Each notification is tagged with its message or call, so a later one for the same message or call replaces it. A repeated event, or a call that was answered or declined, replaces it silently, and a missed call replaces the ring with a missed-call notification. Browsers expect a notification for every push, so it shows one even for a repeat, and the sample's `onError` shows one for pushes that aren't ConvoHop notifications. It remembers events and cancelled rings only while the browser keeps the service worker running. The default titles are English. Pass `render` to show your own text.
+
+`handleNotificationClick` resolves your URL against the service worker's location, then focuses a window that already shows it or opens one. It refuses a URL on another origin.
+
+Build the service worker with your app's bundler, which resolves `@convohop/client/push`. That entry point has no dependencies. In TypeScript, compile the service worker with the `WebWorker` library instead of the DOM's, as the examples' [`tsconfig.worker.json`](https://github.com/ConvoHop/sdks/blob/main/docs/languages/typescript/examples/tsconfig.worker.json) does.
+
 ## How the samples are tested
 
 The test runs `notify` on every vector of the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md) and checks the request it sends to each kind of device. It also checks that `web-push` sends each Web Push request's `TTL`, `Urgency` and `Topic` headers, and that `firebase-admin` accepts each converted FCM message, to a token and to a FID, and sends the request's Android options.
 
+A second test runs the service worker on every Web Push request of the contract: each push shows one notification with the expected tag, and clicking it opens the conversation. Subscribing needs a browser with a push service, so CI only typechecks that sample.
+
 ## Next steps
 
 - [`push` reference](../reference/server.md#push-constant): every builder and its options.
+- [`@convohop/client/push` reference](../reference/client-push.md): subscribing, and showing and opening notifications.
 - [Calling quickstart](calling.md): start the calls that these notifications ring.

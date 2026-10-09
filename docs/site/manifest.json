@@ -55,6 +55,26 @@
           "source": "packages/client",
           "reference": "typescript/reference/client.md",
           "data": "typescript/reference/client.json"
+        },
+        {
+          "name": "@convohop/client/push",
+          "slug": "client-push",
+          "layer": "client",
+          "summary": "Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK.",
+          "runtime": "Current browsers and their service workers. No dependencies.",
+          "source": "packages/client",
+          "reference": "typescript/reference/client-push.md",
+          "data": "typescript/reference/client-push.json"
+        },
+        {
+          "name": "@convohop/react",
+          "slug": "react",
+          "layer": "client",
+          "summary": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.",
+          "runtime": "React 18 or later in current browsers. React Native isn't verified yet.",
+          "source": "packages/react",
+          "reference": "typescript/reference/react.md",
+          "data": "typescript/reference/react.json"
         }
       ],
       "quickstarts": [
@@ -220,7 +240,7 @@
       "path": "typescript/index.md",
       "kind": "language",
       "title": "TypeScript SDKs",
-      "description": "@convohop/server and @convohop/client wrap the ConvoHop API for TypeScript and JavaScript. The server SDK runs in your backend with a secret backend key, and the client SDK runs in your users' apps with a short-lived session for one user.",
+      "description": "@convohop/server and @convohop/client wrap the ConvoHop API for TypeScript and JavaScript. The server SDK runs in your backend with a secret backend key, and the client SDK runs in your users' apps with a short-lived session for one user. @convohop/react adds React hooks over the client SDK, and @convohop/client/push subscribes browsers to Web Push and shows the notifications.",
       "language": "typescript"
     },
     {
@@ -235,7 +255,7 @@
       "path": "typescript/quickstarts/client.md",
       "kind": "quickstart",
       "title": "TypeScript client quickstart",
-      "description": "Use ConvoHop in your users' browsers with @convohop/client: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads.",
+      "description": "Use ConvoHop in your users' browsers with @convohop/client: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads. @convohop/react offers the same as React hooks.",
       "language": "typescript",
       "topic": "client"
     },
@@ -251,7 +271,7 @@
       "path": "typescript/quickstarts/push.md",
       "kind": "quickstart",
       "title": "TypeScript push notifications quickstart",
-      "description": "Send push notifications for ConvoHop messages and calls: @convohop/server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.",
+      "description": "Send push notifications for ConvoHop messages and calls: @convohop/server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries. In browsers, @convohop/client/push subscribes to Web Push and shows the notifications.",
       "language": "typescript",
       "topic": "push"
     },
@@ -287,10 +307,26 @@
       "package": "@convohop/client"
     },
     {
+      "path": "typescript/reference/client-push.md",
+      "kind": "reference",
+      "title": "@convohop/client/push",
+      "description": "Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK.",
+      "language": "typescript",
+      "package": "@convohop/client/push"
+    },
+    {
+      "path": "typescript/reference/react.md",
+      "kind": "reference",
+      "title": "@convohop/react",
+      "description": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.",
+      "language": "typescript",
+      "package": "@convohop/react"
+    },
+    {
       "path": "typescript/reference/operations.md",
       "kind": "coverage",
       "title": "TypeScript operation coverage",
-      "description": "The TypeScript SDK members that send each API operation. 52 of the 76 operations that TypeScript packages can send have a method.",
+      "description": "The TypeScript SDK members that send each API operation. 53 of the 76 operations that TypeScript packages can send have a method.",
       "language": "typescript"
     },
     {

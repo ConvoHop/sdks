@@ -89,4 +89,4 @@ subscription CommunicationConversationEvents($context: RequestContextInput!, $in
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.watch`](../../typescript/reference/client.md#convohopclientwatch-method), [`ConvoHopClient.resyncAuthorizedHistory`](../../typescript/reference/client.md#convohopclientresyncauthorizedhistory-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.watch`](../../typescript/reference/client.md#convohopclientwatch-method), [`ConvoHopClient.resyncAuthorizedHistory`](../../typescript/reference/client.md#convohopclientresyncauthorizedhistory-method), [`ConversationStore.open`](../../typescript/reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](../../typescript/reference/client.md#conversationstoreresync-method), [`useConversation`](../../typescript/reference/react.md#useconversation-function), [`ConversationView.open`](../../typescript/reference/react.md#conversationviewopen-method), [`ConversationView.resync`](../../typescript/reference/react.md#conversationviewresync-method) |
