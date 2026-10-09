@@ -2,7 +2,7 @@
 
 Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.
 
-**Layer:** Client. **Runtime:** Current browsers. React Native isn't verified yet. **Source:** `packages/client`.
+**Layer:** Client. **Runtime:** Current browsers. For React Native, see the React Native docs. **Source:** `packages/client`.
 
 ## Classes
 

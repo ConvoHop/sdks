@@ -1,0 +1,726 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "react-native",
+  "package": "@convohop/react",
+  "layer": "client",
+  "page": "react.md",
+  "symbols": [
+    {
+      "name": "ConversationOptions",
+      "kind": "interface",
+      "ref": "@convohop/react#ConversationOptions",
+      "anchor": "conversationoptions-interface",
+      "signatures": ["interface ConversationOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "onEvent",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationOptions.onEvent",
+          "anchor": "conversationoptionsonevent-property",
+          "signatures": ["onEvent?: ((event: ProtocolObject) => void) | undefined"],
+          "docs": "Called after each new event is applied, including call and live-session events the store doesn't track."
+        },
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationOptions.onError",
+          "anchor": "conversationoptionsonerror-property",
+          "signatures": ["onError?: ((error: Error) => void) | undefined"],
+          "docs": "Called for every error, including realtime interruptions the store recovers from on its own."
+        }
+      ]
+    },
+    {
+      "name": "ConversationView",
+      "kind": "interface",
+      "ref": "@convohop/react#ConversationView",
+      "anchor": "conversationview-interface",
+      "signatures": ["interface ConversationView extends ConversationSnapshot"],
+      "docs": "A conversation's state and the actions on it. Actions reject, and `send` throws, until the conversation's store exists.",
+      "members": [
+        {
+          "name": "store",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationView.store",
+          "anchor": "conversationviewstore-property",
+          "signatures": ["readonly store: ConversationStore | undefined"],
+          "docs": "The store following the conversation, or undefined without a conversation ID and before the first effect runs."
+        },
+        {
+          "name": "send",
+          "kind": "method",
+          "ref": "@convohop/react#ConversationView.send",
+          "anchor": "conversationviewsend-method",
+          "signatures": ["send(text: string, props?: ProtocolObject): OutboxEntry"],
+          "docs": "Queues a message in the outbox. It shows in `pending` until it appears in `messages`.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            },
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "open",
+          "kind": "method",
+          "ref": "@convohop/react#ConversationView.open",
+          "anchor": "conversationviewopen-method",
+          "signatures": ["open(): Promise<void>"],
+          "docs": "Reconnects after an error, from the loaded state.",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            },
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"},
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            },
+            {"id": "communication.events", "page": "../../operations/communication/events.md"},
+            {"id": "communication.receipts", "page": "../../operations/communication/receipts.md"},
+            {
+              "id": "communication.conversationEvents",
+              "page": "../../operations/communication/conversationEvents.md"
+            }
+          ]
+        },
+        {
+          "name": "resync",
+          "kind": "method",
+          "ref": "@convohop/react#ConversationView.resync",
+          "anchor": "conversationviewresync-method",
+          "signatures": ["resync(): Promise<void>"],
+          "docs": "Discards the replay position and reloads the conversation; needed when `resyncRequired` is set.",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            },
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"},
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            },
+            {"id": "communication.events", "page": "../../operations/communication/events.md"},
+            {"id": "communication.receipts", "page": "../../operations/communication/receipts.md"},
+            {
+              "id": "communication.conversationEvents",
+              "page": "../../operations/communication/conversationEvents.md"
+            }
+          ]
+        },
+        {
+          "name": "loadOlder",
+          "kind": "method",
+          "ref": "@convohop/react#ConversationView.loadOlder",
+          "anchor": "conversationviewloadolder-method",
+          "signatures": ["loadOlder(): Promise<boolean>"],
+          "docs": "Loads the previous page of messages. Resolves whether it added any.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "markRead",
+          "kind": "method",
+          "ref": "@convohop/react#ConversationView.markRead",
+          "anchor": "conversationviewmarkread-method",
+          "signatures": ["markRead(): Promise<boolean>"],
+          "docs": "Reports reading through the newest loaded message. Resolves whether a report was needed.",
+          "operations": [
+            {
+              "id": "communication.reportReceipt",
+              "page": "../../operations/communication/reportReceipt.md"
+            }
+          ]
+        },
+        {
+          "name": "markDelivered",
+          "kind": "method",
+          "ref": "@convohop/react#ConversationView.markDelivered",
+          "anchor": "conversationviewmarkdelivered-method",
+          "signatures": ["markDelivered(): Promise<boolean>"],
+          "docs": "Reports delivery through the newest loaded message. Resolves whether a report was needed.",
+          "operations": [
+            {
+              "id": "communication.reportReceipt",
+              "page": "../../operations/communication/reportReceipt.md"
+            }
+          ]
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationView.status",
+          "anchor": "conversationviewstatus-property",
+          "signatures": ["readonly status: ConversationStatus"],
+          "docs": "",
+          "inherited": "ConversationSnapshot"
+        },
+        {
+          "name": "conversation",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationView.conversation",
+          "anchor": "conversationviewconversation-property",
+          "signatures": ["readonly conversation: Readonly<Conversation> | undefined"],
+          "docs": "The conversation and the user's membership, once loaded.",
+          "inherited": "ConversationSnapshot"
+        },
+        {
+          "name": "messages",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationView.messages",
+          "anchor": "conversationviewmessages-property",
+          "signatures": ["readonly messages: readonly Readonly<ConversationMessage>[]"],
+          "docs": "Loaded messages, oldest first. Deleted messages stay, with `deleted: true` and no text.",
+          "inherited": "ConversationSnapshot"
+        },
+        {
+          "name": "pending",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationView.pending",
+          "anchor": "conversationviewpending-property",
+          "signatures": ["readonly pending: readonly OutboxEntry[]"],
+          "docs": "This conversation's outbox entries that aren't in `messages` yet, in send order.",
+          "inherited": "ConversationSnapshot"
+        },
+        {
+          "name": "receipts",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationView.receipts",
+          "anchor": "conversationviewreceipts-property",
+          "signatures": ["readonly receipts: readonly Readonly<ReadReceipt>[]"],
+          "docs": "Each member's delivery and read progress, ordered by principal.",
+          "inherited": "ConversationSnapshot"
+        },
+        {
+          "name": "hasOlder",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationView.hasOlder",
+          "anchor": "conversationviewhasolder-property",
+          "signatures": ["readonly hasOlder: boolean"],
+          "docs": "Whether `ConversationStore.loadOlder` can load earlier messages.",
+          "inherited": "ConversationSnapshot"
+        },
+        {
+          "name": "error",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationView.error",
+          "anchor": "conversationviewerror-property",
+          "signatures": ["readonly error: Error | undefined"],
+          "docs": "",
+          "inherited": "ConversationSnapshot"
+        },
+        {
+          "name": "resyncRequired",
+          "kind": "property",
+          "ref": "@convohop/react#ConversationView.resyncRequired",
+          "anchor": "conversationviewresyncrequired-property",
+          "signatures": ["readonly resyncRequired: boolean"],
+          "docs": "The saved replay position is no longer valid. Only `ConversationStore.resync` recovers.",
+          "inherited": "ConversationSnapshot"
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopProviderProps",
+      "kind": "interface",
+      "ref": "@convohop/react#ConvoHopProviderProps",
+      "anchor": "convohopproviderprops-interface",
+      "signatures": ["interface ConvoHopProviderProps"],
+      "docs": "",
+      "members": [
+        {
+          "name": "client",
+          "kind": "property",
+          "ref": "@convohop/react#ConvoHopProviderProps.client",
+          "anchor": "convohopproviderpropsclient-property",
+          "signatures": ["readonly client: ConvoHopClient"],
+          "docs": "The signed-in user's client. Create it outside the provider, or above it, and close it when the user signs out."
+        },
+        {
+          "name": "outbox",
+          "kind": "property",
+          "ref": "@convohop/react#ConvoHopProviderProps.outbox",
+          "anchor": "convohopproviderpropsoutbox-property",
+          "signatures": ["readonly outbox?: Outbox | undefined"],
+          "docs": "The outbox every conversation below sends through. Without one, each conversation's store sends through an outbox\nof its own, which stops sending when the component unmounts."
+        },
+        {
+          "name": "children",
+          "kind": "property",
+          "ref": "@convohop/react#ConvoHopProviderProps.children",
+          "anchor": "convohopproviderpropschildren-property",
+          "signatures": ["readonly children?: ReactNode"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "LiveSessionState",
+      "kind": "interface",
+      "ref": "@convohop/react#LiveSessionState",
+      "anchor": "livesessionstate-interface",
+      "signatures": ["interface LiveSessionState"],
+      "docs": "",
+      "members": [
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "@convohop/react#LiveSessionState.status",
+          "anchor": "livesessionstatestatus-property",
+          "signatures": ["readonly status: LiveSessionStatus"],
+          "docs": ""
+        },
+        {
+          "name": "session",
+          "kind": "property",
+          "ref": "@convohop/react#LiveSessionState.session",
+          "anchor": "livesessionstatesession-property",
+          "signatures": ["readonly session: LiveSessionHandle | null | undefined"],
+          "docs": "The conversation's current live session, `null` when none is running, and undefined until it first loads."
+        },
+        {
+          "name": "error",
+          "kind": "property",
+          "ref": "@convohop/react#LiveSessionState.error",
+          "anchor": "livesessionstateerror-property",
+          "signatures": ["readonly error: Error | undefined"],
+          "docs": "Why the last load failed. `session` keeps the value last loaded."
+        }
+      ]
+    },
+    {
+      "name": "LiveSessionView",
+      "kind": "interface",
+      "ref": "@convohop/react#LiveSessionView",
+      "anchor": "livesessionview-interface",
+      "signatures": ["interface LiveSessionView extends LiveSessionState"],
+      "docs": "",
+      "members": [
+        {
+          "name": "refresh",
+          "kind": "method",
+          "ref": "@convohop/react#LiveSessionView.refresh",
+          "anchor": "livesessionviewrefresh-method",
+          "signatures": ["refresh(): Promise<void>"],
+          "docs": "Loads the current live session again; a failure shows in `error`. Calls during a load share one more load after it.",
+          "operations": [
+            {
+              "id": "communication.currentLiveSession",
+              "page": "../../operations/communication/currentLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "@convohop/react#LiveSessionView.status",
+          "anchor": "livesessionviewstatus-property",
+          "signatures": ["readonly status: LiveSessionStatus"],
+          "docs": "",
+          "inherited": "LiveSessionState"
+        },
+        {
+          "name": "session",
+          "kind": "property",
+          "ref": "@convohop/react#LiveSessionView.session",
+          "anchor": "livesessionviewsession-property",
+          "signatures": ["readonly session: LiveSessionHandle | null | undefined"],
+          "docs": "The conversation's current live session, `null` when none is running, and undefined until it first loads.",
+          "inherited": "LiveSessionState"
+        },
+        {
+          "name": "error",
+          "kind": "property",
+          "ref": "@convohop/react#LiveSessionView.error",
+          "anchor": "livesessionviewerror-property",
+          "signatures": ["readonly error: Error | undefined"],
+          "docs": "Why the last load failed. `session` keeps the value last loaded.",
+          "inherited": "LiveSessionState"
+        }
+      ]
+    },
+    {
+      "name": "MediaConnectionState",
+      "kind": "interface",
+      "ref": "@convohop/react#MediaConnectionState",
+      "anchor": "mediaconnectionstate-interface",
+      "signatures": ["interface MediaConnectionState"],
+      "docs": "",
+      "members": [
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "@convohop/react#MediaConnectionState.status",
+          "anchor": "mediaconnectionstatestatus-property",
+          "signatures": ["readonly status: MediaConnectionStatus"],
+          "docs": ""
+        },
+        {
+          "name": "connection",
+          "kind": "property",
+          "ref": "@convohop/react#MediaConnectionState.connection",
+          "anchor": "mediaconnectionstateconnection-property",
+          "signatures": ["readonly connection: MediaConnection | undefined"],
+          "docs": "The latest connection: use it for the microphone, camera and stats. It stays after a disconnection, for `reconnect()`."
+        },
+        {
+          "name": "tracks",
+          "kind": "property",
+          "ref": "@convohop/react#MediaConnectionState.tracks",
+          "anchor": "mediaconnectionstatetracks-property",
+          "signatures": ["readonly tracks: readonly RemoteMedia[]"],
+          "docs": "Remote audio and video, in subscription order. Add each `element` to the page, for example from a ref callback."
+        },
+        {
+          "name": "audioBlocked",
+          "kind": "property",
+          "ref": "@convohop/react#MediaConnectionState.audioBlocked",
+          "anchor": "mediaconnectionstateaudioblocked-property",
+          "signatures": ["readonly audioBlocked: boolean"],
+          "docs": "The browser blocked remote audio: call `enableAudio()` from a user gesture, such as a click."
+        },
+        {
+          "name": "error",
+          "kind": "property",
+          "ref": "@convohop/react#MediaConnectionState.error",
+          "anchor": "mediaconnectionstateerror-property",
+          "signatures": ["readonly error: Error | undefined"],
+          "docs": "Why the last connect or reconnect failed."
+        }
+      ]
+    },
+    {
+      "name": "MediaConnectionView",
+      "kind": "interface",
+      "ref": "@convohop/react#MediaConnectionView",
+      "anchor": "mediaconnectionview-interface",
+      "signatures": ["interface MediaConnectionView extends MediaConnectionState"],
+      "docs": "",
+      "members": [
+        {
+          "name": "connect",
+          "kind": "method",
+          "ref": "@convohop/react#MediaConnectionView.connect",
+          "anchor": "mediaconnectionviewconnect-method",
+          "signatures": [
+            "connect(participation: LiveParticipationHandle, options?: LiveConnectOptions): Promise<MediaConnection>"
+          ],
+          "docs": "Connects a participation's media with `livekit-client`. Call it from a user gesture, so the browser allows audio and\neach admission is used once. Rejects while this hook's connection is connecting or connected, or when the\nparticipation's media is connected elsewhere."
+        },
+        {
+          "name": "reconnect",
+          "kind": "method",
+          "ref": "@convohop/react#MediaConnectionView.reconnect",
+          "anchor": "mediaconnectionviewreconnect-method",
+          "signatures": ["reconnect(): Promise<MediaConnection>"],
+          "docs": "Connects again with fresh credentials, typically after `disconnected`."
+        },
+        {
+          "name": "disconnect",
+          "kind": "method",
+          "ref": "@convohop/react#MediaConnectionView.disconnect",
+          "anchor": "mediaconnectionviewdisconnect-method",
+          "signatures": ["disconnect(): Promise<void>"],
+          "docs": "Disconnects. A connection still opening closes as soon as it opens."
+        },
+        {
+          "name": "enableAudio",
+          "kind": "method",
+          "ref": "@convohop/react#MediaConnectionView.enableAudio",
+          "anchor": "mediaconnectionviewenableaudio-method",
+          "signatures": ["enableAudio(): Promise<void>"],
+          "docs": "Plays the remote audio the browser blocked. Call it from a user gesture."
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "@convohop/react#MediaConnectionView.status",
+          "anchor": "mediaconnectionviewstatus-property",
+          "signatures": ["readonly status: MediaConnectionStatus"],
+          "docs": "",
+          "inherited": "MediaConnectionState"
+        },
+        {
+          "name": "connection",
+          "kind": "property",
+          "ref": "@convohop/react#MediaConnectionView.connection",
+          "anchor": "mediaconnectionviewconnection-property",
+          "signatures": ["readonly connection: MediaConnection | undefined"],
+          "docs": "The latest connection: use it for the microphone, camera and stats. It stays after a disconnection, for `reconnect()`.",
+          "inherited": "MediaConnectionState"
+        },
+        {
+          "name": "tracks",
+          "kind": "property",
+          "ref": "@convohop/react#MediaConnectionView.tracks",
+          "anchor": "mediaconnectionviewtracks-property",
+          "signatures": ["readonly tracks: readonly RemoteMedia[]"],
+          "docs": "Remote audio and video, in subscription order. Add each `element` to the page, for example from a ref callback.",
+          "inherited": "MediaConnectionState"
+        },
+        {
+          "name": "audioBlocked",
+          "kind": "property",
+          "ref": "@convohop/react#MediaConnectionView.audioBlocked",
+          "anchor": "mediaconnectionviewaudioblocked-property",
+          "signatures": ["readonly audioBlocked: boolean"],
+          "docs": "The browser blocked remote audio: call `enableAudio()` from a user gesture, such as a click.",
+          "inherited": "MediaConnectionState"
+        },
+        {
+          "name": "error",
+          "kind": "property",
+          "ref": "@convohop/react#MediaConnectionView.error",
+          "anchor": "mediaconnectionviewerror-property",
+          "signatures": ["readonly error: Error | undefined"],
+          "docs": "Why the last connect or reconnect failed.",
+          "inherited": "MediaConnectionState"
+        }
+      ]
+    },
+    {
+      "name": "SessionRefreshOptions",
+      "kind": "interface",
+      "ref": "@convohop/react#SessionRefreshOptions",
+      "anchor": "sessionrefreshoptions-interface",
+      "signatures": ["interface SessionRefreshOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "leadMs",
+          "kind": "property",
+          "ref": "@convohop/react#SessionRefreshOptions.leadMs",
+          "anchor": "sessionrefreshoptionsleadms-property",
+          "signatures": ["leadMs?: number | undefined"],
+          "docs": "How long before the session expires to renew it, in milliseconds. Default 60000."
+        },
+        {
+          "name": "enabled",
+          "kind": "property",
+          "ref": "@convohop/react#SessionRefreshOptions.enabled",
+          "anchor": "sessionrefreshoptionsenabled-property",
+          "signatures": ["enabled?: boolean | undefined"],
+          "docs": "Whether to keep the session renewed. Default true."
+        },
+        {
+          "name": "onRefreshed",
+          "kind": "property",
+          "ref": "@convohop/react#SessionRefreshOptions.onRefreshed",
+          "anchor": "sessionrefreshoptionsonrefreshed-property",
+          "signatures": ["onRefreshed?: ((session: SessionMetadata) => void) | undefined"],
+          "docs": ""
+        },
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/react#SessionRefreshOptions.onError",
+          "anchor": "sessionrefreshoptionsonerror-property",
+          "signatures": ["onError?: ((error: Error) => void) | undefined"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "TypingControls",
+      "kind": "interface",
+      "ref": "@convohop/react#TypingControls",
+      "anchor": "typingcontrols-interface",
+      "signatures": ["interface TypingControls"],
+      "docs": "",
+      "members": [
+        {
+          "name": "input",
+          "kind": "method",
+          "ref": "@convohop/react#TypingControls.input",
+          "anchor": "typingcontrolsinput-method",
+          "signatures": ["input(): void"],
+          "docs": "Call on every edit to the draft.",
+          "operations": [
+            {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+          ]
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "ref": "@convohop/react#TypingControls.stop",
+          "anchor": "typingcontrolsstop-method",
+          "signatures": ["stop(): void"],
+          "docs": "Call when the user sends or clears the draft.",
+          "operations": [
+            {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TypingOptions",
+      "kind": "interface",
+      "ref": "@convohop/react#TypingOptions",
+      "anchor": "typingoptions-interface",
+      "signatures": ["interface TypingOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "intervalMs",
+          "kind": "property",
+          "ref": "@convohop/react#TypingOptions.intervalMs",
+          "anchor": "typingoptionsintervalms-property",
+          "signatures": ["intervalMs?: number | undefined"],
+          "docs": "The shortest time between typing signals while the user keeps typing, in milliseconds. Default 3000."
+        },
+        {
+          "name": "idleMs",
+          "kind": "property",
+          "ref": "@convohop/react#TypingOptions.idleMs",
+          "anchor": "typingoptionsidlems-property",
+          "signatures": ["idleMs?: number | undefined"],
+          "docs": "How long after the last input the user stops typing, in milliseconds. Default 5000."
+        },
+        {
+          "name": "enabled",
+          "kind": "property",
+          "ref": "@convohop/react#TypingOptions.enabled",
+          "anchor": "typingoptionsenabled-property",
+          "signatures": ["enabled?: boolean | undefined"],
+          "docs": "Whether to send signals. Pass `capabilities().features?.typing === true` to skip projects without typing. Default true."
+        },
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/react#TypingOptions.onError",
+          "anchor": "typingoptionsonerror-property",
+          "signatures": ["onError?: ((error: Error) => void) | undefined"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "LiveSessionStatus",
+      "kind": "type",
+      "ref": "@convohop/react#LiveSessionStatus",
+      "anchor": "livesessionstatus-type",
+      "signatures": ["type LiveSessionStatus = \"idle\" | \"loading\" | \"ready\" | \"error\""],
+      "docs": ""
+    },
+    {
+      "name": "MediaConnectionStatus",
+      "kind": "type",
+      "ref": "@convohop/react#MediaConnectionStatus",
+      "anchor": "mediaconnectionstatus-type",
+      "signatures": [
+        "type MediaConnectionStatus = \"idle\" | \"connecting\" | \"connected\" | \"resuming\" | \"disconnected\" | \"failed\""
+      ],
+      "docs": ""
+    },
+    {
+      "name": "ConvoHopProvider",
+      "kind": "function",
+      "ref": "@convohop/react#ConvoHopProvider",
+      "anchor": "convohopprovider-function",
+      "signatures": [
+        "function ConvoHopProvider({ client, outbox, children }: ConvoHopProviderProps): ReactElement"
+      ],
+      "docs": "Makes a client, and optionally a shared outbox, available to the hooks below it. It doesn't own or close either."
+    },
+    {
+      "name": "useConversation",
+      "kind": "function",
+      "ref": "@convohop/react#useConversation",
+      "anchor": "useconversation-function",
+      "signatures": [
+        "function useConversation(conversationId: string | null | undefined, options?: ConversationOptions): ConversationView"
+      ],
+      "docs": "Follows a conversation while the component is mounted: it loads the conversation, keeps it live through\nreconnects and session refreshes, and sends optimistically through the provider's outbox. A new `conversationId`,\nclient or outbox closes the old store and opens a new one; `null` closes it.",
+      "operations": [
+        {
+          "id": "communication.getConversation",
+          "page": "../../operations/communication/getConversation.md"
+        },
+        {"id": "communication.messages", "page": "../../operations/communication/messages.md"},
+        {"id": "communication.getMessage", "page": "../../operations/communication/getMessage.md"},
+        {"id": "communication.events", "page": "../../operations/communication/events.md"},
+        {"id": "communication.receipts", "page": "../../operations/communication/receipts.md"},
+        {
+          "id": "communication.conversationEvents",
+          "page": "../../operations/communication/conversationEvents.md"
+        }
+      ]
+    },
+    {
+      "name": "useConvoHopClient",
+      "kind": "function",
+      "ref": "@convohop/react#useConvoHopClient",
+      "anchor": "useconvohopclient-function",
+      "signatures": ["function useConvoHopClient(): ConvoHopClient"],
+      "docs": "The provider's client."
+    },
+    {
+      "name": "useLiveSession",
+      "kind": "function",
+      "ref": "@convohop/react#useLiveSession",
+      "anchor": "uselivesession-function",
+      "signatures": [
+        "function useLiveSession(conversationId: string | null | undefined): LiveSessionView"
+      ],
+      "docs": "The conversation's current live session. It loads when the component mounts and again after each live-session event\nthat a mounted `useConversation` for the same conversation, under the same provider, receives. Call `refresh()`\nin other cases, for example when a call push notification arrives.",
+      "operations": [
+        {
+          "id": "communication.currentLiveSession",
+          "page": "../../operations/communication/currentLiveSession.md"
+        }
+      ]
+    },
+    {
+      "name": "useMediaConnection",
+      "kind": "function",
+      "ref": "@convohop/react#useMediaConnection",
+      "anchor": "usemediaconnection-function",
+      "signatures": ["function useMediaConnection(): MediaConnectionView"],
+      "docs": "Connects a live-session participation's media in the browser and tracks its remote audio and video. Unmounting\ndisconnects. Browser only: on React Native, connect with `participation.connectWith` and a native LiveKit SDK."
+    },
+    {
+      "name": "useOutbox",
+      "kind": "function",
+      "ref": "@convohop/react#useOutbox",
+      "anchor": "useoutbox-function",
+      "signatures": ["function useOutbox(outbox?: Outbox): readonly OutboxEntry[]"],
+      "docs": "The entries of `outbox`, or of the provider's outbox, in send order."
+    },
+    {
+      "name": "useSessionRefresh",
+      "kind": "function",
+      "ref": "@convohop/react#useSessionRefresh",
+      "anchor": "usesessionrefresh-function",
+      "signatures": ["function useSessionRefresh(options?: SessionRefreshOptions): void"],
+      "docs": "Renews the provider client's session before it expires while the component is mounted. Needs `sessionRefresh`;\nwithout it, throws `SESSION_REFRESH_REQUIRED` to the nearest error boundary.",
+      "operations": [
+        {"id": "communication.route", "page": "../../operations/communication/route.md"},
+        {
+          "id": "communication.currentSession",
+          "page": "../../operations/communication/currentSession.md"
+        }
+      ]
+    },
+    {
+      "name": "useTyping",
+      "kind": "function",
+      "ref": "@convohop/react#useTyping",
+      "anchor": "usetyping-function",
+      "signatures": [
+        "function useTyping(conversationId: string | null | undefined, options?: TypingOptions): TypingControls"
+      ],
+      "docs": "Sends throttled typing signals for a conversation while the user types. Unmounting, or a new conversation, signals\nthat typing stopped. The returned functions keep their identity.",
+      "operations": [
+        {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+      ]
+    }
+  ]
+}

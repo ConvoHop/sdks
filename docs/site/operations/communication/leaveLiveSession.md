@@ -85,3 +85,4 @@ mutation CommunicationLeaveLiveSession($context: RequestContextInput!, $input: L
 | [Swift](../../swift/reference/operations.md) | [`LiveParticipationHandle.leave`](../../swift/reference/convohop.md#liveparticipationhandleleave-method) |
 | [Android](../../android/reference/operations.md) | [`LiveParticipationHandle.leave`](../../android/reference/android-core.md#liveparticipationhandleleave-method), [`ConvoHopCall.hangUp`](../../android/reference/android.md#convohopcallhangup-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`LiveParticipationHandle.leave`](../../flutter/reference/convohop.md#liveparticipationhandleleave-method), [`CommunicationOperations.leaveLiveSession`](../../flutter/reference/convohop.md#communicationoperationsleavelivesession-method) |
+| [React Native](../../react-native/reference/operations.md) | [`LiveParticipationHandle.leave`](../../react-native/reference/client.md#liveparticipationhandleleave-method) |

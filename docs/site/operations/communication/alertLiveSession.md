@@ -79,3 +79,4 @@ mutation CommunicationAlertLiveSession($context: RequestContextInput!, $input: A
 | [Swift](../../swift/reference/operations.md) | [`LiveSessionAlerts.send`](../../swift/reference/convohop.md#livesessionalertssend-method) |
 | [Android](../../android/reference/operations.md) | [`LiveSessionHandle.alerts.send`](../../android/reference/android-core.md#livesessionhandlealertssend-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`LiveSessionAlerts.send`](../../flutter/reference/convohop.md#livesessionalertssend-method), [`CommunicationOperations.alertLiveSession`](../../flutter/reference/convohop.md#communicationoperationsalertlivesession-method) |
+| [React Native](../../react-native/reference/operations.md) | [`LiveSessionHandle.alerts.send`](../../react-native/reference/client.md#livesessionhandlealertssend-property) |

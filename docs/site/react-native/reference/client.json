@@ -1,0 +1,4022 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "react-native",
+  "package": "@convohop/client",
+  "layer": "client",
+  "page": "client.md",
+  "symbols": [
+    {
+      "name": "ConversationHandle",
+      "kind": "class",
+      "ref": "@convohop/client#ConversationHandle",
+      "anchor": "conversationhandle-class",
+      "signatures": ["class ConversationHandle"],
+      "docs": "",
+      "members": [
+        {
+          "name": "client",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationHandle.client",
+          "anchor": "conversationhandleclient-property",
+          "signatures": ["readonly client: ConvoHopClient"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationHandle.conversationId",
+          "anchor": "conversationhandleconversationid-property",
+          "signatures": ["readonly conversationId: string"],
+          "docs": ""
+        },
+        {
+          "name": "live",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationHandle.live",
+          "anchor": "conversationhandlelive-property",
+          "signatures": ["readonly live: ConversationLive"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#ConversationHandle.constructor",
+          "anchor": "conversationhandle-constructor",
+          "signatures": ["constructor(client: ConvoHopClient, conversationId: string)"],
+          "docs": ""
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationHandle.get",
+          "anchor": "conversationhandleget-method",
+          "signatures": [
+            "get(): Promise<{\n    conversationId: string;\n    revision: string;\n    title: string;\n    props: Record<string, unknown> | null;\n    latestSequence: string;\n    membership: {\n        conversationId: string;\n        principalId: string;\n        role: string;\n        status: string;\n        membershipEpoch: string;\n        visibilityEpoch: string;\n        revision: string;\n        visibleFromSequence: string;\n        canStartBroadcast: boolean;\n    } | null;\n}>"
+          ],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "messages",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationHandle.messages",
+          "anchor": "conversationhandlemessages-property",
+          "signatures": ["readonly messages: { … }"],
+          "docs": "",
+          "members": [
+            {
+              "name": "send",
+              "kind": "property",
+              "ref": "@convohop/client#ConversationHandle.messages.send",
+              "anchor": "conversationhandlemessagessend-property",
+              "signatures": [
+                "send: (message: {\n    text: string;\n    props?: ProtocolObject;\n}, options?: CommandOptions) => Promise<{\n    messageId: string;\n    conversationId: string;\n    sequence: string;\n    revision: string;\n    status: string;\n    cursor: {\n        incarnation: string;\n        conversationId: string;\n        sequence: string;\n    } | null;\n} | null>"
+              ],
+              "docs": "",
+              "operations": [
+                {
+                  "id": "communication.sendMessage",
+                  "page": "../../operations/communication/sendMessage.md"
+                }
+              ]
+            },
+            {
+              "name": "list",
+              "kind": "property",
+              "ref": "@convohop/client#ConversationHandle.messages.list",
+              "anchor": "conversationhandlemessageslist-property",
+              "signatures": [
+                "list: (beforeSequence?: string) => Promise<import(\"@convohop/core\").ItemPage<{\n    messageId: string;\n    conversationId: string;\n    authorId: string;\n    sequence: string;\n    revision: string;\n    revisionSequence: string;\n    createdAt: string;\n    deleted: boolean;\n    text: string | null;\n    props: Record<string, unknown> | null;\n    editedAt: string | null;\n}>>"
+              ],
+              "docs": "",
+              "operations": [
+                {
+                  "id": "communication.messages",
+                  "page": "../../operations/communication/messages.md"
+                }
+              ]
+            },
+            {
+              "name": "edit",
+              "kind": "property",
+              "ref": "@convohop/client#ConversationHandle.messages.edit",
+              "anchor": "conversationhandlemessagesedit-property",
+              "signatures": [
+                "edit: (message: ConversationMessage, text: string, options?: CommandOptions) => Promise<{\n    messageId: string;\n    conversationId: string;\n    authorId: string;\n    sequence: string;\n    revision: string;\n    revisionSequence: string;\n    createdAt: string;\n    deleted: boolean;\n    text: string | null;\n    props: Record<string, unknown> | null;\n    editedAt: string | null;\n}>"
+              ],
+              "docs": "",
+              "operations": [
+                {
+                  "id": "communication.editMessage",
+                  "page": "../../operations/communication/editMessage.md"
+                }
+              ]
+            },
+            {
+              "name": "delete",
+              "kind": "property",
+              "ref": "@convohop/client#ConversationHandle.messages.delete",
+              "anchor": "conversationhandlemessagesdelete-property",
+              "signatures": [
+                "delete: (message: ConversationMessage, options?: CommandOptions) => Promise<{\n    messageId: string;\n    conversationId: string;\n    authorId: string;\n    sequence: string;\n    revision: string;\n    revisionSequence: string;\n    createdAt: string;\n    deleted: boolean;\n    text: string | null;\n    props: Record<string, unknown> | null;\n    editedAt: string | null;\n}>"
+              ],
+              "docs": "",
+              "operations": [
+                {
+                  "id": "communication.deleteMessage",
+                  "page": "../../operations/communication/deleteMessage.md"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "mute",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationHandle.mute",
+          "anchor": "conversationhandlemute-property",
+          "signatures": ["readonly mute: { … }"],
+          "docs": "This user's mute of message push notifications for the conversation. `until` (RFC 3339, in the future) applies\nonly to a mute. Calls still ring a muted member.",
+          "members": [
+            {
+              "name": "get",
+              "kind": "property",
+              "ref": "@convohop/client#ConversationHandle.mute.get",
+              "anchor": "conversationhandlemuteget-property",
+              "signatures": ["get: () => Promise<ConversationMute>"],
+              "docs": "",
+              "operations": [
+                {
+                  "id": "communication.conversationMute",
+                  "page": "../../operations/communication/conversationMute.md"
+                }
+              ]
+            },
+            {
+              "name": "set",
+              "kind": "property",
+              "ref": "@convohop/client#ConversationHandle.mute.set",
+              "anchor": "conversationhandlemuteset-property",
+              "signatures": [
+                "set: (input: {\n    muted: boolean;\n    until?: string;\n}, options?: CommandOptions) => Promise<ConversationMute>"
+              ],
+              "docs": "",
+              "operations": [
+                {
+                  "id": "communication.setConversationMute",
+                  "page": "../../operations/communication/setConversationMute.md"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ConversationLive",
+      "kind": "class",
+      "ref": "@convohop/client#ConversationLive",
+      "anchor": "conversationlive-class",
+      "signatures": ["class ConversationLive"],
+      "docs": "",
+      "members": [
+        {
+          "name": "conversation",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationLive.conversation",
+          "anchor": "conversationliveconversation-property",
+          "signatures": ["readonly conversation: ConversationHandle"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#ConversationLive.constructor",
+          "anchor": "conversationlive-constructor",
+          "signatures": ["constructor(conversation: ConversationHandle)"],
+          "docs": ""
+        },
+        {
+          "name": "current",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationLive.current",
+          "anchor": "conversationlivecurrent-method",
+          "signatures": ["current(): Promise<LiveSessionHandle | null>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.currentLiveSession",
+              "page": "../../operations/communication/currentLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "history",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationLive.history",
+          "anchor": "conversationlivehistory-method",
+          "signatures": [
+            "history(options?: PageOptions): Promise<{\n    nextCursor: string | null;\n    complete: boolean;\n    partialReason: string | null;\n    refreshRequired: boolean;\n    items: Array<{\n        liveSessionId: string;\n        conversationId: string;\n        creatorId: string;\n        kind: GraphqlTypes.LiveSessionKind;\n        mediaProfile: GraphqlTypes.LiveMediaProfile;\n        state: GraphqlTypes.LiveSessionState;\n        generation: string;\n        revision: string;\n        createdAt: string;\n        expiresAt: string;\n        myParticipation: { … } | null;\n        mediaCutoff: { … } | null;\n    }>;\n}>"
+          ],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.liveSessions",
+              "page": "../../operations/communication/liveSessions.md"
+            }
+          ]
+        },
+        {
+          "name": "startVoice",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationLive.startVoice",
+          "anchor": "conversationlivestartvoice-method",
+          "signatures": ["startVoice(options?: CommandOptions): Promise<LiveStartOperation>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.startLiveSession",
+              "page": "../../operations/communication/startLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "startVideo",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationLive.startVideo",
+          "anchor": "conversationlivestartvideo-method",
+          "signatures": ["startVideo(options?: CommandOptions): Promise<LiveStartOperation>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.startLiveSession",
+              "page": "../../operations/communication/startLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "startBroadcast",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationLive.startBroadcast",
+          "anchor": "conversationlivestartbroadcast-method",
+          "signatures": [
+            "startBroadcast(input: {\n    mediaProfile: LiveMediaProfile;\n}, options?: CommandOptions): Promise<LiveStartOperation>"
+          ],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.startLiveSession",
+              "page": "../../operations/communication/startLiveSession.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ConversationStore",
+      "kind": "class",
+      "ref": "@convohop/client#ConversationStore",
+      "anchor": "conversationstore-class",
+      "signatures": ["class ConversationStore"],
+      "docs": "One conversation's messages, receipts and pending sends, kept current from its authorized event stream.\n\n`open()` loads the conversation, its newest page of messages and every receipt, then follows new events. The\nreplay starts at the stream's saved position, so give the client `recoveryStorage` to make reopening incremental;\nwithout it, opening replays the conversation's visible history (applying nothing already loaded) before going live.\nKeep one store per conversation and client: stores of the same conversation share the saved replay position.",
+      "members": [
+        {
+          "name": "client",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStore.client",
+          "anchor": "conversationstoreclient-property",
+          "signatures": ["readonly client: ConvoHopClient"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStore.conversationId",
+          "anchor": "conversationstoreconversationid-property",
+          "signatures": ["readonly conversationId: string"],
+          "docs": ""
+        },
+        {
+          "name": "outbox",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStore.outbox",
+          "anchor": "conversationstoreoutbox-property",
+          "signatures": ["readonly outbox: Outbox"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#ConversationStore.constructor",
+          "anchor": "conversationstore-constructor",
+          "signatures": [
+            "constructor(client: ConvoHopClient, conversationId: string, options?: ConversationStoreOptions)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "snapshot",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStore.snapshot",
+          "anchor": "conversationstoresnapshot-property",
+          "signatures": ["get snapshot(): ConversationSnapshot"],
+          "docs": "A frozen snapshot, replaced on every change. Unchanged message and receipt lists keep their identity."
+        },
+        {
+          "name": "subscribe",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStore.subscribe",
+          "anchor": "conversationstoresubscribe-method",
+          "signatures": ["subscribe(listener: () => void): () => void"],
+          "docs": ""
+        },
+        {
+          "name": "open",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStore.open",
+          "anchor": "conversationstoreopen-method",
+          "signatures": ["open(): Promise<void>"],
+          "docs": "Loads the conversation and follows it, rejecting if that fails. While an attempt is running, including the\nreconnect after a session refresh, this returns it; after an error it reconnects from the loaded state. It doesn't\nrecover from `resyncRequired`: call `resync` for that.",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            },
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"},
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            },
+            {"id": "communication.events", "page": "../../operations/communication/events.md"},
+            {"id": "communication.receipts", "page": "../../operations/communication/receipts.md"},
+            {
+              "id": "communication.conversationEvents",
+              "page": "../../operations/communication/conversationEvents.md"
+            }
+          ]
+        },
+        {
+          "name": "resync",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStore.resync",
+          "anchor": "conversationstoreresync-method",
+          "signatures": ["resync(): Promise<void>"],
+          "docs": "Discards the saved replay position, reloads the conversation and replays its authorized history from the start.",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            },
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"},
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            },
+            {"id": "communication.events", "page": "../../operations/communication/events.md"},
+            {"id": "communication.receipts", "page": "../../operations/communication/receipts.md"},
+            {
+              "id": "communication.conversationEvents",
+              "page": "../../operations/communication/conversationEvents.md"
+            }
+          ]
+        },
+        {
+          "name": "loadOlder",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStore.loadOlder",
+          "anchor": "conversationstoreloadolder-method",
+          "signatures": ["loadOlder(): Promise<boolean>"],
+          "docs": "Loads the previous page of messages. Resolves whether it added any.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "send",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStore.send",
+          "anchor": "conversationstoresend-method",
+          "signatures": ["send(text: string, props?: ProtocolObject): OutboxEntry"],
+          "docs": "Queues a message in the outbox. It shows in `pending` until it appears in `messages`.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            },
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "markRead",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStore.markRead",
+          "anchor": "conversationstoremarkread-method",
+          "signatures": ["markRead(): Promise<boolean>"],
+          "docs": "Reports reading through the newest loaded message. Resolves whether a report was needed.",
+          "operations": [
+            {
+              "id": "communication.reportReceipt",
+              "page": "../../operations/communication/reportReceipt.md"
+            }
+          ]
+        },
+        {
+          "name": "markDelivered",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStore.markDelivered",
+          "anchor": "conversationstoremarkdelivered-method",
+          "signatures": ["markDelivered(): Promise<boolean>"],
+          "docs": "Reports delivery through the newest loaded message. Resolves whether a report was needed.",
+          "operations": [
+            {
+              "id": "communication.reportReceipt",
+              "page": "../../operations/communication/reportReceipt.md"
+            }
+          ]
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStore.close",
+          "anchor": "conversationstoreclose-method",
+          "signatures": ["close(): void"],
+          "docs": "Stops following the conversation. A store the app didn't give an outbox also closes its own; await\n`store.outbox.close()` to know when that outbox has stopped writing."
+        }
+      ]
+    },
+    {
+      "name": "ConversationStream",
+      "kind": "class",
+      "ref": "@convohop/client#ConversationStream",
+      "anchor": "conversationstream-class",
+      "signatures": ["class ConversationStream"],
+      "docs": "",
+      "members": [
+        {
+          "name": "client",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStream.client",
+          "anchor": "conversationstreamclient-property",
+          "signatures": ["readonly client: ConvoHopClient"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStream.conversationId",
+          "anchor": "conversationstreamconversationid-property",
+          "signatures": ["readonly conversationId: string"],
+          "docs": ""
+        },
+        {
+          "name": "route",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStream.route",
+          "anchor": "conversationstreamroute-property",
+          "signatures": ["readonly route: ProjectRoute"],
+          "docs": ""
+        },
+        {
+          "name": "apply",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStream.apply",
+          "anchor": "conversationstreamapply-property",
+          "signatures": ["readonly apply: (events: ProtocolObject[]) => Promise<void>"],
+          "docs": ""
+        },
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStream.onError",
+          "anchor": "conversationstreamonerror-property",
+          "signatures": ["readonly onError: (error: Error) => void"],
+          "docs": ""
+        },
+        {
+          "name": "onClose",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStream.onClose",
+          "anchor": "conversationstreamonclose-property",
+          "signatures": ["readonly onClose?: (() => void) | undefined"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#ConversationStream.constructor",
+          "anchor": "conversationstream-constructor",
+          "signatures": [
+            "constructor(client: ConvoHopClient, conversationId: string, route: ProjectRoute, token: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void, onClose?: (() => void) | undefined)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "cursor",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStream.cursor",
+          "anchor": "conversationstreamcursor-property",
+          "signatures": ["get cursor(): ConversationCursor | undefined"],
+          "docs": ""
+        },
+        {
+          "name": "closed",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStream.closed",
+          "anchor": "conversationstreamclosed-property",
+          "signatures": ["get closed(): boolean"],
+          "docs": ""
+        },
+        {
+          "name": "retire",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStream.retire",
+          "anchor": "conversationstreamretire-method",
+          "signatures": ["retire(): Promise<void>"],
+          "docs": ""
+        },
+        {
+          "name": "resyncAuthorizedHistory",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStream.resyncAuthorizedHistory",
+          "anchor": "conversationstreamresyncauthorizedhistory-method",
+          "signatures": ["resyncAuthorizedHistory(): Promise<void>"],
+          "docs": ""
+        },
+        {
+          "name": "start",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStream.start",
+          "anchor": "conversationstreamstart-method",
+          "signatures": ["start(): Promise<void>"],
+          "docs": ""
+        },
+        {
+          "name": "reconcile",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStream.reconcile",
+          "anchor": "conversationstreamreconcile-method",
+          "signatures": ["reconcile(): Promise<void>"],
+          "docs": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "ref": "@convohop/client#ConversationStream.close",
+          "anchor": "conversationstreamclose-method",
+          "signatures": ["close(): void"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopClient",
+      "kind": "class",
+      "ref": "@convohop/client#ConvoHopClient",
+      "anchor": "convohopclient-class",
+      "signatures": ["class ConvoHopClient"],
+      "docs": "",
+      "members": [
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClient.projectId",
+          "anchor": "convohopclientprojectid-property",
+          "signatures": ["readonly projectId: string"],
+          "docs": ""
+        },
+        {
+          "name": "principalId",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClient.principalId",
+          "anchor": "convohopclientprincipalid-property",
+          "signatures": ["readonly principalId: string"],
+          "docs": ""
+        },
+        {
+          "name": "http",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClient.http",
+          "anchor": "convohopclienthttp-property",
+          "signatures": ["readonly http: ConvoHopTransport"],
+          "docs": ""
+        },
+        {
+          "name": "storage",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClient.storage",
+          "anchor": "convohopclientstorage-property",
+          "signatures": ["readonly storage: RecoveryStorage | undefined"],
+          "docs": ""
+        },
+        {
+          "name": "asyncStorage",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClient.asyncStorage",
+          "anchor": "convohopclientasyncstorage-property",
+          "signatures": ["readonly asyncStorage: AsyncRecoveryStorage | undefined"],
+          "docs": "The configured `asyncRecoveryStorage`, if any."
+        },
+        {
+          "name": "platform",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClient.platform",
+          "anchor": "convohopclientplatform-property",
+          "signatures": ["readonly platform: Readonly<ConvoHopPlatform>"],
+          "docs": "The validated `platform` option, frozen. Empty when every service comes from globals."
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#ConvoHopClient.constructor",
+          "anchor": "convohopclient-constructor",
+          "signatures": ["constructor(options: ConvoHopClientOptions)"],
+          "docs": ""
+        },
+        {
+          "name": "sessionBinding",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClient.sessionBinding",
+          "anchor": "convohopclientsessionbinding-property",
+          "signatures": ["get sessionBinding(): Readonly<SessionMetadata> | undefined"],
+          "docs": ""
+        },
+        {
+          "name": "sessionRefreshState",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClient.sessionRefreshState",
+          "anchor": "convohopclientsessionrefreshstate-property",
+          "signatures": ["get sessionRefreshState(): SessionRefreshState"],
+          "docs": ""
+        },
+        {
+          "name": "initialize",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.initialize",
+          "anchor": "convohopclientinitialize-method",
+          "signatures": ["initialize(): Promise<ProjectRoute>"],
+          "docs": "",
+          "operations": [
+            {"id": "communication.route", "page": "../../operations/communication/route.md"},
+            {
+              "id": "communication.currentSession",
+              "page": "../../operations/communication/currentSession.md"
+            }
+          ]
+        },
+        {
+          "name": "refreshSession",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.refreshSession",
+          "anchor": "convohopclientrefreshsession-method",
+          "signatures": ["refreshSession(): Promise<SessionMetadata>"],
+          "docs": "",
+          "operations": [
+            {"id": "communication.route", "page": "../../operations/communication/route.md"},
+            {
+              "id": "communication.currentSession",
+              "page": "../../operations/communication/currentSession.md"
+            }
+          ]
+        },
+        {
+          "name": "scheduleSessionRefresh",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.scheduleSessionRefresh",
+          "anchor": "convohopclientschedulesessionrefresh-method",
+          "signatures": ["scheduleSessionRefresh(options?: SessionRefreshSchedule): () => void"],
+          "docs": "Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is\ncalled. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the\n`sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.\nReturning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'\ntimers can fire late.",
+          "operations": [
+            {"id": "communication.route", "page": "../../operations/communication/route.md"},
+            {
+              "id": "communication.currentSession",
+              "page": "../../operations/communication/currentSession.md"
+            }
+          ]
+        },
+        {
+          "name": "conversation",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.conversation",
+          "anchor": "convohopclientconversation-method",
+          "signatures": ["conversation(id: string): ConversationHandle"],
+          "docs": ""
+        },
+        {
+          "name": "getConversation",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.getConversation",
+          "anchor": "convohopclientgetconversation-method",
+          "signatures": ["getConversation(id: string): Promise<Conversation>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "requests",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClient.requests",
+          "anchor": "convohopclientrequests-property",
+          "signatures": ["readonly requests: { … }"],
+          "docs": "",
+          "members": [
+            {
+              "name": "resolve",
+              "kind": "property",
+              "ref": "@convohop/client#ConvoHopClient.requests.resolve",
+              "anchor": "convohopclientrequestsresolve-property",
+              "signatures": [
+                "resolve: (requestId: string) => Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
+              ],
+              "docs": "",
+              "operations": [
+                {
+                  "id": "communication.resolveRequest",
+                  "page": "../../operations/communication/resolveRequest.md"
+                }
+              ]
+            },
+            {
+              "name": "retry",
+              "kind": "property",
+              "ref": "@convohop/client#ConvoHopClient.requests.retry",
+              "anchor": "convohopclientrequestsretry-property",
+              "signatures": [
+                "retry: (requestId: string) => Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
+              ],
+              "docs": "",
+              "operations": [
+                {
+                  "id": "communication.resolveRequest",
+                  "page": "../../operations/communication/resolveRequest.md"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "liveSession",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.liveSession",
+          "anchor": "convohopclientlivesession-method",
+          "signatures": ["liveSession(id: string): Promise<LiveSessionHandle>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.liveSession",
+              "page": "../../operations/communication/liveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "liveAlerts",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClient.liveAlerts",
+          "anchor": "convohopclientlivealerts-property",
+          "signatures": ["readonly liveAlerts: { … }"],
+          "docs": "",
+          "members": [
+            {
+              "name": "list",
+              "kind": "property",
+              "ref": "@convohop/client#ConvoHopClient.liveAlerts.list",
+              "anchor": "convohopclientlivealertslist-property",
+              "signatures": [
+                "list: (options?: PageOptions) => Promise<OperationPayload<\"communication.liveSessionAlerts\">[\"result\"]>"
+              ],
+              "docs": "",
+              "operations": [
+                {
+                  "id": "communication.liveSessionAlerts",
+                  "page": "../../operations/communication/liveSessionAlerts.md"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "messages",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.messages",
+          "anchor": "convohopclientmessages-method",
+          "signatures": [
+            "messages(id: string, beforeSequence?: string, limit?: number): Promise<ItemPage<ConversationMessage>>"
+          ],
+          "docs": "Up to `limit` (1..100, default 100) messages before `beforeSequence` or the newest, newest first. Pages can hold fewer.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "send",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.send",
+          "anchor": "convohopclientsend-method",
+          "signatures": [
+            "send(id: string, text: string, requestId?: string, props?: ProtocolObject): Promise<SendReceipt>"
+          ],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "edit",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.edit",
+          "anchor": "convohopclientedit-method",
+          "signatures": [
+            "edit(message: ConversationMessage, text: string, requestId?: string): Promise<ConversationMessage>"
+          ],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.editMessage",
+              "page": "../../operations/communication/editMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "delete",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.delete",
+          "anchor": "convohopclientdelete-method",
+          "signatures": [
+            "delete(message: ConversationMessage, requestId?: string): Promise<ConversationMessage>"
+          ],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.deleteMessage",
+              "page": "../../operations/communication/deleteMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "events",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.events",
+          "anchor": "convohopclientevents-method",
+          "signatures": [
+            "events(id: string, after?: ConversationCursor): Promise<ItemPage<ProtocolObject> & {\n    nextCursor: ConversationCursor;\n}>"
+          ],
+          "docs": "",
+          "operations": [
+            {"id": "communication.events", "page": "../../operations/communication/events.md"}
+          ]
+        },
+        {
+          "name": "reportRead",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.reportRead",
+          "anchor": "convohopclientreportread-method",
+          "signatures": [
+            "reportRead(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>"
+          ],
+          "docs": "Reports reading through a message's sequence, which also covers its delivery. Returns the user's current receipt.",
+          "operations": [
+            {
+              "id": "communication.reportReceipt",
+              "page": "../../operations/communication/reportReceipt.md"
+            }
+          ]
+        },
+        {
+          "name": "reportDelivered",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.reportDelivered",
+          "anchor": "convohopclientreportdelivered-method",
+          "signatures": [
+            "reportDelivered(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>"
+          ],
+          "docs": "Reports delivery through a message's sequence. Returns the user's current receipt.",
+          "operations": [
+            {
+              "id": "communication.reportReceipt",
+              "page": "../../operations/communication/reportReceipt.md"
+            }
+          ]
+        },
+        {
+          "name": "receipts",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.receipts",
+          "anchor": "convohopclientreceipts-method",
+          "signatures": ["receipts(id: string, cursor?: string): Promise<ItemPage<ReadReceipt>>"],
+          "docs": "",
+          "operations": [
+            {"id": "communication.receipts", "page": "../../operations/communication/receipts.md"}
+          ]
+        },
+        {
+          "name": "getMessage",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.getMessage",
+          "anchor": "convohopclientgetmessage-method",
+          "signatures": ["getMessage(id: string, messageId: string): Promise<ConversationMessage>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "members",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.members",
+          "anchor": "convohopclientmembers-method",
+          "signatures": [
+            "members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>"
+          ],
+          "docs": "",
+          "operations": [
+            {"id": "communication.members", "page": "../../operations/communication/members.md"}
+          ]
+        },
+        {
+          "name": "inbox",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.inbox",
+          "anchor": "convohopclientinbox-method",
+          "signatures": ["inbox(options?: PageOptions): Promise<InboxPage>"],
+          "docs": "",
+          "operations": [
+            {"id": "communication.inbox", "page": "../../operations/communication/inbox.md"}
+          ]
+        },
+        {
+          "name": "capabilities",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.capabilities",
+          "anchor": "convohopclientcapabilities-method",
+          "signatures": ["capabilities(): Promise<ProjectCapabilities>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.capabilities",
+              "page": "../../operations/communication/capabilities.md"
+            }
+          ]
+        },
+        {
+          "name": "typing",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.typing",
+          "anchor": "convohopclienttyping-method",
+          "signatures": ["typing(id: string, isTyping: boolean): Promise<boolean>"],
+          "docs": "Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,\nretried or resolved. Check `features?.typing` in `capabilities` first.",
+          "operations": [
+            {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+          ]
+        },
+        {
+          "name": "search",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.search",
+          "anchor": "convohopclientsearch-method",
+          "signatures": [
+            "search(query: string, conversationIds?: string[]): Promise<ItemPage<SearchHit>>"
+          ],
+          "docs": "",
+          "operations": [
+            {"id": "communication.search", "page": "../../operations/communication/search.md"}
+          ]
+        },
+        {
+          "name": "recoverPending",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.recoverPending",
+          "anchor": "convohopclientrecoverpending-method",
+          "signatures": ["recoverPending(onError: (error: Error) => void): Promise<void>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "watch",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.watch",
+          "anchor": "convohopclientwatch-method",
+          "signatures": [
+            "watch(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>"
+          ],
+          "docs": "",
+          "operations": [
+            {"id": "communication.events", "page": "../../operations/communication/events.md"},
+            {
+              "id": "communication.conversationEvents",
+              "page": "../../operations/communication/conversationEvents.md"
+            }
+          ]
+        },
+        {
+          "name": "resyncAuthorizedHistory",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
+          "anchor": "convohopclientresyncauthorizedhistory-method",
+          "signatures": [
+            "resyncAuthorizedHistory(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>"
+          ],
+          "docs": "",
+          "operations": [
+            {"id": "communication.events", "page": "../../operations/communication/events.md"},
+            {
+              "id": "communication.conversationEvents",
+              "page": "../../operations/communication/conversationEvents.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopProblem",
+      "kind": "class",
+      "ref": "@convohop/client#ConvoHopProblem",
+      "anchor": "convohopproblem-class",
+      "signatures": ["class ConvoHopProblem extends Error"],
+      "docs": "",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "code",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopProblem.code",
+          "anchor": "convohopproblemcode-property",
+          "signatures": ["readonly code: string"],
+          "docs": ""
+        },
+        {
+          "name": "requestId",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopProblem.requestId",
+          "anchor": "convohopproblemrequestid-property",
+          "signatures": ["readonly requestId: string"],
+          "docs": ""
+        },
+        {
+          "name": "outcome",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopProblem.outcome",
+          "anchor": "convohopproblemoutcome-property",
+          "signatures": ["readonly outcome: string"],
+          "docs": ""
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopProblem.status",
+          "anchor": "convohopproblemstatus-property",
+          "signatures": ["readonly status: number"],
+          "docs": ""
+        },
+        {
+          "name": "retryAfter",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopProblem.retryAfter",
+          "anchor": "convohopproblemretryafter-property",
+          "signatures": ["readonly retryAfter?: number"],
+          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,\nor from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when\n`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first."
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#ConvoHopProblem.constructor",
+          "anchor": "convohopproblem-constructor",
+          "signatures": [
+            "constructor(code: string, requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {\n    retryAfter?: number;\n})"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopTransport",
+      "kind": "class",
+      "ref": "@convohop/client#ConvoHopTransport",
+      "anchor": "convohoptransport-class",
+      "signatures": ["class ConvoHopTransport"],
+      "docs": "",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "baseUrl",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransport.baseUrl",
+          "anchor": "convohoptransportbaseurl-property",
+          "signatures": ["readonly baseUrl: string"],
+          "docs": ""
+        },
+        {
+          "name": "durableRecovery",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransport.durableRecovery",
+          "anchor": "convohoptransportdurablerecovery-property",
+          "signatures": ["readonly durableRecovery: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "incarnation",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransport.incarnation",
+          "anchor": "convohoptransportincarnation-property",
+          "signatures": ["incarnation: string"],
+          "docs": ""
+        },
+        {
+          "name": "servingEpoch",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransport.servingEpoch",
+          "anchor": "convohoptransportservingepoch-property",
+          "signatures": ["servingEpoch: string | undefined"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#ConvoHopTransport.constructor",
+          "anchor": "convohoptransport-constructor",
+          "signatures": ["constructor(options: ConvoHopTransportOptions)"],
+          "docs": ""
+        },
+        {
+          "name": "initializeRecovery",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopTransport.initializeRecovery",
+          "anchor": "convohoptransportinitializerecovery-method",
+          "signatures": ["initializeRecovery(): Promise<void>"],
+          "docs": ""
+        },
+        {
+          "name": "recoveryStates",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransport.recoveryStates",
+          "anchor": "convohoptransportrecoverystates-property",
+          "signatures": ["get recoveryStates(): readonly RecoveryState[]"],
+          "docs": ""
+        },
+        {
+          "name": "execute",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopTransport.execute",
+          "anchor": "convohoptransportexecute-method",
+          "signatures": [
+            "execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>, requestId?: string, credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>>"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "retry",
+          "kind": "method",
+          "ref": "@convohop/client#ConvoHopTransport.retry",
+          "anchor": "convohoptransportretry-method",
+          "signatures": [
+            "retry(requestId: string): Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "LiveEndOperation",
+      "kind": "class",
+      "ref": "@convohop/client#LiveEndOperation",
+      "anchor": "liveendoperation-class",
+      "signatures": ["class LiveEndOperation extends LiveAction"],
+      "docs": "",
+      "members": [
+        {
+          "name": "receipt",
+          "kind": "property",
+          "ref": "@convohop/client#LiveEndOperation.receipt",
+          "anchor": "liveendoperationreceipt-property",
+          "signatures": ["readonly receipt: OperationPayload<\"communication.endLiveSession\">"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#LiveEndOperation.constructor",
+          "anchor": "liveendoperation-constructor",
+          "signatures": [
+            "constructor(client: ConvoHopClient, receipt: OperationPayload<\"communication.endLiveSession\">)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "client",
+          "kind": "property",
+          "ref": "@convohop/client#LiveEndOperation.client",
+          "anchor": "liveendoperationclient-property",
+          "signatures": ["readonly client: ConvoHopClient"],
+          "docs": "",
+          "inherited": "LiveAction"
+        },
+        {
+          "name": "operationId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveEndOperation.operationId",
+          "anchor": "liveendoperationoperationid-property",
+          "signatures": ["readonly operationId: string"],
+          "docs": "",
+          "inherited": "LiveAction"
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveEndOperation.liveSessionId",
+          "anchor": "liveendoperationlivesessionid-property",
+          "signatures": ["readonly liveSessionId: string"],
+          "docs": "",
+          "inherited": "LiveAction"
+        },
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "@convohop/client#LiveEndOperation.kind",
+          "anchor": "liveendoperationkind-property",
+          "signatures": ["readonly kind: \"START\" | \"END\""],
+          "docs": "",
+          "inherited": "LiveAction"
+        },
+        {
+          "name": "requestId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveEndOperation.requestId",
+          "anchor": "liveendoperationrequestid-property",
+          "signatures": ["readonly requestId: string"],
+          "docs": "",
+          "inherited": "LiveAction"
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "ref": "@convohop/client#LiveEndOperation.get",
+          "anchor": "liveendoperationget-method",
+          "signatures": ["get(): Promise<LiveOperation>"],
+          "docs": "",
+          "inherited": "LiveAction",
+          "operations": [
+            {
+              "id": "communication.liveSessionOperation",
+              "page": "../../operations/communication/liveSessionOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "completed",
+          "kind": "method",
+          "ref": "@convohop/client#LiveEndOperation.completed",
+          "anchor": "liveendoperationcompleted-method",
+          "signatures": [
+            "completed(options?: LiveWaitOptions): Promise<NonNullable<LiveOperation[\"completion\"]>>"
+          ],
+          "docs": "",
+          "inherited": "LiveAction",
+          "operations": [
+            {
+              "id": "communication.liveSessionOperation",
+              "page": "../../operations/communication/liveSessionOperation.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "LiveParticipationHandle",
+      "kind": "class",
+      "ref": "@convohop/client#LiveParticipationHandle",
+      "anchor": "liveparticipationhandle-class",
+      "signatures": ["class LiveParticipationHandle"],
+      "docs": "",
+      "members": [
+        {
+          "name": "live",
+          "kind": "property",
+          "ref": "@convohop/client#LiveParticipationHandle.live",
+          "anchor": "liveparticipationhandlelive-property",
+          "signatures": ["readonly live: LiveSessionHandle"],
+          "docs": ""
+        },
+        {
+          "name": "snapshot",
+          "kind": "property",
+          "ref": "@convohop/client#LiveParticipationHandle.snapshot",
+          "anchor": "liveparticipationhandlesnapshot-property",
+          "signatures": ["readonly snapshot: LiveParticipation"],
+          "docs": ""
+        },
+        {
+          "name": "participationId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveParticipationHandle.participationId",
+          "anchor": "liveparticipationhandleparticipationid-property",
+          "signatures": ["readonly participationId: string"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#LiveParticipationHandle.constructor",
+          "anchor": "liveparticipationhandle-constructor",
+          "signatures": ["constructor(live: LiveSessionHandle, snapshot: LiveParticipation)"],
+          "docs": ""
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "ref": "@convohop/client#LiveParticipationHandle.get",
+          "anchor": "liveparticipationhandleget-method",
+          "signatures": ["get(): Promise<LiveParticipation>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.liveSession",
+              "page": "../../operations/communication/liveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "connect",
+          "kind": "method",
+          "ref": "@convohop/client#LiveParticipationHandle.connect",
+          "anchor": "liveparticipationhandleconnect-method",
+          "signatures": ["connect(options?: LiveConnectOptions): Promise<MediaConnection>"],
+          "docs": "Connects this participation's media in the browser with `livekit-client`, which is loaded on first use."
+        },
+        {
+          "name": "connectWith",
+          "kind": "method",
+          "ref": "@convohop/client#LiveParticipationHandle.connectWith",
+          "anchor": "liveparticipationhandleconnectwith-method",
+          "signatures": [
+            "connectWith<C extends LiveConnection>(connector: LiveConnector<C>, options?: CommandOptions): Promise<C>"
+          ],
+          "docs": "Connects this participation's media with your own native client, such as a stock LiveKit SDK on React Native.\nThe SDK obtains a participation-bound grant, checks the media URL, records the attempt durably, then calls\n`connector` once. A connector failure is `MEDIA_CONNECT_FAILED` with an unknown outcome: the reservation remains,\nand the next call resolves the old attempt before a fresh one. Rejects while another attempt is in flight or\nanother connection is connected.",
+          "operations": [
+            {
+              "id": "communication.liveSessionCredentials",
+              "page": "../../operations/communication/liveSessionCredentials.md"
+            }
+          ]
+        },
+        {
+          "name": "leave",
+          "kind": "method",
+          "ref": "@convohop/client#LiveParticipationHandle.leave",
+          "anchor": "liveparticipationhandleleave-method",
+          "signatures": [
+            "leave(options?: CommandOptions): Promise<{\n    status: string;\n    requestId: string;\n    receiptId: string;\n    committedAt: string;\n    replayed: boolean;\n    result: {\n        liveSessionId: string;\n        participationId: string;\n        mediaCutoff: {\n            state: GraphqlTypes.LiveCutoffState;\n            evidence: GraphqlTypes.LiveCutoffEvidence | null;\n            enforcedAt: string | null;\n            operationId: string | null;\n            scope: { … };\n        };\n    };\n}>"
+          ],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.leaveLiveSession",
+              "page": "../../operations/communication/leaveLiveSession.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "LiveSessionHandle",
+      "kind": "class",
+      "ref": "@convohop/client#LiveSessionHandle",
+      "anchor": "livesessionhandle-class",
+      "signatures": ["class LiveSessionHandle"],
+      "docs": "",
+      "members": [
+        {
+          "name": "client",
+          "kind": "property",
+          "ref": "@convohop/client#LiveSessionHandle.client",
+          "anchor": "livesessionhandleclient-property",
+          "signatures": ["readonly client: ConvoHopClient"],
+          "docs": ""
+        },
+        {
+          "name": "snapshot",
+          "kind": "property",
+          "ref": "@convohop/client#LiveSessionHandle.snapshot",
+          "anchor": "livesessionhandlesnapshot-property",
+          "signatures": ["readonly snapshot: LiveSession"],
+          "docs": ""
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveSessionHandle.liveSessionId",
+          "anchor": "livesessionhandlelivesessionid-property",
+          "signatures": ["readonly liveSessionId: string"],
+          "docs": ""
+        },
+        {
+          "name": "generation",
+          "kind": "property",
+          "ref": "@convohop/client#LiveSessionHandle.generation",
+          "anchor": "livesessionhandlegeneration-property",
+          "signatures": ["readonly generation: string"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveSessionHandle.conversationId",
+          "anchor": "livesessionhandleconversationid-property",
+          "signatures": ["readonly conversationId: string"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#LiveSessionHandle.constructor",
+          "anchor": "livesessionhandle-constructor",
+          "signatures": ["constructor(client: ConvoHopClient, snapshot: LiveSession)"],
+          "docs": ""
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "ref": "@convohop/client#LiveSessionHandle.get:static",
+          "anchor": "livesessionhandleget-static-method",
+          "signatures": [
+            "static get(client: ConvoHopClient, liveSessionId: string): Promise<LiveSessionHandle>"
+          ],
+          "docs": "",
+          "static": true,
+          "operations": [
+            {
+              "id": "communication.liveSession",
+              "page": "../../operations/communication/liveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "ref": "@convohop/client#LiveSessionHandle.get",
+          "anchor": "livesessionhandleget-method",
+          "signatures": ["get(): Promise<LiveSession>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.liveSession",
+              "page": "../../operations/communication/liveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "join",
+          "kind": "method",
+          "ref": "@convohop/client#LiveSessionHandle.join",
+          "anchor": "livesessionhandlejoin-method",
+          "signatures": ["join(options?: CommandOptions): Promise<LiveParticipationHandle>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.joinLiveSession",
+              "page": "../../operations/communication/joinLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "participation",
+          "kind": "method",
+          "ref": "@convohop/client#LiveSessionHandle.participation",
+          "anchor": "livesessionhandleparticipation-method",
+          "signatures": ["participation(): Promise<LiveParticipationHandle | null>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.liveSession",
+              "page": "../../operations/communication/liveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "participants",
+          "kind": "method",
+          "ref": "@convohop/client#LiveSessionHandle.participants",
+          "anchor": "livesessionhandleparticipants-method",
+          "signatures": [
+            "participants(options?: PageOptions): Promise<{\n    nextCursor: string | null;\n    complete: boolean;\n    partialReason: string | null;\n    refreshRequired: boolean;\n    items: Array<{\n        participationId: string;\n        principalId: string;\n        membershipEpoch: string;\n        role: GraphqlTypes.LiveRole;\n        state: GraphqlTypes.LiveParticipationState;\n        reservationExpiresAt: string | null;\n        nativeConnectionId: string | null;\n        permissions: { … };\n        mediaCutoff: { … } | null;\n    }>;\n}>"
+          ],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.liveSessionParticipants",
+              "page": "../../operations/communication/liveSessionParticipants.md"
+            }
+          ]
+        },
+        {
+          "name": "alerts",
+          "kind": "property",
+          "ref": "@convohop/client#LiveSessionHandle.alerts",
+          "anchor": "livesessionhandlealerts-property",
+          "signatures": ["readonly alerts: { … }"],
+          "docs": "",
+          "members": [
+            {
+              "name": "send",
+              "kind": "property",
+              "ref": "@convohop/client#LiveSessionHandle.alerts.send",
+              "anchor": "livesessionhandlealertssend-property",
+              "signatures": [
+                "send: (principalIds: string[], options?: CommandOptions) => Promise<{\n    status: string;\n    requestId: string;\n    receiptId: string;\n    committedAt: string;\n    replayed: boolean;\n    result: {\n        liveSessionId: string;\n        created: string;\n        suppressed: string;\n    };\n}>"
+              ],
+              "docs": "",
+              "operations": [
+                {
+                  "id": "communication.alertLiveSession",
+                  "page": "../../operations/communication/alertLiveSession.md"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "end",
+          "kind": "method",
+          "ref": "@convohop/client#LiveSessionHandle.end",
+          "anchor": "livesessionhandleend-method",
+          "signatures": ["end(options?: CommandOptions): Promise<LiveEndOperation>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.endLiveSession",
+              "page": "../../operations/communication/endLiveSession.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "LiveStartOperation",
+      "kind": "class",
+      "ref": "@convohop/client#LiveStartOperation",
+      "anchor": "livestartoperation-class",
+      "signatures": ["class LiveStartOperation extends LiveAction"],
+      "docs": "",
+      "members": [
+        {
+          "name": "receipt",
+          "kind": "property",
+          "ref": "@convohop/client#LiveStartOperation.receipt",
+          "anchor": "livestartoperationreceipt-property",
+          "signatures": ["readonly receipt: OperationPayload<\"communication.startLiveSession\">"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#LiveStartOperation.constructor",
+          "anchor": "livestartoperation-constructor",
+          "signatures": [
+            "constructor(client: ConvoHopClient, receipt: OperationPayload<\"communication.startLiveSession\">)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "ready",
+          "kind": "method",
+          "ref": "@convohop/client#LiveStartOperation.ready",
+          "anchor": "livestartoperationready-method",
+          "signatures": ["ready(options?: LiveWaitOptions): Promise<LiveSessionHandle>"],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.liveSession",
+              "page": "../../operations/communication/liveSession.md"
+            },
+            {
+              "id": "communication.liveSessionOperation",
+              "page": "../../operations/communication/liveSessionOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "client",
+          "kind": "property",
+          "ref": "@convohop/client#LiveStartOperation.client",
+          "anchor": "livestartoperationclient-property",
+          "signatures": ["readonly client: ConvoHopClient"],
+          "docs": "",
+          "inherited": "LiveAction"
+        },
+        {
+          "name": "operationId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveStartOperation.operationId",
+          "anchor": "livestartoperationoperationid-property",
+          "signatures": ["readonly operationId: string"],
+          "docs": "",
+          "inherited": "LiveAction"
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveStartOperation.liveSessionId",
+          "anchor": "livestartoperationlivesessionid-property",
+          "signatures": ["readonly liveSessionId: string"],
+          "docs": "",
+          "inherited": "LiveAction"
+        },
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "@convohop/client#LiveStartOperation.kind",
+          "anchor": "livestartoperationkind-property",
+          "signatures": ["readonly kind: \"START\" | \"END\""],
+          "docs": "",
+          "inherited": "LiveAction"
+        },
+        {
+          "name": "requestId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveStartOperation.requestId",
+          "anchor": "livestartoperationrequestid-property",
+          "signatures": ["readonly requestId: string"],
+          "docs": "",
+          "inherited": "LiveAction"
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "ref": "@convohop/client#LiveStartOperation.get",
+          "anchor": "livestartoperationget-method",
+          "signatures": ["get(): Promise<LiveOperation>"],
+          "docs": "",
+          "inherited": "LiveAction",
+          "operations": [
+            {
+              "id": "communication.liveSessionOperation",
+              "page": "../../operations/communication/liveSessionOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "completed",
+          "kind": "method",
+          "ref": "@convohop/client#LiveStartOperation.completed",
+          "anchor": "livestartoperationcompleted-method",
+          "signatures": [
+            "completed(options?: LiveWaitOptions): Promise<NonNullable<LiveOperation[\"completion\"]>>"
+          ],
+          "docs": "",
+          "inherited": "LiveAction",
+          "operations": [
+            {
+              "id": "communication.liveSessionOperation",
+              "page": "../../operations/communication/liveSessionOperation.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MediaConnection",
+      "kind": "class",
+      "ref": "@convohop/client#MediaConnection",
+      "anchor": "mediaconnection-class",
+      "signatures": ["class MediaConnection"],
+      "docs": "",
+      "members": [
+        {
+          "name": "participation",
+          "kind": "property",
+          "ref": "@convohop/client#MediaConnection.participation",
+          "anchor": "mediaconnectionparticipation-property",
+          "signatures": ["readonly participation: LiveParticipationHandle"],
+          "docs": ""
+        },
+        {
+          "name": "options",
+          "kind": "property",
+          "ref": "@convohop/client#MediaConnection.options",
+          "anchor": "mediaconnectionoptions-property",
+          "signatures": ["readonly options: MediaOptions"],
+          "docs": ""
+        },
+        {
+          "name": "nativeConnectionId",
+          "kind": "property",
+          "ref": "@convohop/client#MediaConnection.nativeConnectionId",
+          "anchor": "mediaconnectionnativeconnectionid-property",
+          "signatures": ["nativeConnectionId: string | undefined"],
+          "docs": "The participation's `nativeConnectionId`: the LiveKit participant sid the media server assigned at admission."
+        },
+        {
+          "name": "reconnect",
+          "kind": "method",
+          "ref": "@convohop/client#MediaConnection.reconnect",
+          "anchor": "mediaconnectionreconnect-method",
+          "signatures": ["reconnect(): Promise<MediaConnection>"],
+          "docs": ""
+        },
+        {
+          "name": "connected",
+          "kind": "property",
+          "ref": "@convohop/client#MediaConnection.connected",
+          "anchor": "mediaconnectionconnected-property",
+          "signatures": ["get connected(): boolean"],
+          "docs": ""
+        },
+        {
+          "name": "resuming",
+          "kind": "property",
+          "ref": "@convohop/client#MediaConnection.resuming",
+          "anchor": "mediaconnectionresuming-property",
+          "signatures": ["get resuming(): boolean"],
+          "docs": "LiveKit is resuming this connection after a network interruption."
+        },
+        {
+          "name": "microphone",
+          "kind": "method",
+          "ref": "@convohop/client#MediaConnection.microphone",
+          "anchor": "mediaconnectionmicrophone-method",
+          "signatures": ["microphone(enabled: boolean): Promise<void>"],
+          "docs": ""
+        },
+        {
+          "name": "camera",
+          "kind": "method",
+          "ref": "@convohop/client#MediaConnection.camera",
+          "anchor": "mediaconnectioncamera-method",
+          "signatures": ["camera(enabled: boolean): Promise<void>"],
+          "docs": ""
+        },
+        {
+          "name": "enableAudio",
+          "kind": "method",
+          "ref": "@convohop/client#MediaConnection.enableAudio",
+          "anchor": "mediaconnectionenableaudio-method",
+          "signatures": ["enableAudio(): Promise<void>"],
+          "docs": ""
+        },
+        {
+          "name": "stats",
+          "kind": "method",
+          "ref": "@convohop/client#MediaConnection.stats",
+          "anchor": "mediaconnectionstats-method",
+          "signatures": ["stats(): Promise<MediaStats>"],
+          "docs": ""
+        },
+        {
+          "name": "disconnect",
+          "kind": "method",
+          "ref": "@convohop/client#MediaConnection.disconnect",
+          "anchor": "mediaconnectiondisconnect-method",
+          "signatures": ["disconnect(): Promise<void>"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "Outbox",
+      "kind": "class",
+      "ref": "@convohop/client#Outbox",
+      "anchor": "outbox-class",
+      "signatures": ["class Outbox"],
+      "docs": "Sends messages optimistically and in order per conversation. Offline periods, session refreshes and uncertain\noutcomes don't duplicate a message: an entry keeps one request ID, and the transport's retry budget, until it is\nsent or fails. A failed entry is only sent again, as a new message, through `Outbox.resend`.",
+      "members": [
+        {
+          "name": "client",
+          "kind": "property",
+          "ref": "@convohop/client#Outbox.client",
+          "anchor": "outboxclient-property",
+          "signatures": ["readonly client: ConvoHopClient"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#Outbox.constructor",
+          "anchor": "outbox-constructor",
+          "signatures": ["constructor(client: ConvoHopClient, options?: OutboxOptions)"],
+          "docs": ""
+        },
+        {
+          "name": "entries",
+          "kind": "property",
+          "ref": "@convohop/client#Outbox.entries",
+          "anchor": "outboxentries-property",
+          "signatures": ["get entries(): readonly OutboxEntry[]"],
+          "docs": "A frozen snapshot in send order, replaced on every change."
+        },
+        {
+          "name": "subscribe",
+          "kind": "method",
+          "ref": "@convohop/client#Outbox.subscribe",
+          "anchor": "outboxsubscribe-method",
+          "signatures": ["subscribe(listener: () => void): () => void"],
+          "docs": ""
+        },
+        {
+          "name": "send",
+          "kind": "method",
+          "ref": "@convohop/client#Outbox.send",
+          "anchor": "outboxsend-method",
+          "signatures": [
+            "send(conversationId: string, text: string, props?: ProtocolObject): OutboxEntry"
+          ],
+          "docs": "",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            },
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "resend",
+          "kind": "method",
+          "ref": "@convohop/client#Outbox.resend",
+          "anchor": "outboxresend-method",
+          "signatures": ["resend(requestId: string): OutboxEntry"],
+          "docs": "Sends a failed entry's message again as a new request, after the entries already waiting.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            },
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "discard",
+          "kind": "method",
+          "ref": "@convohop/client#Outbox.discard",
+          "anchor": "outboxdiscard-method",
+          "signatures": ["discard(requestId: string): void"],
+          "docs": "Drops a queued, failed or sent entry. An entry that is sending or whose outcome is unknown can't be discarded."
+        },
+        {
+          "name": "settle",
+          "kind": "method",
+          "ref": "@convohop/client#Outbox.settle",
+          "anchor": "outboxsettle-method",
+          "signatures": ["settle(requestId: string): void"],
+          "docs": "Releases a sent entry, typically once its message is shown from history."
+        },
+        {
+          "name": "flush",
+          "kind": "method",
+          "ref": "@convohop/client#Outbox.flush",
+          "anchor": "outboxflush-method",
+          "signatures": ["flush(): Promise<void>"],
+          "docs": "Attempts every waiting entry now, ignoring backoff, and resolves when each conversation's queue is idle or blocked.\nWaits for saved entries to load first.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            },
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "ref": "@convohop/client#Outbox.close",
+          "anchor": "outboxclose-method",
+          "signatures": ["close(): Promise<void>"],
+          "docs": "Stops sending. Persisted entries stay saved, and the client keeps its recovery state. Once its sends and saves\nsettle, a persistent outbox of the user created meanwhile in this JavaScript context continues with its saved\nentries; otherwise another running one, or the next to start, takes them over.\n\nResolves once the outbox has stopped writing: what it was loading, taking over, sending and saving has settled,\nand its storage is passed on or released. A send in flight is waited for until it finishes or times out. So on\nsign-out, wait for it before clearing the storage. It never rejects; failures go to `onError`. Every call returns\nthe same promise."
+        }
+      ]
+    },
+    {
+      "name": "ScopeRequiredProblem",
+      "kind": "class",
+      "ref": "@convohop/client#ScopeRequiredProblem",
+      "anchor": "scoperequiredproblem-class",
+      "signatures": ["class ScopeRequiredProblem extends ConvoHopProblem"],
+      "docs": "`SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable).\nClassify it by `instanceof ConvoHopProblem` and `code`; `scope` is a diagnostic detail.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "code",
+          "kind": "property",
+          "ref": "@convohop/client#ScopeRequiredProblem.code",
+          "anchor": "scoperequiredproblemcode-property",
+          "signatures": ["readonly code: \"SCOPE_REQUIRED\""],
+          "docs": ""
+        },
+        {
+          "name": "scope",
+          "kind": "property",
+          "ref": "@convohop/client#ScopeRequiredProblem.scope",
+          "anchor": "scoperequiredproblemscope-property",
+          "signatures": ["readonly scope: string | undefined"],
+          "docs": "The missing scope. The authority names it only in the message, so this is `undefined` when the message does not\nmatch the documented wording. A missing read scope is reported as the read scope even where its manage scope\n(for example `callManage` for `callRead`) would also satisfy the operation."
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#ScopeRequiredProblem.constructor",
+          "anchor": "scoperequiredproblem-constructor",
+          "signatures": [
+            "constructor(requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {\n    retryAfter?: number;\n})"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "requestId",
+          "kind": "property",
+          "ref": "@convohop/client#ScopeRequiredProblem.requestId",
+          "anchor": "scoperequiredproblemrequestid-property",
+          "signatures": ["readonly requestId: string"],
+          "docs": "",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "outcome",
+          "kind": "property",
+          "ref": "@convohop/client#ScopeRequiredProblem.outcome",
+          "anchor": "scoperequiredproblemoutcome-property",
+          "signatures": ["readonly outcome: string"],
+          "docs": "",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "@convohop/client#ScopeRequiredProblem.status",
+          "anchor": "scoperequiredproblemstatus-property",
+          "signatures": ["readonly status: number"],
+          "docs": "",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "retryAfter",
+          "kind": "property",
+          "ref": "@convohop/client#ScopeRequiredProblem.retryAfter",
+          "anchor": "scoperequiredproblemretryafter-property",
+          "signatures": ["readonly retryAfter?: number"],
+          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,\nor from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when\n`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first.",
+          "inherited": "ConvoHopProblem"
+        }
+      ]
+    },
+    {
+      "name": "TypingIndicator",
+      "kind": "class",
+      "ref": "@convohop/client#TypingIndicator",
+      "anchor": "typingindicator-class",
+      "signatures": ["class TypingIndicator"],
+      "docs": "Sends throttled typing signals for one conversation while the user types. Signals are ephemeral: a lost signal\nisn't retried, and other members' typing isn't delivered to this client. The indicator turns itself off when the\nproject doesn't support typing.",
+      "members": [
+        {
+          "name": "client",
+          "kind": "property",
+          "ref": "@convohop/client#TypingIndicator.client",
+          "anchor": "typingindicatorclient-property",
+          "signatures": ["readonly client: ConvoHopClient"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/client#TypingIndicator.conversationId",
+          "anchor": "typingindicatorconversationid-property",
+          "signatures": ["readonly conversationId: string"],
+          "docs": ""
+        },
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "@convohop/client#TypingIndicator.constructor",
+          "anchor": "typingindicator-constructor",
+          "signatures": [
+            "constructor(client: ConvoHopClient, conversationId: string, options?: TypingIndicatorOptions)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "enabled",
+          "kind": "property",
+          "ref": "@convohop/client#TypingIndicator.enabled",
+          "anchor": "typingindicatorenabled-property",
+          "signatures": ["get enabled(): boolean", "set enabled(value: boolean)"],
+          "docs": ""
+        },
+        {
+          "name": "active",
+          "kind": "property",
+          "ref": "@convohop/client#TypingIndicator.active",
+          "anchor": "typingindicatoractive-property",
+          "signatures": ["get active(): boolean"],
+          "docs": "Whether the user counts as typing."
+        },
+        {
+          "name": "input",
+          "kind": "method",
+          "ref": "@convohop/client#TypingIndicator.input",
+          "anchor": "typingindicatorinput-method",
+          "signatures": ["input(): void"],
+          "docs": "Call on every edit to the draft. Signals typing at most once per `intervalMs`.",
+          "operations": [
+            {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+          ]
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "ref": "@convohop/client#TypingIndicator.stop",
+          "anchor": "typingindicatorstop-method",
+          "signatures": ["stop(): void"],
+          "docs": "Call when the user sends or clears the draft. Signals that typing stopped if it had started.",
+          "operations": [
+            {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+          ]
+        },
+        {
+          "name": "dispose",
+          "kind": "method",
+          "ref": "@convohop/client#TypingIndicator.dispose",
+          "anchor": "typingindicatordispose-method",
+          "signatures": ["dispose(): void"],
+          "docs": "",
+          "operations": [
+            {"id": "communication.typing", "page": "../../operations/communication/typing.md"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AsyncRecoveryStorage",
+      "kind": "interface",
+      "ref": "@convohop/client#AsyncRecoveryStorage",
+      "anchor": "asyncrecoverystorage-interface",
+      "signatures": ["interface AsyncRecoveryStorage"],
+      "docs": "",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "getItem",
+          "kind": "method",
+          "ref": "@convohop/client#AsyncRecoveryStorage.getItem",
+          "anchor": "asyncrecoverystoragegetitem-method",
+          "signatures": ["getItem(key: string): Promise<string | null>"],
+          "docs": ""
+        },
+        {
+          "name": "setItem",
+          "kind": "method",
+          "ref": "@convohop/client#AsyncRecoveryStorage.setItem",
+          "anchor": "asyncrecoverystoragesetitem-method",
+          "signatures": ["setItem(key: string, value: string): Promise<void>"],
+          "docs": ""
+        },
+        {
+          "name": "removeItem",
+          "kind": "method",
+          "ref": "@convohop/client#AsyncRecoveryStorage.removeItem",
+          "anchor": "asyncrecoverystorageremoveitem-method",
+          "signatures": ["removeItem(key: string): Promise<void>"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "CommandOptions",
+      "kind": "interface",
+      "ref": "@convohop/client#CommandOptions",
+      "anchor": "commandoptions-interface",
+      "signatures": ["interface CommandOptions"],
+      "docs": "",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "requestId",
+          "kind": "property",
+          "ref": "@convohop/client#CommandOptions.requestId",
+          "anchor": "commandoptionsrequestid-property",
+          "signatures": ["requestId?: string"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "Connectivity",
+      "kind": "interface",
+      "ref": "@convohop/client#Connectivity",
+      "anchor": "connectivity-interface",
+      "signatures": ["interface Connectivity"],
+      "docs": "Network reachability.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "online",
+          "kind": "property",
+          "ref": "@convohop/client#Connectivity.online",
+          "anchor": "connectivityonline-property",
+          "signatures": ["readonly online: boolean"],
+          "docs": "Whether the device may reach the network. Report `true` when it isn't known."
+        },
+        {
+          "name": "subscribe",
+          "kind": "method",
+          "ref": "@convohop/client#Connectivity.subscribe",
+          "anchor": "connectivitysubscribe-method",
+          "signatures": ["subscribe(listener: (online: boolean) => void): () => void"],
+          "docs": "Calls `listener` when reachability changes, until the returned function is called."
+        }
+      ]
+    },
+    {
+      "name": "ConversationSnapshot",
+      "kind": "interface",
+      "ref": "@convohop/client#ConversationSnapshot",
+      "anchor": "conversationsnapshot-interface",
+      "signatures": ["interface ConversationSnapshot"],
+      "docs": "",
+      "members": [
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationSnapshot.status",
+          "anchor": "conversationsnapshotstatus-property",
+          "signatures": ["readonly status: ConversationStatus"],
+          "docs": ""
+        },
+        {
+          "name": "conversation",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationSnapshot.conversation",
+          "anchor": "conversationsnapshotconversation-property",
+          "signatures": ["readonly conversation: Readonly<Conversation> | undefined"],
+          "docs": "The conversation and the user's membership, once loaded."
+        },
+        {
+          "name": "messages",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationSnapshot.messages",
+          "anchor": "conversationsnapshotmessages-property",
+          "signatures": ["readonly messages: readonly Readonly<ConversationMessage>[]"],
+          "docs": "Loaded messages, oldest first. Deleted messages stay, with `deleted: true` and no text."
+        },
+        {
+          "name": "pending",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationSnapshot.pending",
+          "anchor": "conversationsnapshotpending-property",
+          "signatures": ["readonly pending: readonly OutboxEntry[]"],
+          "docs": "This conversation's outbox entries that aren't in `messages` yet, in send order."
+        },
+        {
+          "name": "receipts",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationSnapshot.receipts",
+          "anchor": "conversationsnapshotreceipts-property",
+          "signatures": ["readonly receipts: readonly Readonly<ReadReceipt>[]"],
+          "docs": "Each member's delivery and read progress, ordered by principal."
+        },
+        {
+          "name": "hasOlder",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationSnapshot.hasOlder",
+          "anchor": "conversationsnapshothasolder-property",
+          "signatures": ["readonly hasOlder: boolean"],
+          "docs": "Whether `ConversationStore.loadOlder` can load earlier messages."
+        },
+        {
+          "name": "error",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationSnapshot.error",
+          "anchor": "conversationsnapshoterror-property",
+          "signatures": ["readonly error: Error | undefined"],
+          "docs": ""
+        },
+        {
+          "name": "resyncRequired",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationSnapshot.resyncRequired",
+          "anchor": "conversationsnapshotresyncrequired-property",
+          "signatures": ["readonly resyncRequired: boolean"],
+          "docs": "The saved replay position is no longer valid. Only `ConversationStore.resync` recovers."
+        }
+      ]
+    },
+    {
+      "name": "ConversationStoreOptions",
+      "kind": "interface",
+      "ref": "@convohop/client#ConversationStoreOptions",
+      "anchor": "conversationstoreoptions-interface",
+      "signatures": ["interface ConversationStoreOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "outbox",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStoreOptions.outbox",
+          "anchor": "conversationstoreoptionsoutbox-property",
+          "signatures": ["outbox?: Outbox"],
+          "docs": "A shared outbox for optimistic sends. Without one the store uses its own, which `close()` closes."
+        },
+        {
+          "name": "onEvent",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStoreOptions.onEvent",
+          "anchor": "conversationstoreoptionsonevent-property",
+          "signatures": ["onEvent?: (event: ProtocolObject) => void"],
+          "docs": "Called after each new event is applied, including call and live-session events the store doesn't track."
+        },
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/client#ConversationStoreOptions.onError",
+          "anchor": "conversationstoreoptionsonerror-property",
+          "signatures": ["onError?: (error: Error) => void"],
+          "docs": "Called for every error, including realtime interruptions the store recovers from on its own."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopClientOptions",
+      "kind": "interface",
+      "ref": "@convohop/client#ConvoHopClientOptions",
+      "anchor": "convohopclientoptions-interface",
+      "signatures": ["interface ConvoHopClientOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "baseUrl",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClientOptions.baseUrl",
+          "anchor": "convohopclientoptionsbaseurl-property",
+          "signatures": ["baseUrl: string"],
+          "docs": ""
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClientOptions.projectId",
+          "anchor": "convohopclientoptionsprojectid-property",
+          "signatures": ["projectId: string"],
+          "docs": ""
+        },
+        {
+          "name": "sessionToken",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClientOptions.sessionToken",
+          "anchor": "convohopclientoptionssessiontoken-property",
+          "signatures": ["sessionToken: string"],
+          "docs": ""
+        },
+        {
+          "name": "incarnation",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClientOptions.incarnation",
+          "anchor": "convohopclientoptionsincarnation-property",
+          "signatures": ["incarnation: string"],
+          "docs": ""
+        },
+        {
+          "name": "principalId",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClientOptions.principalId",
+          "anchor": "convohopclientoptionsprincipalid-property",
+          "signatures": ["principalId: string"],
+          "docs": ""
+        },
+        {
+          "name": "recoveryStorage",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClientOptions.recoveryStorage",
+          "anchor": "convohopclientoptionsrecoverystorage-property",
+          "signatures": ["recoveryStorage?: RecoveryStorage"],
+          "docs": "Synchronous storage, such as `localStorage`, for mutation recovery records and replay cursors. Never tokens."
+        },
+        {
+          "name": "asyncRecoveryStorage",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClientOptions.asyncRecoveryStorage",
+          "anchor": "convohopclientoptionsasyncrecoverystorage-property",
+          "signatures": ["asyncRecoveryStorage?: AsyncRecoveryStorage"],
+          "docs": "Asynchronous storage, such as React Native's AsyncStorage, used instead of `recoveryStorage`. Recovery records load\nbefore the first command; replay cursors load when a replay starts."
+        },
+        {
+          "name": "fetch",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClientOptions.fetch",
+          "anchor": "convohopclientoptionsfetch-property",
+          "signatures": ["fetch?: typeof fetch"],
+          "docs": ""
+        },
+        {
+          "name": "sessionRefresh",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClientOptions.sessionRefresh",
+          "anchor": "convohopclientoptionssessionrefresh-property",
+          "signatures": ["sessionRefresh?: SessionRefresh"],
+          "docs": ""
+        },
+        {
+          "name": "platform",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopClientOptions.platform",
+          "anchor": "convohopclientoptionsplatform-property",
+          "signatures": ["platform?: ConvoHopPlatform"],
+          "docs": "Runtime services that replace missing browser globals, such as in React Native. See `ConvoHopPlatform`."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopPlatform",
+      "kind": "interface",
+      "ref": "@convohop/client#ConvoHopPlatform",
+      "anchor": "convohopplatform-interface",
+      "signatures": ["interface ConvoHopPlatform"],
+      "docs": "Runtime services for runtimes that lack a browser global, such as React Native. Every field is optional and\nfalls back to the global of the same name, looked up when it is used. The transport uses `randomUUID`, `sha256`\nand `URL`; `@convohop/client` also uses `WebSocket`, `connectivity` and `lifecycle`.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "randomUUID",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopPlatform.randomUUID",
+          "anchor": "convohopplatformrandomuuid-property",
+          "signatures": ["randomUUID?: () => string"],
+          "docs": "A new random UUID in canonical lowercase form. Default: `crypto.randomUUID()`."
+        },
+        {
+          "name": "sha256",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopPlatform.sha256",
+          "anchor": "convohopplatformsha256-property",
+          "signatures": ["sha256?: (data: Uint8Array) => Promise<Uint8Array>"],
+          "docs": "The 32-byte SHA-256 digest of `data`. Default: `crypto.subtle.digest(\"SHA-256\", data)`."
+        },
+        {
+          "name": "URL",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopPlatform.URL",
+          "anchor": "convohopplatformurl-property",
+          "signatures": ["URL?: PlatformURLConstructor"],
+          "docs": "A WHATWG URL constructor. Default: the global `URL`. The SDK checks it before first use and refuses one that doesn't conform."
+        },
+        {
+          "name": "WebSocket",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopPlatform.WebSocket",
+          "anchor": "convohopplatformwebsocket-property",
+          "signatures": ["WebSocket?: PlatformWebSocketConstructor"],
+          "docs": "Opens the realtime connection. Default: the global `WebSocket`."
+        },
+        {
+          "name": "connectivity",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopPlatform.connectivity",
+          "anchor": "convohopplatformconnectivity-property",
+          "signatures": ["connectivity?: Connectivity"],
+          "docs": "Network reachability. The outbox waits while offline. Coming online starts a waiting outbox entry and realtime\nreconnection at once. Default in browsers: `navigator.onLine` and `online`/`offline` events; elsewhere always online."
+        },
+        {
+          "name": "lifecycle",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopPlatform.lifecycle",
+          "anchor": "convohopplatformlifecycle-property",
+          "signatures": ["lifecycle?: Lifecycle"],
+          "docs": "Foreground state. Returning to `active` starts waiting realtime reconnection, due outbox entries and due session\nrenewal at once. It never changes retry budgets, request IDs or payloads. Default in browsers: page visibility."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopTransportOptions",
+      "kind": "interface",
+      "ref": "@convohop/client#ConvoHopTransportOptions",
+      "anchor": "convohoptransportoptions-interface",
+      "signatures": ["interface ConvoHopTransportOptions"],
+      "docs": "",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "baseUrl",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransportOptions.baseUrl",
+          "anchor": "convohoptransportoptionsbaseurl-property",
+          "signatures": ["baseUrl: string"],
+          "docs": ""
+        },
+        {
+          "name": "credential",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransportOptions.credential",
+          "anchor": "convohoptransportoptionscredential-property",
+          "signatures": ["credential?: string"],
+          "docs": ""
+        },
+        {
+          "name": "namespace",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransportOptions.namespace",
+          "anchor": "convohoptransportoptionsnamespace-property",
+          "signatures": ["namespace: string"],
+          "docs": ""
+        },
+        {
+          "name": "incarnation",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransportOptions.incarnation",
+          "anchor": "convohoptransportoptionsincarnation-property",
+          "signatures": ["incarnation?: string"],
+          "docs": ""
+        },
+        {
+          "name": "recoveryStorage",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransportOptions.recoveryStorage",
+          "anchor": "convohoptransportoptionsrecoverystorage-property",
+          "signatures": ["recoveryStorage?: RecoveryStorage"],
+          "docs": ""
+        },
+        {
+          "name": "asyncRecoveryStorage",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransportOptions.asyncRecoveryStorage",
+          "anchor": "convohoptransportoptionsasyncrecoverystorage-property",
+          "signatures": ["asyncRecoveryStorage?: AsyncRecoveryStorage"],
+          "docs": ""
+        },
+        {
+          "name": "fetch",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransportOptions.fetch",
+          "anchor": "convohoptransportoptionsfetch-property",
+          "signatures": ["fetch?: typeof fetch"],
+          "docs": ""
+        },
+        {
+          "name": "platform",
+          "kind": "property",
+          "ref": "@convohop/client#ConvoHopTransportOptions.platform",
+          "anchor": "convohoptransportoptionsplatform-property",
+          "signatures": ["platform?: ConvoHopPlatform"],
+          "docs": "Runtime services that replace missing globals, such as in React Native. See `ConvoHopPlatform`."
+        }
+      ]
+    },
+    {
+      "name": "ItemPage",
+      "kind": "interface",
+      "ref": "@convohop/client#ItemPage",
+      "anchor": "itempage-interface",
+      "signatures": ["interface ItemPage<T>"],
+      "docs": "",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "items",
+          "kind": "property",
+          "ref": "@convohop/client#ItemPage.items",
+          "anchor": "itempageitems-property",
+          "signatures": ["items: T[]"],
+          "docs": ""
+        },
+        {
+          "name": "complete",
+          "kind": "property",
+          "ref": "@convohop/client#ItemPage.complete",
+          "anchor": "itempagecomplete-property",
+          "signatures": ["complete: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "refreshRequired",
+          "kind": "property",
+          "ref": "@convohop/client#ItemPage.refreshRequired",
+          "anchor": "itempagerefreshrequired-property",
+          "signatures": ["refreshRequired: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "nextCursor",
+          "kind": "property",
+          "ref": "@convohop/client#ItemPage.nextCursor",
+          "anchor": "itempagenextcursor-property",
+          "signatures": ["nextCursor?: unknown"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "Lifecycle",
+      "kind": "interface",
+      "ref": "@convohop/client#Lifecycle",
+      "anchor": "lifecycle-interface",
+      "signatures": ["interface Lifecycle"],
+      "docs": "Whether the app is in the foreground.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "state",
+          "kind": "property",
+          "ref": "@convohop/client#Lifecycle.state",
+          "anchor": "lifecyclestate-property",
+          "signatures": ["readonly state: LifecycleState"],
+          "docs": ""
+        },
+        {
+          "name": "subscribe",
+          "kind": "method",
+          "ref": "@convohop/client#Lifecycle.subscribe",
+          "anchor": "lifecyclesubscribe-method",
+          "signatures": ["subscribe(listener: (state: LifecycleState) => void): () => void"],
+          "docs": "Calls `listener` when the state changes, until the returned function is called."
+        }
+      ]
+    },
+    {
+      "name": "LiveConnectOptions",
+      "kind": "interface",
+      "ref": "@convohop/client#LiveConnectOptions",
+      "anchor": "liveconnectoptions-interface",
+      "signatures": ["interface LiveConnectOptions extends MediaOptions, CommandOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "iceTransportPolicy",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectOptions.iceTransportPolicy",
+          "anchor": "liveconnectoptionsicetransportpolicy-property",
+          "signatures": ["iceTransportPolicy?: \"all\" | \"relay\""],
+          "docs": "",
+          "inherited": "MediaOptions"
+        },
+        {
+          "name": "localVideo",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectOptions.localVideo",
+          "anchor": "liveconnectoptionslocalvideo-property",
+          "signatures": ["localVideo?: HTMLVideoElement"],
+          "docs": "",
+          "inherited": "MediaOptions"
+        },
+        {
+          "name": "onTrack",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectOptions.onTrack",
+          "anchor": "liveconnectoptionsontrack-property",
+          "signatures": ["onTrack?: (track: RemoteMedia) => void"],
+          "docs": "",
+          "inherited": "MediaOptions"
+        },
+        {
+          "name": "onTrackRemoved",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectOptions.onTrackRemoved",
+          "anchor": "liveconnectoptionsontrackremoved-property",
+          "signatures": ["onTrackRemoved?: (track: RemoteMedia) => void"],
+          "docs": "",
+          "inherited": "MediaOptions"
+        },
+        {
+          "name": "onDisconnected",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectOptions.onDisconnected",
+          "anchor": "liveconnectoptionsondisconnected-property",
+          "signatures": ["onDisconnected?: () => void"],
+          "docs": "The media connection ended without `disconnect()`. Call `reconnect()` to connect again with fresh credentials.",
+          "inherited": "MediaOptions"
+        },
+        {
+          "name": "onResuming",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectOptions.onResuming",
+          "anchor": "liveconnectoptionsonresuming-property",
+          "signatures": ["onResuming?: () => void"],
+          "docs": "LiveKit lost the connection and is resuming it with the current or a server-refreshed token.",
+          "inherited": "MediaOptions"
+        },
+        {
+          "name": "onResumed",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectOptions.onResumed",
+          "anchor": "liveconnectoptionsonresumed-property",
+          "signatures": ["onResumed?: () => void"],
+          "docs": "LiveKit resumed the same native connection.",
+          "inherited": "MediaOptions"
+        },
+        {
+          "name": "onAudioPlaybackBlocked",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectOptions.onAudioPlaybackBlocked",
+          "anchor": "liveconnectoptionsonaudioplaybackblocked-property",
+          "signatures": ["onAudioPlaybackBlocked?: () => void"],
+          "docs": "",
+          "inherited": "MediaOptions"
+        },
+        {
+          "name": "requestId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectOptions.requestId",
+          "anchor": "liveconnectoptionsrequestid-property",
+          "signatures": ["requestId?: string"],
+          "docs": "",
+          "inherited": "CommandOptions"
+        }
+      ]
+    },
+    {
+      "name": "LiveConnection",
+      "kind": "interface",
+      "ref": "@convohop/client#LiveConnection",
+      "anchor": "liveconnection-interface",
+      "signatures": ["interface LiveConnection"],
+      "docs": "A native media connection opened by a `LiveConnector`.",
+      "members": [
+        {
+          "name": "connected",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnection.connected",
+          "anchor": "liveconnectionconnected-property",
+          "signatures": ["readonly connected: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "disconnect",
+          "kind": "method",
+          "ref": "@convohop/client#LiveConnection.disconnect",
+          "anchor": "liveconnectiondisconnect-method",
+          "signatures": ["disconnect(): Promise<void>"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "LiveConnectionAttempt",
+      "kind": "interface",
+      "ref": "@convohop/client#LiveConnectionAttempt",
+      "anchor": "liveconnectionattempt-interface",
+      "signatures": ["interface LiveConnectionAttempt"],
+      "docs": "One admitted native connection attempt. Send `token` only to `url`, and only once: the media server admits at most\none new connection with it, and it expires about 60 seconds after issue. Later resumes of that connection use the\nsame token or refresh tokens the media server pushes; a new connection needs a new attempt.",
+      "members": [
+        {
+          "name": "requestId",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectionAttempt.requestId",
+          "anchor": "liveconnectionattemptrequestid-property",
+          "signatures": ["readonly requestId: string"],
+          "docs": "The `liveSessionCredentials` request that issued this attempt's grant."
+        },
+        {
+          "name": "mode",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectionAttempt.mode",
+          "anchor": "liveconnectionattemptmode-property",
+          "signatures": ["readonly mode: \"INITIAL\" | \"RECONNECT\""],
+          "docs": ""
+        },
+        {
+          "name": "url",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectionAttempt.url",
+          "anchor": "liveconnectionattempturl-property",
+          "signatures": ["readonly url: string"],
+          "docs": "The media server's WebSocket URL: `wss:`, or `ws:` on a loopback host."
+        },
+        {
+          "name": "token",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectionAttempt.token",
+          "anchor": "liveconnectionattempttoken-property",
+          "signatures": ["readonly token: string"],
+          "docs": "The single-use `connectToken`."
+        },
+        {
+          "name": "leaseExpiresAt",
+          "kind": "property",
+          "ref": "@convohop/client#LiveConnectionAttempt.leaseExpiresAt",
+          "anchor": "liveconnectionattemptleaseexpiresat-property",
+          "signatures": ["readonly leaseExpiresAt: string"],
+          "docs": "When the server's forwarding lease for this participation expires, unless renewed."
+        }
+      ]
+    },
+    {
+      "name": "LiveWaitOptions",
+      "kind": "interface",
+      "ref": "@convohop/client#LiveWaitOptions",
+      "anchor": "livewaitoptions-interface",
+      "signatures": ["interface LiveWaitOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "signal",
+          "kind": "property",
+          "ref": "@convohop/client#LiveWaitOptions.signal",
+          "anchor": "livewaitoptionssignal-property",
+          "signatures": ["signal?: AbortSignal"],
+          "docs": ""
+        },
+        {
+          "name": "timeoutMs",
+          "kind": "property",
+          "ref": "@convohop/client#LiveWaitOptions.timeoutMs",
+          "anchor": "livewaitoptionstimeoutms-property",
+          "signatures": ["timeoutMs?: number"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "MediaOptions",
+      "kind": "interface",
+      "ref": "@convohop/client#MediaOptions",
+      "anchor": "mediaoptions-interface",
+      "signatures": ["interface MediaOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "iceTransportPolicy",
+          "kind": "property",
+          "ref": "@convohop/client#MediaOptions.iceTransportPolicy",
+          "anchor": "mediaoptionsicetransportpolicy-property",
+          "signatures": ["iceTransportPolicy?: \"all\" | \"relay\""],
+          "docs": ""
+        },
+        {
+          "name": "localVideo",
+          "kind": "property",
+          "ref": "@convohop/client#MediaOptions.localVideo",
+          "anchor": "mediaoptionslocalvideo-property",
+          "signatures": ["localVideo?: HTMLVideoElement"],
+          "docs": ""
+        },
+        {
+          "name": "onTrack",
+          "kind": "property",
+          "ref": "@convohop/client#MediaOptions.onTrack",
+          "anchor": "mediaoptionsontrack-property",
+          "signatures": ["onTrack?: (track: RemoteMedia) => void"],
+          "docs": ""
+        },
+        {
+          "name": "onTrackRemoved",
+          "kind": "property",
+          "ref": "@convohop/client#MediaOptions.onTrackRemoved",
+          "anchor": "mediaoptionsontrackremoved-property",
+          "signatures": ["onTrackRemoved?: (track: RemoteMedia) => void"],
+          "docs": ""
+        },
+        {
+          "name": "onDisconnected",
+          "kind": "property",
+          "ref": "@convohop/client#MediaOptions.onDisconnected",
+          "anchor": "mediaoptionsondisconnected-property",
+          "signatures": ["onDisconnected?: () => void"],
+          "docs": "The media connection ended without `disconnect()`. Call `reconnect()` to connect again with fresh credentials."
+        },
+        {
+          "name": "onResuming",
+          "kind": "property",
+          "ref": "@convohop/client#MediaOptions.onResuming",
+          "anchor": "mediaoptionsonresuming-property",
+          "signatures": ["onResuming?: () => void"],
+          "docs": "LiveKit lost the connection and is resuming it with the current or a server-refreshed token."
+        },
+        {
+          "name": "onResumed",
+          "kind": "property",
+          "ref": "@convohop/client#MediaOptions.onResumed",
+          "anchor": "mediaoptionsonresumed-property",
+          "signatures": ["onResumed?: () => void"],
+          "docs": "LiveKit resumed the same native connection."
+        },
+        {
+          "name": "onAudioPlaybackBlocked",
+          "kind": "property",
+          "ref": "@convohop/client#MediaOptions.onAudioPlaybackBlocked",
+          "anchor": "mediaoptionsonaudioplaybackblocked-property",
+          "signatures": ["onAudioPlaybackBlocked?: () => void"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "MediaStats",
+      "kind": "interface",
+      "ref": "@convohop/client#MediaStats",
+      "anchor": "mediastats-interface",
+      "signatures": ["interface MediaStats"],
+      "docs": "",
+      "members": [
+        {
+          "name": "audioTracks",
+          "kind": "property",
+          "ref": "@convohop/client#MediaStats.audioTracks",
+          "anchor": "mediastatsaudiotracks-property",
+          "signatures": ["audioTracks: number"],
+          "docs": ""
+        },
+        {
+          "name": "videoTracks",
+          "kind": "property",
+          "ref": "@convohop/client#MediaStats.videoTracks",
+          "anchor": "mediastatsvideotracks-property",
+          "signatures": ["videoTracks: number"],
+          "docs": ""
+        },
+        {
+          "name": "audioBytesReceived",
+          "kind": "property",
+          "ref": "@convohop/client#MediaStats.audioBytesReceived",
+          "anchor": "mediastatsaudiobytesreceived-property",
+          "signatures": ["audioBytesReceived: number"],
+          "docs": ""
+        },
+        {
+          "name": "videoBytesReceived",
+          "kind": "property",
+          "ref": "@convohop/client#MediaStats.videoBytesReceived",
+          "anchor": "mediastatsvideobytesreceived-property",
+          "signatures": ["videoBytesReceived: number"],
+          "docs": ""
+        },
+        {
+          "name": "framesDecoded",
+          "kind": "property",
+          "ref": "@convohop/client#MediaStats.framesDecoded",
+          "anchor": "mediastatsframesdecoded-property",
+          "signatures": ["framesDecoded: number"],
+          "docs": ""
+        },
+        {
+          "name": "localAudioEnabled",
+          "kind": "property",
+          "ref": "@convohop/client#MediaStats.localAudioEnabled",
+          "anchor": "mediastatslocalaudioenabled-property",
+          "signatures": ["localAudioEnabled: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "localVideoEnabled",
+          "kind": "property",
+          "ref": "@convohop/client#MediaStats.localVideoEnabled",
+          "anchor": "mediastatslocalvideoenabled-property",
+          "signatures": ["localVideoEnabled: boolean"],
+          "docs": ""
+        },
+        {
+          "name": "tracks",
+          "kind": "property",
+          "ref": "@convohop/client#MediaStats.tracks",
+          "anchor": "mediastatstracks-property",
+          "signatures": [
+            "tracks: {\n    trackId: string;\n    participantIdentity: string;\n    kind: \"audio\" | \"video\";\n    bytesReceived: number;\n    framesDecoded: number;\n}[]"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "transports",
+          "kind": "property",
+          "ref": "@convohop/client#MediaStats.transports",
+          "anchor": "mediastatstransports-property",
+          "signatures": [
+            "transports?: {\n    localCandidateType: string;\n    remoteCandidateType: string;\n    protocol: string;\n    relayProtocol?: string;\n}[]"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "OperationTypes",
+      "kind": "interface",
+      "ref": "@convohop/client#OperationTypes",
+      "anchor": "operationtypes-interface",
+      "signatures": ["interface OperationTypes"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "OutboxEntry",
+      "kind": "interface",
+      "ref": "@convohop/client#OutboxEntry",
+      "anchor": "outboxentry-interface",
+      "signatures": ["interface OutboxEntry"],
+      "docs": "",
+      "members": [
+        {
+          "name": "requestId",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxEntry.requestId",
+          "anchor": "outboxentryrequestid-property",
+          "signatures": ["readonly requestId: string"],
+          "docs": ""
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxEntry.conversationId",
+          "anchor": "outboxentryconversationid-property",
+          "signatures": ["readonly conversationId: string"],
+          "docs": ""
+        },
+        {
+          "name": "text",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxEntry.text",
+          "anchor": "outboxentrytext-property",
+          "signatures": ["readonly text: string"],
+          "docs": ""
+        },
+        {
+          "name": "props",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxEntry.props",
+          "anchor": "outboxentryprops-property",
+          "signatures": ["readonly props: Readonly<ProtocolObject>"],
+          "docs": ""
+        },
+        {
+          "name": "createdAt",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxEntry.createdAt",
+          "anchor": "outboxentrycreatedat-property",
+          "signatures": ["readonly createdAt: string"],
+          "docs": ""
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxEntry.status",
+          "anchor": "outboxentrystatus-property",
+          "signatures": ["readonly status: OutboxStatus"],
+          "docs": ""
+        },
+        {
+          "name": "messageId",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxEntry.messageId",
+          "anchor": "outboxentrymessageid-property",
+          "signatures": ["readonly messageId?: string"],
+          "docs": "The committed message, when the authority returned it."
+        },
+        {
+          "name": "receipt",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxEntry.receipt",
+          "anchor": "outboxentryreceipt-property",
+          "signatures": ["readonly receipt?: SendReceipt"],
+          "docs": ""
+        },
+        {
+          "name": "error",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxEntry.error",
+          "anchor": "outboxentryerror-property",
+          "signatures": ["readonly error?: Error"],
+          "docs": "The latest failure: why a `failed` entry stopped, or why a waiting entry will retry."
+        },
+        {
+          "name": "unconfirmed",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxEntry.unconfirmed",
+          "anchor": "outboxentryunconfirmed-property",
+          "signatures": ["readonly unconfirmed?: boolean"],
+          "docs": "A failed entry may still have been delivered, so resending it can duplicate the message."
+        }
+      ]
+    },
+    {
+      "name": "OutboxOptions",
+      "kind": "interface",
+      "ref": "@convohop/client#OutboxOptions",
+      "anchor": "outboxoptions-interface",
+      "signatures": ["interface OutboxOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "connectivity",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxOptions.connectivity",
+          "anchor": "outboxoptionsconnectivity-property",
+          "signatures": ["connectivity?: Connectivity"],
+          "docs": "Network reachability for this outbox. Default: the client's `platform.connectivity`, else the browser's."
+        },
+        {
+          "name": "persist",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxOptions.persist",
+          "anchor": "outboxoptionspersist-property",
+          "signatures": ["persist?: boolean"],
+          "docs": "Keep unsent messages, including their text, in the client's `recoveryStorage` or `asyncRecoveryStorage` across\nreloads. Off by default; use one persistent outbox per client. Messages that may have been submitted are\nrecovered, never re-sent as new.\n\nEach running persistent outbox of a user saves its messages separately, so tabs sharing `localStorage` keep each\nother's. Up to 16 run at once; they coordinate through Web Locks, or within one JavaScript context where the\nruntime has none. When one stops, such as when its tab closes or reloads, another running outbox takes over the\nmessages it left unsent; if none can yet, the next one to start, come back online or return to the foreground\ndoes. An outbox created in the same JavaScript context while another closes, such as on a React remount,\ncontinues with the closing one's messages instead. While it runs, the outbox holds a Web Lock, so Chromium won't\nkeep the page in its back/forward cache; close the outbox on `pagehide` if you need that.\n\nSaved messages load in the background; they are sent before messages added meanwhile, and\n`Outbox.flush` waits for them. `Outbox.send` refuses a message while 100 are unsent, but loading or\ntaking over saved messages can bring an outbox up to 200."
+        },
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/client#OutboxOptions.onError",
+          "anchor": "outboxoptionsonerror-property",
+          "signatures": ["onError?: (error: Error) => void"],
+          "docs": "Called when an entry fails and when persistence or a listener throws."
+        }
+      ]
+    },
+    {
+      "name": "PageOptions",
+      "kind": "interface",
+      "ref": "@convohop/client#PageOptions",
+      "anchor": "pageoptions-interface",
+      "signatures": ["interface PageOptions"],
+      "docs": "",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "cursor",
+          "kind": "property",
+          "ref": "@convohop/client#PageOptions.cursor",
+          "anchor": "pageoptionscursor-property",
+          "signatures": ["cursor?: string"],
+          "docs": ""
+        },
+        {
+          "name": "limit",
+          "kind": "property",
+          "ref": "@convohop/client#PageOptions.limit",
+          "anchor": "pageoptionslimit-property",
+          "signatures": ["limit?: number"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PlatformURL",
+      "kind": "interface",
+      "ref": "@convohop/client#PlatformURL",
+      "anchor": "platformurl-interface",
+      "signatures": ["interface PlatformURL"],
+      "docs": "The parts of a WHATWG `URL` the SDKs read.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "href",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.href",
+          "anchor": "platformurlhref-property",
+          "signatures": ["readonly href: string"],
+          "docs": ""
+        },
+        {
+          "name": "origin",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.origin",
+          "anchor": "platformurlorigin-property",
+          "signatures": ["readonly origin: string"],
+          "docs": ""
+        },
+        {
+          "name": "protocol",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.protocol",
+          "anchor": "platformurlprotocol-property",
+          "signatures": ["readonly protocol: string"],
+          "docs": ""
+        },
+        {
+          "name": "username",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.username",
+          "anchor": "platformurlusername-property",
+          "signatures": ["readonly username: string"],
+          "docs": ""
+        },
+        {
+          "name": "password",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.password",
+          "anchor": "platformurlpassword-property",
+          "signatures": ["readonly password: string"],
+          "docs": ""
+        },
+        {
+          "name": "host",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.host",
+          "anchor": "platformurlhost-property",
+          "signatures": ["readonly host: string"],
+          "docs": ""
+        },
+        {
+          "name": "hostname",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.hostname",
+          "anchor": "platformurlhostname-property",
+          "signatures": ["readonly hostname: string"],
+          "docs": ""
+        },
+        {
+          "name": "port",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.port",
+          "anchor": "platformurlport-property",
+          "signatures": ["readonly port: string"],
+          "docs": ""
+        },
+        {
+          "name": "pathname",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.pathname",
+          "anchor": "platformurlpathname-property",
+          "signatures": ["readonly pathname: string"],
+          "docs": ""
+        },
+        {
+          "name": "search",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.search",
+          "anchor": "platformurlsearch-property",
+          "signatures": ["readonly search: string"],
+          "docs": ""
+        },
+        {
+          "name": "hash",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformURL.hash",
+          "anchor": "platformurlhash-property",
+          "signatures": ["readonly hash: string"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PlatformWebSocket",
+      "kind": "interface",
+      "ref": "@convohop/client#PlatformWebSocket",
+      "anchor": "platformwebsocket-interface",
+      "signatures": ["interface PlatformWebSocket"],
+      "docs": "The parts of a `WebSocket` the client uses.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "onopen",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformWebSocket.onopen",
+          "anchor": "platformwebsocketonopen-property",
+          "signatures": ["onopen: Handler<unknown> | null"],
+          "docs": ""
+        },
+        {
+          "name": "onmessage",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformWebSocket.onmessage",
+          "anchor": "platformwebsocketonmessage-property",
+          "signatures": ["onmessage: Handler<{\n    readonly data: unknown;\n}> | null"],
+          "docs": ""
+        },
+        {
+          "name": "onerror",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformWebSocket.onerror",
+          "anchor": "platformwebsocketonerror-property",
+          "signatures": ["onerror: Handler<unknown> | null"],
+          "docs": ""
+        },
+        {
+          "name": "onclose",
+          "kind": "property",
+          "ref": "@convohop/client#PlatformWebSocket.onclose",
+          "anchor": "platformwebsocketonclose-property",
+          "signatures": [
+            "onclose: Handler<{\n    readonly code: number;\n    readonly reason?: string;\n}> | null"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "send",
+          "kind": "method",
+          "ref": "@convohop/client#PlatformWebSocket.send",
+          "anchor": "platformwebsocketsend-method",
+          "signatures": ["send(data: string): void"],
+          "docs": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "ref": "@convohop/client#PlatformWebSocket.close",
+          "anchor": "platformwebsocketclose-method",
+          "signatures": ["close(code?: number, reason?: string): void"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "ProjectRoute",
+      "kind": "interface",
+      "ref": "@convohop/client#ProjectRoute",
+      "anchor": "projectroute-interface",
+      "signatures": ["interface ProjectRoute"],
+      "docs": "",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "@convohop/client#ProjectRoute.projectId",
+          "anchor": "projectrouteprojectid-property",
+          "signatures": ["projectId: string"],
+          "docs": ""
+        },
+        {
+          "name": "incarnation",
+          "kind": "property",
+          "ref": "@convohop/client#ProjectRoute.incarnation",
+          "anchor": "projectrouteincarnation-property",
+          "signatures": ["incarnation: string"],
+          "docs": ""
+        },
+        {
+          "name": "servingEpoch",
+          "kind": "property",
+          "ref": "@convohop/client#ProjectRoute.servingEpoch",
+          "anchor": "projectrouteservingepoch-property",
+          "signatures": ["servingEpoch: string"],
+          "docs": ""
+        },
+        {
+          "name": "communicationBase",
+          "kind": "property",
+          "ref": "@convohop/client#ProjectRoute.communicationBase",
+          "anchor": "projectroutecommunicationbase-property",
+          "signatures": ["communicationBase: string"],
+          "docs": ""
+        },
+        {
+          "name": "wssUrl",
+          "kind": "property",
+          "ref": "@convohop/client#ProjectRoute.wssUrl",
+          "anchor": "projectroutewssurl-property",
+          "signatures": ["wssUrl: string"],
+          "docs": ""
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "@convohop/client#ProjectRoute.expiresAt",
+          "anchor": "projectrouteexpiresat-property",
+          "signatures": ["expiresAt: string"],
+          "docs": ""
+        },
+        {
+          "name": "signature",
+          "kind": "property",
+          "ref": "@convohop/client#ProjectRoute.signature",
+          "anchor": "projectroutesignature-property",
+          "signatures": ["signature: string"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "RecoveryState",
+      "kind": "interface",
+      "ref": "@convohop/client#RecoveryState",
+      "anchor": "recoverystate-interface",
+      "signatures": ["interface RecoveryState"],
+      "docs": "A mutation's recovery record. `resolutionState` is how far its request is known to have gone: `pending` before its\nfirst attempt, `unknown` while an attempt's outcome is unknown, `rejected` once the authority has rejected every\nattempt, and `committed` or `accepted` once the authority has the request.",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "requestId",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.requestId",
+          "anchor": "recoverystaterequestid-property",
+          "signatures": ["requestId: string"],
+          "docs": ""
+        },
+        {
+          "name": "incarnation",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.incarnation",
+          "anchor": "recoverystateincarnation-property",
+          "signatures": ["incarnation: string"],
+          "docs": ""
+        },
+        {
+          "name": "payloadFingerprint",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.payloadFingerprint",
+          "anchor": "recoverystatepayloadfingerprint-property",
+          "signatures": ["payloadFingerprint: string"],
+          "docs": ""
+        },
+        {
+          "name": "operation",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.operation",
+          "anchor": "recoverystateoperation-property",
+          "signatures": ["operation: OperationKey"],
+          "docs": ""
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.projectId",
+          "anchor": "recoverystateprojectid-property",
+          "signatures": ["projectId?: string"],
+          "docs": ""
+        },
+        {
+          "name": "input",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.input",
+          "anchor": "recoverystateinput-property",
+          "signatures": ["input: ProtocolObject"],
+          "docs": ""
+        },
+        {
+          "name": "firstSubmittedAt",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.firstSubmittedAt",
+          "anchor": "recoverystatefirstsubmittedat-property",
+          "signatures": ["firstSubmittedAt: number"],
+          "docs": ""
+        },
+        {
+          "name": "retryDeadline",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.retryDeadline",
+          "anchor": "recoverystateretrydeadline-property",
+          "signatures": ["retryDeadline: number"],
+          "docs": ""
+        },
+        {
+          "name": "attemptCount",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.attemptCount",
+          "anchor": "recoverystateattemptcount-property",
+          "signatures": ["attemptCount: number"],
+          "docs": ""
+        },
+        {
+          "name": "lastAttemptAt",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.lastAttemptAt",
+          "anchor": "recoverystatelastattemptat-property",
+          "signatures": ["lastAttemptAt: number"],
+          "docs": ""
+        },
+        {
+          "name": "lastAttemptClassification",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.lastAttemptClassification",
+          "anchor": "recoverystatelastattemptclassification-property",
+          "signatures": ["lastAttemptClassification: string"],
+          "docs": ""
+        },
+        {
+          "name": "resolutionState",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.resolutionState",
+          "anchor": "recoverystateresolutionstate-property",
+          "signatures": [
+            "resolutionState: \"pending\" | \"unknown\" | \"rejected\" | \"committed\" | \"accepted\""
+          ],
+          "docs": ""
+        },
+        {
+          "name": "mediaAdmissionAttempted",
+          "kind": "property",
+          "ref": "@convohop/client#RecoveryState.mediaAdmissionAttempted",
+          "anchor": "recoverystatemediaadmissionattempted-property",
+          "signatures": ["mediaAdmissionAttempted?: true"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "RecoveryStorage",
+      "kind": "interface",
+      "ref": "@convohop/client#RecoveryStorage",
+      "anchor": "recoverystorage-interface",
+      "signatures": ["interface RecoveryStorage"],
+      "docs": "",
+      "origin": "@convohop/core",
+      "members": [
+        {
+          "name": "getItem",
+          "kind": "method",
+          "ref": "@convohop/client#RecoveryStorage.getItem",
+          "anchor": "recoverystoragegetitem-method",
+          "signatures": ["getItem(key: string): string | null"],
+          "docs": ""
+        },
+        {
+          "name": "setItem",
+          "kind": "method",
+          "ref": "@convohop/client#RecoveryStorage.setItem",
+          "anchor": "recoverystoragesetitem-method",
+          "signatures": ["setItem(key: string, value: string): void"],
+          "docs": ""
+        },
+        {
+          "name": "removeItem",
+          "kind": "method",
+          "ref": "@convohop/client#RecoveryStorage.removeItem",
+          "anchor": "recoverystorageremoveitem-method",
+          "signatures": ["removeItem(key: string): void"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "RemoteMedia",
+      "kind": "interface",
+      "ref": "@convohop/client#RemoteMedia",
+      "anchor": "remotemedia-interface",
+      "signatures": ["interface RemoteMedia"],
+      "docs": "",
+      "members": [
+        {
+          "name": "trackId",
+          "kind": "property",
+          "ref": "@convohop/client#RemoteMedia.trackId",
+          "anchor": "remotemediatrackid-property",
+          "signatures": ["trackId: string"],
+          "docs": ""
+        },
+        {
+          "name": "participantIdentity",
+          "kind": "property",
+          "ref": "@convohop/client#RemoteMedia.participantIdentity",
+          "anchor": "remotemediaparticipantidentity-property",
+          "signatures": ["participantIdentity: string"],
+          "docs": ""
+        },
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "@convohop/client#RemoteMedia.kind",
+          "anchor": "remotemediakind-property",
+          "signatures": ["kind: \"audio\" | \"video\""],
+          "docs": ""
+        },
+        {
+          "name": "element",
+          "kind": "property",
+          "ref": "@convohop/client#RemoteMedia.element",
+          "anchor": "remotemediaelement-property",
+          "signatures": ["element: HTMLMediaElement"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "SessionRefreshSchedule",
+      "kind": "interface",
+      "ref": "@convohop/client#SessionRefreshSchedule",
+      "anchor": "sessionrefreshschedule-interface",
+      "signatures": ["interface SessionRefreshSchedule"],
+      "docs": "",
+      "members": [
+        {
+          "name": "leadMs",
+          "kind": "property",
+          "ref": "@convohop/client#SessionRefreshSchedule.leadMs",
+          "anchor": "sessionrefreshscheduleleadms-property",
+          "signatures": ["leadMs?: number"],
+          "docs": "How long before the session expires to renew it, in milliseconds. Default 60000."
+        },
+        {
+          "name": "onRefreshed",
+          "kind": "property",
+          "ref": "@convohop/client#SessionRefreshSchedule.onRefreshed",
+          "anchor": "sessionrefreshscheduleonrefreshed-property",
+          "signatures": ["onRefreshed?: (session: SessionMetadata) => void"],
+          "docs": ""
+        },
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/client#SessionRefreshSchedule.onError",
+          "anchor": "sessionrefreshscheduleonerror-property",
+          "signatures": ["onError?: (error: Error) => void"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "TypingIndicatorOptions",
+      "kind": "interface",
+      "ref": "@convohop/client#TypingIndicatorOptions",
+      "anchor": "typingindicatoroptions-interface",
+      "signatures": ["interface TypingIndicatorOptions"],
+      "docs": "",
+      "members": [
+        {
+          "name": "intervalMs",
+          "kind": "property",
+          "ref": "@convohop/client#TypingIndicatorOptions.intervalMs",
+          "anchor": "typingindicatoroptionsintervalms-property",
+          "signatures": ["intervalMs?: number"],
+          "docs": "The shortest time between typing signals while the user keeps typing, in milliseconds. Default 3000."
+        },
+        {
+          "name": "idleMs",
+          "kind": "property",
+          "ref": "@convohop/client#TypingIndicatorOptions.idleMs",
+          "anchor": "typingindicatoroptionsidlems-property",
+          "signatures": ["idleMs?: number"],
+          "docs": "How long after the last input the user stops typing, in milliseconds. Default 5000."
+        },
+        {
+          "name": "enabled",
+          "kind": "property",
+          "ref": "@convohop/client#TypingIndicatorOptions.enabled",
+          "anchor": "typingindicatoroptionsenabled-property",
+          "signatures": ["enabled?: boolean"],
+          "docs": "Whether to send signals. Pass `capabilities().features?.typing === true` to skip projects without typing.\nDefault true."
+        },
+        {
+          "name": "onError",
+          "kind": "property",
+          "ref": "@convohop/client#TypingIndicatorOptions.onError",
+          "anchor": "typingindicatoroptionsonerror-property",
+          "signatures": ["onError?: (error: Error) => void"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "WebPushSubscription",
+      "kind": "interface",
+      "ref": "@convohop/client#WebPushSubscription",
+      "anchor": "webpushsubscription-interface",
+      "signatures": ["interface WebPushSubscription"],
+      "docs": "A Web Push subscription, as `PushSubscription.toJSON()` returns it.",
+      "members": [
+        {
+          "name": "endpoint",
+          "kind": "property",
+          "ref": "@convohop/client#WebPushSubscription.endpoint",
+          "anchor": "webpushsubscriptionendpoint-property",
+          "signatures": ["readonly endpoint?: string"],
+          "docs": ""
+        },
+        {
+          "name": "expirationTime",
+          "kind": "property",
+          "ref": "@convohop/client#WebPushSubscription.expirationTime",
+          "anchor": "webpushsubscriptionexpirationtime-property",
+          "signatures": ["readonly expirationTime?: number | null"],
+          "docs": ""
+        },
+        {
+          "name": "keys",
+          "kind": "property",
+          "ref": "@convohop/client#WebPushSubscription.keys",
+          "anchor": "webpushsubscriptionkeys-property",
+          "signatures": ["readonly keys?: Readonly<Record<string, string>>"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "Conversation",
+      "kind": "type",
+      "ref": "@convohop/client#Conversation",
+      "anchor": "conversation-type",
+      "signatures": [
+        "type Conversation = NonNullable<OperationPayload<\"communication.getConversation\">[\"result\"]>"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "ConversationCursor",
+      "kind": "type",
+      "ref": "@convohop/client#ConversationCursor",
+      "anchor": "conversationcursor-type",
+      "signatures": [
+        "type ConversationCursor = NonNullable<NonNullable<OperationPayload<\"communication.events\">[\"result\"]>[\"nextCursor\"]>"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "ConversationMessage",
+      "kind": "type",
+      "ref": "@convohop/client#ConversationMessage",
+      "anchor": "conversationmessage-type",
+      "signatures": [
+        "type ConversationMessage = NonNullable<OperationPayload<\"communication.getMessage\">[\"result\"]>"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "ConversationMute",
+      "kind": "type",
+      "ref": "@convohop/client#ConversationMute",
+      "anchor": "conversationmute-type",
+      "signatures": [
+        "type ConversationMute = OperationPayload<\"communication.conversationMute\">[\"result\"]"
+      ],
+      "docs": "Whether a member muted message push notifications for a conversation, and until when.",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "ConversationStatus",
+      "kind": "type",
+      "ref": "@convohop/client#ConversationStatus",
+      "anchor": "conversationstatus-type",
+      "signatures": [
+        "type ConversationStatus = \"idle\" | \"loading\" | \"live\" | \"reconnecting\" | \"error\" | \"closed\""
+      ],
+      "docs": "- `idle`: not opened yet.\n- `loading`: loading the conversation, its newest messages and its receipts, then catching up.\n- `live`: following the conversation.\n- `reconnecting`: realtime updates were interrupted; the store is reconnecting on its own.\n- `error`: updates stopped. See `error` and `resyncRequired`, then call `open()` or `resync()`.\n- `closed`: `ConversationStore.close` was called."
+    },
+    {
+      "name": "InboxItem",
+      "kind": "type",
+      "ref": "@convohop/client#InboxItem",
+      "anchor": "inboxitem-type",
+      "signatures": [
+        "type InboxItem = NonNullable<OperationPayload<\"communication.inbox\">[\"result\"]>[\"items\"][number]"
+      ],
+      "docs": "One conversation in the user's inbox."
+    },
+    {
+      "name": "InboxPage",
+      "kind": "type",
+      "ref": "@convohop/client#InboxPage",
+      "anchor": "inboxpage-type",
+      "signatures": ["type InboxPage = ItemPage<InboxItem> & {\n    partialReason?: string;\n}"],
+      "docs": "A page of the inbox. An incomplete page with no cursor carries `partialReason`, such as `INBOX_WINDOW_LIMIT`."
+    },
+    {
+      "name": "LifecycleState",
+      "kind": "type",
+      "ref": "@convohop/client#LifecycleState",
+      "anchor": "lifecyclestate-type",
+      "signatures": ["type LifecycleState = \"active\" | \"background\""],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "LiveConnectionGrant",
+      "kind": "type",
+      "ref": "@convohop/client#LiveConnectionGrant",
+      "anchor": "liveconnectiongrant-type",
+      "signatures": [
+        "type LiveConnectionGrant = OperationPayload<\"communication.liveSessionCredentials\">[\"result\"]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveConnector",
+      "kind": "type",
+      "ref": "@convohop/client#LiveConnector",
+      "anchor": "liveconnector-type",
+      "signatures": [
+        "type LiveConnector<C extends LiveConnection = LiveConnection> = (attempt: LiveConnectionAttempt) => Promise<C>"
+      ],
+      "docs": "Opens one native connection for an admitted attempt, for example with a stock LiveKit SDK:\n`async attempt => { await room.connect(attempt.url, attempt.token); return { get connected() { … }, disconnect: () => room.disconnect() }; }`."
+    },
+    {
+      "name": "LiveOperation",
+      "kind": "type",
+      "ref": "@convohop/client#LiveOperation",
+      "anchor": "liveoperation-type",
+      "signatures": [
+        "type LiveOperation = OperationPayload<\"communication.liveSessionOperation\">[\"result\"]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveParticipation",
+      "kind": "type",
+      "ref": "@convohop/client#LiveParticipation",
+      "anchor": "liveparticipation-type",
+      "signatures": [
+        "type LiveParticipation = OperationPayload<\"communication.joinLiveSession\">[\"result\"][\"participation\"]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "LiveSession",
+      "kind": "type",
+      "ref": "@convohop/client#LiveSession",
+      "anchor": "livesession-type",
+      "signatures": [
+        "type LiveSession = OperationPayload<\"communication.liveSession\">[\"result\"]"
+      ],
+      "docs": ""
+    },
+    {
+      "name": "Membership",
+      "kind": "type",
+      "ref": "@convohop/client#Membership",
+      "anchor": "membership-type",
+      "signatures": [
+        "type Membership = NonNullable<OperationPayload<\"communication.members\">[\"result\"]>[\"items\"][number]"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "OperationInput",
+      "kind": "type",
+      "ref": "@convohop/client#OperationInput",
+      "anchor": "operationinput-type",
+      "signatures": [
+        "type OperationInput<K extends OperationKey> = OperationTypes[K][\"variables\"] extends {\n    input?: infer I;\n} ? NonNullable<I> : Record<string, never>"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "OperationKey",
+      "kind": "type",
+      "ref": "@convohop/client#OperationKey",
+      "anchor": "operationkey-type",
+      "signatures": ["type OperationKey = keyof OperationTypes"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "OperationPayload",
+      "kind": "type",
+      "ref": "@convohop/client#OperationPayload",
+      "anchor": "operationpayload-type",
+      "signatures": [
+        "type OperationPayload<K extends OperationKey> = OperationTypes[K][\"result\"][FieldName<K> & keyof OperationTypes[K][\"result\"]]"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "OutboxStatus",
+      "kind": "type",
+      "ref": "@convohop/client#OutboxStatus",
+      "anchor": "outboxstatus-type",
+      "signatures": [
+        "type OutboxStatus = \"queued\" | \"sending\" | \"unknown\" | \"sent\" | \"failed\""
+      ],
+      "docs": "- `queued`: waiting to be sent. Nothing about it can have committed.\n- `sending`: a send, retry or resolution is in flight.\n- `unknown`: an attempt's outcome is uncertain. The outbox recovers it with its original request ID.\n- `sent`: committed. The entry stays until `Outbox.settle` or until newer sent entries evict it.\n- `failed`: rejected, or no longer recoverable. `Outbox.resend` it as a new message or discard it."
+    },
+    {
+      "name": "PlatformURLConstructor",
+      "kind": "type",
+      "ref": "@convohop/client#PlatformURLConstructor",
+      "anchor": "platformurlconstructor-type",
+      "signatures": [
+        "type PlatformURLConstructor = new (url: string, base?: string) => PlatformURL"
+      ],
+      "docs": "A WHATWG URL constructor, such as the global `URL` or a polyfill's.",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "PlatformWebSocketConstructor",
+      "kind": "type",
+      "ref": "@convohop/client#PlatformWebSocketConstructor",
+      "anchor": "platformwebsocketconstructor-type",
+      "signatures": [
+        "type PlatformWebSocketConstructor = new (url: string, protocols?: string | string[]) => PlatformWebSocket"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "ProjectCapabilities",
+      "kind": "type",
+      "ref": "@convohop/client#ProjectCapabilities",
+      "anchor": "projectcapabilities-type",
+      "signatures": [
+        "type ProjectCapabilities = NonNullable<OperationPayload<\"communication.capabilities\">[\"result\"]>"
+      ],
+      "docs": "The project's features and limits, as `communication.capabilities` reports them."
+    },
+    {
+      "name": "ProtocolObject",
+      "kind": "type",
+      "ref": "@convohop/client#ProtocolObject",
+      "anchor": "protocolobject-type",
+      "signatures": ["type ProtocolObject = Record<string, unknown>"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "PushRegistration",
+      "kind": "type",
+      "ref": "@convohop/client#PushRegistration",
+      "anchor": "pushregistration-type",
+      "signatures": [
+        "type PushRegistration = {\n    readonly kind: \"webPush\";\n    readonly subscription: WebPushSubscription;\n} | {\n    readonly kind: \"apns\" | \"apnsVoip\";\n    readonly token: string;\n    readonly environment?: \"development\" | \"production\";\n} | {\n    readonly kind: \"fcm\";\n    readonly token: string;\n    readonly fid?: never;\n} | {\n    readonly kind: \"fcm\";\n    readonly fid: string;\n    readonly token?: never;\n}"
+      ],
+      "docs": "Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend\nendpoint can store registrations from browsers and native apps. ConvoHop never sees them.\n\n- `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.\n- `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.\n- `apnsVoip`: an iOS PushKit token for incoming calls.\n- `fcm`: an Android app's Firebase Cloud Messaging target, with exactly one of `token` and `fid`. `token` is the\n  registration token, which apps get by default. `fid` is the Firebase Installation ID, which apps get instead when\n  their manifest sets `firebase_messaging_installation_id_enabled`. Send to it with the FCM HTTP v1 target of the\n  same name."
+    },
+    {
+      "name": "ReadReceipt",
+      "kind": "type",
+      "ref": "@convohop/client#ReadReceipt",
+      "anchor": "readreceipt-type",
+      "signatures": [
+        "type ReadReceipt = NonNullable<OperationPayload<\"communication.receipts\">[\"result\"]>[\"items\"][number]"
+      ],
+      "docs": "One member's delivery and read progress, valid for its membership and visibility epochs."
+    },
+    {
+      "name": "SearchHit",
+      "kind": "type",
+      "ref": "@convohop/client#SearchHit",
+      "anchor": "searchhit-type",
+      "signatures": [
+        "type SearchHit = NonNullable<OperationPayload<\"communication.search\">[\"result\"]>[\"items\"][number] & {\n    message: ConversationMessage;\n}"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "SendReceipt",
+      "kind": "type",
+      "ref": "@convohop/client#SendReceipt",
+      "anchor": "sendreceipt-type",
+      "signatures": [
+        "type SendReceipt = NonNullable<OperationPayload<\"communication.sendMessage\">[\"result\"]> & {\n    cursor: ConversationCursor;\n}"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "SessionBootstrap",
+      "kind": "type",
+      "ref": "@convohop/client#SessionBootstrap",
+      "anchor": "sessionbootstrap-type",
+      "signatures": [
+        "type SessionBootstrap = SessionResult & {\n    session: NonNullable<SessionResult[\"session\"]>;\n}"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "SessionMetadata",
+      "kind": "type",
+      "ref": "@convohop/client#SessionMetadata",
+      "anchor": "sessionmetadata-type",
+      "signatures": [
+        "type SessionMetadata = OperationPayload<\"communication.currentSession\">[\"result\"]"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "SessionRefresh",
+      "kind": "type",
+      "ref": "@convohop/client#SessionRefresh",
+      "anchor": "sessionrefresh-type",
+      "signatures": [
+        "type SessionRefresh = (current: Readonly<SessionMetadata>) => Promise<SessionBootstrap>"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "SessionRefreshState",
+      "kind": "type",
+      "ref": "@convohop/client#SessionRefreshState",
+      "anchor": "sessionrefreshstate-type",
+      "signatures": [
+        "type SessionRefreshState = \"disabled\" | \"uninitialized\" | \"ready\" | \"refreshing\" | \"blocked\""
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "parseConversation",
+      "kind": "function",
+      "ref": "@convohop/client#parseConversation",
+      "anchor": "parseconversation-function",
+      "signatures": ["function parseConversation(value: unknown): Conversation"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "parseCounter",
+      "kind": "function",
+      "ref": "@convohop/client#parseCounter",
+      "anchor": "parsecounter-function",
+      "signatures": ["function parseCounter(value: unknown): string"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "parseCursor",
+      "kind": "function",
+      "ref": "@convohop/client#parseCursor",
+      "anchor": "parsecursor-function",
+      "signatures": ["function parseCursor(value: unknown): ConversationCursor"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "parseId",
+      "kind": "function",
+      "ref": "@convohop/client#parseId",
+      "anchor": "parseid-function",
+      "signatures": ["function parseId(value: unknown): string"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "parseMembership",
+      "kind": "function",
+      "ref": "@convohop/client#parseMembership",
+      "anchor": "parsemembership-function",
+      "signatures": ["function parseMembership(value: unknown): Membership"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "parseMessage",
+      "kind": "function",
+      "ref": "@convohop/client#parseMessage",
+      "anchor": "parsemessage-function",
+      "signatures": ["function parseMessage(value: unknown): ConversationMessage"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "parseObject",
+      "kind": "function",
+      "ref": "@convohop/client#parseObject",
+      "anchor": "parseobject-function",
+      "signatures": ["function parseObject(value: unknown): ProtocolObject"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "parsePage",
+      "kind": "function",
+      "ref": "@convohop/client#parsePage",
+      "anchor": "parsepage-function",
+      "signatures": [
+        "function parsePage<T>(value: unknown, parse: (value: unknown) => T): ItemPage<T>"
+      ],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "parseSearchHit",
+      "kind": "function",
+      "ref": "@convohop/client#parseSearchHit",
+      "anchor": "parsesearchhit-function",
+      "signatures": ["function parseSearchHit(value: unknown): SearchHit"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "parseString",
+      "kind": "function",
+      "ref": "@convohop/client#parseString",
+      "anchor": "parsestring-function",
+      "signatures": ["function parseString(value: unknown): string"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "operationCatalog",
+      "kind": "constant",
+      "ref": "@convohop/client#operationCatalog",
+      "anchor": "operationcatalog-constant",
+      "signatures": ["const operationCatalog: Record<OperationKey, OperationCatalogEntry>"],
+      "docs": "",
+      "origin": "@convohop/core"
+    },
+    {
+      "name": "GraphqlTypes",
+      "kind": "namespace",
+      "ref": "@convohop/client#GraphqlTypes",
+      "anchor": "graphqltypes-namespace",
+      "signatures": ["namespace GraphqlTypes"],
+      "docs": "",
+      "origin": "@convohop/core"
+    }
+  ]
+}

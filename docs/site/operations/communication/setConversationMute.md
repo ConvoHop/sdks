@@ -79,3 +79,4 @@ mutation CommunicationSetConversationMute($context: RequestContextInput!, $input
 | [Swift](../../swift/reference/operations.md) | [`ConversationMuteSetting.set`](../../swift/reference/convohop.md#conversationmutesettingset-method) |
 | [Android](../../android/reference/operations.md) | [`ConversationHandle.mute.set`](../../android/reference/android-core.md#conversationhandlemuteset-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`ConversationMuteControl.set`](../../flutter/reference/convohop.md#conversationmutecontrolset-method), [`CommunicationOperations.setConversationMute`](../../flutter/reference/convohop.md#communicationoperationssetconversationmute-method) |
+| [React Native](../../react-native/reference/operations.md) | [`ConversationHandle.mute.set`](../../react-native/reference/client.md#conversationhandlemuteset-property) |

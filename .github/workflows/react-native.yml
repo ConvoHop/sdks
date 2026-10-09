@@ -6,8 +6,10 @@
 # tests and builds the example app's debug APK against the Android SDK in
 # android/. The iOS job builds the example app for the iOS simulator against
 # the Swift SDK in swift/. SDK CI runs the package's unit and Codegen tests on
-# Node.js 22 and 24 as part of npm test. No job runs Hermes or starts a
-# simulator or emulator. See docs/react-native.md#testing.
+# Node.js 22 and 24 as part of npm test. The docs job checks the React Native
+# docs' API surface and tested examples (see docs/docs-pipeline.md). No job
+# runs Hermes or starts a simulator or emulator. See
+# docs/react-native.md#testing.
 name: React Native
 
 on:
@@ -24,6 +26,8 @@ on:
       - packages/react-native/**
       - spec/**
       - swift/**
+      - docs/languages/react-native/**
+      - tools/docgen/**
   pull_request:
     branches: [main]
     paths:
@@ -37,6 +41,8 @@ on:
       - packages/react-native/**
       - spec/**
       - swift/**
+      - docs/languages/react-native/**
+      - tools/docgen/**
 
 permissions: {}
 
@@ -170,6 +176,41 @@ jobs:
           -configuration Debug -destination "generic/platform=iOS Simulator"
           -derivedDataPath "$RUNNER_TEMP/DerivedData"
           ARCHS=arm64 ONLY_ACTIVE_ARCH=YES
+
+  # Checks the React Native docs as docs/docs-pipeline.md describes: that
+  # docs/languages/react-native/surface.json matches the built declarations, and
+  # the examples the quickstarts include, which type-check and run on Node.js
+  # with the package's stand-ins for React Native and its native modules. The
+  # Docs workflow checks the generated pages.
+  docs:
+    name: Docs (Node ${{ matrix.node }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        # Supported Node.js lines: Active LTS and Maintenance LTS.
+        node: ["22", "24"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            docs/languages/react-native/examples/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Build the TypeScript packages
+        run: npm run build
+      - name: Check that the React Native surface matches the built declarations
+        run: node tools/docgen/cli.mjs extract --check react-native
+      - name: Type-check and run the React Native snippets
+        run: node tools/docgen/cli.mjs test --install react-native
 
   conformance:
     name: React Native driver (mock target)

@@ -22,7 +22,7 @@
       "slug": "client",
       "layer": "client",
       "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.",
-      "runtime": "Current browsers. React Native isn't verified yet.",
+      "runtime": "Current browsers. For React Native, see the React Native docs.",
       "source": "packages/client"
     },
     {
@@ -38,7 +38,7 @@
       "slug": "react",
       "layer": "client",
       "summary": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.",
-      "runtime": "React 18 or later in current browsers. React Native isn't verified yet.",
+      "runtime": "React 18 or later in current browsers. For React Native, see the React Native docs.",
       "source": "packages/react"
     }
   ],

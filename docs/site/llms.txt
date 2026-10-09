@@ -106,6 +106,19 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [package:convohop/io.dart](flutter/reference/io.md): File-backed recovery storage for the conversation store and the outbox.
 - [Flutter operation coverage](flutter/reference/operations.md): The Flutter SDK members that send each API operation. 35 of the 35 operations that Flutter packages can send have a method.
 
+## React Native
+
+- [React Native SDK](react-native/index.md): @convohop/react-native runs the ConvoHop client SDK, @convohop/client, in React Native apps on Android and iOS. The client runs one signed-in user's session in your app: conversations and their realtime events, a local conversation store, an offline outbox with optimistic sends, read receipts, typing and calls. The package adds what React Native needs around it: the platform that the client runs on in Hermes, push registration and notifications through APNs, PushKit and FCM, calls in CallKit and Android's Telecom, and call media through LiveKit's React Native SDK.
+- [React Native client quickstart](react-native/quickstarts/client.md): Use ConvoHop in your users' React Native apps with @convohop/client and @convohop/react-native: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and the app's restarts. @convohop/react offers the same as React hooks.
+- [React Native push notifications quickstart](react-native/quickstarts/push.md): Show ConvoHop's push notifications in your React Native app with @convohop/react-native: register the device with APNs or FCM, open the conversation that a notification is about, and show message text whether or not the project sends message previews.
+- [React Native calling quickstart](react-native/quickstarts/calling.md): Add voice and video calls to a conversation with @convohop/react-native: start a call and ring other members, join it with LiveKit's React Native SDK, answer incoming calls from CallKit or Android's Telecom, and leave or end a call.
+- [React Native reference](react-native/reference/index.md): The public API of each React Native package, generated from its declarations.
+- [@convohop/react-native](react-native/reference/react-native.md): React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom.
+- [@convohop/react-native/media](react-native/reference/media.md): Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @convohop/react-native.
+- [@convohop/client](react-native/reference/client.md): Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @convohop/react-native.
+- [@convohop/react](react-native/reference/react.md): React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @convohop/react-native/media: useMediaConnection needs a browser.
+- [React Native operation coverage](react-native/reference/operations.md): The React Native SDK members that send each API operation. 32 of the 35 operations that React Native packages can send have a method.
+
 ## API operations
 
 - [API operations](operations/index.md): Every operation in the ConvoHop GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it.
@@ -213,3 +226,4 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [Swift in one file](swift/llms-full.txt): every Swift page.
 - [Android in one file](android/llms-full.txt): every Android page.
 - [Flutter in one file](flutter/llms-full.txt): every Flutter page.
+- [React Native in one file](react-native/llms-full.txt): every React Native page.

@@ -73,3 +73,4 @@ query CommunicationConversationMute($context: RequestContextInput!, $input: Conv
 | [Swift](../../swift/reference/operations.md) | [`ConversationMuteSetting.get`](../../swift/reference/convohop.md#conversationmutesettingget-method) |
 | [Android](../../android/reference/operations.md) | [`ConversationHandle.mute.get`](../../android/reference/android-core.md#conversationhandlemuteget-method) |
 | [Flutter](../../flutter/reference/operations.md) | [`ConversationMuteControl.get`](../../flutter/reference/convohop.md#conversationmutecontrolget-method), [`CommunicationOperations.conversationMute`](../../flutter/reference/convohop.md#communicationoperationsconversationmute-method) |
+| [React Native](../../react-native/reference/operations.md) | [`ConversationHandle.mute.get`](../../react-native/reference/client.md#conversationhandlemuteget-property) |

@@ -15,7 +15,9 @@ React Native apps. It adds:
 It reuses the client for everything else: conversations, the outbox,
 replay, receipts, live sessions and push payload parsing. For hooks, use
 [`@convohop/react`](../react/README.md). It isn't published to a package
-registry yet. License: [Apache-2.0](LICENSE).
+registry yet. The [React Native docs](../../docs/site/react-native/index.md)
+have quickstarts with tested code and the API reference. License:
+[Apache-2.0](LICENSE).
 
 > [!NOTE]
 > The iOS and Android modules have run only on a simulator and an
@@ -30,6 +32,18 @@ npm ci
 npm run build
 npm test --workspace @convohop/react-native
 npm run typecheck:example --workspace @convohop/react-native
+```
+
+The docs include code from `docs/languages/react-native/examples`, whose
+tests run it on Node.js with this package's stand-ins. The docs also cover
+`@convohop/client` and `@convohop/react`. After you change the public API of
+any of the three, from the repository's root:
+
+```sh
+npm run build                                   # the extractor reads the built declarations
+npm run extract:docs -- typescript react-native # refresh both languages' surface.json
+npm run generate:docs                           # regenerate docs/site
+npm run test:docs -- --install react-native     # type-check and run the docs examples
 ```
 
 ## Runtimes

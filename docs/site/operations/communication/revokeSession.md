@@ -99,3 +99,4 @@ mutation CommunicationRevokeSession($context: RequestContextInput!, $input: Revo
 | [Swift](../../swift/reference/operations.md) | Not wrapped by a method |
 | [Android](../../android/reference/operations.md) | Not wrapped by a method |
 | [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.revokeSession`](../../flutter/reference/convohop.md#communicationoperationsrevokesession-method) |
+| [React Native](../../react-native/reference/operations.md) | Not wrapped by a method |
