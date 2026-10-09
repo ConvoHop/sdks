@@ -11,6 +11,7 @@ implements the same behaviour, and the
 | Rule | Driver feature | Scenarios |
 | --- | --- | --- |
 | [Recovery journal](#recovery-journal) | `recovery.eviction` | `recovery.eviction.final-records.user`, `recovery.eviction.final-records.backend`, `recovery.eviction.fail-closed.user`, `recovery.eviction.fail-closed.backend` |
+| [Spent retry budgets](#final-records) | `recovery.spentBudget` | `recovery.eviction.spent-budget.user`, `recovery.eviction.spent-budget.backend` |
 | [Retry and reconnect](#retry-and-reconnect) | `realtime.reconnectPolicy` | `realtime.reconnect.gateway-errors`, `realtime.reconnect.retry-after`, `realtime.reconnect.rate-limited`, `realtime.reconnect.quota-exceeded`, `realtime.reconnect.plan-limit` |
 
 The values come from the schema IR, [`schema/ir.json`](../../schema/ir.json):
@@ -37,22 +38,31 @@ outcome. A record's request is in one of these states:
 
 ### Final records
 
-A record is **final** when nothing more can come of its request:
+A record is **final** when the SDK will never send its request again:
 
-- the authority committed or accepted it; or
-- the authority rejected every attempt and won't take another. Either the
-  last rejection's code isn't retryable, or the request's retry budget is
-  spent: three attempts, or 60 seconds since the SDK first submitted it, as
-  `retryBudget` says.
+- the authority committed or accepted it;
+- the authority rejected it with a code that isn't retryable; or
+- its retry budget is spent, whatever its state: three attempts, or 60
+  seconds since the SDK first submitted it, as `retryBudget` says.
 
 A code is retryable unless the IR marks it `retryable: false`. A code the IR
 doesn't list, such as a newer service's, counts as retryable. So does
 `WRONG_REGION`, since the request can succeed once the client routes again
 (see [Classification](#classification)).
 
+Once a request's budget is spent, the SDK refuses to send it again: sending
+it under its ID, or retrying it, fails with `RESOLUTION_REQUIRED`, status
+409 and outcome `unknown`. The app resolves it instead, which needs only its
+ID, not its record. Resolving a `pending` or `unknown` request that never
+reached the authority answers `notObservedYet` every time, which leaves its
+record as it was. Without the budget rule, 128 such requests would fill the
+journal for good.
+
 Records that aren't final are those of `pending` and `unknown` requests, and
 of requests rejected with a retryable code, such as `RATE_LIMITED`, while
 budget remains. The app may still resend these requests under the same ID.
+A clock set back doesn't spend a budget: the SDK refuses to resend until the
+clock passes the last attempt again, and the record isn't final meanwhile.
 A record that the SDK can't read, such as one a newer SDK saved, counts as
 not final.
 
@@ -65,9 +75,7 @@ under its ID.
 When a new request finds the journal full, the SDK evicts one record:
 
 1. It may evict only a record that is final, that no call in progress is
-   using, and that no caller retains. A caller retains the records of
-   requests it may still resend or resolve, such as an outbox's queued
-   messages.
+   using, and that no caller [retains](#retention).
 2. Of those, it evicts the one whose last attempt is the oldest.
 
 The SDK must never evict a record that isn't final. When no record can be
@@ -83,12 +91,47 @@ with a typed problem rather than an untyped error:
 
 `RECOVERY_LIMIT` isn't retryable: the same call fails until a record becomes
 final. To make room, the app resends or resolves its outstanding requests. A
-request that commits, is accepted or is rejected for good leaves a final
-record, which the next new request may evict.
+request that commits, is accepted, is rejected for good or spends its budget
+leaves a final record, which the next new request may evict. Every budget
+runs out 60 seconds after its request was first submitted, so a full journal
+makes room as budgets run out, unless callers retain its records or calls in
+progress use them.
+
+Evicting a record forgets its request. Retrying the request then fails as
+for one that was never recorded, while resolving it still works. Sending
+under its ID again starts a new record with a new budget, and the authority
+deduplicates by request ID. An app that must learn every uncertain outcome
+keeps its request IDs itself and resolves them.
 
 Taking in another client's record of a request, to resend it, needs a place
 too. When there is none, that fails with `RECOVERY_LIMIT` as well, with the
 request's known outcome.
+
+### Retention
+
+Some callers hold a request's ID across calls, to resend or resolve the
+request or to read its record again. Each such caller retains the records of
+the requests it holds, and the SDK keeps a retained record however full the
+journal is:
+
+| Caller | Retains |
+| --- | --- |
+| An outbox | Each queued message's request, until the message is sent or fails. |
+| A live session handle | Its end request. |
+| A live participation handle | Its leave request, and the request of its current connection grant attempt. |
+
+A handle retains the requests that it made and those that it found in the
+journal. It retains each one, whatever its state, for as long as it holds
+the ID. A handle reads its records again, settled or not: a session handle
+ends with the revision that its first end request carried, and a
+participation handle checks its grant attempt's budget and marks native
+admission on the committed grant. Retention ends when the caller lets go of
+the ID, such as when a new grant attempt replaces the old one, or when the
+app drops the handle.
+
+Retention lives only in memory. After a restart, a handle looks for its
+requests in the journal again. One that finds none starts a new request
+under a new ID, which is safe because only final records are evicted.
 
 ### Shared storage
 
@@ -253,15 +296,16 @@ it has a valid session.
 
 ## Conformance
 
-A driver declares `recovery.eviction` and `realtime.reconnectPolicy` in
-`hello` once its SDK follows these rules. Scenarios that need an undeclared
-feature are skipped (see the
+A driver declares `recovery.eviction`, `recovery.spentBudget` and
+`realtime.reconnectPolicy` in `hello` once its SDK follows these rules.
+Scenarios that need an undeclared feature are skipped (see the
 [driver protocol](../conformance/driver-protocol.md#features)).
 
 | Scenario | Checks |
 | --- | --- |
 | `recovery.eviction.final-records.user`, `recovery.eviction.final-records.backend` | 129 `REVISION_CONFLICT` rejections, one more than the journal holds, all reach the service, so final records made room. The user variant also checks that an older `unknown` send is kept and still resends. |
 | `recovery.eviction.fail-closed.user`, `recovery.eviction.fail-closed.backend` | After 128 `RATE_LIMITED` rejections, a new request fails with `RECOVERY_LIMIT` and isn't sent. A kept request still resends under its ID, and once it commits a new request fits. |
+| `recovery.eviction.spent-budget.user`, `recovery.eviction.spent-budget.backend` | After three lost attempts under one ID, a fourth fails with `RESOLUTION_REQUIRED` and isn't sent. With that record and 127 `RATE_LIMITED` rejections in the journal, a new request evicts the spent record and is sent. The user variant also resolves the evicted request, as `notObservedYet`. |
 | `realtime.reconnect.gateway-errors` | Reconnection continues after routing answers 502 and then 504. |
 | `realtime.reconnect.retry-after` | A rate-limited routing answer's `retryAfter` holds off the next attempt. |
 | `realtime.reconnect.rate-limited` | A 4429 `RATE_LIMITED retryAfter=4` close reconnects, no sooner than 4 seconds. |
@@ -271,4 +315,6 @@ feature are skipped (see the
 The mock target's `httpStatus` fault and reason-coded realtime drops drive
 them (see [targets](../conformance/targets.md#faults)). The mock doesn't
 route between regions or refuse upgrades, so `WRONG_REGION` and refused
-upgrades have no scenarios. Each SDK tests them in its own suite.
+upgrades have no scenarios. Nor do budgets spent by time, which take 60
+seconds, or [retention](#retention) by live handles, which the driver
+protocol doesn't expose. Each SDK tests them in its own suite.

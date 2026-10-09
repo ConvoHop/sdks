@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { setFlagsFromString } from "node:v8";
+import { runInNewContext } from "node:vm";
 import * as livekit from "livekit-client";
 import { ConvoHopClient, MediaConnection, LiveSessionHandle, LiveParticipationHandle, operationCatalog } from "@convohop/client";
 import { validateOutput } from "@convohop/core/internal";
@@ -28,6 +30,37 @@ function participant(fields = {}) {
   return { participationId: id(), principalId: id(), membershipEpoch: "1", role: "PUBLISHER", state: "JOINED",
     permissions: { microphone: true, camera: true, subscribe: true },
     reservationExpiresAt: new Date(Date.now() + 120000).toISOString(), nativeConnectionId: null, mediaCutoff: null, ...fields };
+}
+/** A new client of `setup`'s user whose journal holds `count` records of messages, each sent once and unanswered. */
+function crowded(setup, count) {
+  const { projectId, principalId, incarnation } = setup.options, at = Date.now() - 10000, conversationId = id();
+  setup.values.set(`convohop.requests:${projectId}:${principalId}`, JSON.stringify(Array.from({ length: count }, (_, index) => {
+    const requestId = id();
+    return { requestId, incarnation, payloadFingerprint: "fixture", operation: "communication.sendMessage", projectId,
+      input: { conversationId, text: requestId, props: {} }, firstSubmittedAt: at + index, retryDeadline: at + index + 60000,
+      attemptCount: 1, lastAttemptAt: at + index, lastAttemptClassification: "submitted", resolutionState: "unknown" };
+  })));
+  return new ConvoHopClient(setup.options);
+}
+const message = (client, requestId) =>
+  client.http.execute("communication.sendMessage", client.projectId, { conversationId: id(), text: "fixture", props: {} }, requestId);
+const held = client => client.http.recoveryStates.map(state => state.requestId);
+/** The typed refusal of request `requestId` while the journal holds 128 records it may not forget. */
+const recoveryLimit = requestId => ({ code: "RECOVERY_LIMIT", requestId, outcome: "rejected", status: 409 });
+/** Sends `request` three times, unanswered each time, which spends its retry budget and so makes its record final. */
+async function spend(request) {
+  for (let attempt = 0; attempt < 3; attempt++) await assert.rejects(request(), { code: "TRANSPORT_UNKNOWN" });
+}
+setFlagsFromString("--expose-gc");
+const gc = runInNewContext("gc");
+/** Collects garbage until `weak`'s target is gone, as it is once the app drops it; resolves to whether it went. */
+async function collected(weak) {
+  for (let round = 0; round < 10 && weak.deref() !== undefined; round++) {
+    // A target dereferenced in this job survives it.
+    await new Promise(resolve => setImmediate(resolve));
+    gc();
+  }
+  return weak.deref() === undefined;
 }
 
 test("conversation handles are synchronous, nonthenable and do not make hidden reads or capture", async () => {
@@ -168,6 +201,54 @@ test("leave failure retains its request identity and forbids a new connection", 
   await assert.rejects(restored.connect(), /Leave has been requested/);
   await assert.rejects(restored.leave(), { code: "TRANSPORT_UNKNOWN" });
   assert.deepEqual(setup.requests[0], setup.requests[2]);
+});
+
+test("live handles keep the records of the requests they hold, though final, so a full journal refuses instead", async () => {
+  const p = participant(), session = live({ myParticipation: p });
+  const setup = fixture(key => {
+    if (key === "communication.liveSession") return { result: session };
+    throw new Error("commit response lost");
+  });
+  const client = crowded(setup, 125), handle = new LiveSessionHandle(client, session);
+  const participation = new LiveParticipationHandle(handle, p), [granted, left, ended] = [id(), id(), id()];
+  // The handles read these records again: a credential attempt's budget and admission, the original end revision.
+  await spend(() => participation.connectionGrant({ requestId: granted }));
+  await spend(() => participation.leave({ requestId: left }));
+  await spend(() => handle.end({ requestId: ended }));
+  const refused = id(), sent = setup.requests.length;
+  await assert.rejects(message(client, refused), recoveryLimit(refused));
+  assert.equal(setup.requests.length, sent, "nothing is sent");
+  // Ending under a new request ID, the handle lets go of the old one, whose record then makes room.
+  const ending = id();
+  await assert.rejects(handle.end({ requestId: ending }), { code: "TRANSPORT_UNKNOWN" });
+  assert.deepEqual([granted, left, ended, ending].map(requestId => held(client).includes(requestId)), [true, true, false, true]);
+  await assert.rejects(message(client, refused), recoveryLimit(refused));
+});
+
+test("a live handle the app has dropped no longer keeps its requests' records", async () => {
+  const p = participant(), session = live({ myParticipation: p });
+  const setup = fixture(key => {
+    if (key === "communication.liveSession") return { result: session };
+    throw new Error("commit response lost");
+  });
+  const client = crowded(setup, 125), handle = new LiveSessionHandle(client, session), ended = id();
+  await spend(() => handle.end({ requestId: ended }));
+  // Only this function ever holds the participation handle.
+  async function dropped() {
+    const participation = new LiveParticipationHandle(handle, p), requestIds = [id(), id()];
+    await spend(() => participation.connectionGrant({ requestId: requestIds[0] }));
+    await spend(() => participation.leave({ requestId: requestIds[1] }));
+    return { requestIds, participation: new WeakRef(participation) };
+  }
+  const { requestIds, participation } = await dropped();
+  assert.ok(await collected(participation), "the participation handle is collected");
+  const next = [id(), id()];
+  for (const requestId of next) await assert.rejects(message(client, requestId), { code: "TRANSPORT_UNKNOWN" });
+  assert.deepEqual([...requestIds, ended, ...next].map(requestId => held(client).includes(requestId)), [false, false, true, true, true]);
+  // The session handle the app still holds keeps its end request's record.
+  const refused = id();
+  await assert.rejects(message(client, refused), recoveryLimit(refused));
+  assert.equal(handle.liveSessionId, session.liveSessionId);
 });
 
 test("credential recovery preserves the original unknown command, and native retry resolves before a fresh bound reconnect", async () => {

@@ -52,7 +52,7 @@ namespace ConvoHop.Conformance
         /// <summary>The roles this SDK implements. User sessions belong to the client SDKs.</summary>
         public static readonly IReadOnlyList<string> Roles = new[] { BackendRole, ManagementRole };
 
-        public static readonly IReadOnlyList<string> Features = new[] { "recovery.eviction", "recovery.storage", "retryAfter", "webhooks.verify" };
+        public static readonly IReadOnlyList<string> Features = new[] { "recovery.eviction", "recovery.spentBudget", "recovery.storage", "retryAfter", "webhooks.verify" };
 
         // The largest Unix time DateTimeOffset represents (9999-12-31T23:59:59Z).
         private const long MaxDateSeconds = 253402300799;

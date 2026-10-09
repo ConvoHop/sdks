@@ -427,15 +427,17 @@ final class Transport implements OperationExecutor {
   }
 
   /**
-   * Whether nothing more can come of a record's request: the authority committed or accepted it, or rejected every
-   * attempt and won't take another, because the last rejection's code isn't retryable or the retry budget is spent.
+   * Whether this SDK will never send a record's request again: the authority committed or accepted it, or rejected
+   * every attempt and the last rejection's code isn't retryable, or the request's retry budget is spent, whatever its
+   * outcome. A clock set back refuses a resend only until it catches up, so it spends nothing.
    */
   private boolean isFinal(Record record, long now) {
-    if (record.resolution != RecoveryState.Resolution.REJECTED) {
-      return record.resolution == RecoveryState.Resolution.COMMITTED
-          || record.resolution == RecoveryState.Resolution.ACCEPTED;
+    RecoveryState.Resolution resolution = record.resolution;
+    if (resolution == RecoveryState.Resolution.COMMITTED || resolution == RecoveryState.Resolution.ACCEPTED
+        || (resolution == RecoveryState.Resolution.REJECTED && !isRetryable(record.classification))) {
+      return true;
     }
-    return !isRetryable(record.classification) || record.attemptCount >= MAX_ATTEMPTS || now > record.retryDeadline;
+    return record.attemptCount >= MAX_ATTEMPTS || now > record.retryDeadline;
   }
 
   /**

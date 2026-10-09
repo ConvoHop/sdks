@@ -314,12 +314,16 @@ reads it and merges in that client's records request by request, so tabs
 keep each other's records, and `client.requests.retry(id)` can continue a
 request another tab saved. The journal holds at most 128 records. When it is
 full, final records make room, oldest attempt first. A record is final when
-the authority committed or accepted its request, or rejected it in a way
-that resending can't change: the problem isn't retryable, or the request's
-three-attempt/60-second retry budget is spent. Records of pending and
-`unknown` requests, records of requests rejected with a retryable problem
-such as `RATE_LIMITED`, and records an `Outbox` may still resend stay, since
-the request can still be resent with its ID. When no record is final,
+the SDK will never send its request again: the authority committed or
+accepted it, or rejected it with a problem that isn't retryable, or the
+request's three-attempt/60-second retry budget is spent, whatever its
+outcome. A spent request fails with `RESOLUTION_REQUIRED` instead of being
+sent, and `client.requests.resolve(id)` still looks it up after its record
+is gone. Records of pending and `unknown` requests and of requests rejected
+with a retryable problem such as `RATE_LIMITED` stay while their budget
+lasts, since the request can still be resent with its ID. So do records an
+`Outbox` may still resend or resolve, and those a live session or
+participation handle holds, whatever their state. When no record is final,
 creating a request fails without sending it, with `ConvoHopProblem` code
 `RECOVERY_LIMIT`, outcome `rejected` and status 409: retry or resolve the
 outstanding requests first. Any other save drops another tab's oldest

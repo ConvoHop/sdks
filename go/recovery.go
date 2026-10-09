@@ -101,16 +101,17 @@ func (r *RecoveryRecord) settled() bool {
 	return r.ResolutionState == "committed" || r.ResolutionState == "accepted"
 }
 
-// final reports whether nothing more can come of the record's request at
+// final reports whether the SDK will never send the record's request again at
 // time now: the authority committed or accepted it, or rejected every attempt
-// and won't take another, because the last rejection isn't retryable or the
-// retry budget is spent. Only final records make room in a full journal.
+// and the last rejection isn't retryable, or the request's retry budget is
+// spent, whatever its outcome. Only final records make room in a full journal.
+// A clock set back refuses a resend only until it catches up, so it spends
+// nothing.
 func (r *RecoveryRecord) final(now int64) bool {
-	if r.settled() {
+	if r.settled() || (r.ResolutionState == "rejected" && !retryableCode(ErrorCode(r.LastAttemptClassification))) {
 		return true
 	}
-	return r.ResolutionState == "rejected" && (!retryableCode(ErrorCode(r.LastAttemptClassification)) ||
-		r.AttemptCount >= int64(catalog.operations[r.Operation].maxAttempts) || now > r.RetryDeadline)
+	return r.AttemptCount >= int64(catalog.operations[r.Operation].maxAttempts) || now > r.RetryDeadline
 }
 
 // retryableCode reports whether a later attempt of a request may still succeed

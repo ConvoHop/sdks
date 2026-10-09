@@ -22,6 +22,7 @@ namespace ConvoHop.Tests
         private const long Window = 60000;
         private const string Unavailable = "Authority response unavailable; resolve the original request";
         private const string Limit = "Recovery storage already holds 128 requests that aren't final; retry or resolve them first";
+        private const string Budget = "Retry budget expired or clock changed; resolve this request read-only";
 
         // The TypeScript SDK's fingerprint of createOrganization with the input Original/fixture.
         private const string OrganizationFingerprint = "sha256:699f78bf950c2b4b01fab09b858df6c301ab0ce397f841e4fac1bc368f42e93b";
@@ -141,6 +142,48 @@ namespace ConvoHop.Tests
         }
 
         [Fact]
+        public async Task ASpentRetryBudgetMakesAnUnansweredRequestFinal()
+        {
+            bool online = false;
+            var authority = new FakeAuthority(request => request.Key == "management.resolveRequest"
+                ? Fixtures.Reply(request, new JsonObject { ["result"] = Fixtures.Resolution((string)request.Input!["requestId"]!, "notObservedYet") })
+                : online ? Fixtures.Reply(request, new JsonObject { ["result"] = OrganizationResult() }) : Offline(request));
+            var storage = new RecordingStorage();
+            FakeTimeProvider time = Clock();
+            ConvoHopManagementClient client = Client(authority, storage, time);
+            string[] ids = NewIds(127);
+            foreach (string requestId in ids) await Rejects(() => Create(client, requestId), "TRANSPORT_UNKNOWN", Unavailable);
+            string spent = Fixtures.NewId(), extra = Fixtures.NewId();
+            for (int attempt = 1; attempt <= 3; attempt++)
+            {
+                time.Advance(TimeSpan.FromMilliseconds(1));
+                await Rejects(() => Create(client, spent), "TRANSPORT_UNKNOWN", Unavailable);
+                if (attempt == 3) continue;
+                ConvoHopException refused = await Rejects(() => Create(client, extra), "RECOVERY_LIMIT", Limit);
+                Assert.Equal<(string, string, int)>((extra, "rejected", 409), (refused.RequestId, refused.Outcome, refused.Status));
+            }
+
+            // The SDK won't send the request again, so its record is final though its outcome is unknown.
+            online = true;
+            ConvoHopException problem = await Rejects(() => Create(client, spent), "RESOLUTION_REQUIRED", Budget);
+            Assert.Equal<(string, string, int)>((spent, "unknown", 409), (problem.RequestId, problem.Outcome, problem.Status));
+            Assert.Equal(130, Mutations(authority));
+            await Create(client, extra);
+            Assert.Equal(ids.Append(extra), Ids(Stored(storage)));
+
+            // Forgotten, the request can still be resolved, but not retried.
+            ResolveRequestReply resolved = await client.Management.ResolveRequestAsync(new ResolveRequestRequestInput(spent));
+            Assert.Equal("notObservedYet", resolved.Result!.State);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => client.Transport.RetryAsync(spent));
+            // Sent again under its ID, it is a new record with a new budget. The authority deduplicates by request ID.
+            await Create(client, spent);
+            JsonArray records = Stored(storage);
+            Assert.Equal(ids.Append(spent), Ids(records));
+            Assert.Equal<(long, string)>((1, "committed"), ((long)records[127]!["attemptCount"]!, (string)records[127]!["resolutionState"]!));
+            Assert.Equal(132, Mutations(authority));
+        }
+
+        [Fact]
         public async Task ARequestIsRejectedOnlyIfEveryAttemptWas()
         {
             var plan = new Queue<string>(new[] { "lost", "rejected", "rejected", "lost" });
@@ -187,6 +230,9 @@ namespace ConvoHop.Tests
                 Record("rejected", "RATE_LIMITED", new JsonObject { ["retryDeadline"] = now - 1, ["lastAttemptAt"] = now - 8 }),
                 Record("rejected", "FORBIDDEN", new JsonObject { ["lastAttemptAt"] = now - 7 }),
                 Record("rejected", "RATE_LIMITED", new JsonObject { ["attemptCount"] = 3, ["lastAttemptAt"] = now - 6 }),
+                // Final too, though no answer settled them, since their budget is spent.
+                Record("unknown", "TRANSPORT_UNKNOWN", new JsonObject { ["attemptCount"] = 3, ["lastAttemptAt"] = now - 5 }),
+                Record("pending", "notSubmitted", new JsonObject { ["attemptCount"] = 0, ["retryDeadline"] = now - 1, ["lastAttemptAt"] = now - 4 }),
             };
             JsonObject[] kept =
             {
@@ -195,10 +241,13 @@ namespace ConvoHop.Tests
                 Record("rejected", "NEWER_CODE"),
                 Record("unknown", "submitted"),
                 Record("pending", "notSubmitted", new JsonObject { ["attemptCount"] = 0 }),
+                // A record from a clock that was ahead refuses a resend only until this clock catches up.
+                Record("unknown", "submitted",
+                    new JsonObject { ["firstSubmittedAt"] = now + 30000, ["lastAttemptAt"] = now + 30000, ["retryDeadline"] = now + 90000 }),
             };
             IEnumerable<JsonObject> filler = Enumerable.Range(0, 128 - final.Length - kept.Length).Select(_ => Record("unknown", "TRANSPORT_UNKNOWN"));
-            JsonObject[] saved = new[] { final[2] }.Concat(kept.Take(2)).Append(final[0]).Concat(filler).Append(final[3]).Concat(kept.Skip(2))
-                .Append(final[1]).ToArray();
+            JsonObject[] saved = new[] { final[2] }.Concat(kept.Take(2)).Append(final[0]).Append(final[5]).Concat(filler).Append(final[3])
+                .Concat(kept.Skip(2)).Append(final[1]).Append(final[4]).ToArray();
             var storage = new RecordingStorage();
             storage.Values[Key] = Js.Stringify(new JsonArray(saved.Select(record => (JsonNode)record.DeepClone()).ToArray()));
             var authority = new FakeAuthority(Offline);

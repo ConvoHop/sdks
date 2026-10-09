@@ -575,10 +575,11 @@ delete; the transport currently never calls it or deletes the journal.
 Each write merges the client's records into the snapshot it read, request by
 request, and replaces it with at most 128 records. Over that limit, final
 commands are pruned first: other clients', then this client's inactive ones,
-oldest attempt first. A command is final when the authority committed or
-accepted it, or rejected it in a way that resending can't change: the problem
-isn't retryable, or its three-attempt/60-second retry budget is spent (see
-the [recovery journal rules](../../spec/recovery/README.md#recovery-journal)).
+oldest attempt first. A command is final when the SDK will never send it
+again: the authority committed or accepted it, or rejected it with a problem
+that isn't retryable, or its three-attempt/60-second retry budget is spent,
+whatever its outcome (see the
+[recovery journal rules](../../spec/recovery/README.md#recovery-journal)).
 A write that creates a command fails with `ConvoHopProblem` code
 `RECOVERY_LIMIT`, outcome `rejected` and status 409, before the command is
 sent, rather than prune one that isn't final; any other write prunes other
