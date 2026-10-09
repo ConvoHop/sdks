@@ -2,7 +2,8 @@
 // mock. The page loads the built packages as native ES modules and holds only a user's session token: Node creates
 // the users and the conversation with a backend key, as an app's own backend would. Covered: sending and following a
 // conversation over fetch and graphql-transport-ws, holding sends while the browser is offline, keeping unsent
-// messages in localStorage across a reload and in each tab's own slot, an open tab taking over what a closed tab left
+// messages in localStorage across a reload and in each tab's own slot, an open tab taking over what a closed tab left,
+// tabs keeping each other's recovery records so that an open tab resends once what a closed tab left uncertain
 // and, in Chromium, which can deliver a push through DevTools, showing the shared push vectors from a module service
 // worker. Real media needs a LiveKit server, which the mock doesn't have.
 // BROWSERS selects engines, for example BROWSERS=chromium.
@@ -88,6 +89,12 @@ async function until(page, check, arg) {
 function delivered(text) {
   const view = window.harness.view();
   return view.pending.length === 0 && view.messages.some(message => message.text === text);
+}
+
+/** The recovery records saved under `journal` in the page's localStorage, by request ID. */
+function records(page, journal) {
+  return page.evaluate(journal => Object.fromEntries(JSON.parse(localStorage.getItem(journal) ?? "[]")
+    .map(record => [record.requestId, record])), journal);
 }
 
 for (const name of names) {
@@ -216,6 +223,54 @@ for (const name of names) {
         ["Written in tab A", "Written in tab B"]);
       assert.deepEqual(view.errors, []);
       assert.deepEqual([...a.errors, ...b.errors, ...c.errors], []);
+    });
+
+    test("tabs keep each other's recovery records, so an open tab resends once what a closed tab left uncertain", limit, async t => {
+      const { conversationId, alice, bob } = await conversation();
+      const context = await newContext(t);
+      const base = `convohop.outbox:${alice.projectId}:${alice.principalId}`;
+      const journal = `convohop.requests:${alice.projectId}:${alice.principalId}`;
+      // B loads the shared journal before A records its message, so B keeps A's record only by merging it.
+      const b = await openPage(context);
+      await join(b.page, alice, conversationId, { persist: true });
+      const a = await openPage(context);
+      await join(a.page, alice, conversationId, { persist: true, held: true });
+      // A's send waits at the network until A's outbox is offline again, then fails without reaching the mock, so A
+      // makes exactly one attempt.
+      let intercept;
+      const intercepted = new Promise(resolve => { intercept = resolve; });
+      await a.page.route("**/graphql", route =>
+        route.request().postDataJSON()?.operationName === "CommunicationSendMessage" ? intercept(route) : route.continue());
+      const fromA = await a.page.evaluate(text => window.harness.send(text), "Written in tab A");
+      await a.page.evaluate(() => window.harness.resume());
+      const route = await intercepted;
+      await a.page.evaluate(() => window.harness.hold());
+      await route.abort();
+      await until(a.page, requestId => window.harness.view().outbox.some(entry => entry.requestId === requestId &&
+        entry.status === "unknown"), fromA);
+      const first = (await records(a.page, journal))[fromA];
+      assert.deepEqual([first?.attemptCount, first?.resolutionState], [1, "unknown"]);
+      // Another tab's writes reach a page's localStorage asynchronously.
+      await until(b.page, ({ journal, requestId }) => localStorage.getItem(journal)?.includes(requestId) === true,
+        { journal, requestId: fromA });
+
+      const fromB = await b.page.evaluate(text => window.harness.send(text), "Written in tab B");
+      await until(b.page, delivered, "Written in tab B");
+      assert.deepEqual(Object.keys(await records(b.page, journal)).sort(), [fromA, fromB].sort(), "b's send keeps a's record");
+
+      await a.page.close();
+      const view = await until(b.page, delivered, "Written in tab A");
+      await until(b.page, prefix => !Object.keys(localStorage).some(key => key.startsWith(prefix)), base);
+      assert.deepEqual([(await sends(fromA)).length, (await sends(fromB)).length], [1, 1],
+        "only b's resend of a's message reaches the mock");
+      const last = (await records(b.page, journal))[fromA];
+      assert.deepEqual([last.attemptCount, last.firstSubmittedAt, last.retryDeadline, last.resolutionState],
+        [2, first.firstSubmittedAt, first.retryDeadline, "committed"], "b resends a's original request within its budget");
+      const reader = new ConvoHopClient({ baseUrl: mock.descriptor.communicationUrl, ...bob });
+      assert.deepEqual((await reader.messages(conversationId)).items.map(message => message.text).sort(),
+        ["Written in tab A", "Written in tab B"]);
+      assert.deepEqual(view.errors, []);
+      assert.deepEqual([...a.errors, ...b.errors], []);
     });
   });
 }

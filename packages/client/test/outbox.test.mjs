@@ -479,6 +479,48 @@ for (const [locks, skip] of lockKinds) {
   });
 }
 
+for (const [kind, option, make] of [["synchronous", "recoveryStorage", storage], ["asynchronous", "asyncRecoveryStorage", asyncStorage]]) {
+  test(`outboxes side by side keep each other's recovery records, so an uncertain message taken over is resent once (${kind} storage)`, async t => {
+    const saved = make(), setup = authority(), conversationId = id(), networkA = connectivity();
+    const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`;
+    const records = () => {
+      const name = [...saved.values.keys()].find(value => value.startsWith("convohop.requests:"));
+      return new Map(JSON.parse(saved.values.get(name) ?? "[]").map(record => [record.requestId, record]));
+    };
+    // B loads the shared journal before A records its message, so B can only keep A's record by merging.
+    const clientB = setup.client({ [option]: saved });
+    await clientB.http.initializeRecovery();
+    const b = outbox(t, clientB, { persist: true });
+    await b.outbox.flush();
+    const a = outbox(t, setup.client({ [option]: saved }), { persist: true, connectivity: networkA });
+    await a.outbox.flush();
+    setup.onSend = () => { setup.onSend = undefined; throw new Error("connection reset"); };
+    const fromA = a.outbox.send(conversationId, "from a");
+    await until(() => a.outbox.entries[0].status === "unknown", "a's send to fail");
+    networkA.set(false);
+    const first = records().get(fromA.requestId);
+    assert.deepEqual([first.attemptCount, first.resolutionState], [1, "unknown"]);
+
+    const fromB = b.outbox.send(conversationId, "from b");
+    await b.outbox.flush();
+    assert.equal(b.outbox.entries[0].status, "sent");
+    assert.deepEqual(sorted(records().keys()), sorted([fromA.requestId, fromB.requestId]), "b's send keeps a's record");
+
+    a.outbox.close();
+    await until(() => b.outbox.entries.length === 2 && !saved.values.has(key + ":1"), "b to take over a's message");
+    await b.outbox.flush();
+    const taken = b.outbox.entries.find(entry => entry.requestId === fromA.requestId);
+    assert.equal(taken.status, "sent", "b recovers a's message from a's record");
+    assert.equal(taken.messageId, setup.committed.get(fromA.requestId).messageId);
+    assert.deepEqual(sendIds(setup), [fromA.requestId, fromB.requestId, fromA.requestId],
+      "a's message is resent once, with its request ID, and b's is sent once");
+    const last = records().get(fromA.requestId);
+    assert.deepEqual([last.attemptCount, last.firstSubmittedAt, last.retryDeadline, last.resolutionState],
+      [2, first.firstSubmittedAt, first.retryDeadline, "committed"], "the resend counts against a's original budget");
+    assert.deepEqual([...a.errors, ...b.errors], []);
+  });
+}
+
 test("messages left in slots no outbox holds are taken over on start and when the app comes online or to the foreground", async t => {
   const saved = storage(), network = connectivity(false), foreground = lifecycle("background");
   const setup = authority({ recoveryStorage: saved, clientOptions: { platform: { lifecycle: foreground } } });

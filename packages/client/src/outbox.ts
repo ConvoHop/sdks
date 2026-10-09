@@ -2,7 +2,7 @@ import {
   ConvoHopProblem, parseCounter, parseCursor, parseId, parseObject, parseString, type AsyncRecoveryStorage, type Connectivity,
   type ProtocolObject, type RecoveryState, type SendReceipt,
 } from "@convohop/core";
-import { beforeSubmitting, jsonClone, randomUUID } from "@convohop/core/internal";
+import { adoptRecovery, beforeSubmitting, jsonClone, randomUUID } from "@convohop/core/internal";
 import type { ConvoHopClient } from "./client.js";
 import { abortReason, connectivityOf, lifecycleOf, listen, storageWrites, throwIfAborted } from "./platform.js";
 import { asError, frozen, notify } from "./util.js";
@@ -344,7 +344,12 @@ export class Outbox {
     });
     try {
       await this.client.http.initializeRecovery();
-      const recorded = this.#state(item.requestId) !== undefined;
+      let recorded = this.#state(item.requestId) !== undefined;
+      // A message another tab sent and left is recovered from the record it saved, if the record is there.
+      if (!recorded && item.attempted) {
+        phase = "resolve";
+        recorded = await adoptRecovery(this.client.http, item.requestId);
+      }
       if (recorded && !item.exhausted) {
         phase = "retry";
         const resolution = await this.client.requests.retry(item.requestId);
