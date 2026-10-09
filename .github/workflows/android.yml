@@ -167,8 +167,9 @@ jobs:
       - name: Run the conformance scenarios against the mock target
         # Not --strict: a client SDK declares only the user role and does not verify
         # webhooks, so the runner skips the scenarios that only use backend or
-        # management clients and those that verify webhooks. The next step allows
-        # only those.
+        # management clients and those that verify webhooks. Until the SDK follows
+        # the spent-budget rule in spec/recovery/README.md, it also skips the scenario
+        # that needs recovery.spentBudget. The next step allows only those.
         run: >-
           npm run conformance --
           --driver conformance/drivers/android/build/install/convohop-conformance-android/bin/convohop-conformance-android
@@ -179,7 +180,7 @@ jobs:
           import { readFileSync } from "node:fs";
           const allowed = [
             /^it only uses (?:backend|management)(?:, (?:backend|management))* clients, which the driver under test does not declare$/,
-            /^driver convohop-android does not declare feature webhooks\.verify$/,
+            /^driver convohop-android does not declare feature (?:webhooks\.verify|recovery\.spentBudget)$/,
           ];
           const summary = JSON.parse(readFileSync("conformance/reports/android/summary.json", "utf8"));
           const scenarios = summary.suites.flatMap((suite) => suite.scenarios);

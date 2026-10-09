@@ -47,7 +47,7 @@ final class Sdk {
   /** The optional features this driver declares. Realtime is a user-client feature. */
   static final List<String> FEATURES =
       Collections.unmodifiableList(
-          Arrays.asList("recovery.eviction", "recovery.storage", "retryAfter", "webhooks.verify"));
+          Arrays.asList("recovery.eviction", "recovery.spentBudget", "recovery.storage", "retryAfter", "webhooks.verify"));
 
   private static final long MAX_DATE_SECONDS = 8_640_000_000_000L;
 

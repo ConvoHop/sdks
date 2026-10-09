@@ -44,15 +44,17 @@
 // restarts. Records hold request IDs, payloads and attempt counts, never
 // credentials.
 //
-// A client keeps at most 128 records. A record is final once its request
-// committed or was accepted, or once the authority rejected every attempt and
-// won't take another: the last rejection's code is one the API documents as
-// not retryable, other than WRONG_REGION, or the retry budget is spent. When
-// all 128 places are taken, a new mutation forgets the final record whose
-// last attempt is the oldest, of those no call in progress is using. When no
-// record is final, the mutation fails with [ErrorCodeRecoveryLimit], outcome
-// [OutcomeRejected] and status 409, and sends nothing. Sending a recorded
-// request ID again needs no new place.
+// A client keeps at most 128 records. A record is final once the client will
+// never send its request again: the request committed or was accepted, or the
+// authority rejected every attempt with a code the API documents as not
+// retryable, other than WRONG_REGION, or the retry budget is spent, whatever
+// the outcome. A spent request fails with [ErrorCodeResolutionRequired]
+// instead of being sent; ResolveRequest still looks it up once its record is
+// gone. When all 128 places are taken, a new mutation forgets the final record
+// whose last attempt is the oldest, of those no call in progress is using.
+// When no record is final, the mutation fails with [ErrorCodeRecoveryLimit],
+// outcome [OutcomeRejected] and status 409, and sends nothing. Sending a
+// recorded request ID again needs no new place.
 //
 // # Pages
 //

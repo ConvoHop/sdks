@@ -227,7 +227,7 @@ test("a rejection is the request's outcome only when every attempt was rejected"
   assert.deepEqual([shared.record(limited).resolutionState, shared.record(limited).attemptCount], ["committed", 2]);
 });
 
-test("a full journal frees its oldest final record: settled, or rejected and not to be sent again", async () => {
+test("a full journal frees its oldest final record: settled, rejected for good, or out of retry budget", async () => {
   const fake = authority(), shared = journal(), now = Date.now();
   const at = index => now - 10000 + index;
   const rejected = (index, lastAttemptClassification, changes = {}) =>
@@ -235,14 +235,19 @@ test("a full journal frees its oldest final record: settled, or rejected and not
   const records = [
     // Oldest, and not final: the app may still send each again under its ID. WRONG_REGION succeeds after routing again.
     stored(at(0), "unknown"), { ...stored(at(1), "pending"), attemptCount: 0 }, rejected(2, "RATE_LIMITED"), rejected(3, "WRONG_REGION"),
-    // Final: not retryable, out of budget, past the retry deadline, then the oldest committed.
-    rejected(4, "NOT_FOUND"), rejected(5, "RATE_LIMITED", { attemptCount: 3 }), rejected(6, "AUTHORITY_UNAVAILABLE", { retryDeadline: now - 1 }),
-    ...Array.from({ length: 121 }, (_, index) => stored(at(7 + index), "committed")),
+    // Nor is a record from a clock that was ahead: it refuses a resend only until this clock catches up.
+    stored(now + 30000, "unknown"),
+    // Final: not retryable, out of budget, past the retry deadline.
+    rejected(5, "NOT_FOUND"), rejected(6, "RATE_LIMITED", { attemptCount: 3 }), rejected(7, "AUTHORITY_UNAVAILABLE", { retryDeadline: now - 1 }),
+    // Final too, though no answer settled them, since their budget is spent: unanswered three times, or never sent in time.
+    { ...stored(at(8), "unknown"), attemptCount: 3 }, { ...stored(at(9), "pending"), attemptCount: 0, retryDeadline: now - 1 },
+    // Then the oldest committed.
+    ...Array.from({ length: 118 }, (_, index) => stored(at(10 + index), "committed")),
   ];
   shared.save(records);
-  const client = await open(fake, shared, "sync"), sent = [id(), id(), id(), id()];
+  const client = await open(fake, shared, "sync"), sent = Array.from({ length: 6 }, () => id());
   for (const requestId of sent) await send(client, requestId);
-  const kept = [...records.slice(0, 4), ...records.slice(8)].map(value => value.requestId).concat(sent);
+  const kept = [...records.slice(0, 5), ...records.slice(11)].map(value => value.requestId).concat(sent);
   assert.deepEqual(shared.records().map(value => value.requestId), kept);
   assert.deepEqual(held(client), kept);
 });
@@ -264,6 +269,35 @@ test("a journal full of records that aren't final refuses new requests until one
   await send(client, next);
   assert.deepEqual(held(client), [...limited.slice(0, 5), ...limited.slice(6), next]);
   assert.deepEqual(shared.records().map(value => value.requestId), held(client));
+});
+
+test("a request whose retry budget is spent is never sent again, so a full journal frees its record", async () => {
+  for (const kind of kinds) {
+    const fake = authority(), shared = journal(), client = await open(fake, shared, kind), spent = id();
+    fake.mode = "offline";
+    for (let attempt = 0; attempt < 3; attempt++)
+      await assert.rejects(send(client, spent), { code: "TRANSPORT_UNKNOWN", outcome: "unknown", requestId: spent });
+    fake.mode = "online";
+    await assert.rejects(send(client, spent), { code: "RESOLUTION_REQUIRED", outcome: "unknown", status: 409, requestId: spent });
+    assert.equal(fake.sent(spent), 3, `${kind}: the spent request isn't sent again`);
+    fake.rejection = { code: "RATE_LIMITED", status: 429 };
+    const limited = Array.from({ length: 127 }, () => id());
+    for (const requestId of limited) await assert.rejects(send(client, requestId), { code: "RATE_LIMITED" });
+    fake.rejection = undefined;
+    // Its outcome is unknown, but its record is final, so it makes room.
+    const next = id();
+    await send(client, next);
+    assert.deepEqual(held(client), [...limited, next], kind);
+    assert.deepEqual(shared.records().map(value => value.requestId), held(client), kind);
+    // Forgotten, the request can still be resolved, but not retried.
+    const resolved = await client.execute("communication.resolveRequest", projectId, { requestId: spent });
+    assert.equal(resolved.result.state, "notObservedYet", kind);
+    await assert.rejects(client.retry(spent), /No recovery record exists/);
+    // Sent again under its ID, it is a new record with a new budget. The authority deduplicates by request ID.
+    await send(client, spent);
+    assert.equal(fake.sent(spent), 4, kind);
+    assert.deepEqual(held(client), [...limited, spent], kind);
+  }
 });
 
 test("a full journal keeps final records that a caller retains or a command is using", async () => {

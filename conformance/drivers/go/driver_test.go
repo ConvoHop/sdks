@@ -69,7 +69,7 @@ func TestHelloDeclaresTheServerRoles(t *testing.T) {
 		len(result.Roles["management"].Operations) != len(managementOperations) {
 		t.Errorf("roles = %+v", result.Roles)
 	}
-	if strings.Join(result.Features, ",") != "recovery.eviction,recovery.storage,retryAfter,webhooks.verify" {
+	if strings.Join(result.Features, ",") != "recovery.eviction,recovery.spentBudget,recovery.storage,retryAfter,webhooks.verify" {
 		t.Errorf("features = %q", result.Features)
 	}
 }

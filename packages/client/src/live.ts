@@ -1,8 +1,8 @@
 import {
-  ConvoHopProblem, parseId, parseString, type CommandOptions, type ConversationMute, type OperationPayload, type PageOptions,
-  type GraphqlTypes, type ConversationMessage, type ProtocolObject,
+  ConvoHopProblem, parseId, parseString, type CommandOptions, type ConversationMute, type ConvoHopTransport, type OperationPayload,
+  type PageOptions, type GraphqlTypes, type ConversationMessage, type ProtocolObject,
 } from "@convohop/core";
-import { randomUUID } from "@convohop/core/internal";
+import { randomUUID, retainRecovery } from "@convohop/core/internal";
 import { admitConnection } from "./admission.js";
 import type { ConvoHopClient } from "./client.js";
 import { MediaConnection, type MediaOptions } from "./media.js";
@@ -56,6 +56,47 @@ async function pause(signal?: AbortSignal): Promise<void> {
     function aborted() { clearTimeout(timer); signal?.removeEventListener("abort", aborted); reject(signal && abortReason(signal)); }
     signal?.addEventListener("abort", aborted, { once: true });
   });
+}
+
+/** Reads the request IDs a live handle holds, or `undefined` once the app has dropped the handle. */
+type HeldRequests = () => readonly (string | undefined)[] | undefined;
+/** Each transport's readers of the request IDs that live handles hold. */
+const heldRequests = new WeakMap<ConvoHopTransport, Set<HeldRequests>>();
+
+/** The request IDs that `readers` report, forgetting the readers of dropped handles. */
+function readHeld(readers: Set<HeldRequests>): string[] {
+  const requestIds: string[] = [];
+  for (const read of readers) {
+    const held = read();
+    if (held === undefined) readers.delete(read);
+    else for (const requestId of held) if (requestId !== undefined) requestIds.push(requestId);
+  }
+  return requestIds;
+}
+/** Reads `held(handle)` through `handle`, a weak reference, so that it doesn't keep the handle. */
+function reader<T extends object>(handle: WeakRef<T>, held: (handle: T) => readonly (string | undefined)[]): HeldRequests {
+  return () => {
+    const current = handle.deref();
+    return current === undefined ? undefined : held(current);
+  };
+}
+/**
+ * Keeps the recovery records of the requests that a live handle holds, whatever their state, for as long as the app
+ * keeps the handle: it reads them again for an original revision, a credential attempt's budget and its native
+ * admission, so a full journal must not forget them. Ends when the handle lets go of a request ID, or the app drops
+ * the handle. `held` must not capture the handle.
+ */
+function retainHeld<T extends object>(transport: ConvoHopTransport, handle: WeakRef<T>,
+  held: (handle: T) => readonly (string | undefined)[]): void {
+  let readers = heldRequests.get(transport);
+  if (readers === undefined) {
+    const created = readers = new Set();
+    heldRequests.set(transport, created);
+    retainRecovery(transport, () => readHeld(created));
+  }
+  // Forgets dropped handles' readers here too, not only when the journal is full, so the set doesn't grow with them.
+  readHeld(readers);
+  readers.add(reader(handle, held));
 }
 
 export class ConversationHandle {
@@ -180,6 +221,7 @@ export class LiveSessionHandle {
   readonly generation: string;
   readonly conversationId: string;
   #endRequest: string | undefined;
+  #retaining = false;
   constructor(readonly client: ConvoHopClient, readonly snapshot: LiveSession) {
     this.liveSessionId = parseId(snapshot.liveSessionId);
     this.generation = snapshot.generation;
@@ -219,6 +261,7 @@ export class LiveSessionHandle {
       [...this.client.http.recoveryStates].reverse().find(state =>
         state.operation === "communication.endLiveSession" && state.input.liveSessionId === this.liveSessionId)?.requestId ??
       randomUUID(this.client.platform);
+    this.#retain();
     const saved = this.client.http.recoveryStates.find(state => state.requestId === this.#endRequest);
     const revision = saved ? saved.input.expectedRevision : (await this.get()).revision;
     if (typeof revision !== "string") throw new TypeError("Missing original end revision");
@@ -226,6 +269,13 @@ export class LiveSessionHandle {
       { liveSessionId: this.liveSessionId, expectedGeneration: this.generation, expectedRevision: revision }, this.#endRequest);
     return new LiveEndOperation(this.client, receipt);
   }
+  /** Keeps the record of this handle's end request, which holds its original revision, while the app keeps the handle. */
+  #retain(): void {
+    if (this.#retaining) return;
+    this.#retaining = true;
+    retainHeld(this.client.http, new WeakRef(this), LiveSessionHandle.#held);
+  }
+  static #held(handle: LiveSessionHandle): readonly (string | undefined)[] { return [handle.#endRequest]; }
 }
 
 export class LiveParticipationHandle {
@@ -235,10 +285,12 @@ export class LiveParticipationHandle {
   /** The attempt in flight; `media` is set when it is `connect()`'s own. */
   #connecting: { media: Promise<MediaConnection> | undefined } | undefined;
   #leaveRequest: string | undefined;
+  #retaining = false;
   constructor(readonly live: LiveSessionHandle, readonly snapshot: LiveParticipation) {
     this.participationId = parseId(snapshot.participationId);
     this.#leaveRequest = [...live.client.http.recoveryStates].reverse().find(state =>
       state.operation === "communication.leaveLiveSession" && state.input.participationId === this.participationId)?.requestId;
+    if (this.#leaveRequest) this.#retain();
   }
   async get(): Promise<LiveParticipation> {
     const current = (await this.live.get()).myParticipation;
@@ -285,6 +337,7 @@ export class LiveParticipationHandle {
   /** @internal Preserves each credential command separately from native connection attempts. */
   async connectionGrant(options: CommandOptions = {}): Promise<{ requestId: string; mode: "INITIAL" | "RECONNECT"; grant: LiveConnectionGrant }> {
     const { client, liveSessionId, generation } = this.live;
+    this.#retain();
     const current = await this.get();
     if (!this.#attempt) {
       const previous = [...client.http.recoveryStates].reverse().find(state =>
@@ -338,9 +391,22 @@ export class LiveParticipationHandle {
     if (this.#leaveRequest && options.requestId && options.requestId !== this.#leaveRequest)
       throw new Error("Resolve the original leave request before replacing its identity");
     this.#leaveRequest ??= options.requestId ?? randomUUID(this.live.client.platform);
+    this.#retain();
     await this.#connection?.disconnect();
     return this.live.client.http.execute("communication.leaveLiveSession", this.live.client.projectId,
       { liveSessionId: this.live.liveSessionId, expectedGeneration: this.live.generation,
         participationId: this.participationId }, this.#leaveRequest);
+  }
+  /**
+   * Keeps the records of this handle's leave request and current credential attempt while the app keeps the handle:
+   * it reads the attempt's record again for its budget and native admission.
+   */
+  #retain(): void {
+    if (this.#retaining) return;
+    this.#retaining = true;
+    retainHeld(this.live.client.http, new WeakRef(this), LiveParticipationHandle.#held);
+  }
+  static #held(handle: LiveParticipationHandle): readonly (string | undefined)[] {
+    return [handle.#leaveRequest, handle.#attempt?.requestId];
   }
 }

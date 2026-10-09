@@ -96,7 +96,7 @@ def test_hello_declares_the_catalog_operations_of_the_server_roles() -> None:
             "language": "python",
             "packages": {"convohop": convohop.__version__},
         },
-        "features": ["recovery.eviction", "recovery.storage", "retryAfter", "webhooks.verify"],
+        "features": ["recovery.eviction", "recovery.spentBudget", "recovery.storage", "retryAfter", "webhooks.verify"],
     }
     catalog = spec("conformance/operations.json")["operations"]
     assert {role: set(entry["operations"]) for role, entry in declared.items()} == {

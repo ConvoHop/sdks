@@ -34,7 +34,7 @@ flowchart LR
 | [`targets.md`](targets.md) | Target descriptors, capabilities and the optional control API, with the [descriptor schema](target.schema.json). |
 | [`webhook-signatures.md`](webhook-signatures.md) | The webhook signature scheme and its [vectors](vectors/webhooks.json), with their [schema](webhook-vectors.schema.json). |
 | [`../push-payload/`](../push-payload/README.md) | The push payload contract and its [vectors](../push-payload/vectors.json), with their [schema](../push-payload/push-payload.schema.json). Each server SDK's own tests run these vectors, not drivers. |
-| [`../recovery/`](../recovery/README.md) | The recovery journal and the retry and reconnect rules that every SDK follows, which the scenarios that need the `recovery.eviction` and `realtime.reconnectPolicy` features check. |
+| [`../recovery/`](../recovery/README.md) | The recovery journal and the retry and reconnect rules that every SDK follows, which the scenarios that need the `recovery.eviction`, `recovery.spentBudget` and `realtime.reconnectPolicy` features check. |
 | [`conformance/runner.mjs`](../../conformance/runner.mjs) | The runner CLI; its modules are in [`conformance/lib/`](../../conformance/lib). |
 | [`conformance/drivers/ts/`](../../conformance/drivers/ts) | The TypeScript reference driver. |
 | [`conformance/drivers/jvm/`](../../conformance/drivers/jvm) | The driver for the [Java and Kotlin server SDK](../../jvm/README.md). |
@@ -61,15 +61,15 @@ several areas.
 | Expiry | `auth.expiry` | 2 | Expired backend key; a short-lived user session that expires mid-scenario |
 | CRUD | `crud` | 5 | Conversations, memberships and the message lifecycle, read back by other principals |
 | Pagination | `pagination` | 3 | Member limit and cursor, newest-first message history, events after a cursor |
-| Errors | `errors`, `errors.rateLimited` | 21, 5 | Revision conflicts, not found, invalid input, edits by members who are neither author nor moderator, `RATE_LIMITED` with retry-after, `RECOVERY_LIMIT`, realtime closes for `QUOTA_EXCEEDED` and `PLAN_LIMIT_EXCEEDED` |
-| Idempotency | `idempotency` | 13 | Same-id replay from the same or a new client, payload conflicts, replay after a rate limit, same-id retry from a full recovery journal |
-| Recovery | `recovery` | 9 | Drops before and after commit, resolving a request id, recovery state across a restart, a full recovery journal that evicts final records or fails closed |
+| Errors | `errors`, `errors.rateLimited` | 23, 5 | Revision conflicts, not found, invalid input, edits by members who are neither author nor moderator, `RATE_LIMITED` with retry-after, `RECOVERY_LIMIT`, `RESOLUTION_REQUIRED` once a retry budget is spent, realtime closes for `QUOTA_EXCEEDED` and `PLAN_LIMIT_EXCEEDED` |
+| Idempotency | `idempotency` | 15 | Same-id replay from the same or a new client, payload conflicts, replay after a rate limit, same-id retry from a full recovery journal, no resend once a retry budget is spent |
+| Recovery | `recovery` | 11 | Drops before and after commit, resolving a request id, recovery state across a restart, a full recovery journal that evicts final records, including those whose retry budget is spent, or fails closed |
 | Webhook signatures | `webhooks.signature` | 14 | Valid, wrong secret, expired and future timestamps, multiple secrets, rotation |
 | Realtime | `realtime.ordering`, `realtime.reconnect`, `realtime.resume` | 6, 7, 2 | Replay then live, subscriber agreement, server restart, revoked authorization, stored cursors, reconnecting after gateway errors and rate limits, stopping on quota and plan limits |
 
 The suites are `auth` (14 scenarios), `crud` (4), `pagination` (3), `errors`
-(9), `idempotency` (6), `recovery` (9), `realtime` (14) and `webhooks` (14),
-for 73 in total. Run `npm run conformance -- --list` to print every
+(9), `idempotency` (6), `recovery` (11), `realtime` (14) and `webhooks` (14),
+for 75 in total. Run `npm run conformance -- --list` to print every
 scenario with its tags and title.
 
 Live sessions and native media are not covered. The client obtains a live
@@ -441,60 +441,65 @@ tests also run a few scenarios through it.
 
 ### Current results
 
-The TypeScript reference driver passes all 73 scenarios against the mock,
+The TypeScript reference driver passes all 75 scenarios against the mock,
 with none skipped, including the 14 `webhooks` scenarios,
-`errors.rate-limited.retry-after` and the 9 that need `recovery.eviction` or
-`realtime.reconnectPolicy`.
+`errors.rate-limited.retry-after` and the 11 that need `recovery.eviction`,
+`recovery.spentBudget` or `realtime.reconnectPolicy`.
 
-The JVM driver declares the backend and management roles. It passes 71
+The JVM driver declares the backend and management roles. It passes 73
 scenarios against the mock and skips the 2 that only use user clients,
 `auth.user-token.invalid` and `realtime.subscribe.invalid-token`. Its
 [workflow](../../.github/workflows/jvm.yml) fails on any other skip.
 
 The .NET driver declares the backend and management roles too. With both
-the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 71
+the `net10.0` and the `netstandard2.0` builds of the SDK, it passes 73
 scenarios against the mock and skips the same 2. Its
 [workflow](../../.github/workflows/dotnet.yml) fails on any other skip.
 
 The Python driver declares the backend and management roles too. With both
-the sync and the async clients, it passes 71 scenarios against the mock and
+the sync and the async clients, it passes 73 scenarios against the mock and
 skips the same 2. Its [workflow](../../.github/workflows/python.yml) fails
 on any other skip.
 
 The Go driver also declares the backend and management roles, and the
-`recovery.eviction` feature. It passes 71 scenarios against the mock and
-skips only the 2 that only use user clients. Its
-[workflow](../../.github/workflows/go.yml) fails on any other skip.
+`recovery.eviction` and `recovery.spentBudget` features. It passes 73
+scenarios against the mock and skips only the 2 that only use user
+clients. Its [workflow](../../.github/workflows/go.yml) fails on any other
+skip.
 
 The Android driver declares only the user role and no `webhooks.verify`
-feature. It passes 40 scenarios against the mock and skips 33: those that
-use only backend or management clients, and those that verify webhooks. Its
-SDK follows the [recovery and reconnect rules](../recovery/README.md), so it
-declares `recovery.eviction` and `realtime.reconnectPolicy`. Its
+feature. It declares `recovery.eviction` and `realtime.reconnectPolicy`, so
+it passes 40 scenarios against the mock and skips 35: those that use only
+backend or management clients, those that verify webhooks, and the one that
+needs `recovery.spentBudget` with a user client, until its SDK follows the
+[spent-budget rule](../recovery/README.md#final-records). Its
 [workflow](../../.github/workflows/android.yml) fails on any other skip.
 
 The Dart driver also declares only the user role and no `webhooks.verify`
 feature. It declares `recovery.eviction` and `realtime.reconnectPolicy`, so
-it passes 40 scenarios against the mock and skips 33: those that use only
-backend or management clients, and those that verify webhooks. Its
-[workflow](../../.github/workflows/flutter.yml) fails on any other skip.
+it passes 40 scenarios against the mock and skips 35: those that use only
+backend or management clients, those that verify webhooks, and the one that
+needs `recovery.spentBudget` with a user client, until its driver declares
+that feature. Its [workflow](../../.github/workflows/flutter.yml) fails on
+any other skip.
 
 The React Native driver declares only the user role and no
-`webhooks.verify` feature. It passes 40 scenarios against the mock and
-skips 33: those that use only backend or management clients, and those that
+`webhooks.verify` feature. It passes 41 scenarios against the mock and
+skips 34: those that use only backend or management clients, and those that
 verify webhooks. It inherits the TypeScript client's recovery and reconnect
-behaviour, so it declares `recovery.eviction` and `realtime.reconnectPolicy`. Its [workflow](../../.github/workflows/react-native.yml)
+behaviour, so it declares `recovery.eviction`, `recovery.spentBudget` and
+`realtime.reconnectPolicy`. Its [workflow](../../.github/workflows/react-native.yml)
 fails on any other skip. It runs on Node.js, not Hermes, with a fake of the
 native platform module.
 
 The Swift driver also declares only the user role and no `webhooks.verify`
-feature. It passes 33 scenarios against the mock and skips 40: those that
+feature. It passes 33 scenarios against the mock and skips 42: those that
 use only backend or management clients, those that verify webhooks, and the
-7 that need `recovery.eviction` or `realtime.reconnectPolicy` with a user
-client, until its SDK follows the [recovery and reconnect
-rules](../recovery/README.md). On Linux it doesn't declare `realtime`,
-because Ubuntu's libcurl has no WebSocket support. There it passes 24
-scenarios and also skips the 9 realtime ones. Its
+8 that need `recovery.eviction`, `recovery.spentBudget` or
+`realtime.reconnectPolicy` with a user client, until its SDK follows the
+[recovery and reconnect rules](../recovery/README.md). On Linux it doesn't
+declare `realtime`, because Ubuntu's libcurl has no WebSocket support. There
+it passes 24 scenarios and also skips the 9 realtime ones. Its
 [workflow](../../.github/workflows/swift.yml) fails on any other skip.
 
 Passing against the mock shows that the SDK, driver and scenarios agree on

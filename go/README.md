@@ -272,15 +272,17 @@ if errors.As(err, &problem) && problem.Outcome == convohop.OutcomeUnknown {
   load sends nothing, has outcome `rejected` and is tried again by the next
   call. A failed write has the request's known outcome: the record's
   `ResolutionState`, or `unknown` while that is `pending`.
-- A client keeps at most 128 records. A record is final once its request
-  is `committed` or `accepted`, or once it is `rejected` and can't be sent
-  again: its last code is one the API documents as not retryable, other
-  than `WRONG_REGION`, or its retry budget is spent (3 attempts, or a
-  minute since the first). When all 128 places are taken, a new mutation
-  forgets the final record whose last attempt is the oldest, of those no
-  call is using. Other records are never forgotten: `pending` and `unknown`
-  ones, and those `rejected` with a retryable code, such as `RATE_LIMITED`,
-  while budget remains.
+- A client keeps at most 128 records. A record is final once the client
+  will never send its request again: it is `committed` or `accepted`, or
+  `rejected` with a code the API documents as not retryable, other than
+  `WRONG_REGION`, or its retry budget is spent (3 attempts, or a minute
+  since the first), whatever its state. A spent request fails with
+  `RESOLUTION_REQUIRED` instead of being sent, and `ResolveRequest` still
+  looks it up once its record is gone. When all 128 places are taken, a new
+  mutation forgets the final record whose last attempt is the oldest, of
+  those no call is using. Other records are never forgotten: `pending` and
+  `unknown` ones, and those `rejected` with a retryable code, such as
+  `RATE_LIMITED`, while budget remains.
 - When no record is final, a new mutation fails with `RECOVERY_LIMIT`,
   status 409 and outcome `rejected`, and sends nothing. Retry or resolve the
   outstanding requests first. Sending a recorded request ID again needs no
