@@ -104,8 +104,15 @@ internal class PushHarness {
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(millis))
     }
 
-    /** The SDK's notification for a call's `alertId` or a message's `conversationId`. */
-    fun posted(tag: String): Notification? = notifications.getNotification(tag, CallNotifier.NOTIFICATION_ID)
+    /**
+     * The SDK's notification for a call's `alertId` or a message's `conversationId`, under either ID. It fails
+     * if the tag has two, such as a ring and its missed call.
+     */
+    fun posted(tag: String): Notification? {
+        val tagged = app.getSystemService(NotificationManager::class.java).activeNotifications.filter { it.tag == tag }
+        if (tagged.size > 1) throw AssertionError("${tagged.size} notifications for $tag")
+        return tagged.singleOrNull()?.notification
+    }
 
     /** Like [posted], but the notification must be there. */
     fun notification(tag: String): Notification = posted(tag) ?: throw AssertionError("No notification for $tag")
