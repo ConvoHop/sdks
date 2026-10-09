@@ -1,6 +1,6 @@
 import type { Connectivity, ConvoHopPlatform, Lifecycle, LifecycleState } from "@convohop/core";
 
-type Listener = () => void;
+type Listener = (event?: unknown) => void;
 interface EventSource {
   addEventListener?: (type: string, listener: Listener) => void;
   removeEventListener?: (type: string, listener: Listener) => void;
@@ -29,6 +29,15 @@ export function browserLifecycle(): Lifecycle {
     get state() { return state(); },
     subscribe: listener => listenTo(scope.document, { visibilitychange: () => listener(state()) }),
   };
+}
+/** Keys that other pages of this origin set in their `localStorage`, where the runtime has `storage` events. */
+export function storageWrites(listener: (key: string) => void): () => void {
+  return listenTo(scope, {
+    storage: event => {
+      if (typeof event === "object" && event !== null && "key" in event && "newValue" in event
+        && typeof event.key === "string" && typeof event.newValue === "string") listener(event.key);
+    },
+  });
 }
 // Clients may be duck-typed objects without a platform.
 export function connectivityOf(platform: ConvoHopPlatform | undefined): Connectivity {

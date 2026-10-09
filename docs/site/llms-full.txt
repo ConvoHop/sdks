@@ -5449,7 +5449,9 @@ Waits for saved entries to load first.
 close(): void
 ```
 
-Stops sending. Persisted entries stay saved, and the client keeps its recovery state.
+Stops sending. Persisted entries stay saved, and the client keeps its recovery state. Once its sends and saves
+settle, a persistent outbox of the user created meanwhile in this JavaScript context continues with its saved
+entries; otherwise another running one, or the next to start, takes them over.
 
 ### `ScopeRequiredProblem` class
 
@@ -6403,9 +6405,19 @@ persist?: boolean
 
 Keep unsent messages, including their text, in the client's `recoveryStorage` or `asyncRecoveryStorage` across
 reloads. Off by default; use one persistent outbox per client. Messages that may have been submitted are
-recovered, never re-sent as new. Asynchronous storage loads saved messages in the background; they are sent
-before messages added meanwhile, and `Outbox.flush` waits for them. Until they load, the limit of 100
-unsent messages counts only messages added meanwhile, so the outbox can hold up to 200.
+recovered, never re-sent as new.
+
+Each running persistent outbox of a user saves its messages separately, so tabs sharing `localStorage` keep each
+other's. Up to 16 run at once; they coordinate through Web Locks, or within one JavaScript context where the
+runtime has none. When one stops, such as when its tab closes or reloads, another running outbox takes over the
+messages it left unsent; if none can yet, the next one to start, come back online or return to the foreground
+does. An outbox created in the same JavaScript context while another closes, such as on a React remount,
+continues with the closing one's messages instead. While it runs, the outbox holds a Web Lock, so Chromium won't
+keep the page in its back/forward cache; close the outbox on `pagehide` if you need that.
+
+Saved messages load in the background; they are sent before messages added meanwhile, and
+`Outbox.flush` waits for them. `Outbox.send` refuses a message while 100 are unsent, but loading or
+taking over saved messages can bring an outbox up to 200.
 
 #### `OutboxOptions.onError` property
 
