@@ -1,0 +1,231 @@
+# Builds and tests the Swift client SDK in swift/: its generated code and
+# generator goldens, the SwiftPM build and XCTest tests on macOS and in the iOS
+# Simulator with the oldest and newest supported Xcode, an app-extension-only
+# build of the products a Notification Service Extension links, and the
+# conformance scenarios through the Swift driver. See swift/README.md.
+name: Swift
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/swift.yml
+      - conformance/**
+      - schema/**
+      - spec/**
+      - swift/**
+      - tools/sdkgen/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/swift.yml
+      - conformance/**
+      - schema/**
+      - spec/**
+      - swift/**
+      - tools/sdkgen/**
+
+permissions: {}
+
+# A new push to a pull request cancels its superseded macOS runs; every push to main runs.
+concurrency:
+  group: swift-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  generate:
+    name: Generated code and push vectors
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Check the generated code, including the Swift models and operation catalog
+        run: npm run check:graphql
+      - name: Test the generators against their golden files
+        run: npm run test:sdkgen
+      # swift/ keeps its own copy so that it builds and tests on its own.
+      - name: Check the copied push payload schema and vectors
+        run: |
+          for file in push-payload.schema.json vectors.json; do
+            cmp "spec/push-payload/$file" "swift/Tests/ConvoHopTests/Resources/push-payload/$file"
+          done
+
+  build:
+    name: Build and test (Xcode ${{ matrix.xcode }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    permissions:
+      contents: read # check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Xcode 16.4 has Swift 6.1, the oldest toolchain that Package.swift accepts.
+          - os: macos-15
+            xcode: "16.4"
+          # The newest Xcode release on GitHub-hosted runners.
+          - os: macos-26
+            xcode: "26.6"
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Show the toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Type-check the generator's golden Swift output
+        run: >-
+          swiftc -typecheck -swift-version 6 -parse-as-library
+          tools/sdkgen/test/golden/edge/swift/Sources/ConvoHop/Generated/*.swift
+      - name: Build for macOS
+        working-directory: swift
+        run: swift build --disable-keychain
+      - name: Test on macOS
+        working-directory: swift
+        run: swift test --disable-keychain
+      - name: Test in the iOS Simulator
+        working-directory: swift
+        run: |
+          # The newest iOS runtime that this Xcode's simulator SDK supports, and its first iPhone.
+          sdk="$(xcrun --sdk iphonesimulator --show-sdk-version)"
+          device="$(xcrun simctl list devices available --json | python3 -c '
+          import json, sys
+          sdk = tuple(int(part) for part in sys.argv[1].split("."))
+          best = None
+          for runtime, devices in json.load(sys.stdin)["devices"].items():
+              name = runtime.rsplit(".", 1)[-1]
+              if not name.startswith("iOS-"):
+                  continue
+              version = tuple(int(part) for part in name[4:].split("-"))
+              phones = [device for device in devices if device["name"].startswith("iPhone")]
+              if phones and version <= sdk and (best is None or version > best[0]):
+                  best = (version, phones[0])
+          if best is None:
+              sys.exit(f"no available iPhone simulator for the iOS {sys.argv[1]} SDK")
+          print(best[1]["name"], "with iOS", ".".join(map(str, best[0])), file=sys.stderr)
+          print(best[1]["udid"])
+          ' "$sdk")"
+          xcodebuild test -quiet -scheme ConvoHop-Package \
+            -destination "platform=iOS Simulator,id=$device" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData"
+      # A Notification Service Extension links ConvoHopNotificationService, ConvoHop and ConvoHopPush.
+      - name: Build the extension products for iOS with app-extension-only APIs
+        working-directory: swift
+        run: >-
+          xcodebuild build -quiet -scheme ConvoHopNotificationService
+          -destination generic/platform=iOS
+          -derivedDataPath "$RUNNER_TEMP/DerivedData"
+          APPLICATION_EXTENSION_API_ONLY=YES
+
+  conformance:
+    name: Swift driver (mock target)
+    runs-on: macos-15
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Build the Swift driver
+        run: swift build --disable-keychain --package-path conformance/drivers/swift/Driver
+      - name: Run the conformance scenarios against the mock target
+        # Not --strict: a client SDK declares only the user role and doesn't verify
+        # webhooks, so the runner skips those scenarios. The next step allows only those.
+        run: >-
+          npm run conformance --
+          --driver conformance/drivers/swift/Driver/.build/debug/ConvoHopConformanceDriver
+          --reports conformance/reports/swift
+      - name: Fail on any other skip
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync } from "node:fs";
+          const allowed = [
+            /^it only uses [a-z, ]+ clients, which the driver under test does not declare$/,
+            /^driver convohop-swift does not declare feature webhooks\.verify$/,
+          ];
+          const summary = JSON.parse(readFileSync("conformance/reports/swift/summary.json", "utf8"));
+          const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
+          const passed = scenarios.filter((scenario) => scenario.status === "passed");
+          const other = scenarios.filter((scenario) => scenario.status !== "passed"
+            && !(scenario.status === "skipped" && allowed.some((reason) => reason.test(scenario.reason))));
+          for (const scenario of other) {
+            console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
+          }
+          console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
+          if (summary.driver.name !== "convohop-swift" || passed.length === 0 || other.length > 0) process.exit(1);
+          EOF
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-swift-mock
+          path: conformance/reports/swift/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # TODO(DEV-1): like the dev-stack job in conformance.yml, this job stays
+  # skipped until the CONVOHOP_DEV_STACK_IMAGE repository variable names the
+  # dev-stack image. Then replace the "Start the dev stack" step with the
+  # image's start, readiness and credential contract, as in conformance.yml.
+  # GitHub-hosted macOS runners have no container runtime, so the contract
+  # must cover starting the stack here or reaching a hosted one.
+  # Fork pull requests are skipped because they cannot pull the image.
+  conformance-dev-stack:
+    name: Swift driver (dev stack)
+    if: vars.CONVOHOP_DEV_STACK_IMAGE != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: macos-15
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+      packages: read # pull the dev-stack image from GitHub Packages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Build the Swift driver
+        run: swift build --disable-keychain --package-path conformance/drivers/swift/Driver
+      - name: Start the dev stack
+        env:
+          CONVOHOP_DEV_STACK_IMAGE: ${{ vars.CONVOHOP_DEV_STACK_IMAGE }}
+        run: |
+          # TODO(DEV-1): start "$CONVOHOP_DEV_STACK_IMAGE", wait until it is ready and append the
+          # CONVOHOP_DEV_* values named in conformance/targets/dev-stack.json to "$GITHUB_ENV".
+          echo "::error::The dev-stack start step is a placeholder until DEV-1 defines the image contract."
+          exit 1
+      - name: Run the conformance scenarios against the dev stack
+        run: >-
+          npm run conformance --
+          --target conformance/targets/dev-stack.json
+          --driver conformance/drivers/swift/Driver/.build/debug/ConvoHopConformanceDriver
+          --reports conformance/reports/swift-dev-stack
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-swift-dev-stack
+          path: conformance/reports/swift-dev-stack/
+          if-no-files-found: ignore
+          retention-days: 14

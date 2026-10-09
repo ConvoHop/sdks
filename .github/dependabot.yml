@@ -114,3 +114,20 @@ updates:
         update-types:
           - minor
           - patch
+
+  - package-ecosystem: swift
+    directory: /swift
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: fix
+      include: scope
+    groups:
+      swift:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
