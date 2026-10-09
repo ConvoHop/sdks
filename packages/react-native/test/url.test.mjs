@@ -53,8 +53,9 @@ test("non-ASCII hosts throw, because the URL can't convert them without IDNA", (
     assert.throws(() => parseURL(input, { URL: PlatformURL }), { name: "TypeError", message: "Invalid URL" });
   }
   assert.equal(new PlatformURL("http://xn--bcher-kva.example/").hostname, "xn--bcher-kva.example", "Punycode works");
-  // Without IDNA, an xn-- label isn't validated as Punycode. It's kept as the same ASCII DNS name, so it can't name
-  // another host.
-  assert.ok(!URL.canParse("https://xn--A.com/"));
-  assert.equal(new PlatformURL("https://xn--A.com/").hostname, "xn--a.com");
+  // The URL Standard lowercases an ASCII domain without checking its Punycode (see WPT's toascii.json). Depending on
+  // its release, Node's URL may still reject invalid Punycode, so these aren't compared with it.
+  for (const [input, hostname] of [["https://xn--A.com/", "xn--a.com"], ["https://xn--a.xn--zca/", "xn--a.xn--zca"],
+    ["https://XN--1UG.example/", "xn--1ug.example"], ["https://xn--0.com/", "xn--0.com"]])
+    assert.equal(new PlatformURL(input).hostname, hostname, input);
 });
