@@ -37,6 +37,7 @@ flowchart LR
 | [`conformance/runner.mjs`](../../conformance/runner.mjs) | The runner CLI; its modules are in [`conformance/lib/`](../../conformance/lib). |
 | [`conformance/drivers/ts/`](../../conformance/drivers/ts) | The TypeScript reference driver. |
 | [`conformance/drivers/jvm/`](../../conformance/drivers/jvm) | The driver for the [Java and Kotlin server SDK](../../jvm/README.md). |
+| [`conformance/drivers/go/`](../../conformance/drivers/go) | The driver for the [Go server SDK](../../go/README.md). |
 | [`conformance/mock/`](../../conformance/mock) | The deterministic mock target. |
 | [`conformance/targets/`](../../conformance/targets) | Descriptors for real targets, such as the dev-stack image. |
 | [`conformance/test/`](../../conformance/test) | `node:test` tests for the harness itself. |
@@ -417,6 +418,10 @@ The JVM driver declares the backend and management roles. It passes 62
 scenarios against the mock and skips the 2 that only use user clients,
 `auth.user-token.invalid` and `realtime.subscribe.invalid-token`. Its
 [workflow](../../.github/workflows/jvm.yml) fails on any other skip.
+
+The Go driver also declares the backend and management roles. It passes the
+same 62 scenarios against the mock and skips the same 2. Its
+[workflow](../../.github/workflows/go.yml) fails on any other skip.
 
 Passing against the mock shows that the SDK, driver and scenarios agree on
 the public contract. It does not certify a real deployment; for that, run

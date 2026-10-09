@@ -1,0 +1,243 @@
+# Builds and tests the Go server SDK in go/: its generated code and generator
+# goldens, a dry run of fetching the module from a release tag, gofmt, go vet
+# and the race-enabled tests on the two latest Go releases, and the
+# conformance scenarios through the Go driver. See go/README.md.
+name: Go
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/go.yml
+      - conformance/**
+      - go/**
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/go.yml
+      - conformance/**
+      - go/**
+      - schema/**
+      - spec/**
+      - tools/sdkgen/**
+
+permissions: {}
+
+env:
+  # Test exactly the Go release setup-go installed.
+  GOTOOLCHAIN: local
+  # The module and the driver use only the standard library, so any new
+  # dependency fails the build until it is justified and allowed here.
+  GOPROXY: "off"
+
+jobs:
+  build:
+    name: Generate and check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+          check-latest: true
+          cache: false
+      - name: Check the generated code, including the Go package
+        run: npm run check:graphql
+      - name: Test the generators against their golden files, compiling the Go goldens
+        env:
+          CONVOHOP_REQUIRE_GO: "1"
+        run: npm run test:sdkgen
+      - name: Fetch, build and test the module from a release tag (dry run)
+        # Pushing a go/vX.Y.Z tag to this repository publishes the module (see
+        # RELEASING.md), so rehearse a release instead: tag a throwaway
+        # repository that holds only go/, point git's insteadOf at it, and
+        # fetch the module into a separate module as a user's `go get` would.
+        # The module's tests then run from the fetched copy, without spec/.
+        shell: bash
+        run: |
+          dry_run="$RUNNER_TEMP/go-release"
+          mkdir -p "$dry_run/sdks" "$dry_run/user"
+          git archive HEAD go | tar -x -C "$dry_run/sdks"
+          git -C "$dry_run/sdks" init --quiet --initial-branch=main
+          git -C "$dry_run/sdks" add .
+          git -C "$dry_run/sdks" -c user.name=dry-run -c user.email=dry-run@example.invalid commit --quiet --message "Dry run"
+          git -C "$dry_run/sdks" tag go/v0.1.0
+          cd "$dry_run/user"
+          go mod init example.com/user
+          export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0="url.file://$dry_run/sdks.insteadOf" GIT_CONFIG_VALUE_0="https://github.com/ConvoHop/sdks"
+          # The checksum database has never seen this version.
+          export GOPROXY=direct GOSUMDB=off GOMODCACHE="$dry_run/modcache" GOFLAGS=-modcacherw
+          go get github.com/ConvoHop/sdks/go@v0.1.0
+          module="$(go list -m -f '{{.Dir}}' github.com/ConvoHop/sdks/go)"
+          for file in LICENSE NOTICE; do cmp "$GITHUB_WORKSPACE/$file" "$module/$file"; done
+          go build github.com/ConvoHop/sdks/go/...
+          go test github.com/ConvoHop/sdks/go/...
+
+  test:
+    name: Tests (Go ${{ matrix.go }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        # The two latest Go releases, which are the ones Go supports.
+        go: [oldstable, stable]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: ${{ matrix.go }}
+          check-latest: true
+          cache: false
+      - name: Check formatting
+        run: |
+          unformatted="$(gofmt -l go conformance/drivers/go)"
+          if [ -n "$unformatted" ]; then
+            echo "::error::gofmt would reformat these files:"
+            echo "$unformatted"
+            exit 1
+          fi
+      - name: Check that go.mod is tidy
+        run: |
+          for module in go conformance/drivers/go; do
+            (cd "$module" && go mod tidy -diff)
+          done
+      - name: Vet
+        run: |
+          for module in go conformance/drivers/go; do
+            (cd "$module" && go vet ./...)
+          done
+      - name: Run the tests with the race detector
+        # The SDK tests read the shared vectors in spec/; fail rather than skip
+        # when they are missing.
+        env:
+          CONVOHOP_REQUIRE_SPEC: "1"
+        run: |
+          for module in go conformance/drivers/go; do
+            (cd "$module" && go test -race ./...)
+          done
+
+  conformance:
+    name: Go driver (mock target)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+          check-latest: true
+          cache: false
+      - name: Build the Go driver
+        working-directory: conformance/drivers/go
+        run: go build -o build/conformance-driver .
+      - name: Run the conformance scenarios against the mock target
+        # Not --strict: a server SDK declares no user role, so the runner skips
+        # the scenarios that only use user clients. The next step allows only those.
+        run: >-
+          npm run conformance --
+          --driver conformance/drivers/go/build/conformance-driver
+          --reports conformance/reports/go
+      - name: Fail on any other skip
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync } from "node:fs";
+          const allowed = "it only uses user clients, which the driver under test does not declare";
+          const summary = JSON.parse(readFileSync("conformance/reports/go/summary.json", "utf8"));
+          const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
+          const passed = scenarios.filter((scenario) => scenario.status === "passed");
+          const other = scenarios.filter((scenario) => scenario.status !== "passed"
+            && !(scenario.status === "skipped" && scenario.reason === allowed));
+          for (const scenario of other) {
+            console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
+          }
+          console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
+          if (summary.driver.name !== "convohop-go" || passed.length === 0 || other.length > 0) process.exit(1);
+          EOF
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-go-mock
+          path: conformance/reports/go/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # TODO(DEV-1): like the dev-stack job in conformance.yml, this job stays
+  # skipped until the CONVOHOP_DEV_STACK_IMAGE repository variable names the
+  # dev-stack image. Then replace the "Start the dev stack" step with the
+  # image's start, readiness and credential contract, as in conformance.yml.
+  # Fork pull requests are skipped because they cannot pull the image.
+  conformance-dev-stack:
+    name: Go driver (dev stack)
+    if: vars.CONVOHOP_DEV_STACK_IMAGE != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read # check out the repository
+      packages: read # pull the dev-stack image from GitHub Packages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+          check-latest: true
+          cache: false
+      - name: Build the Go driver
+        working-directory: conformance/drivers/go
+        run: go build -o build/conformance-driver .
+      - name: Start the dev stack
+        env:
+          CONVOHOP_DEV_STACK_IMAGE: ${{ vars.CONVOHOP_DEV_STACK_IMAGE }}
+        run: |
+          # TODO(DEV-1): start "$CONVOHOP_DEV_STACK_IMAGE", wait until it is ready and append the
+          # CONVOHOP_DEV_* values named in conformance/targets/dev-stack.json to "$GITHUB_ENV".
+          echo "::error::The dev-stack start step is a placeholder until DEV-1 defines the image contract."
+          exit 1
+      - name: Run the conformance scenarios against the dev stack
+        run: >-
+          npm run conformance --
+          --target conformance/targets/dev-stack.json
+          --driver conformance/drivers/go/build/conformance-driver
+          --reports conformance/reports/go-dev-stack
+      - name: Upload JUnit and summary reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: conformance-reports-go-dev-stack
+          path: conformance/reports/go-dev-stack/
+          if-no-files-found: ignore
+          retention-days: 14

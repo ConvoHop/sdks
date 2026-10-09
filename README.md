@@ -40,6 +40,7 @@ planned languages, push notifications, package names, versioning and support.
 | [React hooks](packages/react/README.md) | `@convohop/react`, not in a release yet | React 18 or later, with `@convohop/client` | Conversations with optimistic, offline-safe sends, typing, session renewal, live sessions and browser media |
 | [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and push payload builders |
 | [Java and Kotlin server](jvm/README.md) | `com.convohop:convohop-server`, `com.convohop:convohop-server-kotlin` | Java 11 or later. Kotlin coroutine extensions are optional. | User identities and sessions, conversations, membership and messages for your backend, generated APIs with paginators for every server operation, backend key issuance, webhook verification, and push payload builders |
+| [Go server](go/README.md) | `github.com/ConvoHop/sdks/go` | Go 1.26 or later, standard library only | Organization and project management, user identities and sessions, conversations, membership, messages, inbox, search and calls for your backend, a generated method with page iterators for every server operation, backend key issuance and delivery, request recovery, webhook verification, and push payload builders |
 
 The TypeScript packages depend on [`@convohop/core`](packages/core/README.md), which
 holds the generated GraphQL types and operations and the shared transport.
@@ -58,7 +59,7 @@ package registry yet. [Install a release](#install-a-release) or
 
 | Layer | Languages and platforms |
 | --- | --- |
-| Server | Python, .NET, Go |
+| Server | Python, .NET |
 | Client | iOS and macOS (Swift), Android (Kotlin), React Native, Flutter |
 
 ## Tools
@@ -152,6 +153,10 @@ The Java and Kotlin SDK has its own Gradle build and
 [JVM workflow](.github/workflows/jvm.yml). See
 [Build and test](jvm/README.md#build-and-test).
 
+The Go SDK is its own module, with its own
+[Go workflow](.github/workflows/go.yml). See
+[Build and test](go/README.md#build-and-test).
+
 ## API contract
 
 - The Communication API and the Management API have separate origins. Each
@@ -216,6 +221,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - [Client SDK](packages/client/README.md)
 - [Node.js server SDK](packages/server/README.md)
 - [Java and Kotlin server SDK](jvm/README.md)
+- [Go server SDK](go/README.md)
 - [Shared core package](packages/core/README.md)
 - [CLI](packages/cli/README.md) and [MCP server](packages/mcp/README.md)
 - [Releasing](RELEASING.md): how releases happen, and how to install and
