@@ -1,6 +1,12 @@
 package com.convohop.android.core
 
+import com.convohop.android.core.FakeAuthority.Fault
+import com.convohop.android.generated.Cursor
+import com.convohop.android.generated.EventPage
+import com.convohop.android.generated.Message
+import com.convohop.android.generated.MessagePage
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.JsonObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -145,6 +151,131 @@ class TimelineTest {
             // The first read and one more after the removal: a closed timeline does not try again.
             h.advance(120_000)
             assertEquals(2, h.authority.calls("CommunicationGetConversation").size)
+        }
+    }
+
+    @Test
+    fun aProblemThatTryingAgainCantFixClosesTheTimeline() = runTest {
+        Harness(this).use { h ->
+            val conversation = h.authority.conversation()
+            val store = h.store()
+            val timeline = store.timeline(conversation)
+            h.settle()
+
+            h.authority.disconnect(4429, "QUOTA_EXCEEDED retryAfter=60 meter=messages")
+            h.settle()
+
+            assertEquals(ReplayState.CLOSED, timeline.replay.value)
+            assertEquals(listOf("QUOTA_EXCEEDED"), h.errorCodes())
+            h.advance(120_000)
+            assertEquals(1, h.authority.calls("CommunicationGetConversation").size)
+            // A new timeline follows the conversation again.
+            val reopened = store.timeline(conversation)
+            h.settle()
+            assertEquals(ReplayState.LIVE, reopened.replay.value)
+            assertEquals(ReplayState.CLOSED, timeline.replay.value)
+        }
+    }
+
+    @Test
+    fun aResponseThatBreaksTheProtocolClosesTheTimeline() = runTest {
+        // A result without its fields is an INVALID_RESPONSE problem; a newest page that asks for a refresh is a violation.
+        val cases = listOf(
+            Triple("INVALID_RESPONSE", "CommunicationGetConversation", Fault.Reply(JsonObject(emptyMap()))),
+            Triple("ConvoHopProtocolException", "CommunicationMessages", Fault.Reply(MessagePage(emptyList(), true, true).toJson())),
+        )
+        for ((expected, operation, fault) in cases) {
+            Harness(this).use { h ->
+                val conversation = h.authority.conversation()
+                h.authority.fail(operation, fault)
+                val timeline = h.store().timeline(conversation)
+                h.settle()
+
+                assertEquals(expected, ReplayState.CLOSED, timeline.replay.value)
+                assertEquals(expected, listOf(expected), h.errorCodes())
+                h.advance(120_000)
+                assertEquals(expected, 1, h.authority.calls(operation).size)
+            }
+        }
+    }
+
+    @Test
+    fun aRetryAfterHoldsTheNextReadEvenWhenTheDeviceComesBackOnline() = runTest {
+        Harness(this).use { h ->
+            val conversation = h.authority.conversation()
+            h.authority.fail("CommunicationGetConversation", Fault.Problem("RATE_LIMITED", 429, retryAfter = 30))
+            val timeline = h.store().timeline(conversation)
+            h.settle()
+            assertEquals(ReplayState.RECONNECTING, timeline.replay.value)
+
+            // Coming back online skips the backoff, but not the 30 seconds that the authority asked for.
+            h.advance(5_000)
+            h.online.value = false
+            h.settle()
+            h.online.value = true
+            h.advance(24_999)
+            assertEquals(1, h.authority.calls("CommunicationGetConversation").size)
+            h.advance(1)
+
+            assertEquals(ReplayState.LIVE, timeline.replay.value)
+            assertEquals(2, h.authority.calls("CommunicationGetConversation").size)
+            assertEquals(listOf("RATE_LIMITED"), h.errorCodes())
+        }
+    }
+
+    @Test
+    fun aSessionProblemWaitsForRenewalUnlessNothingCanRenewTheSession() = runTest {
+        Harness(this).use { h ->
+            val conversation = h.authority.conversation()
+            val renewable = h.client(refresh = SessionRefresh { current -> h.authority.renew(current) })
+            renewable.initialize()
+            h.authority.fail("CommunicationGetConversation", Fault.Problem("UNAUTHENTICATED", 401), Fault.Problem("SESSION_REFRESH_REQUIRED", 409))
+            val timeline = h.store(renewable).timeline(conversation)
+            h.settle()
+            h.advance(2_999)
+            assertEquals(ReplayState.RECONNECTING, timeline.replay.value)
+            assertEquals(2, h.authority.calls("CommunicationGetConversation").size)
+            h.advance(1)
+            assertEquals(ReplayState.LIVE, timeline.replay.value)
+            assertEquals(listOf("UNAUTHENTICATED", "SESSION_REFRESH_REQUIRED"), h.errorCodes())
+
+            // Without a refresh hook, nothing renews the session.
+            h.authority.fail("CommunicationGetConversation", Fault.Problem("UNAUTHENTICATED", 401))
+            val unrenewable = h.store().timeline(conversation)
+            h.settle()
+            assertEquals(ReplayState.CLOSED, unrenewable.replay.value)
+            h.advance(120_000)
+            assertEquals(4, h.authority.calls("CommunicationGetConversation").size)
+        }
+    }
+
+    @Test
+    fun aReplayTheAuthorityCantContinueStartsAgainFromTheCurrentState() = runTest {
+        val cases = listOf<Pair<String, (Message) -> Fault>>(
+            "CURSOR_EXPIRED" to { _ -> Fault.Problem("CURSOR_EXPIRED", 409) },
+            "HistoryResyncRequired" to { missed ->
+                Fault.Reply(EventPage(emptyList(), false, true, Cursor(INCARNATION, missed.conversationId, missed.sequence)).toJson())
+            },
+        )
+        for ((expected, fault) in cases) {
+            Harness(this).use { h ->
+                val conversation = h.authority.conversation()
+                val timeline = h.store().timeline(conversation)
+                h.settle()
+
+                h.authority.disconnect()
+                val missed = h.authority.post(conversation, OTHER, "missed")
+                h.authority.fail("CommunicationEvents", fault(missed))
+                h.advance(1_000)
+                assertEquals(expected, ReplayState.RECONNECTING, timeline.replay.value)
+                assertEquals(listOf(expected), h.errorCodes())
+                assertTrue(timeline.texts().isEmpty())
+                h.advance(1_000)
+
+                assertEquals(expected, listOf("missed"), timeline.texts())
+                assertEquals(expected, ReplayState.LIVE, timeline.replay.value)
+                assertEquals(expected, 2, h.authority.calls("CommunicationGetConversation").size)
+            }
         }
     }
 

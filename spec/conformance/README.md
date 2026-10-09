@@ -467,11 +467,10 @@ skips only the 2 that only use user clients. Its
 [workflow](../../.github/workflows/go.yml) fails on any other skip.
 
 The Android driver declares only the user role and no `webhooks.verify`
-feature. It passes 33 scenarios against the mock and skips 40: those that
-use only backend or management clients, those that verify webhooks, and the
-7 that need `recovery.eviction` or `realtime.reconnectPolicy` with a user
-client, until its SDK follows the [recovery and reconnect
-rules](../recovery/README.md). Its
+feature. It passes 40 scenarios against the mock and skips 33: those that
+use only backend or management clients, and those that verify webhooks. Its
+SDK follows the [recovery and reconnect rules](../recovery/README.md), so it
+declares `recovery.eviction` and `realtime.reconnectPolicy`. Its
 [workflow](../../.github/workflows/android.yml) fails on any other skip.
 
 The Dart driver also declares only the user role and no `webhooks.verify`
@@ -489,11 +488,14 @@ fails on any other skip. It runs on Node.js, not Hermes, with a fake of the
 native platform module.
 
 The Swift driver also declares only the user role and no `webhooks.verify`
-feature. Like the Android driver, it passes 33 scenarios against the mock
-and skips 40. On Linux it doesn't declare `realtime`, because Ubuntu's libcurl
-has no WebSocket support. There it passes 24 scenarios and also skips the 9
-realtime ones. Its [workflow](../../.github/workflows/swift.yml) fails on
-any other skip.
+feature. It passes 33 scenarios against the mock and skips 40: those that
+use only backend or management clients, those that verify webhooks, and the
+7 that need `recovery.eviction` or `realtime.reconnectPolicy` with a user
+client, until its SDK follows the [recovery and reconnect
+rules](../recovery/README.md). On Linux it doesn't declare `realtime`,
+because Ubuntu's libcurl has no WebSocket support. There it passes 24
+scenarios and also skips the 9 realtime ones. Its
+[workflow](../../.github/workflows/swift.yml) fails on any other skip.
 
 Passing against the mock shows that the SDK, driver and scenarios agree on
 the public contract. It does not certify a real deployment; for that, run

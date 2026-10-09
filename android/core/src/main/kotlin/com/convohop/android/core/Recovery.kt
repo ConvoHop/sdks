@@ -7,6 +7,9 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import java.util.concurrent.ConcurrentHashMap
 
+/** The most recovery records a journal holds. */
+internal const val JOURNAL_LIMIT = 128
+
 /**
  * Durable key-value storage for mutation recovery records and replay
  * cursors. Records hold request identities, inputs and outcomes, never
@@ -50,7 +53,7 @@ public data class RecoveryRecord(
     val attemptCount: Long,
     val lastAttemptAt: Long,
     val lastAttemptClassification: String,
-    /** `pending`, `unknown`, `committed` or `accepted`. */
+    /** `pending`, `unknown`, `rejected`, `committed` or `accepted`. */
     val resolutionState: String,
     val mediaAdmissionAttempted: Boolean,
 )
@@ -71,6 +74,14 @@ internal class RecoveryState(
     var mediaAdmissionAttempted: Boolean = false,
 ) {
     val settled: Boolean get() = resolutionState == "committed" || resolutionState == "accepted"
+
+    /**
+     * Whether the request will never be sent again at [now]: the authority committed or accepted it, its retry
+     * budget is spent, or the authority rejected it with a code that isn't retryable. A spent budget makes even a
+     * `pending` or `unknown` record final, since nothing may resend it.
+     */
+    fun final(now: Long): Boolean = settled || attemptCount >= 3 || now > retryDeadline ||
+        (resolutionState == "rejected" && !retryableCode(lastAttemptClassification))
 
     fun snapshot(): RecoveryRecord = RecoveryRecord(
         requestId, incarnation, payloadFingerprint, operation, projectId, input, firstSubmittedAt, retryDeadline,
@@ -94,12 +105,12 @@ internal class RecoveryState(
     )
 
     companion object {
-        private val RESOLUTION_STATES = setOf("pending", "unknown", "committed", "accepted")
+        private val RESOLUTION_STATES = setOf("pending", "unknown", "rejected", "committed", "accepted")
 
         /** Validates every stored record before any can authorize a resend. */
         fun restore(saved: String): List<RecoveryState> {
             val values = CanonicalJson.parse(saved) as? JsonArray ?: protocolError("Invalid mutation recovery storage")
-            if (values.size > 128) protocolError("Invalid mutation recovery storage")
+            if (values.size > JOURNAL_LIMIT) protocolError("Invalid mutation recovery storage")
             val restored = LinkedHashMap<String, RecoveryState>()
             for (item in values) {
                 val state = decode(item)

@@ -201,7 +201,11 @@ public class LiveEndOperation internal constructor(
     public val receipt: EndLiveSessionPayload,
 ) : LiveAction(client, receipt.result.operationId, receipt.result.liveSessionId, LiveOperationKind.END, receipt.requestId)
 
-/** One occurrence (generation) of a call or broadcast. */
+/**
+ * One occurrence (generation) of a call or broadcast. While the app keeps a
+ * handle, the recovery journal keeps the record of the end request it holds,
+ * even once final, so a repeated [end] reuses that request.
+ */
 public class LiveSessionHandle internal constructor(
     public val client: ConvoHopClient,
     /** The state when this handle was created; [get] reads the current state. */
@@ -214,6 +218,12 @@ public class LiveSessionHandle internal constructor(
 
     /** Alerts (rings) other members about this call. */
     public val alerts: Alerts = Alerts()
+
+    init {
+        client.http.retainWhileReachable(this) { (it as LiveSessionHandle).heldRequests() }
+    }
+
+    private fun heldRequests(): List<String> = listOfNotNull(endRequest)
 
     internal companion object {
         suspend fun load(client: ConvoHopClient, liveSessionId: String): LiveSessionHandle =
@@ -271,7 +281,11 @@ public class LiveSessionHandle internal constructor(
     }
 }
 
-/** This user's participation in one live session: its native media connection and leave. */
+/**
+ * This user's participation in one live session: its native media connection
+ * and leave. While the app keeps a handle, the recovery journal keeps the
+ * records of the leave and credential requests it holds, even once final.
+ */
 public class LiveParticipationHandle private constructor(
     public val live: LiveSessionHandle,
     /** The participation when this handle was created; [get] reads the current one. */
@@ -292,14 +306,23 @@ public class LiveParticipationHandle private constructor(
     private var connecting: Deferred<MediaConnection>? = null
     private val client: ConvoHopClient get() = live.client
 
+    init {
+        client.http.retainWhileReachable(this) { (it as LiveParticipationHandle).heldRequests() }
+    }
+
+    private fun heldRequests(): List<String> = listOfNotNull(leaveRequest, attempt?.requestId)
+
     internal companion object {
         suspend fun create(live: LiveSessionHandle, snapshot: LiveParticipation): LiveParticipationHandle {
             val participationId = parseId(snapshot.participationId)
-            val leave = live.client.serial { live.client.http.recoveryStates() }.lastOrNull {
-                it.operation == Operations.Communication.leaveLiveSession.descriptor.id &&
-                    it.input["participationId"].stringOrNull() == participationId
-            }?.requestId
-            return LiveParticipationHandle(live, snapshot, leave)
+            // Takes over an earlier leave in the same step that has the journal keep its record.
+            return live.client.serial {
+                val leave = live.client.http.recoveryStates().lastOrNull {
+                    it.operation == Operations.Communication.leaveLiveSession.descriptor.id &&
+                        it.input["participationId"].stringOrNull() == participationId
+                }?.requestId
+                LiveParticipationHandle(live, snapshot, leave)
+            }
         }
     }
 

@@ -16,6 +16,10 @@ public interface RealtimeListener {
     /** A text frame; null for a binary frame, which the protocol never sends. */
     public fun onMessage(text: String?)
 
+    /**
+     * The connection failed; [onClose] follows. When the service answered the upgrade with an HTTP response
+     * instead of switching protocols, [error] is a [RealtimeUpgradeRefusedException].
+     */
     public fun onError(error: Throwable)
 
     /** The socket closed with [code]; no events follow. */
@@ -37,6 +41,22 @@ public interface RealtimeSocket {
 public fun interface RealtimeConnector {
     public fun connect(url: String, subprotocol: String, listener: RealtimeListener): RealtimeSocket
 }
+
+/**
+ * The service refused the realtime upgrade with an HTTP response, such as a
+ * 429 `application/problem+json`. A [RealtimeConnector] that can read the
+ * response passes this to [RealtimeListener.onError], so the stream classifies
+ * the response like any other HTTP response: it reconnects, no sooner than the
+ * response's delay, or stops and reports the problem.
+ */
+public class RealtimeUpgradeRefusedException(
+    /** The HTTP status of the response. */
+    public val status: Int,
+    /** The response's `Retry-After` header, if any. */
+    public val retryAfter: String?,
+    /** The response body, or as much as was read; null when it couldn't be read. One over 65,536 characters isn't parsed. */
+    public val body: String?,
+) : IOException("Realtime upgrade refused with HTTP status $status")
 
 /** [RealtimeConnector] on OkHttp's WebSocket client, with redirects and cookies disabled. */
 public class OkHttpRealtimeConnector(client: OkHttpClient = OkHttpClient()) : RealtimeConnector {
@@ -70,7 +90,7 @@ public class OkHttpRealtimeConnector(client: OkHttpClient = OkHttpClient()) : Re
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) = listener.onClose(code, reason)
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                listener.onError(t)
+                listener.onError(if (response == null || response.code == 101) t else refused(response))
                 listener.onClose(1006, "")
             }
         })
@@ -81,5 +101,18 @@ public class OkHttpRealtimeConnector(client: OkHttpClient = OkHttpClient()) : Re
                 socket.close(code, reason)
             }
         }
+    }
+
+    /**
+     * OkHttp closes [response] once the failure is delivered, so its body is read here, up to one character past the
+     * bound. JSON is UTF-8, which takes at most 3 bytes a character, so a body within the bound is read whole.
+     */
+    private fun refused(response: Response): RealtimeUpgradeRefusedException {
+        val body = try {
+            response.peekBody(3L * (MAX_UPGRADE_BODY_CHARS + 1)).string().take(MAX_UPGRADE_BODY_CHARS + 1)
+        } catch (_: Exception) {
+            null
+        }
+        return RealtimeUpgradeRefusedException(response.code, response.header("Retry-After"), body)
     }
 }

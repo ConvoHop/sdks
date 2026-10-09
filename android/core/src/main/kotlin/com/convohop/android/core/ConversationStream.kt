@@ -20,11 +20,11 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import java.io.IOException
 import kotlin.math.floor
-import kotlin.math.min
 
-private val AUTHORIZATION_CLOSE_CODES = setOf(4400, 4401, 4403, 4408, 4409)
-private val RETRYABLE_STATUSES = setOf(0, 429, 503)
 private const val MAX_FRAME_LENGTH = 65536
+
+/** The authority can't continue a replay from its cursor; only replaying the authorized history again can. */
+internal class HistoryResyncRequired : IllegalStateException("Explicit authorized history resynchronization required")
 
 internal fun parseCursor(value: JsonElement?): Cursor {
     val v = value.protocolObject()
@@ -59,10 +59,16 @@ public enum class ReplayState {
  *
  * Batches reach the application's apply callback in order, one at a time;
  * the cursor advances and is stored only after the callback returns. A
- * dropped socket reconnects with backoff, settles pending mutations,
- * catches up over HTTP and subscribes again from the applied cursor.
- * Authorization failures and protocol violations close the replay and go to
- * the error callback; open a new replay after obtaining a current session.
+ * dropped socket reconnects with the conversation channel's backoff, routes
+ * again, settles pending mutations, catches up over HTTP and subscribes again
+ * from the applied cursor. A problem with a retryable code and a status of 0,
+ * 408, 429 or 5xx, or `WRONG_REGION`, goes to the error callback and
+ * reconnects too, never sooner than its `retryAfter`. So does a close whose
+ * reason names such a problem, such as `RATE_LIMITED retryAfter=4`. Any other
+ * problem closes the replay and goes to the error callback: a close that names
+ * `QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, ended realtime authorization,
+ * authorization failures and protocol violations. Open a new replay once the
+ * cause is resolved, such as after obtaining a current session.
  */
 public class ConversationStream internal constructor(
     private val client: ConvoHopClient,
@@ -93,6 +99,10 @@ public class ConversationStream internal constructor(
     private var appliedCursor: Cursor? = initialCursor
     private var timer: Job? = null
     private var reconnectAttempts = 0
+
+    /** While reconnecting, the earliest time the authority's `retryAfter` allows, and that delay. */
+    private var holdUntil = 0L
+    private var holdMillis = 0L
     private var pendingPages = 0
     private var queueGeneration = 0
     private var currentRoute: ProjectRoute = route
@@ -252,18 +262,24 @@ public class ConversationStream internal constructor(
         val route = currentRoute
         val subscriptionId = client.environment.uuid()
         lateinit var opened: RealtimeSocket
+        var refused: RealtimeUpgradeRefusedException? = null
         val listener = object : RealtimeListener {
             override fun onOpen() = client.post { onSocketOpen(opened, route) }
 
             override fun onMessage(text: String?) = client.post { onSocketMessage(opened, route, subscriptionId, text) }
 
             override fun onError(error: Throwable) = client.post {
-                if (!closedFlag && !paused && socket === opened) {
+                // A refused upgrade is classified once the socket closes, like any other HTTP response.
+                if (error is RealtimeUpgradeRefusedException) {
+                    refused = error
+                } else if (!closedFlag && !paused && socket === opened) {
                     report(onError, IOException("Realtime connection unavailable; current history remains authoritative", error))
                 }
             }
 
-            override fun onClose(code: Int, reason: String) = client.post { onSocketClose(opened, subscriptionId, code) }
+            override fun onClose(code: Int, reason: String) = client.post {
+                onSocketClose(opened, subscriptionId, code, reason, refused)
+            }
         }
         opened = client.realtime.connect(route.wssUrl, Transport.WEBSOCKET_SUBPROTOCOL, listener)
         socket = opened
@@ -332,6 +348,7 @@ public class ConversationStream internal constructor(
                             extensions["outcome"].protocolString(),
                             extensions["status"].intOrNull() ?: protocolError("Invalid protocol status"),
                             problem["message"].protocolString(),
+                            retryDelay(extensions["retryAfter"]),
                         )
                     }
                     page(payload["data"].protocolObject()["conversationEvents"])
@@ -345,15 +362,19 @@ public class ConversationStream internal constructor(
         }
     }
 
-    private fun onSocketClose(ws: RealtimeSocket, subscriptionId: String, code: Int) {
+    private fun onSocketClose(
+        ws: RealtimeSocket,
+        subscriptionId: String,
+        code: Int,
+        reason: String,
+        refused: RealtimeUpgradeRefusedException?,
+    ) {
         if (socket !== ws) return
         socket = null
         if (closedFlag || paused) return
-        if (code !in AUTHORIZATION_CLOSE_CODES) {
-            retry()
-        } else {
-            fail(ConvoHopProblem("UNAUTHENTICATED", subscriptionId, "rejected", 401, "Realtime authorization ended; obtain a current session"))
-        }
+        // A reason that names an error code reports it, such as `QUOTA_EXCEEDED retryAfter=60 meter=messages`.
+        val problem = closeProblem(code, reason, subscriptionId) ?: refused?.let { upgradeProblem(it, subscriptionId) }
+        if (problem != null) fail(problem) else retry()
     }
 
     private fun page(value: JsonElement?) {
@@ -363,7 +384,7 @@ public class ConversationStream internal constructor(
             )
         }
         val page = eventPage(value, currentRoute.incarnation, conversationId, null)
-        if (page.refreshRequired) throw IllegalStateException("Explicit authorized history resynchronization required")
+        if (page.refreshRequired) throw HistoryResyncRequired()
         val frontier = page.nextCursor ?: protocolError("Invalid protocol object")
         val generation = queueGeneration
         val previous = working
@@ -397,25 +418,30 @@ public class ConversationStream internal constructor(
 
     /**
      * Skips the reconnect backoff, for example when the device is back
-     * online. Does nothing unless the replay is [ReplayState.RECONNECTING].
+     * online, though never the wait that the authority's `retryAfter` asked
+     * for. Does nothing unless the replay is [ReplayState.RECONNECTING].
      */
     public fun reconnectNow() {
         client.post {
             if (closedFlag || paused || stateFlow.value != ReplayState.RECONNECTING) return@post
             timer?.cancel()
             timer = null
-            retry(immediate = true)
+            // Clamped so that a clock set back can't stretch the hold beyond the delay the authority asked for.
+            schedule((holdUntil - client.environment.now()).coerceIn(0L, holdMillis))
         }
     }
 
-    private fun retry(immediate: Boolean = false) {
+    /** Reconnects after backoff, and never sooner than [retryAfter] seconds, even when [reconnectNow] runs. */
+    private fun retry(retryAfter: Long? = null) {
         if (closedFlag || paused || timer != null) return
-        val delayMillis = if (immediate) {
-            0L
-        } else {
-            min(1000L shl min(reconnectAttempts++, 4), 10000L) + floor(client.environment.random() * 500).toLong()
-        }
+        val delayMillis = reconnectDelay(reconnectAttempts++, retryAfter, client.environment.random())
+        holdMillis = retryAfterMillis(retryAfter)
+        holdUntil = client.environment.now() + holdMillis
         stateFlow.value = ReplayState.RECONNECTING
+        schedule(delayMillis)
+    }
+
+    private fun schedule(delayMillis: Long) {
         timer = client.scope.launch {
             delay(delayMillis)
             timer = null
@@ -471,12 +497,13 @@ public class ConversationStream internal constructor(
             report(onError, error)
             return
         }
-        if (error is ConvoHopProblem && (error.status in RETRYABLE_STATUSES || error.code == "WRONG_REGION")) {
+        // Network, timeout, rate-limit and server failures reconnect; WRONG_REGION does too, since reconnecting routes again.
+        if (error is ConvoHopProblem && reconnectAction(error) != ReconnectAction.STOP) {
             val current = socket
             socket = null
             current?.close(4000, "Retrying authoritative connection")
             report(onError, error)
-            retry()
+            retry(error.retryAfter)
             return
         }
         closeNow(error)
@@ -510,7 +537,7 @@ public class ConversationStream internal constructor(
                     val before = appliedCursor
                     val result = client.events(conversationId, before)
                     if (stale()) return@async false
-                    if (result.refreshRequired) throw IllegalStateException("Explicit authorized history resynchronization required")
+                    if (result.refreshRequired) throw HistoryResyncRequired()
                     val frontier = result.nextCursor ?: protocolError("Invalid protocol object")
                     if (!result.complete && before != null && counter(frontier.sequence) <= counter(before.sequence)) {
                         protocolError("Incomplete replay page did not advance the authoritative frontier")
