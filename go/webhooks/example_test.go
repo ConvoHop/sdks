@@ -56,10 +56,11 @@ func Example_handler() {
 		}
 		delivery, err := webhooks.Verify(body, r.Header, secrets)
 		var failure *webhooks.Error
-		if errors.As(err, &failure) {
+		if errors.As(err, &failure) && failure.Code != webhooks.CodeInvalidSecret {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		} else if err != nil {
+			// INVALID_SECRET or an invalid option: fix your configuration.
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

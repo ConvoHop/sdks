@@ -136,3 +136,4 @@ mutation ManagementProjectPolicy($context: RequestContextInput!, $input: Project
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.project_policy`](../../python/reference/convohop.md#convohopmanagementproject_policy-method), [`AsyncConvoHopManagement.project_policy`](../../python/reference/convohop.md#asyncconvohopmanagementproject_policy-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.ProjectPolicyAsync`](../../dotnet/reference/api.md#managementapiprojectpolicyasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.projectPolicy`](../../jvm/reference/server.md#managementapiprojectpolicy-method), [`ManagementSuspendApi.projectPolicy`](../../jvm/reference/server-kotlin.md#managementsuspendapiprojectpolicy-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.ProjectPolicy`](../../go/reference/convohop.md#managementclientprojectpolicy-method) |

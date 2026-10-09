@@ -1,0 +1,7 @@
+{
+  "id": "go",
+  "packages": [
+    { "name": "example.com/fx", "source": "fx" },
+    { "name": "example.com/fx/hooks", "source": "fx/hooks" }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "../../../spec/docs/operation-map.schema.json",
+  "operations": {
+    "communication.capabilities": ["github.com/ConvoHop/sdks/go#ProjectClient.Capabilities"],
+    "communication.route": [
+      "github.com/ConvoHop/sdks/go#ProjectClient.Route",
+      "github.com/ConvoHop/sdks/go#ProjectClient.Initialize"
+    ],
+    "communication.getPrincipal": ["github.com/ConvoHop/sdks/go#ProjectClient.GetPrincipal"],
+    "communication.getConversation": ["github.com/ConvoHop/sdks/go#ProjectClient.GetConversation"],
+    "communication.members": [
+      "github.com/ConvoHop/sdks/go#ProjectClient.Members",
+      "github.com/ConvoHop/sdks/go#ProjectClient.MembersPages"
+    ],
+    "communication.messages": [
+      "github.com/ConvoHop/sdks/go#ProjectClient.Messages",
+      "github.com/ConvoHop/sdks/go#ProjectClient.MessagesPages"
+    ],
+    "communication.getMessage": ["github.com/ConvoHop/sdks/go#ProjectClient.GetMessage"],
+    "communication.inbox": [
+      "github.com/ConvoHop/sdks/go#ProjectClient.Inbox",
+      "github.com/ConvoHop/sdks/go#ProjectClient.InboxPages"
+    ],
+    "communication.search": [
+      "github.com/ConvoHop/sdks/go#ProjectClient.Search",
+      "github.com/ConvoHop/sdks/go#ProjectClient.SearchPages"
+    ],
+    "communication.resolveRequest": [
+      "github.com/ConvoHop/sdks/go#ProjectClient.ResolveRequest",
+      "github.com/ConvoHop/sdks/go#ProjectClient.Retry"
+    ],
+    "communication.getOperation": ["github.com/ConvoHop/sdks/go#ProjectClient.GetOperation"],
+    "communication.conversationMute": ["github.com/ConvoHop/sdks/go#ProjectClient.ConversationMute"],
+    "communication.currentLiveSession": ["github.com/ConvoHop/sdks/go#ProjectClient.CurrentLiveSession"],
+    "communication.liveSession": ["github.com/ConvoHop/sdks/go#ProjectClient.LiveSession"],
+    "communication.liveSessions": [
+      "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessions",
+      "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessionsPages"
+    ],
+    "communication.liveSessionParticipants": [
+      "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessionParticipants",
+      "github.com/ConvoHop/sdks/go#ProjectClient.LiveSessionParticipantsPages"
+    ],
+    "communication.liveSessionOperation": ["github.com/ConvoHop/sdks/go#ProjectClient.LiveSessionOperation"],
+    "communication.sessionRequestOutcome": ["github.com/ConvoHop/sdks/go#ProjectClient.SessionRequestOutcome"],
+    "communication.createPrincipal": ["github.com/ConvoHop/sdks/go#ProjectClient.CreatePrincipal"],
+    "communication.disablePrincipal": ["github.com/ConvoHop/sdks/go#ProjectClient.DisablePrincipal"],
+    "communication.issueSession": ["github.com/ConvoHop/sdks/go#ProjectClient.IssueSession"],
+    "communication.renewSession": ["github.com/ConvoHop/sdks/go#ProjectClient.RenewSession"],
+    "communication.revokeSession": ["github.com/ConvoHop/sdks/go#ProjectClient.RevokeSession"],
+    "communication.createConversation": ["github.com/ConvoHop/sdks/go#ProjectClient.CreateConversation"],
+    "communication.updateConversation": ["github.com/ConvoHop/sdks/go#ProjectClient.UpdateConversation"],
+    "communication.addMember": ["github.com/ConvoHop/sdks/go#ProjectClient.AddMember"],
+    "communication.addMembers": ["github.com/ConvoHop/sdks/go#ProjectClient.AddMembers"],
+    "communication.removeMember": ["github.com/ConvoHop/sdks/go#ProjectClient.RemoveMember"],
+    "communication.historyGrant": ["github.com/ConvoHop/sdks/go#ProjectClient.HistoryGrant"],
+    "communication.sendMessage": ["github.com/ConvoHop/sdks/go#ProjectClient.SendMessage"],
+    "communication.editMessage": ["github.com/ConvoHop/sdks/go#ProjectClient.EditMessage"],
+    "communication.deleteMessage": ["github.com/ConvoHop/sdks/go#ProjectClient.DeleteMessage"],
+    "communication.setBroadcastPermission": ["github.com/ConvoHop/sdks/go#ProjectClient.SetBroadcastPermission"],
+    "communication.setConversationMute": ["github.com/ConvoHop/sdks/go#ProjectClient.SetConversationMute"],
+    "communication.alertLiveSession": ["github.com/ConvoHop/sdks/go#ProjectClient.AlertLiveSession"],
+    "communication.endLiveSession": ["github.com/ConvoHop/sdks/go#ProjectClient.EndLiveSession"],
+    "communication.redeemCredential": ["github.com/ConvoHop/sdks/go#ProjectClient.RedeemCredential"],
+    "communication.acknowledgeCredential": ["github.com/ConvoHop/sdks/go#ProjectClient.AcknowledgeCredential"],
+    "management.capabilities": ["github.com/ConvoHop/sdks/go#ManagementClient.Capabilities"],
+    "management.organizations": ["github.com/ConvoHop/sdks/go#ManagementClient.Organizations"],
+    "management.getOrganization": ["github.com/ConvoHop/sdks/go#ManagementClient.GetOrganization"],
+    "management.getDeployment": ["github.com/ConvoHop/sdks/go#ManagementClient.GetDeployment"],
+    "management.getProject": ["github.com/ConvoHop/sdks/go#ManagementClient.GetProject"],
+    "management.deploymentHealth": ["github.com/ConvoHop/sdks/go#ManagementClient.DeploymentHealth"],
+    "management.deploymentUsage": ["github.com/ConvoHop/sdks/go#ManagementClient.DeploymentUsage"],
+    "management.projectUsage": ["github.com/ConvoHop/sdks/go#ManagementClient.ProjectUsage"],
+    "management.organizationUsage": ["github.com/ConvoHop/sdks/go#ManagementClient.OrganizationUsage"],
+    "management.webhookEndpoints": ["github.com/ConvoHop/sdks/go#ManagementClient.WebhookEndpoints"],
+    "management.webhookDeliveries": ["github.com/ConvoHop/sdks/go#ManagementClient.WebhookDeliveries"],
+    "management.resolveRequest": [
+      "github.com/ConvoHop/sdks/go#ManagementClient.ResolveRequest",
+      "github.com/ConvoHop/sdks/go#ManagementClient.Retry"
+    ],
+    "management.getOperation": ["github.com/ConvoHop/sdks/go#ManagementClient.GetOperation"],
+    "management.createOrganization": ["github.com/ConvoHop/sdks/go#ManagementClient.CreateOrganization"],
+    "management.createDeployment": ["github.com/ConvoHop/sdks/go#ManagementClient.CreateDeployment"],
+    "management.createProject": ["github.com/ConvoHop/sdks/go#ManagementClient.CreateProject"],
+    "management.issueBackendKey": ["github.com/ConvoHop/sdks/go#ManagementClient.IssueBackendKey"],
+    "management.revokeBackendKey": ["github.com/ConvoHop/sdks/go#ManagementClient.RevokeBackendKey"],
+    "management.projectPolicy": ["github.com/ConvoHop/sdks/go#ManagementClient.ProjectPolicy"],
+    "management.credentialPermit": ["github.com/ConvoHop/sdks/go#ManagementClient.CredentialPermit"],
+    "management.pauseOperation": ["github.com/ConvoHop/sdks/go#ManagementClient.PauseOperation"],
+    "management.resumeOperation": ["github.com/ConvoHop/sdks/go#ManagementClient.ResumeOperation"],
+    "management.configureWebhook": ["github.com/ConvoHop/sdks/go#ManagementClient.ConfigureWebhook"],
+    "management.updateWebhook": ["github.com/ConvoHop/sdks/go#ManagementClient.UpdateWebhook"],
+    "management.rotateWebhookSecret": ["github.com/ConvoHop/sdks/go#ManagementClient.RotateWebhookSecret"],
+    "management.disableWebhook": ["github.com/ConvoHop/sdks/go#ManagementClient.DisableWebhook"],
+    "management.replayWebhookDeliveries": ["github.com/ConvoHop/sdks/go#ManagementClient.ReplayWebhookDeliveries"]
+  }
+}

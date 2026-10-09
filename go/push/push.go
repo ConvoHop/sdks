@@ -138,7 +138,7 @@ type APNSHeaders struct {
 }
 
 // FCMRequest is the body of an FCM HTTP v1 messages:send request without a
-// target: add one, such as message.token, before you send it.
+// target: add message.token or message.fid before you send it.
 type FCMRequest struct {
 	Message FCMMessage `json:"message"`
 }

@@ -1,0 +1,269 @@
+{
+  "language": "go",
+  "packages": [
+    {
+      "name": "example.com/fx",
+      "symbols": [
+        {
+          "name": "Base",
+          "kind": "struct",
+          "signatures": [
+            "type Base struct {\n\tName string `json:\"name\"`\n\t// contains filtered or unexported fields\n}"
+          ],
+          "docs": "Base holds what every client shares.",
+          "members": [
+            {
+              "name": "Name",
+              "kind": "property",
+              "signatures": [
+                "Name string `json:\"name\"`"
+              ],
+              "docs": "Name names the client."
+            },
+            {
+              "name": "Ping",
+              "kind": "method",
+              "signatures": [
+                "func (b *Base) Ping(ctx context.Context) error"
+              ],
+              "docs": "Ping checks the connection."
+            },
+            {
+              "name": "Close",
+              "kind": "method",
+              "signatures": [
+                "func (b *Base) Close() error"
+              ],
+              "docs": "Close closes the connection."
+            }
+          ]
+        },
+        {
+          "name": "Client",
+          "kind": "struct",
+          "signatures": [
+            "type Client struct {\n\tBase\n\tTimeout int\n\t// contains filtered or unexported fields\n}"
+          ],
+          "docs": "Client calls the API. See `Client.Send`, `Store` and `https://example.com/docs`.\n\n## Retries\n\nA failed call is retried:\n\n- up to `MaxSize` bytes at a time\n- with \\*backoff\\* & jitter",
+          "members": [
+            {
+              "name": "Base",
+              "kind": "property",
+              "signatures": [
+                "Base"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "Timeout",
+              "kind": "property",
+              "signatures": [
+                "Timeout int"
+              ],
+              "docs": "Timeout overrides `DefaultTimeout`; 0 keeps it."
+            },
+            {
+              "name": "Send",
+              "kind": "method",
+              "signatures": [
+                "func (c *Client) Send(ctx context.Context, text string) error"
+              ],
+              "docs": "Send sends text.",
+              "deprecated": "Use `Client.SendAll`."
+            },
+            {
+              "name": "SendAll",
+              "kind": "method",
+              "signatures": [
+                "func (c *Client) SendAll(ctx context.Context, texts ...string) error"
+              ],
+              "docs": "SendAll sends each text in turn."
+            },
+            {
+              "name": "Close",
+              "kind": "method",
+              "signatures": [
+                "func (c *Client) Close() error"
+              ],
+              "docs": "Close closes the client, unlike `Base.Close`."
+            },
+            {
+              "name": "Name",
+              "kind": "property",
+              "signatures": [
+                "Name string `json:\"name\"`"
+              ],
+              "docs": "Name names the client.",
+              "inherited": "Base"
+            },
+            {
+              "name": "Ping",
+              "kind": "method",
+              "signatures": [
+                "func (b *Base) Ping(ctx context.Context) error"
+              ],
+              "docs": "Ping checks the connection.",
+              "inherited": "Base"
+            }
+          ]
+        },
+        {
+          "name": "Color",
+          "kind": "enum",
+          "signatures": [
+            "type Color string"
+          ],
+          "docs": "Color is a color.\n\nThe colors.",
+          "members": [
+            {
+              "name": "Red",
+              "kind": "case",
+              "signatures": [
+                "const Red Color = \"red\""
+              ],
+              "docs": "Red is warm."
+            },
+            {
+              "name": "Blue",
+              "kind": "case",
+              "signatures": [
+                "const Blue Color = \"blue\""
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "Copy",
+          "kind": "function",
+          "signatures": [
+            "func Copy(dst io.Writer, src io.Reader) (int64, error)"
+          ],
+          "docs": "Copy copies src to dst.",
+          "deprecated": ""
+        },
+        {
+          "name": "DefaultTimeout",
+          "kind": "constant",
+          "signatures": [
+            "const DefaultTimeout = 30"
+          ],
+          "docs": "DefaultTimeout is how long a call waits, in seconds."
+        },
+        {
+          "name": "ErrClosed",
+          "kind": "constant",
+          "signatures": [
+            "var ErrClosed = errors.New(\"fx: closed\")"
+          ],
+          "docs": "ErrClosed reports a call on a closed `Client`."
+        },
+        {
+          "name": "Kind",
+          "kind": "enum",
+          "signatures": [
+            "type Kind string\n\nconst (\n\tKindSquare Kind = \"square\"\n\tKindRound  Kind = \"round\"\n)"
+          ],
+          "docs": "Kind is a generated enum.\n\nThe kinds."
+        },
+        {
+          "name": "MaxSize",
+          "kind": "constant",
+          "signatures": [
+            "const MaxSize = 1 << 20"
+          ],
+          "docs": "MaxSize is the largest body, in bytes.\n\nLimits on a request."
+        },
+        {
+          "name": "MinSize",
+          "kind": "constant",
+          "signatures": [
+            "const MinSize = 1"
+          ],
+          "docs": "The smallest body.\n\nLimits on a request."
+        },
+        {
+          "name": "NewClient",
+          "kind": "function",
+          "signatures": [
+            "func NewClient(key string, opts ...Option) *Client"
+          ],
+          "docs": "NewClient returns a client for key."
+        },
+        {
+          "name": "Option",
+          "kind": "type",
+          "signatures": [
+            "type Option func(*Client)"
+          ],
+          "docs": "Option configures a `Client`."
+        },
+        {
+          "name": "Properties",
+          "kind": "type",
+          "signatures": [
+            "type Properties = map[string]any"
+          ],
+          "docs": "Properties are free-form attributes."
+        },
+        {
+          "name": "Shape",
+          "kind": "struct",
+          "signatures": [
+            "type Shape struct {\n\tSides int `json:\"sides\"`\n}"
+          ],
+          "docs": "Shape is a generated shape.",
+          "members": [
+            {
+              "name": "Area",
+              "kind": "method",
+              "signatures": [
+                "func (s Shape) Area() float64"
+              ],
+              "docs": "Area is a method of a generated type."
+            }
+          ]
+        },
+        {
+          "name": "Store",
+          "kind": "interface",
+          "signatures": [
+            "type Store interface {\n\tio.Closer\n\tLoad(ctx context.Context, key string) ([]byte, error)\n\t// contains filtered or unexported methods\n}"
+          ],
+          "docs": "Store keeps state between calls.",
+          "members": [
+            {
+              "name": "Load",
+              "kind": "method",
+              "signatures": [
+                "Load(ctx context.Context, key string) ([]byte, error)"
+              ],
+              "docs": "Load reads the state of key."
+            }
+          ]
+        },
+        {
+          "name": "WithTimeout",
+          "kind": "function",
+          "signatures": [
+            "func WithTimeout(seconds int) Option"
+          ],
+          "docs": "WithTimeout sets `Client.Timeout`."
+        }
+      ]
+    },
+    {
+      "name": "example.com/fx/hooks",
+      "symbols": [
+        {
+          "name": "Verify",
+          "kind": "function",
+          "signatures": [
+            "func Verify(body []byte, secret string) error"
+          ],
+          "docs": "Verify checks body's signature with secret. See [the guide](https://example.com/guide)."
+        }
+      ]
+    }
+  ]
+}
