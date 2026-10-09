@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The edge golden in the default server layers. -->
+  <PropertyGroup>
+    <EdgeGolden>edge</EdgeGolden>
+  </PropertyGroup>
+  <Import Project="../SdkgenEdge.props" />
+</Project>

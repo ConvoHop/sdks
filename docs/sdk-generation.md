@@ -18,6 +18,7 @@ flowchart LR
   I --> EJ["java"]
   I --> EM["mcp-tools"]
   I --> EC["cli-operations"]
+  I --> ECS["csharp"]
   I --> EG["go"]
   I -.-> E5["future language emitters"]
 ```
@@ -68,6 +69,7 @@ Don't edit generated files by hand. Change the inputs and run
 | `java` | `jvm/convohop-server/src/generated/java/`, `jvm/convohop-server-kotlin/src/generated/kotlin/` | Models, the operation catalog, one API class per plane with lazy pages methods for cursor-paginated queries, and a suspending Kotlin wrapper per plane, for the [JVM server SDK](../jvm/README.md) |
 | `mcp-tools` | `packages/mcp/src/generated/tools.ts` | The tool catalog of `@convohop/mcp`: one MCP tool per query and mutation that a server bearer credential can call, with its input schema and annotations |
 | `cli-operations` | `packages/cli/src/generated/operations.ts` | The operation catalog of `@convohop/cli`: the same operations, with their inputs, types, credentials, scopes, idempotency and destructiveness |
+| `csharp` | `dotnet/src/ConvoHop/Generated/` | Models with a System.Text.Json source-generation context, the operation catalog, the schema metadata that validates responses, and one API class per plane with `IAsyncEnumerable` pages methods for cursor-paginated queries, for the [.NET server SDK](../dotnet/README.md). It covers the server layers and leaves out subscriptions |
 | `go` | `go/types_gen.go`, `go/operations_gen.go`, `go/catalog_gen.go` | Types, one method per server operation on `ProjectClient` (Communication) and `ManagementClient` (Management), with a `Pages` method for each cursor-paginated query, and the catalog of operations and scalar rules that the runtime enforces, for the [Go server SDK](../go/README.md) |
 
 Both `mcp-tools` and `cli-operations` leave out subscriptions, client-only and
@@ -200,6 +202,10 @@ The generator tests are in [`tools/sdkgen/test`](../tools/sdkgen/test) and use
 - The `sdkgen-edge` project of the [JVM build](../jvm/README.md) compiles the
   fixture's generated Java and Kotlin against the JVM runtime with warnings
   as errors.
+- `golden/edge-all-layers` holds the C# emitter's output for every layer of
+  the fixture. The `ConvoHop.SdkgenEdge` and `ConvoHop.SdkgenEdge.AllLayers`
+  projects of the [.NET build](../dotnet/README.md) compile both C# goldens
+  against the .NET runtime with warnings as errors.
 - `go.test.mjs` checks that the generated Go is `gofmt`-clean, runs `go vet`
   on the fixture's generated Go, and checks that Go's `regexp` matches like
   ECMAScript on every scalar pattern the emitter accepts. These tests need

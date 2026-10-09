@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The edge golden in every layer, with the client-only operations and their pages methods. -->
+  <PropertyGroup>
+    <EdgeGolden>edge-all-layers</EdgeGolden>
+  </PropertyGroup>
+  <Import Project="../SdkgenEdge.props" />
+</Project>
