@@ -337,3 +337,4 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.resolve_request`](../../python/reference/convohop.md#convohopmanagementresolve_request-method), [`ConvoHopManagement.retry_request`](../../python/reference/convohop.md#convohopmanagementretry_request-method), [`AsyncConvoHopManagement.resolve_request`](../../python/reference/convohop.md#asyncconvohopmanagementresolve_request-method), [`AsyncConvoHopManagement.retry_request`](../../python/reference/convohop.md#asyncconvohopmanagementretry_request-method) |

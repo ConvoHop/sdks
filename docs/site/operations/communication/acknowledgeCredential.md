@@ -79,3 +79,4 @@ mutation CommunicationAcknowledgeCredential($context: RequestContextInput!, $inp
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | Not wrapped by a method |

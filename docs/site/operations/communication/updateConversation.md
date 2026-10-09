@@ -100,3 +100,4 @@ mutation CommunicationUpdateConversation($context: RequestContextInput!, $input:
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.update`](../../typescript/reference/server.md#serverconversationupdate-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.update_conversation`](../../python/reference/convohop.md#convohopupdate_conversation-method), [`AsyncConvoHop.update_conversation`](../../python/reference/convohop.md#asyncconvohopupdate_conversation-method) |

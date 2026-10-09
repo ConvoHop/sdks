@@ -96,3 +96,4 @@ mutation CommunicationEditMessage($context: RequestContextInput!, $input: EditMe
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.messages.edit`](../../typescript/reference/server.md#serverconversationmessagesedit-method), [`ConvoHopClient.edit`](../../typescript/reference/client.md#convohopclientedit-method), [`ConversationHandle.messages.edit`](../../typescript/reference/client.md#conversationhandlemessagesedit-property) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.edit_message`](../../python/reference/convohop.md#convohopedit_message-method), [`AsyncConvoHop.edit_message`](../../python/reference/convohop.md#asyncconvohopedit_message-method) |

@@ -42,6 +42,7 @@ planned languages, push notifications, package names, versioning and support.
 | [Java and Kotlin server](jvm/README.md) | `com.convohop:convohop-server`, `com.convohop:convohop-server-kotlin` | Java 11 or later. Kotlin coroutine extensions are optional. | User identities and sessions, conversations, membership and messages for your backend, generated APIs with paginators for every server operation, backend key issuance, webhook verification, and push payload builders |
 | [.NET server](dotnet/README.md) | `ConvoHop` | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Organization and project management, backend key issuance, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, generated APIs for every server operation with async page streams, webhook verification, and push payload builders |
 | [Go server](go/README.md) | `github.com/ConvoHop/sdks/go` | Go 1.26 or later, standard library only | Organization and project management, user identities and sessions, conversations, membership, messages, inbox, search and calls for your backend, a generated method with page iterators for every server operation, backend key issuance and delivery, request recovery, webhook verification, and push payload builders |
+| [Python server](python/README.md) | `convohop` | Python 3.11 or later | Sync and `asyncio` clients for organization and project management, backend key issuance, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, generated methods for every server operation with page iterators, webhook verification, and push payload builders |
 
 The TypeScript packages depend on [`@convohop/core`](packages/core/README.md), which
 holds the generated GraphQL types and operations and the shared transport.
@@ -60,7 +61,6 @@ package registry yet. [Install a release](#install-a-release) or
 
 | Layer | Languages and platforms |
 | --- | --- |
-| Server | Python |
 | Client | iOS and macOS (Swift), Android (Kotlin), React Native, Flutter |
 
 ## Tools
@@ -162,6 +162,10 @@ The Go SDK is its own module, with its own
 [Go workflow](.github/workflows/go.yml). See
 [Build and test](go/README.md#build-and-test).
 
+The Python SDK has its own uv project and
+[Python workflow](.github/workflows/python.yml). See
+[Development](python/README.md#development).
+
 ## API contract
 
 - The Communication API and the Management API have separate origins. Each
@@ -228,6 +232,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 - [Java and Kotlin server SDK](jvm/README.md)
 - [.NET server SDK](dotnet/README.md)
 - [Go server SDK](go/README.md)
+- [Python server SDK](python/README.md)
 - [Shared core package](packages/core/README.md)
 - [CLI](packages/cli/README.md) and [MCP server](packages/mcp/README.md)
 - [Releasing](RELEASING.md): how releases happen, and how to install and

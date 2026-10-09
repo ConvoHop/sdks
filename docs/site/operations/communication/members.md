@@ -96,3 +96,4 @@ query CommunicationMembers($context: RequestContextInput!, $input: MembersReques
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.list`](../../typescript/reference/server.md#serverconversationmemberslist-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.members`](../../python/reference/convohop.md#convohopmembers-method), [`ConvoHop.iter_members`](../../python/reference/convohop.md#convohopiter_members-method), [`AsyncConvoHop.members`](../../python/reference/convohop.md#asyncconvohopmembers-method), [`AsyncConvoHop.iter_members`](../../python/reference/convohop.md#asyncconvohopiter_members-method) |

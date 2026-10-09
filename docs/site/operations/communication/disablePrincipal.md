@@ -82,3 +82,4 @@ mutation CommunicationDisablePrincipal($context: RequestContextInput!, $input: D
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.principals.disable`](../../typescript/reference/server.md#projectserverclientprincipalsdisable-property) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.disable_principal`](../../python/reference/convohop.md#convohopdisable_principal-method), [`AsyncConvoHop.disable_principal`](../../python/reference/convohop.md#asyncconvohopdisable_principal-method) |

@@ -78,3 +78,4 @@ mutation ManagementCredentialPermit($context: RequestContextInput!, $input: Cred
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.deliveryPermit`](../../typescript/reference/server.md#convohopmanagementclientdeliverypermit-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.credential_permit`](../../python/reference/convohop.md#convohopmanagementcredential_permit-method), [`AsyncConvoHopManagement.credential_permit`](../../python/reference/convohop.md#asyncconvohopmanagementcredential_permit-method) |

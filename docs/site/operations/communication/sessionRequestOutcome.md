@@ -84,3 +84,4 @@ query CommunicationSessionRequestOutcome($context: RequestContextInput!, $input:
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.sessions.outcome`](../../typescript/reference/server.md#projectserverclientsessionsoutcome-property), [`ProjectServerClient.sessionRequestOutcome`](../../typescript/reference/server.md#projectserverclientsessionrequestoutcome-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.session_request_outcome`](../../python/reference/convohop.md#convohopsession_request_outcome-method), [`AsyncConvoHop.session_request_outcome`](../../python/reference/convohop.md#asyncconvohopsession_request_outcome-method) |

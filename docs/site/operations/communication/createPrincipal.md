@@ -81,3 +81,4 @@ mutation CommunicationCreatePrincipal($context: RequestContextInput!, $input: Cr
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.principals.create`](../../typescript/reference/server.md#projectserverclientprincipalscreate-property), [`ProjectServerClient.createPrincipal`](../../typescript/reference/server.md#projectserverclientcreateprincipal-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.create_principal`](../../python/reference/convohop.md#convohopcreate_principal-method), [`AsyncConvoHop.create_principal`](../../python/reference/convohop.md#asyncconvohopcreate_principal-method) |

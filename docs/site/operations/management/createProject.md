@@ -134,3 +134,4 @@ mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateP
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.createProject`](../../typescript/reference/server.md#convohopmanagementclientcreateproject-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.create_project`](../../python/reference/convohop.md#convohopmanagementcreate_project-method), [`AsyncConvoHopManagement.create_project`](../../python/reference/convohop.md#asyncconvohopmanagementcreate_project-method) |

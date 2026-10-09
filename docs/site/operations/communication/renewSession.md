@@ -92,3 +92,4 @@ mutation CommunicationRenewSession($context: RequestContextInput!, $input: Renew
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.sessions.renew`](../../typescript/reference/server.md#projectserverclientsessionsrenew-property) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.renew_session`](../../python/reference/convohop.md#convohoprenew_session-method), [`AsyncConvoHop.renew_session`](../../python/reference/convohop.md#asyncconvohoprenew_session-method) |

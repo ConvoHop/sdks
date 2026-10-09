@@ -90,3 +90,4 @@ mutation CommunicationIssueSession($context: RequestContextInput!, $input: Issue
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.sessions.issue`](../../typescript/reference/server.md#projectserverclientsessionsissue-property), [`ProjectServerClient.issueSession`](../../typescript/reference/server.md#projectserverclientissuesession-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.issue_session`](../../python/reference/convohop.md#convohopissue_session-method), [`AsyncConvoHop.issue_session`](../../python/reference/convohop.md#asyncconvohopissue_session-method) |

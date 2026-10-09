@@ -81,3 +81,4 @@ query ManagementGetOrganization($context: RequestContextInput!, $input: GetOrgan
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_organization`](../../python/reference/convohop.md#convohopmanagementget_organization-method), [`AsyncConvoHopManagement.get_organization`](../../python/reference/convohop.md#asyncconvohopmanagementget_organization-method) |

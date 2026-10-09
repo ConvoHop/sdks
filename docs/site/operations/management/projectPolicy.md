@@ -133,3 +133,4 @@ mutation ManagementProjectPolicy($context: RequestContextInput!, $input: Project
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.project_policy`](../../python/reference/convohop.md#convohopmanagementproject_policy-method), [`AsyncConvoHopManagement.project_policy`](../../python/reference/convohop.md#asyncconvohopmanagementproject_policy-method) |

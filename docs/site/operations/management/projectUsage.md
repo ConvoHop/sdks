@@ -93,3 +93,4 @@ query ManagementProjectUsage($context: RequestContextInput!, $input: ProjectUsag
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.project_usage`](../../python/reference/convohop.md#convohopmanagementproject_usage-method), [`AsyncConvoHopManagement.project_usage`](../../python/reference/convohop.md#asyncconvohopmanagementproject_usage-method) |

@@ -81,3 +81,4 @@ query CommunicationGetPrincipal($context: RequestContextInput!, $input: GetPrinc
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.principals.get`](../../typescript/reference/server.md#projectserverclientprincipalsget-property) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.get_principal`](../../python/reference/convohop.md#convohopget_principal-method), [`AsyncConvoHop.get_principal`](../../python/reference/convohop.md#asyncconvohopget_principal-method) |

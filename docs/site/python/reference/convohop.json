@@ -1,0 +1,3128 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "python",
+  "package": "convohop",
+  "layer": "server",
+  "page": "convohop.md",
+  "symbols": [
+    {
+      "name": "AsyncConvoHop",
+      "kind": "class",
+      "ref": "convohop#AsyncConvoHop",
+      "anchor": "asyncconvohop-class",
+      "signatures": ["class AsyncConvoHop"],
+      "docs": "Asynchronous backend-key client for one project, for one asyncio event loop.\n\nAwait `initialize()` once before other operations. Each method sends one request; mutations record a\nrecovery entry first, and run to completion even if the awaiting task is cancelled, so their outcome is\nrecorded. Resolve an uncertain mutation with `resolve_request()` or `retry_request()`.",
+      "members": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#AsyncConvoHop.__init__",
+          "anchor": "asyncconvohop-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    base_url: str,\n    backend_key: str,\n    project_id: str,\n    incarnation: str,\n    recovery_storage: RecoveryStorage | None = None,\n    async_recovery_storage: AsyncRecoveryStorage | None = None,\n    http_client: httpx.AsyncClient | None = None,\n    timeout: float = 12.0,\n) -> None"
+          ],
+          "docs": "Parameters:\n\n- `base_url`: The authority origin. Plain HTTP is accepted only for loopback hosts.\n- `backend_key`: The project's backend key. Keep it on trusted servers.\n- `project_id`: The project the key belongs to.\n- `incarnation`: The project incarnation from the console or deployment.\n- `recovery_storage`: Synchronous storage for recovery records. It runs on the event loop, so keep it fast.\n- `async_recovery_storage`: Asynchronous storage for recovery records. Choose one of the two.\n- `http_client`: An `httpx.AsyncClient` to send through. The SDK never closes a client it did not create.\n- `timeout`: Seconds allowed for each connect, write and read, and for the whole response body."
+        },
+        {
+          "name": "project_id",
+          "kind": "property",
+          "ref": "convohop#AsyncConvoHop.project_id",
+          "anchor": "asyncconvohopproject_id-property",
+          "signatures": ["@property\ndef project_id(self) -> str"],
+          "docs": ""
+        },
+        {
+          "name": "incarnation",
+          "kind": "property",
+          "ref": "convohop#AsyncConvoHop.incarnation",
+          "anchor": "asyncconvohopincarnation-property",
+          "signatures": ["@property\ndef incarnation(self) -> str"],
+          "docs": ""
+        },
+        {
+          "name": "serving_epoch",
+          "kind": "property",
+          "ref": "convohop#AsyncConvoHop.serving_epoch",
+          "anchor": "asyncconvohopserving_epoch-property",
+          "signatures": ["@property\ndef serving_epoch(self) -> str | None"],
+          "docs": "The serving epoch `initialize()` observed, or `None` before it runs."
+        },
+        {
+          "name": "initialize",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.initialize",
+          "anchor": "asyncconvohopinitialize-method",
+          "signatures": ["async def initialize(self) -> None"],
+          "docs": "Reads the project route and records its serving epoch.\n\nRaises:\n\n- `ConvoHopProblem`: `INCARNATION_MISMATCH` when the project has a new incarnation; recover explicitly.",
+          "operations": [
+            {"id": "communication.route", "page": "../../operations/communication/route.md"}
+          ]
+        },
+        {
+          "name": "initialize_recovery",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.initialize_recovery",
+          "anchor": "asyncconvohopinitialize_recovery-method",
+          "signatures": ["async def initialize_recovery(self) -> None"],
+          "docs": "Loads `async_recovery_storage`. Operations do this on first use; a load failure is raised to each call."
+        },
+        {
+          "name": "retry_request",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.retry_request",
+          "anchor": "asyncconvohopretry_request-method",
+          "signatures": ["async def retry_request(self, request_id: str) -> RequestResolution"],
+          "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "recovery_states",
+          "kind": "property",
+          "ref": "convohop#AsyncConvoHop.recovery_states",
+          "anchor": "asyncconvohoprecovery_states-property",
+          "signatures": ["@property\ndef recovery_states(self) -> tuple[RecoveryState, ...]"],
+          "docs": "Snapshots of the recorded mutations, oldest first. They never contain credentials."
+        },
+        {
+          "name": "aclose",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.aclose",
+          "anchor": "asyncconvohopaclose-method",
+          "signatures": ["async def aclose(self) -> None"],
+          "docs": "Closes the HTTP client this client created. A client passed as `http_client` stays open."
+        },
+        {
+          "name": "capabilities",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.capabilities",
+          "anchor": "asyncconvohopcapabilities-method",
+          "signatures": ["async def capabilities(self) -> Capabilities"],
+          "docs": "Describe the features, limits and API model the authority supports.\n\nAuthorization: `backendKey`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.capabilities",
+              "page": "../../operations/communication/capabilities.md"
+            }
+          ]
+        },
+        {
+          "name": "route",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.route",
+          "anchor": "asyncconvohoproute-method",
+          "signatures": ["async def route(self) -> dict[str, Any]"],
+          "docs": "Return the signed route: project incarnation, serving epoch and realtime endpoint. Call it before other communication operations and again after WRONG_REGION.\n\nAuthorization: `backendKey`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {"id": "communication.route", "page": "../../operations/communication/route.md"}
+          ]
+        },
+        {
+          "name": "get_principal",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.get_principal",
+          "anchor": "asyncconvohopget_principal-method",
+          "signatures": ["async def get_principal(self, *, principal_id: str) -> Principal"],
+          "docs": "Read a principal (an application user).\n\nAuthorization: `backendKey` with scope `principalManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.getPrincipal",
+              "page": "../../operations/communication/getPrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "get_conversation",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.get_conversation",
+          "anchor": "asyncconvohopget_conversation-method",
+          "signatures": [
+            "async def get_conversation(self, *, conversation_id: str) -> Conversation"
+          ],
+          "docs": "Read a conversation.\n\nAuthorization: `backendKey` with scope `conversationManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "members",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.members",
+          "anchor": "asyncconvohopmembers-method",
+          "signatures": [
+            "async def members(\n    self,\n    *,\n    conversation_id: str,\n    limit: int = 100,\n    cursor: str | None = None,\n) -> MemberPage"
+          ],
+          "docs": "List the members of a conversation.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_members()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.members", "page": "../../operations/communication/members.md"}
+          ]
+        },
+        {
+          "name": "iter_members",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.iter_members",
+          "anchor": "asyncconvohopiter_members-method",
+          "signatures": [
+            "async def iter_members(\n    self,\n    *,\n    conversation_id: str,\n    limit: int = 100,\n    cursor: str | None = None,\n) -> AsyncIterator[Member]"
+          ],
+          "docs": "Iterate the `items` of `members()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.members", "page": "../../operations/communication/members.md"}
+          ]
+        },
+        {
+          "name": "messages",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.messages",
+          "anchor": "asyncconvohopmessages-method",
+          "signatures": [
+            "async def messages(\n    self,\n    *,\n    conversation_id: str,\n    limit: int = 100,\n    before_sequence: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> MessagePage"
+          ],
+          "docs": "List the messages of a conversation, newest first. A backend key reads the full history, or the history visible to the member named by actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `messageRead`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `sequence`. Newest first. Pass nextCursor back as the sequence cursor input to read older items until complete is true. `iter_messages()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "iter_messages",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.iter_messages",
+          "anchor": "asyncconvohopiter_messages-method",
+          "signatures": [
+            "async def iter_messages(\n    self,\n    *,\n    conversation_id: str,\n    limit: int = 100,\n    before_sequence: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> AsyncIterator[Message]"
+          ],
+          "docs": "Iterate the `items` of `messages()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "get_message",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.get_message",
+          "anchor": "asyncconvohopget_message-method",
+          "signatures": [
+            "async def get_message(\n    self,\n    *,\n    conversation_id: str,\n    message_id: str,\n    act_as_principal_id: str | None = None,\n) -> Message"
+          ],
+          "docs": "Read one message. A backend key reads any message, or reads as the member named by actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `messageRead`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "inbox",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.inbox",
+          "anchor": "asyncconvohopinbox-method",
+          "signatures": [
+            "async def inbox(\n    self,\n    *,\n    limit: int = 100,\n    cursor: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> InboxPage"
+          ],
+          "docs": "List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `messageRead`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_inbox()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.inbox", "page": "../../operations/communication/inbox.md"}
+          ]
+        },
+        {
+          "name": "iter_inbox",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.iter_inbox",
+          "anchor": "asyncconvohopiter_inbox-method",
+          "signatures": [
+            "async def iter_inbox(\n    self,\n    *,\n    limit: int = 100,\n    cursor: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> AsyncIterator[InboxItem]"
+          ],
+          "docs": "Iterate the `items` of `inbox()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.inbox", "page": "../../operations/communication/inbox.md"}
+          ]
+        },
+        {
+          "name": "search",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.search",
+          "anchor": "asyncconvohopsearch-method",
+          "signatures": [
+            "async def search(\n    self,\n    *,\n    query: str,\n    page_size: int = 100,\n    scope: SearchScopeInput | None = None,\n    cursor: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> SearchPage"
+          ],
+          "docs": "Search the messages visible to the calling user. A backend key searches as the member named by actAsPrincipalId, or within scope.conversationIds.\n\nAuthorization: `backendKey` with scope `messageRead`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_search()` follows the cursor for you.\n\nParameters:\n\n- `page_size`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.search", "page": "../../operations/communication/search.md"}
+          ]
+        },
+        {
+          "name": "iter_search",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.iter_search",
+          "anchor": "asyncconvohopiter_search-method",
+          "signatures": [
+            "async def iter_search(\n    self,\n    *,\n    query: str,\n    page_size: int = 100,\n    scope: SearchScopeInput | None = None,\n    cursor: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> AsyncIterator[SearchHit]"
+          ],
+          "docs": "Iterate the `items` of `search()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `page_size`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.search", "page": "../../operations/communication/search.md"}
+          ]
+        },
+        {
+          "name": "resolve_request",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.resolve_request",
+          "anchor": "asyncconvohopresolve_request-method",
+          "signatures": ["async def resolve_request(self, *, request_id: str) -> RequestResolution"],
+          "docs": "Look up the stored outcome of an earlier communication mutation by its requestId.\n\nAuthorization: `backendKey`, when `ownRequest`: The caller made the original request.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "get_operation",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.get_operation",
+          "anchor": "asyncconvohopget_operation-method",
+          "signatures": ["async def get_operation(self, *, operation_id: str) -> Operation"],
+          "docs": "Read the state of a long-running communication operation.\n\nAuthorization: `backendKey`, when `operationParticipant`: The caller started the operation or can access its target.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.getOperation",
+              "page": "../../operations/communication/getOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "conversation_mute",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.conversation_mute",
+          "anchor": "asyncconvohopconversation_mute-method",
+          "signatures": [
+            "async def conversation_mute(\n    self,\n    *,\n    conversation_id: str,\n    act_as_principal_id: str | None = None,\n) -> ConversationMute"
+          ],
+          "docs": "Read whether a member has muted message push notifications for a conversation. A backend key must name the member with actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.conversationMute",
+              "page": "../../operations/communication/conversationMute.md"
+            }
+          ]
+        },
+        {
+          "name": "current_live_session",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.current_live_session",
+          "anchor": "asyncconvohopcurrent_live_session-method",
+          "signatures": [
+            "async def current_live_session(self, *, conversation_id: str) -> LiveSession | None"
+          ],
+          "docs": "Return the active live session of a conversation, if any.\n\nAuthorization, any one of:\n\n- `backendKey` with scope `callRead`.\n- `backendKey` with scope `callManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.currentLiveSession",
+              "page": "../../operations/communication/currentLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "live_session",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.live_session",
+          "anchor": "asyncconvohoplive_session-method",
+          "signatures": ["async def live_session(self, *, live_session_id: str) -> LiveSession"],
+          "docs": "Read a live session.\n\nAuthorization, any one of:\n\n- `backendKey` with scope `callRead`.\n- `backendKey` with scope `callManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.liveSession",
+              "page": "../../operations/communication/liveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "live_sessions",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.live_sessions",
+          "anchor": "asyncconvohoplive_sessions-method",
+          "signatures": [
+            "async def live_sessions(\n    self,\n    *,\n    conversation_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> LiveSessionPage"
+          ],
+          "docs": "List the live sessions of a conversation.\n\nAuthorization, any one of:\n\n- `backendKey` with scope `callRead`.\n- `backendKey` with scope `callManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_live_sessions()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server.",
+          "operations": [
+            {
+              "id": "communication.liveSessions",
+              "page": "../../operations/communication/liveSessions.md"
+            }
+          ]
+        },
+        {
+          "name": "iter_live_sessions",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.iter_live_sessions",
+          "anchor": "asyncconvohopiter_live_sessions-method",
+          "signatures": [
+            "async def iter_live_sessions(\n    self,\n    *,\n    conversation_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> AsyncIterator[LiveSession]"
+          ],
+          "docs": "Iterate the `items` of `live_sessions()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server.",
+          "operations": [
+            {
+              "id": "communication.liveSessions",
+              "page": "../../operations/communication/liveSessions.md"
+            }
+          ]
+        },
+        {
+          "name": "live_session_participants",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.live_session_participants",
+          "anchor": "asyncconvohoplive_session_participants-method",
+          "signatures": [
+            "async def live_session_participants(\n    self,\n    *,\n    live_session_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> LiveParticipantPage"
+          ],
+          "docs": "List the participants of a live session.\n\nAuthorization, any one of:\n\n- `backendKey` with scope `callRead`.\n- `backendKey` with scope `callManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_live_session_participants()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server.",
+          "operations": [
+            {
+              "id": "communication.liveSessionParticipants",
+              "page": "../../operations/communication/liveSessionParticipants.md"
+            }
+          ]
+        },
+        {
+          "name": "iter_live_session_participants",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.iter_live_session_participants",
+          "anchor": "asyncconvohopiter_live_session_participants-method",
+          "signatures": [
+            "async def iter_live_session_participants(\n    self,\n    *,\n    live_session_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> AsyncIterator[LiveParticipation]"
+          ],
+          "docs": "Iterate the `items` of `live_session_participants()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server.",
+          "operations": [
+            {
+              "id": "communication.liveSessionParticipants",
+              "page": "../../operations/communication/liveSessionParticipants.md"
+            }
+          ]
+        },
+        {
+          "name": "live_session_operation",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.live_session_operation",
+          "anchor": "asyncconvohoplive_session_operation-method",
+          "signatures": [
+            "async def live_session_operation(self, *, operation_id: str) -> LiveSessionOperation"
+          ],
+          "docs": "Read the state of a live session start or end operation.\n\nAuthorization, any one of:\n\n- `backendKey` with scope `callRead`.\n- `backendKey` with scope `callManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.liveSessionOperation",
+              "page": "../../operations/communication/liveSessionOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "session_request_outcome",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.session_request_outcome",
+          "anchor": "asyncconvohopsession_request_outcome-method",
+          "signatures": [
+            "async def session_request_outcome(self, *, request_id: str) -> SessionRequestOutcome"
+          ],
+          "docs": "Look up the outcome of an earlier issueSession or renewSession request, including the session it produced.\n\nAuthorization: `backendKey` with all of the scopes `sessionIssue` and `sessionManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.sessionRequestOutcome",
+              "page": "../../operations/communication/sessionRequestOutcome.md"
+            }
+          ]
+        },
+        {
+          "name": "create_principal",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.create_principal",
+          "anchor": "asyncconvohopcreate_principal-method",
+          "signatures": [
+            "async def create_principal(\n    self,\n    *,\n    external_user_id: str,\n    request_id: str | None = None,\n) -> Principal"
+          ],
+          "docs": "Create a principal for an application user.\n\nAuthorization: `backendKey` with scope `principalManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.createPrincipal",
+              "page": "../../operations/communication/createPrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "disable_principal",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.disable_principal",
+          "anchor": "asyncconvohopdisable_principal-method",
+          "signatures": [
+            "async def disable_principal(\n    self,\n    *,\n    principal_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Principal"
+          ],
+          "docs": "Disable a principal.\n\nAuthorization: `backendKey` with scope `principalManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.disablePrincipal",
+              "page": "../../operations/communication/disablePrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "issue_session",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.issue_session",
+          "anchor": "asyncconvohopissue_session-method",
+          "signatures": [
+            "async def issue_session(\n    self,\n    *,\n    principal_id: str,\n    device_id: str,\n    requested_ttl_ms: str,\n    request_id: str | None = None,\n) -> SessionBootstrap"
+          ],
+          "docs": "Issue a short-lived user session token for a principal and device.\n\nAuthorization: `backendKey` with scope `sessionIssue`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.issueSession",
+              "page": "../../operations/communication/issueSession.md"
+            }
+          ]
+        },
+        {
+          "name": "renew_session",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.renew_session",
+          "anchor": "asyncconvohoprenew_session-method",
+          "signatures": [
+            "async def renew_session(\n    self,\n    *,\n    session_id: str,\n    principal_id: str,\n    device_id: str,\n    expected_revision: str,\n    requested_ttl_ms: str,\n    request_id: str | None = None,\n) -> SessionBootstrap"
+          ],
+          "docs": "Renew a user session before it expires.\n\nAuthorization: `backendKey` with scope `sessionIssue`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.renewSession",
+              "page": "../../operations/communication/renewSession.md"
+            }
+          ]
+        },
+        {
+          "name": "revoke_session",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.revoke_session",
+          "anchor": "asyncconvohoprevoke_session-method",
+          "signatures": [
+            "async def revoke_session(\n    self,\n    *,\n    session_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> SessionRevocation"
+          ],
+          "docs": "Revoke a user session.\n\nAuthorization: `backendKey` with scope `sessionManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.revokeSession",
+              "page": "../../operations/communication/revokeSession.md"
+            }
+          ]
+        },
+        {
+          "name": "create_conversation",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.create_conversation",
+          "anchor": "asyncconvohopcreate_conversation-method",
+          "signatures": [
+            "async def create_conversation(\n    self,\n    *,\n    title: str,\n    props: Mapping[str, Any],\n    members: Sequence[MemberInputInput],\n    request_id: str | None = None,\n) -> Conversation"
+          ],
+          "docs": "Create a conversation with its initial members.\n\nAuthorization: `backendKey` with scope `conversationManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.createConversation",
+              "page": "../../operations/communication/createConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "update_conversation",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.update_conversation",
+          "anchor": "asyncconvohopupdate_conversation-method",
+          "signatures": [
+            "async def update_conversation(\n    self,\n    *,\n    conversation_id: str,\n    expected_revision: str,\n    title: str | None = None,\n    props: Mapping[str, Any] | None = None,\n    request_id: str | None = None,\n) -> Conversation"
+          ],
+          "docs": "Update the title or properties of a conversation.\n\nAuthorization: `backendKey` with scope `conversationManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.updateConversation",
+              "page": "../../operations/communication/updateConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "add_member",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.add_member",
+          "anchor": "asyncconvohopadd_member-method",
+          "signatures": [
+            "async def add_member(\n    self,\n    *,\n    conversation_id: str,\n    principal_id: str,\n    role: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Member"
+          ],
+          "docs": "Add a member, or change the role of an active member.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {"id": "communication.addMember", "page": "../../operations/communication/addMember.md"}
+          ]
+        },
+        {
+          "name": "add_members",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.add_members",
+          "anchor": "asyncconvohopadd_members-method",
+          "signatures": [
+            "async def add_members(\n    self,\n    *,\n    conversation_id: str,\n    members: Sequence[MemberBatchEntryInput],\n    request_id: str | None = None,\n) -> ConversationMemberBatch"
+          ],
+          "docs": "Add several members in one request.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.addMembers",
+              "page": "../../operations/communication/addMembers.md"
+            }
+          ]
+        },
+        {
+          "name": "remove_member",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.remove_member",
+          "anchor": "asyncconvohopremove_member-method",
+          "signatures": [
+            "async def remove_member(\n    self,\n    *,\n    conversation_id: str,\n    principal_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Member"
+          ],
+          "docs": "Remove a member from a conversation.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.removeMember",
+              "page": "../../operations/communication/removeMember.md"
+            }
+          ]
+        },
+        {
+          "name": "history_grant",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.history_grant",
+          "anchor": "asyncconvohophistory_grant-method",
+          "signatures": [
+            "async def history_grant(\n    self,\n    *,\n    conversation_id: str,\n    principal_id: str,\n    membership_epoch: str,\n    expected_revision: str,\n    from_sequence: str,\n    request_id: str | None = None,\n) -> Member"
+          ],
+          "docs": "Expand the history a member can see to an earlier sequence.\n\nAuthorization: `backendKey` with scope `historyManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.historyGrant",
+              "page": "../../operations/communication/historyGrant.md"
+            }
+          ]
+        },
+        {
+          "name": "send_message",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.send_message",
+          "anchor": "asyncconvohopsend_message-method",
+          "signatures": [
+            "async def send_message(\n    self,\n    *,\n    conversation_id: str,\n    text: str,\n    props: Mapping[str, Any],\n    act_as_principal_id: str | None = None,\n    request_id: str | None = None,\n) -> MessageAck"
+          ],
+          "docs": "Send a message. A backend key sends as its service principal, or as the member named by actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `messageWrite`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "edit_message",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.edit_message",
+          "anchor": "asyncconvohopedit_message-method",
+          "signatures": [
+            "async def edit_message(\n    self,\n    *,\n    conversation_id: str,\n    message_id: str,\n    expected_revision: str,\n    text: str | None = None,\n    props: Mapping[str, Any] | None = None,\n    request_id: str | None = None,\n) -> Message"
+          ],
+          "docs": "Edit a message.\n\nAuthorization: `backendKey` with scope `moderation`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.editMessage",
+              "page": "../../operations/communication/editMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "delete_message",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.delete_message",
+          "anchor": "asyncconvohopdelete_message-method",
+          "signatures": [
+            "async def delete_message(\n    self,\n    *,\n    conversation_id: str,\n    message_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Message"
+          ],
+          "docs": "Delete a message.\n\nAuthorization: `backendKey` with scope `moderation`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.deleteMessage",
+              "page": "../../operations/communication/deleteMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "set_broadcast_permission",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.set_broadcast_permission",
+          "anchor": "asyncconvohopset_broadcast_permission-method",
+          "signatures": [
+            "async def set_broadcast_permission(\n    self,\n    *,\n    conversation_id: str,\n    principal_id: str,\n    allowed: bool,\n    expected_membership_revision: str,\n    request_id: str | None = None,\n) -> BroadcastPermissionChanged"
+          ],
+          "docs": "Allow or deny a member to publish media in live sessions.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.setBroadcastPermission",
+              "page": "../../operations/communication/setBroadcastPermission.md"
+            }
+          ]
+        },
+        {
+          "name": "set_conversation_mute",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.set_conversation_mute",
+          "anchor": "asyncconvohopset_conversation_mute-method",
+          "signatures": [
+            "async def set_conversation_mute(\n    self,\n    *,\n    conversation_id: str,\n    muted: bool,\n    until: str | None = None,\n    act_as_principal_id: str | None = None,\n    request_id: str | None = None,\n) -> ConversationMute"
+          ],
+          "docs": "Mute or unmute message push notifications for a member of a conversation, optionally until a time. Calls still ring. A backend key must name the member with actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.setConversationMute",
+              "page": "../../operations/communication/setConversationMute.md"
+            }
+          ]
+        },
+        {
+          "name": "alert_live_session",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.alert_live_session",
+          "anchor": "asyncconvohopalert_live_session-method",
+          "signatures": [
+            "async def alert_live_session(\n    self,\n    *,\n    live_session_id: str,\n    expected_generation: str,\n    principal_ids: Sequence[str],\n    request_id: str | None = None,\n) -> LiveAlertBatch"
+          ],
+          "docs": "Alert (ring) conversation members about a live session.\n\nAuthorization: `backendKey` with scope `callManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.alertLiveSession",
+              "page": "../../operations/communication/alertLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "end_live_session",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHop.end_live_session",
+          "anchor": "asyncconvohopend_live_session-method",
+          "signatures": [
+            "async def end_live_session(\n    self,\n    *,\n    live_session_id: str,\n    expected_generation: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> EndLiveSessionPayload"
+          ],
+          "docs": "End a live session for every participant. Completes asynchronously.\n\nAuthorization: `backendKey` with scope `callManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `live_session_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.endLiveSession",
+              "page": "../../operations/communication/endLiveSession.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AsyncConvoHopManagement",
+      "kind": "class",
+      "ref": "convohop#AsyncConvoHopManagement",
+      "anchor": "asyncconvohopmanagement-class",
+      "signatures": ["class AsyncConvoHopManagement"],
+      "docs": "Asynchronous management client, for one asyncio event loop.",
+      "members": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#AsyncConvoHopManagement.__init__",
+          "anchor": "asyncconvohopmanagement-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    base_url: str,\n    access_token: str,\n    actor_id: str,\n    recovery_storage: RecoveryStorage | None = None,\n    async_recovery_storage: AsyncRecoveryStorage | None = None,\n    http_client: httpx.AsyncClient | None = None,\n    timeout: float = 12.0,\n) -> None"
+          ],
+          "docs": "Parameters:\n\n- `base_url`: The authority origin. Plain HTTP is accepted only for loopback hosts.\n- `access_token`: An operator access token. Keep it on trusted servers.\n- `actor_id`: The operator the token belongs to; it scopes stored recovery records.\n- `recovery_storage`: Synchronous storage for recovery records. It runs on the event loop, so keep it fast.\n- `async_recovery_storage`: Asynchronous storage for recovery records. Choose one of the two.\n- `http_client`: An `httpx.AsyncClient` to send through. The SDK never closes a client it did not create.\n- `timeout`: Seconds allowed for each connect, write and read, and for the whole response body."
+        },
+        {
+          "name": "actor_id",
+          "kind": "property",
+          "ref": "convohop#AsyncConvoHopManagement.actor_id",
+          "anchor": "asyncconvohopmanagementactor_id-property",
+          "signatures": ["@property\ndef actor_id(self) -> str"],
+          "docs": ""
+        },
+        {
+          "name": "initialize_recovery",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.initialize_recovery",
+          "anchor": "asyncconvohopmanagementinitialize_recovery-method",
+          "signatures": ["async def initialize_recovery(self) -> None"],
+          "docs": "Loads `async_recovery_storage`. Operations do this on first use; a load failure is raised to each call."
+        },
+        {
+          "name": "retry_request",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.retry_request",
+          "anchor": "asyncconvohopmanagementretry_request-method",
+          "signatures": ["async def retry_request(self, request_id: str) -> RequestResolution"],
+          "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry.",
+          "operations": [
+            {
+              "id": "management.resolveRequest",
+              "page": "../../operations/management/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "recovery_states",
+          "kind": "property",
+          "ref": "convohop#AsyncConvoHopManagement.recovery_states",
+          "anchor": "asyncconvohopmanagementrecovery_states-property",
+          "signatures": ["@property\ndef recovery_states(self) -> tuple[RecoveryState, ...]"],
+          "docs": "Snapshots of the recorded mutations, oldest first. They never contain credentials."
+        },
+        {
+          "name": "aclose",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.aclose",
+          "anchor": "asyncconvohopmanagementaclose-method",
+          "signatures": ["async def aclose(self) -> None"],
+          "docs": "Closes the HTTP client this client created. A client passed as `http_client` stays open."
+        },
+        {
+          "name": "capabilities",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.capabilities",
+          "anchor": "asyncconvohopmanagementcapabilities-method",
+          "signatures": ["async def capabilities(self) -> Capabilities"],
+          "docs": "Describe the management features and limits the authority supports.\n\nAuthorization: `portalCredential`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {"id": "management.capabilities", "page": "../../operations/management/capabilities.md"}
+          ]
+        },
+        {
+          "name": "organizations",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.organizations",
+          "anchor": "asyncconvohopmanagementorganizations-method",
+          "signatures": ["async def organizations(self) -> OrganizationPage"],
+          "docs": "List the organizations the caller can access.\n\nAuthorization: `portalCredential`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `bounded`. One bounded page without a cursor input. complete reports whether every item fit.",
+          "operations": [
+            {
+              "id": "management.organizations",
+              "page": "../../operations/management/organizations.md"
+            }
+          ]
+        },
+        {
+          "name": "get_organization",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.get_organization",
+          "anchor": "asyncconvohopmanagementget_organization-method",
+          "signatures": ["async def get_organization(self, *, org_id: str) -> Organization"],
+          "docs": "Read an organization.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.getOrganization",
+              "page": "../../operations/management/getOrganization.md"
+            }
+          ]
+        },
+        {
+          "name": "get_deployment",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.get_deployment",
+          "anchor": "asyncconvohopmanagementget_deployment-method",
+          "signatures": ["async def get_deployment(self, *, deployment_id: str) -> Deployment"],
+          "docs": "Read a deployment.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.getDeployment",
+              "page": "../../operations/management/getDeployment.md"
+            }
+          ]
+        },
+        {
+          "name": "get_project",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.get_project",
+          "anchor": "asyncconvohopmanagementget_project-method",
+          "signatures": ["async def get_project(self, *, project_id: str) -> Project"],
+          "docs": "Read a project.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {"id": "management.getProject", "page": "../../operations/management/getProject.md"}
+          ]
+        },
+        {
+          "name": "deployment_health",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.deployment_health",
+          "anchor": "asyncconvohopmanagementdeployment_health-method",
+          "signatures": [
+            "async def deployment_health(self, *, deployment_id: str) -> DeploymentHealth"
+          ],
+          "docs": "Read the health of a deployment.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.deploymentHealth",
+              "page": "../../operations/management/deploymentHealth.md"
+            }
+          ]
+        },
+        {
+          "name": "deployment_usage",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.deployment_usage",
+          "anchor": "asyncconvohopmanagementdeployment_usage-method",
+          "signatures": [
+            "async def deployment_usage(\n    self,\n    *,\n    deployment_id: str,\n    from_: str | None = None,\n    to: str | None = None,\n) -> DeploymentUsage"
+          ],
+          "docs": "Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.deploymentUsage",
+              "page": "../../operations/management/deploymentUsage.md"
+            }
+          ]
+        },
+        {
+          "name": "project_usage",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.project_usage",
+          "anchor": "asyncconvohopmanagementproject_usage-method",
+          "signatures": [
+            "async def project_usage(\n    self,\n    *,\n    project_id: str,\n    from_: str | None = None,\n    to: str | None = None,\n) -> ProjectUsage"
+          ],
+          "docs": "Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {"id": "management.projectUsage", "page": "../../operations/management/projectUsage.md"}
+          ]
+        },
+        {
+          "name": "organization_usage",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.organization_usage",
+          "anchor": "asyncconvohopmanagementorganization_usage-method",
+          "signatures": [
+            "async def organization_usage(\n    self,\n    *,\n    org_id: str,\n    from_: str | None = None,\n    to: str | None = None,\n) -> OrganizationUsage"
+          ],
+          "docs": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.organizationUsage",
+              "page": "../../operations/management/organizationUsage.md"
+            }
+          ]
+        },
+        {
+          "name": "webhook_endpoints",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.webhook_endpoints",
+          "anchor": "asyncconvohopmanagementwebhook_endpoints-method",
+          "signatures": [
+            "async def webhook_endpoints(self, *, project_id: str) -> WebhookEndpointPage"
+          ],
+          "docs": "List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `bounded`. One bounded page without a cursor input. complete reports whether every item fit.",
+          "operations": [
+            {
+              "id": "management.webhookEndpoints",
+              "page": "../../operations/management/webhookEndpoints.md"
+            }
+          ]
+        },
+        {
+          "name": "webhook_deliveries",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.webhook_deliveries",
+          "anchor": "asyncconvohopmanagementwebhook_deliveries-method",
+          "signatures": [
+            "async def webhook_deliveries(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n) -> WebhookDeliveryPage"
+          ],
+          "docs": "List recent deliveries of a webhook endpoint.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `bounded`. One bounded page without a cursor input. complete reports whether every item fit.",
+          "operations": [
+            {
+              "id": "management.webhookDeliveries",
+              "page": "../../operations/management/webhookDeliveries.md"
+            }
+          ]
+        },
+        {
+          "name": "resolve_request",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.resolve_request",
+          "anchor": "asyncconvohopmanagementresolve_request-method",
+          "signatures": ["async def resolve_request(self, *, request_id: str) -> RequestResolution"],
+          "docs": "Look up the stored outcome of an earlier management mutation by its requestId.\n\nAuthorization: `portalCredential`, when `ownRequest`: The caller made the original request.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.resolveRequest",
+              "page": "../../operations/management/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "get_operation",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.get_operation",
+          "anchor": "asyncconvohopmanagementget_operation-method",
+          "signatures": ["async def get_operation(self, *, operation_id: str) -> Operation"],
+          "docs": "Read the state of a long-running management operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {"id": "management.getOperation", "page": "../../operations/management/getOperation.md"}
+          ]
+        },
+        {
+          "name": "create_organization",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.create_organization",
+          "anchor": "asyncconvohopmanagementcreate_organization-method",
+          "signatures": [
+            "async def create_organization(\n    self,\n    *,\n    name: str,\n    terms_ref: str,\n    request_id: str | None = None,\n) -> Organization"
+          ],
+          "docs": "Create an organization.\n\nAuthorization: `portalCredential`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.createOrganization",
+              "page": "../../operations/management/createOrganization.md"
+            }
+          ]
+        },
+        {
+          "name": "create_deployment",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.create_deployment",
+          "anchor": "asyncconvohopmanagementcreate_deployment-method",
+          "signatures": [
+            "async def create_deployment(\n    self,\n    *,\n    org_id: str,\n    offering: str,\n    geo_id: str,\n    installation_profile_id: str,\n    consent_ref: str,\n    request_id: str | None = None,\n) -> CreateDeploymentReply"
+          ],
+          "docs": "Create a deployment in an organization. Completes asynchronously.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.createDeployment",
+              "page": "../../operations/management/createDeployment.md"
+            }
+          ]
+        },
+        {
+          "name": "create_project",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.create_project",
+          "anchor": "asyncconvohopmanagementcreate_project-method",
+          "signatures": [
+            "async def create_project(\n    self,\n    *,\n    deployment_id: str,\n    name: str,\n    environment: str,\n    backend_principal_name: str,\n    request_id: str | None = None,\n) -> CreateProjectReply"
+          ],
+          "docs": "Create a project in a ready deployment. Completes asynchronously.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.createProject",
+              "page": "../../operations/management/createProject.md"
+            }
+          ]
+        },
+        {
+          "name": "issue_backend_key",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.issue_backend_key",
+          "anchor": "asyncconvohopmanagementissue_backend_key-method",
+          "signatures": [
+            "async def issue_backend_key(\n    self,\n    *,\n    project_id: str,\n    name: str,\n    scopes: Sequence[str],\n    expires_at: str,\n    request_id: str | None = None,\n) -> IssueBackendKeyReply"
+          ],
+          "docs": "Issue a scoped backend key. The secret is delivered once through a credential delivery.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.issueBackendKey",
+              "page": "../../operations/management/issueBackendKey.md"
+            }
+          ]
+        },
+        {
+          "name": "revoke_backend_key",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.revoke_backend_key",
+          "anchor": "asyncconvohopmanagementrevoke_backend_key-method",
+          "signatures": [
+            "async def revoke_backend_key(\n    self,\n    *,\n    project_id: str,\n    key_id: str,\n    expected_revision: str,\n    revoke_issued_sessions: bool,\n    request_id: str | None = None,\n) -> RevokeBackendKeyReply"
+          ],
+          "docs": "Revoke a backend key, optionally revoking the sessions it issued.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.revokeBackendKey",
+              "page": "../../operations/management/revokeBackendKey.md"
+            }
+          ]
+        },
+        {
+          "name": "project_policy",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.project_policy",
+          "anchor": "asyncconvohopmanagementproject_policy-method",
+          "signatures": [
+            "async def project_policy(\n    self,\n    *,\n    project_id: str,\n    expected_revision: str,\n    change: PolicyChangeInput,\n    request_id: str | None = None,\n) -> ProjectPolicyReply"
+          ],
+          "docs": "Change the policy of a project.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.projectPolicy",
+              "page": "../../operations/management/projectPolicy.md"
+            }
+          ]
+        },
+        {
+          "name": "credential_permit",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.credential_permit",
+          "anchor": "asyncconvohopmanagementcredential_permit-method",
+          "signatures": [
+            "async def credential_permit(\n    self,\n    *,\n    project_id: str,\n    delivery_id: str,\n    redemption_request_id: str,\n    request_id: str | None = None,\n) -> dict[str, Any]"
+          ],
+          "docs": "Issue a signed permit that authorizes redeeming one credential delivery.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.credentialPermit",
+              "page": "../../operations/management/credentialPermit.md"
+            }
+          ]
+        },
+        {
+          "name": "pause_operation",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.pause_operation",
+          "anchor": "asyncconvohopmanagementpause_operation-method",
+          "signatures": [
+            "async def pause_operation(\n    self,\n    *,\n    operation_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Operation"
+          ],
+          "docs": "Pause a long-running operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.pauseOperation",
+              "page": "../../operations/management/pauseOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "resume_operation",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.resume_operation",
+          "anchor": "asyncconvohopmanagementresume_operation-method",
+          "signatures": [
+            "async def resume_operation(\n    self,\n    *,\n    operation_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Operation"
+          ],
+          "docs": "Resume a paused operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.resumeOperation",
+              "page": "../../operations/management/resumeOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "configure_webhook",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.configure_webhook",
+          "anchor": "asyncconvohopmanagementconfigure_webhook-method",
+          "signatures": [
+            "async def configure_webhook(\n    self,\n    *,\n    project_id: str,\n    url: str,\n    event_types: Sequence[str],\n    consent_ref: str,\n    request_id: str | None = None,\n) -> ConfigureWebhookReply"
+          ],
+          "docs": "Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.configureWebhook",
+              "page": "../../operations/management/configureWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "update_webhook",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.update_webhook",
+          "anchor": "asyncconvohopmanagementupdate_webhook-method",
+          "signatures": [
+            "async def update_webhook(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n    expected_revision: str,\n    event_types: Sequence[str],\n    enabled: bool,\n    request_id: str | None = None,\n) -> UpdateWebhookReply"
+          ],
+          "docs": "Change the event types of a webhook endpoint, or enable or disable it.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.updateWebhook",
+              "page": "../../operations/management/updateWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "rotate_webhook_secret",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.rotate_webhook_secret",
+          "anchor": "asyncconvohopmanagementrotate_webhook_secret-method",
+          "signatures": [
+            "async def rotate_webhook_secret(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> RotateWebhookSecretReply"
+          ],
+          "docs": "Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.rotateWebhookSecret",
+              "page": "../../operations/management/rotateWebhookSecret.md"
+            }
+          ]
+        },
+        {
+          "name": "disable_webhook",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.disable_webhook",
+          "anchor": "asyncconvohopmanagementdisable_webhook-method",
+          "signatures": [
+            "async def disable_webhook(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> DisableWebhookReply"
+          ],
+          "docs": "Disable a webhook endpoint.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.disableWebhook",
+              "page": "../../operations/management/disableWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "replay_webhook_deliveries",
+          "kind": "method",
+          "ref": "convohop#AsyncConvoHopManagement.replay_webhook_deliveries",
+          "anchor": "asyncconvohopmanagementreplay_webhook_deliveries-method",
+          "signatures": [
+            "async def replay_webhook_deliveries(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n    effect_id: str | None = None,\n    since: str | None = None,\n    until: str | None = None,\n    request_id: str | None = None,\n) -> ReplayWebhookDeliveriesReply"
+          ],
+          "docs": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.replayWebhookDeliveries",
+              "page": "../../operations/management/replayWebhookDeliveries.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ConvoHop",
+      "kind": "class",
+      "ref": "convohop#ConvoHop",
+      "anchor": "convohop-class",
+      "signatures": ["class ConvoHop"],
+      "docs": "Backend-key client for one project.\n\nCall `initialize()` once before other operations: it checks the project incarnation and records the serving\nepoch that later requests report. Every method sends one request; mutations accept `request_id` and record a\nrecovery entry first, so an uncertain outcome can be resolved with `resolve_request()` or\n`retry_request()`. The client never resends on its own. It is safe to share between threads.",
+      "members": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#ConvoHop.__init__",
+          "anchor": "convohop-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    base_url: str,\n    backend_key: str,\n    project_id: str,\n    incarnation: str,\n    recovery_storage: RecoveryStorage | None = None,\n    http_client: httpx.Client | None = None,\n    timeout: float = 12.0,\n) -> None"
+          ],
+          "docs": "Parameters:\n\n- `base_url`: The authority origin, for example `https://api.convohop.example`. Plain HTTP is accepted only\n  for loopback hosts.\n- `backend_key`: The project's backend key. Keep it on trusted servers.\n- `project_id`: The project the key belongs to.\n- `incarnation`: The project incarnation from the console or deployment.\n- `recovery_storage`: Durable storage for mutation recovery records; in memory only when omitted.\n- `http_client`: An `httpx.Client` to send through. The SDK never closes a client it did not create.\n- `timeout`: Seconds allowed for each connect, write and read, and for the whole response body."
+        },
+        {
+          "name": "project_id",
+          "kind": "property",
+          "ref": "convohop#ConvoHop.project_id",
+          "anchor": "convohopproject_id-property",
+          "signatures": ["@property\ndef project_id(self) -> str"],
+          "docs": ""
+        },
+        {
+          "name": "incarnation",
+          "kind": "property",
+          "ref": "convohop#ConvoHop.incarnation",
+          "anchor": "convohopincarnation-property",
+          "signatures": ["@property\ndef incarnation(self) -> str"],
+          "docs": ""
+        },
+        {
+          "name": "serving_epoch",
+          "kind": "property",
+          "ref": "convohop#ConvoHop.serving_epoch",
+          "anchor": "convohopserving_epoch-property",
+          "signatures": ["@property\ndef serving_epoch(self) -> str | None"],
+          "docs": "The serving epoch `initialize()` observed, or `None` before it runs."
+        },
+        {
+          "name": "initialize",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.initialize",
+          "anchor": "convohopinitialize-method",
+          "signatures": ["def initialize(self) -> None"],
+          "docs": "Reads the project route and records its serving epoch.\n\nRaises:\n\n- `ConvoHopProblem`: `INCARNATION_MISMATCH` when the project has a new incarnation; recover explicitly.",
+          "operations": [
+            {"id": "communication.route", "page": "../../operations/communication/route.md"}
+          ]
+        },
+        {
+          "name": "retry_request",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.retry_request",
+          "anchor": "convohopretry_request-method",
+          "signatures": ["def retry_request(self, request_id: str) -> RequestResolution"],
+          "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "recovery_states",
+          "kind": "property",
+          "ref": "convohop#ConvoHop.recovery_states",
+          "anchor": "convohoprecovery_states-property",
+          "signatures": ["@property\ndef recovery_states(self) -> tuple[RecoveryState, ...]"],
+          "docs": "Snapshots of the recorded mutations, oldest first. They never contain credentials."
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.close",
+          "anchor": "convohopclose-method",
+          "signatures": ["def close(self) -> None"],
+          "docs": "Closes the HTTP client this client created. A client passed as `http_client` stays open."
+        },
+        {
+          "name": "capabilities",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.capabilities",
+          "anchor": "convohopcapabilities-method",
+          "signatures": ["def capabilities(self) -> Capabilities"],
+          "docs": "Describe the features, limits and API model the authority supports.\n\nAuthorization: `backendKey`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.capabilities",
+              "page": "../../operations/communication/capabilities.md"
+            }
+          ]
+        },
+        {
+          "name": "route",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.route",
+          "anchor": "convohoproute-method",
+          "signatures": ["def route(self) -> dict[str, Any]"],
+          "docs": "Return the signed route: project incarnation, serving epoch and realtime endpoint. Call it before other communication operations and again after WRONG_REGION.\n\nAuthorization: `backendKey`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {"id": "communication.route", "page": "../../operations/communication/route.md"}
+          ]
+        },
+        {
+          "name": "get_principal",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.get_principal",
+          "anchor": "convohopget_principal-method",
+          "signatures": ["def get_principal(self, *, principal_id: str) -> Principal"],
+          "docs": "Read a principal (an application user).\n\nAuthorization: `backendKey` with scope `principalManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.getPrincipal",
+              "page": "../../operations/communication/getPrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "get_conversation",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.get_conversation",
+          "anchor": "convohopget_conversation-method",
+          "signatures": ["def get_conversation(self, *, conversation_id: str) -> Conversation"],
+          "docs": "Read a conversation.\n\nAuthorization: `backendKey` with scope `conversationManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "members",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.members",
+          "anchor": "convohopmembers-method",
+          "signatures": [
+            "def members(\n    self,\n    *,\n    conversation_id: str,\n    limit: int = 100,\n    cursor: str | None = None,\n) -> MemberPage"
+          ],
+          "docs": "List the members of a conversation.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_members()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.members", "page": "../../operations/communication/members.md"}
+          ]
+        },
+        {
+          "name": "iter_members",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.iter_members",
+          "anchor": "convohopiter_members-method",
+          "signatures": [
+            "def iter_members(\n    self,\n    *,\n    conversation_id: str,\n    limit: int = 100,\n    cursor: str | None = None,\n) -> Iterator[Member]"
+          ],
+          "docs": "Iterate the `items` of `members()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.members", "page": "../../operations/communication/members.md"}
+          ]
+        },
+        {
+          "name": "messages",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.messages",
+          "anchor": "convohopmessages-method",
+          "signatures": [
+            "def messages(\n    self,\n    *,\n    conversation_id: str,\n    limit: int = 100,\n    before_sequence: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> MessagePage"
+          ],
+          "docs": "List the messages of a conversation, newest first. A backend key reads the full history, or the history visible to the member named by actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `messageRead`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `sequence`. Newest first. Pass nextCursor back as the sequence cursor input to read older items until complete is true. `iter_messages()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "iter_messages",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.iter_messages",
+          "anchor": "convohopiter_messages-method",
+          "signatures": [
+            "def iter_messages(\n    self,\n    *,\n    conversation_id: str,\n    limit: int = 100,\n    before_sequence: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> Iterator[Message]"
+          ],
+          "docs": "Iterate the `items` of `messages()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "get_message",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.get_message",
+          "anchor": "convohopget_message-method",
+          "signatures": [
+            "def get_message(\n    self,\n    *,\n    conversation_id: str,\n    message_id: str,\n    act_as_principal_id: str | None = None,\n) -> Message"
+          ],
+          "docs": "Read one message. A backend key reads any message, or reads as the member named by actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `messageRead`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "inbox",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.inbox",
+          "anchor": "convohopinbox-method",
+          "signatures": [
+            "def inbox(\n    self,\n    *,\n    limit: int = 100,\n    cursor: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> InboxPage"
+          ],
+          "docs": "List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `messageRead`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_inbox()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.inbox", "page": "../../operations/communication/inbox.md"}
+          ]
+        },
+        {
+          "name": "iter_inbox",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.iter_inbox",
+          "anchor": "convohopiter_inbox-method",
+          "signatures": [
+            "def iter_inbox(\n    self,\n    *,\n    limit: int = 100,\n    cursor: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> Iterator[InboxItem]"
+          ],
+          "docs": "Iterate the `items` of `inbox()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.inbox", "page": "../../operations/communication/inbox.md"}
+          ]
+        },
+        {
+          "name": "search",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.search",
+          "anchor": "convohopsearch-method",
+          "signatures": [
+            "def search(\n    self,\n    *,\n    query: str,\n    page_size: int = 100,\n    scope: SearchScopeInput | None = None,\n    cursor: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> SearchPage"
+          ],
+          "docs": "Search the messages visible to the calling user. A backend key searches as the member named by actAsPrincipalId, or within scope.conversationIds.\n\nAuthorization: `backendKey` with scope `messageRead`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_search()` follows the cursor for you.\n\nParameters:\n\n- `page_size`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.search", "page": "../../operations/communication/search.md"}
+          ]
+        },
+        {
+          "name": "iter_search",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.iter_search",
+          "anchor": "convohopiter_search-method",
+          "signatures": [
+            "def iter_search(\n    self,\n    *,\n    query: str,\n    page_size: int = 100,\n    scope: SearchScopeInput | None = None,\n    cursor: str | None = None,\n    act_as_principal_id: str | None = None,\n) -> Iterator[SearchHit]"
+          ],
+          "docs": "Iterate the `items` of `search()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `page_size`: Defaults to 100, the largest page.",
+          "operations": [
+            {"id": "communication.search", "page": "../../operations/communication/search.md"}
+          ]
+        },
+        {
+          "name": "resolve_request",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.resolve_request",
+          "anchor": "convohopresolve_request-method",
+          "signatures": ["def resolve_request(self, *, request_id: str) -> RequestResolution"],
+          "docs": "Look up the stored outcome of an earlier communication mutation by its requestId.\n\nAuthorization: `backendKey`, when `ownRequest`: The caller made the original request.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "get_operation",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.get_operation",
+          "anchor": "convohopget_operation-method",
+          "signatures": ["def get_operation(self, *, operation_id: str) -> Operation"],
+          "docs": "Read the state of a long-running communication operation.\n\nAuthorization: `backendKey`, when `operationParticipant`: The caller started the operation or can access its target.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.getOperation",
+              "page": "../../operations/communication/getOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "conversation_mute",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.conversation_mute",
+          "anchor": "convohopconversation_mute-method",
+          "signatures": [
+            "def conversation_mute(\n    self,\n    *,\n    conversation_id: str,\n    act_as_principal_id: str | None = None,\n) -> ConversationMute"
+          ],
+          "docs": "Read whether a member has muted message push notifications for a conversation. A backend key must name the member with actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.conversationMute",
+              "page": "../../operations/communication/conversationMute.md"
+            }
+          ]
+        },
+        {
+          "name": "current_live_session",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.current_live_session",
+          "anchor": "convohopcurrent_live_session-method",
+          "signatures": [
+            "def current_live_session(self, *, conversation_id: str) -> LiveSession | None"
+          ],
+          "docs": "Return the active live session of a conversation, if any.\n\nAuthorization, any one of:\n\n- `backendKey` with scope `callRead`.\n- `backendKey` with scope `callManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.currentLiveSession",
+              "page": "../../operations/communication/currentLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "live_session",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.live_session",
+          "anchor": "convohoplive_session-method",
+          "signatures": ["def live_session(self, *, live_session_id: str) -> LiveSession"],
+          "docs": "Read a live session.\n\nAuthorization, any one of:\n\n- `backendKey` with scope `callRead`.\n- `backendKey` with scope `callManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.liveSession",
+              "page": "../../operations/communication/liveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "live_sessions",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.live_sessions",
+          "anchor": "convohoplive_sessions-method",
+          "signatures": [
+            "def live_sessions(\n    self,\n    *,\n    conversation_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> LiveSessionPage"
+          ],
+          "docs": "List the live sessions of a conversation.\n\nAuthorization, any one of:\n\n- `backendKey` with scope `callRead`.\n- `backendKey` with scope `callManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_live_sessions()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server.",
+          "operations": [
+            {
+              "id": "communication.liveSessions",
+              "page": "../../operations/communication/liveSessions.md"
+            }
+          ]
+        },
+        {
+          "name": "iter_live_sessions",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.iter_live_sessions",
+          "anchor": "convohopiter_live_sessions-method",
+          "signatures": [
+            "def iter_live_sessions(\n    self,\n    *,\n    conversation_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> Iterator[LiveSession]"
+          ],
+          "docs": "Iterate the `items` of `live_sessions()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server.",
+          "operations": [
+            {
+              "id": "communication.liveSessions",
+              "page": "../../operations/communication/liveSessions.md"
+            }
+          ]
+        },
+        {
+          "name": "live_session_participants",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.live_session_participants",
+          "anchor": "convohoplive_session_participants-method",
+          "signatures": [
+            "def live_session_participants(\n    self,\n    *,\n    live_session_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> LiveParticipantPage"
+          ],
+          "docs": "List the participants of a live session.\n\nAuthorization, any one of:\n\n- `backendKey` with scope `callRead`.\n- `backendKey` with scope `callManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `iter_live_session_participants()` follows the cursor for you.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server.",
+          "operations": [
+            {
+              "id": "communication.liveSessionParticipants",
+              "page": "../../operations/communication/liveSessionParticipants.md"
+            }
+          ]
+        },
+        {
+          "name": "iter_live_session_participants",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.iter_live_session_participants",
+          "anchor": "convohopiter_live_session_participants-method",
+          "signatures": [
+            "def iter_live_session_participants(\n    self,\n    *,\n    live_session_id: str,\n    limit: int | None = None,\n    cursor: str | None = None,\n) -> Iterator[LiveParticipation]"
+          ],
+          "docs": "Iterate the `items` of `live_session_participants()` across pages.\n\nFollows `nextCursor` until a page is `complete`. A page that sets `refreshRequired` raises `RESYNC_REQUIRED`; restart from the first page.\n\nParameters:\n\n- `limit`: Defaults to `50` on the server.",
+          "operations": [
+            {
+              "id": "communication.liveSessionParticipants",
+              "page": "../../operations/communication/liveSessionParticipants.md"
+            }
+          ]
+        },
+        {
+          "name": "live_session_operation",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.live_session_operation",
+          "anchor": "convohoplive_session_operation-method",
+          "signatures": [
+            "def live_session_operation(self, *, operation_id: str) -> LiveSessionOperation"
+          ],
+          "docs": "Read the state of a live session start or end operation.\n\nAuthorization, any one of:\n\n- `backendKey` with scope `callRead`.\n- `backendKey` with scope `callManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.liveSessionOperation",
+              "page": "../../operations/communication/liveSessionOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "session_request_outcome",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.session_request_outcome",
+          "anchor": "convohopsession_request_outcome-method",
+          "signatures": [
+            "def session_request_outcome(self, *, request_id: str) -> SessionRequestOutcome"
+          ],
+          "docs": "Look up the outcome of an earlier issueSession or renewSession request, including the session it produced.\n\nAuthorization: `backendKey` with all of the scopes `sessionIssue` and `sessionManage`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "communication.sessionRequestOutcome",
+              "page": "../../operations/communication/sessionRequestOutcome.md"
+            }
+          ]
+        },
+        {
+          "name": "create_principal",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.create_principal",
+          "anchor": "convohopcreate_principal-method",
+          "signatures": [
+            "def create_principal(\n    self,\n    *,\n    external_user_id: str,\n    request_id: str | None = None,\n) -> Principal"
+          ],
+          "docs": "Create a principal for an application user.\n\nAuthorization: `backendKey` with scope `principalManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.createPrincipal",
+              "page": "../../operations/communication/createPrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "disable_principal",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.disable_principal",
+          "anchor": "convohopdisable_principal-method",
+          "signatures": [
+            "def disable_principal(\n    self,\n    *,\n    principal_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Principal"
+          ],
+          "docs": "Disable a principal.\n\nAuthorization: `backendKey` with scope `principalManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.disablePrincipal",
+              "page": "../../operations/communication/disablePrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "issue_session",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.issue_session",
+          "anchor": "convohopissue_session-method",
+          "signatures": [
+            "def issue_session(\n    self,\n    *,\n    principal_id: str,\n    device_id: str,\n    requested_ttl_ms: str,\n    request_id: str | None = None,\n) -> SessionBootstrap"
+          ],
+          "docs": "Issue a short-lived user session token for a principal and device.\n\nAuthorization: `backendKey` with scope `sessionIssue`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.issueSession",
+              "page": "../../operations/communication/issueSession.md"
+            }
+          ]
+        },
+        {
+          "name": "renew_session",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.renew_session",
+          "anchor": "convohoprenew_session-method",
+          "signatures": [
+            "def renew_session(\n    self,\n    *,\n    session_id: str,\n    principal_id: str,\n    device_id: str,\n    expected_revision: str,\n    requested_ttl_ms: str,\n    request_id: str | None = None,\n) -> SessionBootstrap"
+          ],
+          "docs": "Renew a user session before it expires.\n\nAuthorization: `backendKey` with scope `sessionIssue`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.renewSession",
+              "page": "../../operations/communication/renewSession.md"
+            }
+          ]
+        },
+        {
+          "name": "revoke_session",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.revoke_session",
+          "anchor": "convohoprevoke_session-method",
+          "signatures": [
+            "def revoke_session(\n    self,\n    *,\n    session_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> SessionRevocation"
+          ],
+          "docs": "Revoke a user session.\n\nAuthorization: `backendKey` with scope `sessionManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.revokeSession",
+              "page": "../../operations/communication/revokeSession.md"
+            }
+          ]
+        },
+        {
+          "name": "create_conversation",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.create_conversation",
+          "anchor": "convohopcreate_conversation-method",
+          "signatures": [
+            "def create_conversation(\n    self,\n    *,\n    title: str,\n    props: Mapping[str, Any],\n    members: Sequence[MemberInputInput],\n    request_id: str | None = None,\n) -> Conversation"
+          ],
+          "docs": "Create a conversation with its initial members.\n\nAuthorization: `backendKey` with scope `conversationManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.createConversation",
+              "page": "../../operations/communication/createConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "update_conversation",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.update_conversation",
+          "anchor": "convohopupdate_conversation-method",
+          "signatures": [
+            "def update_conversation(\n    self,\n    *,\n    conversation_id: str,\n    expected_revision: str,\n    title: str | None = None,\n    props: Mapping[str, Any] | None = None,\n    request_id: str | None = None,\n) -> Conversation"
+          ],
+          "docs": "Update the title or properties of a conversation.\n\nAuthorization: `backendKey` with scope `conversationManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.updateConversation",
+              "page": "../../operations/communication/updateConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "add_member",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.add_member",
+          "anchor": "convohopadd_member-method",
+          "signatures": [
+            "def add_member(\n    self,\n    *,\n    conversation_id: str,\n    principal_id: str,\n    role: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Member"
+          ],
+          "docs": "Add a member, or change the role of an active member.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {"id": "communication.addMember", "page": "../../operations/communication/addMember.md"}
+          ]
+        },
+        {
+          "name": "add_members",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.add_members",
+          "anchor": "convohopadd_members-method",
+          "signatures": [
+            "def add_members(\n    self,\n    *,\n    conversation_id: str,\n    members: Sequence[MemberBatchEntryInput],\n    request_id: str | None = None,\n) -> ConversationMemberBatch"
+          ],
+          "docs": "Add several members in one request.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.addMembers",
+              "page": "../../operations/communication/addMembers.md"
+            }
+          ]
+        },
+        {
+          "name": "remove_member",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.remove_member",
+          "anchor": "convohopremove_member-method",
+          "signatures": [
+            "def remove_member(\n    self,\n    *,\n    conversation_id: str,\n    principal_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Member"
+          ],
+          "docs": "Remove a member from a conversation.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.removeMember",
+              "page": "../../operations/communication/removeMember.md"
+            }
+          ]
+        },
+        {
+          "name": "history_grant",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.history_grant",
+          "anchor": "convohophistory_grant-method",
+          "signatures": [
+            "def history_grant(\n    self,\n    *,\n    conversation_id: str,\n    principal_id: str,\n    membership_epoch: str,\n    expected_revision: str,\n    from_sequence: str,\n    request_id: str | None = None,\n) -> Member"
+          ],
+          "docs": "Expand the history a member can see to an earlier sequence.\n\nAuthorization: `backendKey` with scope `historyManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.historyGrant",
+              "page": "../../operations/communication/historyGrant.md"
+            }
+          ]
+        },
+        {
+          "name": "send_message",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.send_message",
+          "anchor": "convohopsend_message-method",
+          "signatures": [
+            "def send_message(\n    self,\n    *,\n    conversation_id: str,\n    text: str,\n    props: Mapping[str, Any],\n    act_as_principal_id: str | None = None,\n    request_id: str | None = None,\n) -> MessageAck"
+          ],
+          "docs": "Send a message. A backend key sends as its service principal, or as the member named by actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `messageWrite`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "edit_message",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.edit_message",
+          "anchor": "convohopedit_message-method",
+          "signatures": [
+            "def edit_message(\n    self,\n    *,\n    conversation_id: str,\n    message_id: str,\n    expected_revision: str,\n    text: str | None = None,\n    props: Mapping[str, Any] | None = None,\n    request_id: str | None = None,\n) -> Message"
+          ],
+          "docs": "Edit a message.\n\nAuthorization: `backendKey` with scope `moderation`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.editMessage",
+              "page": "../../operations/communication/editMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "delete_message",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.delete_message",
+          "anchor": "convohopdelete_message-method",
+          "signatures": [
+            "def delete_message(\n    self,\n    *,\n    conversation_id: str,\n    message_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Message"
+          ],
+          "docs": "Delete a message.\n\nAuthorization: `backendKey` with scope `moderation`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.deleteMessage",
+              "page": "../../operations/communication/deleteMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "set_broadcast_permission",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.set_broadcast_permission",
+          "anchor": "convohopset_broadcast_permission-method",
+          "signatures": [
+            "def set_broadcast_permission(\n    self,\n    *,\n    conversation_id: str,\n    principal_id: str,\n    allowed: bool,\n    expected_membership_revision: str,\n    request_id: str | None = None,\n) -> BroadcastPermissionChanged"
+          ],
+          "docs": "Allow or deny a member to publish media in live sessions.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.setBroadcastPermission",
+              "page": "../../operations/communication/setBroadcastPermission.md"
+            }
+          ]
+        },
+        {
+          "name": "set_conversation_mute",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.set_conversation_mute",
+          "anchor": "convohopset_conversation_mute-method",
+          "signatures": [
+            "def set_conversation_mute(\n    self,\n    *,\n    conversation_id: str,\n    muted: bool,\n    until: str | None = None,\n    act_as_principal_id: str | None = None,\n    request_id: str | None = None,\n) -> ConversationMute"
+          ],
+          "docs": "Mute or unmute message push notifications for a member of a conversation, optionally until a time. Calls still ring. A backend key must name the member with actAsPrincipalId.\n\nAuthorization: `backendKey` with scope `membershipManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.setConversationMute",
+              "page": "../../operations/communication/setConversationMute.md"
+            }
+          ]
+        },
+        {
+          "name": "alert_live_session",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.alert_live_session",
+          "anchor": "convohopalert_live_session-method",
+          "signatures": [
+            "def alert_live_session(\n    self,\n    *,\n    live_session_id: str,\n    expected_generation: str,\n    principal_ids: Sequence[str],\n    request_id: str | None = None,\n) -> LiveAlertBatch"
+          ],
+          "docs": "Alert (ring) conversation members about a live session.\n\nAuthorization: `backendKey` with scope `callManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.alertLiveSession",
+              "page": "../../operations/communication/alertLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "end_live_session",
+          "kind": "method",
+          "ref": "convohop#ConvoHop.end_live_session",
+          "anchor": "convohopend_live_session-method",
+          "signatures": [
+            "def end_live_session(\n    self,\n    *,\n    live_session_id: str,\n    expected_generation: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> EndLiveSessionPayload"
+          ],
+          "docs": "End a live session for every participant. Completes asynchronously.\n\nAuthorization: `backendKey` with scope `callManage`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `live_session_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "communication.endLiveSession",
+              "page": "../../operations/communication/endLiveSession.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopManagement",
+      "kind": "class",
+      "ref": "convohop#ConvoHopManagement",
+      "anchor": "convohopmanagement-class",
+      "signatures": ["class ConvoHopManagement"],
+      "docs": "Management client for organizations, projects, deployments, backend keys and webhooks.",
+      "members": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#ConvoHopManagement.__init__",
+          "anchor": "convohopmanagement-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    base_url: str,\n    access_token: str,\n    actor_id: str,\n    recovery_storage: RecoveryStorage | None = None,\n    http_client: httpx.Client | None = None,\n    timeout: float = 12.0,\n) -> None"
+          ],
+          "docs": "Parameters:\n\n- `base_url`: The authority origin. Plain HTTP is accepted only for loopback hosts.\n- `access_token`: An operator access token. Keep it on trusted servers.\n- `actor_id`: The operator the token belongs to; it scopes stored recovery records.\n- `recovery_storage`: Durable storage for mutation recovery records; in memory only when omitted.\n- `http_client`: An `httpx.Client` to send through. The SDK never closes a client it did not create.\n- `timeout`: Seconds allowed for each connect, write and read, and for the whole response body."
+        },
+        {
+          "name": "actor_id",
+          "kind": "property",
+          "ref": "convohop#ConvoHopManagement.actor_id",
+          "anchor": "convohopmanagementactor_id-property",
+          "signatures": ["@property\ndef actor_id(self) -> str"],
+          "docs": ""
+        },
+        {
+          "name": "retry_request",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.retry_request",
+          "anchor": "convohopmanagementretry_request-method",
+          "signatures": ["def retry_request(self, request_id: str) -> RequestResolution"],
+          "docs": "Resolves a recorded mutation, resending it with its original identity only if the authority never saw it.\n\nReturns the authority's resolution: `committed` or `accepted` once it has the request, else\n`notObservedYet` after a resend whose effect is not yet visible. A request the client observed committing,\nor one past its retry budget, raises `RESOLUTION_REQUIRED`; resolve it read-only with `resolve_request`.\n\nRaises:\n\n- `LookupError`: This client has no recovery record for the request.\n- `ConvoHopProblem`: The authority or the recovery checks refused the retry.",
+          "operations": [
+            {
+              "id": "management.resolveRequest",
+              "page": "../../operations/management/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "recovery_states",
+          "kind": "property",
+          "ref": "convohop#ConvoHopManagement.recovery_states",
+          "anchor": "convohopmanagementrecovery_states-property",
+          "signatures": ["@property\ndef recovery_states(self) -> tuple[RecoveryState, ...]"],
+          "docs": "Snapshots of the recorded mutations, oldest first. They never contain credentials."
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.close",
+          "anchor": "convohopmanagementclose-method",
+          "signatures": ["def close(self) -> None"],
+          "docs": "Closes the HTTP client this client created. A client passed as `http_client` stays open."
+        },
+        {
+          "name": "capabilities",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.capabilities",
+          "anchor": "convohopmanagementcapabilities-method",
+          "signatures": ["def capabilities(self) -> Capabilities"],
+          "docs": "Describe the management features and limits the authority supports.\n\nAuthorization: `portalCredential`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {"id": "management.capabilities", "page": "../../operations/management/capabilities.md"}
+          ]
+        },
+        {
+          "name": "organizations",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.organizations",
+          "anchor": "convohopmanagementorganizations-method",
+          "signatures": ["def organizations(self) -> OrganizationPage"],
+          "docs": "List the organizations the caller can access.\n\nAuthorization: `portalCredential`.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `bounded`. One bounded page without a cursor input. complete reports whether every item fit.",
+          "operations": [
+            {
+              "id": "management.organizations",
+              "page": "../../operations/management/organizations.md"
+            }
+          ]
+        },
+        {
+          "name": "get_organization",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.get_organization",
+          "anchor": "convohopmanagementget_organization-method",
+          "signatures": ["def get_organization(self, *, org_id: str) -> Organization"],
+          "docs": "Read an organization.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.getOrganization",
+              "page": "../../operations/management/getOrganization.md"
+            }
+          ]
+        },
+        {
+          "name": "get_deployment",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.get_deployment",
+          "anchor": "convohopmanagementget_deployment-method",
+          "signatures": ["def get_deployment(self, *, deployment_id: str) -> Deployment"],
+          "docs": "Read a deployment.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.getDeployment",
+              "page": "../../operations/management/getDeployment.md"
+            }
+          ]
+        },
+        {
+          "name": "get_project",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.get_project",
+          "anchor": "convohopmanagementget_project-method",
+          "signatures": ["def get_project(self, *, project_id: str) -> Project"],
+          "docs": "Read a project.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {"id": "management.getProject", "page": "../../operations/management/getProject.md"}
+          ]
+        },
+        {
+          "name": "deployment_health",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.deployment_health",
+          "anchor": "convohopmanagementdeployment_health-method",
+          "signatures": ["def deployment_health(self, *, deployment_id: str) -> DeploymentHealth"],
+          "docs": "Read the health of a deployment.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.deploymentHealth",
+              "page": "../../operations/management/deploymentHealth.md"
+            }
+          ]
+        },
+        {
+          "name": "deployment_usage",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.deployment_usage",
+          "anchor": "convohopmanagementdeployment_usage-method",
+          "signatures": [
+            "def deployment_usage(\n    self,\n    *,\n    deployment_id: str,\n    from_: str | None = None,\n    to: str | None = None,\n) -> DeploymentUsage"
+          ],
+          "docs": "Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.deploymentUsage",
+              "page": "../../operations/management/deploymentUsage.md"
+            }
+          ]
+        },
+        {
+          "name": "project_usage",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.project_usage",
+          "anchor": "convohopmanagementproject_usage-method",
+          "signatures": [
+            "def project_usage(\n    self,\n    *,\n    project_id: str,\n    from_: str | None = None,\n    to: str | None = None,\n) -> ProjectUsage"
+          ],
+          "docs": "Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {"id": "management.projectUsage", "page": "../../operations/management/projectUsage.md"}
+          ]
+        },
+        {
+          "name": "organization_usage",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.organization_usage",
+          "anchor": "convohopmanagementorganization_usage-method",
+          "signatures": [
+            "def organization_usage(\n    self,\n    *,\n    org_id: str,\n    from_: str | None = None,\n    to: str | None = None,\n) -> OrganizationUsage"
+          ],
+          "docs": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.organizationUsage",
+              "page": "../../operations/management/organizationUsage.md"
+            }
+          ]
+        },
+        {
+          "name": "webhook_endpoints",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.webhook_endpoints",
+          "anchor": "convohopmanagementwebhook_endpoints-method",
+          "signatures": ["def webhook_endpoints(self, *, project_id: str) -> WebhookEndpointPage"],
+          "docs": "List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `bounded`. One bounded page without a cursor input. complete reports whether every item fit.",
+          "operations": [
+            {
+              "id": "management.webhookEndpoints",
+              "page": "../../operations/management/webhookEndpoints.md"
+            }
+          ]
+        },
+        {
+          "name": "webhook_deliveries",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.webhook_deliveries",
+          "anchor": "convohopmanagementwebhook_deliveries-method",
+          "signatures": [
+            "def webhook_deliveries(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n) -> WebhookDeliveryPage"
+          ],
+          "docs": "List recent deliveries of a webhook endpoint.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nPagination: `bounded`. One bounded page without a cursor input. complete reports whether every item fit.",
+          "operations": [
+            {
+              "id": "management.webhookDeliveries",
+              "page": "../../operations/management/webhookDeliveries.md"
+            }
+          ]
+        },
+        {
+          "name": "resolve_request",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.resolve_request",
+          "anchor": "convohopmanagementresolve_request-method",
+          "signatures": ["def resolve_request(self, *, request_id: str) -> RequestResolution"],
+          "docs": "Look up the stored outcome of an earlier management mutation by its requestId.\n\nAuthorization: `portalCredential`, when `ownRequest`: The caller made the original request.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {
+              "id": "management.resolveRequest",
+              "page": "../../operations/management/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "get_operation",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.get_operation",
+          "anchor": "convohopmanagementget_operation-method",
+          "signatures": ["def get_operation(self, *, operation_id: str) -> Operation"],
+          "docs": "Read the state of a long-running management operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.",
+          "operations": [
+            {"id": "management.getOperation", "page": "../../operations/management/getOperation.md"}
+          ]
+        },
+        {
+          "name": "create_organization",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.create_organization",
+          "anchor": "convohopmanagementcreate_organization-method",
+          "signatures": [
+            "def create_organization(\n    self,\n    *,\n    name: str,\n    terms_ref: str,\n    request_id: str | None = None,\n) -> Organization"
+          ],
+          "docs": "Create an organization.\n\nAuthorization: `portalCredential`.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.createOrganization",
+              "page": "../../operations/management/createOrganization.md"
+            }
+          ]
+        },
+        {
+          "name": "create_deployment",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.create_deployment",
+          "anchor": "convohopmanagementcreate_deployment-method",
+          "signatures": [
+            "def create_deployment(\n    self,\n    *,\n    org_id: str,\n    offering: str,\n    geo_id: str,\n    installation_profile_id: str,\n    consent_ref: str,\n    request_id: str | None = None,\n) -> CreateDeploymentReply"
+          ],
+          "docs": "Create a deployment in an organization. Completes asynchronously.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.createDeployment",
+              "page": "../../operations/management/createDeployment.md"
+            }
+          ]
+        },
+        {
+          "name": "create_project",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.create_project",
+          "anchor": "convohopmanagementcreate_project-method",
+          "signatures": [
+            "def create_project(\n    self,\n    *,\n    deployment_id: str,\n    name: str,\n    environment: str,\n    backend_principal_name: str,\n    request_id: str | None = None,\n) -> CreateProjectReply"
+          ],
+          "docs": "Create a project in a ready deployment. Completes asynchronously.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.createProject",
+              "page": "../../operations/management/createProject.md"
+            }
+          ]
+        },
+        {
+          "name": "issue_backend_key",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.issue_backend_key",
+          "anchor": "convohopmanagementissue_backend_key-method",
+          "signatures": [
+            "def issue_backend_key(\n    self,\n    *,\n    project_id: str,\n    name: str,\n    scopes: Sequence[str],\n    expires_at: str,\n    request_id: str | None = None,\n) -> IssueBackendKeyReply"
+          ],
+          "docs": "Issue a scoped backend key. The secret is delivered once through a credential delivery.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.issueBackendKey",
+              "page": "../../operations/management/issueBackendKey.md"
+            }
+          ]
+        },
+        {
+          "name": "revoke_backend_key",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.revoke_backend_key",
+          "anchor": "convohopmanagementrevoke_backend_key-method",
+          "signatures": [
+            "def revoke_backend_key(\n    self,\n    *,\n    project_id: str,\n    key_id: str,\n    expected_revision: str,\n    revoke_issued_sessions: bool,\n    request_id: str | None = None,\n) -> RevokeBackendKeyReply"
+          ],
+          "docs": "Revoke a backend key, optionally revoking the sessions it issued.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.revokeBackendKey",
+              "page": "../../operations/management/revokeBackendKey.md"
+            }
+          ]
+        },
+        {
+          "name": "project_policy",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.project_policy",
+          "anchor": "convohopmanagementproject_policy-method",
+          "signatures": [
+            "def project_policy(\n    self,\n    *,\n    project_id: str,\n    expected_revision: str,\n    change: PolicyChangeInput,\n    request_id: str | None = None,\n) -> ProjectPolicyReply"
+          ],
+          "docs": "Change the policy of a project.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.projectPolicy",
+              "page": "../../operations/management/projectPolicy.md"
+            }
+          ]
+        },
+        {
+          "name": "credential_permit",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.credential_permit",
+          "anchor": "convohopmanagementcredential_permit-method",
+          "signatures": [
+            "def credential_permit(\n    self,\n    *,\n    project_id: str,\n    delivery_id: str,\n    redemption_request_id: str,\n    request_id: str | None = None,\n) -> dict[str, Any]"
+          ],
+          "docs": "Issue a signed permit that authorizes redeeming one credential delivery.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.credentialPermit",
+              "page": "../../operations/management/credentialPermit.md"
+            }
+          ]
+        },
+        {
+          "name": "pause_operation",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.pause_operation",
+          "anchor": "convohopmanagementpause_operation-method",
+          "signatures": [
+            "def pause_operation(\n    self,\n    *,\n    operation_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Operation"
+          ],
+          "docs": "Pause a long-running operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.pauseOperation",
+              "page": "../../operations/management/pauseOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "resume_operation",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.resume_operation",
+          "anchor": "convohopmanagementresume_operation-method",
+          "signatures": [
+            "def resume_operation(\n    self,\n    *,\n    operation_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> Operation"
+          ],
+          "docs": "Resume a paused operation.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.resumeOperation",
+              "page": "../../operations/management/resumeOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "configure_webhook",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.configure_webhook",
+          "anchor": "convohopmanagementconfigure_webhook-method",
+          "signatures": [
+            "def configure_webhook(\n    self,\n    *,\n    project_id: str,\n    url: str,\n    event_types: Sequence[str],\n    consent_ref: str,\n    request_id: str | None = None,\n) -> ConfigureWebhookReply"
+          ],
+          "docs": "Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.configureWebhook",
+              "page": "../../operations/management/configureWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "update_webhook",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.update_webhook",
+          "anchor": "convohopmanagementupdate_webhook-method",
+          "signatures": [
+            "def update_webhook(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n    expected_revision: str,\n    event_types: Sequence[str],\n    enabled: bool,\n    request_id: str | None = None,\n) -> UpdateWebhookReply"
+          ],
+          "docs": "Change the event types of a webhook endpoint, or enable or disable it.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.updateWebhook",
+              "page": "../../operations/management/updateWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "rotate_webhook_secret",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.rotate_webhook_secret",
+          "anchor": "convohopmanagementrotate_webhook_secret-method",
+          "signatures": [
+            "def rotate_webhook_secret(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> RotateWebhookSecretReply"
+          ],
+          "docs": "Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.rotateWebhookSecret",
+              "page": "../../operations/management/rotateWebhookSecret.md"
+            }
+          ]
+        },
+        {
+          "name": "disable_webhook",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.disable_webhook",
+          "anchor": "convohopmanagementdisable_webhook-method",
+          "signatures": [
+            "def disable_webhook(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n    expected_revision: str,\n    request_id: str | None = None,\n) -> DisableWebhookReply"
+          ],
+          "docs": "Disable a webhook endpoint.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.disableWebhook",
+              "page": "../../operations/management/disableWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "replay_webhook_deliveries",
+          "kind": "method",
+          "ref": "convohop#ConvoHopManagement.replay_webhook_deliveries",
+          "anchor": "convohopmanagementreplay_webhook_deliveries-method",
+          "signatures": [
+            "def replay_webhook_deliveries(\n    self,\n    *,\n    project_id: str,\n    endpoint_id: str,\n    effect_id: str | None = None,\n    since: str | None = None,\n    until: str | None = None,\n    request_id: str | None = None,\n) -> ReplayWebhookDeliveriesReply"
+          ],
+          "docs": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.\n\nAuthorization: `portalCredential`, when `owner`: The caller owns the organization, deployment or project.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nLong-running: returns the whole reply. Poll `get_operation()` with `operation_id` set to `operation.operation_id` until the work completes.\n\nParameters:\n\n- `request_id`: Lowercase UUID that identifies this request. Omit it for a new one; reuse it only through `retry_request`.",
+          "operations": [
+            {
+              "id": "management.replayWebhookDeliveries",
+              "page": "../../operations/management/replayWebhookDeliveries.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopProblem",
+      "kind": "class",
+      "ref": "convohop#ConvoHopProblem",
+      "anchor": "convohopproblem-class",
+      "signatures": ["class ConvoHopProblem(Exception)"],
+      "docs": "A failure the authority reported or the SDK detected for one request.",
+      "members": [
+        {
+          "name": "code",
+          "kind": "property",
+          "ref": "convohop#ConvoHopProblem.code",
+          "anchor": "convohopproblemcode-property",
+          "signatures": ["code: str"],
+          "docs": "The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`."
+        },
+        {
+          "name": "request_id",
+          "kind": "property",
+          "ref": "convohop#ConvoHopProblem.request_id",
+          "anchor": "convohopproblemrequest_id-property",
+          "signatures": ["request_id: str"],
+          "docs": "The request the problem belongs to."
+        },
+        {
+          "name": "outcome",
+          "kind": "property",
+          "ref": "convohop#ConvoHopProblem.outcome",
+          "anchor": "convohopproblemoutcome-property",
+          "signatures": ["outcome: str"],
+          "docs": "`rejected`, `committed`, `accepted` or `unknown`."
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "convohop#ConvoHopProblem.status",
+          "anchor": "convohopproblemstatus-property",
+          "signatures": ["status: int"],
+          "docs": "The HTTP status, or 0 when no response was received or storage failed."
+        },
+        {
+          "name": "retry_after",
+          "kind": "property",
+          "ref": "convohop#ConvoHopProblem.retry_after",
+          "anchor": "convohopproblemretry_after-property",
+          "signatures": ["retry_after: int | None"],
+          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay\n(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or\nresends on its own because of it."
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#ConvoHopProblem.__init__",
+          "anchor": "convohopproblem-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    code: str,\n    request_id: str,\n    outcome: str,\n    status: int,\n    message: str,\n    *,\n    retry_after: int | None = None,\n) -> None"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "message",
+          "kind": "property",
+          "ref": "convohop#ConvoHopProblem.message",
+          "anchor": "convohopproblemmessage-property",
+          "signatures": ["@property\ndef message(self) -> str"],
+          "docs": ""
+        },
+        {
+          "name": "retryable",
+          "kind": "property",
+          "ref": "convohop#ConvoHopProblem.retryable",
+          "anchor": "convohopproblemretryable-property",
+          "signatures": ["@property\ndef retryable(self) -> bool"],
+          "docs": "Whether the error catalog marks the code as retryable with the same request ID."
+        }
+      ]
+    },
+    {
+      "name": "MemoryStorage",
+      "kind": "class",
+      "ref": "convohop#MemoryStorage",
+      "anchor": "memorystorage-class",
+      "signatures": ["class MemoryStorage"],
+      "docs": "In-process `RecoveryStorage`. Records survive client reconstruction but not a process restart.",
+      "members": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#MemoryStorage.__init__",
+          "anchor": "memorystorage-constructor",
+          "signatures": ["def __init__(self) -> None"],
+          "docs": ""
+        },
+        {
+          "name": "get_item",
+          "kind": "method",
+          "ref": "convohop#MemoryStorage.get_item",
+          "anchor": "memorystorageget_item-method",
+          "signatures": ["def get_item(self, key: str) -> str | None"],
+          "docs": ""
+        },
+        {
+          "name": "set_item",
+          "kind": "method",
+          "ref": "convohop#MemoryStorage.set_item",
+          "anchor": "memorystorageset_item-method",
+          "signatures": ["def set_item(self, key: str, value: str) -> None"],
+          "docs": ""
+        },
+        {
+          "name": "remove_item",
+          "kind": "method",
+          "ref": "convohop#MemoryStorage.remove_item",
+          "anchor": "memorystorageremove_item-method",
+          "signatures": ["def remove_item(self, key: str) -> None"],
+          "docs": ""
+        },
+        {
+          "name": "clear",
+          "kind": "method",
+          "ref": "convohop#MemoryStorage.clear",
+          "anchor": "memorystorageclear-method",
+          "signatures": ["def clear(self) -> None"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "PlanLimitExceededProblem",
+      "kind": "class",
+      "ref": "convohop#PlanLimitExceededProblem",
+      "anchor": "planlimitexceededproblem-class",
+      "signatures": ["class PlanLimitExceededProblem(ConvoHopProblem)"],
+      "docs": "`PLAN_LIMIT_EXCEEDED`: the plan does not permit the resource or feature.",
+      "members": [
+        {
+          "name": "code",
+          "kind": "property",
+          "ref": "convohop#PlanLimitExceededProblem.code",
+          "anchor": "planlimitexceededproblemcode-property",
+          "signatures": ["code: str"],
+          "docs": "The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "request_id",
+          "kind": "property",
+          "ref": "convohop#PlanLimitExceededProblem.request_id",
+          "anchor": "planlimitexceededproblemrequest_id-property",
+          "signatures": ["request_id: str"],
+          "docs": "The request the problem belongs to.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "outcome",
+          "kind": "property",
+          "ref": "convohop#PlanLimitExceededProblem.outcome",
+          "anchor": "planlimitexceededproblemoutcome-property",
+          "signatures": ["outcome: str"],
+          "docs": "`rejected`, `committed`, `accepted` or `unknown`.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "convohop#PlanLimitExceededProblem.status",
+          "anchor": "planlimitexceededproblemstatus-property",
+          "signatures": ["status: int"],
+          "docs": "The HTTP status, or 0 when no response was received or storage failed.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "retry_after",
+          "kind": "property",
+          "ref": "convohop#PlanLimitExceededProblem.retry_after",
+          "anchor": "planlimitexceededproblemretry_after-property",
+          "signatures": ["retry_after: int | None"],
+          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay\n(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or\nresends on its own because of it.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#PlanLimitExceededProblem.__init__",
+          "anchor": "planlimitexceededproblem-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    code: str,\n    request_id: str,\n    outcome: str,\n    status: int,\n    message: str,\n    *,\n    retry_after: int | None = None,\n) -> None"
+          ],
+          "docs": "",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "message",
+          "kind": "property",
+          "ref": "convohop#PlanLimitExceededProblem.message",
+          "anchor": "planlimitexceededproblemmessage-property",
+          "signatures": ["@property\ndef message(self) -> str"],
+          "docs": "",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "retryable",
+          "kind": "property",
+          "ref": "convohop#PlanLimitExceededProblem.retryable",
+          "anchor": "planlimitexceededproblemretryable-property",
+          "signatures": ["@property\ndef retryable(self) -> bool"],
+          "docs": "Whether the error catalog marks the code as retryable with the same request ID.",
+          "inherited": "ConvoHopProblem"
+        }
+      ]
+    },
+    {
+      "name": "PushPayloadError",
+      "kind": "class",
+      "ref": "convohop#PushPayloadError",
+      "anchor": "pushpayloaderror-class",
+      "signatures": ["class PushPayloadError(Exception)"],
+      "docs": "A push payload that couldn't be built. The message names the field but never contains its value.",
+      "origin": "convohop.push",
+      "members": [
+        {
+          "name": "code",
+          "kind": "property",
+          "ref": "convohop#PushPayloadError.code",
+          "anchor": "pushpayloaderrorcode-property",
+          "signatures": ["code: PushPayloadCode"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#PushPayloadError.__init__",
+          "anchor": "pushpayloaderror-constructor",
+          "signatures": ["def __init__(self, code: PushPayloadCode, message: str) -> None"],
+          "docs": ""
+        },
+        {
+          "name": "message",
+          "kind": "property",
+          "ref": "convohop#PushPayloadError.message",
+          "anchor": "pushpayloaderrormessage-property",
+          "signatures": ["@property\ndef message(self) -> str"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "QuotaExceededProblem",
+      "kind": "class",
+      "ref": "convohop#QuotaExceededProblem",
+      "anchor": "quotaexceededproblem-class",
+      "signatures": ["class QuotaExceededProblem(ConvoHopProblem)"],
+      "docs": "`QUOTA_EXCEEDED`: a hard usage quota refused new work until `retry_after` seconds pass.",
+      "members": [
+        {
+          "name": "code",
+          "kind": "property",
+          "ref": "convohop#QuotaExceededProblem.code",
+          "anchor": "quotaexceededproblemcode-property",
+          "signatures": ["code: str"],
+          "docs": "The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "request_id",
+          "kind": "property",
+          "ref": "convohop#QuotaExceededProblem.request_id",
+          "anchor": "quotaexceededproblemrequest_id-property",
+          "signatures": ["request_id: str"],
+          "docs": "The request the problem belongs to.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "outcome",
+          "kind": "property",
+          "ref": "convohop#QuotaExceededProblem.outcome",
+          "anchor": "quotaexceededproblemoutcome-property",
+          "signatures": ["outcome: str"],
+          "docs": "`rejected`, `committed`, `accepted` or `unknown`.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "convohop#QuotaExceededProblem.status",
+          "anchor": "quotaexceededproblemstatus-property",
+          "signatures": ["status: int"],
+          "docs": "The HTTP status, or 0 when no response was received or storage failed.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "retry_after",
+          "kind": "property",
+          "ref": "convohop#QuotaExceededProblem.retry_after",
+          "anchor": "quotaexceededproblemretry_after-property",
+          "signatures": ["retry_after: int | None"],
+          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay\n(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or\nresends on its own because of it.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#QuotaExceededProblem.__init__",
+          "anchor": "quotaexceededproblem-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    code: str,\n    request_id: str,\n    outcome: str,\n    status: int,\n    message: str,\n    *,\n    retry_after: int | None = None,\n) -> None"
+          ],
+          "docs": "",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "message",
+          "kind": "property",
+          "ref": "convohop#QuotaExceededProblem.message",
+          "anchor": "quotaexceededproblemmessage-property",
+          "signatures": ["@property\ndef message(self) -> str"],
+          "docs": "",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "retryable",
+          "kind": "property",
+          "ref": "convohop#QuotaExceededProblem.retryable",
+          "anchor": "quotaexceededproblemretryable-property",
+          "signatures": ["@property\ndef retryable(self) -> bool"],
+          "docs": "Whether the error catalog marks the code as retryable with the same request ID.",
+          "inherited": "ConvoHopProblem"
+        }
+      ]
+    },
+    {
+      "name": "RateLimitedProblem",
+      "kind": "class",
+      "ref": "convohop#RateLimitedProblem",
+      "anchor": "ratelimitedproblem-class",
+      "signatures": ["class RateLimitedProblem(ConvoHopProblem)"],
+      "docs": "`RATE_LIMITED`: wait `retry_after` seconds, then resend with the same request ID.",
+      "members": [
+        {
+          "name": "code",
+          "kind": "property",
+          "ref": "convohop#RateLimitedProblem.code",
+          "anchor": "ratelimitedproblemcode-property",
+          "signatures": ["code: str"],
+          "docs": "The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "request_id",
+          "kind": "property",
+          "ref": "convohop#RateLimitedProblem.request_id",
+          "anchor": "ratelimitedproblemrequest_id-property",
+          "signatures": ["request_id: str"],
+          "docs": "The request the problem belongs to.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "outcome",
+          "kind": "property",
+          "ref": "convohop#RateLimitedProblem.outcome",
+          "anchor": "ratelimitedproblemoutcome-property",
+          "signatures": ["outcome: str"],
+          "docs": "`rejected`, `committed`, `accepted` or `unknown`.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "convohop#RateLimitedProblem.status",
+          "anchor": "ratelimitedproblemstatus-property",
+          "signatures": ["status: int"],
+          "docs": "The HTTP status, or 0 when no response was received or storage failed.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "retry_after",
+          "kind": "property",
+          "ref": "convohop#RateLimitedProblem.retry_after",
+          "anchor": "ratelimitedproblemretry_after-property",
+          "signatures": ["retry_after: int | None"],
+          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay\n(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or\nresends on its own because of it.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#RateLimitedProblem.__init__",
+          "anchor": "ratelimitedproblem-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    code: str,\n    request_id: str,\n    outcome: str,\n    status: int,\n    message: str,\n    *,\n    retry_after: int | None = None,\n) -> None"
+          ],
+          "docs": "",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "message",
+          "kind": "property",
+          "ref": "convohop#RateLimitedProblem.message",
+          "anchor": "ratelimitedproblemmessage-property",
+          "signatures": ["@property\ndef message(self) -> str"],
+          "docs": "",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "retryable",
+          "kind": "property",
+          "ref": "convohop#RateLimitedProblem.retryable",
+          "anchor": "ratelimitedproblemretryable-property",
+          "signatures": ["@property\ndef retryable(self) -> bool"],
+          "docs": "Whether the error catalog marks the code as retryable with the same request ID.",
+          "inherited": "ConvoHopProblem"
+        }
+      ]
+    },
+    {
+      "name": "RecoveryState",
+      "kind": "class",
+      "ref": "convohop#RecoveryState",
+      "anchor": "recoverystate-class",
+      "signatures": [
+        "@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)\nclass RecoveryState"
+      ],
+      "docs": "A snapshot of one mutation's recovery record.",
+      "members": [
+        {
+          "name": "request_id",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.request_id",
+          "anchor": "recoverystaterequest_id-property",
+          "signatures": ["request_id: str"],
+          "docs": "The mutation's request ID."
+        },
+        {
+          "name": "incarnation",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.incarnation",
+          "anchor": "recoverystateincarnation-property",
+          "signatures": ["incarnation: str"],
+          "docs": "The project incarnation it was sent in (`\"management\"` for management mutations)."
+        },
+        {
+          "name": "payload_fingerprint",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.payload_fingerprint",
+          "anchor": "recoverystatepayload_fingerprint-property",
+          "signatures": ["payload_fingerprint: str"],
+          "docs": "`sha256:` digest of the operation, project and input."
+        },
+        {
+          "name": "operation",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.operation",
+          "anchor": "recoverystateoperation-property",
+          "signatures": ["operation: str"],
+          "docs": "Operation ID, for example `communication.sendMessage`."
+        },
+        {
+          "name": "project_id",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.project_id",
+          "anchor": "recoverystateproject_id-property",
+          "signatures": ["project_id: str | None"],
+          "docs": "The project, for communication mutations."
+        },
+        {
+          "name": "input",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.input",
+          "anchor": "recoverystateinput-property",
+          "signatures": ["input: Mapping[str, Any]"],
+          "docs": "A copy of the exact input sent."
+        },
+        {
+          "name": "first_submitted_at",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.first_submitted_at",
+          "anchor": "recoverystatefirst_submitted_at-property",
+          "signatures": ["first_submitted_at: int"],
+          "docs": "Unix milliseconds when the record was created."
+        },
+        {
+          "name": "retry_deadline",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.retry_deadline",
+          "anchor": "recoverystateretry_deadline-property",
+          "signatures": ["retry_deadline: int"],
+          "docs": "Unix milliseconds after which the SDK no longer resends it."
+        },
+        {
+          "name": "attempt_count",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.attempt_count",
+          "anchor": "recoverystateattempt_count-property",
+          "signatures": ["attempt_count: int"],
+          "docs": "Attempts sent so far."
+        },
+        {
+          "name": "last_attempt_at",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.last_attempt_at",
+          "anchor": "recoverystatelast_attempt_at-property",
+          "signatures": ["last_attempt_at: int"],
+          "docs": "Unix milliseconds of the latest attempt."
+        },
+        {
+          "name": "last_attempt_classification",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.last_attempt_classification",
+          "anchor": "recoverystatelast_attempt_classification-property",
+          "signatures": ["last_attempt_classification: str"],
+          "docs": "`notSubmitted`, `submitted`, `authorityReceipt`, an error code or\n`opaqueTransportFailure`."
+        },
+        {
+          "name": "resolution_state",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.resolution_state",
+          "anchor": "recoverystateresolution_state-property",
+          "signatures": [
+            "resolution_state: Literal[\"pending\", \"unknown\", \"committed\", \"accepted\"]"
+          ],
+          "docs": "`pending` (never sent), `unknown`, `committed` or `accepted`."
+        },
+        {
+          "name": "media_admission_attempted",
+          "kind": "property",
+          "ref": "convohop#RecoveryState.media_admission_attempted",
+          "anchor": "recoverystatemedia_admission_attempted-property",
+          "signatures": ["media_admission_attempted: bool = False"],
+          "docs": "Whether native media admission used this request's credentials."
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#RecoveryState.__init__",
+          "anchor": "recoverystate-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    *,\n    request_id: str,\n    incarnation: str,\n    payload_fingerprint: str,\n    operation: str,\n    project_id: str | None,\n    input: Mapping[str, Any],\n    first_submitted_at: int,\n    retry_deadline: int,\n    attempt_count: int,\n    last_attempt_at: int,\n    last_attempt_classification: str,\n    resolution_state: Literal[\"pending\", \"unknown\", \"committed\", \"accepted\"],\n    media_admission_attempted: bool = False,\n) -> None"
+          ],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "ScopeRequiredProblem",
+      "kind": "class",
+      "ref": "convohop#ScopeRequiredProblem",
+      "anchor": "scoperequiredproblem-class",
+      "signatures": ["class ScopeRequiredProblem(ConvoHopProblem)"],
+      "docs": "`SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable).\n\n`scope` names the missing scope. The authority names it only in the message, so it is `None` when the\nmessage does not match the documented wording. A missing read scope is reported as the read scope even where its\nmanage scope would also satisfy the operation.",
+      "members": [
+        {
+          "name": "scope",
+          "kind": "property",
+          "ref": "convohop#ScopeRequiredProblem.scope",
+          "anchor": "scoperequiredproblemscope-property",
+          "signatures": ["scope: str | None"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#ScopeRequiredProblem.__init__",
+          "anchor": "scoperequiredproblem-constructor",
+          "signatures": [
+            "def __init__(\n    self,\n    code: str,\n    request_id: str,\n    outcome: str,\n    status: int,\n    message: str,\n    *,\n    retry_after: int | None = None,\n) -> None"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "code",
+          "kind": "property",
+          "ref": "convohop#ScopeRequiredProblem.code",
+          "anchor": "scoperequiredproblemcode-property",
+          "signatures": ["code: str"],
+          "docs": "The error code, for example `SCOPE_REQUIRED` or `TRANSPORT_UNKNOWN`.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "request_id",
+          "kind": "property",
+          "ref": "convohop#ScopeRequiredProblem.request_id",
+          "anchor": "scoperequiredproblemrequest_id-property",
+          "signatures": ["request_id: str"],
+          "docs": "The request the problem belongs to.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "outcome",
+          "kind": "property",
+          "ref": "convohop#ScopeRequiredProblem.outcome",
+          "anchor": "scoperequiredproblemoutcome-property",
+          "signatures": ["outcome: str"],
+          "docs": "`rejected`, `committed`, `accepted` or `unknown`.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "status",
+          "kind": "property",
+          "ref": "convohop#ScopeRequiredProblem.status",
+          "anchor": "scoperequiredproblemstatus-property",
+          "signatures": ["status: int"],
+          "docs": "The HTTP status, or 0 when no response was received or storage failed.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "retry_after",
+          "kind": "property",
+          "ref": "convohop#ScopeRequiredProblem.retry_after",
+          "anchor": "scoperequiredproblemretry_after-property",
+          "signatures": ["retry_after: int | None"],
+          "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay\n(`extensions.retryAfter`, else an HTTP `Retry-After` delay in seconds). The SDK never waits or\nresends on its own because of it.",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "message",
+          "kind": "property",
+          "ref": "convohop#ScopeRequiredProblem.message",
+          "anchor": "scoperequiredproblemmessage-property",
+          "signatures": ["@property\ndef message(self) -> str"],
+          "docs": "",
+          "inherited": "ConvoHopProblem"
+        },
+        {
+          "name": "retryable",
+          "kind": "property",
+          "ref": "convohop#ScopeRequiredProblem.retryable",
+          "anchor": "scoperequiredproblemretryable-property",
+          "signatures": ["@property\ndef retryable(self) -> bool"],
+          "docs": "Whether the error catalog marks the code as retryable with the same request ID.",
+          "inherited": "ConvoHopProblem"
+        }
+      ]
+    },
+    {
+      "name": "WebhookVerificationError",
+      "kind": "class",
+      "ref": "convohop#WebhookVerificationError",
+      "anchor": "webhookverificationerror-class",
+      "signatures": ["class WebhookVerificationError(Exception)"],
+      "docs": "A delivery that failed verification. The message never contains secrets, signatures or the body.\n\nChecks run in this order and stop at the first failure:\n\n- `INVALID_SECRET`: no secret is given, or one is not `whsec_` followed by padded standard Base64 of 24 to\n  64 bytes. This is your configuration, not the sender.\n- `MISSING_HEADER`: `webhook-id`, `webhook-timestamp` or `webhook-signature` is absent or empty.\n- `INVALID_HEADER`: one of those headers is repeated.\n- `INVALID_TIMESTAMP`: `webhook-timestamp` is not 1 to 15 ASCII digits (integer Unix seconds).\n- `TIMESTAMP_EXPIRED`: the timestamp is more than `tolerance_seconds` before now.\n- `TIMESTAMP_FUTURE`: the timestamp is more than `tolerance_seconds` after now.\n- `BODY_TOO_LARGE`: the body exceeds 4096 bytes.\n- `TOO_MANY_SIGNATURES`: `webhook-signature` has more than 8 entries.\n- `NO_MATCHING_SIGNATURE`: no `v1` entry matches any secret.\n- `INVALID_BODY`: `verify()` only; the signed body is not a UTF-8 JSON event envelope.",
+      "origin": "convohop.webhooks",
+      "members": [
+        {
+          "name": "code",
+          "kind": "property",
+          "ref": "convohop#WebhookVerificationError.code",
+          "anchor": "webhookverificationerrorcode-property",
+          "signatures": ["code: WebhookVerificationCode"],
+          "docs": ""
+        },
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "ref": "convohop#WebhookVerificationError.__init__",
+          "anchor": "webhookverificationerror-constructor",
+          "signatures": ["def __init__(self, code: WebhookVerificationCode, message: str) -> None"],
+          "docs": ""
+        },
+        {
+          "name": "message",
+          "kind": "property",
+          "ref": "convohop#WebhookVerificationError.message",
+          "anchor": "webhookverificationerrormessage-property",
+          "signatures": ["@property\ndef message(self) -> str"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "AsyncRecoveryStorage",
+      "kind": "interface",
+      "ref": "convohop#AsyncRecoveryStorage",
+      "anchor": "asyncrecoverystorage-interface",
+      "signatures": ["@runtime_checkable\nclass AsyncRecoveryStorage(Protocol)"],
+      "docs": "Asynchronous key-value storage for recovery records.",
+      "members": [
+        {
+          "name": "get_item",
+          "kind": "method",
+          "ref": "convohop#AsyncRecoveryStorage.get_item",
+          "anchor": "asyncrecoverystorageget_item-method",
+          "signatures": ["async def get_item(self, key: str) -> str | None"],
+          "docs": "Returns the stored value, or `None` when the key is absent."
+        },
+        {
+          "name": "set_item",
+          "kind": "method",
+          "ref": "convohop#AsyncRecoveryStorage.set_item",
+          "anchor": "asyncrecoverystorageset_item-method",
+          "signatures": ["async def set_item(self, key: str, value: str) -> None"],
+          "docs": "Stores the value durably before returning; raise if durability is not confirmed."
+        }
+      ]
+    },
+    {
+      "name": "RecoveryStorage",
+      "kind": "interface",
+      "ref": "convohop#RecoveryStorage",
+      "anchor": "recoverystorage-interface",
+      "signatures": ["@runtime_checkable\nclass RecoveryStorage(Protocol)"],
+      "docs": "Synchronous key-value storage for recovery records, such as a file or database adapter.",
+      "members": [
+        {
+          "name": "get_item",
+          "kind": "method",
+          "ref": "convohop#RecoveryStorage.get_item",
+          "anchor": "recoverystorageget_item-method",
+          "signatures": ["def get_item(self, key: str) -> str | None"],
+          "docs": "Returns the stored value, or `None` when the key is absent."
+        },
+        {
+          "name": "set_item",
+          "kind": "method",
+          "ref": "convohop#RecoveryStorage.set_item",
+          "anchor": "recoverystorageset_item-method",
+          "signatures": ["def set_item(self, key: str, value: str) -> None"],
+          "docs": "Stores the value durably before returning; raise if durability is not confirmed."
+        }
+      ]
+    },
+    {
+      "name": "__version__",
+      "kind": "constant",
+      "ref": "convohop#__version__",
+      "anchor": "__version__-constant",
+      "signatures": ["__version__: str"],
+      "docs": ""
+    },
+    {
+      "name": "push",
+      "kind": "namespace",
+      "ref": "convohop#push",
+      "anchor": "push-namespace",
+      "signatures": ["from convohop import push"],
+      "docs": "Push payload builders for the contract in `spec/push-payload/`.\n\nThey are pure functions: they send nothing and hold no credentials. Your push library sends the requests and owns\nAPNs and FCM authorization, Web Push encryption (RFC 8291) and VAPID signing.\n\nEach builder takes a per-recipient notification event (`notification.message`, `notification.call` or\n`notification.callCancelled`) as `convohop.webhooks.verify()` returns it, or as a mapping in its wire form. It\nvalidates its options and then the event, raising `PushPayloadError`, and returns `None` when the event\ndoesn't apply to the platform or is stale. Payloads are metadata-only unless you pass `title` or `body`, or the\nevent carries an opted-in message preview.\n\nRequests are plain dicts. Serialize a payload with `encode()`: the builders measure their limits on that compact\nform, and `json.dumps` with its defaults (ASCII escapes, spaces after separators) can exceed them."
+    },
+    {
+      "name": "types",
+      "kind": "namespace",
+      "ref": "convohop#types",
+      "anchor": "types-namespace",
+      "signatures": ["from convohop import types"],
+      "docs": "Request inputs and response models of the ConvoHop operations.\n\nEnums are string literals. Response models are frozen dataclasses built from validated responses; `to_dict()`\nreturns their wire form. Inputs are frozen dataclasses whose `None` fields are omitted from the request."
+    },
+    {
+      "name": "webhooks",
+      "kind": "namespace",
+      "ref": "convohop#webhooks",
+      "anchor": "webhooks-namespace",
+      "signatures": ["from convohop import webhooks"],
+      "docs": "Verifies ConvoHop webhook deliveries: Standard Webhooks symmetric `v1` signatures over the raw body.\n\nPass the exact request body, respond `2xx` within 5 seconds, then process. De-duplicate on `webhook_id`: retries\nand replays of a delivery keep it. Events are metadata-only; fetch a resource through the API when you need its\ncontent. `notification.*` events follow the push payload contract in `spec/push-payload/` and are the input of\n`convohop.push`."
+    }
+  ]
+}

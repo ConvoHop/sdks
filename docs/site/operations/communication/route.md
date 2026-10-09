@@ -72,3 +72,4 @@ query CommunicationRoute($context: RequestContextInput!) {
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.initialize`](../../typescript/reference/server.md#projectserverclientinitialize-method), [`ConvoHopClient.initialize`](../../typescript/reference/client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](../../typescript/reference/client.md#convohopclientrefreshsession-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.route`](../../python/reference/convohop.md#convohoproute-method), [`ConvoHop.initialize`](../../python/reference/convohop.md#convohopinitialize-method), [`AsyncConvoHop.route`](../../python/reference/convohop.md#asyncconvohoproute-method), [`AsyncConvoHop.initialize`](../../python/reference/convohop.md#asyncconvohopinitialize-method) |

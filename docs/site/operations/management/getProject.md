@@ -88,3 +88,4 @@ query ManagementGetProject($context: RequestContextInput!, $input: GetProjectReq
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_project`](../../python/reference/convohop.md#convohopmanagementget_project-method), [`AsyncConvoHopManagement.get_project`](../../python/reference/convohop.md#asyncconvohopmanagementget_project-method) |

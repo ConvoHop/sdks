@@ -134,3 +134,4 @@ mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: Issue
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.issueBackendKey`](../../typescript/reference/server.md#convohopmanagementclientissuebackendkey-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.issue_backend_key`](../../python/reference/convohop.md#convohopmanagementissue_backend_key-method), [`AsyncConvoHopManagement.issue_backend_key`](../../python/reference/convohop.md#asyncconvohopmanagementissue_backend_key-method) |
