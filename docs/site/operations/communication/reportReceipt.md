@@ -88,4 +88,4 @@ mutation CommunicationReportReceipt($context: RequestContextInput!, $input: Repo
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.reportRead`](../../typescript/reference/client.md#convohopclientreportread-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.reportRead`](../../typescript/reference/client.md#convohopclientreportread-method), [`ConvoHopClient.reportDelivered`](../../typescript/reference/client.md#convohopclientreportdelivered-method), [`ConversationStore.markRead`](../../typescript/reference/client.md#conversationstoremarkread-method), [`ConversationStore.markDelivered`](../../typescript/reference/client.md#conversationstoremarkdelivered-method), [`ConversationView.markRead`](../../typescript/reference/react.md#conversationviewmarkread-method), [`ConversationView.markDelivered`](../../typescript/reference/react.md#conversationviewmarkdelivered-method) |

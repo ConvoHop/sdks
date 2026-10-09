@@ -1,44 +1,93 @@
 {
   "$schema": "../../../spec/docs/operation-map.schema.json",
   "operations": {
-    "communication.capabilities": ["@convohop/server#ProjectServerClient.capabilities"],
+    "communication.capabilities": ["@convohop/server#ProjectServerClient.capabilities", "@convohop/client#ConvoHopClient.capabilities"],
     "communication.route": [
       "@convohop/server#ProjectServerClient.initialize",
       "@convohop/client#ConvoHopClient.initialize",
-      "@convohop/client#ConvoHopClient.refreshSession"
+      "@convohop/client#ConvoHopClient.refreshSession",
+      "@convohop/client#ConvoHopClient.scheduleSessionRefresh",
+      "@convohop/react#useSessionRefresh"
     ],
-    "communication.currentSession": ["@convohop/client#ConvoHopClient.initialize", "@convohop/client#ConvoHopClient.refreshSession"],
+    "communication.currentSession": [
+      "@convohop/client#ConvoHopClient.initialize",
+      "@convohop/client#ConvoHopClient.refreshSession",
+      "@convohop/client#ConvoHopClient.scheduleSessionRefresh",
+      "@convohop/react#useSessionRefresh"
+    ],
     "communication.getPrincipal": ["@convohop/server#ProjectServerClient.principals.get"],
     "communication.getConversation": [
       "@convohop/server#ServerConversation.get",
       "@convohop/client#ConvoHopClient.getConversation",
-      "@convohop/client#ConversationHandle.get"
+      "@convohop/client#ConversationHandle.get",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync"
     ],
-    "communication.members": ["@convohop/server#ServerConversation.members.list"],
+    "communication.members": ["@convohop/server#ServerConversation.members.list", "@convohop/client#ConvoHopClient.members"],
     "communication.messages": [
       "@convohop/server#ServerConversation.messages.list",
       "@convohop/client#ConvoHopClient.messages",
-      "@convohop/client#ConversationHandle.messages.list"
+      "@convohop/client#ConversationHandle.messages.list",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/client#ConversationStore.loadOlder",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync",
+      "@convohop/react#ConversationView.loadOlder"
     ],
-    "communication.getMessage": ["@convohop/server#ServerConversation.messages.get"],
+    "communication.getMessage": [
+      "@convohop/server#ServerConversation.messages.get",
+      "@convohop/client#ConvoHopClient.getMessage",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync"
+    ],
     "communication.events": [
       "@convohop/client#ConvoHopClient.events",
       "@convohop/client#ConvoHopClient.watch",
-      "@convohop/client#ConvoHopClient.resyncAuthorizedHistory"
+      "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync"
     ],
-    "communication.receipts": ["@convohop/client#ConvoHopClient.receipts"],
-    "communication.inbox": ["@convohop/server#ProjectServerClient.inbox"],
+    "communication.receipts": [
+      "@convohop/client#ConvoHopClient.receipts",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync"
+    ],
+    "communication.inbox": ["@convohop/server#ProjectServerClient.inbox", "@convohop/client#ConvoHopClient.inbox"],
     "communication.search": ["@convohop/server#ProjectServerClient.search", "@convohop/client#ConvoHopClient.search"],
     "communication.resolveRequest": [
       "@convohop/server#ProjectServerClient.requests.resolve",
       "@convohop/server#ProjectServerClient.requests.retry",
       "@convohop/client#ConvoHopClient.requests.resolve",
       "@convohop/client#ConvoHopClient.requests.retry",
-      "@convohop/client#ConvoHopClient.recoverPending"
+      "@convohop/client#ConvoHopClient.recoverPending",
+      "@convohop/client#Outbox.send",
+      "@convohop/client#Outbox.resend",
+      "@convohop/client#Outbox.flush",
+      "@convohop/client#ConversationStore.send",
+      "@convohop/react#ConversationView.send"
     ],
     "communication.getOperation": ["@convohop/server#ProjectServerClient.operation"],
     "communication.conversationMute": ["@convohop/server#ServerConversation.members.getMute", "@convohop/client#ConversationHandle.mute.get"],
-    "communication.currentLiveSession": ["@convohop/server#ServerConversation.live.current", "@convohop/client#ConversationLive.current"],
+    "communication.currentLiveSession": [
+      "@convohop/server#ServerConversation.live.current",
+      "@convohop/client#ConversationLive.current",
+      "@convohop/react#useLiveSession",
+      "@convohop/react#LiveSessionView.refresh"
+    ],
     "communication.liveSession": [
       "@convohop/server#ServerLiveSession.get",
       "@convohop/client#ConvoHopClient.liveSession",
@@ -81,7 +130,12 @@
     "communication.sendMessage": [
       "@convohop/server#ServerConversation.messages.send",
       "@convohop/client#ConvoHopClient.send",
-      "@convohop/client#ConversationHandle.messages.send"
+      "@convohop/client#ConversationHandle.messages.send",
+      "@convohop/client#Outbox.send",
+      "@convohop/client#Outbox.resend",
+      "@convohop/client#Outbox.flush",
+      "@convohop/client#ConversationStore.send",
+      "@convohop/react#ConversationView.send"
     ],
     "communication.editMessage": [
       "@convohop/server#ServerConversation.messages.edit",
@@ -93,7 +147,23 @@
       "@convohop/client#ConvoHopClient.delete",
       "@convohop/client#ConversationHandle.messages.delete"
     ],
-    "communication.reportReceipt": ["@convohop/client#ConvoHopClient.reportRead"],
+    "communication.reportReceipt": [
+      "@convohop/client#ConvoHopClient.reportRead",
+      "@convohop/client#ConvoHopClient.reportDelivered",
+      "@convohop/client#ConversationStore.markRead",
+      "@convohop/client#ConversationStore.markDelivered",
+      "@convohop/react#ConversationView.markRead",
+      "@convohop/react#ConversationView.markDelivered"
+    ],
+    "communication.typing": [
+      "@convohop/client#ConvoHopClient.typing",
+      "@convohop/client#TypingIndicator.input",
+      "@convohop/client#TypingIndicator.stop",
+      "@convohop/client#TypingIndicator.dispose",
+      "@convohop/react#useTyping",
+      "@convohop/react#TypingControls.input",
+      "@convohop/react#TypingControls.stop"
+    ],
     "communication.setBroadcastPermission": ["@convohop/server#ServerConversation.members.setBroadcastPermission"],
     "communication.setConversationMute": ["@convohop/server#ServerConversation.members.setMute", "@convohop/client#ConversationHandle.mute.set"],
     "communication.startLiveSession": [
@@ -105,8 +175,22 @@
     "communication.alertLiveSession": ["@convohop/server#ServerLiveSession.alert", "@convohop/client#LiveSessionHandle.alerts.send"],
     "communication.leaveLiveSession": ["@convohop/client#LiveParticipationHandle.leave"],
     "communication.endLiveSession": ["@convohop/server#ServerLiveSession.end", "@convohop/client#LiveSessionHandle.end"],
-    "communication.liveSessionCredentials": ["@convohop/client#LiveParticipationHandle.connect", "@convohop/client#MediaConnection.reconnect"],
-    "communication.conversationEvents": ["@convohop/client#ConvoHopClient.watch", "@convohop/client#ConvoHopClient.resyncAuthorizedHistory"],
+    "communication.liveSessionCredentials": [
+      "@convohop/client#LiveParticipationHandle.connect",
+      "@convohop/client#LiveParticipationHandle.connectWith",
+      "@convohop/client#MediaConnection.reconnect",
+      "@convohop/react#MediaConnectionView.connect",
+      "@convohop/react#MediaConnectionView.reconnect"
+    ],
+    "communication.conversationEvents": [
+      "@convohop/client#ConvoHopClient.watch",
+      "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
+      "@convohop/client#ConversationStore.open",
+      "@convohop/client#ConversationStore.resync",
+      "@convohop/react#useConversation",
+      "@convohop/react#ConversationView.open",
+      "@convohop/react#ConversationView.resync"
+    ],
     "management.getOperation": ["@convohop/server#ConvoHopManagementClient.operation"],
     "management.createOrganization": ["@convohop/server#ConvoHopManagementClient.createOrganization"],
     "management.createDeployment": ["@convohop/server#ConvoHopManagementClient.createDeployment"],

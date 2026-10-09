@@ -78,4 +78,4 @@ mutation CommunicationTyping($context: RequestContextInput!, $input: TypingReque
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.typing`](../../typescript/reference/client.md#convohopclienttyping-method), [`TypingIndicator.input`](../../typescript/reference/client.md#typingindicatorinput-method), [`TypingIndicator.stop`](../../typescript/reference/client.md#typingindicatorstop-method), [`TypingIndicator.dispose`](../../typescript/reference/client.md#typingindicatordispose-method), [`useTyping`](../../typescript/reference/react.md#usetyping-function), [`TypingControls.input`](../../typescript/reference/react.md#typingcontrolsinput-method), [`TypingControls.stop`](../../typescript/reference/react.md#typingcontrolsstop-method) |

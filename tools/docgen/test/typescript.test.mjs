@@ -4,7 +4,7 @@ import { mkdirSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { DtsParseError, parseDeclarations, parseDoc } from "../extractors/dts.mjs";
-import { ExtractError, collapseSignature, extractTypeScript } from "../extractors/typescript.mjs";
+import { ExtractError, collapseSignature, extractTypeScript, splitSpecifier } from "../extractors/typescript.mjs";
 import { REPO_ROOT, tempRoot, write } from "./helpers.mjs";
 
 const NO_DOC = { text: "", internal: false };
@@ -352,6 +352,50 @@ test("extractTypeScript follows workspace re-exports, inherits members and keeps
       },
     ],
   });
+});
+
+test("splitSpecifier splits a package name from its exports subpath", () => {
+  assert.deepEqual(splitSpecifier("@convohop/client"), { name: "@convohop/client", subpath: "." });
+  assert.deepEqual(splitSpecifier("@convohop/client/push"), { name: "@convohop/client", subpath: "./push" });
+  assert.deepEqual(splitSpecifier("web-push"), { name: "web-push", subpath: "." });
+  assert.deepEqual(splitSpecifier("pkg/a/b"), { name: "pkg", subpath: "./a/b" });
+  for (const specifier of ["", "./local.js", "../up.js", "/abs", "@scope", "@scope/"]) assert.equal(splitSpecifier(specifier), null, specifier);
+});
+
+test("extractTypeScript documents a subpath export under its listed name", t => {
+  const root = writeWorkspace(t);
+  write(root, "packages/sdk/package.json", {
+    name: "@fx/sdk",
+    exports: { ".": { types: "./dist/index.d.ts" }, "./push": { types: "./dist/push.d.ts", default: "./dist/push.js" } },
+  });
+  write(
+    root,
+    "packages/sdk/dist/push.d.ts",
+    lines('export type { Options } from "@fx/core";', "/** Subscribes this device. */", "export declare function subscribe(): Promise<void>;"),
+  );
+  const surface = extractTypeScript({ root, language: "fixture", packages: ["@fx/sdk", "@fx/sdk/push"] });
+  assert.deepEqual(surface.packages.map(item => item.name), ["@fx/sdk", "@fx/sdk/push"]);
+  assert.deepEqual(surface.packages[1].symbols, [
+    {
+      name: "Options",
+      kind: "interface",
+      signatures: ["interface Options"],
+      docs: "Shared options.",
+      origin: "@fx/core",
+      members: [{ name: "url", kind: "property", signatures: ["url: string"], docs: "" }],
+    },
+    { name: "subscribe", kind: "function", signatures: ["function subscribe(): Promise<void>"], docs: "Subscribes this device." },
+  ]);
+
+  const fails = (packages, message) =>
+    assert.throws(() => extractTypeScript({ root, packages }), error => {
+      assert.ok(error instanceof ExtractError, error.stack);
+      assert.equal(error.message, message);
+      return true;
+    });
+  fails(["@fx/sdk/missing"], '@fx/sdk: package.json exports["./missing"] has no "types" condition');
+  fails(["@fx/missing/push"], "@fx/missing is not a workspace package in node_modules; run npm ci first");
+  fails(["./packages/sdk"], "./packages/sdk is not a package name or a package subpath");
 });
 
 test("extractTypeScript names the package or file it can't document", t => {

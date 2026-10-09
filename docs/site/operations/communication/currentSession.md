@@ -59,4 +59,4 @@ query CommunicationCurrentSession($context: RequestContextInput!) {
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.initialize`](../../typescript/reference/client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](../../typescript/reference/client.md#convohopclientrefreshsession-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.initialize`](../../typescript/reference/client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](../../typescript/reference/client.md#convohopclientrefreshsession-method), [`ConvoHopClient.scheduleSessionRefresh`](../../typescript/reference/client.md#convohopclientschedulesessionrefresh-method), [`useSessionRefresh`](../../typescript/reference/react.md#usesessionrefresh-function) |

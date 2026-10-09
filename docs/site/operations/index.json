@@ -16,6 +16,11 @@
             "ref": "@convohop/server#ProjectServerClient.capabilities",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientcapabilities-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.capabilities",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientcapabilities-method"
           }
         ],
         "python": [
@@ -86,6 +91,16 @@
             "ref": "@convohop/client#ConvoHopClient.refreshSession",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientrefreshsession-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.scheduleSessionRefresh",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientschedulesessionrefresh-method"
+          },
+          {
+            "ref": "@convohop/react#useSessionRefresh",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#usesessionrefresh-function"
           }
         ],
         "python": [
@@ -161,6 +176,16 @@
             "ref": "@convohop/client#ConvoHopClient.refreshSession",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientrefreshsession-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.scheduleSessionRefresh",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientschedulesessionrefresh-method"
+          },
+          {
+            "ref": "@convohop/react#useSessionRefresh",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#usesessionrefresh-function"
           }
         ]
       }
@@ -250,6 +275,31 @@
             "ref": "@convohop/client#ConversationHandle.get",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationhandleget-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewresync-method"
           }
         ],
         "python": [
@@ -310,6 +360,11 @@
             "ref": "@convohop/server#ServerConversation.members.list",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#serverconversationmemberslist-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.members",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientmembers-method"
           }
         ],
         "python": [
@@ -405,6 +460,41 @@
             "ref": "@convohop/client#ConversationHandle.messages.list",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationhandlemessageslist-property"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.loadOlder",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreloadolder-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewresync-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.loadOlder",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewloadolder-method"
           }
         ],
         "python": [
@@ -490,6 +580,36 @@
             "ref": "@convohop/server#ServerConversation.messages.get",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#serverconversationmessagesget-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.getMessage",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientgetmessage-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewresync-method"
           }
         ],
         "python": [
@@ -560,6 +680,31 @@
             "ref": "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewresync-method"
           }
         ]
       }
@@ -579,6 +724,31 @@
             "ref": "@convohop/client#ConvoHopClient.receipts",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientreceipts-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewresync-method"
           }
         ]
       }
@@ -598,6 +768,11 @@
             "ref": "@convohop/server#ProjectServerClient.inbox",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientinbox-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.inbox",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientinbox-method"
           }
         ],
         "python": [
@@ -783,6 +958,31 @@
             "ref": "@convohop/client#ConvoHopClient.recoverPending",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientrecoverpending-method"
+          },
+          {
+            "ref": "@convohop/client#Outbox.send",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#outboxsend-method"
+          },
+          {
+            "ref": "@convohop/client#Outbox.resend",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#outboxresend-method"
+          },
+          {
+            "ref": "@convohop/client#Outbox.flush",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#outboxflush-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.send",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoresend-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.send",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewsend-method"
           }
         ],
         "python": [
@@ -993,6 +1193,16 @@
             "ref": "@convohop/client#ConversationLive.current",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationlivecurrent-method"
+          },
+          {
+            "ref": "@convohop/react#useLiveSession",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#uselivesession-function"
+          },
+          {
+            "ref": "@convohop/react#LiveSessionView.refresh",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#livesessionviewrefresh-method"
           }
         ],
         "python": [
@@ -2152,6 +2362,31 @@
             "ref": "@convohop/client#ConversationHandle.messages.send",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationhandlemessagessend-property"
+          },
+          {
+            "ref": "@convohop/client#Outbox.send",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#outboxsend-method"
+          },
+          {
+            "ref": "@convohop/client#Outbox.resend",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#outboxresend-method"
+          },
+          {
+            "ref": "@convohop/client#Outbox.flush",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#outboxflush-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.send",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoresend-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.send",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewsend-method"
           }
         ],
         "python": [
@@ -2352,6 +2587,31 @@
             "ref": "@convohop/client#ConvoHopClient.reportRead",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientreportread-method"
+          },
+          {
+            "ref": "@convohop/client#ConvoHopClient.reportDelivered",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclientreportdelivered-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.markRead",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoremarkread-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.markDelivered",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoremarkdelivered-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.markRead",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewmarkread-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.markDelivered",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewmarkdelivered-method"
           }
         ]
       }
@@ -2365,7 +2625,45 @@
       "layer": "client",
       "summary": "Send an ephemeral typing signal.",
       "page": "communication/typing.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [
+          {
+            "ref": "@convohop/client#ConvoHopClient.typing",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#convohopclienttyping-method"
+          },
+          {
+            "ref": "@convohop/client#TypingIndicator.input",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#typingindicatorinput-method"
+          },
+          {
+            "ref": "@convohop/client#TypingIndicator.stop",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#typingindicatorstop-method"
+          },
+          {
+            "ref": "@convohop/client#TypingIndicator.dispose",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#typingindicatordispose-method"
+          },
+          {
+            "ref": "@convohop/react#useTyping",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#usetyping-function"
+          },
+          {
+            "ref": "@convohop/react#TypingControls.input",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#typingcontrolsinput-method"
+          },
+          {
+            "ref": "@convohop/react#TypingControls.stop",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#typingcontrolsstop-method"
+          }
+        ]
+      }
     },
     {
       "id": "communication.setBroadcastPermission",
@@ -2686,9 +2984,24 @@
             "page": "../typescript/reference/client.md#liveparticipationhandleconnect-method"
           },
           {
+            "ref": "@convohop/client#LiveParticipationHandle.connectWith",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#liveparticipationhandleconnectwith-method"
+          },
+          {
             "ref": "@convohop/client#MediaConnection.reconnect",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#mediaconnectionreconnect-method"
+          },
+          {
+            "ref": "@convohop/react#MediaConnectionView.connect",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#mediaconnectionviewconnect-method"
+          },
+          {
+            "ref": "@convohop/react#MediaConnectionView.reconnect",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#mediaconnectionviewreconnect-method"
           }
         ]
       }
@@ -2779,6 +3092,31 @@
             "ref": "@convohop/client#ConvoHopClient.resyncAuthorizedHistory",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.open",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreopen-method"
+          },
+          {
+            "ref": "@convohop/client#ConversationStore.resync",
+            "package": "@convohop/client",
+            "page": "../typescript/reference/client.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "@convohop/react#useConversation",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#useconversation-function"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.open",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewopen-method"
+          },
+          {
+            "ref": "@convohop/react#ConversationView.resync",
+            "package": "@convohop/react",
+            "page": "../typescript/reference/react.md#conversationviewresync-method"
           }
         ]
       }

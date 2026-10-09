@@ -6,16 +6,18 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 
 ## TypeScript
 
-- [TypeScript SDKs](typescript/index.md): @convohop/server and @convohop/client wrap the ConvoHop API for TypeScript and JavaScript. The server SDK runs in your backend with a secret backend key, and the client SDK runs in your users' apps with a short-lived session for one user.
+- [TypeScript SDKs](typescript/index.md): @convohop/server and @convohop/client wrap the ConvoHop API for TypeScript and JavaScript. The server SDK runs in your backend with a secret backend key, and the client SDK runs in your users' apps with a short-lived session for one user. @convohop/react adds React hooks over the client SDK, and @convohop/client/push subscribes browsers to Web Push and shows the notifications.
 - [TypeScript server quickstart](typescript/quickstarts/server.md): Call ConvoHop from your Node.js backend with @convohop/server: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
-- [TypeScript client quickstart](typescript/quickstarts/client.md): Use ConvoHop in your users' browsers with @convohop/client: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads.
+- [TypeScript client quickstart](typescript/quickstarts/client.md): Use ConvoHop in your users' browsers with @convohop/client: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads. @convohop/react offers the same as React hooks.
 - [TypeScript webhooks quickstart](typescript/quickstarts/webhooks.md): Receive ConvoHop events in your backend with @convohop/server: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
-- [TypeScript push notifications quickstart](typescript/quickstarts/push.md): Send push notifications for ConvoHop messages and calls: @convohop/server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
+- [TypeScript push notifications quickstart](typescript/quickstarts/push.md): Send push notifications for ConvoHop messages and calls: @convohop/server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries. In browsers, @convohop/client/push subscribes to Web Push and shows the notifications.
 - [TypeScript calling quickstart](typescript/quickstarts/calling.md): Add voice and video calls to a conversation with @convohop/client: start a call and ring other members, join the current call, and leave or end it.
 - [TypeScript reference](typescript/reference/index.md): The public API of each TypeScript package, generated from its declarations.
 - [@convohop/server](typescript/reference/server.md): Server SDK for trusted Node.js runtimes: backend-key data-plane calls, management, webhook verification and push requests.
 - [@convohop/client](typescript/reference/client.md): Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.
-- [TypeScript operation coverage](typescript/reference/operations.md): The TypeScript SDK members that send each API operation. 52 of the 76 operations that TypeScript packages can send have a method.
+- [@convohop/client/push](typescript/reference/client-push.md): Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK.
+- [@convohop/react](typescript/reference/react.md): React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.
+- [TypeScript operation coverage](typescript/reference/operations.md): The TypeScript SDK members that send each API operation. 53 of the 76 operations that TypeScript packages can send have a method.
 
 ## Python
 

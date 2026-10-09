@@ -110,7 +110,7 @@ query CommunicationCapabilities($context: RequestContextInput!) {
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.capabilities`](../../typescript/reference/server.md#projectserverclientcapabilities-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.capabilities`](../../typescript/reference/server.md#projectserverclientcapabilities-method), [`ConvoHopClient.capabilities`](../../typescript/reference/client.md#convohopclientcapabilities-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.capabilities`](../../python/reference/convohop.md#convohopcapabilities-method), [`AsyncConvoHop.capabilities`](../../python/reference/convohop.md#asyncconvohopcapabilities-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ProjectServerClient.GetCapabilitiesAsync`](../../dotnet/reference/convohop.md#projectserverclientgetcapabilitiesasync-method), [`CommunicationApi.CapabilitiesAsync`](../../dotnet/reference/api.md#communicationapicapabilitiesasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.capabilities`](../../jvm/reference/server.md#projectserverclientcapabilities-method), [`CommunicationApi.capabilities`](../../jvm/reference/server.md#communicationapicapabilities-method), [`CommunicationSuspendApi.capabilities`](../../jvm/reference/server-kotlin.md#communicationsuspendapicapabilities-method) |

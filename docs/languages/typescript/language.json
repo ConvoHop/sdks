@@ -24,6 +24,22 @@
       "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.",
       "runtime": "Current browsers. React Native isn't verified yet.",
       "source": "packages/client"
+    },
+    {
+      "name": "@convohop/client/push",
+      "slug": "client-push",
+      "layer": "client",
+      "summary": "Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK.",
+      "runtime": "Current browsers and their service workers. No dependencies.",
+      "source": "packages/client"
+    },
+    {
+      "name": "@convohop/react",
+      "slug": "react",
+      "layer": "client",
+      "summary": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.",
+      "runtime": "React 18 or later in current browsers. React Native isn't verified yet.",
+      "source": "packages/react"
     }
   ],
   "quickstarts": ["server", "client", "webhooks", "push", "calling"],

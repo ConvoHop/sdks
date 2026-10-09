@@ -1,14 +1,14 @@
 {
   "name": "convohop-docs-typescript-examples",
   "private": true,
-  "description": "Tested snippets for the TypeScript docs. Imports @convohop/* and runs tsc through the repository root's workspace, so run npm ci and npm run build at the root first.",
+  "description": "Tested snippets for the TypeScript docs. Imports @convohop/*, react and livekit-client and runs tsc through the repository root's workspace, so run npm ci and npm run build at the root first.",
   "license": "Apache-2.0",
   "type": "module",
   "engines": {
     "node": ">=22.18"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.worker.json",
     "test": "npm run typecheck && node --test \"test/*.test.ts\""
   },
   "devDependencies": {

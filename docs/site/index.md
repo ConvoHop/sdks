@@ -6,7 +6,7 @@ Reference documentation, quickstarts and tested examples for the ConvoHop SDKs.
 
 | Language | Status | Packages |
 | --- | --- | --- |
-| [TypeScript](typescript/index.md) | Preview | [`@convohop/server`](typescript/reference/server.md), [`@convohop/client`](typescript/reference/client.md) |
+| [TypeScript](typescript/index.md) | Preview | [`@convohop/server`](typescript/reference/server.md), [`@convohop/client`](typescript/reference/client.md), [`@convohop/client/push`](typescript/reference/client-push.md), [`@convohop/react`](typescript/reference/react.md) |
 | [Python](python/index.md) | Preview | [`convohop`](python/reference/convohop.md), [`convohop.webhooks`](python/reference/webhooks.md), [`convohop.push`](python/reference/push.md), [`convohop.types`](python/reference/types.md) |
 | [.NET](dotnet/index.md) | Preview | [`ConvoHop`](dotnet/reference/convohop.md), [`ConvoHop.Api`](dotnet/reference/api.md), [`ConvoHop.Models`](dotnet/reference/models.md) |
 | [Java and Kotlin](jvm/index.md) | Preview | [`com.convohop:convohop-server`](jvm/reference/server.md), [`com.convohop:convohop-server-kotlin`](jvm/reference/server-kotlin.md) |

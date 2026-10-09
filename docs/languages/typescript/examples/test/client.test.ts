@@ -1,8 +1,22 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { after, before, test } from "node:test";
-import { ConvoHopProblem, type ConversationMessage, type RecoveryStorage } from "@convohop/client";
-import { connectUser, sendMessage, watchConversation } from "../src/client.ts";
+import {
+  ConvoHopProblem,
+  type ConversationMessage,
+  type ConversationSnapshot,
+  type ConversationStore,
+} from "@convohop/client";
+import {
+  connectUser,
+  openOutbox,
+  pendingLabel,
+  sendDraft,
+  sendMessage,
+  showConversation,
+  signOut,
+  watchConversation,
+} from "../src/client.ts";
 import { bootstrapUser, connect, createConversation, type ServerConfig } from "../src/server.ts";
 import { attempts, injectFault, startMock, type MockTarget } from "./mock.ts";
 
@@ -16,12 +30,18 @@ before(async () => {
 });
 after(() => target.close());
 
-function memoryStorage(): RecoveryStorage {
+// localStorage, in memory.
+function memoryStorage(): Storage {
   const items = new Map<string, string>();
   return {
+    get length() {
+      return items.size;
+    },
+    key: index => [...items.keys()][index] ?? null,
     getItem: key => items.get(key) ?? null,
     setItem: (key, value) => void items.set(key, value),
     removeItem: key => void items.delete(key),
+    clear: () => items.clear(),
   };
 }
 
@@ -36,6 +56,19 @@ async function twoMembers(title: string) {
 }
 
 const unknownOutcome = (error: unknown) => error instanceof ConvoHopProblem && error.outcome === "unknown";
+
+// Resolves with the store's first snapshot that passes check.
+function snapshotWhere(
+  store: ConversationStore,
+  check: (snapshot: ConversationSnapshot) => boolean,
+): Promise<ConversationSnapshot> {
+  const { promise, resolve } = Promise.withResolvers<ConversationSnapshot>();
+  const unsubscribe = store.subscribe(() => {
+    if (check(store.snapshot)) resolve(store.snapshot);
+  });
+  if (check(store.snapshot)) resolve(store.snapshot);
+  return promise.finally(unsubscribe);
+}
 
 test("a watching user sees another user's message", { timeout: 15_000 }, async () => {
   const { aliceLogin, bobLogin, conversationId } = await twoMembers("Weekend");
@@ -90,3 +123,71 @@ for (const action of ["dropBeforeCommit", "dropAfterCommit"] as const) {
     assert.deepEqual(await attempts(target, "sendMessage", requestId), action === "dropBeforeCommit" ? [true, false] : [true]);
   });
 }
+
+test("a conversation store shows a draft at once, then the messages ConvoHop committed", { timeout: 15_000 }, async () => {
+  const { aliceLogin, bobLogin, conversationId } = await twoMembers("Store");
+  const alice = await connectUser(aliceLogin, memoryStorage());
+  const bob = await connectUser(bobLogin, memoryStorage());
+  const outbox = openOutbox(alice);
+  const renders: ConversationSnapshot[] = [];
+  const store = await showConversation(alice, outbox, conversationId, snapshot => renders.push(snapshot));
+  try {
+    assert.equal(store.snapshot.status, "live");
+    assert.equal(sendDraft(store, "  "), null);
+    const entry = sendDraft(store, " Hi Bob ");
+    assert.ok(entry);
+    assert.equal(entry.text, "Hi Bob");
+    assert.deepEqual(store.snapshot.pending.map(pending => [pending.requestId, pendingLabel(pending)]), [[entry.requestId, "Sending…"]]);
+    await snapshotWhere(store, snapshot => snapshot.pending.length === 0 && snapshot.messages.length === 1);
+
+    await sendMessage(bob, conversationId, "Hi Alice", randomUUID());
+    const snapshot = await snapshotWhere(store, snapshot => snapshot.messages.length === 2);
+    assert.deepEqual(snapshot.messages.map(message => [message.authorId, message.text]), [
+      [aliceLogin.session.principalId, "Hi Bob"],
+      [bobLogin.session.principalId, "Hi Alice"],
+    ]);
+    assert.equal(renders.at(-1), store.snapshot);
+  } finally {
+    store.close();
+    await outbox.close();
+  }
+});
+
+for (const action of ["dropBeforeCommit", "dropAfterCommit"] as const) {
+  test(`the outbox posts a draft once when the connection drops (${action})`, { timeout: 15_000 }, async () => {
+    const { aliceLogin, conversationId } = await twoMembers("Outbox");
+    const alice = await connectUser(aliceLogin, memoryStorage());
+    const outbox = openOutbox(alice);
+    const store = await showConversation(alice, outbox, conversationId, () => {});
+    try {
+      await injectFault(target, "sendMessage", action);
+      const entry = sendDraft(store, "Still there?");
+      assert.ok(entry);
+      const snapshot = await snapshotWhere(store, snapshot => snapshot.pending.length === 0 && snapshot.messages.length > 0);
+      assert.deepEqual(snapshot.messages.map(message => message.text), ["Still there?"]);
+      // The outbox looks up the request's outcome, and sends it again with the same request ID only if ConvoHop hadn't
+      // committed it.
+      const expected = action === "dropBeforeCommit" ? [true, false] : [true];
+      assert.deepEqual(await attempts(target, "sendMessage", entry.requestId), expected);
+    } finally {
+      store.close();
+      await outbox.close();
+    }
+  });
+}
+
+test("signing out during a send leaves the storage empty", { timeout: 15_000 }, async () => {
+  const { aliceLogin, conversationId } = await twoMembers("Sign-out");
+  const storage = memoryStorage();
+  const alice = await connectUser(aliceLogin, storage);
+  const outbox = openOutbox(alice);
+  const store = await showConversation(alice, outbox, conversationId, () => {});
+  sendDraft(store, "Signing off");
+  await snapshotWhere(store, snapshot => snapshot.pending.some(entry => entry.status === "sending"));
+  assert.ok(storage.length > 0);
+  store.close();
+  await signOut(outbox, storage);
+  assert.equal(storage.length, 0);
+  await alice.messages(conversationId); // A round trip, for anything still in flight to land.
+  assert.equal(storage.length, 0);
+});
