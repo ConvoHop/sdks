@@ -1,10 +1,10 @@
 [versions]
-agp = "9.1.1"
-kotlin = "2.2.21"
-coroutines = "1.10.2"
-serialization = "1.9.0"
+agp = "9.4.1"
+kotlin = "2.4.20"
+coroutines = "1.11.0"
+serialization = "1.11.0"
 okhttp = "4.12.0"
-androidx-core = "1.13.1"
+androidx-core = "1.19.1"
 livekit = "2.29.0"
 # Apps supply firebase-messaging; :push only compiles against it. 25.1.0 (BoM 34.15.0) added
 # registration by Firebase Installation ID, and 25.1.2 (BoM 34.18.0) fixed re-registering after
