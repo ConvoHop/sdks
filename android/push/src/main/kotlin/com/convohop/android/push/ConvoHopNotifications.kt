@@ -427,7 +427,7 @@ private class CallEntry(val call: PushNotification.IncomingCall) {
     var route: AudioRoute? = null
     var routes: Set<AudioRoute> = emptySet()
 
-    fun info(): CallInfo = CallInfo(call, state, endReason, serverReason, muted, route, routes)
+    fun info(): CallInfo = CallInfo(call, state, endReason, serverReason, muted, route, routes, connection != null)
 }
 
 private class Ending(val entry: CallEntry, val connection: CallConnection?, val previous: CallState)

@@ -96,9 +96,11 @@ internal class TelecomTest {
     @Test
     fun answersHoldsAndHangsUpFromTheSystem() {
         val connection = ring(alert)
+        assertTrue(checkNotNull(manager.call(alert)).telecom)
         connection.onAnswer()
         assertEquals(Connection.STATE_ACTIVE, connection.state)
         assertEquals(CallState.ACTIVE, manager.call(alert)?.state)
+        assertTrue(checkNotNull(manager.call(alert)).telecom)
         assertNull(push.posted(alert))
 
         connection.onHold()
@@ -113,6 +115,7 @@ internal class TelecomTest {
         connection.onDisconnect()
         assertDisconnected(connection, DisconnectCause.LOCAL)
         assertEquals(CallEndReason.HUNG_UP, manager.call(alert)?.endReason)
+        assertFalse(checkNotNull(manager.call(alert)).telecom)
         assertEquals(
             listOf(
                 "incoming $alert", "answered $alert", "hold $alert true", "hold $alert false",

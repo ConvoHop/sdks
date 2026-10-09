@@ -81,6 +81,13 @@ public class CallInfo internal constructor(
     public val audioRoute: AudioRoute?,
     /** The routes [ConvoHopNotifications.setAudioRoute] accepts. */
     public val availableAudioRoutes: Set<AudioRoute>,
+    /**
+     * Whether Android's Telecom runs the call through this app's self-managed
+     * `ConnectionService`. Telecom then owns audio focus, the audio mode and
+     * the route, so media must leave them alone; the app still mutes its own
+     * microphone when [muted] and pauses media on hold.
+     */
+    public val telecom: Boolean,
 ) {
     public val alertId: String get() = notification.alertId
     public val liveSessionId: String get() = notification.liveSessionId

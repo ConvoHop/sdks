@@ -236,6 +236,7 @@ internal class CallNotificationsTest {
         assertNull(push.startedActivity())
         assertNull(push.posted(alert))
         assertEquals(CallState.ACTIVE, manager.call(alert)?.state)
+        assertFalse(checkNotNull(manager.call(alert)).telecom)
         assertEquals(listOf("incoming $alert", "answered $alert"), push.events())
     }
 
