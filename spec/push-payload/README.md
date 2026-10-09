@@ -113,8 +113,8 @@ webhook events:
 
 Each SDK has four builders. They are pure functions: they take an event, the
 options and a clock, and return a request or none. They hold no credentials
-and send nothing. Your push library adds the device token, APNs or FCM
-authorization, and Web Push encryption ([RFC 8291](https://www.rfc-editor.org/rfc/rfc8291))
+and send nothing. Your push library adds the device's token or FID, APNs or
+FCM authorization, and Web Push encryption ([RFC 8291](https://www.rfc-editor.org/rfc/rfc8291))
 and VAPID signing.
 
 | Builder | Events | Measured part | Limit (bytes) |
@@ -167,9 +167,10 @@ and `body` to it.
 - **APNs VoIP.** Headers: `apns-push-type: voip`, `apns-topic: <bundleId>.voip`,
   `apns-priority: 10` and `apns-expiration`, without a collapse ID. The
   payload is `{ "convohop" }`.
-- **FCM.** An HTTP v1 `messages:send` message without a target: add `token`.
-  `message.data.convohop` is the `convohop` object as canonical JSON (compare
-  it after parsing). `message.android` is
+- **FCM.** An HTTP v1 `messages:send` message without a target: add `token`
+  or `fid` (the Firebase Installation ID), whichever the Android app
+  registered. `message.data.convohop` is the `convohop` object as canonical
+  JSON (compare it after parsing). `message.android` is
   `{ "priority": "HIGH", "ttl": "<lifetime>s" }`, plus the collapse key as
   `collapse_key` for calls and cancellations. Firebase Admin SDKs take these
   options in their own form, so convert them. Android apps build the

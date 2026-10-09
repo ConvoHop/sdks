@@ -261,9 +261,18 @@ How it works:
 Your backend sends to a registration token with the FCM HTTP v1 `token`
 target, and to a FID with the `fid` target, which `firebase-admin` supports
 from 14.1.0 for Node.js and 7.5.0 for Python. Those versions mark the
-`token` target deprecated, and still send to it. The manifest flag applies
-to the whole app: with it, `FirebaseMessaging.getToken()` throws for every
-library in the app, so set it only if none of them needs a token.
+`token` target deprecated, and still send to it.
+
+On Android, firebase-messaging 25.1.0 deprecates `getToken()`,
+`deleteToken()` and `FirebaseMessagingService.onNewToken()` in favor of
+`register()`, `unregister()` and `onRegistered()`. Both sets work: the
+deprecated methods without the manifest flag, and the new ones with it. The
+token stays the default because the flag applies to the whole app: with it,
+`FirebaseMessaging.getToken()` fails for every library in the app, so set it
+only if none of them needs a token. For FID mode, use firebase-messaging
+25.1.2 or later (Firebase Android BoM 34.18.0 or later): 25.1.1 fixed
+re-registration when the FID changes, and 25.1.2 fixed a `FID_ALREADY_USED`
+registration error.
 
 > [!NOTE]
 > The Node.js server SDK verifies webhooks, with

@@ -2714,7 +2714,7 @@
           "name": "FcmRequest",
           "kind": "interface",
           "signatures": ["class FcmRequest(TypedDict)"],
-          "docs": "An FCM HTTP v1 REST `messages:send` message without a target: add `token` to `message`.\n\nFirebase Admin SDKs take `android` in their own form, such as `firebase_admin.messaging.AndroidConfig` with a\n`ttl` in seconds.",
+          "docs": "An FCM HTTP v1 REST `messages:send` message without a target: add `token` or `fid` to `message`.\n\nFirebase Admin SDKs take `android` in their own form, such as `firebase_admin.messaging.AndroidConfig` with a\n`ttl` in seconds.",
           "members": [
             {
               "name": "[\"message\"]",
