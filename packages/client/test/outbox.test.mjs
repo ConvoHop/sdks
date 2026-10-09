@@ -38,6 +38,7 @@ function problem(code, status, outcome = "rejected", extra = {}) {
 /**
  * Clients of one fake authority that commits each request ID at most once. `onSend` and `onResolve` can answer a
  * request first; when they return undefined the authority commits the send, or reports what it has committed.
+ * `client(options)` overrides the client's options, such as its storage or a `fetch` that wraps `setup.fetch`.
  */
 function authority({ recoveryStorage, projectId = id(), incarnation = id(), principalId = id(), clientOptions = {} } = {}) {
   const setup = { projectId, incarnation, principalId, sends: [], resolves: [], committed: new Map(), sequence: 0,
@@ -51,24 +52,48 @@ function authority({ recoveryStorage, projectId = id(), incarnation = id(), prin
     if (!setup.committed.has(requestId)) setup.committed.set(requestId, setup.ack(request.variables.input.conversationId));
     return setup.committed.get(requestId);
   };
-  setup.client = () => new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
-    sessionToken: "outbox-test-session", ...(recoveryStorage ? { recoveryStorage } : {}), ...clientOptions,
-    fetch: async (_url, options) => {
-      const request = JSON.parse(options.body);
-      if (request.operationName === "CommunicationSendMessage") {
-        setup.sends.push(request);
-        return (await setup.onSend?.(request)) ?? reply(request, { result: setup.commit(request) });
-      }
-      if (request.operationName === "CommunicationResolveRequest") {
-        setup.resolves.push(request);
-        const answer = await setup.onResolve?.(request);
-        if (answer) return answer;
-        const { requestId } = request.variables.input, ack = setup.committed.get(requestId);
-        return reply(request, { result: ack ? resolution(requestId, "committed", { messageAck: ack }) : resolution(requestId, "notObservedYet") });
-      }
-      throw new Error("Unexpected operation " + request.operationName);
-    } });
+  setup.fetch = async (_url, options) => {
+    const request = JSON.parse(options.body);
+    if (request.operationName === "CommunicationSendMessage") {
+      setup.sends.push(request);
+      return (await setup.onSend?.(request)) ?? reply(request, { result: setup.commit(request) });
+    }
+    if (request.operationName === "CommunicationResolveRequest") {
+      setup.resolves.push(request);
+      const answer = await setup.onResolve?.(request);
+      if (answer) return answer;
+      const { requestId } = request.variables.input, ack = setup.committed.get(requestId);
+      return reply(request, { result: ack ? resolution(requestId, "committed", { messageAck: ack }) : resolution(requestId, "notObservedYet") });
+    }
+    throw new Error("Unexpected operation " + request.operationName);
+  };
+  setup.client = (options = {}) => new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
+    sessionToken: "outbox-test-session", ...(recoveryStorage ? { recoveryStorage } : {}), ...clientOptions, fetch: setup.fetch, ...options });
   return setup;
+}
+/**
+ * A page's storage over the browser's `values` and its connection to the authority. After `unloadAfter(steps)`, the
+ * page writes or sends that many more times and unloads before its next write or send: that and later ones are lost.
+ * `log` names the steps taken since: `record` writes the client's recovery records, `entry` the outbox's entries.
+ */
+function page(values, asynchronous = false) {
+  const value = { log: [], steps: Infinity, unloaded: false };
+  const step = name => {
+    if (value.log.length >= value.steps) { value.unloaded = true; return false; }
+    value.log.push(name);
+    return true;
+  };
+  const write = (key, change) => { if (step(key.startsWith("convohop.requests:") ? "record" : "entry")) change(); };
+  const storage = { getItem: key => values.get(key) ?? null,
+    setItem: (key, text) => write(key, () => values.set(key, text)), removeItem: key => write(key, () => values.delete(key)) };
+  value.storage = asynchronous ? { getItem: async key => storage.getItem(key), setItem: async (key, text) => storage.setItem(key, text),
+    removeItem: async key => storage.removeItem(key) } : storage;
+  value.fetch = send => async (url, options) => {
+    if (!step("send")) throw new TypeError("The page unloaded before sending");
+    return send(url, options);
+  };
+  value.unloadAfter = steps => { value.log = []; value.steps = steps; };
+  return value;
 }
 function outbox(t, client, options = {}) {
   const errors = [], value = new Outbox(client, { connectivity: connectivity(), onError: error => errors.push(error), ...options });
@@ -313,7 +338,7 @@ test("a persistent outbox restores unsent messages and recovers attempted ones w
   assert.deepEqual(errors, []);
 });
 
-test("a send recorded before the transport saved its request is resolved read-only after a reload", async t => {
+test("an attempted message whose recovery record was lost is resolved read-only after a reload", async t => {
   const saved = storage(), setup = authority({ recoveryStorage: saved }), conversationId = id();
   const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`, committedId = id(), missingId = id();
   const createdAt = new Date().toISOString();
@@ -333,6 +358,38 @@ test("a send recorded before the transport saved its request is resolved read-on
   assert.deepEqual(JSON.parse(saved.values.get(key)).map(item => [item.requestId, item.failed, item.unconfirmed]),
     [[missingId, true, true]]);
 });
+
+for (const [kind, option] of [["synchronous", "recoveryStorage"], ["asynchronous", "asyncRecoveryStorage"]]) {
+  test(`a page that unloads at any point of a send leaves the message for a reload to deliver exactly once (${kind} storage)`, async t => {
+    let completed = false;
+    for (let steps = 0; !completed; steps++) {
+      assert.ok(steps < 20, "the send never completed");
+      const values = new Map(), setup = authority(), conversationId = id(), network = connectivity(false);
+      const key = `convohop.outbox:${setup.projectId}:${setup.principalId}`, first = page(values, kind === "asynchronous");
+      const { outbox: before } = outbox(t, setup.client({ [option]: first.storage, fetch: first.fetch(setup.fetch) }),
+        { persist: true, connectivity: network });
+      const { requestId } = before.send(conversationId, "sent once");
+      await before.flush();
+      await until(() => values.has(key), "the queued message to be saved");
+      first.unloadAfter(steps);
+      network.set(true);
+      await before.flush();
+      before.close();
+      completed = !first.unloaded;
+      const left = values.has(key);
+      const { outbox: after, errors } = outbox(t, setup.client({ [option]: page(values, kind === "asynchronous").storage }), { persist: true });
+      await after.flush();
+      const at = `after ${steps} steps (${first.log.join(", ")})`;
+      assert.deepEqual(after.entries.map(entry => [entry.requestId, entry.status]), left ? [[requestId, "sent"]] : [], at);
+      assert.deepEqual(sendIds(setup), [requestId], "the message reaches the authority once, with its request ID, " + at);
+      assert.deepEqual(errors, [], at);
+      after.close();
+      if (completed)
+        assert.deepEqual(first.log, ["record", "entry", "record", "send", "record", "entry"],
+          "the request is recorded before the outbox notes its attempt, which precedes sending it");
+    }
+  });
+}
 
 test("unreadable saved entries are skipped, failed ones restore as failed, and storage failures are reported", async t => {
   const saved = storage(), setup = authority({ recoveryStorage: saved });

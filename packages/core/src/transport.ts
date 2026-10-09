@@ -23,6 +23,8 @@ export interface TransportAuthentication {
     observedServingEpoch?: string) => Promise<OperationPayload<K>>;
 }
 const transportAuthentication = new WeakMap<ConvoHopTransport, TransportAuthentication>();
+/** Each transport's {@link beforeSubmitting} hooks by request ID. */
+const submissionHooks = new WeakMap<ConvoHopTransport, Map<string, () => void | Promise<void>>>();
 export class ConvoHopTransport {
   readonly baseUrl: string;
   readonly durableRecovery: boolean;
@@ -232,6 +234,8 @@ export class ConvoHopTransport {
     const now = Date.now();
     if (state.attemptCount >= 3 || now > state.retryDeadline || now < state.firstSubmittedAt || now < state.lastAttemptAt)
       throw new ConvoHopProblem("RESOLUTION_REQUIRED", state.requestId, "unknown", 409, "Retry budget expired or clock changed; resolve this request read-only");
+    const hook = submissionHooks.get(this)?.get(state.requestId);
+    if (hook) await hook();
     state.attemptCount += 1; state.lastAttemptAt = now;
     if (state.resolutionState === "pending") state.resolutionState = "unknown";
     state.lastAttemptClassification = "submitted"; await this.#persist(state);
@@ -367,4 +371,18 @@ export function authenticatedTransport(options: ConvoHopTransportOptions): {
   const authentication = transportAuthentication.get(transport);
   if (!authentication) throw new Error("Missing transport authentication state");
   return { transport, authentication };
+}
+/**
+ * @internal Runs `hook` before each submission of `requestId` within its retry budget: after the transport has
+ * stored the request's recovery record, and before it counts and sends the attempt, which wait for the hook. A
+ * caller that records that the request may have been sent does so here, so storage never holds that note without
+ * the record that recovers the request. If the hook throws, nothing is sent and the submission fails with its error.
+ * Returns a function that removes the hook.
+ */
+export function beforeSubmitting(transport: ConvoHopTransport, requestId: string, hook: () => void | Promise<void>): () => void {
+  const key = parseId(requestId);
+  const hooks = submissionHooks.get(transport) ?? new Map<string, () => void | Promise<void>>();
+  submissionHooks.set(transport, hooks);
+  hooks.set(key, hook);
+  return () => { if (hooks.get(key) === hook) hooks.delete(key); };
 }

@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { ConvoHopTransport, ConvoHopClient } from "@convohop/client";
+import { beforeSubmitting } from "@convohop/core/internal";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -76,6 +77,38 @@ test("async pending intent, submitted attempt and receipt writes are awaited in 
   assert.equal(states(saved)[0].requestId, requestId);
   assert.equal(states(saved)[0].resolutionState, "committed");
   assert.equal(saved.removals.length, 0);
+});
+
+test("a submission hook runs once the request is recorded and before each attempt is counted and sent, and a failing one sends nothing", async () => {
+  const saved = asyncStorage(), requestId = id(), calls = [];
+  let fetches = 0;
+  const transport = new ConvoHopTransport({ ...options, asyncRecoveryStorage: saved, fetch: async (_url, init) => {
+    const request = JSON.parse(init.body);
+    if (request.operationName === "ManagementResolveRequest") return reply(request, { result: resolution(requestId, "notObservedYet") });
+    fetches++;
+    throw new Error("connection lost");
+  } });
+  await transport.initializeRecovery();
+  let hook = async () => { throw new Error("the hook failed"); };
+  const forget = beforeSubmitting(transport, requestId, () => { calls.push([states(saved)[0].attemptCount, fetches]); return hook(); });
+  await assert.rejects(mutate(transport, requestId), /the hook failed/);
+  assert.deepEqual([fetches, states(saved)[0].attemptCount, states(saved)[0].lastAttemptClassification], [0, 0, "notSubmitted"],
+    "a failing hook sends nothing");
+  const entered = Promise.withResolvers(), gate = Promise.withResolvers();
+  hook = () => { entered.resolve(); return gate.promise; };
+  const work = mutate(transport, requestId);
+  await entered.promise;
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual([fetches, transport.recoveryStates[0].attemptCount], [0, 0], "the attempt waits for the hook");
+  gate.resolve();
+  await assert.rejects(work, { code: "TRANSPORT_UNKNOWN" });
+  hook = async () => {};
+  await assert.rejects(transport.retry(requestId), { code: "TRANSPORT_UNKNOWN" });
+  forget();
+  await assert.rejects(transport.retry(requestId), { code: "TRANSPORT_UNKNOWN" });
+  assert.deepEqual(calls, [[0, 0], [0, 0], [1, 1]], "each submission runs the hook once, after its record is saved");
+  assert.equal(fetches, 3);
+  assert.equal(states(saved)[0].attemptCount, 3);
 });
 
 test("failed async restore is retained and cannot become empty recovery or permit effects", async () => {

@@ -2,7 +2,7 @@ import {
   ConvoHopProblem, parseCounter, parseCursor, parseId, parseObject, parseString, type AsyncRecoveryStorage, type Connectivity,
   type ProtocolObject, type RecoveryState, type SendReceipt,
 } from "@convohop/core";
-import { jsonClone, randomUUID } from "@convohop/core/internal";
+import { beforeSubmitting, jsonClone, randomUUID } from "@convohop/core/internal";
 import type { ConvoHopClient } from "./client.js";
 import { abortReason, connectivityOf, lifecycleOf, listen, storageWrites, throwIfAborted } from "./platform.js";
 import { asError, frozen, notify } from "./util.js";
@@ -57,7 +57,7 @@ export interface OutboxOptions {
 
 interface Item {
   requestId: string; conversationId: string; text: string; props: ProtocolObject; createdAt: string; status: OutboxStatus;
-  /** The send may have reached the authority. */
+  /** The send may have reached the authority. Noted before each submission, after the request's recovery record is saved. */
   attempted: boolean;
   /** Some submission's outcome was uncertain, so the message may have committed. */
   uncertain: boolean;
@@ -324,26 +324,30 @@ export class Outbox {
   async #attempt(item: Item): Promise<void> {
     item.status = "sending"; this.#changed();
     let phase: Phase = "submit";
+    // Noted once the transport has saved the request's recovery record, so a page that unloads at any point leaves
+    // either the record, which recovers this request, or no sign that it was sent.
+    const forget = beforeSubmitting(this.client.http, item.requestId, async () => {
+      if (!item.attempted) { item.attempted = true; await this.#save(); }
+    });
     try {
       await this.client.http.initializeRecovery();
-      if (this.#state(item.requestId) && !item.exhausted) {
+      const recorded = this.#state(item.requestId) !== undefined;
+      if (recorded && !item.exhausted) {
         phase = "retry";
         const resolution = await this.client.requests.retry(item.requestId);
         if (resolution.state === "committed") this.#committed(item, resolution);
         else { item.uncertain = true; this.#later(item, new Error("The message's outcome is not known yet")); }
-      } else if (item.attempted) {
+      } else if (recorded || item.attempted) {
         phase = "resolve";
         await this.#resolve(item);
       } else {
-        // Recorded before submission, so a reload recovers this request instead of sending it again.
-        item.attempted = true; await this.#save();
         const receipt = await this.client.send(item.conversationId, item.text, item.requestId, item.props);
         this.#sent(item, receipt.messageId, receipt);
       }
     } catch (error) {
       try { await this.#failed(item, error, phase); }
       catch (cause) { this.#fail(item, asError(cause, "Message send failed"), true); }
-    }
+    } finally { forget(); }
     this.#changed();
   }
   async #failed(item: Item, error: unknown, phase: Phase): Promise<void> {
