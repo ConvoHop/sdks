@@ -104,13 +104,31 @@ internal class PushLedgerTest {
     }
 
     @Test
+    fun givesAnAlertOneMissedCall() {
+        val store = MemoryPushLedgerStore()
+        val first = ledger(store)
+        assertEquals(PushDecision.RING, first.record(Fixtures.call(id(1), id(100))))
+        assertEquals(PushDecision.MISSED_CALL, first.record(Fixtures.cancel(id(2), id(100), "ended")))
+        // More missed cancellations for the alert under new event IDs, even in a new process.
+        assertEquals(PushDecision.IGNORE, first.record(Fixtures.cancel(id(3), id(100), "expired")))
+        val second = ledger(store)
+        assertEquals(PushDecision.IGNORE, second.record(Fixtures.cancel(id(4), id(100), "ended")))
+        // Stopping is idempotent, so other reasons still stop the ringing; another alert gets its own missed call.
+        assertEquals(PushDecision.STOP_RINGING, second.record(Fixtures.cancel(id(5), id(100), "answered")))
+        assertEquals(PushDecision.MISSED_CALL, second.record(Fixtures.cancel(id(6), id(101), "ended")))
+    }
+
+    @Test
     fun keepsHandledAlertsForADayPastTheirDeadline() {
         val ledger = ledger()
         ledger.stop(id(100), NOW + 30_000)
+        assertEquals(PushDecision.MISSED_CALL, ledger.record(Fixtures.cancel(id(1), id(101), "ended")))
         now = NOW + 30_000 + 86_400_000 - 1
-        assertEquals(PushDecision.IGNORE, ledger.record(Fixtures.cancel(id(1), id(100), "expired")))
+        assertEquals(PushDecision.IGNORE, ledger.record(Fixtures.cancel(id(2), id(100), "expired")))
+        assertEquals(PushDecision.IGNORE, ledger.record(Fixtures.cancel(id(3), id(101), "expired")))
         now += 1
-        assertEquals(PushDecision.MISSED_CALL, ledger.record(Fixtures.cancel(id(2), id(100), "expired")))
+        assertEquals(PushDecision.MISSED_CALL, ledger.record(Fixtures.cancel(id(4), id(100), "expired")))
+        assertEquals(PushDecision.MISSED_CALL, ledger.record(Fixtures.cancel(id(5), id(101), "expired")))
     }
 
     @Test

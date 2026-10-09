@@ -197,6 +197,23 @@ internal class CallNotificationsTest {
     }
 
     @Test
+    fun showsOneMissedCallPerRing() {
+        push.handle(callData(id(1), alert))
+        assertEquals(PushResult.MISSED, push.handle(cancelData(id(2), alert, "ended")))
+        assertEquals("Missed call", push.notification(alert).title)
+        assertEquals(listOf("incoming $alert", "ended $alert MISSED ended"), push.events())
+        // The user dismisses the missed call, and the process forgets the ended call.
+        push.app.getSystemService(NotificationManager::class.java).cancel(alert, CallNotifier.NOTIFICATION_ID)
+        push.advance(60_000)
+        assertNull(manager.call(alert))
+
+        // Another missed cancellation for the ring, under a new event ID, doesn't show it again.
+        assertEquals(PushResult.IGNORED, push.handle(cancelData(id(3), alert, "expired")))
+        assertNull(push.posted(alert))
+        assertEquals(emptyList<String>(), push.events())
+    }
+
+    @Test
     fun leavesMissedCallsToTheAppWhenAsked() {
         push.options.showMissedCalls = false
         push.handle(callData(id(1), alert))

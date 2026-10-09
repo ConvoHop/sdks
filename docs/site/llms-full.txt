@@ -55596,9 +55596,12 @@ public class PushLedger
 Applies the push contract's delivery rules. Delivery is at least once and
 unordered, so the ledger handles each `eventId` once, and a ring counts as
 stopped once a cancellation with its `alertId` arrived, even before the
-ring itself, or once its `expiresAt` passed. A ring the user answered,
-declined or let ring out on this device (`stop`) gets no missed call when
-the server's cancellation arrives later, even in a new process.
+ring itself, or once its `expiresAt` passed. A ring gets at most one
+missed call, even in a new process: none if the user answered, declined
+or let it ring out on this device (`stop`), and only one if several missed
+cancellations for its `alertId` arrive under different `eventId`s. The
+ledger remembers this for a day past the ring's deadline, as long as a
+missed call stays relevant.
 
 It is thread-safe. Give it a durable `store` so its state survives the
 short-lived processes that receive pushes. A store that can't be read
@@ -56620,7 +56623,7 @@ Stop ringing this alert: it was answered, declined or stopped for a reason this 
 MISSED_CALL
 ```
 
-Stop ringing this alert and show a missed call: the call ended or nobody answered.
+Stop ringing this alert and show a missed call: the call ended or nobody answered. Each alert gets this at most once.
 
 #### `PushDecision.IGNORE` case
 
@@ -56628,7 +56631,8 @@ Stop ringing this alert and show a missed call: the call ended or nobody answere
 IGNORE
 ```
 
-Nothing to do: the event was handled before, or the ring was already cancelled or expired.
+Nothing to do: the event was handled before, the ring was already
+cancelled, expired or handled on this device, or it already got its missed call.
 
 ### `PushResult` enum
 

@@ -33,10 +33,13 @@ public enum class PushDecision {
     /** Stop ringing this alert: it was answered, declined or stopped for a reason this SDK doesn't know. */
     STOP_RINGING,
 
-    /** Stop ringing this alert and show a missed call: the call ended or nobody answered. */
+    /** Stop ringing this alert and show a missed call: the call ended or nobody answered. Each alert gets this at most once. */
     MISSED_CALL,
 
-    /** Nothing to do: the event was handled before, or the ring was already cancelled or expired. */
+    /**
+     * Nothing to do: the event was handled before, the ring was already
+     * cancelled, expired or handled on this device, or it already got its missed call.
+     */
     IGNORE,
 }
 
@@ -44,9 +47,12 @@ public enum class PushDecision {
  * Applies the push contract's delivery rules. Delivery is at least once and
  * unordered, so the ledger handles each `eventId` once, and a ring counts as
  * stopped once a cancellation with its `alertId` arrived, even before the
- * ring itself, or once its `expiresAt` passed. A ring the user answered,
- * declined or let ring out on this device ([stop]) gets no missed call when
- * the server's cancellation arrives later, even in a new process.
+ * ring itself, or once its `expiresAt` passed. A ring gets at most one
+ * missed call, even in a new process: none if the user answered, declined
+ * or let it ring out on this device ([stop]), and only one if several missed
+ * cancellations for its `alertId` arrive under different `eventId`s. The
+ * ledger remembers this for a day past the ring's deadline, as long as a
+ * missed call stays relevant.
  *
  * It is thread-safe. Give it a durable [store] so its state survives the
  * short-lived processes that receive pushes. A store that can't be read
@@ -63,7 +69,8 @@ public class PushLedger(
     // Alerts that must not ring, until their deadline.
     private val stopped = LinkedHashMap<String, Long>()
 
-    // Alerts handled on this device, kept a day past their deadline: as long as a missed call stays relevant.
+    // Alerts that get no further missed call: handled on this device, or already missed.
+    // Kept a day past their deadline: as long as a missed call stays relevant.
     private val handled = LinkedHashMap<String, Long>()
 
     init {
@@ -85,9 +92,12 @@ public class PushLedger(
             is PushNotification.CallCancelled -> {
                 keep(stopped, notification.alertId, notification.expiresAtMillis, now)
                 when {
-                    notification.alertId in handled && notification.missed -> PushDecision.IGNORE
-                    notification.missed -> PushDecision.MISSED_CALL
-                    else -> PushDecision.STOP_RINGING
+                    !notification.missed -> PushDecision.STOP_RINGING
+                    notification.alertId in handled -> PushDecision.IGNORE
+                    else -> {
+                        keep(handled, notification.alertId, notification.expiresAtMillis + MISSED_CALL_RELEVANCE_MILLIS, now)
+                        PushDecision.MISSED_CALL
+                    }
                 }
             }
         }

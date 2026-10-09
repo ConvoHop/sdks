@@ -6392,13 +6392,13 @@
               "name": "MISSED_CALL",
               "kind": "case",
               "signatures": ["MISSED_CALL"],
-              "docs": "Stop ringing this alert and show a missed call: the call ended or nobody answered."
+              "docs": "Stop ringing this alert and show a missed call: the call ended or nobody answered. Each alert gets this at most once."
             },
             {
               "name": "IGNORE",
               "kind": "case",
               "signatures": ["IGNORE"],
-              "docs": "Nothing to do: the event was handled before, or the ring was already cancelled or expired."
+              "docs": "Nothing to do: the event was handled before, the ring was already\ncancelled, expired or handled on this device, or it already got its missed call."
             }
           ]
         },
@@ -6406,7 +6406,7 @@
           "name": "PushLedger",
           "kind": "class",
           "signatures": ["public class PushLedger"],
-          "docs": "Applies the push contract's delivery rules. Delivery is at least once and\nunordered, so the ledger handles each `eventId` once, and a ring counts as\nstopped once a cancellation with its `alertId` arrived, even before the\nring itself, or once its `expiresAt` passed. A ring the user answered,\ndeclined or let ring out on this device (`stop`) gets no missed call when\nthe server's cancellation arrives later, even in a new process.\n\nIt is thread-safe. Give it a durable `store` so its state survives the\nshort-lived processes that receive pushes. A store that can't be read\nstarts an empty ledger; that can only repeat a notification.\n\nPackage: `com.convohop.android.push`.",
+          "docs": "Applies the push contract's delivery rules. Delivery is at least once and\nunordered, so the ledger handles each `eventId` once, and a ring counts as\nstopped once a cancellation with its `alertId` arrived, even before the\nring itself, or once its `expiresAt` passed. A ring gets at most one\nmissed call, even in a new process: none if the user answered, declined\nor let it ring out on this device (`stop`), and only one if several missed\ncancellations for its `alertId` arrive under different `eventId`s. The\nledger remembers this for a day past the ring's deadline, as long as a\nmissed call stays relevant.\n\nIt is thread-safe. Give it a durable `store` so its state survives the\nshort-lived processes that receive pushes. A store that can't be read\nstarts an empty ledger; that can only repeat a notification.\n\nPackage: `com.convohop.android.push`.",
           "members": [
             {
               "name": "constructor",
