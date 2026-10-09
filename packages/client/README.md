@@ -34,10 +34,13 @@ npm test --workspace @convohop/client
   worker in Chromium. Calls aren't tested over real WebRTC.
 - **React Native:** intended, but not verified yet. Pass a `platform`
   option with what the JavaScript engine lacks, such as `randomUUID`,
-  `sha256`, a WHATWG-conforming `URL`, `connectivity` and `lifecycle`. Metro
-  resolves package `exports` by default from React Native 0.79; on earlier
-  versions, set `resolver.unstable_enablePackageExports = true`. Calls
-  connect through `participation.connectWith` and LiveKit's React Native SDK.
+  `sha256`, a WHATWG-conforming `URL`, `connectivity` and `lifecycle`.
+  [`@convohop/react-native`](../react-native/README.md) provides one with
+  `createPlatform()`, and adds push and calls in the system call UI; its
+  README says what has been verified. Metro resolves package `exports` by
+  default from React Native 0.79; on earlier versions, set
+  `resolver.unstable_enablePackageExports = true`. Calls connect through
+  `participation.connectWith` and LiveKit's React Native SDK.
 - **Node.js 22+:** builds and unit tests. Use
   [`@convohop/server`](../server/README.md) for backend code.
 
