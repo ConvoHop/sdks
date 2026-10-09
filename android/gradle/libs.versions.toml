@@ -1,0 +1,32 @@
+[versions]
+agp = "9.1.1"
+kotlin = "2.2.21"
+coroutines = "1.10.2"
+serialization = "1.9.0"
+okhttp = "4.12.0"
+androidx-core = "1.13.1"
+livekit = "2.29.0"
+# Apps supply firebase-messaging; :push only compiles against it. 25.1.0 (BoM 34.15.0) added
+# registration by Firebase Installation ID, and 25.1.2 (BoM 34.18.0) fixed re-registering after
+# an FID change and FID_ALREADY_USED, so 25.1.2 is the floor the README documents. Use only APIs
+# that 25.1.2 has.
+firebase-messaging = "25.1.2"
+junit = "4.13.2"
+robolectric = "4.17"
+
+[libraries]
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
+androidx-core = { module = "androidx.core:core", version.ref = "androidx-core" }
+livekit-android = { module = "io.livekit:livekit-android", version.ref = "livekit" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebase-messaging" }
+junit = { module = "junit:junit", version.ref = "junit" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

@@ -16,7 +16,7 @@ work, what the packages are called, and how they're versioned and supported.
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
 | Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md); .NET: [`ConvoHop`](../dotnet/README.md); Go: [`github.com/ConvoHop/sdks/go`](../go/README.md); Python: [`convohop`](../python/README.md) |
-| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md) |
+| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md); Android: [`convohop-android`](../android/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
 
@@ -137,7 +137,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 | Web | TypeScript | LiveKit JavaScript SDK | Source available |
 | React | Hooks on top of the Web SDK | Same as Web | Source available |
 | iOS and macOS | Swift | LiveKit Swift SDK | Planned |
-| Android | Kotlin | LiveKit Android SDK | Planned |
+| Android | Kotlin | LiveKit Android SDK | Source available |
 | React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | Planned |
 | Flutter | Dart | LiveKit Flutter SDK | Planned |
 
@@ -180,6 +180,8 @@ Kotlin generator and its own conformance driver. The
 conformance driver. The [Go server SDK](../go/README.md) adds a Go
 generator and its own conformance driver. The
 [Python server SDK](../python/README.md) adds a Python generator and its own
+conformance driver. The [Android client SDK](../android/README.md) adds a
+Kotlin generator for Android, separate from the JVM one, and its own
 conformance driver. Generators for the other languages are in development.
 The same IR generates the operation catalog of the `convohop` command-line
 tool ([`packages/cli`](../packages/cli/README.md)) and the tools of an MCP
@@ -280,8 +282,9 @@ registration error.
 > APNs, FCM and Web Push requests from notification events, with its
 > [push payload builders](../packages/server/README.md#push-payloads). The
 > [push payload contract](../spec/push-payload/README.md) defines the
-> events, the requests and shared vectors for every server SDK. The other
-> helpers in this table are planned.
+> events, the requests and shared vectors for every server SDK. The
+> [Android client SDK](../android/README.md#push-notifications) has the
+> Android helpers. The other helpers in this table are planned.
 
 The SDK helpers are all optional:
 
@@ -312,7 +315,7 @@ registry yet.
 | npm | `@convohop/server` | `@convohop/client` (Web), `@convohop/react`, `@convohop/react-native` |
 | PyPI | `convohop` | None |
 | NuGet | `ConvoHop` | None |
-| Maven Central | `com.convohop:convohop-server` (Java), `com.convohop:convohop-server-kotlin` (Kotlin coroutines) | `com.convohop:convohop-android` |
+| Maven Central | `com.convohop:convohop-server` (Java), `com.convohop:convohop-server-kotlin` (Kotlin coroutines) | `com.convohop:convohop-android`, which brings in `com.convohop:convohop-android-core` and `com.convohop:convohop-android-push` |
 | Go modules | `github.com/ConvoHop/sdks/go` | None |
 | Swift Package Manager | None | `ConvoHop`, from `github.com/ConvoHop/convohop-swift` |
 | pub.dev | None | `convohop` (Flutter) |
@@ -430,9 +433,10 @@ release.
 
 Today, CI verifies the TypeScript packages on Node.js 22 and 24, the Java
 and Kotlin SDK on Java 11, 17, 21 and 25, the .NET SDK on .NET 8, 9 and 10,
-the Go SDK on the two most recent Go releases, and the Python SDK on Python
-3.11, 3.12, 3.13 and 3.14. Each other row becomes a CI requirement when that
-SDK lands.
+the Go SDK on the two most recent Go releases, the Python SDK on Python
+3.11, 3.12, 3.13 and 3.14, and the Android SDK on Robolectric at API levels
+24, 26, 33 and 34, without a device or emulator. Each other row becomes a CI
+requirement when that SDK lands.
 
 For the Web row, CI runs the Web client's browser tests in Playwright's
 current builds of Chromium, Firefox and WebKit. For the React row, it runs
