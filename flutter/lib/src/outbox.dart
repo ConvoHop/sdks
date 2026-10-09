@@ -225,8 +225,14 @@ const _waitingCodes = {...sessionCodes, 'RECOVERY_LIMIT'};
 /// unknown outcome, a rejection the realtime stream would also retry (such as
 /// `RATE_LIMITED`), `WRONG_REGION`, after which the client routes again
 /// first, `RECOVERY_LIMIT` and an ended session. Any other rejection, such as
-/// `QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, fails it at once. Until a
-/// message is sent or fails, its recovery record is never evicted.
+/// `QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, fails it at once.
+///
+/// While the outbox is open, the transport never evicts the recovery record
+/// of a message the outbox may still send or check. A message attempted
+/// before the outbox loaded it may have lost its record meanwhile, evicted
+/// or lost with storage. Unless a read-only check finds it committed, such a
+/// message isn't sent again: it fails with `RESOLUTION_REQUIRED`, as
+/// [OutboxState.unknown] if an attempt may have reached the authority.
 ///
 /// With [ConvoHopClient.storage] set and [persist] on, unsent messages,
 /// including their text, are stored under
@@ -546,35 +552,51 @@ final class ConvoHopOutbox {
         throw ConvoHopProblem('INVALID_RESPONSE', entry.requestId, 'unknown', 503, 'Unknown request resolution state');
       }
       final record = _record(entry.requestId);
-      if (record == null) {
-        // The transport stores its record before submitting, so nothing was sent.
-        entry.uncertain = false;
-      } else if (_settled.contains(record.resolutionState)) {
-        return const _Delivered(null);
+      if (record != null && _settled.contains(record.resolutionState)) return const _Delivered(null);
+      if (record == null && entry.attempted) {
+        // The transport stored the request's record before the attempt, so
+        // the record was evicted while no outbox held it, or lost with
+        // storage: the request can't be resent safely.
+        throw ConvoHopProblem(
+          'RESOLUTION_REQUIRED',
+          entry.requestId,
+          'unknown',
+          409,
+          "The message was not observed and its request can't be resent; resend it as a new message if it should still be sent",
+        );
       }
     }
-    final wasAttempted = entry.attempted, wasUncertain = entry.uncertain;
-    entry.attempted = true;
-    // In doubt until the attempt settles, in case the app stops meanwhile.
-    entry.uncertain = true;
-    entry.attempts += 1;
-    try {
+    final wasAttempted = entry.attempted, wasUncertain = entry.uncertain, attempts = entry.attempts;
+    var submitted = false;
+    // Noted once the transport has stored the request's record, so storage
+    // never says the message may have been sent without the record that
+    // recovers it. In doubt until the attempt settles, in case the app stops
+    // meanwhile.
+    final forget = beforeSubmitting(client.transport, entry.requestId, () async {
+      entry
+        ..attempted = true
+        ..uncertain = true
+        ..attempts = attempts + 1;
       await _save();
+      submitted = true;
+    });
+    try {
       return _Delivered(
         await client.send(entry.conversationId, entry.text, props: entry.props, requestId: entry.requestId),
       );
     } on Object catch (error) {
-      final problem = error is ConvoHopProblem ? error : null;
-      // The journal had no room, so the transport stored and sent nothing.
-      final full = problem?.code == 'RECOVERY_LIMIT';
-      // The transport refused before submitting.
-      final unsent = problem != null
-          ? full || (problem.outcome != 'rejected' && _unsentCodes.contains(problem.code))
-          : (_record(entry.requestId)?.resolutionState ?? 'pending') == 'pending';
-      if (unsent) entry.attempts -= 1;
-      if (full) entry.attempted = wasAttempted;
-      if (unsent || problem?.outcome == 'rejected') entry.uncertain = wasUncertain;
+      if (!submitted) {
+        // The transport refused before submitting, so nothing was sent.
+        entry
+          ..attempted = wasAttempted
+          ..uncertain = wasUncertain
+          ..attempts = attempts;
+      } else if (error is ConvoHopProblem && error.outcome == 'rejected') {
+        entry.uncertain = wasUncertain;
+      }
       rethrow;
+    } finally {
+      forget();
     }
   }
 

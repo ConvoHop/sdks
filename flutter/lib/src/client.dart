@@ -613,9 +613,10 @@ final class ConvoHopClient {
     return _result(reply.result, reply.requestId, reply.status, 'search page');
   }
 
-  /// Resolves up to 16 mutations that aren't final: pending, unknown, or
-  /// rejected with a retryable code. It resends a request only while its
-  /// original retry budget remains. Errors go to [onError].
+  /// Resolves up to 16 mutations whose outcome isn't settled: pending,
+  /// unknown, or rejected with a retryable code. It resends a request only
+  /// while its original retry budget remains, and otherwise checks it
+  /// read-only. Errors go to [onError].
   Future<void> recoverPending(ErrorListener onError) async {
     await transport.initializeRecovery();
     final states = transport.recoveryStates

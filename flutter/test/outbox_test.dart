@@ -133,16 +133,18 @@ bool _done(FakeAsync async, Future<void> future) {
 /// A distinct canonical request ID.
 String _requestId(int index) => '00000000-0000-4000-8000-${index.toRadixString(16).padLeft(12, '0')}';
 
-/// The recovery record of an earlier message send, stored after one attempt
-/// at [at].
+/// The recovery record of an earlier send of [text], by default its ID,
+/// stored after [attemptCount] attempts, the last at [at].
 Map<String, Object?> _journalRecord(
   String id,
   int at,
   String resolutionState, {
+  String? text,
   String classification = 'submitted',
+  int attemptCount = 1,
   int? retryDeadline,
 }) {
-  final input = <String, Object?>{'conversationId': conversationId, 'text': id, 'props': <String, Object?>{}};
+  final input = <String, Object?>{'conversationId': conversationId, 'text': text ?? id, 'props': <String, Object?>{}};
   return <String, Object?>{
     'requestId': id,
     'incarnation': incarnation,
@@ -156,7 +158,7 @@ Map<String, Object?> _journalRecord(
     'input': input,
     'firstSubmittedAt': at,
     'retryDeadline': retryDeadline ?? at + 60000,
-    'attemptCount': 1,
+    'attemptCount': attemptCount,
     'lastAttemptAt': at,
     'lastAttemptClassification': classification,
     'resolutionState': resolutionState,
@@ -457,21 +459,30 @@ void main() {
     });
   });
 
-  test('after the app stops before the transport stores its record, checks read-only and submits once', () {
+  test('after the app stops once the transport stored its record but before the outbox noted the attempt, '
+      'checks read-only and submits once', () {
     fakeAsync((async) {
       int now() => fixedClock() + async.elapsed.inMilliseconds;
-      // The outbox noted the attempt, then the app stopped before the transport stored a recovery record.
+      // The transport stored the request's record, then the app stopped
+      // before the outbox noted the attempt: nothing was submitted.
       final storage = MemoryRecoveryStorage()
         ..setItem(
           _outboxKey,
           jsonEncode(<Object?>[
-            <String, Object?>{
-              ..._stored(requestId),
-              'state': 'sending',
-              'attempted': true,
-              'uncertain': true,
-              'attempts': 1,
-            },
+            <String, Object?>{..._stored(requestId), 'state': 'sending'},
+          ]),
+        )
+        ..setItem(
+          _journalKey,
+          jsonEncode(<Object?>[
+            _journalRecord(
+              requestId,
+              fixedClock(),
+              'pending',
+              text: 'stored',
+              classification: 'notSubmitted',
+              attemptCount: 0,
+            ),
           ]),
         );
       final authority = _Authority();
@@ -488,13 +499,69 @@ void main() {
         'props': <String, Object?>{},
       });
       expect(changes.map((item) => item.state), <OutboxState>[OutboxState.sending, OutboxState.sent]);
+      expect(changes.last.attempts, 1);
       expect(outbox.items, isEmpty);
       expect(storage.items.containsKey(_outboxKey), isFalse);
-      final record = client.transport.recoveryStates.singleWhere((state) => state.requestId == requestId);
-      expect((record.resolutionState, record.attemptCount), ('committed', 1));
+      final record = client.transport.recoveryStates.single;
+      expect((record.requestId, record.resolutionState, record.attemptCount), (requestId, 'committed', 1));
 
       settled(async, outbox.close());
       client.close();
+    });
+  });
+
+  test('fails a message closed when its recovery record is gone after an attempt, without sending it again', () {
+    fakeAsync((async) {
+      int now() => fixedClock() + async.elapsed.inMilliseconds;
+      // Both messages were attempted, but the journal no longer holds their
+      // records: each was evicted once its budget was spent.
+      final inDoubt = _requestId(1), refused = _requestId(2);
+      final storage = MemoryRecoveryStorage()
+        ..setItem(
+          _outboxKey,
+          jsonEncode(<Object?>[
+            <String, Object?>{
+              ..._stored(inDoubt),
+              'state': 'sending',
+              'attempted': true,
+              'uncertain': true,
+              'attempts': 1,
+            },
+            <String, Object?>{..._stored(refused), 'attempted': true, 'attempts': 3, 'errorCode': 'RATE_LIMITED'},
+          ]),
+        );
+      final authority = _Authority();
+      final client = authority.client(now, storage: storage);
+      final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+      settled(async, outbox.initialize());
+      // Neither was observed, and neither can be resent under its ID.
+      expect(authority.checks, <String>[inDoubt, refused]);
+      expect(authority.sends, isEmpty);
+      expect(
+        outbox.items.map((item) => (item.requestId, item.state, item.errorCode, item.attempts, item.uncertain)),
+        <Object>[
+          (inDoubt, OutboxState.unknown, 'RESOLUTION_REQUIRED', 1, true),
+          (refused, OutboxState.failed, 'RESOLUTION_REQUIRED', 3, false),
+        ],
+      );
+      expect(
+        outbox.items.first.error,
+        isA<ConvoHopProblem>()
+            .having((problem) => problem.requestId, 'requestId', inDoubt)
+            .having((problem) => problem.outcome, 'outcome', 'unknown'),
+      );
+      expect(_journal(client), isEmpty);
+
+      // A later read-only check can still find the message in doubt committed.
+      authority.answer('CommunicationResolveRequest', _committed(inDoubt, '9'));
+      final resolved = settled(async, outbox.resolve(inDoubt));
+      expect((resolved.state, resolved.ack?.sequence), (OutboxState.sent, '9'));
+      expect(outbox.items.map((item) => item.requestId), <String>[refused]);
+      expect(authority.sends, isEmpty);
+
+      settled(async, outbox.close());
+      client.close();
+      expect(async.pendingTimers, isEmpty);
     });
   });
 
@@ -735,12 +802,17 @@ void main() {
 
       final item = settled(async, outbox.send(conversationId, 'retried'));
       expect(errors, <Matcher>[isA<StateError>().having((error) => error.message, 'message', 'disk full')]);
-      expect(outbox.items.single.state, OutboxState.queued);
+      final current = outbox.items.single;
+      expect((current.state, current.attempts, current.uncertain), (OutboxState.queued, 0, false));
       expect(authority.sends, isEmpty);
+      // Nothing was submitted, so the request spent none of its budget.
+      final record = client.transport.recoveryStates.single;
+      expect((record.resolutionState, record.attemptCount), ('pending', 0));
 
       async.elapse(const Duration(seconds: 1));
       expect(authority.sends, <String>[item.requestId]);
       expect(outbox.items, isEmpty);
+      expect(client.transport.recoveryStates.single.attemptCount, 1);
       expect(errors, hasLength(1));
       settled(async, outbox.close());
       client.close();
@@ -931,17 +1003,18 @@ void main() {
       });
     });
 
-    test('keeps the recovery record of a message it may still send until the message fails or it closes', () {
+    test('keeps the recovery record of a message it may still send or check until the message fails or it closes', () {
       fakeAsync((async) {
         int now() => fixedClock() + async.elapsed.inMilliseconds;
+        _Answer limited(String retryAfter) =>
+            (id, input) => jsonResponse(gqlError('RATE_LIMITED', status: 429, retryAfter: retryAfter));
         final authority = _Authority()
-          ..answer('CommunicationSendMessage', (id, input) => jsonResponse(gqlError('QUOTA_EXCEEDED', status: 429)))
-          ..answer(
-            'CommunicationSendMessage',
-            (id, input) => jsonResponse(gqlError('RATE_LIMITED', status: 429, retryAfter: '120')),
-          );
+          ..answer('CommunicationSendMessage', limited('1'))
+          ..answer('CommunicationSendMessage', limited('1'))
+          ..answer('CommunicationSendMessage', limited('120'))
+          ..answer('CommunicationSendMessage', (id, input) => jsonResponse(gqlError('QUOTA_EXCEEDED', status: 429)));
         final storage = MemoryRecoveryStorage();
-        // Sends whose outcome is unknown are never final.
+        // Sends in doubt aren't final while their budget lasts.
         final unknown = <String>[for (var index = 1; index <= 126; index++) _requestId(index)];
         storage.setItem(
           _journalKey,
@@ -950,18 +1023,28 @@ void main() {
         final client = authority.client(now, storage: storage);
         final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
 
-        final failed = settled(async, outbox.send(_otherConversationId, 'over quota'));
+        // Rate limited three times, the message has spent its budget, so its
+        // record is final; the outbox keeps it queued until it checks it again.
         final held = settled(async, outbox.send(conversationId, 'rate limited'));
-        expect(outbox.items.map((item) => (item.requestId, item.state)), <Object>[
-          (failed.requestId, OutboxState.failed),
-          (held.requestId, OutboxState.queued),
-        ]);
-        expect(_journal(client), <String>[...unknown, failed.requestId, held.requestId]);
+        async.elapse(const Duration(seconds: 3));
+        final current = outbox.items.single;
+        expect(
+          (current.state, current.attempts, current.errorCode, current.uncertain, current.nextAttemptAt),
+          (OutboxState.queued, 3, 'RATE_LIMITED', false, fixedClock() + 123000),
+        );
+        final record = client.transport.recoveryStates.last;
+        expect((record.requestId, record.resolutionState, record.attemptCount), (held.requestId, 'rejected', 3));
 
-        // Past their retry deadline, both records are final. The failed
-        // message's record makes room; the queued message's stays, though it
-        // is older than any other final record.
-        async.elapse(const Duration(seconds: 61));
+        async.elapse(const Duration(seconds: 1));
+        final failed = settled(async, outbox.send(_otherConversationId, 'over quota'));
+        expect(outbox.items.map((item) => (item.requestId, item.state)), <Object>[
+          (held.requestId, OutboxState.queued),
+          (failed.requestId, OutboxState.failed),
+        ]);
+        expect(_journal(client), <String>[...unknown, held.requestId, failed.requestId]);
+
+        // The journal is full. The failed message's record makes room; the
+        // queued message's stays, though its last attempt is older.
         settled(async, client.send(conversationId, 'first', requestId: _requestId(201)));
         expect(_journal(client), <String>[...unknown, held.requestId, _requestId(201)]);
         settled(async, client.send(conversationId, 'second', requestId: _requestId(202)));
@@ -972,8 +1055,10 @@ void main() {
         settled(async, client.send(conversationId, 'third', requestId: _requestId(203)));
         expect(_journal(client), <String>[...unknown, _requestId(202), _requestId(203)]);
         expect(authority.sends, <String>[
-          failed.requestId,
           held.requestId,
+          held.requestId,
+          held.requestId,
+          failed.requestId,
           _requestId(201),
           _requestId(202),
           _requestId(203),

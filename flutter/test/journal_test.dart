@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:convohop/convohop.dart';
 import 'package:convohop/src/protocol.dart' show fingerprint;
-import 'package:convohop/src/transport.dart' show retainRecovery;
+import 'package:convohop/src/transport.dart' show beforeSubmitting, retainRecovery;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
@@ -264,6 +264,90 @@ void main() {
       expect(_held(transport), isNot(contains(_id(1))));
       expect(_held(transport), containsAll(<String>[_id(301), _id(302)]));
       expect(_saved(storage), _held(transport));
+      transport.close();
+    });
+
+    test('a spent retry budget makes a record final, even while its outcome is in doubt', () async {
+      final authority = _Authority(), storage = MemoryRecoveryStorage(), now = fixedClock();
+      int at(int index) => now - 10000 + index;
+      final records = <Map<String, Object?>>[
+        // Oldest, but in doubt while its budget lasts.
+        _stored(_id(1), at(0), 'unknown'),
+        // Out of attempts, or past the retry deadline, whatever the outcome.
+        _stored(_id(2), at(1), 'unknown', attemptCount: 3),
+        _stored(_id(3), at(2), 'unknown', retryDeadline: now - 1),
+        _stored(_id(4), at(3), 'pending', classification: 'notSubmitted', attemptCount: 0, retryDeadline: now - 1),
+        // Final, but retained.
+        _stored(_id(5), at(4), 'unknown', attemptCount: 3),
+        for (var index = 6; index <= 128; index++) _stored(_id(index), at(index), 'unknown'),
+      ];
+      storage.setItem(_key, jsonEncode(records));
+      final transport = authority.transport(storage);
+      final release = retainRecovery(transport, () => [_id(5)]);
+      // Each new request's response is lost, so it is in doubt too.
+      authority.lost = true;
+      final sent = [_id(201), _id(202), _id(203)];
+      for (final id in sent) {
+        await expectLater(_send(transport, id), throwsA(_problem('TRANSPORT_UNKNOWN', outcome: 'unknown')));
+      }
+      final within = [for (var index = 6; index <= 128; index++) _id(index)];
+      expect(_held(transport), [_id(1), _id(5), ...within, ...sent]);
+      expect(_saved(storage), _held(transport));
+      await expectLater(_send(transport, _id(204)), throwsA(_recoveryLimit(_id(204))));
+      expect(authority.sends, sent);
+
+      release();
+      await expectLater(_send(transport, _id(204)), throwsA(_problem('TRANSPORT_UNKNOWN')));
+      expect(_held(transport), [_id(1), ...within, ...sent, _id(204)]);
+      expect(_saved(storage), _held(transport));
+      transport.close();
+    });
+
+    test('a submission hook runs once the record is stored, before the attempt is counted or sent', () async {
+      final authority = _Authority(), storage = MemoryRecoveryStorage();
+      final transport = authority.transport(storage);
+      final id = _id(1), seen = <Object>[];
+      final replaced = beforeSubmitting(transport, id, () async => seen.add('replaced'));
+      final forget = beforeSubmitting(transport, id, () async {
+        final record = transport.recoveryStates.single;
+        seen.add([_saved(storage), record.resolutionState, record.attemptCount, List.of(authority.sends)]);
+      });
+      // Removing a replaced hook leaves its replacement.
+      replaced();
+      await _send(transport, id);
+      expect(seen, [
+        [
+          [id],
+          'pending',
+          0,
+          <String>[],
+        ],
+      ]);
+      expect(authority.sends, [id]);
+      forget();
+      await _send(transport, id);
+      expect(seen, hasLength(1), reason: 'a removed hook no longer runs');
+      expect(authority.sends, [id, id]);
+      transport.close();
+    });
+
+    test('a submission hook that throws fails the submission before anything is counted or sent', () async {
+      final authority = _Authority(), storage = MemoryRecoveryStorage();
+      final transport = authority.transport(storage);
+      final id = _id(1);
+      final forget = beforeSubmitting(transport, id, () async => throw StateError('disk full'));
+      await expectLater(_send(transport, id), throwsA(isStateError));
+      expect(authority.sends, isEmpty);
+      final record = transport.recoveryStates.single;
+      expect(
+        (record.resolutionState, record.attemptCount, record.lastAttemptClassification),
+        ('pending', 0, 'notSubmitted'),
+      );
+      // Once the hook passes, the request is sent under its ID with its full budget.
+      forget();
+      await _send(transport, id);
+      expect(authority.sends, [id]);
+      expect(transport.recoveryStates.single.attemptCount, 1);
       transport.close();
     });
 

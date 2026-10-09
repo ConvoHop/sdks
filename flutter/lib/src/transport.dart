@@ -149,14 +149,17 @@ final class _Record {
 
   bool get settled => _settled.contains(resolutionState);
 
-  /// Whether nothing more can come of the request: the authority committed or
-  /// accepted it, or rejected every attempt and won't take another, because
-  /// the last rejection isn't retryable or the retry budget is spent. Only
-  /// such records make room in a full journal.
+  /// Whether the SDK can't send the request again: the authority committed or
+  /// accepted it, rejected every attempt with a last code that isn't
+  /// retryable, or its retry budget (three attempts within 60 seconds) is
+  /// spent. A spent budget makes even a request in doubt final; only a
+  /// read-only resolve can settle it then. Only final records make room in a
+  /// full journal.
   bool isFinal(int now) =>
       settled ||
-      (resolutionState == 'rejected' &&
-          (!retryableCode(lastAttemptClassification) || attemptCount >= _maxAttempts || now > retryDeadline));
+      attemptCount >= _maxAttempts ||
+      now > retryDeadline ||
+      (resolutionState == 'rejected' && !retryableCode(lastAttemptClassification));
 
   RecoveryState snapshot() => RecoveryState(
     requestId: requestId,
@@ -230,6 +233,21 @@ void Function() retainRecovery(ConvoHopTransport transport, Iterable<String> Fun
   return () => transport._retainers.remove(retainer);
 }
 
+/// Runs [hook] before each submission of [requestId] within its retry budget:
+/// after the transport has stored the request's recovery record, and before it
+/// counts and sends the attempt, which wait for the hook. A caller that notes
+/// that the request may have been sent does so here, so storage never holds
+/// that note without the record that recovers the request. If the hook
+/// throws, nothing is sent and the submission fails with its error. Returns a
+/// function that removes the hook.
+void Function() beforeSubmitting(ConvoHopTransport transport, String requestId, Future<void> Function() hook) {
+  final hooks = transport._submissionHooks;
+  hooks[requestId] = hook;
+  return () {
+    if (identical(hooks[requestId], hook)) hooks.remove(requestId);
+  };
+}
+
 /// Sends generated operations to `/graphql` and keeps mutation recovery.
 ///
 /// A mutation keeps its request ID, payload, incarnation and retry budget
@@ -238,10 +256,12 @@ void Function() retainRecovery(ConvoHopTransport transport, Iterable<String> Fun
 /// treats a lost response as a rejection or a commit.
 ///
 /// The recovery journal holds at most 128 records. When a new mutation finds
-/// it full, the transport evicts the final record (committed, accepted, or
-/// rejected for good) whose last attempt is oldest. It never evicts a record
-/// whose request may still be resent; when no record can go, it refuses the
-/// new mutation before sending it, with `RECOVERY_LIMIT`.
+/// it full, the transport evicts the final record whose last attempt is
+/// oldest and that no call is using and no caller retains. A record is final
+/// once the SDK can't send its request again: committed, accepted, rejected
+/// with a code that isn't retryable, or out of retry budget. When no record
+/// can go, it refuses the new mutation before sending it, with
+/// `RECOVERY_LIMIT`. An evicted request can still be resolved by its ID.
 final class ConvoHopTransport {
   ConvoHopTransport({
     required String baseUrl,
@@ -271,6 +291,7 @@ final class ConvoHopTransport {
   final Map<String, _Record> _states = <String, _Record>{};
   final Map<String, _Active> _active = <String, _Active>{};
   final Set<Iterable<String> Function()> _retainers = <Iterable<String> Function()>{};
+  final Map<String, Future<void> Function()> _submissionHooks = <String, Future<void> Function()>{};
   Future<void>? _initialization;
   bool _recoveryInitialized = false;
   Future<void>? _writes;
@@ -559,7 +580,8 @@ final class ConvoHopTransport {
   /// new request [requestId] with `RECOVERY_LIMIT`, before anything is sent.
   void _reserve(String requestId) {
     if (_states.length < _maxRecoveryRecords) return;
-    final retained = <String>{for (final retainer in _retainers) ...retainer()};
+    // A retainer may release itself while it runs.
+    final retained = <String>{for (final retainer in List.of(_retainers)) ...retainer()};
     final now = _clock();
     _Record? forgotten;
     for (final value in _states.values) {
@@ -605,6 +627,7 @@ final class ConvoHopTransport {
         'Retry budget expired or clock changed; resolve this request read-only',
       );
     }
+    await _submissionHooks[state.requestId]?.call();
     final prior = state.resolutionState;
     state.attemptCount += 1;
     state.lastAttemptAt = now;
