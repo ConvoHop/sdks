@@ -103,3 +103,4 @@ query CommunicationSearch($context: RequestContextInput!, $input: SearchRequestI
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.search`](../../typescript/reference/server.md#projectserverclientsearch-method), [`ConvoHopClient.search`](../../typescript/reference/client.md#convohopclientsearch-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.search`](../../python/reference/convohop.md#convohopsearch-method), [`ConvoHop.iter_search`](../../python/reference/convohop.md#convohopiter_search-method), [`AsyncConvoHop.search`](../../python/reference/convohop.md#asyncconvohopsearch-method), [`AsyncConvoHop.iter_search`](../../python/reference/convohop.md#asyncconvohopiter_search-method) |

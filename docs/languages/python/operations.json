@@ -1,0 +1,134 @@
+{
+  "$schema": "../../../spec/docs/operation-map.schema.json",
+  "operations": {
+    "communication.capabilities": ["convohop#ConvoHop.capabilities", "convohop#AsyncConvoHop.capabilities"],
+    "communication.route": [
+      "convohop#ConvoHop.route",
+      "convohop#ConvoHop.initialize",
+      "convohop#AsyncConvoHop.route",
+      "convohop#AsyncConvoHop.initialize"
+    ],
+    "communication.getPrincipal": ["convohop#ConvoHop.get_principal", "convohop#AsyncConvoHop.get_principal"],
+    "communication.getConversation": ["convohop#ConvoHop.get_conversation", "convohop#AsyncConvoHop.get_conversation"],
+    "communication.members": [
+      "convohop#ConvoHop.members",
+      "convohop#ConvoHop.iter_members",
+      "convohop#AsyncConvoHop.members",
+      "convohop#AsyncConvoHop.iter_members"
+    ],
+    "communication.messages": [
+      "convohop#ConvoHop.messages",
+      "convohop#ConvoHop.iter_messages",
+      "convohop#AsyncConvoHop.messages",
+      "convohop#AsyncConvoHop.iter_messages"
+    ],
+    "communication.getMessage": ["convohop#ConvoHop.get_message", "convohop#AsyncConvoHop.get_message"],
+    "communication.inbox": [
+      "convohop#ConvoHop.inbox",
+      "convohop#ConvoHop.iter_inbox",
+      "convohop#AsyncConvoHop.inbox",
+      "convohop#AsyncConvoHop.iter_inbox"
+    ],
+    "communication.search": [
+      "convohop#ConvoHop.search",
+      "convohop#ConvoHop.iter_search",
+      "convohop#AsyncConvoHop.search",
+      "convohop#AsyncConvoHop.iter_search"
+    ],
+    "communication.resolveRequest": [
+      "convohop#ConvoHop.resolve_request",
+      "convohop#ConvoHop.retry_request",
+      "convohop#AsyncConvoHop.resolve_request",
+      "convohop#AsyncConvoHop.retry_request"
+    ],
+    "communication.getOperation": ["convohop#ConvoHop.get_operation", "convohop#AsyncConvoHop.get_operation"],
+    "communication.conversationMute": ["convohop#ConvoHop.conversation_mute", "convohop#AsyncConvoHop.conversation_mute"],
+    "communication.currentLiveSession": ["convohop#ConvoHop.current_live_session", "convohop#AsyncConvoHop.current_live_session"],
+    "communication.liveSession": ["convohop#ConvoHop.live_session", "convohop#AsyncConvoHop.live_session"],
+    "communication.liveSessions": [
+      "convohop#ConvoHop.live_sessions",
+      "convohop#ConvoHop.iter_live_sessions",
+      "convohop#AsyncConvoHop.live_sessions",
+      "convohop#AsyncConvoHop.iter_live_sessions"
+    ],
+    "communication.liveSessionParticipants": [
+      "convohop#ConvoHop.live_session_participants",
+      "convohop#ConvoHop.iter_live_session_participants",
+      "convohop#AsyncConvoHop.live_session_participants",
+      "convohop#AsyncConvoHop.iter_live_session_participants"
+    ],
+    "communication.liveSessionOperation": ["convohop#ConvoHop.live_session_operation", "convohop#AsyncConvoHop.live_session_operation"],
+    "communication.sessionRequestOutcome": ["convohop#ConvoHop.session_request_outcome", "convohop#AsyncConvoHop.session_request_outcome"],
+    "communication.createPrincipal": ["convohop#ConvoHop.create_principal", "convohop#AsyncConvoHop.create_principal"],
+    "communication.disablePrincipal": ["convohop#ConvoHop.disable_principal", "convohop#AsyncConvoHop.disable_principal"],
+    "communication.issueSession": ["convohop#ConvoHop.issue_session", "convohop#AsyncConvoHop.issue_session"],
+    "communication.renewSession": ["convohop#ConvoHop.renew_session", "convohop#AsyncConvoHop.renew_session"],
+    "communication.revokeSession": ["convohop#ConvoHop.revoke_session", "convohop#AsyncConvoHop.revoke_session"],
+    "communication.createConversation": ["convohop#ConvoHop.create_conversation", "convohop#AsyncConvoHop.create_conversation"],
+    "communication.updateConversation": ["convohop#ConvoHop.update_conversation", "convohop#AsyncConvoHop.update_conversation"],
+    "communication.addMember": ["convohop#ConvoHop.add_member", "convohop#AsyncConvoHop.add_member"],
+    "communication.addMembers": ["convohop#ConvoHop.add_members", "convohop#AsyncConvoHop.add_members"],
+    "communication.removeMember": ["convohop#ConvoHop.remove_member", "convohop#AsyncConvoHop.remove_member"],
+    "communication.historyGrant": ["convohop#ConvoHop.history_grant", "convohop#AsyncConvoHop.history_grant"],
+    "communication.sendMessage": ["convohop#ConvoHop.send_message", "convohop#AsyncConvoHop.send_message"],
+    "communication.editMessage": ["convohop#ConvoHop.edit_message", "convohop#AsyncConvoHop.edit_message"],
+    "communication.deleteMessage": ["convohop#ConvoHop.delete_message", "convohop#AsyncConvoHop.delete_message"],
+    "communication.setBroadcastPermission": [
+      "convohop#ConvoHop.set_broadcast_permission",
+      "convohop#AsyncConvoHop.set_broadcast_permission"
+    ],
+    "communication.setConversationMute": ["convohop#ConvoHop.set_conversation_mute", "convohop#AsyncConvoHop.set_conversation_mute"],
+    "communication.alertLiveSession": ["convohop#ConvoHop.alert_live_session", "convohop#AsyncConvoHop.alert_live_session"],
+    "communication.endLiveSession": ["convohop#ConvoHop.end_live_session", "convohop#AsyncConvoHop.end_live_session"],
+    "management.capabilities": ["convohop#ConvoHopManagement.capabilities", "convohop#AsyncConvoHopManagement.capabilities"],
+    "management.organizations": ["convohop#ConvoHopManagement.organizations", "convohop#AsyncConvoHopManagement.organizations"],
+    "management.getOrganization": ["convohop#ConvoHopManagement.get_organization", "convohop#AsyncConvoHopManagement.get_organization"],
+    "management.getDeployment": ["convohop#ConvoHopManagement.get_deployment", "convohop#AsyncConvoHopManagement.get_deployment"],
+    "management.getProject": ["convohop#ConvoHopManagement.get_project", "convohop#AsyncConvoHopManagement.get_project"],
+    "management.deploymentHealth": ["convohop#ConvoHopManagement.deployment_health", "convohop#AsyncConvoHopManagement.deployment_health"],
+    "management.deploymentUsage": ["convohop#ConvoHopManagement.deployment_usage", "convohop#AsyncConvoHopManagement.deployment_usage"],
+    "management.projectUsage": ["convohop#ConvoHopManagement.project_usage", "convohop#AsyncConvoHopManagement.project_usage"],
+    "management.organizationUsage": [
+      "convohop#ConvoHopManagement.organization_usage",
+      "convohop#AsyncConvoHopManagement.organization_usage"
+    ],
+    "management.webhookEndpoints": ["convohop#ConvoHopManagement.webhook_endpoints", "convohop#AsyncConvoHopManagement.webhook_endpoints"],
+    "management.webhookDeliveries": [
+      "convohop#ConvoHopManagement.webhook_deliveries",
+      "convohop#AsyncConvoHopManagement.webhook_deliveries"
+    ],
+    "management.resolveRequest": [
+      "convohop#ConvoHopManagement.resolve_request",
+      "convohop#ConvoHopManagement.retry_request",
+      "convohop#AsyncConvoHopManagement.resolve_request",
+      "convohop#AsyncConvoHopManagement.retry_request"
+    ],
+    "management.getOperation": ["convohop#ConvoHopManagement.get_operation", "convohop#AsyncConvoHopManagement.get_operation"],
+    "management.createOrganization": [
+      "convohop#ConvoHopManagement.create_organization",
+      "convohop#AsyncConvoHopManagement.create_organization"
+    ],
+    "management.createDeployment": ["convohop#ConvoHopManagement.create_deployment", "convohop#AsyncConvoHopManagement.create_deployment"],
+    "management.createProject": ["convohop#ConvoHopManagement.create_project", "convohop#AsyncConvoHopManagement.create_project"],
+    "management.issueBackendKey": ["convohop#ConvoHopManagement.issue_backend_key", "convohop#AsyncConvoHopManagement.issue_backend_key"],
+    "management.revokeBackendKey": [
+      "convohop#ConvoHopManagement.revoke_backend_key",
+      "convohop#AsyncConvoHopManagement.revoke_backend_key"
+    ],
+    "management.projectPolicy": ["convohop#ConvoHopManagement.project_policy", "convohop#AsyncConvoHopManagement.project_policy"],
+    "management.credentialPermit": ["convohop#ConvoHopManagement.credential_permit", "convohop#AsyncConvoHopManagement.credential_permit"],
+    "management.pauseOperation": ["convohop#ConvoHopManagement.pause_operation", "convohop#AsyncConvoHopManagement.pause_operation"],
+    "management.resumeOperation": ["convohop#ConvoHopManagement.resume_operation", "convohop#AsyncConvoHopManagement.resume_operation"],
+    "management.configureWebhook": ["convohop#ConvoHopManagement.configure_webhook", "convohop#AsyncConvoHopManagement.configure_webhook"],
+    "management.updateWebhook": ["convohop#ConvoHopManagement.update_webhook", "convohop#AsyncConvoHopManagement.update_webhook"],
+    "management.rotateWebhookSecret": [
+      "convohop#ConvoHopManagement.rotate_webhook_secret",
+      "convohop#AsyncConvoHopManagement.rotate_webhook_secret"
+    ],
+    "management.disableWebhook": ["convohop#ConvoHopManagement.disable_webhook", "convohop#AsyncConvoHopManagement.disable_webhook"],
+    "management.replayWebhookDeliveries": [
+      "convohop#ConvoHopManagement.replay_webhook_deliveries",
+      "convohop#AsyncConvoHopManagement.replay_webhook_deliveries"
+    ]
+  }
+}

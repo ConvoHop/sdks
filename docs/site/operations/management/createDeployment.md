@@ -135,3 +135,4 @@ mutation ManagementCreateDeployment($context: RequestContextInput!, $input: Crea
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.createDeployment`](../../typescript/reference/server.md#convohopmanagementclientcreatedeployment-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.create_deployment`](../../python/reference/convohop.md#convohopmanagementcreate_deployment-method), [`AsyncConvoHopManagement.create_deployment`](../../python/reference/convohop.md#asyncconvohopmanagementcreate_deployment-method) |

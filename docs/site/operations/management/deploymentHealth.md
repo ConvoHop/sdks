@@ -87,3 +87,4 @@ query ManagementDeploymentHealth($context: RequestContextInput!, $input: Deploym
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.deployment_health`](../../python/reference/convohop.md#convohopmanagementdeployment_health-method), [`AsyncConvoHopManagement.deployment_health`](../../python/reference/convohop.md#asyncconvohopmanagementdeployment_health-method) |

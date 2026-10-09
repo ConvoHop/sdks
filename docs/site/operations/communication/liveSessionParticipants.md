@@ -95,3 +95,4 @@ query CommunicationLiveSessionParticipants($context: RequestContextInput!, $inpu
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerLiveSession.participants`](../../typescript/reference/server.md#serverlivesessionparticipants-method), [`LiveSessionHandle.participants`](../../typescript/reference/client.md#livesessionhandleparticipants-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.live_session_participants`](../../python/reference/convohop.md#convohoplive_session_participants-method), [`ConvoHop.iter_live_session_participants`](../../python/reference/convohop.md#convohopiter_live_session_participants-method), [`AsyncConvoHop.live_session_participants`](../../python/reference/convohop.md#asyncconvohoplive_session_participants-method), [`AsyncConvoHop.iter_live_session_participants`](../../python/reference/convohop.md#asyncconvohopiter_live_session_participants-method) |

@@ -82,3 +82,4 @@ mutation ManagementCreateOrganization($context: RequestContextInput!, $input: Cr
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.createOrganization`](../../typescript/reference/server.md#convohopmanagementclientcreateorganization-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.create_organization`](../../python/reference/convohop.md#convohopmanagementcreate_organization-method), [`AsyncConvoHopManagement.create_organization`](../../python/reference/convohop.md#asyncconvohopmanagementcreate_organization-method) |

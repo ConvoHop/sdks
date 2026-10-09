@@ -97,3 +97,4 @@ mutation CommunicationCreateConversation($context: RequestContextInput!, $input:
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.conversations.create`](../../typescript/reference/server.md#projectserverclientconversationscreate-property), [`ProjectServerClient.createConversation`](../../typescript/reference/server.md#projectserverclientcreateconversation-method) |
+| [Python](../../python/reference/operations.md) | [`ConvoHop.create_conversation`](../../python/reference/convohop.md#convohopcreate_conversation-method), [`AsyncConvoHop.create_conversation`](../../python/reference/convohop.md#asyncconvohopcreate_conversation-method) |

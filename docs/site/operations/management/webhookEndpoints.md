@@ -99,3 +99,4 @@ query ManagementWebhookEndpoints($context: RequestContextInput!, $input: Webhook
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
+| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.webhook_endpoints`](../../python/reference/convohop.md#convohopmanagementwebhook_endpoints-method), [`AsyncConvoHopManagement.webhook_endpoints`](../../python/reference/convohop.md#asyncconvohopmanagementwebhook_endpoints-method) |

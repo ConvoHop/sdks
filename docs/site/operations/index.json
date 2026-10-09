@@ -17,6 +17,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientcapabilities-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.capabilities",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopcapabilities-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.capabilities",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopcapabilities-method"
+          }
         ]
       }
     },
@@ -45,6 +57,28 @@
             "ref": "@convohop/client#ConvoHopClient.refreshSession",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientrefreshsession-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.route",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohoproute-method"
+          },
+          {
+            "ref": "convohop#ConvoHop.initialize",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopinitialize-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.route",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohoproute-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.initialize",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopinitialize-method"
           }
         ]
       }
@@ -89,6 +123,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientprincipalsget-property"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.get_principal",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopget_principal-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.get_principal",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopget_principal-method"
+          }
         ]
       }
     },
@@ -118,6 +164,18 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationhandleget-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.get_conversation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopget_conversation-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.get_conversation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopget_conversation-method"
+          }
         ]
       }
     },
@@ -136,6 +194,28 @@
             "ref": "@convohop/server#ServerConversation.members.list",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#serverconversationmemberslist-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.members",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmembers-method"
+          },
+          {
+            "ref": "convohop#ConvoHop.iter_members",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopiter_members-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.members",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmembers-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.iter_members",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopiter_members-method"
           }
         ]
       }
@@ -166,6 +246,28 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationhandlemessageslist-property"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.messages",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmessages-method"
+          },
+          {
+            "ref": "convohop#ConvoHop.iter_messages",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopiter_messages-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.messages",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmessages-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.iter_messages",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopiter_messages-method"
+          }
         ]
       }
     },
@@ -184,6 +286,18 @@
             "ref": "@convohop/server#ServerConversation.messages.get",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#serverconversationmessagesget-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.get_message",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopget_message-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.get_message",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopget_message-method"
           }
         ]
       }
@@ -252,6 +366,28 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientinbox-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.inbox",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopinbox-method"
+          },
+          {
+            "ref": "convohop#ConvoHop.iter_inbox",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopiter_inbox-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.inbox",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopinbox-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.iter_inbox",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopiter_inbox-method"
+          }
         ]
       }
     },
@@ -275,6 +411,28 @@
             "ref": "@convohop/client#ConvoHopClient.search",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientsearch-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.search",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopsearch-method"
+          },
+          {
+            "ref": "convohop#ConvoHop.iter_search",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopiter_search-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.search",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopsearch-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.iter_search",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopiter_search-method"
           }
         ]
       }
@@ -315,6 +473,28 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#convohopclientrecoverpending-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.resolve_request",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopresolve_request-method"
+          },
+          {
+            "ref": "convohop#ConvoHop.retry_request",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopretry_request-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.resolve_request",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopresolve_request-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.retry_request",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopretry_request-method"
+          }
         ]
       }
     },
@@ -333,6 +513,18 @@
             "ref": "@convohop/server#ProjectServerClient.operation",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientoperation-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.get_operation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopget_operation-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.get_operation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopget_operation-method"
           }
         ]
       }
@@ -358,6 +550,18 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationhandlemuteget-property"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.conversation_mute",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopconversation_mute-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.conversation_mute",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopconversation_mute-method"
+          }
         ]
       }
     },
@@ -381,6 +585,18 @@
             "ref": "@convohop/client#ConversationLive.current",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationlivecurrent-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.current_live_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopcurrent_live_session-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.current_live_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopcurrent_live_session-method"
           }
         ]
       }
@@ -431,6 +647,18 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#liveparticipationhandleget-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.live_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohoplive_session-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.live_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohoplive_session-method"
+          }
         ]
       }
     },
@@ -455,6 +683,28 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationlivehistory-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.live_sessions",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohoplive_sessions-method"
+          },
+          {
+            "ref": "convohop#ConvoHop.iter_live_sessions",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopiter_live_sessions-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.live_sessions",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohoplive_sessions-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.iter_live_sessions",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopiter_live_sessions-method"
+          }
         ]
       }
     },
@@ -478,6 +728,28 @@
             "ref": "@convohop/client#LiveSessionHandle.participants",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#livesessionhandleparticipants-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.live_session_participants",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohoplive_session_participants-method"
+          },
+          {
+            "ref": "convohop#ConvoHop.iter_live_session_participants",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopiter_live_session_participants-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.live_session_participants",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohoplive_session_participants-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.iter_live_session_participants",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopiter_live_session_participants-method"
           }
         ]
       }
@@ -547,6 +819,18 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#liveendoperationcompleted-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.live_session_operation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohoplive_session_operation-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.live_session_operation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohoplive_session_operation-method"
+          }
         ]
       }
     },
@@ -570,6 +854,18 @@
             "ref": "@convohop/server#ProjectServerClient.sessionRequestOutcome",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientsessionrequestoutcome-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.session_request_outcome",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopsession_request_outcome-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.session_request_outcome",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopsession_request_outcome-method"
           }
         ]
       }
@@ -595,6 +891,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientcreateprincipal-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.create_principal",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopcreate_principal-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.create_principal",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopcreate_principal-method"
+          }
         ]
       }
     },
@@ -613,6 +921,18 @@
             "ref": "@convohop/server#ProjectServerClient.principals.disable",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientprincipalsdisable-property"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.disable_principal",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopdisable_principal-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.disable_principal",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopdisable_principal-method"
           }
         ]
       }
@@ -638,6 +958,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientissuesession-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.issue_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopissue_session-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.issue_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopissue_session-method"
+          }
         ]
       }
     },
@@ -657,6 +989,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientsessionsrenew-property"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.renew_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohoprenew_session-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.renew_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohoprenew_session-method"
+          }
         ]
       }
     },
@@ -675,6 +1019,18 @@
             "ref": "@convohop/server#ProjectServerClient.sessions.revoke",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientsessionsrevoke-property"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.revoke_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohoprevoke_session-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.revoke_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohoprevoke_session-method"
           }
         ]
       }
@@ -700,6 +1056,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#projectserverclientcreateconversation-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.create_conversation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopcreate_conversation-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.create_conversation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopcreate_conversation-method"
+          }
         ]
       }
     },
@@ -719,6 +1087,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#serverconversationupdate-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.update_conversation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopupdate_conversation-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.update_conversation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopupdate_conversation-method"
+          }
         ]
       }
     },
@@ -737,6 +1117,18 @@
             "ref": "@convohop/server#ServerConversation.members.add",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#serverconversationmembersadd-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.add_member",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopadd_member-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.add_member",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopadd_member-method"
           }
         ]
       }
@@ -762,6 +1154,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#serverconversationmembersaddbatch-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.add_members",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopadd_members-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.add_members",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopadd_members-method"
+          }
         ]
       }
     },
@@ -781,6 +1185,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#serverconversationmembersremove-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.remove_member",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopremove_member-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.remove_member",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopremove_member-method"
+          }
         ]
       }
     },
@@ -799,6 +1215,18 @@
             "ref": "@convohop/server#ServerConversation.members.grantHistory",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#serverconversationmembersgranthistory-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.history_grant",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohophistory_grant-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.history_grant",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohophistory_grant-method"
           }
         ]
       }
@@ -829,6 +1257,18 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationhandlemessagessend-property"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.send_message",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopsend_message-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.send_message",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopsend_message-method"
+          }
         ]
       }
     },
@@ -858,6 +1298,18 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationhandlemessagesedit-property"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.edit_message",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopedit_message-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.edit_message",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopedit_message-method"
+          }
         ]
       }
     },
@@ -886,6 +1338,18 @@
             "ref": "@convohop/client#ConversationHandle.messages.delete",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationhandlemessagesdelete-property"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.delete_message",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopdelete_message-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.delete_message",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopdelete_message-method"
           }
         ]
       }
@@ -936,6 +1400,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#serverconversationmemberssetbroadcastpermission-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.set_broadcast_permission",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopset_broadcast_permission-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.set_broadcast_permission",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopset_broadcast_permission-method"
+          }
         ]
       }
     },
@@ -959,6 +1435,18 @@
             "ref": "@convohop/client#ConversationHandle.mute.set",
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#conversationhandlemuteset-property"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.set_conversation_mute",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopset_conversation_mute-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.set_conversation_mute",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopset_conversation_mute-method"
           }
         ]
       }
@@ -1032,6 +1520,18 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#livesessionhandlealertssend-property"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.alert_live_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopalert_live_session-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.alert_live_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopalert_live_session-method"
+          }
         ]
       }
     },
@@ -1075,6 +1575,18 @@
             "package": "@convohop/client",
             "page": "../typescript/reference/client.md#livesessionhandleend-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHop.end_live_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopend_live_session-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHop.end_live_session",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopend_live_session-method"
+          }
         ]
       }
     },
@@ -1111,7 +1623,7 @@
       "layer": "server",
       "summary": "Redeem a delivered credential with its delivery permit.",
       "page": "communication/redeemCredential.md",
-      "languages": {"typescript": []}
+      "languages": {"typescript": [], "python": []}
     },
     {
       "id": "communication.acknowledgeCredential",
@@ -1122,7 +1634,7 @@
       "layer": "server",
       "summary": "Acknowledge that a redeemed credential is stored, closing the delivery.",
       "page": "communication/acknowledgeCredential.md",
-      "languages": {"typescript": []}
+      "languages": {"typescript": [], "python": []}
     },
     {
       "id": "communication.conversationEvents",
@@ -1157,7 +1669,21 @@
       "layer": "server",
       "summary": "Describe the management features and limits the authority supports.",
       "page": "management/capabilities.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.capabilities",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementcapabilities-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.capabilities",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementcapabilities-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.organizations",
@@ -1168,7 +1694,21 @@
       "layer": "server",
       "summary": "List the organizations the caller can access.",
       "page": "management/organizations.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.organizations",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementorganizations-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.organizations",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementorganizations-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.getOrganization",
@@ -1179,7 +1719,21 @@
       "layer": "server",
       "summary": "Read an organization.",
       "page": "management/getOrganization.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.get_organization",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementget_organization-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.get_organization",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementget_organization-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.getDeployment",
@@ -1190,7 +1744,21 @@
       "layer": "server",
       "summary": "Read a deployment.",
       "page": "management/getDeployment.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.get_deployment",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementget_deployment-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.get_deployment",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementget_deployment-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.getProject",
@@ -1201,7 +1769,21 @@
       "layer": "server",
       "summary": "Read a project.",
       "page": "management/getProject.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.get_project",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementget_project-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.get_project",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementget_project-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.deploymentHealth",
@@ -1212,7 +1794,21 @@
       "layer": "server",
       "summary": "Read the health of a deployment.",
       "page": "management/deploymentHealth.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.deployment_health",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementdeployment_health-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.deployment_health",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementdeployment_health-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.deploymentUsage",
@@ -1223,7 +1819,21 @@
       "layer": "server",
       "summary": "Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
       "page": "management/deploymentUsage.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.deployment_usage",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementdeployment_usage-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.deployment_usage",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementdeployment_usage-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.projectUsage",
@@ -1234,7 +1844,21 @@
       "layer": "server",
       "summary": "Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
       "page": "management/projectUsage.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.project_usage",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementproject_usage-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.project_usage",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementproject_usage-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.organizationUsage",
@@ -1245,7 +1869,21 @@
       "layer": "server",
       "summary": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.",
       "page": "management/organizationUsage.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.organization_usage",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementorganization_usage-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.organization_usage",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementorganization_usage-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.webhookEndpoints",
@@ -1256,7 +1894,21 @@
       "layer": "server",
       "summary": "List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.",
       "page": "management/webhookEndpoints.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.webhook_endpoints",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementwebhook_endpoints-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.webhook_endpoints",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementwebhook_endpoints-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.webhookDeliveries",
@@ -1267,7 +1919,21 @@
       "layer": "server",
       "summary": "List recent deliveries of a webhook endpoint.",
       "page": "management/webhookDeliveries.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.webhook_deliveries",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementwebhook_deliveries-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.webhook_deliveries",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementwebhook_deliveries-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.resolveRequest",
@@ -1278,7 +1944,31 @@
       "layer": "server",
       "summary": "Look up the stored outcome of an earlier management mutation by its requestId.",
       "page": "management/resolveRequest.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.resolve_request",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementresolve_request-method"
+          },
+          {
+            "ref": "convohop#ConvoHopManagement.retry_request",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementretry_request-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.resolve_request",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementresolve_request-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.retry_request",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementretry_request-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.getOperation",
@@ -1295,6 +1985,18 @@
             "ref": "@convohop/server#ConvoHopManagementClient.operation",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#convohopmanagementclientoperation-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.get_operation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementget_operation-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.get_operation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementget_operation-method"
           }
         ]
       }
@@ -1315,6 +2017,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#convohopmanagementclientcreateorganization-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.create_organization",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementcreate_organization-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.create_organization",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementcreate_organization-method"
+          }
         ]
       }
     },
@@ -1333,6 +2047,18 @@
             "ref": "@convohop/server#ConvoHopManagementClient.createDeployment",
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#convohopmanagementclientcreatedeployment-method"
+          }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.create_deployment",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementcreate_deployment-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.create_deployment",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementcreate_deployment-method"
           }
         ]
       }
@@ -1353,6 +2079,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#convohopmanagementclientcreateproject-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.create_project",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementcreate_project-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.create_project",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementcreate_project-method"
+          }
         ]
       }
     },
@@ -1372,6 +2110,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#convohopmanagementclientissuebackendkey-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.issue_backend_key",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementissue_backend_key-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.issue_backend_key",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementissue_backend_key-method"
+          }
         ]
       }
     },
@@ -1384,7 +2134,21 @@
       "layer": "server",
       "summary": "Revoke a backend key, optionally revoking the sessions it issued.",
       "page": "management/revokeBackendKey.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.revoke_backend_key",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementrevoke_backend_key-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.revoke_backend_key",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementrevoke_backend_key-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.projectPolicy",
@@ -1395,7 +2159,21 @@
       "layer": "server",
       "summary": "Change the policy of a project.",
       "page": "management/projectPolicy.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.project_policy",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementproject_policy-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.project_policy",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementproject_policy-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.credentialPermit",
@@ -1413,6 +2191,18 @@
             "package": "@convohop/server",
             "page": "../typescript/reference/server.md#convohopmanagementclientdeliverypermit-method"
           }
+        ],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.credential_permit",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementcredential_permit-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.credential_permit",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementcredential_permit-method"
+          }
         ]
       }
     },
@@ -1425,7 +2215,21 @@
       "layer": "server",
       "summary": "Pause a long-running operation.",
       "page": "management/pauseOperation.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.pause_operation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementpause_operation-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.pause_operation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementpause_operation-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.resumeOperation",
@@ -1436,7 +2240,21 @@
       "layer": "server",
       "summary": "Resume a paused operation.",
       "page": "management/resumeOperation.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.resume_operation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementresume_operation-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.resume_operation",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementresume_operation-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.configureWebhook",
@@ -1447,7 +2265,21 @@
       "layer": "server",
       "summary": "Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.",
       "page": "management/configureWebhook.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.configure_webhook",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementconfigure_webhook-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.configure_webhook",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementconfigure_webhook-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.updateWebhook",
@@ -1458,7 +2290,21 @@
       "layer": "server",
       "summary": "Change the event types of a webhook endpoint, or enable or disable it.",
       "page": "management/updateWebhook.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.update_webhook",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementupdate_webhook-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.update_webhook",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementupdate_webhook-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.rotateWebhookSecret",
@@ -1469,7 +2315,21 @@
       "layer": "server",
       "summary": "Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.",
       "page": "management/rotateWebhookSecret.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.rotate_webhook_secret",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementrotate_webhook_secret-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.rotate_webhook_secret",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementrotate_webhook_secret-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.disableWebhook",
@@ -1480,7 +2340,21 @@
       "layer": "server",
       "summary": "Disable a webhook endpoint.",
       "page": "management/disableWebhook.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.disable_webhook",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementdisable_webhook-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.disable_webhook",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementdisable_webhook-method"
+          }
+        ]
+      }
     },
     {
       "id": "management.replayWebhookDeliveries",
@@ -1491,7 +2365,21 @@
       "layer": "server",
       "summary": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.",
       "page": "management/replayWebhookDeliveries.md",
-      "languages": {"typescript": []}
+      "languages": {
+        "typescript": [],
+        "python": [
+          {
+            "ref": "convohop#ConvoHopManagement.replay_webhook_deliveries",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#convohopmanagementreplay_webhook_deliveries-method"
+          },
+          {
+            "ref": "convohop#AsyncConvoHopManagement.replay_webhook_deliveries",
+            "package": "convohop",
+            "page": "../python/reference/convohop.md#asyncconvohopmanagementreplay_webhook_deliveries-method"
+          }
+        ]
+      }
     }
   ]
 }
