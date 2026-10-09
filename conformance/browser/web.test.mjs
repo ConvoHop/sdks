@@ -180,7 +180,9 @@ describe("Web Push in a Chromium service worker", { skip: !names.includes("chrom
 
   /**
    * Registers the test page's module service worker in a fresh profile that allows notifications. `push` delivers a
-   * payload through DevTools, as a push service would; `shown` waits until the shown notifications satisfy `check`.
+   * payload through DevTools, as a push service would, and waits until the worker has handled it; `shown` then waits
+   * until the shown notifications satisfy `check`. Notifications are read only between pushes, because Chromium's
+   * getNotifications() deletes a notification that it reads before the notification is on display.
    */
   async function serviceWorker(t) {
     const context = await browser.newContext();
@@ -194,6 +196,9 @@ describe("Web Push in a Chromium service worker", { skip: !names.includes("chrom
     }));
     await cdp.send("ServiceWorker.enable");
     await page.evaluate(async () => {
+      window.pushesHandled = 0;
+      navigator.serviceWorker.addEventListener("message", event => { if (event.data === "push handled") window.pushesHandled++; });
+      navigator.serviceWorker.startMessages();
       await navigator.serviceWorker.register("/sw.js", { type: "module" });
       await navigator.serviceWorker.ready;
     });
@@ -205,7 +210,15 @@ describe("Web Push in a Chromium service worker", { skip: !names.includes("chrom
     });
     return {
       errors,
-      push: data => cdp.send("ServiceWorker.deliverPushMessage", { origin: site.origin, registrationId, data }),
+      async push(data) {
+        const handled = await page.evaluate(() => window.pushesHandled);
+        await cdp.send("ServiceWorker.deliverPushMessage", { origin: site.origin, registrationId, data });
+        try {
+          await page.waitForFunction(count => window.pushesHandled > count, handled, { timeout: 15_000, polling: 50 });
+        } catch (error) {
+          throw new Error(`the service worker didn't handle the push: ${error.message.split("\n")[0]}`, { cause: error });
+        }
+      },
       async shown(check) {
         for (const deadline = Date.now() + 15_000; ;) {
           const list = await notifications();
