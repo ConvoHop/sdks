@@ -32,7 +32,7 @@ function editAnnotations(root, edit) {
 test("generate writes every generated file once, and --check then passes", t => {
   const root = copyFixture(t);
   const paths = generatedPaths(root);
-  assert.equal(paths.length, 49);
+  assert.equal(paths.length, 54);
   const first = cli("generate", "--root", root);
   assert.deepEqual(first, { status: 0, out: [...paths.map(path => `wrote ${path}`), SUMMARY].join("\n"), err: "" });
   for (const path of paths) assert.ok(existsSync(join(root, path)), path);
@@ -99,7 +99,7 @@ test("usage errors exit 2 with the message and the usage text", () => {
     [["ir", "--check"], '--check does not apply to "ir"'],
     [["check-annotations", "--check"], '--check does not apply to "check-annotations"'],
     [["emit"], "emit needs at least one emitter name"],
-    [["emit", "ir", "python"], 'unknown emitter "python"'],
+    [["emit", "ir", "nonexistent"], 'unknown emitter "nonexistent"'],
     [["generate", "--bogus"], /^Unknown option '--bogus'/],
     [["generate", "--root"], /^Option '--root <value>' argument missing/],
   ];
@@ -115,7 +115,7 @@ test("usage errors exit 2 with the message and the usage text", () => {
   for (const flag of ["-h", "--help"]) {
     const help = cli(flag);
     assert.equal(help.status, 0);
-    assert.match(help.out, /^Usage: node tools\/sdkgen\/cli\.mjs <command>[\s\S]*emit <name>\.\.\. \[--check\] {2}Run only the named emitters: ir, graphql-operations, typescript, doc-snippets, java, mcp-tools, cli-operations\./);
+    assert.match(help.out, /^Usage: node tools\/sdkgen\/cli\.mjs <command>[\s\S]*emit <name>\.\.\. \[--check\] {2}Run only the named emitters: ir, graphql-operations, typescript, doc-snippets, java, mcp-tools, cli-operations, python\./);
   }
 });
 

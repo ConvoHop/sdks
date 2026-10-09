@@ -89,3 +89,28 @@ updates:
         update-types:
           - minor
           - patch
+
+  # The Python SDK (python/). It is a library: its declared ranges stay and
+  # only uv.lock moves unless a new version falls outside a range.
+  - package-ecosystem: uv
+    directory: /python
+    schedule:
+      interval: weekly
+    versioning-strategy: increase-if-necessary
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
+    groups:
+      uv-production:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      uv-development:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
