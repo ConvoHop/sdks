@@ -67,3 +67,4 @@ query CommunicationConversationMute($context: RequestContextInput!, $input: Conv
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.getMute`](../../typescript/reference/server.md#serverconversationmembersgetmute-method), [`ConversationHandle.mute.get`](../../typescript/reference/client.md#conversationhandlemuteget-property) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.conversation_mute`](../../python/reference/convohop.md#convohopconversation_mute-method), [`AsyncConvoHop.conversation_mute`](../../python/reference/convohop.md#asyncconvohopconversation_mute-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.conversationMute`](../../jvm/reference/server.md#communicationapiconversationmute-method), [`CommunicationSuspendApi.conversationMute`](../../jvm/reference/server-kotlin.md#communicationsuspendapiconversationmute-method) |

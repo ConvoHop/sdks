@@ -9,11 +9,8 @@ import kotlinx.coroutines.runInterruptible
 
 /**
  * Runs a blocking SDK [call] on [dispatcher] and interrupts it when the calling coroutine is cancelled.
- * The suspending plane APIs run every call this way; use it for the blocking client helpers too:
- *
- * ```
- * val principal = interruptible { server.principals().create(accountId) }
- * ```
+ * The suspending plane APIs run every call this way; use it for the blocking client helpers too, as in
+ * `interruptible { server.principals().create(accountId) }`.
  *
  * The transport reports an interrupted request as a lost request whose outcome is unknown, not as an
  * [InterruptedException]. Left alone, that problem would complete the cancelled coroutine as a failure

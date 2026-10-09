@@ -93,3 +93,4 @@ mutation CommunicationRevokeSession($context: RequestContextInput!, $input: Revo
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.sessions.revoke`](../../typescript/reference/server.md#projectserverclientsessionsrevoke-property) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.revoke_session`](../../python/reference/convohop.md#convohoprevoke_session-method), [`AsyncConvoHop.revoke_session`](../../python/reference/convohop.md#asyncconvohoprevoke_session-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.sessions.revoke`](../../jvm/reference/server.md#projectserverclientsessionsrevoke-method), [`CommunicationApi.revokeSession`](../../jvm/reference/server.md#communicationapirevokesession-method), [`CommunicationSuspendApi.revokeSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapirevokesession-method) |

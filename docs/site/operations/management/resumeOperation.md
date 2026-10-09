@@ -149,3 +149,4 @@ mutation ManagementResumeOperation($context: RequestContextInput!, $input: Resum
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.resume_operation`](../../python/reference/convohop.md#convohopmanagementresume_operation-method), [`AsyncConvoHopManagement.resume_operation`](../../python/reference/convohop.md#asyncconvohopmanagementresume_operation-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.resumeOperation`](../../jvm/reference/server.md#managementapiresumeoperation-method), [`ManagementSuspendApi.resumeOperation`](../../jvm/reference/server-kotlin.md#managementsuspendapiresumeoperation-method) |

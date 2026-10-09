@@ -93,3 +93,4 @@ mutation CommunicationHistoryGrant($context: RequestContextInput!, $input: Histo
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.grantHistory`](../../typescript/reference/server.md#serverconversationmembersgranthistory-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.history_grant`](../../python/reference/convohop.md#convohophistory_grant-method), [`AsyncConvoHop.history_grant`](../../python/reference/convohop.md#asyncconvohophistory_grant-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.historyGrant`](../../jvm/reference/server.md#communicationapihistorygrant-method), [`CommunicationSuspendApi.historyGrant`](../../jvm/reference/server-kotlin.md#communicationsuspendapihistorygrant-method) |

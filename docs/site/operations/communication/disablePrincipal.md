@@ -83,3 +83,4 @@ mutation CommunicationDisablePrincipal($context: RequestContextInput!, $input: D
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.principals.disable`](../../typescript/reference/server.md#projectserverclientprincipalsdisable-property) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.disable_principal`](../../python/reference/convohop.md#convohopdisable_principal-method), [`AsyncConvoHop.disable_principal`](../../python/reference/convohop.md#asyncconvohopdisable_principal-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.principals.disable`](../../jvm/reference/server.md#projectserverclientprincipalsdisable-method), [`CommunicationApi.disablePrincipal`](../../jvm/reference/server.md#communicationapidisableprincipal-method), [`CommunicationSuspendApi.disablePrincipal`](../../jvm/reference/server-kotlin.md#communicationsuspendapidisableprincipal-method) |

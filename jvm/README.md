@@ -6,7 +6,8 @@ extensions to it. Use them only in trusted JVM backends, because they hold
 secret backend keys and operator credentials. Never put them, or a backend
 key, in an Android app or any other client. They aren't published to a
 package registry yet: [build them from source](#install-from-source).
-License: [Apache-2.0](../LICENSE).
+The [Java and Kotlin docs](../docs/site/jvm/index.md) have quickstarts with
+tested code and the API reference. License: [Apache-2.0](../LICENSE).
 
 ## Requirements
 
@@ -309,8 +310,8 @@ ConvoHop doesn't send push notifications for you
 `PushPayloads` builds APNs, FCM and Web Push requests from a notification
 event, following the [push payload contract](../spec/push-payload/README.md).
 The builders hold no credentials and send nothing: your push library adds the
-device token and the provider's authorization, encrypts and VAPID-signs Web
-Push messages, and sends them. Subscribe a webhook endpoint to
+device's token or FID and the provider's authorization, encrypts and
+VAPID-signs Web Push messages, and sends them. Subscribe a webhook endpoint to
 `notification.message`, `notification.call` and
 `notification.callCancelled`, and de-duplicate on the event ID.
 
@@ -332,8 +333,16 @@ platform or is stale. Send nothing for null.
 | --- | --- | --- | --- |
 | `apnsAlert(event, bundleId[, options])` | APNs `getHeaders()` and `getPayload()` for an alert | A `notification.callCancelled` that isn't a missed call | 4096 of the payload |
 | `apnsVoip(event, bundleId[, options])` | APNs headers and payload for a PushKit VoIP push, on the `<bundleId>.voip` topic | Every event but `notification.call` | 5120 of the payload |
-| `fcm(event[, options])` | An FCM HTTP v1 message without a target, as JSON, with Android options. Add `token`, or use `getData()` and the getters with the Firebase Admin SDK. | Stale events only | 4096 of the data |
+| `fcm(event[, options])` | An FCM HTTP v1 message without a target, as JSON, with Android options. Add `token` or `fid`, or use `getData()` and the getters with the Firebase Admin SDK. | Stale events only | 4096 of the data |
 | `webPush(event[, options])` | RFC 8030 headers (`TTL`, `Urgency` and `Topic`) and a payload for your library to encrypt | Stale events only | 3993 of the payload, the RFC 8291 plaintext limit |
+
+An FCM message goes to the target that the Android app registered: its
+registration `token` by default, or its `fid`, the Firebase Installation ID,
+when the app's manifest sets `firebase_messaging_installation_id_enabled`.
+The Firebase Admin SDK for Java sends to a FID from
+[9.10.0](https://github.com/firebase/firebase-admin-java/releases/tag/v9.10.0),
+with `Message.Builder.setFid`. That version also deprecates `setToken`, which
+still sends to a token.
 
 `PushOptions` sets the visible `title` and `body`, such as the sender's name,
 whether a message event's opted-in `preview` becomes the body when you set no
@@ -398,6 +407,20 @@ the repository root:
 npm run conformance -- --driver conformance/drivers/jvm/build/install/conformance-driver/bin/conformance-driver
 ```
 
+The build also includes two projects for the
+[Java and Kotlin docs](../docs/site/jvm/index.md): `docs-surface` reads the
+SDK's public API for the [docs pipeline](../docs/docs-pipeline.md), and
+`docs-examples` holds the code that the docs include. The examples' tests
+start the conformance mock, so they need Node.js 22 or later and `npm ci` at
+the repository root; skip them with `-x :docs-examples:test`. After you
+change the public API, from the repository root:
+
+```sh
+npm run extract:docs -- jvm   # refresh docs/languages/jvm/surface.json
+npm run generate:docs         # regenerate docs/site
+npm run test:docs -- jvm      # compile and run the docs examples
+```
+
 `src/generated` holds code generated from the schemas: never edit it. From
 the repository root, `npm run generate:graphql` regenerates it and
 `npm run check:graphql` checks it. See [SDK generation](../docs/sdk-generation.md).
@@ -411,3 +434,5 @@ the repository root, `npm run generate:graphql` regenerates it and
 | `convohop-server-kotlin/src/generated/kotlin` | Generated suspending APIs |
 | `sdkgen-edge` | Compiles the generator's edge-case golden output against the runtime |
 | [`../conformance/drivers/jvm`](../conformance/drivers/jvm) | The conformance driver |
+| [`../tools/docgen/extractors/jvm`](../tools/docgen/extractors/jvm) | `docs-surface`: the public API extractor that the docs generator runs |
+| [`../docs/languages/jvm/examples`](../docs/languages/jvm/examples) | `docs-examples`: the code that the Java and Kotlin docs include, and its tests |

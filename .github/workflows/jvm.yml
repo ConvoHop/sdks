@@ -1,8 +1,9 @@
 # Builds and tests the Java and Kotlin server SDK in jvm/: its generated code
 # and generator goldens, the Gradle build (Java 11 bytecode, compiled on JDK
 # 17), the tests on Java 11, 17, 21 and 25, a dry-run publication to a local
-# Maven repository, and the conformance scenarios through the JVM driver.
-# See jvm/README.md.
+# Maven repository, the conformance scenarios through the JVM driver, and the
+# Java and Kotlin docs' surface and tested examples. See jvm/README.md and
+# docs/docs-pipeline.md.
 name: JVM
 
 on:
@@ -11,18 +12,22 @@ on:
     paths:
       - .github/workflows/jvm.yml
       - conformance/**
+      - docs/languages/jvm/**
       - jvm/**
       - schema/**
       - spec/**
+      - tools/docgen/**
       - tools/sdkgen/**
   pull_request:
     branches: [main]
     paths:
       - .github/workflows/jvm.yml
       - conformance/**
+      - docs/languages/jvm/**
       - jvm/**
       - schema/**
       - spec/**
+      - tools/docgen/**
       - tools/sdkgen/**
 
 permissions: {}
@@ -58,6 +63,8 @@ jobs:
             jvm/gradle/libs.versions.toml
             jvm/gradle/wrapper/gradle-wrapper.properties
             conformance/drivers/jvm/build.gradle.kts
+            docs/languages/jvm/examples/build.gradle.kts
+            tools/docgen/extractors/jvm/build.gradle.kts
       # The test job runs the tests on every supported Java version.
       - name: Compile, lint, document and package
         working-directory: jvm
@@ -91,6 +98,26 @@ jobs:
           name: jvm-maven-local
           path: jvm/build/m2/
           if-no-files-found: error
+          retention-days: 14
+      # The docs steps need Node.js and npm ci, so they run here rather than in the test job.
+      - name: Test the docs surface extractor
+        working-directory: jvm
+        run: ./gradlew --no-daemon --console=plain :docs-surface:test
+      - name: Check that the docs surface matches the SDK sources
+        run: node tools/docgen/cli.mjs extract --check jvm
+      - name: Compile and run the docs examples against the conformance mock
+        run: node tools/docgen/cli.mjs test --install jvm
+      - name: Upload the docs test reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: jvm-docs-test-reports
+          path: |
+            docs/languages/jvm/examples/build/reports/tests/
+            docs/languages/jvm/examples/build/test-results/
+            tools/docgen/extractors/jvm/build/reports/tests/
+            tools/docgen/extractors/jvm/build/test-results/
+          if-no-files-found: ignore
           retention-days: 14
 
   test:
@@ -127,6 +154,10 @@ jobs:
             jvm/gradle/libs.versions.toml
             jvm/gradle/wrapper/gradle-wrapper.properties
             conformance/drivers/jvm/build.gradle.kts
+            docs/languages/jvm/examples/build.gradle.kts
+            tools/docgen/extractors/jvm/build.gradle.kts
+      # The build job tests the docs projects: the extractor runs on JDK 17, and
+      # the examples' tests start the conformance mock with Node.js.
       - name: Run the tests
         working-directory: jvm
         env:
@@ -136,6 +167,7 @@ jobs:
           ./gradlew --no-daemon --console=plain test
           -PtestJavaVersion="$TEST_JAVA"
           -Porg.gradle.java.installations.paths="$TEST_JDK"
+          -x :docs-surface:test -x :docs-examples:test
       - name: Upload the test reports
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -173,6 +205,8 @@ jobs:
             jvm/gradle/libs.versions.toml
             jvm/gradle/wrapper/gradle-wrapper.properties
             conformance/drivers/jvm/build.gradle.kts
+            docs/languages/jvm/examples/build.gradle.kts
+            tools/docgen/extractors/jvm/build.gradle.kts
       - name: Build the JVM driver
         working-directory: jvm
         run: ./gradlew --no-daemon --console=plain :conformance-driver:installDist
@@ -242,6 +276,8 @@ jobs:
             jvm/gradle/libs.versions.toml
             jvm/gradle/wrapper/gradle-wrapper.properties
             conformance/drivers/jvm/build.gradle.kts
+            docs/languages/jvm/examples/build.gradle.kts
+            tools/docgen/extractors/jvm/build.gradle.kts
       - name: Build the JVM driver
         working-directory: jvm
         run: ./gradlew --no-daemon --console=plain :conformance-driver:installDist

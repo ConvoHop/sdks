@@ -94,3 +94,4 @@ query ManagementDeploymentUsage($context: RequestContextInput!, $input: Deployme
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.deployment_usage`](../../python/reference/convohop.md#convohopmanagementdeployment_usage-method), [`AsyncConvoHopManagement.deployment_usage`](../../python/reference/convohop.md#asyncconvohopmanagementdeployment_usage-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.deploymentUsage`](../../jvm/reference/server.md#managementapideploymentusage-method), [`ManagementSuspendApi.deploymentUsage`](../../jvm/reference/server-kotlin.md#managementsuspendapideploymentusage-method) |

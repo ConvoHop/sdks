@@ -93,3 +93,4 @@ mutation CommunicationRenewSession($context: RequestContextInput!, $input: Renew
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.sessions.renew`](../../typescript/reference/server.md#projectserverclientsessionsrenew-property) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.renew_session`](../../python/reference/convohop.md#convohoprenew_session-method), [`AsyncConvoHop.renew_session`](../../python/reference/convohop.md#asyncconvohoprenew_session-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.sessions.renew`](../../jvm/reference/server.md#projectserverclientsessionsrenew-method), [`CommunicationApi.renewSession`](../../jvm/reference/server.md#communicationapirenewsession-method), [`CommunicationSuspendApi.renewSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapirenewsession-method) |

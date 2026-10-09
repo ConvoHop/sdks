@@ -8,8 +8,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * An FCM data message from {@link PushPayloads#fcm}. {@link #getMessage()} is an FCM HTTP v1 {@code messages:send}
- * message without a target: add {@code token}. With the Firebase Admin SDK, put {@link #getData()} and set the Android
- * priority, TTL and collapse key from the getters. {@link #toString()} omits the data.
+ * message without a target: add {@code token} or {@code fid}. With the Firebase Admin SDK, put {@link #getData()}
+ * and set the Android priority, TTL and collapse key from the getters. {@link #toString()} omits the data.
  */
 public final class FcmRequest {
   private final Map<String, String> data;

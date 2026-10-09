@@ -134,3 +134,4 @@ mutation ManagementRotateWebhookSecret($context: RequestContextInput!, $input: R
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.rotate_webhook_secret`](../../python/reference/convohop.md#convohopmanagementrotate_webhook_secret-method), [`AsyncConvoHopManagement.rotate_webhook_secret`](../../python/reference/convohop.md#asyncconvohopmanagementrotate_webhook_secret-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.rotateWebhookSecret`](../../jvm/reference/server.md#managementapirotatewebhooksecret-method), [`ManagementSuspendApi.rotateWebhookSecret`](../../jvm/reference/server-kotlin.md#managementsuspendapirotatewebhooksecret-method) |

@@ -92,3 +92,4 @@ mutation CommunicationEndLiveSession($context: RequestContextInput!, $input: End
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerLiveSession.end`](../../typescript/reference/server.md#serverlivesessionend-method), [`LiveSessionHandle.end`](../../typescript/reference/client.md#livesessionhandleend-method) |
 | [Python](../../python/reference/operations.md) | [`ConvoHop.end_live_session`](../../python/reference/convohop.md#convohopend_live_session-method), [`AsyncConvoHop.end_live_session`](../../python/reference/convohop.md#asyncconvohopend_live_session-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.endLiveSession`](../../jvm/reference/server.md#communicationapiendlivesession-method), [`CommunicationSuspendApi.endLiveSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapiendlivesession-method) |

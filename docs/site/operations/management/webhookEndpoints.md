@@ -100,3 +100,4 @@ query ManagementWebhookEndpoints($context: RequestContextInput!, $input: Webhook
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | [`ConvoHopManagement.webhook_endpoints`](../../python/reference/convohop.md#convohopmanagementwebhook_endpoints-method), [`AsyncConvoHopManagement.webhook_endpoints`](../../python/reference/convohop.md#asyncconvohopmanagementwebhook_endpoints-method) |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.webhookEndpoints`](../../jvm/reference/server.md#managementapiwebhookendpoints-method), [`ManagementSuspendApi.webhookEndpoints`](../../jvm/reference/server-kotlin.md#managementsuspendapiwebhookendpoints-method) |

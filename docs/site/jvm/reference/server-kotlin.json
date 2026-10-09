@@ -1,0 +1,1140 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "jvm",
+  "package": "com.convohop:convohop-server-kotlin",
+  "layer": "server",
+  "page": "server-kotlin.md",
+  "symbols": [
+    {
+      "name": "CommunicationSuspendApi",
+      "kind": "class",
+      "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi",
+      "anchor": "communicationsuspendapi-class",
+      "signatures": ["public class CommunicationSuspendApi"],
+      "docs": "Suspending view of `CommunicationApi`. Each call runs on `dispatcher`. Cancelling the calling\ncoroutine interrupts the blocking request and the call fails with a CancellationException\nwhose cause is the lost-request problem; a mutation stays in the client's recovery journal.\n\nPackage: `com.convohop.server.kotlin`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.constructor",
+          "anchor": "communicationsuspendapi-constructor",
+          "signatures": [
+            "public constructor(api: CommunicationApi, dispatcher: CoroutineDispatcher = Dispatchers.IO)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "capabilities",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.capabilities",
+          "anchor": "communicationsuspendapicapabilities-method",
+          "signatures": ["public suspend fun capabilities(): CapabilitiesReply"],
+          "docs": "Suspending `CommunicationApi.capabilities`.",
+          "operations": [
+            {
+              "id": "communication.capabilities",
+              "page": "../../operations/communication/capabilities.md"
+            }
+          ]
+        },
+        {
+          "name": "route",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.route",
+          "anchor": "communicationsuspendapiroute-method",
+          "signatures": ["public suspend fun route(): RouteReply"],
+          "docs": "Suspending `CommunicationApi.route`.",
+          "operations": [
+            {"id": "communication.route", "page": "../../operations/communication/route.md"}
+          ]
+        },
+        {
+          "name": "getPrincipal",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getPrincipal",
+          "anchor": "communicationsuspendapigetprincipal-method",
+          "signatures": [
+            "public suspend fun getPrincipal(input: GetPrincipalRequestInput): GetPrincipalReply"
+          ],
+          "docs": "Suspending `CommunicationApi.getPrincipal`.",
+          "operations": [
+            {
+              "id": "communication.getPrincipal",
+              "page": "../../operations/communication/getPrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "getConversation",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getConversation",
+          "anchor": "communicationsuspendapigetconversation-method",
+          "signatures": [
+            "public suspend fun getConversation(input: GetConversationRequestInput): GetConversationReply"
+          ],
+          "docs": "Suspending `CommunicationApi.getConversation`.",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "members",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.members",
+          "anchor": "communicationsuspendapimembers-method",
+          "signatures": ["public suspend fun members(input: MembersRequestInput): MembersReply"],
+          "docs": "Suspending `CommunicationApi.members`.",
+          "operations": [
+            {"id": "communication.members", "page": "../../operations/communication/members.md"}
+          ]
+        },
+        {
+          "name": "membersPages",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.membersPages",
+          "anchor": "communicationsuspendapimemberspages-method",
+          "signatures": ["public fun membersPages(input: MembersRequestInput): Flow<MemberPage>"],
+          "docs": "`CommunicationApi.membersPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it.",
+          "operations": [
+            {"id": "communication.members", "page": "../../operations/communication/members.md"}
+          ]
+        },
+        {
+          "name": "messages",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.messages",
+          "anchor": "communicationsuspendapimessages-method",
+          "signatures": ["public suspend fun messages(input: MessagesRequestInput): MessagesReply"],
+          "docs": "Suspending `CommunicationApi.messages`.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "messagesPages",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.messagesPages",
+          "anchor": "communicationsuspendapimessagespages-method",
+          "signatures": ["public fun messagesPages(input: MessagesRequestInput): Flow<MessagePage>"],
+          "docs": "`CommunicationApi.messagesPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "getMessage",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getMessage",
+          "anchor": "communicationsuspendapigetmessage-method",
+          "signatures": [
+            "public suspend fun getMessage(input: GetMessageRequestInput): GetMessageReply"
+          ],
+          "docs": "Suspending `CommunicationApi.getMessage`.",
+          "operations": [
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "inbox",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.inbox",
+          "anchor": "communicationsuspendapiinbox-method",
+          "signatures": ["public suspend fun inbox(input: InboxRequestInput): InboxReply"],
+          "docs": "Suspending `CommunicationApi.inbox`.",
+          "operations": [
+            {"id": "communication.inbox", "page": "../../operations/communication/inbox.md"}
+          ]
+        },
+        {
+          "name": "inboxPages",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.inboxPages",
+          "anchor": "communicationsuspendapiinboxpages-method",
+          "signatures": ["public fun inboxPages(input: InboxRequestInput): Flow<InboxPage>"],
+          "docs": "`CommunicationApi.inboxPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it.",
+          "operations": [
+            {"id": "communication.inbox", "page": "../../operations/communication/inbox.md"}
+          ]
+        },
+        {
+          "name": "search",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.search",
+          "anchor": "communicationsuspendapisearch-method",
+          "signatures": ["public suspend fun search(input: SearchRequestInput): SearchReply"],
+          "docs": "Suspending `CommunicationApi.search`.",
+          "operations": [
+            {"id": "communication.search", "page": "../../operations/communication/search.md"}
+          ]
+        },
+        {
+          "name": "searchPages",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.searchPages",
+          "anchor": "communicationsuspendapisearchpages-method",
+          "signatures": ["public fun searchPages(input: SearchRequestInput): Flow<SearchPage>"],
+          "docs": "`CommunicationApi.searchPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it.",
+          "operations": [
+            {"id": "communication.search", "page": "../../operations/communication/search.md"}
+          ]
+        },
+        {
+          "name": "resolveRequest",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.resolveRequest",
+          "anchor": "communicationsuspendapiresolverequest-method",
+          "signatures": [
+            "public suspend fun resolveRequest(input: ResolveRequestRequestInput): ResolveRequestReply"
+          ],
+          "docs": "Suspending `CommunicationApi.resolveRequest`.",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "getOperation",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getOperation",
+          "anchor": "communicationsuspendapigetoperation-method",
+          "signatures": [
+            "public suspend fun getOperation(input: GetOperationRequestInput): GetOperationReply"
+          ],
+          "docs": "Suspending `CommunicationApi.getOperation`.",
+          "operations": [
+            {
+              "id": "communication.getOperation",
+              "page": "../../operations/communication/getOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "conversationMute",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.conversationMute",
+          "anchor": "communicationsuspendapiconversationmute-method",
+          "signatures": [
+            "public suspend fun conversationMute(input: ConversationMuteInput): ConversationMuteReply"
+          ],
+          "docs": "Suspending `CommunicationApi.conversationMute`.",
+          "operations": [
+            {
+              "id": "communication.conversationMute",
+              "page": "../../operations/communication/conversationMute.md"
+            }
+          ]
+        },
+        {
+          "name": "currentLiveSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.currentLiveSession",
+          "anchor": "communicationsuspendapicurrentlivesession-method",
+          "signatures": [
+            "public suspend fun currentLiveSession(input: ConversationLiveInput): CurrentLiveSessionReply"
+          ],
+          "docs": "Suspending `CommunicationApi.currentLiveSession`.",
+          "operations": [
+            {
+              "id": "communication.currentLiveSession",
+              "page": "../../operations/communication/currentLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "liveSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSession",
+          "anchor": "communicationsuspendapilivesession-method",
+          "signatures": [
+            "public suspend fun liveSession(input: LiveSessionInput): LiveSessionReply"
+          ],
+          "docs": "Suspending `CommunicationApi.liveSession`.",
+          "operations": [
+            {
+              "id": "communication.liveSession",
+              "page": "../../operations/communication/liveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "liveSessions",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessions",
+          "anchor": "communicationsuspendapilivesessions-method",
+          "signatures": [
+            "public suspend fun liveSessions(input: LiveSessionsInput): LiveSessionPageReply"
+          ],
+          "docs": "Suspending `CommunicationApi.liveSessions`.",
+          "operations": [
+            {
+              "id": "communication.liveSessions",
+              "page": "../../operations/communication/liveSessions.md"
+            }
+          ]
+        },
+        {
+          "name": "liveSessionsPages",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionsPages",
+          "anchor": "communicationsuspendapilivesessionspages-method",
+          "signatures": [
+            "public fun liveSessionsPages(input: LiveSessionsInput): Flow<LiveSessionPage>"
+          ],
+          "docs": "`CommunicationApi.liveSessionsPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it.",
+          "operations": [
+            {
+              "id": "communication.liveSessions",
+              "page": "../../operations/communication/liveSessions.md"
+            }
+          ]
+        },
+        {
+          "name": "liveSessionParticipants",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionParticipants",
+          "anchor": "communicationsuspendapilivesessionparticipants-method",
+          "signatures": [
+            "public suspend fun liveSessionParticipants(input: LiveParticipantsInput): LiveParticipantPageReply"
+          ],
+          "docs": "Suspending `CommunicationApi.liveSessionParticipants`.",
+          "operations": [
+            {
+              "id": "communication.liveSessionParticipants",
+              "page": "../../operations/communication/liveSessionParticipants.md"
+            }
+          ]
+        },
+        {
+          "name": "liveSessionParticipantsPages",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionParticipantsPages",
+          "anchor": "communicationsuspendapilivesessionparticipantspages-method",
+          "signatures": [
+            "public fun liveSessionParticipantsPages(input: LiveParticipantsInput): Flow<LiveParticipantPage>"
+          ],
+          "docs": "`CommunicationApi.liveSessionParticipantsPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it.",
+          "operations": [
+            {
+              "id": "communication.liveSessionParticipants",
+              "page": "../../operations/communication/liveSessionParticipants.md"
+            }
+          ]
+        },
+        {
+          "name": "liveSessionOperation",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionOperation",
+          "anchor": "communicationsuspendapilivesessionoperation-method",
+          "signatures": [
+            "public suspend fun liveSessionOperation(input: LiveSessionOperationInput): LiveSessionOperationReply"
+          ],
+          "docs": "Suspending `CommunicationApi.liveSessionOperation`.",
+          "operations": [
+            {
+              "id": "communication.liveSessionOperation",
+              "page": "../../operations/communication/liveSessionOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "sessionRequestOutcome",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.sessionRequestOutcome",
+          "anchor": "communicationsuspendapisessionrequestoutcome-method",
+          "signatures": [
+            "public suspend fun sessionRequestOutcome(input: SessionRequestOutcomeRequestInput): SessionRequestOutcomeReply"
+          ],
+          "docs": "Suspending `CommunicationApi.sessionRequestOutcome`.",
+          "operations": [
+            {
+              "id": "communication.sessionRequestOutcome",
+              "page": "../../operations/communication/sessionRequestOutcome.md"
+            }
+          ]
+        },
+        {
+          "name": "createPrincipal",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.createPrincipal",
+          "anchor": "communicationsuspendapicreateprincipal-method",
+          "signatures": [
+            "public suspend fun createPrincipal(input: CreatePrincipalRequestInput, requestId: String? = null): CreatePrincipalReply"
+          ],
+          "docs": "Suspending `CommunicationApi.createPrincipal`.",
+          "operations": [
+            {
+              "id": "communication.createPrincipal",
+              "page": "../../operations/communication/createPrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "disablePrincipal",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.disablePrincipal",
+          "anchor": "communicationsuspendapidisableprincipal-method",
+          "signatures": [
+            "public suspend fun disablePrincipal(input: DisablePrincipalRequestInput, requestId: String? = null): DisablePrincipalReply"
+          ],
+          "docs": "Suspending `CommunicationApi.disablePrincipal`.",
+          "operations": [
+            {
+              "id": "communication.disablePrincipal",
+              "page": "../../operations/communication/disablePrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "issueSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.issueSession",
+          "anchor": "communicationsuspendapiissuesession-method",
+          "signatures": [
+            "public suspend fun issueSession(input: IssueSessionRequestInput, requestId: String? = null): IssueSessionReply"
+          ],
+          "docs": "Suspending `CommunicationApi.issueSession`.",
+          "operations": [
+            {
+              "id": "communication.issueSession",
+              "page": "../../operations/communication/issueSession.md"
+            }
+          ]
+        },
+        {
+          "name": "renewSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.renewSession",
+          "anchor": "communicationsuspendapirenewsession-method",
+          "signatures": [
+            "public suspend fun renewSession(input: RenewSessionRequestInput, requestId: String? = null): RenewSessionReply"
+          ],
+          "docs": "Suspending `CommunicationApi.renewSession`.",
+          "operations": [
+            {
+              "id": "communication.renewSession",
+              "page": "../../operations/communication/renewSession.md"
+            }
+          ]
+        },
+        {
+          "name": "revokeSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.revokeSession",
+          "anchor": "communicationsuspendapirevokesession-method",
+          "signatures": [
+            "public suspend fun revokeSession(input: RevokeSessionRequestInput, requestId: String? = null): RevokeSessionReply"
+          ],
+          "docs": "Suspending `CommunicationApi.revokeSession`.",
+          "operations": [
+            {
+              "id": "communication.revokeSession",
+              "page": "../../operations/communication/revokeSession.md"
+            }
+          ]
+        },
+        {
+          "name": "createConversation",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.createConversation",
+          "anchor": "communicationsuspendapicreateconversation-method",
+          "signatures": [
+            "public suspend fun createConversation(input: CreateConversationRequestInput, requestId: String? = null): CreateConversationReply"
+          ],
+          "docs": "Suspending `CommunicationApi.createConversation`.",
+          "operations": [
+            {
+              "id": "communication.createConversation",
+              "page": "../../operations/communication/createConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "updateConversation",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.updateConversation",
+          "anchor": "communicationsuspendapiupdateconversation-method",
+          "signatures": [
+            "public suspend fun updateConversation(input: UpdateConversationRequestInput, requestId: String? = null): UpdateConversationReply"
+          ],
+          "docs": "Suspending `CommunicationApi.updateConversation`.",
+          "operations": [
+            {
+              "id": "communication.updateConversation",
+              "page": "../../operations/communication/updateConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "addMember",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.addMember",
+          "anchor": "communicationsuspendapiaddmember-method",
+          "signatures": [
+            "public suspend fun addMember(input: AddMemberRequestInput, requestId: String? = null): AddMemberReply"
+          ],
+          "docs": "Suspending `CommunicationApi.addMember`.",
+          "operations": [
+            {"id": "communication.addMember", "page": "../../operations/communication/addMember.md"}
+          ]
+        },
+        {
+          "name": "addMembers",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.addMembers",
+          "anchor": "communicationsuspendapiaddmembers-method",
+          "signatures": [
+            "public suspend fun addMembers(input: AddMembersInput, requestId: String? = null): AddMembersPayload"
+          ],
+          "docs": "Suspending `CommunicationApi.addMembers`.",
+          "operations": [
+            {
+              "id": "communication.addMembers",
+              "page": "../../operations/communication/addMembers.md"
+            }
+          ]
+        },
+        {
+          "name": "removeMember",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.removeMember",
+          "anchor": "communicationsuspendapiremovemember-method",
+          "signatures": [
+            "public suspend fun removeMember(input: RemoveMemberRequestInput, requestId: String? = null): RemoveMemberReply"
+          ],
+          "docs": "Suspending `CommunicationApi.removeMember`.",
+          "operations": [
+            {
+              "id": "communication.removeMember",
+              "page": "../../operations/communication/removeMember.md"
+            }
+          ]
+        },
+        {
+          "name": "historyGrant",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.historyGrant",
+          "anchor": "communicationsuspendapihistorygrant-method",
+          "signatures": [
+            "public suspend fun historyGrant(input: HistoryGrantRequestInput, requestId: String? = null): HistoryGrantReply"
+          ],
+          "docs": "Suspending `CommunicationApi.historyGrant`.",
+          "operations": [
+            {
+              "id": "communication.historyGrant",
+              "page": "../../operations/communication/historyGrant.md"
+            }
+          ]
+        },
+        {
+          "name": "sendMessage",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.sendMessage",
+          "anchor": "communicationsuspendapisendmessage-method",
+          "signatures": [
+            "public suspend fun sendMessage(input: SendMessageRequestInput, requestId: String? = null): SendMessageReply"
+          ],
+          "docs": "Suspending `CommunicationApi.sendMessage`.",
+          "operations": [
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "editMessage",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.editMessage",
+          "anchor": "communicationsuspendapieditmessage-method",
+          "signatures": [
+            "public suspend fun editMessage(input: EditMessageRequestInput, requestId: String? = null): EditMessageReply"
+          ],
+          "docs": "Suspending `CommunicationApi.editMessage`.",
+          "operations": [
+            {
+              "id": "communication.editMessage",
+              "page": "../../operations/communication/editMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "deleteMessage",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.deleteMessage",
+          "anchor": "communicationsuspendapideletemessage-method",
+          "signatures": [
+            "public suspend fun deleteMessage(input: DeleteMessageRequestInput, requestId: String? = null): DeleteMessageReply"
+          ],
+          "docs": "Suspending `CommunicationApi.deleteMessage`.",
+          "operations": [
+            {
+              "id": "communication.deleteMessage",
+              "page": "../../operations/communication/deleteMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "setBroadcastPermission",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.setBroadcastPermission",
+          "anchor": "communicationsuspendapisetbroadcastpermission-method",
+          "signatures": [
+            "public suspend fun setBroadcastPermission(input: SetBroadcastPermissionInput, requestId: String? = null): SetBroadcastPermissionPayload"
+          ],
+          "docs": "Suspending `CommunicationApi.setBroadcastPermission`.",
+          "operations": [
+            {
+              "id": "communication.setBroadcastPermission",
+              "page": "../../operations/communication/setBroadcastPermission.md"
+            }
+          ]
+        },
+        {
+          "name": "setConversationMute",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.setConversationMute",
+          "anchor": "communicationsuspendapisetconversationmute-method",
+          "signatures": [
+            "public suspend fun setConversationMute(input: SetConversationMuteInput, requestId: String? = null): SetConversationMutePayload"
+          ],
+          "docs": "Suspending `CommunicationApi.setConversationMute`.",
+          "operations": [
+            {
+              "id": "communication.setConversationMute",
+              "page": "../../operations/communication/setConversationMute.md"
+            }
+          ]
+        },
+        {
+          "name": "alertLiveSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.alertLiveSession",
+          "anchor": "communicationsuspendapialertlivesession-method",
+          "signatures": [
+            "public suspend fun alertLiveSession(input: AlertLiveSessionInput, requestId: String? = null): AlertLiveSessionPayload"
+          ],
+          "docs": "Suspending `CommunicationApi.alertLiveSession`.",
+          "operations": [
+            {
+              "id": "communication.alertLiveSession",
+              "page": "../../operations/communication/alertLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "endLiveSession",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.endLiveSession",
+          "anchor": "communicationsuspendapiendlivesession-method",
+          "signatures": [
+            "public suspend fun endLiveSession(input: EndLiveSessionInput, requestId: String? = null): EndLiveSessionPayload"
+          ],
+          "docs": "Suspending `CommunicationApi.endLiveSession`.",
+          "operations": [
+            {
+              "id": "communication.endLiveSession",
+              "page": "../../operations/communication/endLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "redeemCredential",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.redeemCredential",
+          "anchor": "communicationsuspendapiredeemcredential-method",
+          "signatures": [
+            "public suspend fun redeemCredential(input: RedeemCredentialRequestInput, credentialDeliveryPermit: Map<String, Any?>, requestId: String? = null): RedeemCredentialReply"
+          ],
+          "docs": "Suspending `CommunicationApi.redeemCredential`.",
+          "operations": [
+            {
+              "id": "communication.redeemCredential",
+              "page": "../../operations/communication/redeemCredential.md"
+            }
+          ]
+        },
+        {
+          "name": "acknowledgeCredential",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.acknowledgeCredential",
+          "anchor": "communicationsuspendapiacknowledgecredential-method",
+          "signatures": [
+            "public suspend fun acknowledgeCredential(input: AcknowledgeCredentialRequestInput, credentialDeliveryPermit: Map<String, Any?>, requestId: String? = null): AcknowledgeCredentialReply"
+          ],
+          "docs": "Suspending `CommunicationApi.acknowledgeCredential`.",
+          "operations": [
+            {
+              "id": "communication.acknowledgeCredential",
+              "page": "../../operations/communication/acknowledgeCredential.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ManagementSuspendApi",
+      "kind": "class",
+      "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi",
+      "anchor": "managementsuspendapi-class",
+      "signatures": ["public class ManagementSuspendApi"],
+      "docs": "Suspending view of `ManagementApi`. Each call runs on `dispatcher`. Cancelling the calling\ncoroutine interrupts the blocking request and the call fails with a CancellationException\nwhose cause is the lost-request problem; a mutation stays in the client's recovery journal.\n\nPackage: `com.convohop.server.kotlin`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.constructor",
+          "anchor": "managementsuspendapi-constructor",
+          "signatures": [
+            "public constructor(api: ManagementApi, dispatcher: CoroutineDispatcher = Dispatchers.IO)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "capabilities",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.capabilities",
+          "anchor": "managementsuspendapicapabilities-method",
+          "signatures": ["public suspend fun capabilities(): CapabilitiesReply"],
+          "docs": "Suspending `ManagementApi.capabilities`.",
+          "operations": [
+            {"id": "management.capabilities", "page": "../../operations/management/capabilities.md"}
+          ]
+        },
+        {
+          "name": "organizations",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizations",
+          "anchor": "managementsuspendapiorganizations-method",
+          "signatures": ["public suspend fun organizations(): OrganizationsReply"],
+          "docs": "Suspending `ManagementApi.organizations`.",
+          "operations": [
+            {
+              "id": "management.organizations",
+              "page": "../../operations/management/organizations.md"
+            }
+          ]
+        },
+        {
+          "name": "getOrganization",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getOrganization",
+          "anchor": "managementsuspendapigetorganization-method",
+          "signatures": [
+            "public suspend fun getOrganization(input: GetOrganizationRequestInput): GetOrganizationReply"
+          ],
+          "docs": "Suspending `ManagementApi.getOrganization`.",
+          "operations": [
+            {
+              "id": "management.getOrganization",
+              "page": "../../operations/management/getOrganization.md"
+            }
+          ]
+        },
+        {
+          "name": "getDeployment",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getDeployment",
+          "anchor": "managementsuspendapigetdeployment-method",
+          "signatures": [
+            "public suspend fun getDeployment(input: GetDeploymentRequestInput): GetDeploymentReply"
+          ],
+          "docs": "Suspending `ManagementApi.getDeployment`.",
+          "operations": [
+            {
+              "id": "management.getDeployment",
+              "page": "../../operations/management/getDeployment.md"
+            }
+          ]
+        },
+        {
+          "name": "getProject",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getProject",
+          "anchor": "managementsuspendapigetproject-method",
+          "signatures": [
+            "public suspend fun getProject(input: GetProjectRequestInput): GetProjectReply"
+          ],
+          "docs": "Suspending `ManagementApi.getProject`.",
+          "operations": [
+            {"id": "management.getProject", "page": "../../operations/management/getProject.md"}
+          ]
+        },
+        {
+          "name": "deploymentHealth",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.deploymentHealth",
+          "anchor": "managementsuspendapideploymenthealth-method",
+          "signatures": [
+            "public suspend fun deploymentHealth(input: DeploymentHealthRequestInput): DeploymentHealthReply"
+          ],
+          "docs": "Suspending `ManagementApi.deploymentHealth`.",
+          "operations": [
+            {
+              "id": "management.deploymentHealth",
+              "page": "../../operations/management/deploymentHealth.md"
+            }
+          ]
+        },
+        {
+          "name": "deploymentUsage",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.deploymentUsage",
+          "anchor": "managementsuspendapideploymentusage-method",
+          "signatures": [
+            "public suspend fun deploymentUsage(input: DeploymentUsageRequestInput): DeploymentUsageReply"
+          ],
+          "docs": "Suspending `ManagementApi.deploymentUsage`.",
+          "operations": [
+            {
+              "id": "management.deploymentUsage",
+              "page": "../../operations/management/deploymentUsage.md"
+            }
+          ]
+        },
+        {
+          "name": "projectUsage",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.projectUsage",
+          "anchor": "managementsuspendapiprojectusage-method",
+          "signatures": [
+            "public suspend fun projectUsage(input: ProjectUsageRequestInput): ProjectUsageReply"
+          ],
+          "docs": "Suspending `ManagementApi.projectUsage`.",
+          "operations": [
+            {"id": "management.projectUsage", "page": "../../operations/management/projectUsage.md"}
+          ]
+        },
+        {
+          "name": "organizationUsage",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizationUsage",
+          "anchor": "managementsuspendapiorganizationusage-method",
+          "signatures": [
+            "public suspend fun organizationUsage(input: OrganizationUsageRequestInput): OrganizationUsageReply"
+          ],
+          "docs": "Suspending `ManagementApi.organizationUsage`.",
+          "operations": [
+            {
+              "id": "management.organizationUsage",
+              "page": "../../operations/management/organizationUsage.md"
+            }
+          ]
+        },
+        {
+          "name": "webhookEndpoints",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.webhookEndpoints",
+          "anchor": "managementsuspendapiwebhookendpoints-method",
+          "signatures": [
+            "public suspend fun webhookEndpoints(input: WebhookEndpointsRequestInput): WebhookEndpointsReply"
+          ],
+          "docs": "Suspending `ManagementApi.webhookEndpoints`.",
+          "operations": [
+            {
+              "id": "management.webhookEndpoints",
+              "page": "../../operations/management/webhookEndpoints.md"
+            }
+          ]
+        },
+        {
+          "name": "webhookDeliveries",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.webhookDeliveries",
+          "anchor": "managementsuspendapiwebhookdeliveries-method",
+          "signatures": [
+            "public suspend fun webhookDeliveries(input: WebhookDeliveriesRequestInput): WebhookDeliveriesReply"
+          ],
+          "docs": "Suspending `ManagementApi.webhookDeliveries`.",
+          "operations": [
+            {
+              "id": "management.webhookDeliveries",
+              "page": "../../operations/management/webhookDeliveries.md"
+            }
+          ]
+        },
+        {
+          "name": "resolveRequest",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.resolveRequest",
+          "anchor": "managementsuspendapiresolverequest-method",
+          "signatures": [
+            "public suspend fun resolveRequest(input: ResolveRequestRequestInput): ResolveRequestReply"
+          ],
+          "docs": "Suspending `ManagementApi.resolveRequest`.",
+          "operations": [
+            {
+              "id": "management.resolveRequest",
+              "page": "../../operations/management/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "getOperation",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getOperation",
+          "anchor": "managementsuspendapigetoperation-method",
+          "signatures": [
+            "public suspend fun getOperation(input: GetOperationRequestInput): GetOperationReply"
+          ],
+          "docs": "Suspending `ManagementApi.getOperation`.",
+          "operations": [
+            {"id": "management.getOperation", "page": "../../operations/management/getOperation.md"}
+          ]
+        },
+        {
+          "name": "createOrganization",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createOrganization",
+          "anchor": "managementsuspendapicreateorganization-method",
+          "signatures": [
+            "public suspend fun createOrganization(input: CreateOrganizationRequestInput, requestId: String? = null): CreateOrganizationReply"
+          ],
+          "docs": "Suspending `ManagementApi.createOrganization`.",
+          "operations": [
+            {
+              "id": "management.createOrganization",
+              "page": "../../operations/management/createOrganization.md"
+            }
+          ]
+        },
+        {
+          "name": "createDeployment",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createDeployment",
+          "anchor": "managementsuspendapicreatedeployment-method",
+          "signatures": [
+            "public suspend fun createDeployment(input: CreateDeploymentRequestInput, requestId: String? = null): CreateDeploymentReply"
+          ],
+          "docs": "Suspending `ManagementApi.createDeployment`.",
+          "operations": [
+            {
+              "id": "management.createDeployment",
+              "page": "../../operations/management/createDeployment.md"
+            }
+          ]
+        },
+        {
+          "name": "createProject",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createProject",
+          "anchor": "managementsuspendapicreateproject-method",
+          "signatures": [
+            "public suspend fun createProject(input: CreateProjectRequestInput, requestId: String? = null): CreateProjectReply"
+          ],
+          "docs": "Suspending `ManagementApi.createProject`.",
+          "operations": [
+            {
+              "id": "management.createProject",
+              "page": "../../operations/management/createProject.md"
+            }
+          ]
+        },
+        {
+          "name": "issueBackendKey",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.issueBackendKey",
+          "anchor": "managementsuspendapiissuebackendkey-method",
+          "signatures": [
+            "public suspend fun issueBackendKey(input: IssueBackendKeyRequestInput, requestId: String? = null): IssueBackendKeyReply"
+          ],
+          "docs": "Suspending `ManagementApi.issueBackendKey`.",
+          "operations": [
+            {
+              "id": "management.issueBackendKey",
+              "page": "../../operations/management/issueBackendKey.md"
+            }
+          ]
+        },
+        {
+          "name": "revokeBackendKey",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.revokeBackendKey",
+          "anchor": "managementsuspendapirevokebackendkey-method",
+          "signatures": [
+            "public suspend fun revokeBackendKey(input: RevokeBackendKeyRequestInput, requestId: String? = null): RevokeBackendKeyReply"
+          ],
+          "docs": "Suspending `ManagementApi.revokeBackendKey`.",
+          "operations": [
+            {
+              "id": "management.revokeBackendKey",
+              "page": "../../operations/management/revokeBackendKey.md"
+            }
+          ]
+        },
+        {
+          "name": "projectPolicy",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.projectPolicy",
+          "anchor": "managementsuspendapiprojectpolicy-method",
+          "signatures": [
+            "public suspend fun projectPolicy(input: ProjectPolicyRequestInput, requestId: String? = null): ProjectPolicyReply"
+          ],
+          "docs": "Suspending `ManagementApi.projectPolicy`.",
+          "operations": [
+            {
+              "id": "management.projectPolicy",
+              "page": "../../operations/management/projectPolicy.md"
+            }
+          ]
+        },
+        {
+          "name": "credentialPermit",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.credentialPermit",
+          "anchor": "managementsuspendapicredentialpermit-method",
+          "signatures": [
+            "public suspend fun credentialPermit(input: CredentialPermitRequestInput, requestId: String? = null): CredentialPermitReply"
+          ],
+          "docs": "Suspending `ManagementApi.credentialPermit`.",
+          "operations": [
+            {
+              "id": "management.credentialPermit",
+              "page": "../../operations/management/credentialPermit.md"
+            }
+          ]
+        },
+        {
+          "name": "pauseOperation",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.pauseOperation",
+          "anchor": "managementsuspendapipauseoperation-method",
+          "signatures": [
+            "public suspend fun pauseOperation(input: PauseOperationRequestInput, requestId: String? = null): PauseOperationReply"
+          ],
+          "docs": "Suspending `ManagementApi.pauseOperation`.",
+          "operations": [
+            {
+              "id": "management.pauseOperation",
+              "page": "../../operations/management/pauseOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "resumeOperation",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.resumeOperation",
+          "anchor": "managementsuspendapiresumeoperation-method",
+          "signatures": [
+            "public suspend fun resumeOperation(input: ResumeOperationRequestInput, requestId: String? = null): ResumeOperationReply"
+          ],
+          "docs": "Suspending `ManagementApi.resumeOperation`.",
+          "operations": [
+            {
+              "id": "management.resumeOperation",
+              "page": "../../operations/management/resumeOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "configureWebhook",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.configureWebhook",
+          "anchor": "managementsuspendapiconfigurewebhook-method",
+          "signatures": [
+            "public suspend fun configureWebhook(input: ConfigureWebhookRequestInput, requestId: String? = null): ConfigureWebhookReply"
+          ],
+          "docs": "Suspending `ManagementApi.configureWebhook`.",
+          "operations": [
+            {
+              "id": "management.configureWebhook",
+              "page": "../../operations/management/configureWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "updateWebhook",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.updateWebhook",
+          "anchor": "managementsuspendapiupdatewebhook-method",
+          "signatures": [
+            "public suspend fun updateWebhook(input: UpdateWebhookRequestInput, requestId: String? = null): UpdateWebhookReply"
+          ],
+          "docs": "Suspending `ManagementApi.updateWebhook`.",
+          "operations": [
+            {
+              "id": "management.updateWebhook",
+              "page": "../../operations/management/updateWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "rotateWebhookSecret",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.rotateWebhookSecret",
+          "anchor": "managementsuspendapirotatewebhooksecret-method",
+          "signatures": [
+            "public suspend fun rotateWebhookSecret(input: RotateWebhookSecretRequestInput, requestId: String? = null): RotateWebhookSecretReply"
+          ],
+          "docs": "Suspending `ManagementApi.rotateWebhookSecret`.",
+          "operations": [
+            {
+              "id": "management.rotateWebhookSecret",
+              "page": "../../operations/management/rotateWebhookSecret.md"
+            }
+          ]
+        },
+        {
+          "name": "disableWebhook",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.disableWebhook",
+          "anchor": "managementsuspendapidisablewebhook-method",
+          "signatures": [
+            "public suspend fun disableWebhook(input: DisableWebhookRequestInput, requestId: String? = null): DisableWebhookReply"
+          ],
+          "docs": "Suspending `ManagementApi.disableWebhook`.",
+          "operations": [
+            {
+              "id": "management.disableWebhook",
+              "page": "../../operations/management/disableWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "replayWebhookDeliveries",
+          "kind": "method",
+          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.replayWebhookDeliveries",
+          "anchor": "managementsuspendapireplaywebhookdeliveries-method",
+          "signatures": [
+            "public suspend fun replayWebhookDeliveries(input: ReplayWebhookDeliveriesRequestInput, requestId: String? = null): ReplayWebhookDeliveriesReply"
+          ],
+          "docs": "Suspending `ManagementApi.replayWebhookDeliveries`.",
+          "operations": [
+            {
+              "id": "management.replayWebhookDeliveries",
+              "page": "../../operations/management/replayWebhookDeliveries.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "interruptible",
+      "kind": "function",
+      "ref": "com.convohop:convohop-server-kotlin#interruptible",
+      "anchor": "interruptible-function",
+      "signatures": [
+        "public suspend fun <T> interruptible(dispatcher: CoroutineDispatcher = Dispatchers.IO, call: () -> T): T"
+      ],
+      "docs": "Runs a blocking SDK `call` on `dispatcher` and interrupts it when the calling coroutine is cancelled.\nThe suspending plane APIs run every call this way; use it for the blocking client helpers too, as in\n`interruptible { server.principals().create(accountId) }`.\n\nThe transport reports an interrupted request as a lost request whose outcome is unknown, not as an\n`InterruptedException`. Left alone, that problem would complete the cancelled coroutine as a failure\nand cancel its parent, so a failure that races cancellation becomes a `CancellationException` whose\ncause is the original problem. A mutation stays in the client's recovery journal either way.\n\nPackage: `com.convohop.server.kotlin`."
+    },
+    {
+      "name": "suspending",
+      "kind": "function",
+      "ref": "com.convohop:convohop-server-kotlin#suspending",
+      "anchor": "suspending-function",
+      "signatures": [
+        "public fun CommunicationApi.suspending(dispatcher: CoroutineDispatcher = Dispatchers.IO): CommunicationSuspendApi",
+        "public fun ManagementApi.suspending(dispatcher: CoroutineDispatcher = Dispatchers.IO): ManagementSuspendApi"
+      ],
+      "docs": "A suspending view of this plane API whose calls run on `dispatcher`.\n\nPackage: `com.convohop.server.kotlin`."
+    }
+  ]
+}

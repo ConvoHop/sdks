@@ -80,3 +80,4 @@ mutation CommunicationAcknowledgeCredential($context: RequestContextInput!, $inp
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
 | [Python](../../python/reference/operations.md) | Not wrapped by a method |
+| [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.acknowledgeCredential`](../../jvm/reference/server.md#communicationapiacknowledgecredential-method), [`CommunicationSuspendApi.acknowledgeCredential`](../../jvm/reference/server-kotlin.md#communicationsuspendapiacknowledgecredential-method) |
