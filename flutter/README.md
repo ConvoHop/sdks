@@ -177,7 +177,8 @@ store.changes.listen((snapshot) {
 `store.loadOlder()` loads earlier pages while `snapshot.hasOlder`, and
 `store.events` reports each event it applied, such as `live.*` events for a
 call UI. Use one store per conversation and client, and call
-`store.reconnect()` when connectivity returns to skip the backoff. Without a
+`store.reconnect()` when connectivity returns to skip the backoff; it never
+reconnects sooner than a `retryAfter` from ConvoHop. Without a
 store, `client.watch(conversationId, apply, onError)` replays a
 conversation's events from the stored cursor through your own `apply` and
 follows them over realtime.

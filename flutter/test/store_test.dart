@@ -647,6 +647,114 @@ void main() {
     });
   });
 
+  test('stops following at a spend stop until the app reconnects', () {
+    fakeAsync((async) {
+      final authority = _Authority()..post('first');
+      final setup = _Setup(async, authority);
+      final store = setup.store;
+      setup.acknowledge();
+
+      authority.calls.clear();
+      unawaited(setup.socket.serverClose(4402, 'CREDITS_EXHAUSTED meter=mau'));
+      async.flushMicrotasks();
+      expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.failed, false));
+      expect(
+        setup.snapshot.error,
+        isA<ConvoHopProblem>()
+            .having((problem) => problem.code, 'code', 'CREDITS_EXHAUSTED')
+            .having((problem) => problem.status, 'status', 402),
+      );
+      expect(setup.errors.single, same(setup.snapshot.error));
+      async.elapse(const Duration(minutes: 10));
+      expect(authority.calls, isEmpty);
+      expect(setup.connector.sockets, hasLength(1));
+
+      // Once credits are added or the cap raised, the app reconnects.
+      settled(async, store.reconnect());
+      expect(authority.operations, <String>['Events']);
+      expect(setup.connector.sockets, hasLength(2));
+      expect(
+        (setup.snapshot.status, setup.snapshot.connected, setup.snapshot.error),
+        (ConversationStoreStatus.ready, true, null),
+      );
+      expect(setup.texts, <String>['first']);
+
+      setup.close();
+      expect(async.pendingTimers, isEmpty);
+    });
+  });
+
+  test("waits out unverified spend's retryAfter, even when the app reconnects", () {
+    fakeAsync((async) {
+      final authority = _Authority()..post('first');
+      final setup = _Setup(async, authority);
+      final store = setup.store;
+      setup.acknowledge();
+
+      authority.calls.clear();
+      unawaited(setup.socket.serverClose(4503, 'SPEND_UNVERIFIED retryAfter=5 meter=mau'));
+      async.flushMicrotasks();
+      expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.ready, false));
+      expect(
+        setup.snapshot.error,
+        isA<ConvoHopProblem>()
+            .having((problem) => problem.code, 'code', 'SPEND_UNVERIFIED')
+            .having((problem) => problem.retryAfter, 'retryAfter', 5),
+      );
+
+      settled(async, store.reconnect());
+      async.elapse(const Duration(milliseconds: 4999));
+      settled(async, store.reconnect());
+      expect(authority.calls, isEmpty);
+      expect(setup.connector.sockets, hasLength(1));
+      async.elapse(const Duration(milliseconds: 500));
+      expect(authority.operations, <String>['Route', 'Events']);
+      expect(setup.connector.sockets, hasLength(2));
+      expect(setup.errors, hasLength(1));
+
+      // Once the wait is over, reconnect() replaces the stream again.
+      setup.acknowledge();
+      authority.calls.clear();
+      settled(async, store.reconnect());
+      expect(authority.operations, <String>['Events']);
+      expect(setup.connector.sockets, hasLength(3));
+      expect(
+        (setup.snapshot.status, setup.snapshot.connected, setup.snapshot.error),
+        (ConversationStoreStatus.ready, true, null),
+      );
+
+      setup.close();
+      expect(async.pendingTimers, isEmpty);
+    });
+  });
+
+  test("waits out a failed load's retryAfter, even when the app reconnects", () {
+    fakeAsync((async) {
+      final authority = _Authority()..post('first');
+      authority.answer(
+        'GetConversation',
+        (id, input) => jsonResponse(gqlError('SPEND_UNVERIFIED', status: 503, retryAfter: '5')),
+      );
+      final setup = _Setup(async, authority);
+      expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.loading, false));
+      expect(setup.snapshot.error, _problem('SPEND_UNVERIFIED'));
+
+      authority.calls.clear();
+      settled(async, setup.store.reconnect());
+      async.elapse(const Duration(milliseconds: 4999));
+      settled(async, setup.store.reconnect());
+      expect(authority.calls, isEmpty);
+      async.elapse(const Duration(milliseconds: 1));
+      expect(authority.operations, _fullLoad);
+      expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.ready, true));
+      expect(setup.texts, <String>['first']);
+      expect(setup.errors, <Matcher>[_problem('SPEND_UNVERIFIED')]);
+
+      setup.close();
+      expect(async.pendingTimers, isEmpty);
+    });
+  });
+
   test('close completes while listeners are paused and returns one future', () {
     fakeAsync((async) {
       final authority = _Authority()..post('first');

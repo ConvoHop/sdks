@@ -7,7 +7,7 @@
 /// LiveKit media and `package:convohop/io.dart` for file-backed storage.
 library;
 
-export 'src/client.dart';
+export 'src/client.dart' hide waitsOutRetryAfter;
 export 'src/generated/generated.dart';
 export 'src/notifications.dart';
 export 'src/outbox.dart';

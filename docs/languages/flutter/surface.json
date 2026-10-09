@@ -1068,7 +1068,7 @@
               "name": "reconnect",
               "kind": "method",
               "signatures": ["Future<void> reconnect()"],
-              "docs": "Reconnects now, for example when connectivity returns, instead of\nwaiting for the backoff. After `ConversationStoreStatus.failed`, tries\nagain."
+              "docs": "Reconnects now, for example when connectivity returns, instead of\nwaiting for the backoff. After `ConversationStoreStatus.failed`, tries\nagain. It never reconnects sooner than the authority's `retryAfter`:\nuntil that has passed, it does nothing and the scheduled reconnect\nstands."
             },
             {
               "name": "resync",

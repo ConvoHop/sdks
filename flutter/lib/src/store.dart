@@ -192,6 +192,8 @@ final class ConversationStore {
   int _generation = 0;
   ConversationStream? _stream;
   Timer? _retry;
+  // Runs while the authority's retryAfter for the scheduled retry hasn't passed.
+  Timer? _hold;
   int _failures = 0;
   Future<void>? _writing;
   Future<void>? _closing;
@@ -308,12 +310,16 @@ final class ConversationStore {
 
   /// Reconnects now, for example when connectivity returns, instead of
   /// waiting for the backoff. After [ConversationStoreStatus.failed], tries
-  /// again.
+  /// again. It never reconnects sooner than the authority's `retryAfter`:
+  /// until that has passed, it does nothing and the scheduled reconnect
+  /// stands.
   Future<void> reconnect() async {
     _checkOpen();
     if (_status == ConversationStoreStatus.resyncRequired) {
       throw StateError('The conversation needs resync() before it can reconnect');
     }
+    final stream = _stream;
+    if (_hold != null || (stream != null && !stream.closed && waitsOutRetryAfter(stream))) return;
     final generation = await _supersede();
     await _connect(generation);
   }
@@ -341,6 +347,8 @@ final class ConversationStore {
   Future<int> _supersede() async {
     _retry?.cancel();
     _retry = null;
+    _hold?.cancel();
+    _hold = null;
     _failures = 0;
     final generation = ++_generation;
     final stream = _stream;
@@ -360,6 +368,8 @@ final class ConversationStore {
     _generation++;
     _retry?.cancel();
     _retry = null;
+    _hold?.cancel();
+    _hold = null;
     // Not awaited: a broadcast cancel has nothing to wait for, and its root-zone future would stall close() under fake time.
     _outboxSubscription?.cancel().ignore();
     final stream = _stream;
@@ -459,8 +469,13 @@ final class ConversationStore {
       _retry?.cancel();
       final retryAfter = error is ConvoHopProblem ? error.retryAfter ?? 0 : 0;
       final delay = min(max(backoffDelay(_failures, _random.nextInt(1 << 30)), retryAfter * 1000), maxTimerDelayMs);
+      final hold = min(retryAfter * 1000, maxTimerDelayMs);
+      _hold?.cancel();
+      _hold = hold > 0 ? Timer(Duration(milliseconds: hold), () => _hold = null) : null;
       _retry = Timer(Duration(milliseconds: delay), () {
         _retry = null;
+        _hold?.cancel();
+        _hold = null;
         if (generation == _generation && !_closed) {
           unawaited(_connect(generation, reroute: action == ReconnectAction.reroute));
         }

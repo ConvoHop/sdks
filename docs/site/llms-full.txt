@@ -63812,7 +63812,9 @@ Future<void> reconnect()
 
 Reconnects now, for example when connectivity returns, instead of
 waiting for the backoff. After `ConversationStoreStatus.failed`, tries
-again.
+again. It never reconnects sooner than the authority's `retryAfter`:
+until that has passed, it does nothing and the scheduled reconnect
+stands.
 
 Sends [`communication.getConversation`](operations/communication/getConversation.md), [`communication.messages`](operations/communication/messages.md), [`communication.getMessage`](operations/communication/getMessage.md), [`communication.events`](operations/communication/events.md), [`communication.receipts`](operations/communication/receipts.md), [`communication.resolveRequest`](operations/communication/resolveRequest.md) and [`communication.conversationEvents`](operations/communication/conversationEvents.md).
 
