@@ -130,7 +130,8 @@ namespace ConvoHop
         /// <summary>The CLR type of the operation result.</summary>
         public abstract Type ResultClrType { get; }
 
-        /// <inheritdoc />
+        /// <summary>Returns <see cref="Id"/>.</summary>
+        /// <returns>The operation ID.</returns>
         public override string ToString() => Id;
     }
 

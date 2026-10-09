@@ -7,10 +7,10 @@ namespace ConvoHop
     /// The request headers of a webhook delivery. Names match ASCII case-insensitively. A header that is present more than
     /// once fails verification with <see cref="WebhookVerificationCode.InvalidHeader"/>.
     /// </summary>
-    /// <example>
+    /// <remarks>
     /// ASP.NET Core: <c>WebhookHeaders.From(request.Headers)</c>. <c>HttpRequestMessage</c>:
     /// <c>WebhookHeaders.From(message.Headers)</c>. A dictionary: <c>WebhookHeaders.From(dictionary)</c>.
-    /// </example>
+    /// </remarks>
     public sealed class WebhookHeaders
     {
         private static readonly string[] Names = { "webhook-id", "webhook-timestamp", "webhook-signature" };

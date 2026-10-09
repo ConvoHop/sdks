@@ -1,0 +1,1123 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "dotnet",
+  "package": "ConvoHop.Api",
+  "layer": "server",
+  "page": "api.md",
+  "symbols": [
+    {
+      "name": "CommunicationApi",
+      "kind": "class",
+      "ref": "ConvoHop.Api#CommunicationApi",
+      "anchor": "communicationapi-class",
+      "signatures": ["public sealed class CommunicationApi"],
+      "docs": "The `communication` plane: Conversations, members, messages, receipts, realtime events and live sessions inside one project.\n\nObtain an instance from a client. Instances are thread-safe.",
+      "members": [
+        {
+          "name": "CapabilitiesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.CapabilitiesAsync",
+          "anchor": "communicationapicapabilitiesasync-method",
+          "signatures": [
+            "public Task<CapabilitiesReply> CapabilitiesAsync(CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Describe the features, limits and API model the authority supports.\n\nParameters:\n\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession, backendKey.",
+          "operations": [
+            {
+              "id": "communication.capabilities",
+              "page": "../../operations/communication/capabilities.md"
+            }
+          ]
+        },
+        {
+          "name": "RouteAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.RouteAsync",
+          "anchor": "communicationapirouteasync-method",
+          "signatures": [
+            "public Task<RouteReply> RouteAsync(CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Return the signed route: project incarnation, serving epoch and realtime endpoint. Call it before other communication operations and again after WRONG_REGION.\n\nParameters:\n\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession, backendKey.",
+          "operations": [
+            {"id": "communication.route", "page": "../../operations/communication/route.md"}
+          ]
+        },
+        {
+          "name": "GetPrincipalAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.GetPrincipalAsync",
+          "anchor": "communicationapigetprincipalasync-method",
+          "signatures": [
+            "public Task<GetPrincipalReply> GetPrincipalAsync(GetPrincipalRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read a principal (an application user).\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: backendKey (scopes principalManage).",
+          "operations": [
+            {
+              "id": "communication.getPrincipal",
+              "page": "../../operations/communication/getPrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "GetConversationAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.GetConversationAsync",
+          "anchor": "communicationapigetconversationasync-method",
+          "signatures": [
+            "public Task<GetConversationReply> GetConversationAsync(GetConversationRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read a conversation.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition member), backendKey (scopes conversationManage).",
+          "operations": [
+            {
+              "id": "communication.getConversation",
+              "page": "../../operations/communication/getConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "MembersAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.MembersAsync",
+          "anchor": "communicationapimembersasync-method",
+          "signatures": [
+            "public Task<MembersReply> MembersAsync(MembersRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "List the members of a conversation.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition member), backendKey (scopes membershipManage).",
+          "operations": [
+            {"id": "communication.members", "page": "../../operations/communication/members.md"}
+          ]
+        },
+        {
+          "name": "MembersPagesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.MembersPagesAsync",
+          "anchor": "communicationapimemberspagesasync-method",
+          "signatures": [
+            "public IAsyncEnumerable<MemberPage> MembersPagesAsync(MembersRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "The pages of `MembersAsync`, requested lazily.\n\nParameters:\n\n- `input`: The first page's input.\n- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.\n\nReturns: The pages, in order.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ArgumentException`: The input's `cursor` is not a valid cursor.\n\nEach page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.\n\nEnumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.",
+          "operations": [
+            {"id": "communication.members", "page": "../../operations/communication/members.md"}
+          ]
+        },
+        {
+          "name": "MessagesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.MessagesAsync",
+          "anchor": "communicationapimessagesasync-method",
+          "signatures": [
+            "public Task<MessagesReply> MessagesAsync(MessagesRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "List the messages of a conversation, newest first. A backend key reads the full history, or the history visible to the member named by actAsPrincipalId.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition member), backendKey (scopes messageRead).",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "MessagesPagesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.MessagesPagesAsync",
+          "anchor": "communicationapimessagespagesasync-method",
+          "signatures": [
+            "public IAsyncEnumerable<MessagePage> MessagesPagesAsync(MessagesRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "The pages of `MessagesAsync`, requested lazily.\n\nParameters:\n\n- `input`: The first page's input.\n- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.\n\nReturns: The pages, in order.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ArgumentException`: The input's `beforeSequence` is not a valid cursor.\n\nEach page is requested when enumeration reaches it. Later requests set `beforeSequence` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.\n\nPagination: `sequence`. Newest first. Pass nextCursor back as the sequence cursor input to read older items until complete is true.\n\nEnumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.",
+          "operations": [
+            {"id": "communication.messages", "page": "../../operations/communication/messages.md"}
+          ]
+        },
+        {
+          "name": "GetMessageAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.GetMessageAsync",
+          "anchor": "communicationapigetmessageasync-method",
+          "signatures": [
+            "public Task<GetMessageReply> GetMessageAsync(GetMessageRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read one message. A backend key reads any message, or reads as the member named by actAsPrincipalId.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition member), backendKey (scopes messageRead).",
+          "operations": [
+            {
+              "id": "communication.getMessage",
+              "page": "../../operations/communication/getMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "InboxAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.InboxAsync",
+          "anchor": "communicationapiinboxasync-method",
+          "signatures": [
+            "public Task<InboxReply> InboxAsync(InboxRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "List the conversations visible to the calling user. A backend key must name that user with actAsPrincipalId.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession, backendKey (scopes messageRead).",
+          "operations": [
+            {"id": "communication.inbox", "page": "../../operations/communication/inbox.md"}
+          ]
+        },
+        {
+          "name": "InboxPagesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.InboxPagesAsync",
+          "anchor": "communicationapiinboxpagesasync-method",
+          "signatures": [
+            "public IAsyncEnumerable<InboxPage> InboxPagesAsync(InboxRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "The pages of `InboxAsync`, requested lazily.\n\nParameters:\n\n- `input`: The first page's input.\n- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.\n\nReturns: The pages, in order.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ArgumentException`: The input's `cursor` is not a valid cursor.\n\nEach page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.\n\nEnumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.",
+          "operations": [
+            {"id": "communication.inbox", "page": "../../operations/communication/inbox.md"}
+          ]
+        },
+        {
+          "name": "SearchAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.SearchAsync",
+          "anchor": "communicationapisearchasync-method",
+          "signatures": [
+            "public Task<SearchReply> SearchAsync(SearchRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Search the messages visible to the calling user. A backend key searches as the member named by actAsPrincipalId, or within scope.conversationIds.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession, backendKey (scopes messageRead).",
+          "operations": [
+            {"id": "communication.search", "page": "../../operations/communication/search.md"}
+          ]
+        },
+        {
+          "name": "SearchPagesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.SearchPagesAsync",
+          "anchor": "communicationapisearchpagesasync-method",
+          "signatures": [
+            "public IAsyncEnumerable<SearchPage> SearchPagesAsync(SearchRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "The pages of `SearchAsync`, requested lazily.\n\nParameters:\n\n- `input`: The first page's input.\n- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.\n\nReturns: The pages, in order.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ArgumentException`: The input's `cursor` is not a valid cursor.\n\nEach page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.\n\nEnumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.",
+          "operations": [
+            {"id": "communication.search", "page": "../../operations/communication/search.md"}
+          ]
+        },
+        {
+          "name": "ResolveRequestAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.ResolveRequestAsync",
+          "anchor": "communicationapiresolverequestasync-method",
+          "signatures": [
+            "public Task<ResolveRequestReply> ResolveRequestAsync(ResolveRequestRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Look up the stored outcome of an earlier communication mutation by its requestId.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition ownRequest), backendKey (condition ownRequest).",
+          "operations": [
+            {
+              "id": "communication.resolveRequest",
+              "page": "../../operations/communication/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "GetOperationAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.GetOperationAsync",
+          "anchor": "communicationapigetoperationasync-method",
+          "signatures": [
+            "public Task<GetOperationReply> GetOperationAsync(GetOperationRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read the state of a long-running communication operation.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition operationParticipant), backendKey (condition operationParticipant).",
+          "operations": [
+            {
+              "id": "communication.getOperation",
+              "page": "../../operations/communication/getOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "ConversationMuteAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.ConversationMuteAsync",
+          "anchor": "communicationapiconversationmuteasync-method",
+          "signatures": [
+            "public Task<ConversationMuteReply> ConversationMuteAsync(ConversationMuteInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read whether a member has muted message push notifications for a conversation. A backend key must name the member with actAsPrincipalId.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition member), backendKey (scopes membershipManage).",
+          "operations": [
+            {
+              "id": "communication.conversationMute",
+              "page": "../../operations/communication/conversationMute.md"
+            }
+          ]
+        },
+        {
+          "name": "CurrentLiveSessionAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.CurrentLiveSessionAsync",
+          "anchor": "communicationapicurrentlivesessionasync-method",
+          "signatures": [
+            "public Task<CurrentLiveSessionReply> CurrentLiveSessionAsync(ConversationLiveInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Return the active live session of a conversation, if any.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition member), backendKey (scopes callRead), backendKey (scopes callManage).",
+          "operations": [
+            {
+              "id": "communication.currentLiveSession",
+              "page": "../../operations/communication/currentLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "LiveSessionAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.LiveSessionAsync",
+          "anchor": "communicationapilivesessionasync-method",
+          "signatures": [
+            "public Task<LiveSessionReply> LiveSessionAsync(LiveSessionInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read a live session.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition member), backendKey (scopes callRead), backendKey (scopes callManage).",
+          "operations": [
+            {
+              "id": "communication.liveSession",
+              "page": "../../operations/communication/liveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "LiveSessionsAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.LiveSessionsAsync",
+          "anchor": "communicationapilivesessionsasync-method",
+          "signatures": [
+            "public Task<LiveSessionPageReply> LiveSessionsAsync(LiveSessionsInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "List the live sessions of a conversation.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition member), backendKey (scopes callRead), backendKey (scopes callManage).",
+          "operations": [
+            {
+              "id": "communication.liveSessions",
+              "page": "../../operations/communication/liveSessions.md"
+            }
+          ]
+        },
+        {
+          "name": "LiveSessionsPagesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.LiveSessionsPagesAsync",
+          "anchor": "communicationapilivesessionspagesasync-method",
+          "signatures": [
+            "public IAsyncEnumerable<LiveSessionPage> LiveSessionsPagesAsync(LiveSessionsInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "The pages of `LiveSessionsAsync`, requested lazily.\n\nParameters:\n\n- `input`: The first page's input.\n- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.\n\nReturns: The pages, in order.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ArgumentException`: The input's `cursor` is not a valid cursor.\n\nEach page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.\n\nEnumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.",
+          "operations": [
+            {
+              "id": "communication.liveSessions",
+              "page": "../../operations/communication/liveSessions.md"
+            }
+          ]
+        },
+        {
+          "name": "LiveSessionParticipantsAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.LiveSessionParticipantsAsync",
+          "anchor": "communicationapilivesessionparticipantsasync-method",
+          "signatures": [
+            "public Task<LiveParticipantPageReply> LiveSessionParticipantsAsync(LiveParticipantsInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "List the participants of a live session.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition member), backendKey (scopes callRead), backendKey (scopes callManage).",
+          "operations": [
+            {
+              "id": "communication.liveSessionParticipants",
+              "page": "../../operations/communication/liveSessionParticipants.md"
+            }
+          ]
+        },
+        {
+          "name": "LiveSessionParticipantsPagesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.LiveSessionParticipantsPagesAsync",
+          "anchor": "communicationapilivesessionparticipantspagesasync-method",
+          "signatures": [
+            "public IAsyncEnumerable<LiveParticipantPage> LiveSessionParticipantsPagesAsync(LiveParticipantsInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "The pages of `LiveSessionParticipantsAsync`, requested lazily.\n\nParameters:\n\n- `input`: The first page's input.\n- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.\n\nReturns: The pages, in order.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ArgumentException`: The input's `cursor` is not a valid cursor.\n\nEach page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.\n\nPagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.\n\nEnumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.",
+          "operations": [
+            {
+              "id": "communication.liveSessionParticipants",
+              "page": "../../operations/communication/liveSessionParticipants.md"
+            }
+          ]
+        },
+        {
+          "name": "LiveSessionOperationAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.LiveSessionOperationAsync",
+          "anchor": "communicationapilivesessionoperationasync-method",
+          "signatures": [
+            "public Task<LiveSessionOperationReply> LiveSessionOperationAsync(LiveSessionOperationInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read the state of a live session start or end operation.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: userSession (condition member), backendKey (scopes callRead), backendKey (scopes callManage).",
+          "operations": [
+            {
+              "id": "communication.liveSessionOperation",
+              "page": "../../operations/communication/liveSessionOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "SessionRequestOutcomeAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.SessionRequestOutcomeAsync",
+          "anchor": "communicationapisessionrequestoutcomeasync-method",
+          "signatures": [
+            "public Task<SessionRequestOutcomeReply> SessionRequestOutcomeAsync(SessionRequestOutcomeRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Look up the outcome of an earlier issueSession or renewSession request, including the session it produced.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: backendKey (scopes sessionIssue, sessionManage).",
+          "operations": [
+            {
+              "id": "communication.sessionRequestOutcome",
+              "page": "../../operations/communication/sessionRequestOutcome.md"
+            }
+          ]
+        },
+        {
+          "name": "CreatePrincipalAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.CreatePrincipalAsync",
+          "anchor": "communicationapicreateprincipalasync-method",
+          "signatures": [
+            "public Task<CreatePrincipalReply> CreatePrincipalAsync(CreatePrincipalRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Create a principal for an application user.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: backendKey (scopes principalManage).",
+          "operations": [
+            {
+              "id": "communication.createPrincipal",
+              "page": "../../operations/communication/createPrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "DisablePrincipalAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.DisablePrincipalAsync",
+          "anchor": "communicationapidisableprincipalasync-method",
+          "signatures": [
+            "public Task<DisablePrincipalReply> DisablePrincipalAsync(DisablePrincipalRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Disable a principal.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: backendKey (scopes principalManage).\n\nDestructive: it deletes, revokes, removes, disables or ends something.",
+          "operations": [
+            {
+              "id": "communication.disablePrincipal",
+              "page": "../../operations/communication/disablePrincipal.md"
+            }
+          ]
+        },
+        {
+          "name": "IssueSessionAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.IssueSessionAsync",
+          "anchor": "communicationapiissuesessionasync-method",
+          "signatures": [
+            "public Task<IssueSessionReply> IssueSessionAsync(IssueSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Issue a short-lived user session token for a principal and device.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: backendKey (scopes sessionIssue).",
+          "operations": [
+            {
+              "id": "communication.issueSession",
+              "page": "../../operations/communication/issueSession.md"
+            }
+          ]
+        },
+        {
+          "name": "RenewSessionAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.RenewSessionAsync",
+          "anchor": "communicationapirenewsessionasync-method",
+          "signatures": [
+            "public Task<RenewSessionReply> RenewSessionAsync(RenewSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Renew a user session before it expires.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: backendKey (scopes sessionIssue).",
+          "operations": [
+            {
+              "id": "communication.renewSession",
+              "page": "../../operations/communication/renewSession.md"
+            }
+          ]
+        },
+        {
+          "name": "RevokeSessionAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.RevokeSessionAsync",
+          "anchor": "communicationapirevokesessionasync-method",
+          "signatures": [
+            "public Task<RevokeSessionReply> RevokeSessionAsync(RevokeSessionRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Revoke a user session.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: userSession (condition ownSession), backendKey (scopes sessionManage).\n\nDestructive: it deletes, revokes, removes, disables or ends something.",
+          "operations": [
+            {
+              "id": "communication.revokeSession",
+              "page": "../../operations/communication/revokeSession.md"
+            }
+          ]
+        },
+        {
+          "name": "CreateConversationAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.CreateConversationAsync",
+          "anchor": "communicationapicreateconversationasync-method",
+          "signatures": [
+            "public Task<CreateConversationReply> CreateConversationAsync(CreateConversationRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Create a conversation with its initial members.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: backendKey (scopes conversationManage).",
+          "operations": [
+            {
+              "id": "communication.createConversation",
+              "page": "../../operations/communication/createConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "UpdateConversationAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.UpdateConversationAsync",
+          "anchor": "communicationapiupdateconversationasync-method",
+          "signatures": [
+            "public Task<UpdateConversationReply> UpdateConversationAsync(UpdateConversationRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Update the title or properties of a conversation.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: userSession (condition moderator), backendKey (scopes conversationManage).",
+          "operations": [
+            {
+              "id": "communication.updateConversation",
+              "page": "../../operations/communication/updateConversation.md"
+            }
+          ]
+        },
+        {
+          "name": "AddMemberAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.AddMemberAsync",
+          "anchor": "communicationapiaddmemberasync-method",
+          "signatures": [
+            "public Task<AddMemberReply> AddMemberAsync(AddMemberRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Add a member, or change the role of an active member.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: backendKey (scopes membershipManage).",
+          "operations": [
+            {"id": "communication.addMember", "page": "../../operations/communication/addMember.md"}
+          ]
+        },
+        {
+          "name": "AddMembersAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.AddMembersAsync",
+          "anchor": "communicationapiaddmembersasync-method",
+          "signatures": [
+            "public Task<AddMembersPayload> AddMembersAsync(AddMembersInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Add several members in one request.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: backendKey (scopes membershipManage).",
+          "operations": [
+            {
+              "id": "communication.addMembers",
+              "page": "../../operations/communication/addMembers.md"
+            }
+          ]
+        },
+        {
+          "name": "RemoveMemberAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.RemoveMemberAsync",
+          "anchor": "communicationapiremovememberasync-method",
+          "signatures": [
+            "public Task<RemoveMemberReply> RemoveMemberAsync(RemoveMemberRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Remove a member from a conversation.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: backendKey (scopes membershipManage).\n\nDestructive: it deletes, revokes, removes, disables or ends something.",
+          "operations": [
+            {
+              "id": "communication.removeMember",
+              "page": "../../operations/communication/removeMember.md"
+            }
+          ]
+        },
+        {
+          "name": "HistoryGrantAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.HistoryGrantAsync",
+          "anchor": "communicationapihistorygrantasync-method",
+          "signatures": [
+            "public Task<HistoryGrantReply> HistoryGrantAsync(HistoryGrantRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Expand the history a member can see to an earlier sequence.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: backendKey (scopes historyManage).",
+          "operations": [
+            {
+              "id": "communication.historyGrant",
+              "page": "../../operations/communication/historyGrant.md"
+            }
+          ]
+        },
+        {
+          "name": "SendMessageAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.SendMessageAsync",
+          "anchor": "communicationapisendmessageasync-method",
+          "signatures": [
+            "public Task<SendMessageReply> SendMessageAsync(SendMessageRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Send a message. A backend key sends as its service principal, or as the member named by actAsPrincipalId.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: userSession (condition member), backendKey (scopes messageWrite).",
+          "operations": [
+            {
+              "id": "communication.sendMessage",
+              "page": "../../operations/communication/sendMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "EditMessageAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.EditMessageAsync",
+          "anchor": "communicationapieditmessageasync-method",
+          "signatures": [
+            "public Task<EditMessageReply> EditMessageAsync(EditMessageRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Edit a message.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: userSession (condition authorOrModerator), backendKey (scopes moderation).",
+          "operations": [
+            {
+              "id": "communication.editMessage",
+              "page": "../../operations/communication/editMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "DeleteMessageAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.DeleteMessageAsync",
+          "anchor": "communicationapideletemessageasync-method",
+          "signatures": [
+            "public Task<DeleteMessageReply> DeleteMessageAsync(DeleteMessageRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Delete a message.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: userSession (condition authorOrModerator), backendKey (scopes moderation).\n\nDestructive: it deletes, revokes, removes, disables or ends something.",
+          "operations": [
+            {
+              "id": "communication.deleteMessage",
+              "page": "../../operations/communication/deleteMessage.md"
+            }
+          ]
+        },
+        {
+          "name": "SetBroadcastPermissionAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.SetBroadcastPermissionAsync",
+          "anchor": "communicationapisetbroadcastpermissionasync-method",
+          "signatures": [
+            "public Task<SetBroadcastPermissionPayload> SetBroadcastPermissionAsync(SetBroadcastPermissionInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Allow or deny a member to publish media in live sessions.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: backendKey (scopes membershipManage).",
+          "operations": [
+            {
+              "id": "communication.setBroadcastPermission",
+              "page": "../../operations/communication/setBroadcastPermission.md"
+            }
+          ]
+        },
+        {
+          "name": "SetConversationMuteAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.SetConversationMuteAsync",
+          "anchor": "communicationapisetconversationmuteasync-method",
+          "signatures": [
+            "public Task<SetConversationMutePayload> SetConversationMuteAsync(SetConversationMuteInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Mute or unmute message push notifications for a member of a conversation, optionally until a time. Calls still ring. A backend key must name the member with actAsPrincipalId.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: userSession (condition member), backendKey (scopes membershipManage).",
+          "operations": [
+            {
+              "id": "communication.setConversationMute",
+              "page": "../../operations/communication/setConversationMute.md"
+            }
+          ]
+        },
+        {
+          "name": "AlertLiveSessionAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.AlertLiveSessionAsync",
+          "anchor": "communicationapialertlivesessionasync-method",
+          "signatures": [
+            "public Task<AlertLiveSessionPayload> AlertLiveSessionAsync(AlertLiveSessionInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Alert (ring) conversation members about a live session.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: userSession (condition creatorOrModerator), backendKey (scopes callManage).",
+          "operations": [
+            {
+              "id": "communication.alertLiveSession",
+              "page": "../../operations/communication/alertLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "EndLiveSessionAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.EndLiveSessionAsync",
+          "anchor": "communicationapiendlivesessionasync-method",
+          "signatures": [
+            "public Task<EndLiveSessionPayload> EndLiveSessionAsync(EndLiveSessionInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "End a live session for every participant. Completes asynchronously.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: userSession (condition creatorOrModerator), backendKey (scopes callManage).\n\nDestructive: it deletes, revokes, removes, disables or ends something.",
+          "operations": [
+            {
+              "id": "communication.endLiveSession",
+              "page": "../../operations/communication/endLiveSession.md"
+            }
+          ]
+        },
+        {
+          "name": "RedeemCredentialAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.RedeemCredentialAsync",
+          "anchor": "communicationapiredeemcredentialasync-method",
+          "signatures": [
+            "public Task<RedeemCredentialReply> RedeemCredentialAsync(RedeemCredentialRequestInput input, JsonElement credentialDeliveryPermit, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Redeem a delivered credential with its delivery permit.\n\nParameters:\n\n- `input`: The operation input.\n- `credentialDeliveryPermit`: The `credentialDeliveryPermit` credential, sent unchanged in the request context.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ArgumentException`: `credentialDeliveryPermit` is a default `JsonElement`.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `permitBound`. Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.\n\nAuthorization: deliveryPermit.",
+          "operations": [
+            {
+              "id": "communication.redeemCredential",
+              "page": "../../operations/communication/redeemCredential.md"
+            }
+          ]
+        },
+        {
+          "name": "AcknowledgeCredentialAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#CommunicationApi.AcknowledgeCredentialAsync",
+          "anchor": "communicationapiacknowledgecredentialasync-method",
+          "signatures": [
+            "public Task<AcknowledgeCredentialReply> AcknowledgeCredentialAsync(AcknowledgeCredentialRequestInput input, JsonElement credentialDeliveryPermit, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Acknowledge that a redeemed credential is stored, closing the delivery.\n\nParameters:\n\n- `input`: The operation input.\n- `credentialDeliveryPermit`: The `credentialDeliveryPermit` credential, sent unchanged in the request context.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ArgumentException`: `credentialDeliveryPermit` is a default `JsonElement`.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `permitBound`. Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.\n\nAuthorization: deliveryPermit.",
+          "operations": [
+            {
+              "id": "communication.acknowledgeCredential",
+              "page": "../../operations/communication/acknowledgeCredential.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ManagementApi",
+      "kind": "class",
+      "ref": "ConvoHop.Api#ManagementApi",
+      "anchor": "managementapi-class",
+      "signatures": ["public sealed class ManagementApi"],
+      "docs": "The `management` plane: Organizations, deployments, projects, backend keys and webhooks.\n\nObtain an instance from a client. Instances are thread-safe.",
+      "members": [
+        {
+          "name": "CapabilitiesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.CapabilitiesAsync",
+          "anchor": "managementapicapabilitiesasync-method",
+          "signatures": [
+            "public Task<CapabilitiesReply> CapabilitiesAsync(CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Describe the management features and limits the authority supports.\n\nParameters:\n\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential.",
+          "operations": [
+            {"id": "management.capabilities", "page": "../../operations/management/capabilities.md"}
+          ]
+        },
+        {
+          "name": "OrganizationsAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.OrganizationsAsync",
+          "anchor": "managementapiorganizationsasync-method",
+          "signatures": [
+            "public Task<OrganizationsReply> OrganizationsAsync(CancellationToken cancellationToken = default);"
+          ],
+          "docs": "List the organizations the caller can access.\n\nParameters:\n\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential.",
+          "operations": [
+            {
+              "id": "management.organizations",
+              "page": "../../operations/management/organizations.md"
+            }
+          ]
+        },
+        {
+          "name": "GetOrganizationAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.GetOrganizationAsync",
+          "anchor": "managementapigetorganizationasync-method",
+          "signatures": [
+            "public Task<GetOrganizationReply> GetOrganizationAsync(GetOrganizationRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read an organization.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.getOrganization",
+              "page": "../../operations/management/getOrganization.md"
+            }
+          ]
+        },
+        {
+          "name": "GetDeploymentAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.GetDeploymentAsync",
+          "anchor": "managementapigetdeploymentasync-method",
+          "signatures": [
+            "public Task<GetDeploymentReply> GetDeploymentAsync(GetDeploymentRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read a deployment.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.getDeployment",
+              "page": "../../operations/management/getDeployment.md"
+            }
+          ]
+        },
+        {
+          "name": "GetProjectAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.GetProjectAsync",
+          "anchor": "managementapigetprojectasync-method",
+          "signatures": [
+            "public Task<GetProjectReply> GetProjectAsync(GetProjectRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read a project.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {"id": "management.getProject", "page": "../../operations/management/getProject.md"}
+          ]
+        },
+        {
+          "name": "DeploymentHealthAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.DeploymentHealthAsync",
+          "anchor": "managementapideploymenthealthasync-method",
+          "signatures": [
+            "public Task<DeploymentHealthReply> DeploymentHealthAsync(DeploymentHealthRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read the health of a deployment.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.deploymentHealth",
+              "page": "../../operations/management/deploymentHealth.md"
+            }
+          ]
+        },
+        {
+          "name": "DeploymentUsageAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.DeploymentUsageAsync",
+          "anchor": "managementapideploymentusageasync-method",
+          "signatures": [
+            "public Task<DeploymentUsageReply> DeploymentUsageAsync(DeploymentUsageRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.deploymentUsage",
+              "page": "../../operations/management/deploymentUsage.md"
+            }
+          ]
+        },
+        {
+          "name": "ProjectUsageAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.ProjectUsageAsync",
+          "anchor": "managementapiprojectusageasync-method",
+          "signatures": [
+            "public Task<ProjectUsageReply> ProjectUsageAsync(ProjectUsageRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {"id": "management.projectUsage", "page": "../../operations/management/projectUsage.md"}
+          ]
+        },
+        {
+          "name": "OrganizationUsageAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.OrganizationUsageAsync",
+          "anchor": "managementapiorganizationusageasync-method",
+          "signatures": [
+            "public Task<OrganizationUsageReply> OrganizationUsageAsync(OrganizationUsageRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.organizationUsage",
+              "page": "../../operations/management/organizationUsage.md"
+            }
+          ]
+        },
+        {
+          "name": "WebhookEndpointsAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.WebhookEndpointsAsync",
+          "anchor": "managementapiwebhookendpointsasync-method",
+          "signatures": [
+            "public Task<WebhookEndpointsReply> WebhookEndpointsAsync(WebhookEndpointsRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "List the webhook endpoints of a project with their status, signing-secret rotation and delivery health.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.webhookEndpoints",
+              "page": "../../operations/management/webhookEndpoints.md"
+            }
+          ]
+        },
+        {
+          "name": "WebhookDeliveriesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.WebhookDeliveriesAsync",
+          "anchor": "managementapiwebhookdeliveriesasync-method",
+          "signatures": [
+            "public Task<WebhookDeliveriesReply> WebhookDeliveriesAsync(WebhookDeliveriesRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "List recent deliveries of a webhook endpoint.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.webhookDeliveries",
+              "page": "../../operations/management/webhookDeliveries.md"
+            }
+          ]
+        },
+        {
+          "name": "ResolveRequestAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.ResolveRequestAsync",
+          "anchor": "managementapiresolverequestasync-method",
+          "signatures": [
+            "public Task<ResolveRequestReply> ResolveRequestAsync(ResolveRequestRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Look up the stored outcome of an earlier management mutation by its requestId.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition ownRequest).",
+          "operations": [
+            {
+              "id": "management.resolveRequest",
+              "page": "../../operations/management/resolveRequest.md"
+            }
+          ]
+        },
+        {
+          "name": "GetOperationAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.GetOperationAsync",
+          "anchor": "managementapigetoperationasync-method",
+          "signatures": [
+            "public Task<GetOperationReply> GetOperationAsync(GetOperationRequestInput input, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Read the state of a long-running management operation.\n\nParameters:\n\n- `input`: The operation input.\n- `cancellationToken`: Stops waiting.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {"id": "management.getOperation", "page": "../../operations/management/getOperation.md"}
+          ]
+        },
+        {
+          "name": "CreateOrganizationAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.CreateOrganizationAsync",
+          "anchor": "managementapicreateorganizationasync-method",
+          "signatures": [
+            "public Task<CreateOrganizationReply> CreateOrganizationAsync(CreateOrganizationRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Create an organization.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential.",
+          "operations": [
+            {
+              "id": "management.createOrganization",
+              "page": "../../operations/management/createOrganization.md"
+            }
+          ]
+        },
+        {
+          "name": "CreateDeploymentAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.CreateDeploymentAsync",
+          "anchor": "managementapicreatedeploymentasync-method",
+          "signatures": [
+            "public Task<CreateDeploymentReply> CreateDeploymentAsync(CreateDeploymentRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Create a deployment in an organization. Completes asynchronously.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.createDeployment",
+              "page": "../../operations/management/createDeployment.md"
+            }
+          ]
+        },
+        {
+          "name": "CreateProjectAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.CreateProjectAsync",
+          "anchor": "managementapicreateprojectasync-method",
+          "signatures": [
+            "public Task<CreateProjectReply> CreateProjectAsync(CreateProjectRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Create a project in a ready deployment. Completes asynchronously.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.createProject",
+              "page": "../../operations/management/createProject.md"
+            }
+          ]
+        },
+        {
+          "name": "IssueBackendKeyAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.IssueBackendKeyAsync",
+          "anchor": "managementapiissuebackendkeyasync-method",
+          "signatures": [
+            "public Task<IssueBackendKeyReply> IssueBackendKeyAsync(IssueBackendKeyRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Issue a scoped backend key. The secret is delivered once through a credential delivery.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.issueBackendKey",
+              "page": "../../operations/management/issueBackendKey.md"
+            }
+          ]
+        },
+        {
+          "name": "RevokeBackendKeyAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.RevokeBackendKeyAsync",
+          "anchor": "managementapirevokebackendkeyasync-method",
+          "signatures": [
+            "public Task<RevokeBackendKeyReply> RevokeBackendKeyAsync(RevokeBackendKeyRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Revoke a backend key, optionally revoking the sessions it issued.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nDestructive: it deletes, revokes, removes, disables or ends something.",
+          "operations": [
+            {
+              "id": "management.revokeBackendKey",
+              "page": "../../operations/management/revokeBackendKey.md"
+            }
+          ]
+        },
+        {
+          "name": "ProjectPolicyAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.ProjectPolicyAsync",
+          "anchor": "managementapiprojectpolicyasync-method",
+          "signatures": [
+            "public Task<ProjectPolicyReply> ProjectPolicyAsync(ProjectPolicyRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Change the policy of a project.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.projectPolicy",
+              "page": "../../operations/management/projectPolicy.md"
+            }
+          ]
+        },
+        {
+          "name": "CredentialPermitAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.CredentialPermitAsync",
+          "anchor": "managementapicredentialpermitasync-method",
+          "signatures": [
+            "public Task<CredentialPermitReply> CredentialPermitAsync(CredentialPermitRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Issue a signed permit that authorizes redeeming one credential delivery.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.credentialPermit",
+              "page": "../../operations/management/credentialPermit.md"
+            }
+          ]
+        },
+        {
+          "name": "PauseOperationAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.PauseOperationAsync",
+          "anchor": "managementapipauseoperationasync-method",
+          "signatures": [
+            "public Task<PauseOperationReply> PauseOperationAsync(PauseOperationRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Pause a long-running operation.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.pauseOperation",
+              "page": "../../operations/management/pauseOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "ResumeOperationAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.ResumeOperationAsync",
+          "anchor": "managementapiresumeoperationasync-method",
+          "signatures": [
+            "public Task<ResumeOperationReply> ResumeOperationAsync(ResumeOperationRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Resume a paused operation.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.resumeOperation",
+              "page": "../../operations/management/resumeOperation.md"
+            }
+          ]
+        },
+        {
+          "name": "ConfigureWebhookAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.ConfigureWebhookAsync",
+          "anchor": "managementapiconfigurewebhookasync-method",
+          "signatures": [
+            "public Task<ConfigureWebhookReply> ConfigureWebhookAsync(ConfigureWebhookRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Create a webhook endpoint for project events. The signing secret is delivered once through a credential delivery.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.configureWebhook",
+              "page": "../../operations/management/configureWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "UpdateWebhookAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.UpdateWebhookAsync",
+          "anchor": "managementapiupdatewebhookasync-method",
+          "signatures": [
+            "public Task<UpdateWebhookReply> UpdateWebhookAsync(UpdateWebhookRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Change the event types of a webhook endpoint, or enable or disable it.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nDestructive: it deletes, revokes, removes, disables or ends something.",
+          "operations": [
+            {
+              "id": "management.updateWebhook",
+              "page": "../../operations/management/updateWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "RotateWebhookSecretAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.RotateWebhookSecretAsync",
+          "anchor": "managementapirotatewebhooksecretasync-method",
+          "signatures": [
+            "public Task<RotateWebhookSecretReply> RotateWebhookSecretAsync(RotateWebhookSecretRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Start rotating the signing secret of a webhook endpoint. The next secret is delivered once through a credential delivery.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nDestructive: it deletes, revokes, removes, disables or ends something.",
+          "operations": [
+            {
+              "id": "management.rotateWebhookSecret",
+              "page": "../../operations/management/rotateWebhookSecret.md"
+            }
+          ]
+        },
+        {
+          "name": "DisableWebhookAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.DisableWebhookAsync",
+          "anchor": "managementapidisablewebhookasync-method",
+          "signatures": [
+            "public Task<DisableWebhookReply> DisableWebhookAsync(DisableWebhookRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Disable a webhook endpoint.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).\n\nDestructive: it deletes, revokes, removes, disables or ends something.",
+          "operations": [
+            {
+              "id": "management.disableWebhook",
+              "page": "../../operations/management/disableWebhook.md"
+            }
+          ]
+        },
+        {
+          "name": "ReplayWebhookDeliveriesAsync",
+          "kind": "method",
+          "ref": "ConvoHop.Api#ManagementApi.ReplayWebhookDeliveriesAsync",
+          "anchor": "managementapireplaywebhookdeliveriesasync-method",
+          "signatures": [
+            "public Task<ReplayWebhookDeliveriesReply> ReplayWebhookDeliveriesAsync(ReplayWebhookDeliveriesRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);"
+          ],
+          "docs": "Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.\n\nParameters:\n\n- `input`: The operation input.\n- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.\n- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.\n\nReturns: The authority result.\n\nExceptions:\n\n- `ArgumentNullException`: `input` is null.\n- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.\n\nIdempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.\n\nAuthorization: portalCredential (condition owner).",
+          "operations": [
+            {
+              "id": "management.replayWebhookDeliveries",
+              "page": "../../operations/management/replayWebhookDeliveries.md"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

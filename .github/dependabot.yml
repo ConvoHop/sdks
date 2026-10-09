@@ -192,3 +192,42 @@ updates:
         update-types:
           - minor
           - patch
+
+  # Tested .NET docs samples (docs/languages/dotnet/examples). They build the
+  # SDK from dotnet/. Major updates stay ungrouped so each one is checked
+  # against its quickstart, for example FirebaseAdmin's FCM targets.
+  - package-ecosystem: nuget
+    directory: /docs/languages/dotnet/examples
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: docs
+      include: scope
+    groups:
+      docs-dotnet-examples:
+        update-types:
+          - minor
+          - patch
+
+  # The .NET docs extractor and its tests (tools/docgen/extractors/dotnet).
+  # They only run in development and CI.
+  - package-ecosystem: nuget
+    directories:
+      - /tools/docgen/extractors/dotnet/src
+      - /tools/docgen/extractors/dotnet/test
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      docgen-dotnet:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
