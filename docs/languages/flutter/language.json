@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../spec/docs/language.schema.json",
+  "id": "flutter",
+  "name": "Flutter",
+  "order": 80,
+  "status": "preview",
+  "codeFence": "dart",
+  "regionComment": "//",
+  "testedFences": ["dart"],
+  "snippetRoots": ["examples/lib"],
+  "packages": [
+    {
+      "name": "package:convohop/convohop.dart",
+      "slug": "convohop",
+      "layer": "client",
+      "summary": "Client SDK for Flutter apps on end-user devices: one signed-in user's conversations, realtime events, conversation store, offline outbox, read receipts, typing, recent activity and call control.",
+      "runtime": "Flutter 3.38 or later (Dart 3.10 or later) on Android 7.0 (API level 24) or later and iOS 13 or later.",
+      "source": "flutter"
+    },
+    {
+      "name": "package:convohop/calls.dart",
+      "slug": "calls",
+      "layer": "client",
+      "summary": "Call media through the official `livekit_client` package.",
+      "runtime": "Flutter 3.38 or later on Android 7.0 (API level 24) or later and iOS 13 or later, with `livekit_client` 2.13.1 or later.",
+      "source": "flutter"
+    },
+    {
+      "name": "package:convohop/push.dart",
+      "slug": "push",
+      "layer": "client",
+      "summary": "Push registration, notification payloads and the system incoming-call UI, through the package's own platform code.",
+      "runtime": "Flutter 3.38 or later on Android 7.0 (API level 24) or later with Firebase Cloud Messaging, and iOS 13 or later with APNs.",
+      "source": "flutter"
+    },
+    {
+      "name": "package:convohop/io.dart",
+      "slug": "io",
+      "layer": "client",
+      "summary": "File-backed recovery storage for the conversation store and the outbox.",
+      "runtime": "Flutter 3.38 or later (Dart 3.10 or later) on Android 7.0 (API level 24) or later and iOS 13 or later.",
+      "source": "flutter"
+    }
+  ],
+  "quickstarts": ["client", "calling", "push"],
+  "operations": "operations.json",
+  "extract": {
+    "command": ["node", "tools/docgen/extractors/dart.mjs", "docs/languages/flutter/language.json"]
+  },
+  "test": {
+    "install": ["flutter", "pub", "get", "--directory", "docs/languages/flutter/examples"],
+    "command": ["node", "docs/languages/flutter/examples/test.mjs"]
+  }
+}

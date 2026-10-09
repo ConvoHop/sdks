@@ -1,0 +1,1342 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "flutter",
+  "package": "package:convohop/push.dart",
+  "layer": "client",
+  "page": "push.md",
+  "symbols": [
+    {
+      "name": "ApnsRegistration",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#ApnsRegistration",
+      "anchor": "apnsregistration-class",
+      "signatures": ["final class ApnsRegistration extends PushRegistration"],
+      "docs": "An iOS APNs device token, in lowercase hexadecimal: for alerts, or with\n`voip` for VoIP pushes through PushKit, which your backend sends to the\n`<bundle ID>.voip` topic.",
+      "members": [
+        {
+          "name": "ApnsRegistration",
+          "kind": "constructor",
+          "ref": "package:convohop/push.dart#ApnsRegistration.ApnsRegistration",
+          "anchor": "apnsregistration-constructor",
+          "signatures": ["const ApnsRegistration(String token, {bool voip = false})"],
+          "docs": ""
+        },
+        {
+          "name": "token",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ApnsRegistration.token",
+          "anchor": "apnsregistrationtoken-property",
+          "signatures": ["final String token"],
+          "docs": ""
+        },
+        {
+          "name": "voip",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ApnsRegistration.voip",
+          "anchor": "apnsregistrationvoip-property",
+          "signatures": ["final bool voip"],
+          "docs": "Whether `token` is PushKit's, for VoIP pushes."
+        },
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ApnsRegistration.kind",
+          "anchor": "apnsregistrationkind-property",
+          "signatures": ["String get kind"],
+          "docs": "`fcm`, `apns` or `apnsVoip`."
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ApnsRegistration.toJson",
+          "anchor": "apnsregistrationtojson-method",
+          "signatures": ["Map<String, String> toJson()"],
+          "docs": "The registration as JSON: `{\"kind\": \"fcm\", \"token\": …}`,\n`{\"kind\": \"fcm\", \"fid\": …}` or `{\"kind\": \"apns\" | \"apnsVoip\", \"token\": …}`."
+        },
+        {
+          "name": "operator ==",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ApnsRegistration.operator ==",
+          "anchor": "apnsregistrationoperator--method",
+          "signatures": ["bool operator ==(Object other)"],
+          "docs": ""
+        },
+        {
+          "name": "hashCode",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ApnsRegistration.hashCode",
+          "anchor": "apnsregistrationhashcode-property",
+          "signatures": ["int get hashCode"],
+          "docs": ""
+        },
+        {
+          "name": "toString",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ApnsRegistration.toString",
+          "anchor": "apnsregistrationtostring-method",
+          "signatures": ["String toString()"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "CallAction",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#CallAction",
+      "anchor": "callaction-class",
+      "signatures": ["final class CallAction"],
+      "docs": "The user acted on a call in the system call UI.",
+      "members": [
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallAction.kind",
+          "anchor": "callactionkind-property",
+          "signatures": ["final CallActionKind kind"],
+          "docs": ""
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallAction.alertId",
+          "anchor": "callactionalertid-property",
+          "signatures": ["final String alertId"],
+          "docs": "The ring the action is for."
+        },
+        {
+          "name": "call",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallAction.call",
+          "anchor": "callactioncall-property",
+          "signatures": ["final CallNotification? call"],
+          "docs": "The ring's notification, when the device still had it."
+        },
+        {
+          "name": "toString",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#CallAction.toString",
+          "anchor": "callactiontostring-method",
+          "signatures": ["String toString()"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "CallCancelledNotification",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#CallCancelledNotification",
+      "anchor": "callcancellednotification-class",
+      "signatures": ["final class CallCancelledNotification extends RingNotification"],
+      "docs": "A ring that stopped for the user.",
+      "members": [
+        {
+          "name": "reason",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.reason",
+          "anchor": "callcancellednotificationreason-property",
+          "signatures": ["final String reason"],
+          "docs": "`answered`, `declined`, `ended`, `expired` or a reason this SDK doesn't\nknow yet, which only stops the ringing."
+        },
+        {
+          "name": "eventType",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.eventType",
+          "anchor": "callcancellednotificationeventtype-property",
+          "signatures": ["String get eventType"],
+          "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`."
+        },
+        {
+          "name": "missedCall",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.missedCall",
+          "anchor": "callcancellednotificationmissedcall-property",
+          "signatures": ["bool get missedCall"],
+          "docs": "Whether to tell the user they missed the call: the call ended or nobody\nanswered. Answered and declined rings (on any device) only stop ringing."
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.toJson",
+          "anchor": "callcancellednotificationtojson-method",
+          "signatures": ["Map<String, Object?> toJson()"],
+          "docs": "The `convohop` object, for handing the notification to native code."
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.liveSessionId",
+          "anchor": "callcancellednotificationlivesessionid-property",
+          "signatures": ["final String liveSessionId"],
+          "docs": "",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.alertId",
+          "anchor": "callcancellednotificationalertid-property",
+          "signatures": ["final String alertId"],
+          "docs": "One ring for one recipient. A later ring of the same call has a new one.",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.expiresAt",
+          "anchor": "callcancellednotificationexpiresat-property",
+          "signatures": ["final String expiresAt"],
+          "docs": "When the ring stops if nobody answers.",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "mediaProfile",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.mediaProfile",
+          "anchor": "callcancellednotificationmediaprofile-property",
+          "signatures": ["final String mediaProfile"],
+          "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a profile this SDK doesn't know yet.",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "expiresAtMillis",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.expiresAtMillis",
+          "anchor": "callcancellednotificationexpiresatmillis-property",
+          "signatures": ["int get expiresAtMillis"],
+          "docs": "`expiresAt` in milliseconds since the epoch, ignoring any fraction.",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "hasVideo",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.hasVideo",
+          "anchor": "callcancellednotificationhasvideo-property",
+          "signatures": ["bool get hasVideo"],
+          "docs": "",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.eventId",
+          "anchor": "callcancellednotificationeventid-property",
+          "signatures": ["final String eventId"],
+          "docs": "Deduplicate on this: delivery is at least once.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.occurredAt",
+          "anchor": "callcancellednotificationoccurredat-property",
+          "signatures": ["final String occurredAt"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.projectId",
+          "anchor": "callcancellednotificationprojectid-property",
+          "signatures": ["final String projectId"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.recipientId",
+          "anchor": "callcancellednotificationrecipientid-property",
+          "signatures": ["final String recipientId"],
+          "docs": "The principal the notification is for.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.conversationId",
+          "anchor": "callcancellednotificationconversationid-property",
+          "signatures": ["final String conversationId"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.senderId",
+          "anchor": "callcancellednotificationsenderid-property",
+          "signatures": ["final String senderId"],
+          "docs": "Who sent the message or started the ringing.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.title",
+          "anchor": "callcancellednotificationtitle-property",
+          "signatures": ["final String? title"],
+          "docs": "Visible title, when the push had one.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.body",
+          "anchor": "callcancellednotificationbody-property",
+          "signatures": ["final String? body"],
+          "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "isFor",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#CallCancelledNotification.isFor",
+          "anchor": "callcancellednotificationisfor-method",
+          "signatures": ["bool isFor(ConvoHopClient client)"],
+          "docs": "Whether this notification is for `client`'s user and project.",
+          "inherited": "ConvoHopNotification"
+        }
+      ]
+    },
+    {
+      "name": "CallNotification",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#CallNotification",
+      "anchor": "callnotification-class",
+      "signatures": ["final class CallNotification extends RingNotification"],
+      "docs": "An incoming call: a ring for the user.",
+      "members": [
+        {
+          "name": "eventType",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.eventType",
+          "anchor": "callnotificationeventtype-property",
+          "signatures": ["String get eventType"],
+          "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`."
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#CallNotification.toJson",
+          "anchor": "callnotificationtojson-method",
+          "signatures": ["Map<String, Object?> toJson()"],
+          "docs": "The `convohop` object, for handing the notification to native code."
+        },
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.liveSessionId",
+          "anchor": "callnotificationlivesessionid-property",
+          "signatures": ["final String liveSessionId"],
+          "docs": "",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.alertId",
+          "anchor": "callnotificationalertid-property",
+          "signatures": ["final String alertId"],
+          "docs": "One ring for one recipient. A later ring of the same call has a new one.",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.expiresAt",
+          "anchor": "callnotificationexpiresat-property",
+          "signatures": ["final String expiresAt"],
+          "docs": "When the ring stops if nobody answers.",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "mediaProfile",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.mediaProfile",
+          "anchor": "callnotificationmediaprofile-property",
+          "signatures": ["final String mediaProfile"],
+          "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a profile this SDK doesn't know yet.",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "expiresAtMillis",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.expiresAtMillis",
+          "anchor": "callnotificationexpiresatmillis-property",
+          "signatures": ["int get expiresAtMillis"],
+          "docs": "`expiresAt` in milliseconds since the epoch, ignoring any fraction.",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "hasVideo",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.hasVideo",
+          "anchor": "callnotificationhasvideo-property",
+          "signatures": ["bool get hasVideo"],
+          "docs": "",
+          "inherited": "RingNotification"
+        },
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.eventId",
+          "anchor": "callnotificationeventid-property",
+          "signatures": ["final String eventId"],
+          "docs": "Deduplicate on this: delivery is at least once.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.occurredAt",
+          "anchor": "callnotificationoccurredat-property",
+          "signatures": ["final String occurredAt"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.projectId",
+          "anchor": "callnotificationprojectid-property",
+          "signatures": ["final String projectId"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.recipientId",
+          "anchor": "callnotificationrecipientid-property",
+          "signatures": ["final String recipientId"],
+          "docs": "The principal the notification is for.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.conversationId",
+          "anchor": "callnotificationconversationid-property",
+          "signatures": ["final String conversationId"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.senderId",
+          "anchor": "callnotificationsenderid-property",
+          "signatures": ["final String senderId"],
+          "docs": "Who sent the message or started the ringing.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.title",
+          "anchor": "callnotificationtitle-property",
+          "signatures": ["final String? title"],
+          "docs": "Visible title, when the push had one.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#CallNotification.body",
+          "anchor": "callnotificationbody-property",
+          "signatures": ["final String? body"],
+          "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "isFor",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#CallNotification.isFor",
+          "anchor": "callnotificationisfor-method",
+          "signatures": ["bool isFor(ConvoHopClient client)"],
+          "docs": "Whether this notification is for `client`'s user and project.",
+          "inherited": "ConvoHopNotification"
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopNotification",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#ConvoHopNotification",
+      "anchor": "convohopnotification-class",
+      "signatures": ["sealed class ConvoHopNotification"],
+      "docs": "A ConvoHop notification, parsed from a push payload's `convohop` object.\n\nNotifications carry identifiers. They carry message text only when the\nproject opted in to message previews (off by default) or your backend\nadded its own text, so `title` and `body` are often null: show your own\ngeneric text and fetch content with the user's session.",
+      "members": [
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.eventId",
+          "anchor": "convohopnotificationeventid-property",
+          "signatures": ["final String eventId"],
+          "docs": "Deduplicate on this: delivery is at least once."
+        },
+        {
+          "name": "eventType",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.eventType",
+          "anchor": "convohopnotificationeventtype-property",
+          "signatures": ["String get eventType"],
+          "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`."
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.occurredAt",
+          "anchor": "convohopnotificationoccurredat-property",
+          "signatures": ["final String occurredAt"],
+          "docs": ""
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.projectId",
+          "anchor": "convohopnotificationprojectid-property",
+          "signatures": ["final String projectId"],
+          "docs": ""
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.recipientId",
+          "anchor": "convohopnotificationrecipientid-property",
+          "signatures": ["final String recipientId"],
+          "docs": "The principal the notification is for."
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.conversationId",
+          "anchor": "convohopnotificationconversationid-property",
+          "signatures": ["final String conversationId"],
+          "docs": ""
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.senderId",
+          "anchor": "convohopnotificationsenderid-property",
+          "signatures": ["final String senderId"],
+          "docs": "Who sent the message or started the ringing."
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.title",
+          "anchor": "convohopnotificationtitle-property",
+          "signatures": ["final String? title"],
+          "docs": "Visible title, when the push had one."
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.body",
+          "anchor": "convohopnotificationbody-property",
+          "signatures": ["final String? body"],
+          "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none."
+        },
+        {
+          "name": "isFor",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.isFor",
+          "anchor": "convohopnotificationisfor-method",
+          "signatures": ["bool isFor(ConvoHopClient client)"],
+          "docs": "Whether this notification is for `client`'s user and project."
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopNotification.toJson",
+          "anchor": "convohopnotificationtojson-method",
+          "signatures": ["Map<String, Object?> toJson()"],
+          "docs": "The `convohop` object, for handing the notification to native code."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopNotifications",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#ConvoHopNotifications",
+      "anchor": "convohopnotifications-class",
+      "signatures": ["final class ConvoHopNotifications"],
+      "docs": "Handles ConvoHop push payloads on the device: parses and validates them,\ndeduplicates on `eventId`, and tracks which calls are ringing.\n\nDelivery is at least once and unordered, so a cancellation can arrive\nbefore its call. A call stops ringing once a cancellation with its\n`alertId` was seen or its `expiresAt` passed.",
+      "members": [
+        {
+          "name": "ConvoHopNotifications",
+          "kind": "constructor",
+          "ref": "package:convohop/push.dart#ConvoHopNotifications.ConvoHopNotifications",
+          "anchor": "convohopnotifications-constructor",
+          "signatures": ["ConvoHopNotifications({Clock? clock, int capacity = 1024})"],
+          "docs": "`capacity` bounds how many event IDs are remembered for deduplication."
+        },
+        {
+          "name": "rings",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotifications.rings",
+          "anchor": "convohopnotificationsrings-property",
+          "signatures": ["Stream<RingUpdate> get rings"],
+          "docs": "Ring changes: a call starts or stops ringing."
+        },
+        {
+          "name": "ringing",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopNotifications.ringing",
+          "anchor": "convohopnotificationsringing-property",
+          "signatures": ["List<CallNotification> get ringing"],
+          "docs": "Calls that are ringing now."
+        },
+        {
+          "name": "isRinging",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopNotifications.isRinging",
+          "anchor": "convohopnotificationsisringing-method",
+          "signatures": ["bool isRinging(String alertId)"],
+          "docs": "Whether the ring `alertId` is on."
+        },
+        {
+          "name": "handleNotification",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopNotifications.handleNotification",
+          "anchor": "convohopnotificationshandlenotification-method",
+          "signatures": ["HandledNotification? handleNotification(Map<Object?, Object?> payload)"],
+          "docs": "Parses and records `payload`. Returns null when it isn't a ConvoHop\npayload, and throws a `FormatException` when it breaks the contract."
+        },
+        {
+          "name": "record",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopNotifications.record",
+          "anchor": "convohopnotificationsrecord-method",
+          "signatures": ["HandledNotification record(ConvoHopNotification notification)"],
+          "docs": "Records an already parsed `notification`."
+        },
+        {
+          "name": "stopRinging",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopNotifications.stopRinging",
+          "anchor": "convohopnotificationsstopringing-method",
+          "signatures": ["bool stopRinging(String alertId, {String reason = 'declined'})"],
+          "docs": "Stops the ring `alertId` locally, for example after the user declined\nit in the call UI. Returns whether it was ringing."
+        },
+        {
+          "name": "stopCall",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopNotifications.stopCall",
+          "anchor": "convohopnotificationsstopcall-method",
+          "signatures": ["bool stopCall(String liveSessionId, {String reason = 'ended'})"],
+          "docs": "Stops every ring of the call `liveSessionId`, for example when the\ncall ended. Returns whether any was ringing."
+        },
+        {
+          "name": "applyEvent",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopNotifications.applyEvent",
+          "anchor": "convohopnotificationsapplyevent-method",
+          "signatures": ["bool applyEvent(Event event)"],
+          "docs": "Applies a conversation event from the user's realtime connection: a\n`live.ended` event stops the call's rings. Pass every event of the\nconversations the user can be called in, for example from\n`ConversationStore.events`, because pushes don't always report that a\nring stopped. Returns whether a ring stopped."
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopNotifications.close",
+          "anchor": "convohopnotificationsclose-method",
+          "signatures": ["void close()"],
+          "docs": "Cancels ring timers and stops reporting on `rings`. Payloads are still\nparsed, deduplicated and tracked."
+        }
+      ]
+    },
+    {
+      "name": "ConvoHopPush",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#ConvoHopPush",
+      "anchor": "convohoppush-class",
+      "signatures": ["final class ConvoHopPush"],
+      "docs": "Push notifications and the system incoming-call UI on Android and iOS.\n\nThe plugin's native code shows ConvoHop pushes even while Dart isn't\nrunning. On Android, its Firebase messaging service builds a notification\nfor each FCM data message and rings with a full-screen call-style\nnotification. On iOS, the system shows APNs alerts, and VoIP pushes ring\nthrough CallKit once you `registerVoip`. Without `title` or `body` in the\npush, which is the default because message previews are off,\nnotifications show generic text: see the package README to localize it.\n\nListen to the streams, then call `start`. Send each registration from\n`registrations` to your backend.",
+      "members": [
+        {
+          "name": "ConvoHopPush",
+          "kind": "constructor",
+          "ref": "package:convohop/push.dart#ConvoHopPush.ConvoHopPush",
+          "anchor": "convohoppush-constructor",
+          "signatures": [
+            "ConvoHopPush({\n  ConvoHopNotifications? notifications,\n  ErrorListener? onError,\n  @visibleForTesting MethodChannel methods = const MethodChannel('convohop/push'),\n  @visibleForTesting EventChannel events = const EventChannel('convohop/push/events'),\n})"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "notifications",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopPush.notifications",
+          "anchor": "convohoppushnotifications-property",
+          "signatures": ["final ConvoHopNotifications notifications"],
+          "docs": "Deduplicates notifications and tracks rings."
+        },
+        {
+          "name": "registrations",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopPush.registrations",
+          "anchor": "convohoppushregistrations-property",
+          "signatures": ["Stream<PushRegistration> get registrations"],
+          "docs": "This device's push registrations, after `register` and `registerVoip`\nand whenever the platform changes one. The same registration can\narrive more than once: store them idempotently."
+        },
+        {
+          "name": "received",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopPush.received",
+          "anchor": "convohoppushreceived-property",
+          "signatures": ["Stream<HandledNotification> get received"],
+          "docs": "ConvoHop pushes that reached the device while Dart was running, after\nnative code showed them. Check `HandledNotification.duplicate`. On iOS,\nalert pushes reach the app only while it's in the foreground."
+        },
+        {
+          "name": "opened",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopPush.opened",
+          "anchor": "convohoppushopened-property",
+          "signatures": ["Stream<ConvoHopNotification> get opened"],
+          "docs": "Notifications the user opened: open the conversation or the call."
+        },
+        {
+          "name": "callActions",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#ConvoHopPush.callActions",
+          "anchor": "convohoppushcallactions-property",
+          "signatures": ["Stream<CallAction> get callActions"],
+          "docs": "What the user did in the system call UI, including actions taken\nshortly before Dart started."
+        },
+        {
+          "name": "start",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.start",
+          "anchor": "convohoppushstart-method",
+          "signatures": ["Future<void> start()"],
+          "docs": "Starts delivering native events, including the notification that\nlaunched the app and earlier call actions. Listen to the streams first."
+        },
+        {
+          "name": "requestPermission",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.requestPermission",
+          "anchor": "convohoppushrequestpermission-method",
+          "signatures": ["Future<bool> requestPermission()"],
+          "docs": "Asks the user to allow notifications. Resolves whether they're allowed."
+        },
+        {
+          "name": "register",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.register",
+          "anchor": "convohoppushregister-method",
+          "signatures": ["Future<void> register()"],
+          "docs": "Registers this device for alert pushes, and reports the registration on\n`registrations`: an `FcmRegistration` on Android and an\n`ApnsRegistration` on iOS. Call it at each launch, after `start`.\n\nOn iOS the registration can arrive after this returns, once APNs issued\na token. On Android it throws a `PlatformException` with code\n`FIREBASE_UNAVAILABLE` when Firebase isn't configured or registration\nfailed, for example while offline."
+        },
+        {
+          "name": "registerVoip",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.registerVoip",
+          "anchor": "convohoppushregistervoip-method",
+          "signatures": ["Future<void> registerVoip()"],
+          "docs": "Registers for VoIP pushes with PushKit, on iOS only, and keeps doing so\nat each launch. The registration arrives on `registrations`. Call it\nonly if your app rings through CallKit: iOS terminates an app that\nreceives a VoIP push without reporting a call."
+        },
+        {
+          "name": "canUseFullScreenIntent",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.canUseFullScreenIntent",
+          "anchor": "convohoppushcanusefullscreenintent-method",
+          "signatures": ["Future<bool> canUseFullScreenIntent()"],
+          "docs": "Whether Android lets the app show full-screen incoming calls. From\nAndroid 14, users and app stores can turn it off; incoming calls then\nshow as heads-up notifications. Always true on iOS."
+        },
+        {
+          "name": "handleNotification",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.handleNotification",
+          "anchor": "convohoppushhandlenotification-method",
+          "signatures": ["HandledNotification? handleNotification(Map<Object?, Object?> payload)"],
+          "docs": "Records a push payload that reached Dart another way, for example\nthrough another push plugin, and reports it on `received`. Returns\nnull when the payload isn't ConvoHop's; throws a `FormatException`\nwhen it breaks the push payload contract."
+        },
+        {
+          "name": "showNotification",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.showNotification",
+          "anchor": "convohoppushshownotification-method",
+          "signatures": ["Future<bool> showNotification(Map<Object?, Object?> payload)"],
+          "docs": "Shows a ConvoHop FCM data message with the plugin's notifications, on\nAndroid, when another plugin's messaging service received it: call it\nwith the message's data from that plugin's foreground and background\nhandlers, instead of `handleNotification`. While a started\n`ConvoHopPush` runs, `received` reports it. Resolves false when\n`payload` isn't ConvoHop's, and on iOS, where the system shows APNs\nalerts."
+        },
+        {
+          "name": "showIncomingCall",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.showIncomingCall",
+          "anchor": "convohoppushshowincomingcall-method",
+          "signatures": ["Future<void> showIncomingCall(CallNotification call)"],
+          "docs": "Rings for `call` in the system call UI, for example when another push\nplugin delivered the call's push to Dart. Does nothing once the ring\nstopped. Throws a `PlatformException` with code `CALL_FAILED` when the\nsystem refused the call, for example when iOS Do Not Disturb or call\nblocking rejects it in CallKit."
+        },
+        {
+          "name": "answerCall",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.answerCall",
+          "anchor": "convohoppushanswercall-method",
+          "signatures": ["Future<bool> answerCall(String alertId)"],
+          "docs": "Answers the ring `alertId` in the system call UI, for example from the\napp's own incoming-call screen, and reports it on `callActions`.\nResolves false when the ring had stopped."
+        },
+        {
+          "name": "declineCall",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.declineCall",
+          "anchor": "convohoppushdeclinecall-method",
+          "signatures": ["Future<bool> declineCall(String alertId)"],
+          "docs": "Declines the ring `alertId` on this device and reports it on\n`callActions`. Resolves false when the ring had stopped. Other devices\nkeep ringing: the decline is local."
+        },
+        {
+          "name": "endCall",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.endCall",
+          "anchor": "convohoppushendcall-method",
+          "signatures": ["Future<void> endCall(String alertId, {String reason = 'ended'})"],
+          "docs": "Ends the ring or call `alertId` in the system call UI without a call\naction: the call ended, or the ring stopped elsewhere. `reason` is a\ncancellation reason: `answered`, `declined`, `ended` or `expired`.\nRings that `notifications` sees stop end by themselves."
+        },
+        {
+          "name": "removeDeliveredNotifications",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.removeDeliveredNotifications",
+          "anchor": "convohoppushremovedeliverednotifications-method",
+          "signatures": ["Future<void> removeDeliveredNotifications({String? conversationId})"],
+          "docs": "Removes ConvoHop's delivered message notifications, only\n`conversationId`'s when given, for example when the user opens the\nconversation. The app's own notifications stay."
+        },
+        {
+          "name": "setActiveConversation",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.setActiveConversation",
+          "anchor": "convohoppushsetactiveconversation-method",
+          "signatures": ["Future<void> setActiveConversation(String? conversationId)"],
+          "docs": "Sets the conversation the user is looking at, or null for none. While\nthe app is in the foreground, its message pushes show no notification;\nthey still arrive on `received`."
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#ConvoHopPush.close",
+          "anchor": "convohoppushclose-method",
+          "signatures": ["Future<void> close()"],
+          "docs": "Stops delivering events. Native code keeps showing pushes."
+        }
+      ]
+    },
+    {
+      "name": "FcmRegistration",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#FcmRegistration",
+      "anchor": "fcmregistration-class",
+      "signatures": ["final class FcmRegistration extends PushRegistration"],
+      "docs": "An Android app registered with Firebase Cloud Messaging, by exactly one of\n`token` and `fid`. FCM issues registration tokens unless the app's\nmanifest switches it to Firebase installation IDs: see the package README.\nYour backend sends its FCM messages to the matching `token` or `fid`\ntarget.",
+      "members": [
+        {
+          "name": "FcmRegistration",
+          "kind": "constructor",
+          "ref": "package:convohop/push.dart#FcmRegistration.FcmRegistration",
+          "anchor": "fcmregistration-constructor",
+          "signatures": [
+            "const FcmRegistration.token(String token)",
+            "const FcmRegistration.fid(String fid)"
+          ],
+          "docs": "**`FcmRegistration.token`**\n\nA registration by FCM registration token.\n\n**`FcmRegistration.fid`**\n\nA registration by Firebase installation ID."
+        },
+        {
+          "name": "token",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#FcmRegistration.token",
+          "anchor": "fcmregistrationtoken-property",
+          "signatures": ["final String? token"],
+          "docs": "The FCM registration token, unless FCM registered `fid`."
+        },
+        {
+          "name": "fid",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#FcmRegistration.fid",
+          "anchor": "fcmregistrationfid-property",
+          "signatures": ["final String? fid"],
+          "docs": "The Firebase installation ID (FID) that FCM registered, when the app's\nmanifest switches FCM to installation IDs."
+        },
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#FcmRegistration.kind",
+          "anchor": "fcmregistrationkind-property",
+          "signatures": ["String get kind"],
+          "docs": "`fcm`, `apns` or `apnsVoip`."
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#FcmRegistration.toJson",
+          "anchor": "fcmregistrationtojson-method",
+          "signatures": ["Map<String, String> toJson()"],
+          "docs": "The registration as JSON: `{\"kind\": \"fcm\", \"token\": …}`,\n`{\"kind\": \"fcm\", \"fid\": …}` or `{\"kind\": \"apns\" | \"apnsVoip\", \"token\": …}`."
+        },
+        {
+          "name": "operator ==",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#FcmRegistration.operator ==",
+          "anchor": "fcmregistrationoperator--method",
+          "signatures": ["bool operator ==(Object other)"],
+          "docs": ""
+        },
+        {
+          "name": "hashCode",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#FcmRegistration.hashCode",
+          "anchor": "fcmregistrationhashcode-property",
+          "signatures": ["int get hashCode"],
+          "docs": ""
+        },
+        {
+          "name": "toString",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#FcmRegistration.toString",
+          "anchor": "fcmregistrationtostring-method",
+          "signatures": ["String toString()"],
+          "docs": ""
+        }
+      ]
+    },
+    {
+      "name": "HandledNotification",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#HandledNotification",
+      "anchor": "handlednotification-class",
+      "signatures": ["final class HandledNotification"],
+      "docs": "What `ConvoHopNotifications.handleNotification` found.",
+      "members": [
+        {
+          "name": "notification",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#HandledNotification.notification",
+          "anchor": "handlednotificationnotification-property",
+          "signatures": ["final ConvoHopNotification notification"],
+          "docs": ""
+        },
+        {
+          "name": "duplicate",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#HandledNotification.duplicate",
+          "anchor": "handlednotificationduplicate-property",
+          "signatures": ["final bool duplicate"],
+          "docs": "Whether an earlier payload had the same event ID. Act on a notification\nonce."
+        },
+        {
+          "name": "ringing",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#HandledNotification.ringing",
+          "anchor": "handlednotificationringing-property",
+          "signatures": ["final bool ringing"],
+          "docs": "For a `CallNotification`: whether the ring is still on, with no\ncancellation for its alert seen and its `expiresAt` in the future."
+        }
+      ]
+    },
+    {
+      "name": "MessageNotification",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#MessageNotification",
+      "anchor": "messagenotification-class",
+      "signatures": ["final class MessageNotification extends ConvoHopNotification"],
+      "docs": "A new message for the user.",
+      "members": [
+        {
+          "name": "messageId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#MessageNotification.messageId",
+          "anchor": "messagenotificationmessageid-property",
+          "signatures": ["final String messageId"],
+          "docs": ""
+        },
+        {
+          "name": "eventType",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#MessageNotification.eventType",
+          "anchor": "messagenotificationeventtype-property",
+          "signatures": ["String get eventType"],
+          "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`."
+        },
+        {
+          "name": "fetchMessage",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#MessageNotification.fetchMessage",
+          "anchor": "messagenotificationfetchmessage-method",
+          "signatures": ["Future<Message> fetchMessage(ConvoHopClient client)"],
+          "docs": "Fetches the message with the user's own session, for example when\n`body` is null because previews are off."
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#MessageNotification.toJson",
+          "anchor": "messagenotificationtojson-method",
+          "signatures": ["Map<String, Object?> toJson()"],
+          "docs": "The `convohop` object, for handing the notification to native code."
+        },
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#MessageNotification.eventId",
+          "anchor": "messagenotificationeventid-property",
+          "signatures": ["final String eventId"],
+          "docs": "Deduplicate on this: delivery is at least once.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#MessageNotification.occurredAt",
+          "anchor": "messagenotificationoccurredat-property",
+          "signatures": ["final String occurredAt"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#MessageNotification.projectId",
+          "anchor": "messagenotificationprojectid-property",
+          "signatures": ["final String projectId"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#MessageNotification.recipientId",
+          "anchor": "messagenotificationrecipientid-property",
+          "signatures": ["final String recipientId"],
+          "docs": "The principal the notification is for.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#MessageNotification.conversationId",
+          "anchor": "messagenotificationconversationid-property",
+          "signatures": ["final String conversationId"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#MessageNotification.senderId",
+          "anchor": "messagenotificationsenderid-property",
+          "signatures": ["final String senderId"],
+          "docs": "Who sent the message or started the ringing.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#MessageNotification.title",
+          "anchor": "messagenotificationtitle-property",
+          "signatures": ["final String? title"],
+          "docs": "Visible title, when the push had one.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#MessageNotification.body",
+          "anchor": "messagenotificationbody-property",
+          "signatures": ["final String? body"],
+          "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "isFor",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#MessageNotification.isFor",
+          "anchor": "messagenotificationisfor-method",
+          "signatures": ["bool isFor(ConvoHopClient client)"],
+          "docs": "Whether this notification is for `client`'s user and project.",
+          "inherited": "ConvoHopNotification"
+        }
+      ]
+    },
+    {
+      "name": "PushRegistration",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#PushRegistration",
+      "anchor": "pushregistration-class",
+      "signatures": ["sealed class PushRegistration"],
+      "docs": "Where your backend sends this device's pushes. Send each one to your\nbackend, which delivers ConvoHop's notification events to it; ConvoHop\nnever sees them. Every ConvoHop client hands its app the same JSON shape,\nfrom `toJson`, so one backend endpoint can store registrations from\nbrowsers and native apps.",
+      "members": [
+        {
+          "name": "kind",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#PushRegistration.kind",
+          "anchor": "pushregistrationkind-property",
+          "signatures": ["String get kind"],
+          "docs": "`fcm`, `apns` or `apnsVoip`."
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#PushRegistration.toJson",
+          "anchor": "pushregistrationtojson-method",
+          "signatures": ["Map<String, String> toJson()"],
+          "docs": "The registration as JSON: `{\"kind\": \"fcm\", \"token\": …}`,\n`{\"kind\": \"fcm\", \"fid\": …}` or `{\"kind\": \"apns\" | \"apnsVoip\", \"token\": …}`."
+        }
+      ]
+    },
+    {
+      "name": "RingNotification",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#RingNotification",
+      "anchor": "ringnotification-class",
+      "signatures": ["sealed class RingNotification extends ConvoHopNotification"],
+      "docs": "A notification about one ring of a call.",
+      "members": [
+        {
+          "name": "liveSessionId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.liveSessionId",
+          "anchor": "ringnotificationlivesessionid-property",
+          "signatures": ["final String liveSessionId"],
+          "docs": ""
+        },
+        {
+          "name": "alertId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.alertId",
+          "anchor": "ringnotificationalertid-property",
+          "signatures": ["final String alertId"],
+          "docs": "One ring for one recipient. A later ring of the same call has a new one."
+        },
+        {
+          "name": "expiresAt",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.expiresAt",
+          "anchor": "ringnotificationexpiresat-property",
+          "signatures": ["final String expiresAt"],
+          "docs": "When the ring stops if nobody answers."
+        },
+        {
+          "name": "mediaProfile",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.mediaProfile",
+          "anchor": "ringnotificationmediaprofile-property",
+          "signatures": ["final String mediaProfile"],
+          "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a profile this SDK doesn't know yet."
+        },
+        {
+          "name": "expiresAtMillis",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.expiresAtMillis",
+          "anchor": "ringnotificationexpiresatmillis-property",
+          "signatures": ["int get expiresAtMillis"],
+          "docs": "`expiresAt` in milliseconds since the epoch, ignoring any fraction."
+        },
+        {
+          "name": "hasVideo",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.hasVideo",
+          "anchor": "ringnotificationhasvideo-property",
+          "signatures": ["bool get hasVideo"],
+          "docs": ""
+        },
+        {
+          "name": "eventId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.eventId",
+          "anchor": "ringnotificationeventid-property",
+          "signatures": ["final String eventId"],
+          "docs": "Deduplicate on this: delivery is at least once.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "eventType",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.eventType",
+          "anchor": "ringnotificationeventtype-property",
+          "signatures": ["String get eventType"],
+          "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "occurredAt",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.occurredAt",
+          "anchor": "ringnotificationoccurredat-property",
+          "signatures": ["final String occurredAt"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "projectId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.projectId",
+          "anchor": "ringnotificationprojectid-property",
+          "signatures": ["final String projectId"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "recipientId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.recipientId",
+          "anchor": "ringnotificationrecipientid-property",
+          "signatures": ["final String recipientId"],
+          "docs": "The principal the notification is for.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "conversationId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.conversationId",
+          "anchor": "ringnotificationconversationid-property",
+          "signatures": ["final String conversationId"],
+          "docs": "",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "senderId",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.senderId",
+          "anchor": "ringnotificationsenderid-property",
+          "signatures": ["final String senderId"],
+          "docs": "Who sent the message or started the ringing.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "title",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.title",
+          "anchor": "ringnotificationtitle-property",
+          "signatures": ["final String? title"],
+          "docs": "Visible title, when the push had one.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "body",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingNotification.body",
+          "anchor": "ringnotificationbody-property",
+          "signatures": ["final String? body"],
+          "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "isFor",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#RingNotification.isFor",
+          "anchor": "ringnotificationisfor-method",
+          "signatures": ["bool isFor(ConvoHopClient client)"],
+          "docs": "Whether this notification is for `client`'s user and project.",
+          "inherited": "ConvoHopNotification"
+        },
+        {
+          "name": "toJson",
+          "kind": "method",
+          "ref": "package:convohop/push.dart#RingNotification.toJson",
+          "anchor": "ringnotificationtojson-method",
+          "signatures": ["Map<String, Object?> toJson()"],
+          "docs": "The `convohop` object, for handing the notification to native code.",
+          "inherited": "ConvoHopNotification"
+        }
+      ]
+    },
+    {
+      "name": "RingUpdate",
+      "kind": "class",
+      "ref": "package:convohop/push.dart#RingUpdate",
+      "anchor": "ringupdate-class",
+      "signatures": ["final class RingUpdate"],
+      "docs": "A change in a ring's state.",
+      "members": [
+        {
+          "name": "call",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingUpdate.call",
+          "anchor": "ringupdatecall-property",
+          "signatures": ["final CallNotification call"],
+          "docs": ""
+        },
+        {
+          "name": "ringing",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingUpdate.ringing",
+          "anchor": "ringupdateringing-property",
+          "signatures": ["final bool ringing"],
+          "docs": ""
+        },
+        {
+          "name": "reason",
+          "kind": "property",
+          "ref": "package:convohop/push.dart#RingUpdate.reason",
+          "anchor": "ringupdatereason-property",
+          "signatures": ["final String? reason"],
+          "docs": "Why the ring stopped: the cancellation's reason, or `expired` when its\n`expiresAt` passed. Null while it rings."
+        }
+      ]
+    },
+    {
+      "name": "CallActionKind",
+      "kind": "enum",
+      "ref": "package:convohop/push.dart#CallActionKind",
+      "anchor": "callactionkind-enum",
+      "signatures": ["enum CallActionKind"],
+      "docs": "What the user did in the system call UI.",
+      "members": [
+        {
+          "name": "answer",
+          "kind": "case",
+          "ref": "package:convohop/push.dart#CallActionKind.answer",
+          "anchor": "callactionkindanswer-case",
+          "signatures": ["answer"],
+          "docs": "Answered the ring: join the call."
+        },
+        {
+          "name": "decline",
+          "kind": "case",
+          "ref": "package:convohop/push.dart#CallActionKind.decline",
+          "anchor": "callactionkinddecline-case",
+          "signatures": ["decline"],
+          "docs": "Declined the ring on this device."
+        },
+        {
+          "name": "end",
+          "kind": "case",
+          "ref": "package:convohop/push.dart#CallActionKind.end",
+          "anchor": "callactionkindend-case",
+          "signatures": ["end"],
+          "docs": "Ended an answered call."
+        },
+        {
+          "name": "mute",
+          "kind": "case",
+          "ref": "package:convohop/push.dart#CallActionKind.mute",
+          "anchor": "callactionkindmute-case",
+          "signatures": ["mute"],
+          "docs": "Muted the microphone in the system call UI, on iOS."
+        },
+        {
+          "name": "unmute",
+          "kind": "case",
+          "ref": "package:convohop/push.dart#CallActionKind.unmute",
+          "anchor": "callactionkindunmute-case",
+          "signatures": ["unmute"],
+          "docs": "Unmuted the microphone in the system call UI, on iOS."
+        }
+      ]
+    },
+    {
+      "name": "notificationEpochSeconds",
+      "kind": "function",
+      "ref": "package:convohop/push.dart#notificationEpochSeconds",
+      "anchor": "notificationepochseconds-function",
+      "signatures": ["int? notificationEpochSeconds(String value)"],
+      "docs": "Unix seconds of an RFC 3339 timestamp with an uppercase `T`, and `Z` or an\noffset, ignoring any fraction, or null when the value isn't one. The date\nmust exist, and second 60 isn't accepted."
+    },
+    {
+      "name": "parseNotificationPayload",
+      "kind": "function",
+      "ref": "package:convohop/push.dart#parseNotificationPayload",
+      "anchor": "parsenotificationpayload-function",
+      "signatures": [
+        "ConvoHopNotification? parseNotificationPayload(Map<Object?, Object?> payload)"
+      ],
+      "docs": "Parses a push payload: an APNs `userInfo` (`{aps, convohop: {...}}`), FCM\ndata (`{convohop: \"<JSON>\"}`) or a Web Push payload.\n\nReturns null when the payload isn't ConvoHop's, and throws a\n`FormatException` naming the first invalid field when it breaks the push\npayload contract. Fields it doesn't know are ignored, as the contract\nrequires of consumers."
+    }
+  ]
+}

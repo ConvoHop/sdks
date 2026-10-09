@@ -1,0 +1,5 @@
+.dart_tool/
+.flutter-plugins-dependencies
+/build/
+# Resolution follows the pinned packages of the Flutter SDK that runs the tests, which change with each stable release.
+/pubspec.lock

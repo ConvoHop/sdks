@@ -281,11 +281,14 @@ updates:
           - minor
           - patch
 
-  # The Flutter example app and the Dart conformance driver.
+  # The Flutter example app, the Dart conformance driver and the Dart docs
+  # extractor (tools/docgen/extractors/dart). They only run in development and
+  # CI.
   - package-ecosystem: pub
     directories:
       - /flutter/example
       - /conformance/drivers/dart
+      - /tools/docgen/extractors/dart
     schedule:
       interval: weekly
     cooldown:
@@ -295,6 +298,25 @@ updates:
       include: scope
     groups:
       pub-flutter-tools:
+        update-types:
+          - minor
+          - patch
+
+  # Tested Flutter docs samples (docs/languages/flutter/examples). They use the
+  # SDK from flutter/ and, like it, commit no lockfile: the Flutter SDK pins
+  # some of their packages, and CI tests them with the current stable release.
+  # Major updates stay ungrouped so each one is checked against its quickstart.
+  - package-ecosystem: pub
+    directory: /docs/languages/flutter/examples
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: docs
+      include: scope
+    groups:
+      docs-flutter-examples:
         update-types:
           - minor
           - patch

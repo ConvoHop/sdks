@@ -95,3 +95,4 @@ mutation CommunicationJoinLiveSession($context: RequestContextInput!, $input: Jo
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`LiveSessionHandle.join`](../../typescript/reference/client.md#livesessionhandlejoin-method) |
 | [Android](../../android/reference/operations.md) | [`LiveSessionHandle.join`](../../android/reference/android-core.md#livesessionhandlejoin-method), [`ConvoHopCall.answer` (static)](../../android/reference/android.md#convohopcallanswer-static-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`LiveSessionHandle.join`](../../flutter/reference/convohop.md#livesessionhandlejoin-method), [`CommunicationOperations.joinLiveSession`](../../flutter/reference/convohop.md#communicationoperationsjoinlivesession-method) |

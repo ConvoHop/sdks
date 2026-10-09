@@ -105,3 +105,4 @@ mutation CommunicationUpdateConversation($context: RequestContextInput!, $input:
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.updateConversation`](../../jvm/reference/server.md#communicationapiupdateconversation-method), [`CommunicationSuspendApi.updateConversation`](../../jvm/reference/server-kotlin.md#communicationsuspendapiupdateconversation-method) |
 | [Go](../../go/reference/operations.md) | [`ProjectClient.UpdateConversation`](../../go/reference/convohop.md#projectclientupdateconversation-method) |
 | [Android](../../android/reference/operations.md) | Not wrapped by a method |
+| [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.updateConversation`](../../flutter/reference/convohop.md#communicationoperationsupdateconversation-method) |

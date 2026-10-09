@@ -77,6 +77,13 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopclientcapabilities-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.capabilities",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationscapabilities-method"
+          }
         ]
       }
     },
@@ -196,6 +203,38 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopclientrefreshautomatically-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.initialize",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientinitialize-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.refreshSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientrefreshsession-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#SessionRefresher.SessionRefresher",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#sessionrefresher-constructor"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#SessionRefresher.check",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#sessionrefreshercheck-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.route",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsroute-method"
+          }
         ]
       }
     },
@@ -246,6 +285,33 @@
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.refreshAutomatically",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopclientrefreshautomatically-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.initialize",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientinitialize-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.refreshSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientrefreshsession-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#SessionRefresher.SessionRefresher",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#sessionrefresher-constructor"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#SessionRefresher.check",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#sessionrefreshercheck-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.currentSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationscurrentsession-method"
           }
         ]
       }
@@ -438,6 +504,48 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopstoretimeline-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.getConversation",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientgetconversation-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationHandle.get",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationhandleget-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.ConversationStore",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstore-constructor"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.reconnect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstorereconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.resync",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.markRead",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoremarkread-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.getConversation",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsgetconversation-method"
+          }
         ]
       }
     },
@@ -546,6 +654,13 @@
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.members",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopclientmembers-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.members",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsmembers-method"
           }
         ]
       }
@@ -711,6 +826,43 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#timelineloadolder-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.messages",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientmessages-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationMessages.list",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationmessageslist-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.ConversationStore",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstore-constructor"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.reconnect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstorereconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.resync",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.loadOlder",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoreloadolder-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.messages",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsmessages-method"
+          }
         ]
       }
     },
@@ -825,6 +977,43 @@
             "package": "com.convohop:convohop-android",
             "page": "../android/reference/android.md#convohopmessagecontentcontent-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.getMessage",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientgetmessage-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#MessageNotification.fetchMessage",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#messagenotificationfetchmessage-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.ConversationStore",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstore-constructor"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.reconnect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstorereconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.resync",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.send",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoresend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.getMessage",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsgetmessage-method"
+          }
         ]
       }
     },
@@ -906,6 +1095,48 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopstoretimeline-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.events",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientevents-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.watch",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStream.reconcile",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstreamreconcile-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.ConversationStore",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstore-constructor"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.reconnect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstorereconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.resync",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.events",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsevents-method"
+          }
         ]
       }
     },
@@ -961,6 +1192,33 @@
             "ref": "com.convohop:convohop-android-core#ConvoHopStore.timeline",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopstoretimeline-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.receipts",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientreceipts-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.ConversationStore",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstore-constructor"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.reconnect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstorereconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.resync",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.receipts",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsreceipts-method"
           }
         ]
       }
@@ -1066,6 +1324,18 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopclientinbox-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.inbox",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientinbox-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.inbox",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsinbox-method"
+          }
         ]
       }
     },
@@ -1169,6 +1439,18 @@
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.search",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopclientsearch-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.search",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientsearch-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.search",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationssearch-method"
           }
         ]
       }
@@ -1354,6 +1636,98 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#liveparticipationhandleconnect-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ClientRequests.resolve",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#clientrequestsresolve-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ClientRequests.retry",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#clientrequestsretry-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.recoverPending",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientrecoverpending-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.watch",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopTransport.retry",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohoptransportretry-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopOutbox.initialize",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopoutboxinitialize-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopOutbox.send",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopoutboxsend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopOutbox.flush",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopoutboxflush-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopOutbox.resolve",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopoutboxresolve-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopOutbox.resend",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopoutboxresend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.send",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoresend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.ConversationStore",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstore-constructor"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.reconnect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstorereconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.resync",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoreresync-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveParticipationHandle.connect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#liveparticipationhandleconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveMediaConnection.reconnect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livemediaconnectionreconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.resolveRequest",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsresolverequest-method"
+          }
         ]
       }
     },
@@ -1422,7 +1796,14 @@
             "page": "../go/reference/convohop.md#projectclientgetoperation-method"
           }
         ],
-        "android": []
+        "android": [],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.getOperation",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsgetoperation-method"
+          }
+        ]
       }
     },
     {
@@ -1495,6 +1876,18 @@
             "ref": "com.convohop:convohop-android-core#ConversationHandle.mute.get",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#conversationhandlemuteget-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConversationMuteControl.get",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationmutecontrolget-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.conversationMute",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsconversationmute-method"
           }
         ]
       }
@@ -1579,6 +1972,18 @@
             "ref": "com.convohop:convohop-android-core#ConversationLive.current",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#conversationlivecurrent-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConversationLive.current",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationlivecurrent-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.currentLiveSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationscurrentlivesession-method"
           }
         ]
       }
@@ -1709,6 +2114,53 @@
             "package": "com.convohop:convohop-android",
             "page": "../android/reference/android.md#convohopcallanswer-static-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.liveSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientlivesession-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveSessionHandle.get",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livesessionhandleget-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveSessionHandle.participation",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livesessionhandleparticipation-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveSessionHandle.end",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livesessionhandleend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveStartOperation.ready",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livestartoperationready-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveParticipationHandle.get",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#liveparticipationhandleget-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveParticipationHandle.connect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#liveparticipationhandleconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveMediaConnection.reconnect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livemediaconnectionreconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.liveSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationslivesession-method"
+          }
         ]
       }
     },
@@ -1812,6 +2264,18 @@
             "ref": "com.convohop:convohop-android-core#ConversationLive.history",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#conversationlivehistory-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConversationLive.history",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationlivehistory-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.liveSessions",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationslivesessions-method"
           }
         ]
       }
@@ -1917,6 +2381,18 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#livesessionhandleparticipants-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#LiveSessionHandle.participants",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livesessionhandleparticipants-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.liveSessionParticipants",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationslivesessionparticipants-method"
+          }
         ]
       }
     },
@@ -1942,6 +2418,18 @@
             "ref": "com.convohop:convohop-android-core#ConvoHopClient.liveAlerts.list",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopclientlivealertslist-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#LiveAlerts.list",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livealertslist-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.liveSessionAlerts",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationslivesessionalerts-method"
           }
         ]
       }
@@ -2056,6 +2544,28 @@
             "ref": "com.convohop:convohop-android-core#LiveStartOperation.ready",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#livestartoperationready-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#LiveAction.get",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#liveactionget-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveAction.completed",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#liveactioncompleted-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveStartOperation.ready",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livestartoperationready-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.liveSessionOperation",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationslivesessionoperation-method"
           }
         ]
       }
@@ -2470,7 +2980,14 @@
             "page": "../go/reference/convohop.md#projectclientrevokesession-method"
           }
         ],
-        "android": []
+        "android": [],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.revokeSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsrevokesession-method"
+          }
+        ]
       }
     },
     {
@@ -2605,7 +3122,14 @@
             "page": "../go/reference/convohop.md#projectclientupdateconversation-method"
           }
         ],
-        "android": []
+        "android": [],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.updateConversation",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsupdateconversation-method"
+          }
+        ]
       }
     },
     {
@@ -3007,6 +3531,48 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#timelinesend-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.send",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientsend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationMessages.send",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationmessagessend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopOutbox.initialize",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopoutboxinitialize-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopOutbox.send",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopoutboxsend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopOutbox.flush",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopoutboxflush-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopOutbox.resend",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopoutboxresend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.send",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoresend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.sendMessage",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationssendmessage-method"
+          }
         ]
       }
     },
@@ -3095,6 +3661,23 @@
             "ref": "com.convohop:convohop-android-core#ConversationHandle.messages.edit",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#conversationhandlemessagesedit-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.edit",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientedit-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationMessages.edit",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationmessagesedit-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.editMessage",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationseditmessage-method"
           }
         ]
       }
@@ -3185,6 +3768,23 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#conversationhandlemessagesdelete-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.delete",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientdelete-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationMessages.delete",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationmessagesdelete-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.deleteMessage",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsdeletemessage-method"
+          }
         ]
       }
     },
@@ -3245,6 +3845,23 @@
             "ref": "com.convohop:convohop-android-core#Timeline.markRead",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#timelinemarkread-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.reportRead",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientreportread-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.markRead",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoremarkread-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.reportReceipt",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsreportreceipt-method"
           }
         ]
       }
@@ -3316,6 +3933,33 @@
             "ref": "com.convohop:convohop-android-core#Timeline.send",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#timelinesend-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.sendTyping",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientsendtyping-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#TypingIndicator.keystroke",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#typingindicatorkeystroke-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#TypingIndicator.stop",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#typingindicatorstop-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#TypingIndicator.close",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#typingindicatorclose-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.typing",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationstyping-method"
           }
         ]
       }
@@ -3453,6 +4097,18 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#conversationhandlemuteset-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConversationMuteControl.set",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationmutecontrolset-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.setConversationMute",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationssetconversationmute-method"
+          }
         ]
       }
     },
@@ -3499,6 +4155,28 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#conversationlivestartbroadcast-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConversationLive.startVoice",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationlivestartvoice-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationLive.startVideo",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationlivestartvideo-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationLive.startBroadcast",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationlivestartbroadcast-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.startLiveSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsstartlivesession-method"
+          }
         ]
       }
     },
@@ -3529,6 +4207,18 @@
             "ref": "com.convohop:convohop-android#ConvoHopCall.answer:static",
             "package": "com.convohop:convohop-android",
             "page": "../android/reference/android.md#convohopcallanswer-static-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#LiveSessionHandle.join",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livesessionhandlejoin-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.joinLiveSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsjoinlivesession-method"
           }
         ]
       }
@@ -3604,6 +4294,18 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#livesessionhandlealertssend-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#LiveSessionAlerts.send",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livesessionalertssend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.alertLiveSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsalertlivesession-method"
+          }
         ]
       }
     },
@@ -3634,6 +4336,18 @@
             "ref": "com.convohop:convohop-android#ConvoHopCall.hangUp",
             "package": "com.convohop:convohop-android",
             "page": "../android/reference/android.md#convohopcallhangup-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#LiveParticipationHandle.leave",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#liveparticipationhandleleave-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.leaveLiveSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsleavelivesession-method"
           }
         ]
       }
@@ -3709,6 +4423,18 @@
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#livesessionhandleend-method"
           }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#LiveSessionHandle.end",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livesessionhandleend-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.endLiveSession",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationsendlivesession-method"
+          }
         ]
       }
     },
@@ -3769,6 +4495,23 @@
             "ref": "com.convohop:convohop-android#ConvoHopCall.join:static",
             "package": "com.convohop:convohop-android",
             "page": "../android/reference/android.md#convohopcalljoin-static-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#LiveParticipationHandle.connect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#liveparticipationhandleconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#LiveMediaConnection.reconnect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#livemediaconnectionreconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#CommunicationOperations.liveSessionCredentials",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#communicationoperationslivesessioncredentials-method"
           }
         ]
       }
@@ -3915,6 +4658,33 @@
             "ref": "com.convohop:convohop-android-core#ConvoHopStore.timeline",
             "package": "com.convohop:convohop-android-core",
             "page": "../android/reference/android-core.md#convohopstoretimeline-method"
+          }
+        ],
+        "flutter": [
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.watch",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientwatch-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConvoHopClient.resyncAuthorizedHistory",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#convohopclientresyncauthorizedhistory-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.ConversationStore",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstore-constructor"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.reconnect",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstorereconnect-method"
+          },
+          {
+            "ref": "package:convohop/convohop.dart#ConversationStore.resync",
+            "package": "package:convohop/convohop.dart",
+            "page": "../flutter/reference/convohop.md#conversationstoreresync-method"
           }
         ]
       }

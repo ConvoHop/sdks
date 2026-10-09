@@ -582,6 +582,20 @@ The [example app](example/README.md) signs in through your backend and shows
 the inbox, a conversation with the store, the outbox and typing, push and
 voice calls. CI builds it for Android and the iOS simulator.
 
+Two more Dart packages serve the [Flutter docs](../docs/site/flutter/index.md):
+the extractor reads the SDK's public API for the
+[docs pipeline](../docs/docs-pipeline.md), and the examples hold the code that
+the docs include. The extractor needs Dart 3.11 or later. The examples' tests
+start the conformance mock, so they need Node.js 22 or later and `npm ci` at
+the repository root. After you change the public API, from the repository
+root:
+
+```sh
+npm run extract:docs -- flutter          # refresh docs/languages/flutter/surface.json
+npm run generate:docs                    # regenerate docs/site
+npm run test:docs -- --install flutter   # get the examples' packages and run them
+```
+
 | Path | Contents |
 | --- | --- |
 | `lib/src` | The client, transport, realtime, store, outbox, typing, recent activity, calls, notifications and push |
@@ -591,3 +605,5 @@ voice calls. CI builds it for Android and the iOS simulator.
 | `test` | Unit tests |
 | `example` | The example app |
 | [`../conformance/drivers/dart`](../conformance/drivers/dart) | The conformance driver |
+| [`../tools/docgen/extractors/dart`](../tools/docgen/extractors/dart) | The public API extractor that the docs generator runs |
+| [`../docs/languages/flutter/examples`](../docs/languages/flutter/examples) | The code that the Flutter docs include, and its tests |

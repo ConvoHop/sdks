@@ -77,3 +77,4 @@ mutation CommunicationAlertLiveSession($context: RequestContextInput!, $input: A
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.alertLiveSession`](../../jvm/reference/server.md#communicationapialertlivesession-method), [`CommunicationSuspendApi.alertLiveSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapialertlivesession-method) |
 | [Go](../../go/reference/operations.md) | [`ProjectClient.AlertLiveSession`](../../go/reference/convohop.md#projectclientalertlivesession-method) |
 | [Android](../../android/reference/operations.md) | [`LiveSessionHandle.alerts.send`](../../android/reference/android-core.md#livesessionhandlealertssend-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`LiveSessionAlerts.send`](../../flutter/reference/convohop.md#livesessionalertssend-method), [`CommunicationOperations.alertLiveSession`](../../flutter/reference/convohop.md#communicationoperationsalertlivesession-method) |
