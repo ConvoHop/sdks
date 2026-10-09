@@ -11,6 +11,9 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -32,6 +35,24 @@ internal fun parseCursor(value: JsonElement?): Cursor {
     )
 }
 
+/** Where a [ConversationStream] stands. */
+public enum class ReplayState {
+    /** Catching up over HTTP, or opening the live subscription. */
+    CATCHING_UP,
+
+    /** Subscribed; events arrive as they happen. */
+    LIVE,
+
+    /** The connection dropped; waiting to reconnect with backoff. */
+    RECONNECTING,
+
+    /** Held while the session is renewed. */
+    PAUSED,
+
+    /** Closed by the app, or failed permanently. */
+    CLOSED,
+}
+
 /**
  * One conversation's authorized history, replayed from its applied cursor
  * and then followed live over `graphql-transport-ws`.
@@ -51,6 +72,8 @@ public class ConversationStream internal constructor(
     initialCursor: Cursor?,
     private val apply: suspend (List<Event>) -> Unit,
     private val onError: (Throwable) -> Unit,
+    /** False for views that load a snapshot first; their position must not move the app's stored cursor. */
+    private val persistCursor: Boolean,
     private val onClose: () -> Unit,
 ) : AutoCloseable {
     private class Round(val generation: Int, val result: Deferred<Boolean>)
@@ -75,6 +98,10 @@ public class ConversationStream internal constructor(
     private var currentRoute: ProjectRoute = route
     private var token: String = token
     private val storageKey = storageKey(client, conversationId)
+    private val stateFlow = MutableStateFlow(ReplayState.CATCHING_UP)
+
+    /** Where the replay stands. */
+    public val state: StateFlow<ReplayState> = stateFlow.asStateFlow()
 
     /** The last applied position; replay resumes after it. */
     public val cursor: Cursor? get() = appliedCursor
@@ -96,7 +123,7 @@ public class ConversationStream internal constructor(
 
     private suspend fun saveCursor(next: Cursor) {
         appliedCursor = next
-        client.storage?.setItem(storageKey, CanonicalJson.encode(next.toJson()))
+        if (persistCursor) client.storage?.setItem(storageKey, CanonicalJson.encode(next.toJson()))
     }
 
     private fun notifyClosed() {
@@ -117,6 +144,7 @@ public class ConversationStream internal constructor(
 
     internal fun closeNow() {
         closedFlag = true
+        stateFlow.value = ReplayState.CLOSED
         if (finished) return
         finished = true
         queueGeneration++
@@ -135,6 +163,7 @@ public class ConversationStream internal constructor(
 
     internal suspend fun suspendSessionRefresh() {
         paused = true
+        if (!closedFlag) stateFlow.value = ReplayState.PAUSED
         timer?.cancel()
         timer = null
         val current = socket
@@ -156,6 +185,7 @@ public class ConversationStream internal constructor(
         currentRoute = route
         this.token = token
         paused = false
+        stateFlow.value = ReplayState.CATCHING_UP
         try {
             proceed(reconcileRound().await())
         } catch (error: CancellationException) {
@@ -279,6 +309,7 @@ public class ConversationStream internal constructor(
                 "connection_ack" -> {
                     reconnectAttempts = 0
                     ws.send(subscribeFrame(route, subscriptionId))
+                    stateFlow.value = ReplayState.LIVE
                 }
                 "ping" -> ws.send(CanonicalJson.encode(jsonObjectOf("type" to "pong".json())))
                 "next", "error" -> {
@@ -356,14 +387,32 @@ public class ConversationStream internal constructor(
         work.start()
     }
 
-    private fun retry() {
+    /**
+     * Skips the reconnect backoff, for example when the device is back
+     * online. Does nothing unless the replay is [ReplayState.RECONNECTING].
+     */
+    public fun reconnectNow() {
+        client.post {
+            if (closedFlag || paused || stateFlow.value != ReplayState.RECONNECTING) return@post
+            timer?.cancel()
+            timer = null
+            retry(immediate = true)
+        }
+    }
+
+    private fun retry(immediate: Boolean = false) {
         if (closedFlag || paused || timer != null) return
-        val backoff = min(1000L shl min(reconnectAttempts++, 4), 10000L)
-        val delayMillis = backoff + floor(client.environment.random() * 500).toLong()
+        val delayMillis = if (immediate) {
+            0L
+        } else {
+            min(1000L shl min(reconnectAttempts++, 4), 10000L) + floor(client.environment.random() * 500).toLong()
+        }
+        stateFlow.value = ReplayState.RECONNECTING
         timer = client.scope.launch {
             delay(delayMillis)
             timer = null
             if (closedFlag || paused) return@launch
+            stateFlow.value = ReplayState.CATCHING_UP
             val generation = queueGeneration
             val current = { !closedFlag && !paused && generation == queueGeneration }
             try {

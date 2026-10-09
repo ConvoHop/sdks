@@ -8,6 +8,7 @@ import com.convohop.android.generated.Event
 import com.convohop.android.generated.EventPage
 import com.convohop.android.generated.EventsRequestInput
 import com.convohop.android.generated.GetConversationRequestInput
+import com.convohop.android.generated.GetMessageRequestInput
 import com.convohop.android.generated.LiveAlertPage
 import com.convohop.android.generated.LiveAlertsInput
 import com.convohop.android.generated.Member
@@ -39,12 +40,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Options for [ConvoHopClient]. The session token stays in memory; it is
@@ -145,6 +152,7 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
     internal val environment: ConvoHopEnvironment = options.environment
     internal val realtime: RealtimeConnector = options.realtime
     internal val storage: RecoveryStorage? = options.recoveryStorage
+    internal val dispatcher: CoroutineDispatcher = options.dispatcher
     internal val serialDispatcher: CoroutineDispatcher = options.dispatcher.limitedParallelism(1)
     internal val scope: CoroutineScope = CoroutineScope(SupervisorJob() + serialDispatcher)
     internal val http: ConvoHopTransport
@@ -186,6 +194,8 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
     /** The incarnation this client is bound to. */
     public val incarnation: String get() = http.incarnation
 
+    internal val isClosed: Boolean get() = closed
+
     /** The verified session binding, once [initialize] ran with a [SessionRefresh] hook. */
     public val sessionBinding: Session? get() = session
 
@@ -200,6 +210,9 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
 
     /** Mutation recovery and request resolution. */
     public val requests: Requests = Requests()
+
+    /** Ticks after each verified session renewal, so work held for the session can try again. */
+    internal val renewals = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     /** Live-session alerts addressed to this principal. */
     public val liveAlerts: LiveAlerts = LiveAlerts()
@@ -286,6 +299,77 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
         refreshing = pending
         pending.start()
         pending.await()
+    }
+
+    /**
+     * Renews the session through the [SessionRefresh] hook before it expires,
+     * at least 30 seconds and at most 5 minutes ahead. A failed renewal goes to
+     * [onError] and is retried with backoff until the session expires; the
+     * schedule stops when renewal is [SessionRefreshState.BLOCKED], the session
+     * has expired, the returned handle is closed or the client is closed.
+     * Initializes the client first if needed.
+     */
+    public fun refreshAutomatically(onError: (Throwable) -> Unit): AutoCloseable {
+        require(sessionRefresh != null) { "refreshAutomatically requires a sessionRefresh hook" }
+        check(!closed) { "ConvoHopClient is closed" }
+        val job = scope.launch {
+            var failures = 0
+            while (isActive) {
+                val binding = try {
+                    session ?: initialize().let { session } ?: return@launch
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    report(onError, error)
+                    failures++
+                    delay(min(5_000L shl min(failures - 1, 4), 60_000L))
+                    continue
+                }
+                val now = environment.now()
+                val expiry = sessionExpiry(binding)
+                if (expiry <= now) {
+                    report(
+                        onError,
+                        ConvoHopProblem(
+                            "SESSION_EXPIRED", environment.uuid(), "rejected", 401,
+                            "The session expired before it could be renewed; bootstrap a new client",
+                        ),
+                    )
+                    return@launch
+                }
+                val remaining = expiry - now
+                val wait = if (failures == 0) {
+                    max(remaining - (remaining / 5).coerceIn(30_000L, 300_000L), 1_000L)
+                } else {
+                    min(min(5_000L shl min(failures - 1, 4), 60_000L), max(remaining - 1_000L, 0L))
+                }
+                delay(wait)
+                if (session !== binding) {
+                    failures = 0
+                    continue
+                }
+                try {
+                    refreshSession()
+                    failures = 0
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    report(onError, error)
+                    if (sessionRefreshState == SessionRefreshState.BLOCKED) return@launch
+                    failures++
+                }
+            }
+        }
+        return AutoCloseable { job.cancel() }
+    }
+
+    /**
+     * Skips the reconnect backoff of every replay that is waiting to
+     * reconnect, for example when the device is back online.
+     */
+    public fun reconnectNow() {
+        if (closed) return
+        post { for (stream in streams.toList()) stream.reconnectNow() }
     }
 
     internal fun suspendReplay(stream: ConversationStream) {
@@ -404,6 +488,7 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
             this.quiescing = null
             barrier.release()
         }
+        if (replacement != null) renewals.tryEmit(Unit)
         if (!authentication.blocked) {
             val resumed = quiescing.replays.toList().map { stream ->
                 scope.async(start = CoroutineStart.UNDISPATCHED) { stream.resumeSessionRefresh(replayRoute, token) }
@@ -434,6 +519,16 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
         val input = GetConversationRequestInput(requireId(conversationId, "conversationId")).toJson()
         http.execute(Operations.Communication.getConversation, projectId, input).result
             ?: protocolError("Invalid protocol object")
+    }
+
+    /** One message by ID, as this principal is currently allowed to see it. */
+    public suspend fun getMessage(conversationId: String, messageId: String): Message = serial {
+        val id = requireId(conversationId, "conversationId")
+        val input = GetMessageRequestInput(id, requireId(messageId, "messageId")).toJson()
+        val message = http.execute(Operations.Communication.getMessage, projectId, input).result
+            ?: protocolError("Invalid protocol object")
+        if (message.conversationId != id || message.messageId != messageId) protocolError("Message scope does not match the request")
+        message
     }
 
     /** Request resolution and mutation recovery. */
@@ -596,6 +691,18 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
     ): ConversationStream = serial { openReplay(requireId(conversationId, "conversationId"), apply, onError, false) }
 
     /**
+     * Like [watch], but replays from [after] and leaves the stored cursor
+     * alone; for views that load a current snapshot before following changes.
+     */
+    internal suspend fun watchFrom(
+        conversationId: String,
+        after: Cursor,
+        apply: suspend (List<Event>) -> Unit,
+        onError: (Throwable) -> Unit,
+        onOpen: (ConversationStream) -> Unit,
+    ): ConversationStream = serial { openReplay(requireId(conversationId, "conversationId"), apply, onError, false, after, onOpen) }
+
+    /**
      * Closes every replay of [conversationId] and replays authorized history
      * from the start, ignoring the stored cursor until the first batch
      * replaces it. Use it when the authority requires resynchronization.
@@ -632,17 +739,22 @@ public class ConvoHopClient(options: ConvoHopClientOptions) : AutoCloseable {
         apply: suspend (List<Event>) -> Unit,
         onError: (Throwable) -> Unit,
         resync: Boolean,
+        after: Cursor? = null,
+        onOpen: ((ConversationStream) -> Unit)? = null,
     ): ConversationStream {
         checkReplayAdmission()
         val generation = replayGenerations[conversationId] ?: 0
         for (stream in streams.filter { it.conversationId == conversationId && it.closed }) stream.retire()
         val initial = route ?: initialize()
-        val saved = if (resync) null else ConversationStream.loadCursor(this, conversationId)
+        val saved = after ?: if (resync) null else ConversationStream.loadCursor(this, conversationId)
         checkReplayAdmission()
         checkGeneration(conversationId, generation)
         lateinit var realtime: ConversationStream
-        realtime = ConversationStream(this, conversationId, route ?: initial, token, saved, apply, onError) { streams.remove(realtime) }
+        realtime = ConversationStream(this, conversationId, route ?: initial, token, saved, apply, onError, after == null) {
+            streams.remove(realtime)
+        }
         streams.add(realtime)
+        onOpen?.invoke(realtime)
         if (quiescing != null) suspendReplay(realtime)
         try {
             if (resync) realtime.resyncAuthorizedHistory() else realtime.start()
