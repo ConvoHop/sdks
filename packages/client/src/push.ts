@@ -264,8 +264,9 @@ export interface WebClients {
 }
 /**
  * Handles a `notificationclick` for a ConvoHop notification: closes it, then focuses a window already showing `url`
- * or opens one. `url` maps the notification (and the clicked action, if any) to a same-origin URL of your app.
- * Returns whether the notification was a ConvoHop one.
+ * or opens one. `url` maps the notification (and the clicked action, if any) to a URL of your app: relative to the
+ * service worker, such as `/conversations/${notification.conversationId}`, or absolute on its origin. Another origin
+ * is a TypeError, and the notification stays open. Returns whether the notification was a ConvoHop one.
  */
 export function handleNotificationClick(clients: WebClients, event: WebNotificationClickEvent,
   url: (notification: PushNotification, action: string | undefined) => string): boolean {
@@ -273,14 +274,35 @@ export function handleNotificationClick(clients: WebClients, event: WebNotificat
   const source = typeof data === "object" && data !== null ? (data as Fields).convohop : undefined;
   if (source === undefined) return false;
   const notification = parsePushNotification(source);
+  const target = appUrl(url(notification, event.action || undefined));
   event.notification.close();
-  const target = url(notification, event.action || undefined);
   event.waitUntil((async () => {
     const windows = await clients.matchAll({ type: "window", includeUncontrolled: true });
-    const open = windows.find(client => client.url === target);
+    const open = windows.find(client => sameUrl(client.url, target));
     if (open) await open.focus(); else await clients.openWindow(target);
   })());
   return true;
+}
+/** Resolves a notification's URL against the service worker's location and refuses another origin. */
+function appUrl(url: unknown): string {
+  if (typeof url !== "string") throw new TypeError("The notification URL must be a string");
+  let base: unknown;
+  try {
+    base = (globalThis as { location?: { href?: unknown } }).location?.href;
+  } catch {
+    base = undefined;
+  }
+  if (typeof base !== "string") throw new TypeError("handleNotificationClick needs the service worker's location");
+  const origin = new URL(base).origin, target = new URL(url, base);
+  if (target.origin !== origin) throw new TypeError(`A notification can only open a page on ${origin}`);
+  return target.href;
+}
+function sameUrl(url: string, target: string): boolean {
+  try {
+    return new URL(url).href === target;
+  } catch {
+    return false;
+  }
 }
 
 /** A Web Push subscription, as `PushSubscription.toJSON()` returns it. */

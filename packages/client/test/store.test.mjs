@@ -188,7 +188,8 @@ test("edits and deletes replace a message only with a newer revision, and a fail
   const w = world(), conversation = store(t, w);
   await conversation.open();
   const [third, fourth, fifth] = conversation.snapshot.messages, list = conversation.snapshot.messages;
-  const edited = w.revise(third.messageId, { text: "edited", editedAt: at }), deleted = w.revise(fourth.messageId, { deleted: true, text: null });
+  const edited = w.revise(third.messageId, { text: "edited", editedAt: at });
+  const deleted = w.revise(fourth.messageId, { deleted: true, text: null, props: null });
   await w.stream().apply([w.event("message.edited", { messageId: third.messageId, revision: edited }),
     w.event("message.deleted", { messageId: fourth.messageId, revision: deleted }),
     w.event("message.edited", { messageId: fifth.messageId, revision: "1" }),
@@ -197,7 +198,8 @@ test("edits and deletes replace a message only with a newer revision, and a fail
     [third.messageId, fourth.messageId].sort(), "stale and unloaded messages aren't read");
   const [newThird, newFourth, newFifth] = conversation.snapshot.messages;
   assert.deepEqual([newThird.text, newThird.revision], ["edited", "2"]);
-  assert.deepEqual([newFourth.deleted, newFourth.text], [true, null]);
+  assert.deepEqual([newFourth.deleted, newFourth.text, newFourth.props], [true, null, null], "a deletion is shown as sent");
+  assert.ok(Object.isFrozen(newFourth));
   assert.equal(newFifth, fifth, "an unchanged message keeps its identity");
   assert.notEqual(conversation.snapshot.messages, list);
 
@@ -276,7 +278,7 @@ test("read and delivery reports cover the newest visible message once", async t 
   assert.equal(own().readThroughSequence, "5");
   assert.equal(await conversation.markDelivered(), false, "reading covers delivery");
 
-  const newest = w.add(), removed = w.add({ deleted: true, text: null });
+  const newest = w.add(), removed = w.add({ deleted: true, text: null, props: null });
   await w.stream().apply([w.created(newest), w.created(removed)]);
   assert.equal(await conversation.markDelivered(), true);
   assert.deepEqual(w.calls.at(-1), ["reportDelivered", "1", newest.sequence], "a deleted message isn't reported");

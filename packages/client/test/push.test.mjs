@@ -222,18 +222,31 @@ function windows(urls) {
   return clients;
 }
 
-test("notification clicks focus the app's window for the notification or open one", async () => {
-  const url = (notification, action) => "https://app.example/c/" + notification.conversationId + (action ? "?" + action : "");
+/** Gives the test the `location` of a service worker at `href`, as `self.location` is in one. */
+function serviceWorkerAt(t, href) {
+  const own = Object.getOwnPropertyDescriptor(globalThis, "location");
+  Object.defineProperty(globalThis, "location", { value: { href }, configurable: true, writable: true });
+  t.after(() => { if (own) Object.defineProperty(globalThis, "location", own); else delete globalThis.location; });
+}
+
+test("notification clicks focus the app's window for the notification or open one", async t => {
+  serviceWorkerAt(t, "https://app.example/sw.js");
+  const url = (notification, action) => "/c/" + notification.conversationId + (action ? "?" + action : "");
   const target = "https://app.example/c/" + message.conversationId;
   const open = windows(["https://app.example/", target]), event = clicked({ convohop: message });
   assert.equal(handleNotificationClick(open, event, url), true);
   await Promise.all(event.waits);
-  assert.deepEqual([event.closed, open.focused, open.opened], [1, [target], []]);
+  assert.deepEqual([event.closed, open.focused, open.opened], [1, [target], []], "a relative URL matches the open window");
+
+  const absolute = windows(["https://app.example/", target]), again = clicked({ convohop: message });
+  handleNotificationClick(absolute, again, () => target);
+  await Promise.all(again.waits);
+  assert.deepEqual([absolute.focused, absolute.opened], [[target], []]);
 
   const none = windows(["https://app.example/"]), answer = clicked({ convohop: message }, "reply");
   handleNotificationClick(none, answer, url);
   await Promise.all(answer.waits);
-  assert.deepEqual(none.opened, [target + "?reply"]);
+  assert.deepEqual(none.opened, [target + "?reply"], "a window opens at the absolute URL");
 
   for (const data of [null, undefined, "text", { other: true }]) {
     const foreign = clicked(data);
@@ -241,6 +254,31 @@ test("notification clicks focus the app's window for the notification or open on
     assert.deepEqual([foreign.closed, foreign.waits], [0, []]);
   }
   assert.throws(() => handleNotificationClick(none, clicked({ convohop: { ...message, projectId: "x" } }), url), TypeError);
+  for (const [other, error] of [
+    [() => "https://elsewhere.example/c/1", /only open a page on https:\/\/app\.example/],
+    [() => "//elsewhere.example/c/1", /only open a page on/],
+    [() => "javascript:alert(1)", /only open a page on/],
+    [() => undefined, /must be a string/],
+  ]) {
+    const refused = clicked({ convohop: message });
+    assert.throws(() => handleNotificationClick(none, refused, other), { name: "TypeError", message: error });
+    assert.deepEqual([refused.closed, refused.waits], [0, []], "a refused click leaves the notification open");
+  }
+  assert.deepEqual([none.focused, none.opened], [[], [target + "?reply"]]);
+});
+
+test("notification click URLs resolve against the service worker's location", async t => {
+  serviceWorkerAt(t, "https://app.example/inbox/sw.js");
+  const scoped = windows([]), event = clicked({ convohop: message });
+  handleNotificationClick(scoped, event, notification => "c/" + notification.conversationId);
+  await Promise.all(event.waits);
+  assert.deepEqual(scoped.opened, ["https://app.example/inbox/c/" + message.conversationId]);
+
+  delete globalThis.location;
+  const outside = clicked({ convohop: message });
+  assert.throws(() => handleNotificationClick(scoped, outside, () => "/c/1"),
+    { name: "TypeError", message: "handleNotificationClick needs the service worker's location" });
+  assert.equal(outside.closed, 0);
 });
 
 const vapid = new Uint8Array(65).map((_, index) => (index * 37 + 4) % 256);

@@ -163,7 +163,9 @@ resolution before resending only what the authority never observed.
 message, and `unconfirmed` warns that the old one may have arrived.
 `persist: true` keeps unsent messages, including their text, in the client's
 `recoveryStorage` across reloads; restored sends that may have been
-submitted are recovered, never sent as new. It is off by default.
+submitted are recovered, never sent as new. It is off by default. Each tab's
+outbox saves separately, coordinated through Web Locks, and when a tab
+closes or reloads, another tab's outbox takes over what it left unsent.
 
 `TypingIndicator` sends throttled, ephemeral `typing` signals (at most one
 per `intervalMs`, stopping after `idleMs`). Signals are never retried, and
@@ -200,8 +202,10 @@ a cancellation that arrives before its ring, for as long as the service
 worker runs. `handlePushEvent` shows a notification for every push, because
 browsers expect one; duplicates and stopped rings replace the earlier
 notification silently. Pass `render` for your own text; the default
-fallback titles are English. `unsubscribePush` lets your backend forget the
-subscription before unsubscribing.
+fallback titles are English. `handleNotificationClick` resolves your URL
+against the service worker's location, then focuses a window already showing
+it or opens one; a URL on another origin is refused. `unsubscribePush` lets
+your backend forget the subscription before unsubscribing.
 
 ## Explicit live phases
 

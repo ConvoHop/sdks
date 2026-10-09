@@ -2,14 +2,16 @@
 // mock. The page loads the built packages as native ES modules and holds only a user's session token: Node creates
 // the users and the conversation with a backend key, as an app's own backend would. Covered: sending and following a
 // conversation over fetch and graphql-transport-ws, holding sends while the browser is offline, keeping unsent
-// messages in localStorage across a reload and, in Chromium, which can deliver a push through DevTools, showing the
-// shared push vectors from a module service worker. Real media needs a LiveKit server, which the mock doesn't have.
+// messages in localStorage across a reload and in each tab's own slot, an open tab taking over what a closed tab left
+// and, in Chromium, which can deliver a push through DevTools, showing the shared push vectors from a module service
+// worker. Real media needs a LiveKit server, which the mock doesn't have.
 // BROWSERS selects engines, for example BROWSERS=chromium.
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { after, before, beforeEach, describe, test } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
+import { isDeepStrictEqual } from "node:util";
 import { ConvoHopClient } from "@convohop/client";
 import { ProjectServerClient } from "@convohop/server";
 import { chromium, firefox, webkit } from "playwright";
@@ -66,9 +68,9 @@ async function openPage(context) {
   return { page, errors };
 }
 
-/** Opens the conversation in the page as `user`. */
-function join(page, user, conversationId, persist = false) {
-  return page.evaluate(options => window.harness.open(options), { ...user, conversationId, persist });
+/** Opens the conversation in the page as `user`, with the harness's `persist` and `held` options. */
+function join(page, user, conversationId, options = {}) {
+  return page.evaluate(options => window.harness.open(options), { ...user, conversationId, ...options });
 }
 
 /** Waits until `check(arg)` holds in the page and returns the page's view; a timeout reports the last view. */
@@ -146,7 +148,7 @@ for (const name of names) {
       const context = await newContext(t);
       const key = `convohop.outbox:${alice.projectId}:${alice.principalId}`;
       const first = await openPage(context);
-      await join(first.page, alice, conversationId, true);
+      await join(first.page, alice, conversationId, { persist: true });
       await context.setOffline(true);
       await until(first.page, () => !navigator.onLine);
       const requestId = await first.page.evaluate(text => window.harness.send(text), "Written before a reload");
@@ -156,12 +158,64 @@ for (const name of names) {
 
       await context.setOffline(false);
       const second = await openPage(context);
-      await join(second.page, alice, conversationId, true);
+      await join(second.page, alice, conversationId, { persist: true });
       const view = await until(second.page, delivered, "Written before a reload");
       await until(second.page, key => localStorage.getItem(key) === null, key);
       assert.equal((await sends(requestId)).length, 1);
       assert.deepEqual(view.errors, []);
       assert.deepEqual([...first.errors, ...second.errors], []);
+    });
+
+    test("tabs keep their own unsent messages, and an open tab takes over what a closed tab left", limit, async t => {
+      const { conversationId, alice, bob } = await conversation();
+      const context = await newContext(t);
+      const base = `convohop.outbox:${alice.projectId}:${alice.principalId}`;
+      /** Asserts the texts in each of the user's outbox slots in localStorage, by key suffix, once the page sees them. */
+      async function slots(page, expected, message) {
+        const read = () => page.evaluate(base => Object.fromEntries(Object.keys(localStorage).sort()
+          .filter(key => key === base || key.startsWith(`${base}:`))
+          .map(key => [key.slice(base.length), JSON.parse(localStorage.getItem(key)).map(entry => entry.text)])), base);
+        // Another tab's writes reach a page's localStorage asynchronously.
+        let found = await read();
+        for (const deadline = Date.now() + 15_000; !isDeepStrictEqual(found, expected) && Date.now() < deadline;) {
+          await delay(50);
+          found = await read();
+        }
+        assert.deepEqual(found, expected, message);
+      }
+      /** In the page: whether its outbox holds `count` entries and the slot `base + key` is gone. */
+      const took = ({ base, key, count }) => window.harness.view().outbox.length === count && localStorage.getItem(base + key) === null;
+      // Chromium can put a tab of an offline context back online when another tab closes, so these tabs hold their
+      // sends through the outbox's connectivity rather than the browser's offline mode.
+      const held = { persist: true, held: true };
+      const a = await openPage(context), b = await openPage(context);
+      await join(a.page, alice, conversationId, held);
+      await join(b.page, alice, conversationId, held);
+      const fromA = await a.page.evaluate(text => window.harness.send(text), "Written in tab A");
+      const fromB = await b.page.evaluate(text => window.harness.send(text), "Written in tab B");
+      await slots(a.page, { "": ["Written in tab A"], ":1": ["Written in tab B"] }, "each tab saves its own");
+
+      await b.page.close();
+      await until(a.page, took, { base, key: ":1", count: 2 });
+      await slots(a.page, { "": ["Written in tab A", "Written in tab B"] }, "the older tab takes over");
+
+      const c = await openPage(context);
+      await join(c.page, alice, undefined, held);
+      await a.page.close();
+      await until(c.page, took, { base, key: "", count: 2 });
+      await slots(c.page, { ":1": ["Written in tab A", "Written in tab B"] }, "a newer tab takes over");
+      assert.deepEqual([(await sends(fromA)).length, (await sends(fromB)).length], [0, 0], "held tabs send nothing");
+
+      await c.page.evaluate(() => window.harness.resume());
+      const view = await until(c.page, () => window.harness.view().outbox.every(entry => entry.status === "sent"));
+      assert.deepEqual(view.outbox.map(entry => entry.requestId), [fromA, fromB]);
+      await until(c.page, prefix => !Object.keys(localStorage).some(key => key.startsWith(prefix)), base);
+      assert.deepEqual([(await sends(fromA)).length, (await sends(fromB)).length], [1, 1]);
+      const reader = new ConvoHopClient({ baseUrl: mock.descriptor.communicationUrl, ...bob });
+      assert.deepEqual((await reader.messages(conversationId)).items.map(message => message.text).sort(),
+        ["Written in tab A", "Written in tab B"]);
+      assert.deepEqual(view.errors, []);
+      assert.deepEqual([...a.errors, ...b.errors, ...c.errors], []);
     });
   });
 }
