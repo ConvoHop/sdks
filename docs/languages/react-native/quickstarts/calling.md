@@ -38,9 +38,10 @@ Ringing gives each principal you ring a `notification.call` webhook event, which
 
 - `join()` reserves this device's place in the call. If you retry a join, pass the first attempt's `requestId` again, and keep it until the join succeeds.
 - `createRoom()` creates a LiveKit room with the Web SDK's media policy: VP8 video at up to 320x240, 15 frames per second and 350 kbit/s, without simulcast.
-- `connectWith` gets single-use credentials for each attempt, and `createRoomConnector` connects the room once with them. LiveKit resumes a dropped connection with the token that the media server refreshes. When it can't, `onDisconnected` runs, and `reconnectCall` connects again with new credentials. If reconnecting fails too, offer a button that calls `reconnectCall` again, or leave the call. If the first connection fails, the sample leaves.
+- `connectWith` gets single-use credentials for each attempt, and `createRoomConnector` connects the room once with them. LiveKit resumes a dropped connection with the token that the media server refreshes. When it can't, `onDisconnected` runs, and `reconnectCall` connects again with new credentials. If reconnecting fails too, offer a button that calls `reconnectCall` again, or leave the call.
 - Connecting captures nothing. `microphone` turns the microphone on once the room connects, if `snapshot.permissions` allows it, and the first time, iOS or Android asks the user for access. A voice call, started with `startVoice()`, never allows the camera. In a call started with `startVideo()`, turn the camera on with `room.localParticipant.setCameraEnabled(true)`, and show video with `VideoTrack` from `@livekit/react-native`. Don't connect or disconnect the room yourself.
 - With a system call, `joinCall` follows it before anything else, so it sees the user mute, hold or hang up while the call joins. `reportConnecting` and `reportConnected` show the call's progress in the system UI. They reject if the user hung up meanwhile, and the sample then leaves.
+- If the join or the first connection fails, `joinCall` gives this device's place back and hangs up the system call, then throws the error that stopped it. If that cleanup fails too, it logs the cleanup's error instead of throwing it.
 
 ## Mute and hold
 
@@ -59,6 +60,7 @@ A call's push rings on the device, even while JavaScript isn't running: through 
 ```
 
 - Start `answerCalls` once the user's client is connected. `subscribeAnsweredCalls` first replays the answered calls that are still current, so a call that the user answered before JavaScript started isn't lost. It calls back once for each call, and never for a call that the user starts.
+- When the user signs out, call the function that `answerCalls` returned. A call that is still joining then is left as soon as it joins, and never reaches `onJoined`.
 - iOS gets no push when a ring stops, because iOS would make the app report it as a new call. While a call rings, `watchRingingCalls` lists the user's live alerts, and stops the ring once another of the user's devices answered it, the caller hung up or it expired. On Android, it also stops a ring whose cancellation push arrives late.
 - `endCall` on a ringing call declines it on this device only. ConvoHop has no decline operation, so nobody else is told and the call goes on.
 
@@ -76,7 +78,7 @@ On Android 14 and later, incoming calls ring full screen only while the app may 
 ```ts include=examples/src/calling.ts#end-call
 ```
 
-Leaving hangs up the system call and ends this device's participation, and the call goes on for everyone else. If `leave()` fails, call `leaveCall` again: it reuses the original request.
+Leaving hangs up the system call, ends this device's participation and, on Android, stops LiveKit's audio session. The call goes on for everyone else. `leaveCall` takes every step even when one fails, so the media disconnects even if the system call won't hang up. It then throws the first failure and logs the others: call `leaveCall` again, and `leave()` reuses the original request.
 
 Ending stops the call for everyone, and only the call's creator or a moderator can end it. `completed()` returns once ConvoHop has cut off everyone's media. If it times out, it throws `ConvoHopProblem` with the code `RESOLUTION_REQUIRED`, and the end may still complete: call `end()` on the same live session again, which reuses the original request, and wait again. `REVISION_CONFLICT` means the call changed since `end()` read it: call `end` with a new `requestId`, which reads the call again. `LIVE_SESSION_CLOSED` means the call has already ended.
 
@@ -94,7 +96,13 @@ When the user signs out, in this order:
 
 ## How the samples are tested
 
-The calling samples need CallKit or Android's Telecom, LiveKit's native WebRTC and a ConvoHop project with calls, so CI only typechecks them, with `setupMedia`. No test starts, answers or connects a call.
+CI typechecks every calling sample. A real call needs CallKit or Android's Telecom, LiveKit's native WebRTC and a ConvoHop project with calls, so the tests run only `joinCall`, `answerCalls` and `leaveCall`, on Node.js with stand-ins for the package's native modules, the client and LiveKit's audio session. The tests check:
+
+- that `leaveCall` leaves the call and stops its audio when the system call won't hang up, throws that failure, and hangs up when called again;
+- that `joinCall` gives this device's place back and hangs up when the join or the first connection fails, and throws the error that stopped it even when hanging up fails too;
+- that `answerCalls` hands each call that the user answers to the app, and leaves a call that finishes joining after the user signed out.
+
+No test rings, connects media or shows the system call UI, because those need a device.
 
 ## Next steps
 

@@ -23,7 +23,8 @@ Every React Native sample in these docs is a region of a file in [the examples p
 
 - The client samples run against the conformance mock, a local stand-in for the ConvoHop API, including dropped connections, with stand-ins for React Native, AsyncStorage and NetInfo. Session renewal runs against a local stand-in for your backend.
 - The push samples run against stand-ins for the package's native modules, which answer the way its iOS and Android code does, with your backend's endpoints on a local HTTP server. Reading a message push's text runs against the conformance mock.
-- The calling and React samples need CallKit or Android's Telecom, LiveKit's native WebRTC or React Native's renderer, so CI only typechecks them.
+- Joining, answering and leaving a call run against stand-ins for the package's native modules, the client and LiveKit's audio session, including when a step fails or the user signs out while a call joins. A real call needs CallKit or Android's Telecom and LiveKit's native WebRTC, so CI only typechecks the other calling samples.
+- The React samples need React Native's renderer, so CI only typechecks them.
 
 The tests run on Node.js, not Hermes. They don't cover push delivery through APNs or FCM, the system call UI or call media on a device.
 

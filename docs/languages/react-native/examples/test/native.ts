@@ -16,6 +16,8 @@ interface NativeStandIns {
   linkPlatform(overrides?: Methods): FakeModule;
   linkPush(overrides?: Methods): FakeModule;
   linkCalls(overrides?: Methods): FakeModule;
+  // A call as ConvoHopCalls reports it: a ringing incoming call, unless fields says otherwise.
+  snapshot(fields?: Record<string, unknown>): { readonly id: string; readonly liveSessionId: string };
   // Lets pending promise callbacks and native events run.
   turn(): Promise<void>;
 }

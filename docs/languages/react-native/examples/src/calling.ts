@@ -1,5 +1,6 @@
-// Calling quickstart snippets. They need CallKit or Android's Telecom, LiveKit's native WebRTC and a ConvoHop project
-// with calls, so the tests only typecheck them.
+// Calling quickstart snippets. A real call needs CallKit or Android's Telecom, LiveKit's native WebRTC and a ConvoHop
+// project with calls, so test/calling.test.ts runs only joinCall, answerCalls and leaveCall, with stand-ins for the
+// native modules, the client and LiveKit's audio session. The tests typecheck the rest.
 
 // #region imports
 import { AudioSession } from "@livekit/react-native";
@@ -93,7 +94,8 @@ export async function joinCall(
   } catch (error) {
     if (system) {
       system.stopFollowing();
-      await endCall(system.id).catch(() => {}); // Hangs up the system call.
+      // Hangs up the system call. If that fails too, the app still gets the error that stopped the join.
+      await endCall(system.id).catch((hangUpError: unknown) => console.warn("Couldn't hang up the call", hangUpError));
     }
     throw error;
   }
@@ -121,7 +123,8 @@ export async function joinCall(
     if (system) await reportConnected(system.id);
     return call;
   } catch (error) {
-    await leaveCall(call).catch(() => {}); // Gives this device's place back.
+    // Gives this device's place back and hangs up. If that fails too, the app still gets the error that stopped it.
+    await leaveCall(call).catch((leaveError: unknown) => console.warn("Couldn't leave the call", leaveError));
     throw error;
   }
 }
@@ -197,15 +200,23 @@ export async function setMuted(call: JoinedCall, muted: boolean): Promise<void> 
 // Joins each call the user answers, and stops rings that ended elsewhere. Start it after sign-in, and call the
 // function it returns when the user signs out.
 export function answerCalls(client: ConvoHopClient, onJoined: (call: JoinedCall) => void): () => void {
+  let answering = true;
   // Replays the calls answered before it started, such as one answered on the lock screen as the app launched.
   const stopAnswering = subscribeAnsweredCalls(answered => {
-    joinCall(client, answered.liveSessionId, answered).then(onJoined, (error: unknown) => {
-      console.warn("Couldn't join the call", error); // joinCall hung up the system call.
-    });
+    if (!answering) return;
+    joinCall(client, answered.liveSessionId, answered).then(
+      call => {
+        // If the user signed out while the call joined, the app doesn't get it.
+        if (!answering) leaveCall(call).catch((error: unknown) => console.warn("Couldn't leave the call", error));
+        else onJoined(call);
+      },
+      (error: unknown) => console.warn("Couldn't join the call", error), // joinCall has already cleaned up.
+    );
   });
   // iOS gets no push when a ring stops, so this checks the user's rings while a call rings.
   const stopWatching = watchRingingCalls(client, { onError: error => console.warn("Couldn't check a ring", error) });
   return () => {
+    answering = false;
     stopAnswering();
     stopWatching();
   };
@@ -242,16 +253,20 @@ export function allowFullScreenCalls(): Promise<void> {
 // #endregion full-screen
 
 // #region end-call
-// Leaves the call on this device and hangs up its system call. Everyone else stays in the call.
+// Leaves the call on this device and hangs up its system call. Everyone else stays in the call. Each step runs even if
+// an earlier one fails. Then it throws the first failure and logs the others: call leaveCall again.
 export async function leaveCall(call: JoinedCall): Promise<void> {
   call.left = true;
   call.system?.stopFollowing();
-  try {
-    if (call.system) await endCall(call.system.id);
-    await call.participation.leave(); // Disconnects the media first. If it fails, call leaveCall again.
-  } finally {
-    if (Platform.OS === "android") await AudioSession.stopAudioSession();
-  }
+  const failures: unknown[] = [];
+  const failed = (error: unknown) => {
+    failures.push(error);
+  };
+  if (call.system) await endCall(call.system.id).catch(failed);
+  await call.participation.leave().catch(failed); // Disconnects the media first. A retry reuses its request.
+  if (Platform.OS === "android") await AudioSession.stopAudioSession().catch(failed);
+  for (const failure of failures.slice(1)) console.warn("Couldn't leave the call", failure);
+  if (failures.length > 0) throw failures[0];
 }
 
 // Ends the call for everyone. Only the call's creator or a moderator can.
