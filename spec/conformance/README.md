@@ -393,9 +393,10 @@ references and runs the harness's own `node:test` suites in
 schemas, catalog, scenarios and webhook vectors; the
 [push payload vectors](../push-payload/README.md#vectors), against rules
 written independently of the builders; the runner's modules; the mock;
-the driver client, against a scriptable fake driver; and end-to-end runner
-invocations, including the reference driver against the mock and a
-dev-stack descriptor pointed at a local mock.
+the driver client, against a scriptable fake driver; the
+[dev-stack start script](targets.md#dev-stack-target), against a scriptable
+fake Docker CLI; and end-to-end runner invocations, including the reference
+driver against the mock and a dev-stack descriptor pointed at a local mock.
 
 [SDK CI](../../.github/workflows/sdk-ci.yml) runs those tests on Node.js 22
 and 24 as part of `npm test`. The `mock` job of the
@@ -439,11 +440,16 @@ the suite against a real target.
    area, or create `scenarios/<suite>.json` for a new area.
 2. Use only catalog operations, `${nonce}` for anything that must be unique
    on a shared target, and `${uuid.<label>}` for request ids.
-3. Pin observable public behaviour only. Do not pin internal event type
+3. Invoke `route.initialize` on each backend and user client right after
+   creating it. A real server rejects their other commands with 409
+   `WRONG_REGION` until the client has the current serving epoch, which the
+   mock does not check. Authentication comes first, so only a command that
+   must fail with `UNAUTHENTICATED` may precede it.
+4. Pin observable public behaviour only. Do not pin internal event type
    names, timings or a particular SDK's retry strategy. Expect only error
    codes that the IR lists for the operation (see
    [Alignment with the IR](#alignment-with-the-ir)).
-4. Run `npm run test:conformance` for the static and IR checks, then
+5. Run `npm run test:conformance` for the static and IR checks, then
    `npm run conformance -- --filter <id>` against the mock, and against a
    real target when you have one.
 

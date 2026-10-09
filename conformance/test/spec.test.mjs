@@ -42,6 +42,24 @@ describe("scenario suites", () => {
     const used = scenarios.flatMap(scenario => scenario.steps).filter(step => step.do === "webhooks.verify").map(step => step.vector);
     assert.deepEqual(sorted(used), sorted(spec.vectors.keys()));
   });
+
+  // A real server rejects a backend or user command without the current serving epoch (409 WRONG_REGION),
+  // which a client learns from route.initialize; the mock does not check it. Authentication comes first, so
+  // a command whose credential the server rejects needs no route.
+  test("route each backend and user client before its other commands", () => {
+    const unrouted = [];
+    for (const scenario of scenarios) {
+      const routed = new Map();
+      for (const [index, step] of scenario.steps.entries()) {
+        if (step.do === "client.create") routed.set(step.client, !["backend", "user"].includes(step.role));
+        else if (step.do === "invoke" && step.operation === "route.initialize") routed.set(step.client, step.expect?.error === undefined);
+        else if ((step.do === "invoke" || step.do === "realtime.subscribe") && routed.get(step.client) === false
+          && step.expect?.error?.code !== "UNAUTHENTICATED")
+          unrouted.push(`${scenario.id} step ${index + 1}: ${step.operation ?? step.do} on ${step.client}`);
+      }
+    }
+    assert.deepEqual(unrouted, [], "invoke route.initialize after creating each backend and user client");
+  });
 });
 
 describe("enumerations agree across the spec, the mock and the reference driver", () => {

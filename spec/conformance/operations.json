@@ -117,7 +117,7 @@
       "required": ["message"],
       "optional": ["requestId"],
       "arguments": { "message": "A Message value previously returned by messages.list or messages.edit." },
-      "returns": "Message (deleted: true, text: \"\")"
+      "returns": "Message tombstone (deleted: true, text: null, props: null)"
     },
     "events.list": {
       "roles": ["user"],
@@ -151,7 +151,7 @@
       "required": ["projectId", "name", "scopes", "expiresAt"],
       "optional": [],
       "arguments": { "scopes": "Array of scope names.", "expiresAt": "RFC 3339 timestamp." },
-      "returns": "IssueBackendKeyReply receipt envelope { status: accepted, requestId, operation, resourceRef, ... }"
+      "returns": "IssueBackendKeyReply receipt envelope { status: accepted, requestId, operation, resourceRef, ... }; resourceRef names the project, because the key is minted when the operation runs"
     }
   }
 }
