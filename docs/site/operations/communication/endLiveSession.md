@@ -96,3 +96,4 @@ mutation CommunicationEndLiveSession($context: RequestContextInput!, $input: End
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.endLiveSession`](../../jvm/reference/server.md#communicationapiendlivesession-method), [`CommunicationSuspendApi.endLiveSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapiendlivesession-method) |
 | [Go](../../go/reference/operations.md) | [`ProjectClient.EndLiveSession`](../../go/reference/convohop.md#projectclientendlivesession-method) |
 | [Android](../../android/reference/operations.md) | [`LiveSessionHandle.end`](../../android/reference/android-core.md#livesessionhandleend-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`LiveSessionHandle.end`](../../flutter/reference/convohop.md#livesessionhandleend-method), [`CommunicationOperations.endLiveSession`](../../flutter/reference/convohop.md#communicationoperationsendlivesession-method) |

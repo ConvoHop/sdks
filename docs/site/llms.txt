@@ -79,6 +79,19 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [com.convohop:convohop-android-push](android/reference/android-push.md): FCM registration, notifications and Telecom incoming calls, with no networking, LiveKit or coroutines, so a React Native or Flutter wrapper can ship it alone.
 - [Android operation coverage](android/reference/operations.md): The Android SDK members that send each API operation. 32 of the 35 operations that Android packages can send have a method.
 
+## Flutter
+
+- [Flutter SDK](flutter/index.md): convohop is the ConvoHop client SDK for Flutter apps on Android and iOS. It runs one signed-in user's session in your app: conversations and their realtime events, a local conversation store, an offline outbox with optimistic sends, read receipts, typing, recent activity, calls through the official livekit_client package, push registration and the system incoming-call UI.
+- [Flutter client quickstart](flutter/quickstarts/client.md): Use ConvoHop in your users' Flutter apps with package:convohop: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and app restarts.
+- [Flutter push notifications quickstart](flutter/quickstarts/push.md): Show ConvoHop push notifications in your users' Flutter apps with package:convohop/push.dart: register the device for FCM or APNs, open conversations from notifications, and ring for calls with the system call UI.
+- [Flutter calling quickstart](flutter/quickstarts/calling.md): Add voice and video calls to a conversation with package:convohop: start a call and ring other members, join the current call, and leave or end it.
+- [Flutter reference](flutter/reference/index.md): The public API of each Flutter package, generated from its declarations.
+- [package:convohop/convohop.dart](flutter/reference/convohop.md): Client SDK for Flutter apps on end-user devices: one signed-in user's conversations, realtime events, conversation store, offline outbox, read receipts, typing, recent activity and call control.
+- [package:convohop/calls.dart](flutter/reference/calls.md): Call media through the official livekit_client package.
+- [package:convohop/push.dart](flutter/reference/push.md): Push registration, notification payloads and the system incoming-call UI, through the package's own platform code.
+- [package:convohop/io.dart](flutter/reference/io.md): File-backed recovery storage for the conversation store and the outbox.
+- [Flutter operation coverage](flutter/reference/operations.md): The Flutter SDK members that send each API operation. 35 of the 35 operations that Flutter packages can send have a method.
+
 ## API operations
 
 - [API operations](operations/index.md): Every operation in the ConvoHop GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it.
@@ -171,3 +184,4 @@ Pages are Markdown. Each language has an overview, quickstarts with tested code,
 - [Java and Kotlin in one file](jvm/llms-full.txt): every Java and Kotlin page.
 - [Go in one file](go/llms-full.txt): every Go page.
 - [Android in one file](android/llms-full.txt): every Android page.
+- [Flutter in one file](flutter/llms-full.txt): every Flutter page.

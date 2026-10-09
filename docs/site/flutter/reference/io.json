@@ -1,0 +1,59 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "flutter",
+  "package": "package:convohop/io.dart",
+  "layer": "client",
+  "page": "io.md",
+  "symbols": [
+    {
+      "name": "FileRecoveryStorage",
+      "kind": "class",
+      "ref": "package:convohop/io.dart#FileRecoveryStorage",
+      "anchor": "filerecoverystorage-class",
+      "signatures": ["final class FileRecoveryStorage implements RecoveryStorage"],
+      "docs": "`RecoveryStorage` with one file per key in `directory`, for example the\napp's support directory.\n\nWrites go to a temporary file that then replaces the item, so a crash\nleaves the old or the new value. Use one instance per directory: it\norders its own writes to a key, but not those of other instances. The\nfiles hold message text from the outbox and the conversation store, so\nkeep them in app-private storage.",
+      "members": [
+        {
+          "name": "FileRecoveryStorage",
+          "kind": "constructor",
+          "ref": "package:convohop/io.dart#FileRecoveryStorage.FileRecoveryStorage",
+          "anchor": "filerecoverystorage-constructor",
+          "signatures": ["FileRecoveryStorage(Directory directory)"],
+          "docs": ""
+        },
+        {
+          "name": "directory",
+          "kind": "property",
+          "ref": "package:convohop/io.dart#FileRecoveryStorage.directory",
+          "anchor": "filerecoverystoragedirectory-property",
+          "signatures": ["final Directory directory"],
+          "docs": ""
+        },
+        {
+          "name": "getItem",
+          "kind": "method",
+          "ref": "package:convohop/io.dart#FileRecoveryStorage.getItem",
+          "anchor": "filerecoverystoragegetitem-method",
+          "signatures": ["Future<String?> getItem(String key)"],
+          "docs": ""
+        },
+        {
+          "name": "setItem",
+          "kind": "method",
+          "ref": "package:convohop/io.dart#FileRecoveryStorage.setItem",
+          "anchor": "filerecoverystoragesetitem-method",
+          "signatures": ["Future<void> setItem(String key, String value)"],
+          "docs": ""
+        },
+        {
+          "name": "removeItem",
+          "kind": "method",
+          "ref": "package:convohop/io.dart#FileRecoveryStorage.removeItem",
+          "anchor": "filerecoverystorageremoveitem-method",
+          "signatures": ["Future<void> removeItem(String key)"],
+          "docs": ""
+        }
+      ]
+    }
+  ]
+}

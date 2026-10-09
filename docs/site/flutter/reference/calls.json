@@ -1,0 +1,77 @@
+{
+  "$schema": "../../../../spec/docs/reference.schema.json",
+  "language": "flutter",
+  "package": "package:convohop/calls.dart",
+  "layer": "client",
+  "page": "calls.md",
+  "symbols": [
+    {
+      "name": "LiveKitMediaRoom",
+      "kind": "class",
+      "ref": "package:convohop/calls.dart#LiveKitMediaRoom",
+      "anchor": "livekitmediaroom-class",
+      "signatures": ["final class LiveKitMediaRoom implements LiveMediaRoom"],
+      "docs": "A `LiveMediaRoom` built on the official `livekit_client` `livekit.Room`.\n\nLiveKit resumes the connection itself, with SFU-pushed refresh tokens. A\nfull reconnect would reuse the single-use connect token, which the media\nserver refuses, so the room disconnects instead and\n`LiveMediaConnection.reconnect` continues with new credentials.",
+      "members": [
+        {
+          "name": "room",
+          "kind": "property",
+          "ref": "package:convohop/calls.dart#LiveKitMediaRoom.room",
+          "anchor": "livekitmediaroomroom-property",
+          "signatures": ["final livekit.Room room"],
+          "docs": "The LiveKit room, for rendering participants and tracks."
+        },
+        {
+          "name": "connect",
+          "kind": "method",
+          "ref": "package:convohop/calls.dart#LiveKitMediaRoom.connect",
+          "anchor": "livekitmediaroomconnect-method",
+          "signatures": ["Future<void> connect(String url, String token)"],
+          "docs": "Connects to `url` with the single-use `token`. Throws when the room\ndoesn't connect."
+        },
+        {
+          "name": "localParticipantSid",
+          "kind": "property",
+          "ref": "package:convohop/calls.dart#LiveKitMediaRoom.localParticipantSid",
+          "anchor": "livekitmediaroomlocalparticipantsid-property",
+          "signatures": ["String? get localParticipantSid"],
+          "docs": "The connected local participant's SID. ConvoHop's media server makes it\nthe participation's `nativeConnectionId`."
+        },
+        {
+          "name": "setMicrophoneEnabled",
+          "kind": "method",
+          "ref": "package:convohop/calls.dart#LiveKitMediaRoom.setMicrophoneEnabled",
+          "anchor": "livekitmediaroomsetmicrophoneenabled-method",
+          "signatures": ["Future<void> setMicrophoneEnabled(bool enabled)"],
+          "docs": ""
+        },
+        {
+          "name": "setCameraEnabled",
+          "kind": "method",
+          "ref": "package:convohop/calls.dart#LiveKitMediaRoom.setCameraEnabled",
+          "anchor": "livekitmediaroomsetcameraenabled-method",
+          "signatures": ["Future<void> setCameraEnabled(bool enabled)"],
+          "docs": ""
+        },
+        {
+          "name": "disconnect",
+          "kind": "method",
+          "ref": "package:convohop/calls.dart#LiveKitMediaRoom.disconnect",
+          "anchor": "livekitmediaroomdisconnect-method",
+          "signatures": ["Future<void> disconnect()"],
+          "docs": "Leaves the room and releases its tracks. Calling it again does nothing."
+        }
+      ]
+    },
+    {
+      "name": "liveKitRooms",
+      "kind": "function",
+      "ref": "package:convohop/calls.dart#liveKitRooms",
+      "anchor": "livekitrooms-function",
+      "signatures": [
+        "LiveMediaRoomFactory<LiveKitMediaRoom> liveKitRooms({\n  livekit.RoomOptions roomOptions = const livekit.RoomOptions(),\n  bool relayOnly = false,\n})"
+      ],
+      "docs": "Creates LiveKit rooms for `LiveParticipationHandle.connect`.\n\nSet `relayOnly` to send media only through TURN relays."
+    }
+  ]
+}

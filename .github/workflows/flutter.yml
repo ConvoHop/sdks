@@ -1,7 +1,8 @@
 # Tests the Flutter SDK (flutter/) on the oldest supported and the current
 # stable Flutter release, checks that its generated code is current, runs the
-# conformance scenarios through the Dart driver and builds the example app
-# for Android and the iOS simulator. See flutter/README.md and
+# conformance scenarios through the Dart driver, checks the Flutter docs' API
+# surface and tested examples (see docs/docs-pipeline.md) and builds the
+# example app for Android and the iOS simulator. See flutter/README.md and
 # docs/sdk-strategy.md.
 name: Flutter
 
@@ -11,8 +12,10 @@ on:
     paths:
       - "flutter/**"
       - "conformance/**"
+      - "docs/languages/flutter/**"
       - "schema/**"
       - "spec/**"
+      - "tools/docgen/**"
       - "tools/sdkgen/**"
       - ".github/workflows/flutter.yml"
   pull_request:
@@ -20,8 +23,10 @@ on:
     paths:
       - "flutter/**"
       - "conformance/**"
+      - "docs/languages/flutter/**"
       - "schema/**"
       - "spec/**"
+      - "tools/docgen/**"
       - "tools/sdkgen/**"
       - ".github/workflows/flutter.yml"
 
@@ -91,6 +96,49 @@ jobs:
         run: npm run test:sdkgen
       - name: Check that flutter/lib/src/generated matches the IR
         run: npm run check:graphql
+
+  # Checks the Flutter docs as docs/docs-pipeline.md describes: the extractor's
+  # tests, that docs/languages/flutter/surface.json matches the package's
+  # source, and the examples the quickstarts include, which run against the
+  # conformance mock and mocked platform channels. The Docs workflow checks the
+  # generated pages. Only the current stable release runs it. The extractor's
+  # locked analyzer needs Dart 3.11 or later, which Flutter 3.38 doesn't have,
+  # and the extractor parses the package without resolving it, so the surface
+  # doesn't depend on the Flutter release. The examples' formatting follows
+  # the release's formatter, and the package job tests the SDK on 3.38.
+  docs:
+    name: Docs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      # The examples' tests start the conformance mock, which imports graphql.
+      - run: npm ci --no-audit --no-fund
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+      - run: flutter --version
+      - name: Test the Dart extractor's command
+        run: node --test tools/docgen/test/dart.test.mjs
+      - name: Check, analyze and test the Dart extractor
+        working-directory: tools/docgen/extractors/dart
+        run: |
+          dart pub get --enforce-lockfile
+          dart format --output=none --set-exit-if-changed .
+          dart analyze --fatal-infos
+          dart test
+      - name: Check that the Flutter surface matches the package
+        run: node tools/docgen/cli.mjs extract --check flutter
+      - name: Analyze and test the Flutter examples
+        run: node tools/docgen/cli.mjs test --install flutter
 
   conformance:
     name: Dart driver (mock target)

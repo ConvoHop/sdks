@@ -106,7 +106,7 @@ flutter test
 ```
 
 See the [Flutter SDK README](flutter/README.md#develop) for the conformance
-driver and the example app.
+driver, the example app and the docs projects.
 
 The [Swift client SDK](swift/README.md) is a Swift package in `swift/`. Build
 and test it on macOS with Xcode 16.4 or later:
@@ -289,7 +289,11 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   `packages/*/test/`. The generator's tests live in `tools/sdkgen/test/` and
   compare the emitters' output with golden files.
 - The Flutter SDK's tests use `package:flutter_test` and live in
-  `flutter/test/`. Run them with `flutter test`.
+  `flutter/test/`. Run them with `flutter test`. So do the tests of the
+  Flutter docs examples, in `docs/languages/flutter/examples/test/`, which
+  start the conformance mock. The Dart docs extractor's tests use
+  `package:test`. They live in `tools/docgen/extractors/dart/test/`
+  and run with `dart test` in `tools/docgen/extractors/dart/`.
 - Add or update a regression test in the existing package suite for every
   bug fix and behavior change. Don't add standalone assertion scripts or a
   second test client.

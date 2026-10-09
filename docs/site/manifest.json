@@ -319,6 +319,63 @@
         {"topic": "push", "path": "android/quickstarts/push.md"},
         {"topic": "calling", "path": "android/quickstarts/calling.md"}
       ]
+    },
+    {
+      "id": "flutter",
+      "name": "Flutter",
+      "status": "preview",
+      "codeFence": "dart",
+      "home": "flutter/index.md",
+      "reference": "flutter/reference/index.md",
+      "coverage": "flutter/reference/operations.md",
+      "llmsFull": "flutter/llms-full.txt",
+      "packages": [
+        {
+          "name": "package:convohop/convohop.dart",
+          "slug": "convohop",
+          "layer": "client",
+          "summary": "Client SDK for Flutter apps on end-user devices: one signed-in user's conversations, realtime events, conversation store, offline outbox, read receipts, typing, recent activity and call control.",
+          "runtime": "Flutter 3.38 or later (Dart 3.10 or later) on Android 7.0 (API level 24) or later and iOS 13 or later.",
+          "source": "flutter",
+          "reference": "flutter/reference/convohop.md",
+          "data": "flutter/reference/convohop.json"
+        },
+        {
+          "name": "package:convohop/calls.dart",
+          "slug": "calls",
+          "layer": "client",
+          "summary": "Call media through the official livekit_client package.",
+          "runtime": "Flutter 3.38 or later on Android 7.0 (API level 24) or later and iOS 13 or later, with livekit_client 2.13.1 or later.",
+          "source": "flutter",
+          "reference": "flutter/reference/calls.md",
+          "data": "flutter/reference/calls.json"
+        },
+        {
+          "name": "package:convohop/push.dart",
+          "slug": "push",
+          "layer": "client",
+          "summary": "Push registration, notification payloads and the system incoming-call UI, through the package's own platform code.",
+          "runtime": "Flutter 3.38 or later on Android 7.0 (API level 24) or later with Firebase Cloud Messaging, and iOS 13 or later with APNs.",
+          "source": "flutter",
+          "reference": "flutter/reference/push.md",
+          "data": "flutter/reference/push.json"
+        },
+        {
+          "name": "package:convohop/io.dart",
+          "slug": "io",
+          "layer": "client",
+          "summary": "File-backed recovery storage for the conversation store and the outbox.",
+          "runtime": "Flutter 3.38 or later (Dart 3.10 or later) on Android 7.0 (API level 24) or later and iOS 13 or later.",
+          "source": "flutter",
+          "reference": "flutter/reference/io.md",
+          "data": "flutter/reference/io.json"
+        }
+      ],
+      "quickstarts": [
+        {"topic": "client", "path": "flutter/quickstarts/client.md"},
+        {"topic": "push", "path": "flutter/quickstarts/push.md"},
+        {"topic": "calling", "path": "flutter/quickstarts/calling.md"}
+      ]
     }
   ],
   "operations": {"index": "operations/index.md", "data": "operations/index.json"},
@@ -767,6 +824,83 @@
       "title": "Android operation coverage",
       "description": "The Android SDK members that send each API operation. 32 of the 35 operations that Android packages can send have a method.",
       "language": "android"
+    },
+    {
+      "path": "flutter/index.md",
+      "kind": "language",
+      "title": "Flutter SDK",
+      "description": "convohop is the ConvoHop client SDK for Flutter apps on Android and iOS. It runs one signed-in user's session in your app: conversations and their realtime events, a local conversation store, an offline outbox with optimistic sends, read receipts, typing, recent activity, calls through the official livekit_client package, push registration and the system incoming-call UI.",
+      "language": "flutter"
+    },
+    {
+      "path": "flutter/quickstarts/client.md",
+      "kind": "quickstart",
+      "title": "Flutter client quickstart",
+      "description": "Use ConvoHop in your users' Flutter apps with package:convohop: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and app restarts.",
+      "language": "flutter",
+      "topic": "client"
+    },
+    {
+      "path": "flutter/quickstarts/push.md",
+      "kind": "quickstart",
+      "title": "Flutter push notifications quickstart",
+      "description": "Show ConvoHop push notifications in your users' Flutter apps with package:convohop/push.dart: register the device for FCM or APNs, open conversations from notifications, and ring for calls with the system call UI.",
+      "language": "flutter",
+      "topic": "push"
+    },
+    {
+      "path": "flutter/quickstarts/calling.md",
+      "kind": "quickstart",
+      "title": "Flutter calling quickstart",
+      "description": "Add voice and video calls to a conversation with package:convohop: start a call and ring other members, join the current call, and leave or end it.",
+      "language": "flutter",
+      "topic": "calling"
+    },
+    {
+      "path": "flutter/reference/index.md",
+      "kind": "reference-index",
+      "title": "Flutter reference",
+      "description": "The public API of each Flutter package, generated from its declarations.",
+      "language": "flutter"
+    },
+    {
+      "path": "flutter/reference/convohop.md",
+      "kind": "reference",
+      "title": "package:convohop/convohop.dart",
+      "description": "Client SDK for Flutter apps on end-user devices: one signed-in user's conversations, realtime events, conversation store, offline outbox, read receipts, typing, recent activity and call control.",
+      "language": "flutter",
+      "package": "package:convohop/convohop.dart"
+    },
+    {
+      "path": "flutter/reference/calls.md",
+      "kind": "reference",
+      "title": "package:convohop/calls.dart",
+      "description": "Call media through the official livekit_client package.",
+      "language": "flutter",
+      "package": "package:convohop/calls.dart"
+    },
+    {
+      "path": "flutter/reference/push.md",
+      "kind": "reference",
+      "title": "package:convohop/push.dart",
+      "description": "Push registration, notification payloads and the system incoming-call UI, through the package's own platform code.",
+      "language": "flutter",
+      "package": "package:convohop/push.dart"
+    },
+    {
+      "path": "flutter/reference/io.md",
+      "kind": "reference",
+      "title": "package:convohop/io.dart",
+      "description": "File-backed recovery storage for the conversation store and the outbox.",
+      "language": "flutter",
+      "package": "package:convohop/io.dart"
+    },
+    {
+      "path": "flutter/reference/operations.md",
+      "kind": "coverage",
+      "title": "Flutter operation coverage",
+      "description": "The Flutter SDK members that send each API operation. 35 of the 35 operations that Flutter packages can send have a method.",
+      "language": "flutter"
     },
     {
       "path": "operations/index.md",

@@ -97,3 +97,4 @@ mutation CommunicationRevokeSession($context: RequestContextInput!, $input: Revo
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.sessions.revoke`](../../jvm/reference/server.md#projectserverclientsessionsrevoke-method), [`CommunicationApi.revokeSession`](../../jvm/reference/server.md#communicationapirevokesession-method), [`CommunicationSuspendApi.revokeSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapirevokesession-method) |
 | [Go](../../go/reference/operations.md) | [`ProjectClient.RevokeSession`](../../go/reference/convohop.md#projectclientrevokesession-method) |
 | [Android](../../android/reference/operations.md) | Not wrapped by a method |
+| [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.revokeSession`](../../flutter/reference/convohop.md#communicationoperationsrevokesession-method) |
