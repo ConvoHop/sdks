@@ -224,7 +224,8 @@ test("a quota, plan or operator refusal fails a message at once, while server, t
     const setup = authority(), { outbox: box, errors } = outbox(t, setup.client());
     setup.onSend = () => problem(code, status, "rejected", extra);
     box.send(id(), "refused");
-    await until(() => box.entries[0].status === "failed", code);
+    await box.flush();
+    assert.equal(box.entries[0].status, "failed", code);
     assert.deepEqual(errors.map(error => error.code), [code]);
     assert.equal(box.entries[0].unconfirmed, undefined);
     t.mock.timers.tick(600000);
@@ -236,9 +237,15 @@ test("a quota, plan or operator refusal fails a message at once, while server, t
     const setup = authority(), { outbox: box, errors } = outbox(t, setup.client());
     setup.onSend = () => setup.sends.length === 1 ? problem(code, status, "rejected") : undefined;
     const entry = box.send(id(), "later");
-    await until(() => box.entries[0].status === "queued" && box.entries[0].error?.code === code, code);
-    t.mock.timers.tick(1000);
-    await until(() => box.entries[0].status === "sent", "the retry after " + code);
+    await box.flush();
+    assert.equal(box.entries[0].status, "queued", code);
+    assert.equal(box.entries[0].error?.code, code);
+    t.mock.timers.tick(999);
+    assert.equal(setup.sends.length, 1, "nothing is sent before the retry after " + code);
+    t.mock.timers.tick(1);
+    assert.equal(box.entries[0].status, "sending", "the timer starts the retry after " + code);
+    await box.flush();
+    assert.equal(box.entries[0].status, "sent", "the retry after " + code);
     assert.deepEqual(sendIds(setup), [entry.requestId, entry.requestId]);
     assert.deepEqual(errors, []);
   }
