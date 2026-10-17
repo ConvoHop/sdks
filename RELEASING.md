@@ -5,10 +5,13 @@ and released, how to install and verify a release, and what has to happen
 before releases go to package registries.
 
 > [!IMPORTANT]
-> Releases are published only as GitHub Releases in this repository. The npm
-> publish step is a dry run: it checks what would be published, but nothing
-> reaches the npm registry until the work in
-> [Before registry publishing](#before-registry-publishing-rel-pub) is done.
+> No registry publication is claimed by this document. The existing npm
+> release train publishes GitHub Releases and only dry-runs npm. Separate
+> [registry workflows](#registry-release-preparation) prepare Python, .NET,
+> Flutter and Maven artifacts. PyPI/NuGet publishing needs an explicit tagged
+> dispatch, readiness configuration and environment approval; pub.dev also
+> needs a real manual first publication. Maven Central publication remains
+> paused for domain namespace verification.
 
 ## What gets released
 
@@ -24,7 +27,7 @@ last released version of each one, where `0.0.0` means not released yet.
 | `@convohop/client` | `packages/client` | `client-vX.Y.Z` | `packages/client/CHANGELOG.md` |
 | `@convohop/server` | `packages/server` | `server-vX.Y.Z` | `packages/server/CHANGELOG.md` |
 
-Nothing else is released, including the root workspace, `schema/`,
+Nothing else joins this automatic npm release train, including the root workspace, `schema/`,
 `tools/`, `scripts/`, `test/`, `docs/` and test harnesses such as the
 conformance suite. Any other directory with a `package.json`, such as a
 tool or a harness, stays `"private": true` and out of the release
@@ -332,8 +335,10 @@ To release a new npm package:
    `0.0.0`. Its first release is 0.1.0.
 3. Run `npm run check:release`.
 
-To release another language, such as Python, .NET, Java and Kotlin, Go,
-Flutter or Android:
+Python, .NET, Flutter, JVM and Android use the separate, explicitly invoked
+[registry preparation path](#registry-release-preparation). Their versions
+come from reviewed registry tags, not from changes to the npm manifest.
+To add another language to the automatic release-please train instead:
 
 1. Add its directory to the configuration with a matching release type, such
    as `python`, `go` or `dart`, or `simple` with `extra-files`, and to the
@@ -399,15 +404,261 @@ Registry publishing is tracked as REL-PUB. For npm:
    [`docs/sdk-strategy.md`](docs/sdk-strategy.md) and this document. List
    each official package in the release notes.
 
-For other registries, when each SDK lands:
+Other registries use the preparation and setup instructions below. Go's
+`go/vX.Y.Z` tag is its release; read the Go notes in
+[Adding a package or language](#adding-a-package-or-language) first.
 
-- **PyPI:** add a pending trusted publisher before the first release.
-- **NuGet:** configure trusted publishing.
-- **pub.dev:** automated publishing needs a workflow run on the release tag.
-  Tags created with `GITHUB_TOKEN` don't start workflows, so plan how that
-  run starts.
-- **Maven Central:** verify the `com.convohop` namespace, which needs the
-  `convohop.com` domain, and sign the artifacts.
-- **Go:** the `go/vX.Y.Z` tag is the release. There's no registry to
-  configure, but read the Go notes in
-  [Adding a package or language](#adding-a-package-or-language) first.
+## Registry release preparation
+
+These workflows do not join the npm release train or change
+`.release-please-manifest.json`. A registry tag is the version authority:
+`python-vX.Y.Z`, `dotnet-vX.Y.Z`, `flutter-vX.Y.Z`, `jvm-vX.Y.Z` or
+`android-vX.Y.Z`. Only nonzero stable `major.minor.patch` versions are
+supported here; prereleases fail explicitly. Never move a tag, reuse a
+published version, or hand-edit development versions to prepare a release.
+
+[`registry-prepare.yml`](.github/workflows/registry-prepare.yml) checks the
+repository identity, exact workflow/checkout commit and ancestry in
+`origin/main`. It accepts either `main` with an explicit preparation version,
+or the corresponding immutable release tag. It checks generated source,
+runs Python/.NET/Flutter's maintained unit tests as appropriate, and builds
+the real package. It has only `contents: read`, no environment, no registry
+credentials and no OIDC permission. It neither creates a tag/GitHub Release
+nor uploads to a registry.
+
+Python and Flutter are copied from committed files into an isolated
+directory. Only that copy loses `Private :: Do Not Upload` or
+`publish_to: none`, and receives the tag/preparation version. Flutter also
+receives a generated changelog linking to its exact source commit when no
+source changelog exists. .NET and Gradle receive build-time version
+properties. Ignored files, local credentials and uncommitted changes do not
+enter the staged source archive. The development upload blocks remain in
+the checkout, including after preparation.
+
+Prepare without any registry accounts or publishing approval:
+
+```sh
+gh workflow run pypi-release.yml --repo ConvoHop/sdks --ref main -f version=0.1.0
+gh workflow run nuget-release.yml --repo ConvoHop/sdks --ref main -f version=0.1.0
+gh workflow run pubdev-release.yml --repo ConvoHop/sdks --ref main -f version=0.1.0
+gh workflow run maven-prepare.yml --repo ConvoHop/sdks --ref main -f sdk=jvm -f version=0.1.0
+gh workflow run maven-prepare.yml --repo ConvoHop/sdks --ref main -f sdk=android -f version=0.1.0
+```
+
+`0.1.0` is an example to review, not a claim that the version exists.
+Tag-based preparation omits `version`, for example `--ref python-v0.1.0`.
+Before a real release, use a reviewed, passing main commit, approve the
+version and create its protected tag through the maintainer's authorized
+release procedure. A preparation on `main` is not permission to publish.
+
+Each run uploads `registry-<registry>-<sha>-<attempt>` as an Actions artifact
+for 14 days. It includes the wheel/sdist, NuGet package/symbols, Flutter
+source archive or explicitly unsigned Maven bundle, plus `RELEASE.json` and
+`SHA256SUMS`. `RELEASE.json` records the package, version, full source SHA,
+actual source ref, prospective/actual tag and exact file list. Publication
+downloads the same run's artifact and rechecks metadata, source identity,
+file set and checksums before authentication. Python package/import
+versions, NuGet Source Link and both target frameworks, Flutter upload
+metadata, and Maven coordinates/dependency pins/docs/checksums are checked
+by the maintained artifact helper.
+
+The build helpers require Node 22+ and Python 3.11+. Archive checks use
+Python's standard library, not a registry connection. The focused local
+checks are:
+
+```sh
+node --test test/release/registry.test.mjs test/release/workflows.test.mjs
+actionlint .github/workflows/registry-prepare.yml .github/workflows/pypi-release.yml \
+  .github/workflows/nuget-release.yml .github/workflows/pubdev-release.yml \
+  .github/workflows/maven-prepare.yml
+npm run check:release
+```
+
+These are packaging/source checks, not evidence of hosted registry
+authentication, production service compatibility or real native media.
+
+## Registry trust and first publication
+
+Accounts alone do not establish package ownership, name availability or
+trusted publishing. The account owner verifies email/required 2FA and name
+availability, then performs the registry setup in their own signed-in
+browser. Never share passwords, 2FA codes, tokens or signing keys in an
+issue, pull request or chat.
+
+Use these exact values from the committed workflows:
+
+| Registry | Project/package scope | Repository owner | Repository | Workflow filename | GitHub environment | Release tag |
+| --- | --- | --- | --- | --- | --- | --- |
+| PyPI | `convohop` (also the Python import) | `ConvoHop` | `sdks` | `pypi-release.yml` | `pypi` | `python-vX.Y.Z` |
+| NuGet | `ConvoHop` now; separately authorize future `ConvoHop.*` | `ConvoHop` | `sdks` | `nuget-release.yml` | `nuget` | `dotnet-vX.Y.Z` |
+| pub.dev | `convohop` | `ConvoHop` | `sdks` | `pubdev-release.yml` | `pub.dev` | `flutter-vX.Y.Z` |
+
+PyPI and NuGet ask for the **filename only**, not the workflow display name
+or `.github/workflows/` path. pub.dev instead binds the full repository
+`ConvoHop/sdks`, tag pattern **`flutter-v{{version}}`** and required
+environment `pub.dev`; it has no workflow-filename field.
+
+First create the `pypi`, `nuget` and `pub.dev` GitHub environments with
+required reviewers, prevention of self-review and deployment restrictions
+allowing only their respective release tag patterns. Do this **before**
+enabling publishing: GitHub otherwise auto-creates an unprotected
+environment when a job first references it. Preparation never references
+these environments.
+
+All readiness switches are repository **variables**, not credentials, and
+are off when absent. Keep `PYPI_PUBLISH_ENABLED`, `NUGET_PUBLISH_ENABLED`
+and `PUBDEV_PUBLISH_ENABLED` unset or `false` until the corresponding
+external setup and environment protections are complete. `NUGET_USER` is
+the only account-name variable: set it to the exact NuGet **profile name**,
+not an email address or the PyPI username. Its value must be confirmed by
+the owner; the workflow does not guess it. No stored PyPI, NuGet or pub.dev
+API key is needed.
+
+### PyPI
+
+For a new project, register a
+[pending Trusted Publisher](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/)
+under the owner's PyPI account with project name `convohop` and the exact
+table values. A pending publisher neither creates nor reserves the project
+until its first real upload. Do not upload a placeholder to reserve the
+name. If the project already exists, its owner instead adds an
+[existing-project Trusted Publisher](https://docs.pypi.org/trusted-publishers/adding-a-publisher/)
+with the same values.
+
+After verifying that setup and the protected `pypi` environment, set
+`PYPI_PUBLISH_ENABLED=true`. For an approved, existing `python-v0.1.0` tag:
+
+```sh
+gh workflow run pypi-release.yml --repo ConvoHop/sdks --ref python-v0.1.0 \
+  -F publish=true -f 'confirmation=publish pypi 0.1.0'
+```
+
+Review the artifact, source SHA and version before approving the environment.
+The non-reusable publishing job uses PyPA's OIDC action and PEP 740
+attestations. The same first upload creates the real project and converts
+its pending publisher; no manual priming upload or password is needed.
+
+### NuGet
+
+Create a [Trusted Publishing policy](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
+under the individual or organization that will own `ConvoHop`, using the
+table's repository, filename and `nuget` environment. Authorize publishing
+**new packages and new versions** of `ConvoHop`, so the first real package
+can be created. Future `ConvoHop.*` packages need their own explicit glob
+scope; `ConvoHop.*` does not cover the unqualified `ConvoHop` package.
+Neither an account nor a trust policy proves that the package ID is
+available or owned by that account.
+
+Set `NUGET_USER` to the owner's verified NuGet profile name, then
+`NUGET_PUBLISH_ENABLED=true` after setup. For an approved, existing tag:
+
+```sh
+gh workflow run nuget-release.yml --repo ConvoHop/sdks --ref dotnet-v0.1.0 \
+  -F publish=true -f 'confirmation=publish nuget 0.1.0'
+```
+
+After environment approval, `NuGet/login` exchanges OIDC for a short-lived
+key immediately before pushing `ConvoHop.<version>.nupkg` and its matching
+`.snupkg`. The key is passed through a masked step output/environment, not
+interpolated into a script or stored in repository settings.
+
+### pub.dev bootstrap, then automation
+
+Automated publishing can only be configured by an uploader/admin **after a
+real package exists**. Keep `PUBDEV_PUBLISH_ENABLED` off during bootstrap.
+Prepare the approved `flutter-v0.1.0` tag with a manual dispatch, download
+its artifact and check `SHA256SUMS` (`shasum -a 256 -c SHA256SUMS` on macOS)
+and the exact source ref/SHA/version in `RELEASE.json`. Extract
+`convohop-0.1.0.tar.gz` into a new empty directory. The account owner then
+performs the first real publication locally from that directory:
+
+```sh
+flutter pub get
+flutter pub publish --dry-run
+flutter pub publish
+```
+
+The last command is a real, interactive publication; it is not part of
+preparation and must be separately authorized. The owner completes browser
+sign-in and the publication confirmation themselves. This uploads the full
+SDK, not a placeholder. An individual uploader account is sufficient;
+creating a domain-verified pub.dev publisher is not required for this
+bootstrap.
+
+Once `convohop` exists, its uploader/admin opens
+`https://pub.dev/packages/convohop/admin`, enables
+[GitHub automated publishing](https://dart.dev/tools/pub/automated-publishing)
+for repository `ConvoHop/sdks`, tag pattern `flutter-v{{version}}`, and
+**requires** GitHub environment `pub.dev`. Confirm its GitHub environment
+protections, then set `PUBDEV_PUBLISH_ENABLED=true`.
+
+Only a subsequent protected `flutter-v<new-version>` **tag push** can
+automate publication, and it still waits for environment approval. The
+publishing job also requires evidence that the real package exists before
+obtaining its OIDC token. Manual dispatch always prepares; it never
+publishes to pub.dev, even on a tag. Use an explicitly authorized human or
+release identity for the tag push: a tag created with `GITHUB_TOKEN` does
+not trigger another workflow. For retries, rerun the original tag-push run
+so its event remains `push`; do not move the tag or substitute a dispatch.
+
+### Failures and irreversible uploads
+
+Readiness, confirmation, malformed artifacts, mismatched versions/SHAs,
+invalid refs, missing bootstrap evidence and registry errors fail visibly.
+PyPI/NuGet do not use `skip-existing`/`--skip-duplicate` to disguise an
+unverified duplicate as success. A network error is not proof that nothing
+was uploaded. Wheel/sdist and package/symbol uploads are not a transaction:
+inspect the registry and its audit evidence before recovering a partial
+upload. Rerun only failed jobs while the built artifact remains available,
+and never replace a published version or weaken the gates to recover.
+There is no password or long-lived-key fallback.
+
+## Maven Central preparation while the domain is deferred
+
+The group stays **`com.convohop`**. Its existing artifact IDs are
+`convohop-server`, `convohop-server-kotlin`, `convohop-android`,
+`convohop-android-core` and `convohop-android-push`. Do not substitute
+`io.github.*` or unprefixed coordinates to avoid namespace verification.
+Actual namespace verification/publication waits for ownership of
+`convohop.com`; having a normal Central account does not establish it.
+
+The build-local repositories use shared Central POM metadata and include
+sources and documentation JARs. Java Javadoc is supplemented with the full
+maintained SDK guide, including Kotlin-only/Android modules; no empty
+documentation placeholder is introduced. `maven-prepare.yml` checks
+coordinates and aligned internal dependencies and produces
+`convohop-maven-<sdk>-<version>-unsigned.tar.gz`, in Central's repository
+layout, with MD5, SHA-1, SHA-256 and SHA-512 checksums. MD5/SHA-1 are required
+Central transport checksums, not security assertions. An **unsigned bundle
+is not upload-ready**.
+
+Domain-independent signing support is available for a later authorized
+release: supply an **existing** armored private key and passphrase securely
+as `MAVEN_SIGNING_KEY` and `MAVEN_SIGNING_PASSWORD` to Gradle. Both must be
+present and nonempty, or both absent for unsigned preparation. Gradle signs
+every publication in memory. No workflow creates keys or consumes these
+secrets. Publish the selected module tasks to the build-local repository
+with the stable release version, then assemble a signed bundle, for example:
+
+```sh
+python3 scripts/release/registry-artifacts.py bundle-maven \
+  --sdk jvm --version 0.1.0 --repository jvm/build/repo \
+  --signed --out /path/to/convohop-jvm-0.1.0-signed.tar.gz
+```
+
+The assembler requires every `.asc`, verifies it with `gpg --batch --verify`
+using the operator's public-key keyring, validates the artifacts and adds
+checksums. It refuses missing/invalid signatures and refuses to silently
+drop existing signatures into an unsigned bundle. It **never uploads**.
+The same command supports `--sdk android` and `android/build/repo`.
+
+Before a later real Central upload, the owner must verify the namespace,
+make the signing public key discoverable as Central requires, and obtain a
+**Central Portal user token** for an authorized API uploader (not a legacy
+OSSRH password or GitHub OIDC). The current preparation workflows consume
+no Central token or publishing environment and intentionally contain no
+Central upload endpoint. See Central's
+[artifact requirements](https://central.sonatype.org/publish/requirements/)
+and [bundle layout](https://central.sonatype.org/publish/publish-portal-upload/).
+The source implementation does not assert that signatures, namespace
+ownership, Portal authentication or Central publication have been verified.

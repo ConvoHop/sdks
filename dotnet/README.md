@@ -8,6 +8,11 @@ WebAssembly, Unity or other client app. It isn't on NuGet yet:
 [.NET docs](../docs/site/dotnet/index.md) have quickstarts with tested code
 and the API reference. License: [Apache-2.0](../LICENSE).
 
+[Registry preparation and the gated first publication](../RELEASING.md#registry-release-preparation)
+build the real package and symbols without enabling incidental publishing.
+NuGet account ownership and its Trusted Publishing policy remain separate
+release prerequisites.
+
 ## Requirements
 
 - The package has `netstandard2.0` and `net10.0` assets. CI runs the tests on

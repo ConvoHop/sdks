@@ -11,6 +11,11 @@ issues. Never put a backend key or an operator credential in an app. The
 package isn't on pub.dev yet: [install it from Git](#install).
 License: [Apache-2.0](LICENSE).
 
+[Release preparation](../RELEASING.md#registry-release-preparation) preserves
+`publish_to: none` in this checkout. The first real pub.dev publication is
+an explicitly authorized, interactive bootstrap; only an existing package
+can configure the later approval-gated tag-push automation.
+
 ## Requirements
 
 - Flutter 3.38 or later, with Dart 3.10 or later. CI tests Flutter 3.38 and

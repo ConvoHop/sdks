@@ -16,6 +16,7 @@ on:
     paths:
       - .github/workflows/android.yml
       - android/**
+      - scripts/release/maven-publishing.gradle.kts
       - conformance/**
       - docs/languages/android/**
       - schema/**
@@ -27,6 +28,7 @@ on:
     paths:
       - .github/workflows/android.yml
       - android/**
+      - scripts/release/maven-publishing.gradle.kts
       - conformance/**
       - docs/languages/android/**
       - schema/**
@@ -95,7 +97,7 @@ jobs:
                   if not found:
                       sys.exit(f"{artifact}: no {suffix} file in {names}")
                   return versions[0] / found[-1]
-              for suffix in (".pom", ".module", "-sources.jar"):
+              for suffix in (".pom", ".module", "-sources.jar", "-javadoc.jar"):
                   find(suffix)
               main = find(f".{packaging}")
               if packaging == "aar":

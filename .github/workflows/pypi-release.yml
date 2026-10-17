@@ -1,0 +1,73 @@
+name: PyPI release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Preparation version on main; leave empty on a python-v<version> tag.
+        default: ""
+        type: string
+      publish:
+        description: Publish the tagged release after registry setup and environment approval.
+        default: false
+        type: boolean
+      confirmation:
+        description: "For publication only: publish pypi <version>"
+        default: ""
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: registry-pypi
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/registry-prepare.yml # zizmor: ignore[self-repository] Same-commit syntax; actionlint does not yet parse $/.
+    with:
+      registry: pypi
+      version: ${{ inputs.version }}
+      publish: ${{ inputs.publish }}
+      confirmation: ${{ inputs.confirmation }}
+
+  publish:
+    name: Publish convohop to PyPI
+    needs: prepare
+    if: needs.prepare.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.prepare.outputs.artifact }}
+          path: ${{ runner.temp }}/registry-assets
+      - name: Verify the approved source and checksums before obtaining credentials
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SOURCE_SHA: ${{ needs.prepare.outputs.sha }}
+        run: |
+          node scripts/release/registry.mjs verify --registry pypi --version "$VERSION" \
+            --sha "$SOURCE_SHA" --source-ref "$GITHUB_REF" --directory "$RUNNER_TEMP/registry-assets"
+          mkdir "$RUNNER_TEMP/pypi"
+          cp "$RUNNER_TEMP/registry-assets/"*.whl "$RUNNER_TEMP/registry-assets/"*.tar.gz "$RUNNER_TEMP/pypi/"
+      - name: Publish using the pending or existing PyPI Trusted Publisher
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          packages-dir: ${{ runner.temp }}/pypi/
+          attestations: true
+          skip-existing: false

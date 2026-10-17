@@ -234,6 +234,98 @@ test('the release build runs every npm check that CI runs', () => {
   }
 });
 
+test('registry publishers are separate, explicitly gated jobs with no incidental branch publication', () => {
+  for (const [file, environment] of [
+    ['pypi-release.yml', 'pypi'], ['nuget-release.yml', 'nuget'], ['pubdev-release.yml', 'pub.dev'],
+  ]) {
+    const workflow = workflows.find(({ name }) => name.endsWith(`/${file}`));
+    assert.ok(workflow, `${file} is missing`);
+    const { top, jobs } = sections(workflow.lines);
+    assert.deepEqual(permissionsAt(top, 0), {}, `${file} must default to no permissions`);
+    assert.deepEqual([...jobs.keys()], ['prepare', 'publish']);
+    const preparation = jobs.get('prepare').join('\n');
+    assert.match(preparation, /uses: \.\/\.github\/workflows\/registry-prepare\.yml/);
+    assert.deepEqual(permissionsAt(jobs.get('prepare'), 4), { contents: 'read' });
+    const publication = jobs.get('publish').join('\n');
+    assert.match(publication, /if: .*needs\.prepare\.outputs\.publish == 'true'/);
+    assert.match(publication, new RegExp(`^ {4}environment: ${environment.replace('.', '\\.')}\\s*$`, 'm'));
+    assert.deepEqual(permissionsAt(jobs.get('publish'), 4), { contents: 'read', 'id-token': 'write' });
+    assert.match(publication, /ref: \$\{\{ needs\.prepare\.outputs\.sha \}\}/);
+    assert.match(publication, /persist-credentials: false/);
+    assert.match(publication, /registry\.mjs verify/);
+    assert.doesNotMatch(publication, /\bsecrets\./, `${file} must use short-lived registry credentials, not a stored key`);
+    if (file !== 'pubdev-release.yml') {
+      assert.doesNotMatch(top.join('\n'), /^ {2}(push|pull_request|release):/m);
+      assert.match(top.join('\n'), /publish:\n(?:.*\n)*? {8}default: false/);
+      assert.match(preparation, /confirmation: \$\{\{ inputs\.confirmation \}\}/);
+    } else {
+      assert.match(top.join('\n'), /tags: \["flutter-v\*"\]/);
+      assert.match(preparation, /github\.event_name == 'push' && vars\.PUBDEV_PUBLISH_ENABLED == 'true'/);
+      assert.match(publication, /if: github\.event_name == 'push'/);
+      assert.ok(publication.indexOf('registry.mjs pubdev-ready') < publication.indexOf('uses: dart-lang/setup-dart@'));
+    }
+  }
+});
+
+test('registry preparation has no credentials and preserves explicit publication readiness switches', () => {
+  const workflow = workflows.find(({ name }) => name.endsWith('/registry-prepare.yml'));
+  assert.ok(workflow);
+  const { top, jobs } = sections(workflow.lines);
+  assert.deepEqual(permissionsAt(top, 0), {});
+  assert.deepEqual([...jobs.keys()], ['prepare']);
+  const job = jobs.get('prepare');
+  assert.deepEqual(permissionsAt(job, 4), { contents: 'read' });
+  const text = job.join('\n');
+  assert.doesNotMatch(text, /environment:|\bsecrets\.|id-token:|NuGet\/login|gh-action-pypi-publish|pub publish --force|nuget push/);
+  assert.match(text, /vars\.PYPI_PUBLISH_ENABLED/);
+  assert.match(text, /vars\.NUGET_PUBLISH_ENABLED/);
+  assert.match(text, /vars\.PUBDEV_PUBLISH_ENABLED/);
+  assert.match(text, /registry\.mjs plan/);
+  assert.match(text, /registry\.mjs seal/);
+  assert.match(text, /fetch-depth: 0/);
+  assert.match(text, /--ignore-scripts/);
+  assert.doesNotMatch(text, /conformance --|dev-stack\.mjs|self-hosted/);
+  const maven = workflows.find(({ name }) => name.endsWith('/maven-prepare.yml'));
+  assert.ok(maven);
+  assert.deepEqual([...sections(maven.lines).jobs.keys()], ['prepare']);
+  assert.doesNotMatch(maven.lines.join('\n'), /id-token:|\bsecrets\.|environment:|https:\/\/central\.|uploadBundle|publish: true/);
+});
+
+test('registry uploads verify exact assets before authentication and never blindly skip duplicates', () => {
+  const pypi = workflows.find(({ name }) => name.endsWith('/pypi-release.yml')).lines.join('\n');
+  assert.ok(pypi.indexOf('registry.mjs verify') < pypi.indexOf('uses: pypa/gh-action-pypi-publish@'));
+  assert.match(pypi, /skip-existing: false/);
+  assert.match(pypi, /attestations: true/);
+  const nuget = workflows.find(({ name }) => name.endsWith('/nuget-release.yml')).lines.join('\n');
+  assert.ok(nuget.indexOf('registry.mjs verify') < nuget.indexOf('uses: NuGet/login@'));
+  assert.match(nuget, /user: \$\{\{ vars\.NUGET_USER \}\}/);
+  assert.match(nuget, /NUGET_API_KEY: \$\{\{ steps\.login\.outputs\.NUGET_API_KEY \}\}/);
+  assert.doesNotMatch(nuget, /--skip-duplicate/);
+});
+
+test('development metadata stays blocked while Central uses complete build-local publications', () => {
+  const python = readFileSync(join(REPO_ROOT, 'python/pyproject.toml'), 'utf8');
+  const flutter = readFileSync(join(REPO_ROOT, 'flutter/pubspec.yaml'), 'utf8');
+  assert.match(python, /"Private :: Do Not Upload"/);
+  assert.match(flutter, /^publish_to: none$/m);
+  const maven = readFileSync(join(REPO_ROOT, 'scripts/release/maven-publishing.gradle.kts'), 'utf8');
+  assert.match(maven, /useInMemoryPgpKeys\(signingKey, signingPassword\)/);
+  assert.match(maven, /environmentVariable\("MAVEN_SIGNING_KEY"\)/);
+  assert.match(maven, /environmentVariable\("MAVEN_SIGNING_PASSWORD"\)/);
+  assert.match(maven, /layout\.buildDirectory\.dir\("repo"\)/);
+  assert.doesNotMatch(maven, /https:\/\/central\.|ossrh|credentials\s*\{/);
+  for (const module of ['core', 'push', 'convohop']) {
+    const build = readFileSync(join(REPO_ROOT, 'android', module, 'build.gradle.kts'), 'utf8');
+    assert.match(build, /withJavadocJar\(\)/, `${module} must supply documentation, not just sources`);
+    assert.match(build, /^description = ".+"/m, `${module} needs Central POM description metadata`);
+  }
+  for (const sdk of ['jvm', 'android']) {
+    const workflow = workflows.find(({ name }) => name.endsWith(`/${sdk}.yml`)).lines.join('\n');
+    assert.equal(workflow.match(/- scripts\/release\/maven-publishing\.gradle\.kts/g)?.length, 2);
+    if (sdk === 'jvm') assert.match(workflow, /Validate shared Maven release configuration[\s\S]+?gradlew --no-daemon --console=plain help/);
+  }
+});
+
 test('PR titles use exactly the commit types release-please knows', () => {
   const { config } = loadReleaseConfig(REPO_ROOT);
   const changelogSections = config['changelog-sections'];

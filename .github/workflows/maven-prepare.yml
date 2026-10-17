@@ -1,0 +1,32 @@
+# Domain-independent artifact preparation only. No Central token, environment,
+# upload endpoint or publication job until com.convohop is verified.
+name: Prepare Maven Central artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      sdk:
+        description: SDK to package without uploading.
+        required: true
+        type: choice
+        default: jvm
+        options: [jvm, android]
+      version:
+        description: Preparation version on main; leave empty on a jvm-v<version> or android-v<version> tag.
+        default: ""
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: registry-maven-${{ inputs.sdk }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/registry-prepare.yml # zizmor: ignore[self-repository] Same-commit syntax; actionlint does not yet parse $/.
+    with:
+      registry: ${{ format('maven-{0}', inputs.sdk) }}
+      version: ${{ inputs.version }}

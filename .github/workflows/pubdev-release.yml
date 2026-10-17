@@ -1,0 +1,73 @@
+# Dispatch prepares the real first-publication archive without credentials.
+# Only a protected tag push can use pub.dev automation, after bootstrap.
+name: pub.dev release
+
+on:
+  push:
+    tags: ["flutter-v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Preparation/bootstrap version on main; leave empty on a flutter-v<version> tag.
+        default: ""
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: registry-pubdev
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/registry-prepare.yml # zizmor: ignore[self-repository] Same-commit syntax; actionlint does not yet parse $/.
+    with:
+      registry: pubdev
+      version: ${{ inputs.version || '' }}
+      publish: ${{ github.event_name == 'push' && vars.PUBDEV_PUBLISH_ENABLED == 'true' }}
+
+  publish:
+    name: Publish convohop after the real pub.dev bootstrap
+    needs: prepare
+    if: github.event_name == 'push' && needs.prepare.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: pub.dev
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.prepare.outputs.artifact }}
+          path: ${{ runner.temp }}/registry-assets
+      - name: Verify the archive and require an existing real package before OIDC
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SOURCE_SHA: ${{ needs.prepare.outputs.sha }}
+        run: |
+          node scripts/release/registry.mjs verify --registry pubdev --version "$VERSION" \
+            --sha "$SOURCE_SHA" --source-ref "$GITHUB_REF" --directory "$RUNNER_TEMP/registry-assets"
+          node scripts/release/registry.mjs pubdev-ready
+          mkdir "$RUNNER_TEMP/pubdev"
+          tar -xzf "$RUNNER_TEMP/registry-assets/convohop-$VERSION.tar.gz" -C "$RUNNER_TEMP/pubdev"
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+      - name: Configure the short-lived pub.dev token
+        uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
+      - name: Publish the verified package with Flutter's bundled Dart
+        working-directory: ${{ runner.temp }}/pubdev
+        run: |
+          flutter pub get
+          flutter pub publish --force

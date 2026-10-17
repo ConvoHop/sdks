@@ -8,11 +8,13 @@ plugins {
 
 group = "com.convohop"
 version = providers.gradleProperty("convohopVersion").get()
+description = "Platform-free runtime for the ConvoHop Android client SDK."
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
     withSourcesJar()
+    withJavadocJar()
 }
 
 kotlin {
@@ -45,13 +47,6 @@ publishing {
             // The pure-JVM runtime the Android library builds on; not a supported entry point.
             artifactId = "convohop-android-core"
             from(components["java"])
-        }
-    }
-    repositories {
-        // Registry publishing is not approved yet; publish only into the build directory.
-        maven {
-            name = "build"
-            url = uri(rootProject.layout.buildDirectory.dir("repo"))
         }
     }
 }
