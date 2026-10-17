@@ -147,6 +147,8 @@ async function sourceFixture(t) {
     'python/pyproject.toml': '[project]\nname = "convohop"\nclassifiers = [\n  "Private :: Do Not Upload",\n]\n',
     'python/src/convohop/_version.py': '__version__ = "0.1.0"\n',
     'flutter/pubspec.yaml': 'name: convohop\nversion: 0.0.0\npublish_to: none\n',
+    'flutter/lib/convohop.dart': "export 'src/version.dart';\n",
+    'flutter/lib/src/version.dart': "const convoHopPackageVersion = '0.0.0';\n",
     'flutter/README.md': '# ConvoHop\n',
     'spec/push-payload/vectors.json': '{}\n',
   });
@@ -218,6 +220,10 @@ test('Flutter staging generates release metadata and changelog without enabling 
   const pubspec = readFileSync(join(out, 'flutter/pubspec.yaml'), 'utf8');
   assert.match(pubspec, /^version: 0\.1\.0$/m);
   assert.match(pubspec, /^publish_to: https:\/\/pub\.dev$/m);
+  assert.equal(readFileSync(join(out, 'flutter/lib/src/version.dart'), 'utf8'),
+    `const convoHopPackageVersion = '${VERSION}';\n`);
+  assert.equal(readFileSync(join(root, 'flutter/lib/src/version.dart'), 'utf8'),
+    "const convoHopPackageVersion = '0.0.0';\n");
   assert.match(readFileSync(join(root, 'flutter/pubspec.yaml'), 'utf8'), /^publish_to: none$/m);
   assert.match(readFileSync(join(out, 'flutter/CHANGELOG.md'), 'utf8'), new RegExp(sha));
   assert.ok(existsSync(join(out, 'spec/push-payload/vectors.json')));

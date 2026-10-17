@@ -98,7 +98,7 @@ class RegistryArtifactsTest(unittest.TestCase):
           <metadata><id>ConvoHop</id><version>{VERSION}</version><license type="expression">Apache-2.0</license>
           <repository url="https://github.com/ConvoHop/sdks" commit="{commit}"/></metadata></package>""".encode()
         package = {"ConvoHop.nuspec": spec, "README.md": b"SDK", "LICENSE": b"Apache-2.0", "NOTICE": b"ConvoHop"}
-        symbols = {"ConvoHop.nuspec": spec}
+        symbols = {"ConvoHop.nuspec": spec.replace(b'<license type="expression">Apache-2.0</license>', b"")}
         for framework in ("netstandard2.0", "net10.0"):
             for suffix in ("dll", "xml"):
                 package[f"lib/{framework}/ConvoHop.{suffix}"] = b"fixture"
@@ -154,10 +154,30 @@ class RegistryArtifactsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "release commit"):
             ARTIFACTS.inspect_nuget(self.directory, VERSION, SHA)
 
+    def test_nuget_symbols_without_license_still_require_the_exact_version_and_source_link(self) -> None:
+        self.nuget()
+        archive = self.directory / f"ConvoHop.{VERSION}.snupkg"
+        files = ARTIFACTS.zip_files(archive.read_bytes())
+        self.assertNotIn(b"<license", files["ConvoHop.nuspec"])
+        ARTIFACTS.inspect_nuget(self.directory, VERSION, SHA)
+        original = files["ConvoHop.nuspec"]
+        files["ConvoHop.nuspec"] = original.replace(
+            f"<version>{VERSION}</version>".encode(), b"<version>0.2.0</version>"
+        )
+        archive.write_bytes(zipped(files))
+        with self.assertRaisesRegex(ValueError, "snupkg version"):
+            ARTIFACTS.inspect_nuget(self.directory, VERSION, SHA)
+        files["ConvoHop.nuspec"] = original
+        files["lib/net10.0/ConvoHop.pdb"] = b"wrong Source Link"
+        archive.write_bytes(zipped(files))
+        with self.assertRaisesRegex(ValueError, "Source Link"):
+            ARTIFACTS.inspect_nuget(self.directory, VERSION, SHA)
+
     def test_flutter_bootstrap_archive_is_a_real_package(self) -> None:
         files = {
             "pubspec.yaml": f"name: convohop\nversion: {VERSION}\npublish_to: https://pub.dev\n".encode(),
             "lib/convohop.dart": b"library;",
+            "lib/src/version.dart": f"const convoHopPackageVersion = '{VERSION}';\n".encode(),
             "README.md": b"SDK",
             "LICENSE": b"Apache-2.0",
             "NOTICE": b"ConvoHop",
@@ -166,6 +186,11 @@ class RegistryArtifactsTest(unittest.TestCase):
         archive = self.directory / f"convohop-{VERSION}.tar.gz"
         archive.write_bytes(tarred(files))
         ARTIFACTS.inspect_pubdev(self.directory, VERSION)
+        files["lib/src/version.dart"] = b"const convoHopPackageVersion = '0.0.0';\n"
+        archive.write_bytes(tarred(files))
+        with self.assertRaisesRegex(ValueError, "library version"):
+            ARTIFACTS.inspect_pubdev(self.directory, VERSION)
+        files["lib/src/version.dart"] = f"const convoHopPackageVersion = '{VERSION}';\n".encode()
         files["pubspec.yaml"] = files["pubspec.yaml"].replace(b"https://pub.dev", b"none")
         archive.write_bytes(tarred(files))
         with self.assertRaisesRegex(ValueError, "publish_to"):

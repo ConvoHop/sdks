@@ -129,8 +129,12 @@ def inspect_nuget(directory: Path, version: str, sha: str) -> None:
         metadata = spec.find(f"{namespace}metadata")
         if metadata is None:
             raise ValueError("NuGet metadata is missing")
-        for key, expected in {"id": "ConvoHop", "version": version, "license": "Apache-2.0"}.items():
-            require(metadata.findtext(f"{namespace}{key}") == expected, f"NuGet {key} must be {expected}")
+        values = {"id": "ConvoHop", "version": version}
+        # NuGet omits the license from its symbol nuspec; the main package must carry it.
+        if extension == "nupkg":
+            values["license"] = "Apache-2.0"
+        for key, expected in values.items():
+            require(metadata.findtext(f"{namespace}{key}") == expected, f"NuGet {extension} {key} must be {expected}")
         repository = metadata.find(f"{namespace}repository")
         require(
             repository is not None and repository.get("url") == REPOSITORY_URL and repository.get("commit") == sha,
@@ -160,7 +164,13 @@ def inspect_pubdev(directory: Path, version: str) -> None:
         require(re.findall(rf"^{key}: (.+)$", pubspec, re.MULTILINE) == [expected], f"Flutter {key} must be {expected}")
     for name in ("README.md", "LICENSE", "NOTICE", "CHANGELOG.md"):
         require(name in files, f"Flutter archive is missing {name}")
-    require(any(name.startswith("lib/") and name.endswith(".dart") for name in files), "Flutter archive has no library")
+    require(bool(files.get("lib/convohop.dart")), "Flutter archive has no public library")
+    require("lib/src/version.dart" in files, "Flutter package version declaration is missing")
+    require(
+        re.findall(r"^const convoHopPackageVersion = '([^']+)';$", files["lib/src/version.dart"].decode(), re.MULTILINE)
+        == [version],
+        "Flutter library version differs from its pubspec",
+    )
     forbidden = (".dart_tool/", "build/", ".git/")
     require(
         not any(name.startswith(forbidden) or name == "pubspec.lock" for name in files),

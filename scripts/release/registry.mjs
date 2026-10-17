@@ -193,6 +193,10 @@ export async function stageRegistrySource({ registry, version, sha, root = REPO_
       metadata = replaceOnce(metadata, /^publish_to: none$/gm, 'publish_to: https://pub.dev', 'Flutter upload fence');
       metadata = metadata.replace(/^# Registry publishing waits for release approval; see RELEASING\.md\.\n/m, '');
       writeFileSync(pubspec, metadata);
+      const versionFile = join(packageRoot, 'lib/src/version.dart');
+      writeFileSync(versionFile, replaceOnce(readFileSync(versionFile, 'utf8'),
+        /^const convoHopPackageVersion = '[^']+';$/gm,
+        `const convoHopPackageVersion = '${version}';`, 'Flutter package version'));
       const changelog = join(packageRoot, 'CHANGELOG.md');
       if (!existsSync(changelog)) {
         writeFileSync(changelog, `# Changelog\n\n## ${version}\n\nPrepared from the [release source](https://github.com/${REPOSITORY}/tree/${sha}/flutter) at ${sha}.\n`);

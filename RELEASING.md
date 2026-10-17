@@ -428,7 +428,8 @@ nor uploads to a registry.
 
 Python and Flutter are copied from committed files into an isolated
 directory. Only that copy loses `Private :: Do Not Upload` or
-`publish_to: none`, and receives the tag/preparation version. Flutter also
+`publish_to: none`, and receives the tag/preparation version, including its
+imported package-version declaration. Flutter also
 receives a generated changelog linking to its exact source commit when no
 source changelog exists. .NET and Gradle receive build-time version
 properties. Ignored files, local credentials and uncommitted changes do not
