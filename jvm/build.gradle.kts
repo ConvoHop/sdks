@@ -40,30 +40,6 @@ subprojects {
     }
 
     pluginManager.withPlugin("maven-publish") {
-        val module = this@subprojects
-        the<PublishingExtension>().publications.withType<MavenPublication>().configureEach {
-            pom {
-                name.set(module.name)
-                description.set(module.provider { module.description })
-                url.set("https://github.com/ConvoHop/sdks")
-                licenses {
-                    license {
-                        name.set("Apache-2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("convohop")
-                        name.set("ConvoHop")
-                    }
-                }
-                scm {
-                    url.set("https://github.com/ConvoHop/sdks")
-                    connection.set("scm:git:https://github.com/ConvoHop/sdks.git")
-                    developerConnection.set("scm:git:https://github.com/ConvoHop/sdks.git")
-                }
-            }
-        }
+        apply(from = repositoryRoot.resolve("scripts/release/maven-publishing.gradle.kts"))
     }
 }

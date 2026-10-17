@@ -1,5 +1,4 @@
-// Shared helpers for the release pipeline (see RELEASING.md). The release
-// scripts are dependency-free so release jobs only need Node.js and npm.
+// Dependency-free helpers shared by npm and registry release jobs (see RELEASING.md).
 import { execFile } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
 import { appendFileSync, readFileSync } from 'node:fs';

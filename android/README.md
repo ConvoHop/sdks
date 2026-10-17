@@ -15,6 +15,11 @@ It isn't published to a package registry yet:
 [Android docs](../docs/site/android/index.md) have quickstarts with tested
 code and the API reference. License: [Apache-2.0](../LICENSE).
 
+[Central preparation](../RELEASING.md#maven-central-preparation-while-the-domain-is-deferred)
+includes POM metadata, sources, documentation and offline bundle/signature
+checks. It does not upload; actual `com.convohop` namespace verification
+and publication remain paused for domain ownership.
+
 ## Requirements
 
 - Android 7.0 (API 24) or later.

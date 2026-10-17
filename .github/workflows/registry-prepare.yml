@@ -1,0 +1,180 @@
+# Build-only workflow shared by the explicit registry entry points. No OIDC,
+# environments, registry credentials, registry uploads or release/tag creation here.
+name: Prepare registry artifacts
+
+on:
+  workflow_call:
+    inputs:
+      registry:
+        required: true
+        type: string
+      version:
+        description: Preparation version on main; tagged runs derive it from the tag.
+        default: ""
+        type: string
+      publish:
+        default: false
+        type: boolean
+      confirmation:
+        default: ""
+        type: string
+    outputs:
+      artifact:
+        value: ${{ jobs.prepare.outputs.artifact }}
+      version:
+        value: ${{ jobs.prepare.outputs.version }}
+      sha:
+        value: ${{ jobs.prepare.outputs.sha }}
+      publish:
+        value: ${{ jobs.prepare.outputs.publish }}
+
+permissions: {}
+
+jobs:
+  prepare:
+    name: Prepare ${{ inputs.registry }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    outputs:
+      artifact: ${{ format('{0}-{1}', steps.plan.outputs.artifact, github.run_attempt) }}
+      version: ${{ steps.plan.outputs.version }}
+      sha: ${{ steps.plan.outputs.sha }}
+      publish: ${{ steps.plan.outputs.publish }}
+    env:
+      REGISTRY: ${{ inputs.registry }}
+      UV_PYTHON_DOWNLOADS: never
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - id: plan
+        name: Validate source, version and explicit publication request
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+          REQUEST_PUBLISH: ${{ inputs.publish }}
+          PUBLISH_CONFIRMATION: ${{ inputs.confirmation }}
+          PUBLISH_ENABLED: ${{ (inputs.registry == 'pypi' && vars.PYPI_PUBLISH_ENABLED) || (inputs.registry == 'nuget' && vars.NUGET_PUBLISH_ENABLED) || (inputs.registry == 'pubdev' && vars.PUBDEV_PUBLISH_ENABLED) || 'false' }}
+        run: node scripts/release/registry.mjs plan
+      - name: Check generated sources at the release commit
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run check:annotations
+          npm run check:graphql
+      - name: Stage committed Python or Flutter source without changing development upload fences
+        if: inputs.registry == 'pypi' || inputs.registry == 'pubdev'
+        env:
+          VERSION: ${{ steps.plan.outputs.version }}
+          SOURCE_SHA: ${{ steps.plan.outputs.sha }}
+        run: >-
+          node scripts/release/registry.mjs stage
+          --registry "$REGISTRY" --version "$VERSION" --sha "$SOURCE_SHA"
+          --out "$RUNNER_TEMP/registry-stage" --directory "$RUNNER_TEMP/registry-assets"
+      - if: inputs.registry == 'pypi'
+        id: python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - if: inputs.registry == 'pypi'
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: latest-known
+          cache-dependency-glob: python/uv.lock
+      - if: inputs.registry == 'pypi'
+        name: Test Python and build the staged wheel and sdist
+        working-directory: python
+        env:
+          PYTHON_PATH: ${{ steps.python.outputs.python-path }}
+        run: |
+          uv sync --locked --python "$PYTHON_PATH"
+          .venv/bin/pytest
+          .venv/bin/python -m build "$RUNNER_TEMP/registry-stage/python" --outdir "$RUNNER_TEMP/registry-assets"
+          .venv/bin/twine check --strict "$RUNNER_TEMP/registry-assets/"*
+      - if: inputs.registry == 'nuget'
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+          dotnet-version: 8.0.x
+      - if: inputs.registry == 'nuget'
+        name: Test both .NET library assets and pack with the tag version
+        env:
+          VERSION: ${{ steps.plan.outputs.version }}
+        run: |
+          for framework in net8.0 net10.0; do
+            dotnet test dotnet/test/ConvoHop.Tests/ConvoHop.Tests.csproj -c Release \
+              -f "$framework" -maxcpucount:2 -p:Version="$VERSION"
+          done
+          timestamp="$(git log -1 --format=%ct)"
+          dotnet pack dotnet/src/ConvoHop/ConvoHop.csproj -c Release -maxcpucount:2 \
+            -p:Version="$VERSION" -p:PackageVersion="$VERSION" \
+            -p:ContinuousIntegrationBuild=true -p:DeterministicTimestamp="$timestamp" \
+            -o "$RUNNER_TEMP/registry-assets"
+      - if: inputs.registry == 'pubdev'
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+      - if: inputs.registry == 'pubdev'
+        name: Analyze, test and dry-run the real Flutter package
+        working-directory: ${{ runner.temp }}/registry-stage/flutter
+        run: |
+          flutter pub get
+          flutter analyze --fatal-infos
+          flutter test --reporter=expanded
+          flutter pub publish --dry-run
+      - if: startsWith(inputs.registry, 'maven-')
+        uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - if: startsWith(inputs.registry, 'maven-')
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+      - if: inputs.registry == 'maven-jvm'
+        name: Prepare unsigned JVM publications in a build-local repository
+        working-directory: jvm
+        env:
+          VERSION: ${{ steps.plan.outputs.version }}
+        run: >-
+          ./gradlew --no-daemon --console=plain -Pversion="$VERSION"
+          :convohop-server:publishMavenPublicationToBuildRepository
+          :convohop-server-kotlin:publishMavenPublicationToBuildRepository
+      - if: inputs.registry == 'maven-android'
+        name: Prepare unsigned Android publications in a build-local repository
+        working-directory: android
+        env:
+          VERSION: ${{ steps.plan.outputs.version }}
+        run: >-
+          ./gradlew --no-daemon --console=plain -PconvohopVersion="$VERSION"
+          :core:publishReleasePublicationToBuildRepository
+          :push:publishReleasePublicationToBuildRepository
+          :convohop:publishReleasePublicationToBuildRepository
+      - if: startsWith(inputs.registry, 'maven-')
+        name: Check Central metadata and assemble an explicitly unsigned bundle
+        env:
+          VERSION: ${{ steps.plan.outputs.version }}
+          SDK: ${{ inputs.registry == 'maven-jvm' && 'jvm' || 'android' }}
+        run: >-
+          node scripts/release/registry.mjs maven-bundle
+          --registry "$REGISTRY" --version "$VERSION" --repository "$SDK/build/repo"
+          --directory "$RUNNER_TEMP/registry-assets"
+      - name: Check artifact metadata and seal the exact file set
+        env:
+          VERSION: ${{ steps.plan.outputs.version }}
+          SOURCE_SHA: ${{ steps.plan.outputs.sha }}
+        run: >-
+          node scripts/release/registry.mjs seal
+          --registry "$REGISTRY" --version "$VERSION" --sha "$SOURCE_SHA"
+          --source-ref "$GITHUB_REF" --directory "$RUNNER_TEMP/registry-assets"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ format('{0}-{1}', steps.plan.outputs.artifact, github.run_attempt) }}
+          path: ${{ runner.temp }}/registry-assets/
+          if-no-files-found: error
+          retention-days: 14

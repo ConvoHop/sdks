@@ -44,8 +44,11 @@ dependencies {
 }
 ```
 
-The Maven group might change to `io.github.convohop` before the first
-release. The Java and Kotlin package names stay `com.convohop.server`.
+The Maven group stays `com.convohop`. Central publication is paused until
+domain ownership verifies that namespace; it does not fall back to another
+coordinate. [Central preparation](../RELEASING.md#maven-central-preparation-while-the-domain-is-deferred)
+can build unsigned artifacts or assemble an explicitly signed bundle from
+existing signing credentials without uploading anything.
 
 ## Application backend
 

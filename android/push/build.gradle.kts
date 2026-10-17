@@ -13,6 +13,7 @@ plugins {
 
 group = "com.convohop"
 version = providers.gradleProperty("convohopVersion").get()
+description = "Push notifications and incoming-call handling for the ConvoHop Android SDK."
 
 android {
     namespace = "com.convohop.android.push"
@@ -51,6 +52,7 @@ android {
     publishing {
         singleVariant("release") {
             withSourcesJar()
+            withJavadocJar()
         }
     }
 }
@@ -82,13 +84,6 @@ publishing {
         create<MavenPublication>("release") {
             artifactId = "convohop-android-push"
             afterEvaluate { from(components["release"]) }
-        }
-    }
-    repositories {
-        // Registry publishing is not approved yet; publish only into the build directory.
-        maven {
-            name = "build"
-            url = uri(rootProject.layout.buildDirectory.dir("repo"))
         }
     }
 }

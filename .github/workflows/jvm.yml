@@ -14,6 +14,7 @@ on:
       - conformance/**
       - docs/languages/jvm/**
       - jvm/**
+      - scripts/release/maven-publishing.gradle.kts
       - schema/**
       - spec/**
       - tools/docgen/**
@@ -25,6 +26,7 @@ on:
       - conformance/**
       - docs/languages/jvm/**
       - jvm/**
+      - scripts/release/maven-publishing.gradle.kts
       - schema/**
       - spec/**
       - tools/docgen/**
@@ -66,6 +68,9 @@ jobs:
             docs/languages/jvm/examples/build.gradle.kts
             tools/docgen/extractors/jvm/build.gradle.kts
       # The test job runs the tests on every supported Java version.
+      - name: Validate shared Maven release configuration
+        working-directory: jvm
+        run: ./gradlew --no-daemon --console=plain help
       - name: Compile, lint, document and package
         working-directory: jvm
         run: ./gradlew --no-daemon --console=plain build -x test

@@ -8,7 +8,9 @@ License: [Apache-2.0](LICENSE).
 
 It isn't on PyPI: registry publishing isn't approved yet, and the package
 carries the `Private :: Do Not Upload` classifier so that an accidental upload
-fails. Install it from a clone of this repository:
+fails. [Registry preparation and the gated first publication](../RELEASING.md#registry-release-preparation)
+operate on an isolated copy; they do not remove that development safeguard
+or claim an existing PyPI release. Install it from a clone of this repository:
 
 ```sh
 pip install ./python

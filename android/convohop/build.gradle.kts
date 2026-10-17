@@ -7,6 +7,7 @@ plugins {
 
 group = "com.convohop"
 version = providers.gradleProperty("convohopVersion").get()
+description = "ConvoHop client SDK for Android: conversations, realtime, calls and push."
 
 android {
     namespace = "com.convohop.android"
@@ -42,6 +43,7 @@ android {
     publishing {
         singleVariant("release") {
             withSourcesJar()
+            withJavadocJar()
         }
     }
 }
@@ -73,13 +75,6 @@ publishing {
         create<MavenPublication>("release") {
             artifactId = "convohop-android"
             afterEvaluate { from(components["release"]) }
-        }
-    }
-    repositories {
-        // Registry publishing is not approved yet; publish only into the build directory.
-        maven {
-            name = "build"
-            url = uri(rootProject.layout.buildDirectory.dir("repo"))
         }
     }
 }

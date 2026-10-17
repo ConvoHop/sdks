@@ -16,6 +16,7 @@ on:
       - conformance/**
       - docs/languages/dotnet/**
       - dotnet/**
+      - scripts/release/registry-artifacts.py
       - global.json
       - schema/**
       - spec/**
@@ -29,6 +30,7 @@ on:
       - conformance/**
       - docs/languages/dotnet/**
       - dotnet/**
+      - scripts/release/registry-artifacts.py
       - global.json
       - schema/**
       - spec/**
@@ -158,6 +160,12 @@ jobs:
                   sys.exit(f"{name} contains the build path {root}; the build is not path-independent")
           print(f"ConvoHop {version}: {len(package)} package files and {len(pdbs)} symbol files, Source Link to {commit}")
           EOF
+      - name: Validate the real packages with the registry release metadata checker
+        working-directory: dotnet
+        run: |
+          version="$(dotnet msbuild src/ConvoHop/ConvoHop.csproj -getProperty:Version)"
+          python3 ../scripts/release/registry-artifacts.py inspect --registry nuget \
+            --version "$version" --sha "$(git rev-parse HEAD)" --directory artifacts/first
       - name: Upload the packages
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
