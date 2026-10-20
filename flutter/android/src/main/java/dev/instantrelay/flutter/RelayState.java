@@ -25,7 +25,7 @@ import java.util.Map;
  * actions Dart hasn't taken yet, and the secret the plugin's notification intents carry.
  */
 final class RelayState {
-  private static final String PREFERENCES = "dev.instantrelay.flutter.push";
+  private static final String PREFERENCES = "com.convohop.flutter.push";
   private static final String SEEN = "seen";
   private static final String STOPPED = "stopped";
   private static final String ACTIONS = "actions";

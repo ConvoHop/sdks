@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 /** Declines a ring from its notification without opening the app. */
-public final class RelayCallReceiver extends BroadcastReceiver {
+public class RelayCallReceiver extends BroadcastReceiver {
   @Override
   public void onReceive(Context context, Intent intent) {
     if (!RelayNotifier.ACTION_DECLINE_CALL.equals(intent.getAction())) return;

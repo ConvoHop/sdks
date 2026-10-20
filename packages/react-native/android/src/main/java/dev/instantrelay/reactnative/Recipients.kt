@@ -35,7 +35,7 @@ internal class RecipientStore(context: Context) {
     }
 
     private companion object {
-        const val FILE = "dev.instantrelay.reactnative.recipient"
+        const val FILE = "com.convohop.reactnative.recipient"
         const val KEY = "recipient"
     }
 }

@@ -43,7 +43,7 @@ public final class RelayPlugin
         PluginRegistry.NewIntentListener,
         PluginRegistry.RequestPermissionsResultListener {
   private static final String POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS";
-  private static final String EXTRA_HANDLED = "dev.instantrelay.flutter.HANDLED";
+  private static final String EXTRA_HANDLED = "com.convohop.flutter.HANDLED";
   private static final int PERMISSION_REQUEST = 6470;
   // Plugins with an activity. Touched on the main thread only.
   private static final Set<RelayPlugin> WITH_ACTIVITY = new LinkedHashSet<>();

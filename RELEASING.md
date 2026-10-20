@@ -528,6 +528,13 @@ notification identifiers, Flutter platform channels and CLI credential
 storage identifiers also remain unchanged, so branding does not discard
 persisted state or alter the wire contract.
 
+Flutter and React Native keep their original private preference files,
+notification actions/extras and signing domain. Flutter Android's single,
+non-exported decline receiver retains the component name
+`com.convohop.flutter.ConvoHopCallReceiver`; the handler stays in the Relay
+namespace. PendingIntents stored before an update must reach that same
+component with the same authenticated payload keys, not a permissive fallback.
+
 The `npm`, `pypi`, `nuget`, `pubdev` and `maven` environments are separate
 registry authorization boundaries, not application staging deployments.
 They neither create Azure resources nor select a service environment.

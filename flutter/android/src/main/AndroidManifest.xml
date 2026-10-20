@@ -17,7 +17,7 @@
             </intent-filter>
         </service>
         <receiver
-            android:name="dev.instantrelay.flutter.RelayCallReceiver"
+            android:name="com.convohop.flutter.ConvoHopCallReceiver"
             android:exported="false" />
     </application>
 </manifest>

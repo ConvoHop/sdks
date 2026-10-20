@@ -27,17 +27,17 @@ import androidx.core.content.ContextCompat;
 
 /** Builds the notifications for Relay pushes. */
 final class RelayNotifier {
-  static final String ACTION_OPEN = "dev.instantrelay.flutter.OPEN";
-  static final String ACTION_INCOMING_CALL = "dev.instantrelay.flutter.INCOMING_CALL";
-  static final String ACTION_ANSWER_CALL = "dev.instantrelay.flutter.ANSWER_CALL";
-  static final String ACTION_DECLINE_CALL = "dev.instantrelay.flutter.DECLINE_CALL";
-  static final String EXTRA_PAYLOAD = "dev.instantrelay.flutter.PAYLOAD";
-  static final String EXTRA_ALERT_ID = "dev.instantrelay.flutter.ALERT_ID";
-  static final String EXTRA_SECRET = "dev.instantrelay.flutter.SECRET";
+  static final String ACTION_OPEN = "com.convohop.flutter.OPEN";
+  static final String ACTION_INCOMING_CALL = "com.convohop.flutter.INCOMING_CALL";
+  static final String ACTION_ANSWER_CALL = "com.convohop.flutter.ANSWER_CALL";
+  static final String ACTION_DECLINE_CALL = "com.convohop.flutter.DECLINE_CALL";
+  static final String EXTRA_PAYLOAD = "com.convohop.flutter.PAYLOAD";
+  static final String EXTRA_ALERT_ID = "com.convohop.flutter.ALERT_ID";
+  static final String EXTRA_SECRET = "com.convohop.flutter.SECRET";
 
   private static final String TAG = "Relay";
   // Marks the plugin's message notifications, whose tag is this conversation ID.
-  private static final String EXTRA_CONVERSATION_ID = "dev.instantrelay.flutter.CONVERSATION_ID";
+  private static final String EXTRA_CONVERSATION_ID = "com.convohop.flutter.CONVERSATION_ID";
   private static final String MESSAGES_CHANNEL = "convohop_messages";
   private static final String CALLS_CHANNEL = "convohop_calls";
   private static final String MISSED_CALLS_CHANNEL = "convohop_missed_calls";
@@ -287,7 +287,7 @@ final class RelayNotifier {
   private static PendingIntent declineIntent(Context context, String alertId) {
     Intent intent =
         new Intent(ACTION_DECLINE_CALL)
-            .setClass(context, RelayCallReceiver.class)
+            .setClass(context, com.convohop.flutter.ConvoHopCallReceiver.class)
             .putExtra(EXTRA_ALERT_ID, alertId);
     return PendingIntent.getBroadcast(
         context,

@@ -342,7 +342,7 @@ internal class RelayPushModule(context: ReactApplicationContext) :
     }
 
     private companion object {
-        const val PERMISSION_FILE = "dev.instantrelay.reactnative.permission"
+        const val PERMISSION_FILE = "com.convohop.reactnative.permission"
         const val ASKED = "asked"
         const val PERMISSION_REQUEST = 0x434f
 

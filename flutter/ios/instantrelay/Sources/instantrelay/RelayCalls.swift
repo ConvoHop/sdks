@@ -19,10 +19,10 @@ final class RelayCalls: NSObject, CXProviderDelegate, PKPushRegistryDelegate {
   }
 
   // Why rings stopped, by alert ID: [alertId: ["reason": String, "until": Unix seconds]].
-  private static let stoppedKey = "dev.instantrelay.flutter.stopped"
+  private static let stoppedKey = "com.convohop.flutter.stopped"
   private static let stoppedCapacity = 128
   // Whether Dart registered for VoIP pushes.
-  private static let voipKey = "dev.instantrelay.flutter.voip"
+  private static let voipKey = "com.convohop.flutter.voip"
   private static let iconName = "RelayCallIcon"
 
   private unowned let push: RelayPush

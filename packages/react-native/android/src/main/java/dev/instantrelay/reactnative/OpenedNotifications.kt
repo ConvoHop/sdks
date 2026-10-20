@@ -30,7 +30,7 @@ internal class IntentSigner(loadKey: () -> ByteArray) {
     companion object {
         private const val ALGORITHM = "HmacSHA256"
         private const val DOMAIN = "convohop.opened\u0000"
-        private const val FILE = "dev.instantrelay.reactnative.intents"
+        private const val FILE = "com.convohop.reactnative.intents"
         private const val KEY = "key"
         private const val KEY_BYTES = 32
 
@@ -90,7 +90,7 @@ internal class SignedConversationIntent(
     }
 
     companion object {
-        const val EXTRA_PAYLOAD = "dev.instantrelay.reactnative.extra.PAYLOAD"
-        const val EXTRA_SIGNATURE = "dev.instantrelay.reactnative.extra.SIGNATURE"
+        const val EXTRA_PAYLOAD = "com.convohop.reactnative.extra.PAYLOAD"
+        const val EXTRA_SIGNATURE = "com.convohop.reactnative.extra.SIGNATURE"
     }
 }
